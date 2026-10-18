@@ -1,0 +1,89 @@
+\section{比较方法在本模型下的准则}\label{app:baselines}
+\subsection{单源谱、MUSIC及MVDR-known}
+LS取峰使用式\eqref{eq:single}，每个位置分别按单源模型评分。MUSIC和MVDR则需要从观测估计空间统计量。为此，将同一记录划分为$S$个不重叠片段，各片段长度为$N_s=N/S$。令$\bm z_{bf}\in\C^L$表示第$b$段在频率$f$处的多站DFT观测，$b=1,\ldots,S$。各段采用共同的频率轴，并在该轴上选择相同物理频带；样本协方差估计为
+\begin{equation}
+ \widehat{\bm C}_f=S^{-1}\sum_{b=1}^S\bm z_{bf}\bm z_{bf}^H .
+\end{equation}
+同一记录内的位置、传播关系和信号统计保持不变，各片段DFT用于构成同频快拍。零均值模型下，相关矩阵等于协方差矩阵，故上式不另减样本均值。完整记录与片段DFT分别按$1/N$和$1/N_s$归一化，对应噪声方差为$\sigma_t^2/N$和$\sigma_t^2/N_s$。分段提供更多统计快拍，同时降低频率分辨率、缩短单段时长。
+
+MUSIC利用信号响应与噪声子空间的正交关系定位\cite{WeissAmar2005}。其通常要求$K<L$、源频域系数的协方差满秩、不同源的跨站响应线性独立，并采用空间白噪声模型。在两源均有非零功率的频点，独立源的总体协方差满足相应源秩条件；有限记录下的子空间估计精度还与功率差、有效快拍数及频点信号强度有关。本文采用逐频响应与宽带评分汇聚。
+
+设$\bm E_{n,f}\in\C^{L\times(L-K)}$的列为$\widehat{\bm C}_f$最小$L-K$个特征值对应的单位正交特征向量。用已知源数$K$划分子空间，本文MUSIC适配版使用
+\begin{align}
+ S_{\mathrm{MU}}(\bm p)&=\left[\sum_f w_f
+ \bm q_f(\bm p)^H\bm E_{n,f}\bm E_{n,f}^H\bm q_f(\bm p)\right]^{-1},\label{eq:music}\\
+ \widetilde w_f&=\max\{\tr(\widehat{\bm C}_f)-L\sigma_t^2/N_s,0\},\quad
+ w_f=\widetilde w_f/\sum_v\widetilde w_v .\nonumber
+\end{align}
+式中$\tr$为矩阵迹，$\widetilde w_f$为扣除期望噪声后的非负观测功率，$w_f$为归一化权重，$v$遍历保留频点。所有权重为零时使用均匀权重。该宽带汇聚使信号能量较高的频点发挥更大作用；带外频点不参与分解。
+
+MVDR在保持候选响应不失真的条件下，最小化输出功率\cite{Capon1969}。令$\bm h_f\in\C^L$为复数合成权重，对加载后的协方差解
+\begin{equation}
+ \min_{\bm h_f}\ \bm h_f^H\bm C_{f,\delta}\bm h_f,
+ \qquad \bm h_f^H\bm q_f(\bm p)=1.\label{eq:mvdrConstraint}
+\end{equation}
+最优输出功率为$[\bm q_f^H\bm C_{f,\delta}^{-1}\bm q_f]^{-1}$。将这一功率在保留频点上平均，得到MVDR-known评分：
+\begin{align}
+ \bm C_{f,\delta}&=\widehat{\bm C}_f+
+ \delta\,\tr(\widehat{\bm C}_f)\bm I/L,\nonumber\\
+ S_{\mathrm{MV}}(\bm p)&=F_s^{-1}\sum_f
+ [\bm q_f(\bm p)^H\bm C_{f,\delta}^{-1}\bm q_f(\bm p)]^{-1} .\label{eq:mvdr}
+\end{align}
+这里$\delta>0$为无量纲相对加载量，加载项是平均对角功率$\tr(\widehat{\bm C}_f)/L$的$\delta$倍，用于缓解有限快拍下求逆不稳定的问题；$F_s$为片段频率轴上保留的频点数，区别于采样率$f_s$。约束中的响应和评分均使用同一单位范数向量$\bm q_f$。“known”表示采用已知相对传播响应；本宽带汇聚式与DPD-HR的原公式分别命名\cite{TirerWeiss2016}。
+
+\subsection{充分AP、多初值联合ML与GA}
+充分AP对各源反复进行全域条件扫描与连续精修，以式\eqref{eq:profile}判断更新\cite{ChenHudsonYao2002}。它与MCJ-AP优化同一目标，但进行更多初值处理和全域核查。实验同时报告保存的早期解与最终停止时间，区分取得结果和完成核查的成本。
+
+多初值联合ML从四个唯一的谱峰组合和四个Sobol低差异序列给出的空间覆盖组合出发，以有界L-BFGS-B最小化$J$，输出最小残差解。候选组合的无序重复在初始化阶段删除。遗传算法（GA）将两个源的四个坐标编码为一个实数个体，在相同目标$J$上进行锦标赛选择、模拟二进制交叉和多项式变异\cite{DebAgrawal1995}，保留4个精英，最后作联合连续精修。锦标赛规模为3，交叉概率为0.9、分布指数为15，每维变异概率为0.25、分布指数为20。这些参数控制个体选择与扰动范围；总体成本由种群规模、代数和实际目标调用共同决定。
+
+\subsection{多频共享功率SBL}
+稀疏贝叶斯学习（SBL）在离散位置字典上估计稀疏源功率。令$\bm g_j\in\Omega$为第$j$个字典位置，$\bm D_f=[\bm q_f(\bm g_1),\ldots,\bm q_f(\bm g_G)]\in\C^{L\times G}$。逐频系数$\bm z_f\in\C^G$采用零均值复高斯先验，$\bm z_f\sim\mathcal{CN}(0,\bm\Gamma)$，其中$\bm\Gamma=\diag(\bm\gamma)$，$\bm\gamma\in\R_{\ge0}^G$为跨频共享的非负功率超参数\cite{Nannuru2019}。各频系数按该先验独立建模，位置支持通过共同的$\bm\gamma$关联。观测协方差、系数后验均值及待最小化的负对数边际似然分别为
+\begin{align}
+ \bm C_f&=\sigma_f^2\bm I+\bm D_f\bm\Gamma\bm D_f^H,\label{eq:sblCov}\\
+ \bm\mu_f&=\bm\Gamma\bm D_f^H\bm C_f^{-1}\bm x_f,\nonumber\\
+ \mathcal E(\bm\gamma)&=F^{-1}\sum_f[\log\det\bm C_f+\bm x_f^H\bm C_f^{-1}\bm x_f] .\label{eq:sblEvidence}
+\end{align}
+其中$\sigma_f^2=\sigma_t^2/N$，$\bm C_f\in\C^{L\times L}$，$\bm\mu_f\in\C^G$为后验均值；$\log\det$为自然对数行列式，$\mathcal E$省略了与超参数无关的常数。对每个频点采用同一功率先验时，当前实现的固定点更新为
+\begin{equation}
+ \gamma_j^+=\gamma_j\left[
+ \frac{\sum_f|\bm d_{fj}^H\bm C_f^{-1}\bm x_f|^2}
+ {\sum_f\bm d_{fj}^H\bm C_f^{-1}\bm d_{fj}}
+ \right]^{1/2} .\label{eq:sblUpdate}
+\end{equation}
+这里$\bm d_{fj}$为$\bm D_f$的第$j$列，$\gamma_j^+$为更新后的超参数，指数$1/2$表示采用半步更新。每次更新通过回溯检查$\mathcal E$是否下降。每5轮对8个活动字典点作离网优化，即允许高权重点离开初始网格以减小量化误差。每维位移限制为20\,m，坐标尺度为1000\,m，L-BFGS-B最多20轮，最终从单点$\gamma_j$取峰。停止检查同样每5轮执行一次：负对数边际似然的归一化变化小于$10^{-5}$，$\gamma$的L1相对变化小于1\%，输出位置和活动点最大移动均小于0.05\,m；连续两次满足时停止，否则最多300轮。这些是优化稳定性条件，0.05\,m不是定位成功门槛。谱峰分组候选不并入本文提出方法。
+
+\subsection{局部精修与停止参数}
+AP的交替和联合版本在归一化目标$J$上使用相同的投影梯度阈值$10^{-8}$，目标差停止项设为零。投影梯度表示考虑搜索边界后的可行下降方向：在内部等于普通梯度，在边界排除指向区域外的分量。每次L-BFGS-B最多100轮，线搜索最多25次；交替版本最多12个完整位置扫描。初始化的单源精修采用目标相对容差$10^{-12}$。候选先在$3\times3$网格邻域中取局部极大值，再按30\,m间隔去重。连续精修不受初始20\,m网格步长限制，候选间隔也不等于成功门槛。
+
+VP-BNOMP每次局部Newton最多5步，Hessian最小特征值下限为$10^{-9}$，位置步长上限为50\,m。按$1,1/2,1/4,1/8,1/16$依次回溯，接受下降步，局部小步阈值为0.01\,m。循环中目标下降小于$10^{-8}$且最大位置移动小于0.05\,m，连续两轮满足时停止。正式比较最多执行200轮循环，并分别记录正常停止与达到上限。
+
+\subsection{固定系数BNOMP对应版与消元对照}
+原文对应版根据给定系数$q_f^{(0)}$使用
+\begin{equation}
+ L_{\mathrm{FC}}(\bm p)=E_x^{-1}\sum_f
+ \|\bm y_f-\bm a_f(\bm p)q_f^{(0)}\|^2 .\label{eq:fixedcoef}
+\end{equation}
+其中$\bm y_f=\bm y_{j,f}$为一次局部优化内固定的观测，$q_f^{(0)}$为当前系数估计。对位置求Newton方向，再按该版的时序重估系数。本文以二维多频块NOMP\cite{Yang2022}为对应来源，移植的是固定系数下的位置更新及循环结构，将声学阵列响应替换为本模型的四站时延--幅度响应，使用相同位置边界和明确的数值保护。
+
+受控消元版只将式\eqref{eq:fixedcoef}替换为式\eqref{eq:localprofile}，保留外层时序，以检验局部消元的作用。VP-BNOMP还采用相应的联合系数重估时序，因此整算法成本与这一局部对照分别评价。
+
+\subsection{辅助评价与停止状态}
+表\ref{tab:auxiliary}与正文共同子集表使用同一240条观测。GOSPA按式\eqref{eq:gospa}计算；耗时P95反映较慢样本的成本。达到迭代上限的结果仍按最终输出评价，其余停止原因及具体配置随可复现材料保存。
+\input{sections/generated_formal_auxiliary}
+
+\section{消元局部导数与实现核验}\label{app:derivatives}
+为计算Newton曲率，需要响应对位置的二阶导数。固定频率$f$，令$\kappa=2\pi f/c_0$，单位为rad/m；$d_l=\|\bm p-\bm r_l\|_2$、$\bm v_l=(\bm p-\bm r_l)/d_l$沿用正文定义。写$a_l=\exp(\ell_l)$，其中$\ell_l=-\log d_l-\mathrm j\kappa d_l$是这一响应的连续指数表示。在观测模型一节所述距离保护区外，$d_l>0$，有
+\begin{align}
+ \nabla\ell_l&=(-d_l^{-1}-\mathrm j\kappa)\bm v_l,\\
+ \nabla^2\ell_l&=d_l^{-2}\bm v_l\bm v_l^T
+ +\frac{-d_l^{-1}-\mathrm j\kappa}{d_l}
+ (\bm I-\bm v_l\bm v_l^T),\\
+ \nabla^2 a_l&=a_l[\nabla^2\ell_l+(\nabla\ell_l)(\nabla\ell_l)^T].\label{eq:responseHessian}
+\end{align}
+这里$\nabla$和$\nabla^2$分别对二维位置求梯度和Hessian，$\bm I$为$2\times2$单位矩阵。式\eqref{eq:responseHessian}同时包含幅度与时延的二阶变化；转置$T$没有取复共轭，因为此处求的是复响应对实坐标的普通导数。
+
+对固定的$\bm y_f$，将系数$q_f$拆为实部和虚部，按$\bm u_f=[\Rea q_f,\operatorname{Im}q_f]^T\in\R^2$排列。该频点损失对$\bm u_f$的Hessian为
+\begin{equation}
+ H_{uu,f}=2\|\bm a_f\|^2\bm I_2/E_x .
+\end{equation}
+各频点的系数块相互独立，因此逐频计算混合导数，再累加式\eqref{eq:schur}的修正项，即得到$\phi_j$的$2\times2$实Hessian。实现中以直接最小二乘和小矩阵运算核对投影公式，以有限差分核对位置梯度与Hessian；定位性能另由仿真实验评价。

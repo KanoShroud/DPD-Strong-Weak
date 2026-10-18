@@ -1,0 +1,176 @@
+\section{多候选联合AP与波形消元块NOMP}\label{sec:methods}
+\subsection{条件投影搜索}
+逐源搜索需要先考虑已经发现的源。给定这些源的位置，以$\bm B_f\in\C^{L\times K_{\mathrm B}}$收集其响应，其中$K_{\mathrm B}$为当前固定的源数；搜索第二源时$K_{\mathrm B}=1$。用正交投影去除已有响应所能解释的成分，定义
+\begin{equation}
+ \bm r_f=\bm\Pi_{\bm B_f}^{\perp}\bm x_f,\qquad
+ \bm u_f(\bm p)=\bm\Pi_{\bm B_f}^{\perp}\bm a_f(\bm p).
+\end{equation}
+其中$\bm\Pi_{\bm B_f}^{\perp}=\bm I_L-\bm B_f\bm B_f^\dagger$，$\bm r_f\in\C^L$为投影后的观测，$\bm u_f(\bm p)\in\C^L$为候选响应经过同一投影后的向量。对应的条件位置谱为
+\begin{equation}
+ Q_{\mathrm{AP}}(\bm p\mid\bm B)
+ =E_x^{-1}\sum_f\frac{|\bm u_f(\bm p)^H\bm r_f|^2}
+ {\|\bm u_f(\bm p)\|_2^2}.\label{eq:conditional}
+\end{equation}
+这个评分衡量的是：增加一个候选位置后，联合最小二乘拟合能多解释多少观测能量。为得到这一关系，将$\bm a_f$分解为其在$\bm B_f$列空间内的分量与正交分量$\bm u_f$。当$\bm u_f\ne0$时，新增方向与已有响应正交，因此
+\begin{equation}
+ \bm\Pi_{[\bm B_f,\bm a_f]}^{\perp}
+ =\bm\Pi_{\bm B_f}^{\perp}
+ -\frac{\bm u_f\bm u_f^H}{\|\bm u_f\|^2} .
+\end{equation}
+对上式作观测的二次型并求和，便有
+\begin{equation}
+ J_{\mathrm B}-J([\bm B,\bm a(\bm p)])
+ =\frac1{E_x}\sum_f\frac{|\bm u_f(\bm p)^H\bm r_f|^2}
+ {\|\bm u_f(\bm p)\|^2}
+ =Q_{\mathrm{AP}}(\bm p\mid\bm B),\label{eq:conditionalGain}
+\end{equation}
+其中$J_{\mathrm B}=E_x^{-1}\sum_f\|\bm r_f\|^2$为仅拟合已有源的残差，$J([\bm B,\bm a(\bm p)])$表示加入候选后、共同重估所有系数所得的残差。若$\bm u_f=0$，该候选没有提供新的响应方向，此频点贡献记为零。
+
+因此，最大化条件谱等价于固定已有位置后寻找残差最小的新位置\cite{ChenHudsonYao2002}。观测与候选响应必须作相同投影；仅处理观测、仍用原始响应评分，便不再对应式\eqref{eq:conditionalGain}的联合拟合。
+
+\subsection{多候选联合精修AP（MCJ-AP）}\label{sec:mcj}
+条件谱在粗网格上的排序，只反映各候选未经联合精修时的拟合优劣。不同候选进入不同的局部区域，精修后排序可能改变。为保留这些可能解，先在公共粗网格$\mathcal G\subset\Omega$上最大化$Q_0$，并作单源连续精修，得到$\bm p_1^{(0)}$。固定此位置，计算第二源条件谱，保留$M$个相互分离的局部极大值$\bm c_1,\ldots,\bm c_M\in\R^2$。以$m$标记候选分支，各初始组合分别进入同一联合优化：
+\begin{equation}
+ \widehat{\bm P}^{(m)}=\operatorname{LocalMin}_{\bm P\in\Omega^2}
+ J(\bm P;[\bm p_1^{(0)},\bm c_m]),\qquad
+ m^*=\arg\min_m J(\widehat{\bm P}^{(m)}).\label{eq:branch}
+\end{equation}
+其中$\operatorname{LocalMin}$表示从给定位置组合出发，在搜索边界内局部最小化$J$；$\widehat{\bm P}^{(m)}$为第$m$个分支的精修结果，$m^*$为最终残差最小的分支编号。算法输出$\widehat{\bm P}^{(m^*)}$，选择依据是实际观测的拟合残差。
+
+\begin{algorithm}[H]
+\caption{多候选联合精修AP}\label{alg:ap}
+\begin{algorithmic}[1]
+\Require 观测$\{\bm x_f\}$，站点坐标，公共网格$\mathcal G$，候选数$M$
+\State 最大化$Q_0$并单源精修，得到$\bm p_1^{(0)}$
+\State 固定$\bm p_1^{(0)}$，以式\eqref{eq:conditional}扫描$\mathcal G$
+\State 按固定局部极大值与间距规则保留$M$个候选
+\For{$m=1,\ldots,M$}
+  \State 从$[\bm p_1^{(0)},\bm c_m]$联合优化$J$；每次试探按式\eqref{eq:waveLS}重估波形
+  \State 保存该分支的目标、位置与停止状态
+\EndFor
+\State 按式\eqref{eq:branch}输出最小残差分支
+\end{algorithmic}
+\end{algorithm}
+
+每个分支采用有界拟牛顿法L-BFGS-B优化两个位置\cite{Byrd1995}。令$\bm\theta=\operatorname{vec}(\bm P)\in\R^{2K}$为按源依次排列的坐标向量，$\theta_i$为其第$i$个分量；令$\bm e_f=\bm x_f-\bm A_f\widehat{\bm s}_f\in\C^L$为联合拟合残差。在响应矩阵局部满列秩时，最小二乘正交条件为$\bm A_f^H\bm e_f=0$。对$J$求导，涉及$\partial\widehat{\bm s}_f/\partial\theta_i$的项因这一正交关系消失，得到\cite{GolubPereyra1973}
+\begin{equation}
+ \frac{\partial J}{\partial\theta_i}
+ =-\frac{2}{E_x}\Rea\sum_f
+ \bm e_f^H\frac{\partial\bm A_f}{\partial\theta_i}
+ \widehat{\bm s}_f,\label{eq:gradient}
+\end{equation}
+式中$\Rea$表示取实部，$\partial\bm A_f/\partial\theta_i\in\C^{L\times K}$为响应矩阵对该坐标的导数。记$\bm v_l=(\bm p-\bm r_l)/d_l\in\R^2$为从第$l$站指向候选位置的单位方向，$d_l=\|\bm p-\bm r_l\|_2$，响应的空间梯度为
+\begin{equation}
+ \nabla_{\bm p}a_l(f,\bm p)
+ =a_l(f,\bm p)\left(-\frac1{d_l}-\mathrm j\frac{2\pi f}{c_0}\right)\bm v_l.
+ \label{eq:responseDerivative}
+\end{equation}
+这里$a_l(f,\bm p)=[\bm a_f(\bm p)]_l$。括号内两项分别来自距离幅度和传播时延的变化。联合优化每次重估波形，但计算式\eqref{eq:gradient}时不需要显式求波形估计的导数。
+
+比较不同候选数时，采用嵌套候选并保持公共分支的初始化、求解器和停止条件一致。此时较大候选集包含较小集合的全部精修结果，所选最小残差不会增大。新增分支是否改善真实位置精度，还需通过位置误差验证。$M=1$对应轻量单候选版本；$M>1$增加计算，以减少粗搜索过早舍弃有效区域的风险。
+
+\subsection{波形消元块NOMP（VP-BNOMP）}\label{sec:vpnomp}
+NOMP在当前拟合残差中发现新成分，再循环修正已有参数\cite{Mamandipoor2016}。二维多频率块NOMP将同一位置的逐频系数视为一个参数块\cite{Yang2022}。本文保留这一发现和循环结构，改进局部位置更新：每试探一个位置，就先求该源的最优信号系数，再判断位置是否更好。
+
+给定当前位置和共同估计的系数$\widehat s_{k,f}$，更新源$j$时先减去其他源的当前拟合贡献：
+\begin{equation}
+ \bm y_{j,f}=\bm x_f-\sum_{k\ne j}\bm a_f(\bm p_k)\widehat s_{k,f} .
+ \label{eq:targetResidual}
+\end{equation}
+其中$\bm y_{j,f}\in\C^L$为保留源$j$贡献的残差观测，在一次局部位置优化内固定。对任意试探位置$\bm p$，其最优复数系数$\widehat q_f(\bm p)\in\C$与局部目标$\phi_j(\bm p)$分别为
+\begin{align}
+ \widehat q_f(\bm p)&=\frac{\bm a_f(\bm p)^H\bm y_{j,f}}
+ {\|\bm a_f(\bm p)\|^2},\label{eq:localcoef}\\
+ \phi_j(\bm p)&=\min_{\{q_f\}}E_x^{-1}\sum_f
+ \|\bm y_{j,f}-\bm a_f(\bm p)q_f\|^2\nonumber\\
+ &=E_x^{-1}\sum_f\left(\|\bm y_{j,f}\|^2-
+ \frac{|\bm a_f(\bm p)^H\bm y_{j,f}|^2}{\|\bm a_f(\bm p)\|^2}\right).
+ \label{eq:localprofile}
+\end{align}
+这里$q_f$表示该源的标量信号系数，与单位范数响应向量$\bm q_f$区分。式\eqref{eq:localprofile}由单源线性最小二乘直接得到：先求使残差最小的$q_f$，再代回损失。Newton更新采用$\phi_j$对两个位置坐标的梯度和Hessian（二阶导数矩阵），而不固定$q_f$计算曲率。步长限制和回溯用于选择局部试探步；随后以完整联合目标$J$检查是否接受，并共同重估全部源系数。
+
+发现新源时，记当前共同拟合残差为$\bm r_f=\bm x_f-\sum_k\bm a_f(\bm p_k)\widehat s_{k,f}$；尚未发现源时$\bm r_f=\bm x_f$。扫描的残差谱为
+\begin{equation}
+ Q_{\mathrm R}(\bm p)=E_x^{-1}\sum_f
+ \frac{|\bm a_f(\bm p)^H\bm r_f|^2}{\|\bm a_f(\bm p)\|^2},
+ \label{eq:residualScore}
+\end{equation}
+该谱评价候选对当前残差的解释能力。它用于发现初始位置，后续再以联合拟合修正所有已发现源。
+
+\begin{algorithm}[H]
+\caption{波形消元块NOMP}\label{alg:nomp}
+\begin{algorithmic}[1]
+\Require 观测，公共网格，源数$K$，循环与Newton停止参数
+\State 初始化源集合为空，$\bm r_f\gets\bm x_f$
+\For{$k=1,\ldots,K$}
+  \State 最大化残差谱\eqref{eq:residualScore}，发现新位置
+  \State 以式\eqref{eq:localprofile}作单源Newton精修，加入源集合
+  \State 按式\eqref{eq:waveLS}共同重估全部已发现源的系数
+  \Repeat
+    \For{已发现的每个源$j$}
+      \State 构造$\bm y_{j,f}$，用$\phi_j$作有界Newton更新
+      \State 仅接受使完整$J$不增的位置，并共同重估系数
+    \EndFor
+  \Until{循环停止条件满足或达到安全上限}
+  \State 更新共同拟合残差
+\EndFor
+\State 输出已发现位置；可单列末端联合精修版本用于比较
+\end{algorithmic}
+\end{algorithm}
+
+两种发现方式的区别在于如何处理已有源。共同LS拟合后，残差$\bm r_f$与已有响应的列空间正交，因此AP条件谱和NOMP残差谱的分子相同；分母则分别为$\|\bm\Pi_{\bm B_f}^{\perp}\bm a_f\|^2$和$\|\bm a_f\|^2$。AP还考虑候选与已有响应的相似程度，NOMP直接扫描当前残差，两者因而可能选中不同的初始区域。本文保留这两种发现机制。
+
+\subsection{消元更新的曲率与下降性质}\label{sec:curvature}
+下面说明为什么固定信号系数可能使位置更新缓慢。对于一次源位置更新，将二维坐标记为$\bm z\in\R^2$，将$F$个复信号系数的实部和虚部排列为$\bm u\in\R^{2F}$。对应的归一化局部损失记为$\mathcal L_{\mathrm{loc}}(\bm z,\bm u)$，给定位置的最小二乘系数记为$\widehat{\bm u}(\bm z)$，消元后损失为$\varphi(\bm z)=\mathcal L_{\mathrm{loc}}(\bm z,\widehat{\bm u}(\bm z))$，即式\eqref{eq:localprofile}。
+
+假设响应二阶连续可微，且系数最小二乘解局部唯一。定义$H_{zz}\in\R^{2\times2}$、$H_{uu}\in\R^{2F\times2F}$和$H_{zu}\in\R^{2\times2F}$分别为$\mathcal L_{\mathrm{loc}}$的位置、系数及混合二阶导数，$H_{uz}=H_{zu}^T$，所有导数在$(\bm z,\widehat{\bm u}(\bm z))$处计算。最优系数满足$\nabla_u\mathcal L_{\mathrm{loc}}=0$，对位置求导可得
+\begin{equation}
+ H_{uz}+H_{uu}\frac{\partial\widehat{\bm u}}{\partial\bm z}=0,
+ \qquad\frac{\partial\widehat{\bm u}}{\partial\bm z}
+ =-H_{uu}^{-1}H_{uz}.\label{eq:coefficientDerivative}
+\end{equation}
+将这一关系代入$\varphi$的一、二阶导数，得到变量投影的梯度和曲率关系\cite{GolubPereyra1973}：
+\begin{align}
+ \nabla\varphi&=\nabla_z\mathcal L_{\mathrm{loc}},\label{eq:envelope}\\
+ H_{\mathrm{VP}}&=H_{zz}-H_{zu}H_{uu}^{-1}H_{uz},\label{eq:schur}\\
+ H_{zz}-H_{\mathrm{VP}}&\succeq0 .\label{eq:psd}
+\end{align}
+其中$H_{\mathrm{VP}}=\nabla^2\varphi\in\R^{2\times2}$，下标VP表示变量投影；$\succeq0$表示半正定。式\eqref{eq:psd}来自系数最小二乘子问题的$H_{uu}$正定，因此$H_{zu}H_{uu}^{-1}H_{uz}$为半正定矩阵。
+
+这一差值给出固定系数更新与波形消元更新的联系。位置变化时，一部分响应变化可通过重新估计信号系数来补偿；固定系数曲率$H_{zz}$没有扣除这部分变化，在耦合较强的方向上可能偏大。相同梯度配上偏大的正曲率，会产生较小的位置步长。消元曲率$H_{\mathrm{VP}}$通过式\eqref{eq:schur}扣除了相应项，后面的受控实验检验这一机制是否造成实际计算差异。
+
+在搜索区域内部的局部极小点$\bm z^*$附近，令位置误差$\bm\epsilon=\bm z-\bm z^*$。当$H_{zz}$和$H_{\mathrm{VP}}$均正定，且采用完整Newton步时，用固定系数曲率更新消元梯度的一阶误差传播为
+\begin{equation}
+ \bm\epsilon^{+}\approx
+ \left(\bm I_2-H_{zz}^{-1}H_{\mathrm{VP}}\right)\bm\epsilon .\label{eq:localrate}
+\end{equation}
+式中$\bm\epsilon^+$为更新后的位置误差，Hessian取局部极小点处的值。由式\eqref{eq:psd}，迭代矩阵的特征值落在$[0,1)$；当某方向的消元曲率远小于固定系数曲率时，该方向的误差收缩因子接近1，迭代便可能出现大量小步。采用精确消元Newton曲率可去掉这一局部线性误差项。实际算法还受回溯、步长限制和Hessian近似的影响，因此用目标与导数调用次数进一步评价计算效率。
+
+波形消元处理同一源的位置与信号系数之间的耦合，联合位置精修则处理两个源位置之间的耦合。对联合位置目标$J$，双源的$4\times4$ Hessian可分块写为
+\begin{equation}
+ H_{\mathrm{joint}}=
+ \begin{bmatrix}H_{11}&H_{12}\\H_{21}&H_{22}\end{bmatrix} .
+\end{equation}
+其中$H_{ij}=\partial^2J/(\partial\bm p_i\partial\bm p_j^T)\in\R^{2\times2}$。逐源精修每次只改变一个位置，联合精修同时调整两个位置，从而利用跨源项$H_{12}$和$H_{21}$所反映的相互影响。MCJ-AP采用联合L-BFGS-B更新；VP-BNOMP首先改进每个源内部的位置--系数耦合，末端联合位置精修作为独立变体比较。
+
+算法仅接受使完整目标不增的更新，即$J(\bm P^+)\le J(\bm P)$。由于$J\ge0$，已接受的目标值序列单调有界，因而收敛；这是目标值的收敛性质。实际计算同时检查目标变化、位置移动或梯度，并设置安全迭代上限。局部搜索所得位置还取决于初始化，这也是保留多个候选的原因。
+
+\subsection{计算量及方法关系}\label{sec:complexity}
+复杂度以保留频点数$F$、站数$L$、源数$K$和初始网格点数$G=|\mathcal G|$表示。记$I$为循环精修次数，$T$为连续目标或梯度的调用总数。单次联合系数求解需形成$K\times K$ Gram矩阵$\bm A_f^H\bm A_f$，并解相应线性方程，跨频主要计算量为$\mathcal O(F(LK^2+K^3))$。固定其他源后，投影可预计算，条件网格扫描约为$\mathcal O(FGLK)$。双源全组合搜索需检查$G^2$组位置，而逐源发现每次只扫描$G$点。
+
+\begin{table}[htbp]
+\centering\small
+\caption{主要计算量。$I_{\mathrm B}$为稀疏贝叶斯迭代数，$S$为分段数。}\label{tab:complexity}
+\begin{tabularx}{\linewidth}{@{}lX@{}}\toprule
+方法或运算 & 主要量级与可观测计数\\\midrule
+公共DFT & $\mathcal O(LN\log N)$；原始采样点与保留频点数\\
+MUSIC／MVDR & 统计约$\mathcal O(F_sSL^2+F_sL^3)$，谱扫描$\mathcal O(F_sGL^2)$；$F_s$为分段后频点数\\
+MCJ-AP & 两次条件扫描加$M$个局部位置优化；约$\mathcal O(FGLK+T_MF(LK^2+K^3))$\\
+VP-BNOMP & 逐源扫描与$I$轮循环精修；约$\mathcal O(KFGL+IKT_{\mathrm{loc}}FL)$，另计共同系数重估\\
+多初值／GA & 由位置目标调用总数$T$决定，约$\mathcal O(TF(LK^2+K^3))$\\
+宽带SBL & 稠密字典每轮约$\mathcal O(FGL^2+FL^3)$，累计随$I_{\mathrm B}$增长\\\bottomrule
+\end{tabularx}
+\end{table}
+表中$T_M$为全部$M$个候选分支的连续目标与梯度调用总数，$T_{\mathrm{loc}}$为一次源位置精修的调用数，$F_s$为分段DFT保留的频点数。本文通过减少实际调用次数节省计算。局部单源系数按频点独立，式\eqref{eq:schur}的$H_{uu}$为分块对角矩阵，每块仅$2\times2$；逐频计算后累加得到$2\times2$位置曲率，无需构造完整$2F\times2F$矩阵。固定系数与消元更新的单次运算均随$F$线性增长，差别主要在所需步数与循环次数。实验因此同时报告扫描点数、目标/梯度调用数和完整耗时。
+
+AP、NOMP、BNOMP与QNOMP分别提供条件搜索、残差发现、块更新与联合准Newton优化的研究基础\cite{ChenHudsonYao2002,Mamandipoor2016,Yang2022,Zeng2025}。本文方法的重点是：在同一未知波形直接定位模型中，明确候选保留、系数消元和联合位置精修的职责，并用控制变量实验建立这些选择与定位成本之间的联系。

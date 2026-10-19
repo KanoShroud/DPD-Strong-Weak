@@ -1,13 +1,18 @@
 """Protect prior formulas/tables and check saved-only closeout statements."""
 import hashlib
+import argparse
 import json
 import re
 from pathlib import Path
+from relocated_evidence import local_path
 
 PAPER = Path(__file__).resolve().parents[1]
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--out', default='qa/contribution_closeout_20261019')
+    args = parser.parse_args()
     text = (PAPER / 'paper_draft.tex').read_text(encoding='utf-8')
     old = (PAPER / 'archive/contribution_closeout_20261019/paper_draft.tex').read_text(encoding='utf-8')
     equations = re.findall(r'\\begin\{(?:equation|align)\}.*?\\end\{(?:equation|align)\}', old, re.S)
@@ -16,7 +21,7 @@ def main():
     assert all(t in text for t in tables)
     a = json.loads((PAPER / 'data/contribution_closeout_20261019/analysis.json').read_text(encoding='utf-8'))
     for path, digest in a['sources'].items():
-        assert hashlib.sha256(Path(path).read_bytes()).hexdigest() == digest
+        assert hashlib.sha256(local_path(path).read_bytes()).hexdigest() == digest
     assert a['ap5_recovered']['observations'] == 96
     assert a['ap5_recovered']['layout_repeat_count'] == 18
     assert a['ap5_failed']['observations'] == 24
@@ -29,7 +34,7 @@ def main():
     result = dict(passed=True, preserved_equations=len(equations), preserved_tables=len(tables),
                   saved_evidence_identity=True, recovery_unit_checked=True,
                   spectral_diagnostic_checked=True, no_new_positioning=True)
-    out = PAPER / 'qa/contribution_closeout_20261019'
+    out = PAPER / args.out
     out.mkdir(parents=True, exist_ok=True)
     (out / 'content_validation.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
     print(json.dumps(result, ensure_ascii=False, indent=2))

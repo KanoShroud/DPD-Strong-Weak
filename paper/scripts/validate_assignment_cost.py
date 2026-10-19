@@ -4,6 +4,7 @@ import argparse
 import json
 import re
 from pathlib import Path
+from relocated_evidence import local_path
 
 import fitz
 
@@ -11,7 +12,7 @@ HERE = Path(__file__).resolve().parents[1]
 
 
 def sha(p):
-    return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+    return hashlib.sha256(local_path(p).read_bytes()).hexdigest()
 
 
 def main():

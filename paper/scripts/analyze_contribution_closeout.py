@@ -3,6 +3,7 @@ import csv
 import hashlib
 import json
 from pathlib import Path
+from relocated_evidence import local_path
 
 PAPER = Path(__file__).resolve().parents[1]
 ROOT = PAPER.parent
@@ -16,7 +17,7 @@ def main():
     data = PAPER / 'data/assignment_cost_20261019'
     previous = json.loads((data / 'report.json').read_text(encoding='utf-8'))
     for name, digest in previous['source_files'].items():
-        assert sha(Path(name)) == digest, name
+        assert sha(local_path(name)) == digest, name
     source = data / 'core_per_case.csv'
     with source.open(encoding='utf-8-sig', newline='') as stream:
         rows = list(csv.DictReader(stream))

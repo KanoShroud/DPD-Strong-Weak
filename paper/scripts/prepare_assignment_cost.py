@@ -8,6 +8,7 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+from relocated_evidence import local_path
 
 import matplotlib
 matplotlib.use('Agg')
@@ -51,7 +52,7 @@ def digest(p):
 
 
 def read(p, expected=None):
-    p = Path(p).resolve(strict=True)
+    p = local_path(p)
     h = digest(p)
     if expected is not None and h != expected:
         raise ValueError('Evidence changed: '+str(p))
@@ -69,7 +70,7 @@ def csv_write(p, rows):
 
 
 def source(pointer_name):
-    ptr = read(BASE/(pointer_name+'.json')); folder = Path(ptr['out']).resolve(strict=True)
+    ptr = read(BASE/(pointer_name+'.json')); folder = local_path(ptr['out'])
     assert folder.is_relative_to(BASE.resolve())
     c = read(folder/'contract.json', ptr['contract_sha'])
     audit = read(folder/'final_audit_report.json')

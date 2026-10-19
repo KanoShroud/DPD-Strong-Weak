@@ -1,5 +1,7 @@
 # 论文独立工作目录
 
+2026-10-19按用户最新决定，本论文迁回 `F:/SourceCount_DPD_E2E/paper`，这里是唯一正文维护入口，不再另设 `DPD_WeakSource_Localization`。前次分离的统计重放见`data/migration_replay_20261019/`，历史验证见`qa/migration_20261019/`与`qa/migration_build_20261019/`；本次迁回检查见`qa/paper_home_20261019/`与[交付记录](../outputs_e2e/maintenance/paper_home_20261019/交付记录.md)。当前`prepare_assignment_cost.py`、`analyze_contribution_closeout.py`及对应两个验证脚本通过`relocated_evidence.py`兼容两个历史根并解析本地证据，不改写旧合同。其他历史脚本不承诺自动迁移续跑兼容。
+
 2026-10-19已完成贡献论证收尾：补齐谱方法及停止核验结论，解释恢复次数与RMSE来源，保留原公式、结果表及图。[修订与25页核验](qa/contribution_closeout_20261019/修订与核验.md)。本轮仅整理保存结果，不运行定位；前一版归档在`archive/contribution_closeout_20261019/`。
 
 2026-10-19已完成统一评价匹配、AP候选数—VP共同计时及CDF/耗时展示，见[最终核验](qa/assignment_cost_20261019/修订与核验.md)。新评价器不覆盖冻结v2证据；当前结果重绘入口为`scripts/prepare_assignment_cost.py`，新版数据及图表分别写入`data/assignment_cost_20261019/`和`figures/assignment_cost_20261019/`。它只读取已完成结果，不运行定位。历史`prepare_formal_assets.py`及拆分文件保留追溯，不用于覆盖当前内联正文。修订前稿件保存在`archive/assignment_cost_20261019/`。

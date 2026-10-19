@@ -1,6 +1,10 @@
 # 论文独立工作目录
 
-2026-10-18已完成贡献表述、既有机制证据整理及有限分段核验；最新状态和检查结果见[修订与核验](qa/evidence_revision/修订与核验.md)。
+2026-10-19已完成贡献论证收尾：补齐谱方法及停止核验结论，解释恢复次数与RMSE来源，保留原公式、结果表及图。[修订与25页核验](qa/contribution_closeout_20261019/修订与核验.md)。本轮仅整理保存结果，不运行定位；前一版归档在`archive/contribution_closeout_20261019/`。
+
+2026-10-19已完成统一评价匹配、AP候选数—VP共同计时及CDF/耗时展示，见[最终核验](qa/assignment_cost_20261019/修订与核验.md)。新评价器不覆盖冻结v2证据；当前结果重绘入口为`scripts/prepare_assignment_cost.py`，新版数据及图表分别写入`data/assignment_cost_20261019/`和`figures/assignment_cost_20261019/`。它只读取已完成结果，不运行定位。历史`prepare_formal_assets.py`及拆分文件保留追溯，不用于覆盖当前内联正文。修订前稿件保存在`archive/assignment_cost_20261019/`。
+
+2026-10-18已完成独立审稿后获批的内容修订：补充LAOLS近邻、明确局部与联合消元及参照实现、补报既有区间并修正轨迹时间。最新检查见[审稿后修订核验](qa/review_followup_20261018/修订与核验.md)。此前的[机制证据与有限分段核验](qa/evidence_revision/修订与核验.md)继续保留。
 
 今后直接修改 [paper_draft.tex](paper_draft.tex)。摘要、正文、公式、表格和附录已全部写入这一文件，不再通过 `\input` 引入章节或表格。阅读版为 [paper_draft.pdf](paper_draft.pdf)。
 

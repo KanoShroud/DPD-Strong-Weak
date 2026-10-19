@@ -4,6 +4,7 @@ import hashlib
 import json
 import re
 import csv
+import argparse
 import numpy as np
 from validate_draft import math_checks
 
@@ -15,6 +16,9 @@ def sha(path):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--out', type=Path, default=PAPER/'qa/evidence_revision/validation.json')
+    args = parser.parse_args()
     path = PAPER/'paper_draft.tex'
     text = path.read_text(encoding='utf-8')
     old = (PAPER/'archive/evidence_revision_20261018/paper_draft.tex').read_text(encoding='utf-8')
@@ -65,7 +69,8 @@ def main():
                   labels=len(labels), citations=len(cites), math=math, latex_errors=errors,
                   source_identities_unchanged=True, new_localization_solves=0,
                   diagnostic_status='Finite-window mismatch measured; no causal solver failure attribution.')
-    (PAPER/'qa/evidence_revision/validation.json').write_text(
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(
         json.dumps(checks, ensure_ascii=False, indent=2), encoding='utf-8')
     print(json.dumps({k: v for k, v in checks.items() if k != 'math'}, ensure_ascii=False, indent=2))
 

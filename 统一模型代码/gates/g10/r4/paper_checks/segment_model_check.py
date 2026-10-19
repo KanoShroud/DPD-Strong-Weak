@@ -22,6 +22,8 @@ HALF_BAND = 7e6
 TASKS = [(g, 200, gap) for g in range(4) for gap in (0, 15)]
 
 
+from migration_paths import input_path  # noqa: E402
+
 def digest(data):
     return hashlib.sha256(data).hexdigest()
 
@@ -38,6 +40,7 @@ def checked_bytes(path, expected=None):
 
 
 def read(path, expected=None):
+    path = input_path(path)
     return json.loads(checked_bytes(path, expected).decode('utf-8'))
 
 

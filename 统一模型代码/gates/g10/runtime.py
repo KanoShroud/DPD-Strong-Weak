@@ -13,6 +13,8 @@ import torch
 from .config import ROOT, BASE
 
 
+from migration_paths import input_path  # noqa: E402
+
 def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
@@ -51,6 +53,7 @@ def write(path, data):
 
 
 def read(path):
+    path = input_path(path)
     return json.loads(Path(path).read_text(encoding='utf-8'))
 
 

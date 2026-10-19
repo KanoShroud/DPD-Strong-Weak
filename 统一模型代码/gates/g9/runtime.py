@@ -14,6 +14,8 @@ BASE = ROOT/'outputs_e2e/unified/e2e_g9'
 FROZEN = Path('F:/SourceCount_DPD/outputs').resolve()
 
 
+from migration_paths import input_path  # noqa: E402
+
 def location(path):
     path = Path(path).resolve()
     if path == BASE.resolve() or not path.is_relative_to(BASE.resolve()) or path.is_relative_to(FROZEN):
@@ -34,10 +36,12 @@ def write(path, value):
 
 
 def read(path):
+    path = input_path(path)
     return json.loads(Path(path).read_text(encoding='utf-8'))
 
 
 def identity(path):
+    path = input_path(path)
     path = Path(path).resolve(strict=True)
     return dict(path=str(path), sha256=hashlib.sha256(path.read_bytes()).hexdigest())
 
@@ -49,9 +53,11 @@ def source_manifest():
     return [identity(p) for p in sorted(paths)]
 
 
+from migration_paths import identities_equal  # noqa: E402
+
 def verify(manifest):
     for item in manifest:
-        if identity(item['path']) != item:
+        if not identities_equal(identity(item['path']), item):
             raise RuntimeError('冻结源码/输入身份变化：'+item['path'])
 
 

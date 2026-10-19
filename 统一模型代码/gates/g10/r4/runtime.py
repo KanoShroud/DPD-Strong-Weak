@@ -51,6 +51,8 @@ def safe_out(path):
     return p
 
 
+from migration_paths import input_path  # noqa: E402
+
 def create():
     require_exclusive()
     ref = reference()
@@ -58,7 +60,7 @@ def create():
     resource_check()
     manifest = read(ROOT/'outputs_e2e/literature/g10_r4_nearest_20261016/source_manifest.json')
     for item in manifest.values():
-        if sha(Path(item['path']).resolve(strict=True)) != item['sha256']:
+        if sha(input_path(item['path']).resolve(strict=True)) != item['sha256']:
             raise RuntimeError('Source PDF identity changed')
     identity = sources()
     verify(identity)

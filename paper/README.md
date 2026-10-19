@@ -1,6 +1,6 @@
 # 论文独立工作目录
 
-2026-10-19按用户最新决定，本论文迁回 `F:/SourceCount_DPD_E2E/paper`，这里是唯一正文维护入口，不再另设 `DPD_WeakSource_Localization`。前次分离的统计重放见`data/migration_replay_20261019/`，历史验证见`qa/migration_20261019/`与`qa/migration_build_20261019/`；本次迁回检查见`qa/paper_home_20261019/`与[交付记录](../outputs_e2e/maintenance/paper_home_20261019/交付记录.md)。当前`prepare_assignment_cost.py`、`analyze_contribution_closeout.py`及对应两个验证脚本通过`relocated_evidence.py`兼容两个历史根并解析本地证据，不改写旧合同。其他历史脚本不承诺自动迁移续跑兼容。
+2026-10-19按用户最新决定，本论文现位于 `F:/DPD_Strong_Weak/paper`，这里是唯一正文维护入口，不再另设 `DPD_WeakSource_Localization`。前次分离的统计重放见`data/migration_replay_20261019/`，历史验证见`qa/migration_20261019/`与`qa/migration_build_20261019/`；本次迁回检查见`qa/paper_home_20261019/`与[交付记录](../outputs_e2e/maintenance/paper_home_20261019/交付记录.md)。当前`prepare_assignment_cost.py`、`analyze_contribution_closeout.py`及对应两个验证脚本通过`relocated_evidence.py`兼容两个历史根并解析本地证据，不改写旧合同。其他历史脚本不承诺自动迁移续跑兼容。
 
 2026-10-19已完成贡献论证收尾：补齐谱方法及停止核验结论，解释恢复次数与RMSE来源，保留原公式、结果表及图。[修订与25页核验](qa/contribution_closeout_20261019/修订与核验.md)。本轮仅整理保存结果，不运行定位；前一版归档在`archive/contribution_closeout_20261019/`。
 
@@ -39,6 +39,6 @@
 | `sections/`、`tables/` | 上版拆分源文件，保留追溯，不参与编译，也不作为后续正文编辑入口 |
 | `scripts/` | 研究结果重绘和历史核验工具，不是独立编译依赖 |
 
-`scripts/`中的实验来源核验、重绘工具仍可能需要原项目结果，只在需要重新分析数据时使用；普通编译不调用它们。修改主文档后，不要用历史拆分文件覆盖它。旧 `paper.pdf` 为历史输出，当前阅读与编译输出统一为 `paper_draft.pdf`。
+`scripts/`中的实验来源核验、重绘工具读取本项目保留的结果，只在需要重新分析数据时使用；普通编译不调用它们。修改主文档后，不要用历史拆分文件覆盖它。旧 `paper.pdf` 为历史输出，当前阅读与编译输出统一为 `paper_draft.pdf`。
 
 本次完整展开保持文字、公式和统计不变；独立编译验证见 [qa/独立编译核验.md](qa/独立编译核验.md)。

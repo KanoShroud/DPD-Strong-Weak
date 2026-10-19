@@ -18,11 +18,14 @@ PROTOCOL = 'EVAL-20261011-v2'
 IDENTITIES = {}
 
 
+from migration_paths import input_path  # noqa: E402
+
 def sha(data):
     return hashlib.sha256(data).hexdigest()
 
 
 def read(path):
+    path = input_path(path)
     data = path.read_bytes()
     IDENTITIES[str(path.relative_to(ROOT))] = sha(data)
     result = json.loads(data)

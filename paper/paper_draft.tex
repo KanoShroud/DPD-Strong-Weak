@@ -100,7 +100,7 @@
 
 稀疏参数估计将粗搜索与离网精修结合起来。Newtonized orthogonal matching pursuit（NOMP）在贪心发现后进行Newton更新和循环精修\cite{Mamandipoor2016}。Yang等的多频率二维块NOMP以距离衰减和传播相位构造响应，将各频率的未知源系数组成一个块，并在位置更新后重估系数\cite{Yang2022}。其宽带模型与本文接近，是局部更新的直接参照。QNOMP则针对已知导频形成的信道观测，先以最小二乘消去路径增益，再联合优化各路径的时延和角度\cite{Zeng2025}。本文沿用这些多频拟合与连续优化基础，集中改进两个环节：在条件搜索后保留多个可精修分支，以及在块NOMP的位置试探中同步消去当前源的逐频系数。
 
-候选保留与后续拟合择优已有一般性研究。前瞻正交最小二乘（look-ahead orthogonal least squares，LAOLS）保留多个离散原子候选，向前补全支持集，再按最终残差决定当前选择\cite{Chatterjee2012}。本文面对的差别在于位置可连续变化：粗条件谱固定第一源位置，连续精修却允许两源共同移动，两种排序因而可能不同。MCJ-AP保留多个条件候选，分别与第一源组成分支，联合优化后按完整残差择优。新增计算集中在少量局部分支，不需要为每个分支重复全域扫描。
+AP初始化的改进已有专门研究\cite{OhUn1991}，候选保留与后续拟合择优也有一般性基础。前瞻正交最小二乘（look-ahead orthogonal least squares，LAOLS）保留多个离散原子候选，向前补全支持集，再按最终残差决定当前选择\cite{Chatterjee2012}。本文面对的具体问题在于位置可连续变化：粗条件谱固定第一源位置，连续精修却允许两源共同移动，两种排序因而可能不同。MCJ-AP保留多个条件候选，分别与第一源组成分支，联合优化后按完整残差择优。新增计算集中在少量局部分支，不需要为每个分支重复全域扫描。
 
 未知波形的处理同样影响迭代效率。变量投影法先求最优线性系数，再优化非线性参数\cite{GolubPereyra1973}。这里线性系数是逐频波形，非线性参数是源位置。试探位置改变时重新估计波形，可以避免固定系数对位置步长的约束。本文据此构造波形消元块NOMP，并推导固定系数曲率与消元曲率的关系，解释局部更新为何可能需要不同的计算量。
 
@@ -160,7 +160,7 @@ $m$采用移位后的有符号频率索引，$\mathrm j=\sqrt{-1}$。在DFT频�
 
 上述频域模型采用共同观测窗的时延近似，忽略各站有限记录在窗边缘的差异。完整DFT的白噪声满足$\E[\bm n_f\bm n_f^H]=(\sigma_t^2/N)\bm I_L$。去除带外频点后，保留频点的噪声方差不变，DFT归一化仍使用原始点数$N$。所有方法采用这一处理，不对各站混合IQ作额外RMS归一化。
 
-计算中也可使用单位范数响应$\bm q_f(\bm p)=\bm a_f(\bm p)/\|\bm a_f(\bm p)\|_2$。这一操作对同一位置的整列响应除以同一个数，站间相对幅度不变。逐频源系数自由估计时，列缩放可由相应系数补偿，因此不改变联合拟合的最小残差。离散扫描包含站点坐标时，为避免$d_l=0$的数值奇点，实现将不足1\,m的距离按1\,m计算；本文的导数推导适用于这一保护区外，仿真源位置均远离站点。
+计算中也可使用单位范数响应$\bm q_f(\bm p)=\bm a_f(\bm p)/\|\bm a_f(\bm p)\|_2$。这一操作对同一位置的整列响应除以同一个数，站间相对幅度不变。逐频源系数自由估计时，列缩放可由相应系数补偿，因此不改变联合拟合的最小残差。离散扫描包含站点坐标时，为避免$d_l=0$的数值奇点，实现将不足1\,m的距离按1\,m计算。在该开保护区内，对应站点响应对位置的一、二阶导数置零；保护区外使用下文解析导数。边界$d_l=1$\,m处为分段模型的非光滑点，不赋予唯一解析导数。仿真源位置均远离站点。
 
 下文粗体小写和大写分别表示向量与矩阵，$\C$和$\R$分别表示复数域和实数域；$(\cdot)^T$、$(\cdot)^H$及$(\cdot)^\dagger$分别表示转置、共轭转置和Moore--Penrose伪逆，$\|\cdot\|_2$表示欧氏范数，$\bm I_d$表示$d$阶单位矩阵。未标阶数的单位矩阵由相乘矩阵的维度确定。
 
@@ -228,7 +228,7 @@ $m$采用移位后的有符号频率索引，$\mathrm j=\sqrt{-1}$。在DFT频�
 \end{equation}
 其中$J_{\mathrm B}=E_x^{-1}\sum_f\|\bm r_f\|^2$为仅拟合已有源的残差，$J([\bm B,\bm a(\bm p)])$表示加入候选后、共同重估所有系数所得的残差。若$\bm u_f=0$，该候选没有提供新的响应方向，此频点贡献记为零。
 
-式\eqref{eq:conditionalGain}将条件搜索与联合拟合连接起来：固定已有位置时，条件得分最高的候选使联合残差最小\cite{ChenHudsonYao2002}。这一等价关系要求观测和候选响应使用相同投影。
+式\eqref{eq:conditionalGain}将条件搜索与联合拟合连接起来：固定已有位置时，条件得分最高的候选使联合残差最小\cite{ChenHudsonYao2002}。这一等价关系要求观测和候选响应使用相同投影。数值实现先将候选响应归一化；投影后的范数平方不超过$10^{-20}$时，该频点评分记为零，以避免除以近零量。共同最小二乘采用相对阈值$10^{-10}$的SVD伪逆处理秩退化，式\eqref{eq:conditionalGain}的数值核对应考虑两处截断对近退化方向的影响。
 
 \subsection{多候选联合精修AP（MCJ-AP）}\label{sec:mcj}
 MCJ-AP以AP条件投影生成第二源候选，随后转入多分支联合位置优化。AP在此承担条件初始化，联合精修完成分支内求解；两者的具体分工见算法\ref{alg:ap}。
@@ -423,7 +423,7 @@ VP-BNOMP & 每次局部位置试探都重估当前源系数；逐源循环后共
 
 实验先在共同240条观测上比较八类方法，再将核心方法的随机重复从每布局2次增加到20次，形成2400条扩展验证。两组均覆盖全部20布局和六档功率差，区别在于随机重复次数；240条是2400条的预先固定子集，不额外增加样本总数。全面比较用于衡量各方法的可靠性与成本，扩展验证则用于检查核心方法的表现及收益来源。
 \begin{figure}[pos=htbp]\centering
-\includegraphics[width=.88\linewidth]{figures/formal_geometry.pdf}
+\includegraphics[width=.88\linewidth]{figures/formal_geometry.png}
 \caption{20个源站布局，每类5个。黑色三角形为接收站，灰色菱形边界为站点凸包；同一面板内，相同形状的两个标记为一对源，红色为源A、蓝色为源B。0\,dB时两源平均接收功率相同。}\label{fig:formalgeometry}
 \end{figure}
 \FloatBarrier
@@ -504,21 +504,21 @@ GA联合ML & 77.08 (185/240) & 279.056 & 501.231 & 8.0702 & 8.1102 & 9.0229\\
 
 在相同观测上，MCJ-AP以更低成本达到了充分AP和SBL的恢复水平。三者均全部成功，平均完整耗时分别为0.708\,s、8.908\,s和44.130\,s。固定系数BNOMP与VP-BNOMP均成功228条；消元版本的平均耗时由2.942\,s降至0.591\,s。两者保留相同发现和循环后共同LS结构，局部系数处理的差别在第\ref{sec:mechanismresults}节分析。
 \begin{figure}[pos=htbp]\centering
-\includegraphics[width=\linewidth]{figures/assignment_cost_20261019/common_error_cdf.pdf}
+\includegraphics[width=\linewidth]{figures/assignment_cost_20261019/common_error_cdf.png}
 \caption{共同240条观测的强、弱源误差CDF。上行展示完整误差范围，横轴在1\,m内线性、其外对数；下行为小误差区间的线性放大。所有面板均使用全部240条作分母，竖线为20\,m参考线。}\label{fig:commonerrorcdf}
 \end{figure}
 \FloatBarrier
 图\ref{fig:commonerrorcdf}将定位精度与恢复概率放在同一分布中观察。MCJ-AP和充分AP的曲线几乎重合，两源误差均集中在较小范围；SBL也恢复全部双源，但弱源误差分布更宽。VP-BNOMP在大部分观测上接近AP的精度，仍有一段远距离错误尾部。谱方法与多初值ML的低成功率同时伴随较大误差，并非仅由20\,m门槛附近的轻微偏差造成。
 
 \begin{figure}[pos=htbp]\centering
-\includegraphics[width=\linewidth]{figures/assignment_cost_20261019/common_time_cdf.pdf}
+\includegraphics[width=\linewidth]{figures/assignment_cost_20261019/common_time_cdf.png}
 \caption{与表\ref{tab:formalcommon}同批的完整耗时CDF。左图覆盖全部耗时，横轴0.1\,s内线性、其外对数；右图以线性坐标放大早期完成区间。}\label{fig:commontimecdf}
 \end{figure}
 \FloatBarrier
 图\ref{fig:commontimecdf}显示，谱方法计算较快，但应结合误差CDF判断其定位质量。MCJ-AP在保持高恢复率的同时，比充分AP和SBL更早完成；VP-BNOMP多数观测较快，少量长循环使其耗时尾部超过MCJ-AP。因此，中位耗时与P95分别补充了典型成本和慢样本成本，不能只看平均值。
 
 \begin{figure}[pos=htbp]\centering
-\includegraphics[width=\linewidth]{figures/formal_common.pdf}
+\includegraphics[width=\linewidth]{figures/formal_common.png}
 \caption{共同240条观测的功率差扫描，每档40条。左侧比较谱方法，右侧比较逐源与联合求解方法；两个面板使用同一五候选AP参照。}\label{fig:formalcommon}
 \end{figure}
 \FloatBarrier
@@ -550,14 +550,14 @@ VP-BNOMP & 94.92 (2278/2400) & 0.892 & 74.193 & 0.5855 & 0.3693 & 1.2470\\
 
 功率差既可能影响正确区域内的定位精度，也可能改变候选选择。图\ref{fig:formalcore}将本批诊断发现的布局4与其余19布局分开，分别观察这两种影响。两组均保留全部随机实现、功率条件和失败结果，总体成绩见表\ref{tab:formalcore}。
 \begin{figure}[pos=htbp]\centering
-\includegraphics[width=.94\linewidth]{figures/formal_core.pdf}
+\includegraphics[width=.94\linewidth]{figures/formal_core.png}
 \caption{扩展验证中功率差的分组结果。左列为其余19布局，共2280条、每档380条；右列为困难布局4，共120条、每档20条。上行为双源成功率，下行为弱源RMSE。分组依据本批构型诊断，全部2400条仍计入总体统计。}\label{fig:formalcore}
 \end{figure}
 \FloatBarrier
 其余19布局中，两种AP均全部成功，MCJ-AP的弱源RMSE随功率差从1.31\,m增至1.93\,m，显示强源增强后弱源定位精度逐步下降。VP-BNOMP在这一组有两条15\,dB失败，因此该档RMSE仍受到长尾影响。右列单独呈现候选恢复困难，具体失败分布和候选机制在第\ref{sec:timecases}节集中分析。
 
 \begin{figure}[pos=htbp]\centering
-\includegraphics[width=\linewidth]{figures/assignment_cost_20261019/core_error_cdf.pdf}
+\includegraphics[width=\linewidth]{figures/assignment_cost_20261019/core_error_cdf.png}
 \caption{全部2400条核心观测的强、弱源误差CDF。上行横轴在1\,m内线性、其外对数，下行线性放大小误差区间；每条曲线保留全部样本，竖线标出20\,m。}\label{fig:formalcdfcost}
 \end{figure}
 \FloatBarrier
@@ -567,7 +567,7 @@ VP-BNOMP & 94.92 (2278/2400) & 0.892 & 74.193 & 0.5855 & 0.3693 & 1.2470\\
 \subsection{候选保留提高可靠性，联合精修减少计算}\label{sec:apresults}
 图\ref{fig:formalablation}分别检验候选数量与位置更新方式：前者决定搜索覆盖，后者决定处理同一组候选所需的计算。
 \begin{figure}[pos=htbp]\centering
-\includegraphics[width=\linewidth]{figures/formal_ablation.pdf}
+\includegraphics[width=\linewidth]{figures/formal_ablation.png}
 \caption{AP的候选与精修消融，四面板单行排列。左两图为原2400条主批的成功率与耗时，右两图为同一2400条输入上的五候选配对耗时与梯度计算。ALT为交替精修，joint为联合精修；左、右两批分别计时，不跨批计算加速比。}\label{fig:formalablation}
 \end{figure}
 \FloatBarrier
@@ -577,14 +577,14 @@ VP-BNOMP & 94.92 (2278/2400) & 0.892 & 74.193 & 0.5855 & 0.3693 & 1.2470\\
 为直接比较候选数量与逐源更新的实际取舍，在共同240条观测上交错运行候选数$M=1,2,3,4,5$的联合AP和VP-BNOMP，共1440次求解。各版本独立完成预处理、候选搜索、精修和输出检查，配置及原生停止条件保持不变。以下耗时均来自这一同批重测，不与表\ref{tab:formalcommon}的历史墙钟拼接计算加速比。三、四候选的位置与五分支前缀择优结果逐例一致。
 
 \begin{figure}[pos=htbp]\centering
-\includegraphics[width=\linewidth]{figures/assignment_cost_20261019/candidate_time_cdf.pdf}
+\includegraphics[width=\linewidth]{figures/assignment_cost_20261019/candidate_time_cdf.png}
 \caption{同批240条观测的AP候选数与VP-BNOMP完整耗时CDF。每条曲线包含240条观测的完整求解耗时；左图0.1\,s内线性、其外对数，右图线性放大0--1.5\,s。}\label{fig:candidatetimecdf}
 \end{figure}
 \FloatBarrier
 图\ref{fig:candidatetimecdf}中，增加AP候选数使耗时分布逐步右移。VP-BNOMP的中位耗时为0.3674\,s，接近单候选AP的0.3514\,s，但其耗时P95为1.3147\,s，高于五候选AP的0.7201\,s。两种流程的成本差别主要体现在分支数量和少量长循环，而不只是平均速度。
 
 \begin{figure}[pos=htbp]\centering
-\includegraphics[width=\linewidth]{figures/assignment_cost_20261019/candidate_tradeoff.pdf}
+\includegraphics[width=\linewidth]{figures/assignment_cost_20261019/candidate_tradeoff.png}
 \caption{同一240条观测的可靠性、误差与平均完整耗时。误差棒为固定20布局内按随机实现配对重采样的95\%区间，同一实现的六档功率差保持在一起；区间不表示对任意几何总体的推断。}\label{fig:candidatetradeoff}
 \end{figure}
 \FloatBarrier
@@ -632,7 +632,7 @@ VP-BNOMP & 94.92 (2278/2400) & 0.892 & 74.193 & 0.5855 & 0.3693 & 1.2470\\
 
 相同位置与最小二乘系数下的曲率核对进一步解释了这一差别。在两个站外诊断位置，未施加数值保护的固定系数Newton试探步分别约0.0138\,m和0.0111\,m，消元试探步分别约11.25\,m和32.26\,m；这些试探方向用于比较曲率，实际接受步仍由回溯确定。四个保存位置的解析消元Hessian与自动微分结果的最大差约$1.4\times10^{-18}$。这与式\eqref{eq:schur}一致：允许波形随位置调整后，消元曲率去除了可由系数补偿的响应变化，减少了固定系数更新中的重复小步。
 
-在同批共同240条上，固定系数与消元版本都成功228条，平均完整耗时分别为2.9416\,s和0.5907\,s，消元版本减少约79.92\%的计算时间，见表\ref{tab:formalcommon}。这一对照保持残差发现、逐源循环和循环后共同LS的时序，局部更新将固定系数Newton及其回溯目标改为式\eqref{eq:localprofile}的消元形式。结合式\eqref{eq:schur}，它直接检验了位置--波形耦合处理对计算效率的作用。
+在同批共同240条上，固定系数与消元版本都成功228条，平均完整耗时分别为2.9416\,s和0.5907\,s，消元版本减少约79.92\%的计算时间，见表\ref{tab:formalcommon}。这一对照保持残差发现、逐源循环和循环后共同LS的时序，局部更新将固定系数Newton及其回溯目标改为式\eqref{eq:localprofile}的消元形式。因此，79.92\%衡量整套局部消元更新的效率收益；曲率关系和保存轨迹进一步解释了重复小步减少的原因。
 
 在全部2400条上，VP-BNOMP成功2278条，整体精度与成本见表\ref{tab:formalcore}。成功观测中的弱源RMSE约1.52\,m，表中的总体RMSE则同时计入未恢复观测。MCJ-AP通过分支保留扩大有效候选覆盖，VP-BNOMP通过局部消元降低逐源更新成本，两者的贡献分别由候选消融与固定系数对照检验。
 
@@ -641,7 +641,7 @@ VP-BNOMP全部观测均按相邻循环的归一化残差能量变化不超过$10
 \subsection{求解时间轨迹与困难构型的候选恢复}\label{sec:timecases}
 图\ref{fig:formaltime}重放共同240条观测上已经保存的输出。尚无双源输出的观测按未成功计；RMSE仅在全部观测有输出后显示。
 \begin{figure}[pos=htbp]\centering
-\includegraphics[width=\linewidth]{figures/formal_time.pdf}
+\includegraphics[width=\linewidth]{figures/formal_time.png}
 \caption{共同240条观测的保存输出轨迹。上行使用0.25--300\,s对数时间轴，下行以线性时间轴放大0--3\,s；三列依次为双源成功率、完整输出比例和两源合并RMSE，后者为$\sqrt{(nK)^{-1}\sum_{i,k}e_{ik}^2}$。正常停止后保持最终值，RMSE纵轴仍用对数刻度。连接线表示保存点之间的变化，不额外规定算法停止时刻。}\label{fig:formaltime}
 \end{figure}
 \FloatBarrier
@@ -651,11 +651,13 @@ VP-BNOMP全部观测均按相邻循环的归一化残差能量变化不超过$10
 \paragraph{困难构型下的候选覆盖}
 图\ref{fig:formallayouts}给出全部20布局的失败分布，用于定位总体长尾的来源。
 \begin{figure}[pos=htbp]\centering
-\includegraphics[width=\linewidth]{figures/formal_layouts.pdf}
+\includegraphics[width=\linewidth]{figures/formal_layouts.png}
 \caption{各布局的双源失败数，每布局120条。四个面板对应四类构型，零表示该布局全部成功；不同标记在纵向稍作错开，便于辨认重合结果。}\label{fig:formallayouts}
 \end{figure}
 \FloatBarrier
 单候选AP在布局4的120条观测上全部失败，五候选恢复其中96条；恢复涉及该布局20次随机实现中的18次，其余24条失败涉及6次实现，两组可包含同一实现的不同功率条件。其余19布局没有成功转失败。多候选的可靠性收益集中在这一源站构型，并在多次波形与噪声实现中重复出现；其恢复过程可由候选位置及精修后的目标变化解释。
+
+逐一回读2400条观测的五个精修分支，2376条至少存在一个双源误差均不超过20\,m的分支，最终残差择优也恰好选中这2376条的成功分支。本批没有出现成功分支被最终排序排除的情况。其余24条的五个精修结果均未达标，说明剩余损失发生在获得成功分支之前；仅凭最终分支结果，尚不能进一步区分初始区域遗漏与局部优化未恢复。这里的分支成功标签仅用于离线诊断，不参与算法择优。
 
 VP-BNOMP在布局4同样未达到20\,m门槛，但将该布局的弱源RMSE从单候选AP的479.66\,m降至325.07\,m，说明它减少了部分错误解的偏差。其余19布局中，AP的弱源RMSE约1.52\,m，VP-BNOMP因布局1的两次不同随机实现在15\,dB下失败，RMSE为15.25\,m。因此，VP相对单候选AP的总体RMSE收益主要来自布局4的严重错误减轻；五候选AP则进一步将其中96条恢复到20\,m内。总体误差、达标率与CDF分别刻画了这些不同的变化。
 
@@ -663,7 +665,7 @@ MCJ-AP每档400条观测中有3--6条失败，均来自布局4，并贡献各档
 
 图\ref{fig:formalcandidates}给出同一困难布局的恢复与未恢复案例，以对照候选覆盖和最终选择。
 \begin{figure}[pos=htbp]\centering
-\includegraphics[width=\linewidth]{figures/formal_candidates.pdf}
+\includegraphics[width=\linewidth]{figures/formal_candidates.png}
 \caption{同一困难构型的两个0\,dB事后机制案例。左列为单源LS谱，中列为条件谱，右列为候选精修前后残差；上行为恢复案例，下行为未恢复案例。红色和白色星号分别标示源A、源B，空心圆为条件候选。谱图采用对数色标，右列连接线仅连接候选编号，不表示实际迭代路径。}\label{fig:formalcandidates}
 \end{figure}
 \FloatBarrier

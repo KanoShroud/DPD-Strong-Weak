@@ -132,7 +132,6 @@ def plot_ecdf(ax, values, label, color, style, xmax):
 
 
 def savefig(name, fig, rows, zh, en, scope):
-    fig.savefig(FIG/(name+'.pdf'), bbox_inches='tight')
     fig.savefig(FIG/(name+'.png'), dpi=600, bbox_inches='tight')
     with Image.open(FIG/(name+'.png')) as im:
         gray=im.convert('L'); gray.thumbnail((1600,1100)); gray.save(FIG/(name+'_grayscale.png'))

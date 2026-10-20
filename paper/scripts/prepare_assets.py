@@ -96,7 +96,6 @@ def row_read(path: Path, audit: dict):
 
 
 def figure_save(name, fig, rows, caption_zh, caption_en, selection):
-    fig.savefig(HERE / 'figures' / f'{name}.pdf', bbox_inches='tight')
     fig.savefig(HERE / 'figures' / f'{name}.png', dpi=600, bbox_inches='tight')
     # Review-only grayscale copy; plotted values and archival CSV stay unchanged.
     with Image.open(HERE / 'figures' / f'{name}.png') as im:

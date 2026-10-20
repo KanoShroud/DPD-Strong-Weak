@@ -1,5 +1,7 @@
 # 论文独立工作目录
 
+2026-10-20整理：当前12张插图均使用已有高分辨率PNG；现行绘图脚本只导出PNG、CSV及必要图注／来源信息，不再重复生成PDF图片。18个工作区PDF图片、7个根目录编译残留和旧paper.pdf已压缩归档到`archive/organization_20261020/`，可按清单恢复。历史稿与冻结结果中的PDF、整篇论文PDF保留。图像切换不修改统计数据或论文内容。
+
 2026-10-19按用户最新决定，本论文现位于 `F:/DPD_Strong_Weak/paper`，这里是唯一正文维护入口，不再另设 `DPD_WeakSource_Localization`。前次分离的统计重放见`data/migration_replay_20261019/`，历史验证见`qa/migration_20261019/`与`qa/migration_build_20261019/`；本次迁回检查见`qa/paper_home_20261019/`与[交付记录](../outputs_e2e/maintenance/paper_home_20261019/交付记录.md)。当前`prepare_assignment_cost.py`、`analyze_contribution_closeout.py`及对应两个验证脚本通过`relocated_evidence.py`兼容两个历史根并解析本地证据，不改写旧合同。其他历史脚本不承诺自动迁移续跑兼容。
 
 2026-10-19已完成贡献论证收尾：补齐谱方法及停止核验结论，解释恢复次数与RMSE来源，保留原公式、结果表及图。[修订与25页核验](qa/contribution_closeout_20261019/修订与核验.md)。本轮仅整理保存结果，不运行定位；前一版归档在`archive/contribution_closeout_20261019/`。
@@ -29,7 +31,7 @@
 | 位置 | 用途 |
 | --- | --- |
 | `paper_draft.tex` | 唯一正文编辑入口，包含完整正文和表格 |
-| `figures/` | 图的PDF、PNG与绘图CSV |
+| `figures/` | 当前PNG、绘图CSV及图注／来源文件 |
 | `references/` | BibTeX文献库 |
 | `template/` | CAS模板类、样式与说明 |
 | `data/` | 已导出统计数据、图注及来源清单 |
@@ -39,6 +41,6 @@
 | `sections/`、`tables/` | 上版拆分源文件，保留追溯，不参与编译，也不作为后续正文编辑入口 |
 | `scripts/` | 研究结果重绘和历史核验工具，不是独立编译依赖 |
 
-`scripts/`中的实验来源核验、重绘工具读取本项目保留的结果，只在需要重新分析数据时使用；普通编译不调用它们。修改主文档后，不要用历史拆分文件覆盖它。旧 `paper.pdf` 为历史输出，当前阅读与编译输出统一为 `paper_draft.pdf`。
+`scripts/`中的实验来源核验、重绘工具读取本项目保留的结果，只在需要重新分析数据时使用；普通编译不调用它们。`prepare_assignment_cost.py`用于当前CDF和成本图重绘，`render_review.py`用于排版核验；`flatten_manuscript.py`和`migrate_cas_layout.py`是历史迁移工具，不要再次运行覆盖当前正文。旧 `paper.pdf` 已压缩归档，当前阅读与编译输出统一为 `paper_draft.pdf`。
 
 本次完整展开保持文字、公式和统计不变；独立编译验证见 [qa/独立编译核验.md](qa/独立编译核验.md)。

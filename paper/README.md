@@ -1,5 +1,7 @@
 # 论文独立工作目录
 
+2026-10-20正式补证已纳入正文：新增曲率配对与16个源位置布局结果，导出入口为`scripts/prepare_assignment_cost.py --review-supplement`，数据和图片分别位于`data/review_supplement_20261020/`、`figures/review_supplement_20261020/`。只读取已完成结果，不运行定位。当前13张插图均为PNG，文献区别和贡献范围同步更新，详见[来源索引](来源与核验索引.md)。
+
 2026-10-20整理：当前12张插图均使用已有高分辨率PNG；现行绘图脚本只导出PNG、CSV及必要图注／来源信息，不再重复生成PDF图片。18个工作区PDF图片、7个根目录编译残留和旧paper.pdf已压缩归档到`archive/organization_20261020/`，可按清单恢复。历史稿与冻结结果中的PDF、整篇论文PDF保留。图像切换不修改统计数据或论文内容。
 
 2026-10-19按用户最新决定，本论文现位于 `F:/DPD_Strong_Weak/paper`，这里是唯一正文维护入口，不再另设 `DPD_WeakSource_Localization`。前次分离的统计重放见`data/migration_replay_20261019/`，历史验证见`qa/migration_20261019/`与`qa/migration_build_20261019/`；本次迁回检查见`qa/paper_home_20261019/`与[交付记录](../outputs_e2e/maintenance/paper_home_20261019/交付记录.md)。当前`prepare_assignment_cost.py`、`analyze_contribution_closeout.py`及对应两个验证脚本通过`relocated_evidence.py`兼容两个历史根并解析本地证据，不改写旧合同。其他历史脚本不承诺自动迁移续跑兼容。

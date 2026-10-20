@@ -302,4 +302,185 @@ def main():
     print(json.dumps(report['method_summaries'],ensure_ascii=False,indent=2))
 
 
-if __name__=='__main__':main()
+def review_supplement():
+    """Replay completed supplement only. No solver imports or new IQ generation."""
+    global DEST, FIG
+    DEST = HERE/'data/review_supplement_20261020'
+    FIG = HERE/'figures/review_supplement_20261020'
+    DEST.mkdir(parents=True, exist_ok=True)
+    FIG.mkdir(parents=True, exist_ok=True)
+    ptr = read(BASE/'review_supplement_release.json')
+    out = local_path(ptr['out'])
+    release = read(out/'release.json', ptr['release_sha'])
+    contract = read(out/'contract.json', release['formal_contract_sha'])
+    for relative, expected_sha in contract['source_hashes'].items():
+        assert digest(ROOT/relative) == expected_sha, relative
+    original = local_path(contract['source'])
+    audit = read(original/'final_audit_report.json', contract['source_audit_sha'])
+    read(original/'contract.json', contract['source_contract_sha'])
+    assert read(out/'summary.json')['completed_solves'] == 1920
+    timing, _, timing_audit = source('candidate_cost_run')
+    rows, trajectories, equivalence = [], [], []
+    pair_maps = {'geometry': {}, 'mechanism': {}}
+    for path in sorted((out/'pairs').glob('*.json')):
+        pair = read(path)
+        stage, task = pair['stage'], pair['task']
+        key = '_'.join(map(str, task))
+        assert key not in pair_maps[stage]
+        pair_maps[stage][key] = pair
+        expected = ({'FC_VP', 'VP_VP'} if stage == 'mechanism'
+                    else {'AP_1_JOINT', 'AP_5_JOINT', 'PROFILE_DIAG'})
+        assert {r['method'] for r in pair['rows']} == expected
+        assert [stage, task, [r['method'] for r in pair['rows']]] in contract['jobs'] or any(
+            j[0] == stage and j[1] == task and set(j[2]) == expected for j in contract['jobs'])
+        for row in pair['rows']:
+            r = row['result']
+            q = metrics.evaluate(pair['truth'], r['positions'])
+            assert q == row['metrics'] and q['valid_output']
+            counts = r['counts']
+            rows.append(dict(stage=stage, method=row['method'], case=key,
+                layout=task[0], repeat=task[1], gap=task[2],
+                strong_error_m=q['errors_m'][0], weak_error_m=q['errors_m'][1],
+                strong20=q['success20'][0], weak20=q['success20'][1], both20=q['both20'],
+                seconds=r['review_complete_seconds'], core_seconds=r['seconds'],
+                recording_seconds=r['recording_seconds'], certificate_seconds=r['certificate_seconds'],
+                objective=r['native_objective'], gradient=r['projected_gradient'],
+                stop_reason=r['stop_reason'],
+                updates=len(r.get('updates', [])),
+                cycles=sum(v['cycles'] for v in r.get('native_cycles', [])),
+                joint_evaluations=counts.get('joint_evaluations', 0),
+                gradient_calls=counts.get('gradient_calls', 0),
+                iterations=counts.get('iterations', 0)))
+            if stage == 'mechanism' and row['method'] == 'VP_VP':
+                for batch, folder, a in [('original', original, audit),
+                                         ('candidate_timing', timing, timing_audit)]:
+                    name = key+'_PROFILE_DIAG.json'
+                    oldrow = read(folder/'rows'/name, a['rows'][name])
+                    old = oldrow['result']
+                    assert oldrow['input_identity']['iq_sha'] == pair['iq_sha']
+                    assert oldrow['truth'] == pair['truth']
+                    np.testing.assert_allclose(old['positions'], r['positions'], atol=1e-5, rtol=0)
+                    assert old['counts'] == r['counts']
+                    assert old['stop_reason'] == r['stop_reason']
+                    assert old['config'] == r['config']
+                    np.testing.assert_allclose(old['native_objective'], r['native_objective'], atol=1e-13, rtol=0)
+                    oldhist = old['history']
+                    assert len(oldhist) == len(r['history'])
+                    for h, h0 in zip(r['history'], oldhist):
+                        np.testing.assert_allclose(h['positions'], h0['positions'], atol=1e-5, rtol=0)
+                        np.testing.assert_allclose(h['native_objective'], h0['native_objective'], atol=1e-13, rtol=0)
+                    equivalence.append(dict(case=key, old_batch=batch, path_equal=True,
+                        old_complete=old['complete_seconds'], new_complete=r['review_complete_seconds'],
+                        old_core=old['seconds'], new_core=r['seconds']))
+            if stage == 'geometry' and row['method'] == 'PROFILE_DIAG':
+                history = [h for h in r['history'] if len(h['positions']) == 2]
+                assert history
+                first = metrics.evaluate(pair['truth'], history[0]['positions'])
+                ever = any(metrics.evaluate(pair['truth'], h['positions'])['both20'] for h in history)
+                ap = next(v['result'] for v in pair['rows'] if v['method'] == 'AP_1_JOINT')
+                trajectories.append(dict(case=key, layout=task[0], repeat=task[1], gap=task[2],
+                    final_success=q['both20'], first_saved_success=first['both20'],
+                    any_saved_success=ever, first_saved_weak_m=first['errors_m'][1],
+                    final_weak_m=q['errors_m'][1], final_strong_m=q['errors_m'][0],
+                    objective_above_ap=r['native_objective']-ap['native_objective'],
+                    last_cycle_change=abs(history[-1]['energy_before']-history[-1]['native_objective']),
+                    gradient=r['projected_gradient'], seconds=r['review_complete_seconds'],
+                    cycles=r['native_cycles'][-1]['cycles'], stop=r['stop_reason']))
+    assert len(rows) == 1920 and len(pair_maps['geometry']) == 480
+    assert len(pair_maps['mechanism']) == 240 and len(equivalence) == 480
+    assert {(j[0], tuple(j[1])) for j in contract['jobs']} == {
+        (stage, tuple(pair['task'])) for stage, pairs in pair_maps.items() for pair in pairs.values()}
+    csv_write(DEST/'per_case.csv', rows)
+    csv_write(DEST/'vp_trajectories.csv', trajectories)
+    csv_write(DEST/'vp_timing_identity.csv', equivalence)
+    summaries = []
+    for stage in pair_maps:
+        for method in sorted({r['method'] for r in rows if r['stage'] == stage}):
+            rr = [r for r in rows if r['stage'] == stage and r['method'] == method]
+            summaries.append(dict(stage=stage, method=method, **summarize(rr),
+                mean_updates=float(np.mean([r['updates'] for r in rr])),
+                mean_cycles=float(np.mean([r['cycles'] for r in rr])),
+                mean_core_seconds=float(np.mean([r['core_seconds'] for r in rr])),
+                mean_recording_seconds=float(np.mean([r['recording_seconds'] for r in rr])),
+                mean_certificate_seconds=float(np.mean([r['certificate_seconds'] for r in rr]))))
+    csv_write(DEST/'summary.csv', summaries)
+    layouts = []
+    for g in range(16):
+        rr = [r for r in trajectories if r['layout'] == g]
+        layouts.append(dict(layout_one_based=g+1, n=len(rr),
+            failures=sum(not r['final_success'] for r in rr),
+            first_saved_failures=sum(not r['first_saved_success'] for r in rr),
+            any_success_then_failure=sum(r['any_saved_success'] and not r['final_success'] for r in rr),
+            mean_seconds=float(np.mean([r['seconds'] for r in rr]))))
+    csv_write(DEST/'layout_failures.csv', layouts)
+    # Fixed-layout paired bootstrap; draw realizations, retain their six gaps.
+    intervals = {}
+    for stage, methods in [('mechanism', ('FC_VP', 'VP_VP')),
+                           ('geometry', ('AP_1_JOINT', 'AP_5_JOINT'))]:
+        aa = {r['case']: r for r in rows if r['stage'] == stage and r['method'] == methods[0]}
+        bb = {r['case']: r for r in rows if r['stage'] == stage and r['method'] == methods[1]}
+        assert aa.keys() == bb.keys()
+        keys = sorted(aa, key=lambda k: tuple(map(int, k.split('_'))))
+        ix = {k: i for i, k in enumerate(keys)}
+        clusters = []
+        for g in sorted({a['layout'] for a in aa.values()}):
+            repeats = sorted({a['repeat'] for a in aa.values() if a['layout'] == g})
+            clusters.append([[ix[f'{g}_{rep}_{gap}'] for gap in (0, 3, 6, 9, 12, 15)] for rep in repeats])
+        clusters = np.asarray(clusters)
+        rng = np.random.default_rng(20261020)
+        draws = rng.integers(0, clusters.shape[1], (4000, *clusters.shape[:2]))
+        chosen = clusters[np.arange(len(clusters))[None, :, None], draws].reshape(4000, -1)
+        ta = np.array([aa[k]['seconds'] for k in keys])
+        tb = np.array([bb[k]['seconds'] for k in keys])
+        saving = 100*(1-tb[chosen].mean(1)/ta[chosen].mean(1))
+        intervals[stage] = dict(methods=methods,
+            mean_time_saving_percent=float(100*(1-tb.mean()/ta.mean())),
+            saving_ci95=np.quantile(saving, [.025, .975]).tolist(),
+            faster_cases=int((tb < ta).sum()),
+            success_identity_mismatches=sum(aa[k]['both20'] != bb[k]['both20'] for k in keys),
+            scope='Fixed layouts; resample realizations within each layout, retain all six gaps.',
+            repetitions=4000, seed=20261020)
+    failures = [r for r in trajectories if not r['final_success']]
+    report = dict(status='COMPLETED_OFFLINE_AUDIT', observations_new=480,
+        reused_observations=240, solves=1920, protocol=metrics.REVISION,
+        layouts=contract['layouts'], geometry_seed=contract['geometry_seed'],
+        waveform_seed=contract['waveform_seed'], frozen_configs=contract['configs'],
+        summary=summaries, paired=intervals, historical_path_equivalent_checks=len(equivalence),
+        failed_vp_cases=len(failures),
+        failed_vp_first_saved_failed=sum(not r['first_saved_success'] for r in failures),
+        failed_vp_any_saved_success=sum(r['any_saved_success'] for r in failures),
+        failed_vp_objective_above_ap=sum(r['objective_above_ap'] > 1e-10 for r in failures),
+        failure_mean_seconds=float(np.mean([r['seconds'] for r in failures])),
+        success_mean_seconds=float(np.mean([r['seconds'] for r in trajectories if r['final_success']])),
+        source_files=PROVENANCE, exporter_sha=digest(__file__))
+    save_json(DEST/'audit.json', report)
+    plt.rcParams.update({'font.family':'DejaVu Sans','font.size':8,'axes.titlesize':9,
+        'axes.spines.top':False,'axes.spines.right':False,'lines.linewidth':1.4})
+    geo = [r for r in rows if r['stage'] == 'geometry']
+    fig, axes = plt.subplots(1, 3, figsize=(7.5, 2.7), layout='constrained')
+    for m in ('AP_1_JOINT', 'AP_5_JOINT', 'PROFILE_DIAG'):
+        rr = [r for r in geo if r['method'] == m]
+        for ax, field, xmax in zip(axes, ('strong_error_m', 'weak_error_m', 'seconds'), (1000, 1000, 10)):
+            plot_ecdf(ax, [r[field] for r in rr], LABELS[m], COLORS[m], STYLES[m], xmax)
+    for i, ax in enumerate(axes):
+        ax.set_xscale('symlog', linthresh=1 if i < 2 else .1)
+        ax.set_xlim(0, 1000 if i < 2 else 10)
+        ax.set_xlabel('Position error (m)' if i < 2 else 'Complete time (s)')
+        ax.set_title(('(a) Strong source', '(b) Weak source', '(c) Computation')[i])
+        if i < 2: ax.axvline(20, color='#888888', ls=':', lw=.8)
+    h, labels = axes[0].get_legend_handles_labels()
+    fig.legend(h, labels, loc='outside lower center', ncol=3, frameon=False)
+    savefig('independent_cdf', fig, geo,
+        '16个新源位置布局的480条观测；全部样本进入误差与耗时CDF，竖线为20m，接收站坐标保持不变。',
+        '480 observations from 16 new source-position layouts; all samples retained, receivers unchanged.',
+        dict(n_per_method=480, receiver_geometry_unchanged=True))
+    print(json.dumps({k:v for k,v in report.items()
+                     if k not in ('source_files', 'layouts', 'frozen_configs')}, ensure_ascii=False, indent=2))
+
+
+if __name__=='__main__':
+    import sys
+    if '--review-supplement' in sys.argv:
+        review_supplement()
+    else:
+        main()

@@ -630,6 +630,8 @@ def candidate_cases(details):
             ax.tick_params(labelsize=7)
             cb = fig.colorbar(im, ax=ax, orientation='horizontal', fraction=.07, pad=.15,
                               shrink=.85, ticks=np.geomspace(max(z.min(), 1e-8), z.max(), 3))
+            # Matplotlib otherwise rasterizes colorbar solids automatically.
+            cb.solids.set_rasterized(False)
             cb.ax.xaxis.set_major_formatter(FuncFormatter(lambda value, _: f'{value:.2g}'))
             cb.ax.minorticks_off(); cb.ax.tick_params(labelsize=6)
         ax = axes[i, 2]
@@ -677,5 +679,70 @@ def prepare(offline=True):
     print(f'已导出{len(art.FIGURES)}幅正式图；仅读取完成结果，未运行定位。', flush=True)
 
 
+def vector_redraw():
+    """Replot saved evidence without rewriting historical tables or manifests.
+
+    Compatibility adapters apply only during this rendering call. Original
+    JSON bytes, identities and metric checks are still verified by the loaders.
+    """
+    global read_json
+    from relocated_evidence import local_path
+    import re
+
+    active_figures = set()
+    for name in ('paper_draft', 'paper_submission', 'paper_supplement', 'paper_supplement_zh'):
+        manuscript = HERE / (name + '.tex')
+        if manuscript.exists():
+            active_figures.update(Path(p).stem for p in re.findall(
+                r'\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}',
+                manuscript.read_text(encoding='utf-8')))
+
+    original_read = art.read
+    original_json = read_json
+    originals = (art.table_csv, art.save_json, art.figure_save)
+
+    def relocated_read(path):
+        return original_read(local_path(path))
+
+    def relocated_json(path):
+        value = original_json(path)
+        if Path(path).name in ('paper_pair_run.json', 'profile_full_run.json'):
+            value = dict(value, out=str(local_path(value['out'])))
+        return value
+
+    def render_only(name, fig, *_):
+        if name in active_figures:
+            fig.savefig(HERE / 'figures' / f'{name}.pdf', bbox_inches='tight')
+            fig.savefig(HERE / 'figures' / f'{name}.png', dpi=600, bbox_inches='tight')
+        plt.close(fig)
+
+    try:
+        art.read = relocated_read
+        read_json = relocated_json
+        art.table_csv = lambda *args: None
+        art.save_json = lambda *args: None
+        art.figure_save = render_only
+        art.setup()
+        plt.rcParams.update({'axes.prop_cycle': plt.cycler(color=list(COLORS.values())),
+                             'lines.linewidth': 1.6})
+        rows, details, contract, _ = load_evidence()
+        paired = paired_results(rows)
+        rows += profile_results(rows)
+        geometry(contract)
+        performance(rows)
+        layouts_and_ablation(rows, paired)
+        time_curves(details)
+        candidate_cases(details)
+        print('Vector redraw complete; historical tables and manifests unchanged.')
+    finally:
+        art.read = original_read
+        read_json = original_json
+        art.table_csv, art.save_json, art.figure_save = originals
+
+
 if __name__ == '__main__':
-    prepare()
+    import sys
+    if '--vector-only' in sys.argv:
+        vector_redraw()
+    else:
+        prepare()

@@ -1,4 +1,5 @@
-param([string]$TexBin = '')
+param([string]$TexBin = '',
+      [ValidateSet('Chinese','English','All')][string]$Document = 'Chinese')
 $ErrorActionPreference = 'Stop'
 # No project Python, experiment results or parent-directory dependencies.
 function Find-TexTool([string]$Name) {
@@ -14,15 +15,25 @@ $bibtex = Find-TexTool 'bibtex'
 Push-Location -LiteralPath $PSScriptRoot
 try {
     New-Item -ItemType Directory -Path build -Force | Out-Null
-    & $xelatex -interaction=nonstopmode -halt-on-error -file-line-error -no-shell-escape -recorder -output-directory=build paper_draft.tex
-    if ($LASTEXITCODE -ne 0) { throw 'Initial XeLaTeX pass failed.' }
-    & $bibtex build/paper_draft
-    if ($LASTEXITCODE -ne 0) { throw 'BibTeX failed.' }
-    foreach ($pass in 1..2) {
-        & $xelatex -interaction=nonstopmode -halt-on-error -file-line-error -no-shell-escape -recorder -output-directory=build paper_draft.tex
-        if ($LASTEXITCODE -ne 0) { throw "XeLaTeX pass $pass failed." }
+    $documents = @()
+    if ($Document -in @('Chinese','All')) { $documents += @('paper_draft','paper_supplement_zh') }
+    if ($Document -in @('English','All')) { $documents += @('paper_submission','paper_supplement') }
+    foreach ($name in $documents) {
+        & $xelatex -interaction=nonstopmode -halt-on-error -file-line-error -no-shell-escape -recorder -output-directory=build "$name.tex"
+        if ($LASTEXITCODE -ne 0) { throw "Initial XeLaTeX pass failed: $name" }
+        & $bibtex "build/$name"
+        if ($LASTEXITCODE -ne 0) { throw "BibTeX failed: $name" }
     }
-    Copy-Item -LiteralPath build/paper_draft.pdf -Destination paper_draft.pdf -Force
-    Write-Host "论文编译完成：$PSScriptRoot\paper_draft.pdf"
+    # Both documents have aux files before cross-document references are resolved.
+    foreach ($pass in 1..2) {
+        foreach ($name in $documents) {
+            & $xelatex -interaction=nonstopmode -halt-on-error -file-line-error -no-shell-escape -recorder -output-directory=build "$name.tex"
+            if ($LASTEXITCODE -ne 0) { throw "XeLaTeX pass $pass failed: $name" }
+        }
+    }
+    foreach ($name in $documents) {
+        Copy-Item -LiteralPath "build/$name.pdf" -Destination "$name.pdf" -Force
+        Write-Host "论文编译完成：$PSScriptRoot\$name.pdf"
+    }
 }
 finally { Pop-Location }

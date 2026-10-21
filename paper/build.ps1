@@ -16,15 +16,15 @@ Push-Location -LiteralPath $PSScriptRoot
 try {
     New-Item -ItemType Directory -Path build -Force | Out-Null
     $documents = @()
-    if ($Document -in @('Chinese','All')) { $documents += @('paper_draft','paper_supplement_zh') }
-    if ($Document -in @('English','All')) { $documents += @('paper_submission','paper_supplement') }
+    if ($Document -in @('Chinese','All')) { $documents += 'paper_draft' }
+    if ($Document -in @('English','All')) { $documents += 'paper_submission' }
     foreach ($name in $documents) {
         & $xelatex -interaction=nonstopmode -halt-on-error -file-line-error -no-shell-escape -recorder -output-directory=build "$name.tex"
         if ($LASTEXITCODE -ne 0) { throw "Initial XeLaTeX pass failed: $name" }
         & $bibtex "build/$name"
         if ($LASTEXITCODE -ne 0) { throw "BibTeX failed: $name" }
     }
-    # Both documents have aux files before cross-document references are resolved.
+    # Resolve references within each complete manuscript.
     foreach ($pass in 1..2) {
         foreach ($name in $documents) {
             & $xelatex -interaction=nonstopmode -halt-on-error -file-line-error -no-shell-escape -recorder -output-directory=build "$name.tex"

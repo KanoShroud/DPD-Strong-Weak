@@ -8,7 +8,7 @@
 
 | 位置 | 用途 |
 |---|---|
-| `paper/paper_draft.tex` | 唯一论文正文；用`paper/build.ps1`编译 |
+| `paper/paper_draft.tex`、`paper/paper_submission.tex` | 内容对应的中文审读稿与英文投稿稿；无外置补充材料，用`paper/build.ps1 -Document All`编译 |
 | `统一模型代码/gates/g10/r4` | 当前论文算法与核验代码 |
 | `运行入口/E2E/G10` | 用户运行入口，具体选哪个以当前任务为准 |
 | `outputs_e2e/unified` | 观测、逐例结果、配对、合同与恢复账本；固定路径不随意移动 |

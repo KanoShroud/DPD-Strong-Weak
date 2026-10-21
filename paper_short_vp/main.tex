@@ -1,0 +1,183 @@
+% !TeX program = xelatex
+% Standalone English short communication; all content counts toward 10 pages.
+\makeatletter\def\input@path{{./}{template/}}\makeatother
+\documentclass[a4paper,12pt,review]{cas-sc}
+% The supplied class hard-codes a 192 x 262 mm sheet. Set paper only;
+% preserve its margins, fonts, captions, equation alignment and other styles.
+\geometry{a4paper}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{bm,algorithm,algpseudocode,placeins}
+\newcommand{\R}{\mathbb R}
+\newcommand{\C}{\mathbb C}
+\newcommand{\Rea}{\operatorname{Re}}
+\begin{document}
+\let\WriteBookmarks\relax
+\shorttitle{Variable-projection curvature for wideband direct positioning}
+\shortauthors{}
+\title[mode=title]{Variable-Projection Curvature for Efficient Newtonized Refinement in Wideband Direct Position Determination}
+% Authors, affiliations, funding, competing interests and data availability
+% must be supplied and confirmed by the authors before submission.
+\begin{abstract}
+Unknown wideband waveforms couple source positions to many frequency coefficients in direct position determination. Block Newtonized orthogonal matching pursuit reduces the search dimension, but position updates based on fixed coefficients can make slow progress even when waveforms are re-estimated during acceptance. We develop a variable-projection curvature update for this local refinement. Eliminating the current source coefficients removes a positive-semidefinite coupling term from the position Hessian, and a local convergence analysis explains the resulting small-step reduction. Frequency-wise accumulation requires only small matrices. In 240 paired two-source observations, replacing fixed-coefficient curvature under the same waveform-eliminated acceptance objective reduces mean complete runtime by 83.77\%, with identical success/failure decisions at a 20 m tolerance. A further 480-observation test distinguishes this local efficiency gain from the configuration sensitivity of the complete sequential locator. The method improves the computational efficiency of block refinement without changing residual-based source discovery.
+\end{abstract}
+\begin{keywords}
+Direct position determination\sep Variable projection\sep Newton refinement\sep Unknown waveforms\sep Block orthogonal matching pursuit
+\end{keywords}
+\maketitle
+
+\section{Introduction}
+Direct position determination (DPD) fits synchronized receiver observations jointly to estimate emitter positions, avoiding intermediate delay association \cite{ChenHudsonYao2002,WeissAmar2005}. For overlapping unknown waveforms, positions and frequency coefficients must be estimated together. Sequential source discovery reduces the spatial search, but its cost can be dominated by repeated local refinement.
+
+Newtonized orthogonal matching pursuit (NOMP) alternates discovery, Newton refinement and cyclic feedback \cite{Mamandipoor2016}. Multi-frequency block NOMP extends this construction to two-dimensional positions and unknown source coefficients at each frequency \cite{Yang2022}. Its fixed-coefficient position derivatives provide the closest refinement reference. QNOMP jointly updates delay and angle parameters using quasi-Newton optimization and gain re-estimation in pilot-based channel estimation \cite{Zeng2025}. Here we retain sequential block updates and study the exact local curvature for unknown waveforms.
+
+Variable projection eliminates linear coefficients before nonlinear optimization \cite{GolubPereyra1973}. We specialize its curvature to wideband DPD, show how position--waveform coupling can slow fixed-coefficient updates, and accumulate the correction with small frequency-wise matrices. The experimental comparison keeps waveform-eliminated acceptance and numerical controls common to isolate the curvature change. This distinction matters because original NOMP already re-estimates gains in its acceptance test \cite{Mamandipoor2016}; re-estimation alone is not the contribution.
+
+\section{Model and local objective}
+Let $\bm r_l\in\R^2$ and $\bm p_k\in\Omega\subset\R^2$ denote station $l$ and source $k$. For $L$ synchronized single-antenna stations and known source count $K$, the retained DFT observations satisfy
+\begin{equation}
+ \bm x_f=\sum_{k=1}^K\bm a_f(\bm p_k)s_{k,f}+\bm n_f,
+ \qquad [\bm a_f(\bm p)]_l=\frac{\exp[-\mathrm j2\pi f d_l(\bm p)/c_0]}{d_l(\bm p)},
+ \label{eq:model}
+\end{equation}
+where $d_l(\bm p)=\|\bm p-\bm r_l\|$, $c_0$ is propagation speed, $f\in\mathcal F$ is signed baseband frequency, and $F=|\mathcal F|$. The unknown $s_{k,f}\in\C$ includes transmitted power. The known relative amplitude follows free-space loss; its common wavelength factor is absorbed into $s_{k,f}$ \cite{ITURP5252024}. We use a static, calibrated, direct-path baseband-delay model, without RF carrier phase or random link gains. The common-window approximation neglects station-dependent record edges \cite{ChenHudsonYao2002}. Independent complex Gaussian sample noise of variance $\sigma_t^2$ has retained-bin variance $\sigma_t^2/N$ for a $1/N$-normalized DFT of length $N$. Numerical evaluation floors distances at 1 m; the following smooth derivatives apply outside that protection region.
+
+Write $E=\sum_f\|\bm x_f\|^2>0$. During refinement of source $j$, hold the other fitted contributions fixed and form $\bm y_f=\bm x_f-\sum_{k\ne j}\bm a_f(\bm p_k)\widehat s_{k,f}$. For trial position $\bm z\in\R^2$,
+\begin{align}
+ \mathcal L(\bm z,\bm q)&=E^{-1}\sum_f\|\bm y_f-\bm a_f(\bm z)q_f\|^2,
+ &\widehat q_f(\bm z)&=\frac{\bm a_f^H\bm y_f}{\bm a_f^H\bm a_f},\label{eq:ls}\\
+ \phi(\bm z)&=\min_{\bm q}\mathcal L(\bm z,\bm q)
+ =E^{-1}\sum_f\left(\|\bm y_f\|^2-\frac{|\bm a_f^H\bm y_f|^2}{\bm a_f^H\bm a_f}\right).
+ \label{eq:profile}
+\end{align}
+Here $\bm x_f,\bm y_f,\bm n_f\in\C^L$ and $\bm q\in\C^F$. Superscripts $H$ and $T$ denote conjugate and ordinary transpose; $\mathrm j^2=-1$ and $I_2$ is the identity. All current-source coefficients are eliminated; the other source contributions remain fixed within this local call.
+
+\section{Waveform-eliminated curvature}
+At the current position, set $q_f=\widehat q_f$, $\bm e_f=\bm y_f-\bm a_fq_f$, and define $\bm a_{f,i}=\partial\bm a_f/\partial z_i$ and $\bm a_{f,ij}=\partial^2\bm a_f/\partial z_i\partial z_j$. Differentiating with fixed coefficients gives
+\begin{align}
+ g_i&=-\frac{2}{E}\Rea\sum_f\bm e_f^H\bm a_{f,i}q_f,\label{eq:g}\\*
+ [H_{zz}]_{ij}&=\frac{2}{E}\Rea\sum_f
+ \left(|q_f|^2\bm a_{f,i}^H\bm a_{f,j}-\bm e_f^H\bm a_{f,ij}q_f\right).
+ \label{eq:hfixed}
+\end{align}
+Coefficient optimality makes $\bm g$ also the gradient of $\phi$, but $H_{zz}$ is not its Hessian. To obtain the reduced Hessian, collect coefficient real and imaginary parts in $\bm u\in\R^{2F}$. Differentiating $\nabla_u\mathcal L(\bm z,\widehat{\bm u}(\bm z))=0$ gives
+\begin{equation}
+ \frac{\partial\widehat{\bm u}}{\partial\bm z}=-H_{uu}^{-1}H_{uz},\qquad
+ H_{\rm VP}=H_{zz}-H_{zu}H_{uu}^{-1}H_{uz}.
+ \label{eq:schur}
+\end{equation}
+This standard elimination identity \cite{GolubPereyra1973} requires a smooth response and a locally unique coefficient minimizer. All blocks are evaluated at the current coefficient optimum. Here $H_{uu}$ is block diagonal with $2\times2$ blocks $2\|\bm a_f\|^2 I_2/E$, so it is positive definite. Consequently, $H_{zz}-H_{\rm VP}\succeq0$: fixed-coefficient curvature includes response changes that waveform adjustment can compensate.
+
+For explicit evaluation, let $\bm D_f=[\bm a_{f,1},\bm a_{f,2}]$, $\bm c_f=q_f(\bm a_f^H\bm D_f)^T$ and $\bm b_f=(\bm e_f^H\bm D_f)^T$. The mixed block for frequency $f$ is
+\begin{equation}
+ H_{zu,f}=\frac{2}{E}
+ [\Rea(\bm c_f-\bm b_f),\ \operatorname{Im}(\bm c_f+\bm b_f)].
+ \label{eq:cross}
+\end{equation}
+Summing its Schur corrections avoids a dense $2F\times2F$ matrix. With $\bm v_l=(\bm z-\bm r_l)/d_l$ and $b_l=-d_l^{-1}-\mathrm j2\pi f/c_0$, response derivatives are
+\begin{equation}
+ \nabla a_{fl}=a_{fl}b_l\bm v_l,\qquad
+ \nabla^2a_{fl}=a_{fl}\left[(b_l^2+d_l^{-2})\bm v_l\bm v_l^T
+ +\frac{b_l}{d_l}(I_2-\bm v_l\bm v_l^T)\right].
+ \label{eq:response}
+\end{equation}
+Both curvature constructions cost $\mathcal O(FL)$ per local step. The expected saving is in steps and cycles, not a smaller asymptotic frequency order. Both use the same unnormalized response in \eqref{eq:model}.
+
+The local effect follows directly. At an interior minimum $\bm z^*$, assume $H_{zz}^*$ and $H_{\rm VP}^*$ are positive definite. For error $\bm\epsilon=\bm z-\bm z^*$, a full fixed-curvature step on $\phi$ has linearization
+\begin{equation}
+ \bm\epsilon^+=\left[I_2-(H_{zz}^*)^{-1}H_{\rm VP}^*\right]\bm\epsilon
+ +o(\|\bm\epsilon\|).
+ \label{eq:rate}
+\end{equation}
+The iteration eigenvalues lie in $[0,1)$ and approach one when reduced curvature is small relative to fixed curvature. Exact reduced Newton curvature cancels this linear term. This explains slow local progress under strong coupling; backtracking and outer source updates still determine practical runtime.
+
+Algorithm~\ref{alg:vp} inserts this update into block NOMP. Discovery maximizes $\sum_f|\bm a_f^H\bm r_f|^2/\|\bm a_f\|^2$ over the grid, where $\bm r_f$ is the current residual. A local call solves $(H_{\rm VP}+\lambda I_2)\bm d=-\bm g$, with $\lambda$ chosen to meet the eigenvalue floor, and accepts a bounded backtracked trial only when $\phi$ does not increase. Accepted block updates and joint coefficient fitting preserve nonincreasing residual energy. This ensures convergence of objective values, not global localization.
+\begin{algorithm}[htbp]
+\caption{VP-BNOMP with known $K$}\label{alg:vp}
+\begin{algorithmic}[1]
+\State Initialize an empty source set and residuals $\bm r_f=\bm x_f$.
+\For{$k=1,\ldots,K$}
+\State Discover a grid position, refine it using \eqref{eq:profile}--\eqref{eq:schur}, and subtract its fitted contribution.
+\Repeat
+\State For each source, add its contribution back, apply the same local refinement, and update the residual.
+\Until{cyclic energy change meets tolerance or the safety limit is reached}
+\State Jointly refit all coefficients by least squares and update residuals.
+\EndFor
+\State Return the source positions.
+\end{algorithmic}
+\end{algorithm}
+
+\FloatBarrier
+\section{Experiments}
+We use independent BPSK waveforms with root-raised-cosine shaping (10 Mbaud, roll-off 0.25, pulse support $\pm10$ symbols) and settings in Table~\ref{tab:settings}. Noise and the weak source are fixed while the other source power changes. In-band SNR is the four-station average isolated signal power divided by $\sigma_t^2B/f_s$; the power gap uses average received powers. At 0 dB, source identities remain fixed rather than being reordered. Each pair uses identical IQ and initialization rules. Positions are matched once by minimum total squared distance; both matched errors must be at most 20 m for success.
+\begin{table}[pos=H]
+\caption{Common simulation and refinement settings.}\label{tab:settings}
+\centering
+\begin{tabular}{ll}
+\toprule
+Item & Value \\
+\midrule
+Stations (m); sources & $(500,0),(0,500),(-500,0),(0,-500)$; $K=2$ \\
+Sampling; record & $f_s=50$ MHz; $N=8192$ \\
+Signal; processing band & Zero center; $B=12.5$ MHz; $|f|\le7$ MHz \\
+Weak in-band SNR; power gap & 6 dB; $0,3,6,9,12,15$ dB \\
+Search box; initial grid & $[-1000,1000]^2$ m; 20 m \\
+Local steps; eigenvalue floor & At most 5; $10^{-9}$ \\
+Step cap; local exit & 50 m; accepted displacement $<0.01$ m \\
+Backtracking factors & $1,1/2,1/4,1/8,1/16$ \\
+Cyclic stop; safety cap & Normalized energy change $\le10^{-8}$; 10,000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The curvature comparison uses 20 fixed source configurations, two waveform/noise realizations each and six gaps, totaling 240 observations. Five configurations represent each of four categories: both sources inside the receiver hull, either source outside, and both outside. Positions are sampled uniformly in $[-950,950]^2$ m with minimum source separation 300 m, station distance 150 m, center distance 100 m, and distance to every station-pair line 50 m. Selection uses geometry alone. FC--VP uses \eqref{eq:hfixed}; VP--VP uses \eqref{eq:schur}. Both re-estimate coefficients at every trial, share the same discovery and joint-refit schedule, and use Table~\ref{tab:settings}. Thus FC--VP is a controlled reference rather than an exact reproduction of a published implementation.
+
+Runs use Windows, Python 3.10, PyTorch 2.8, double precision, an RTX 4070 Ti SUPER and 20 CPU threads. Complete time includes DFT, band selection, transfer, search, refinement, trajectory recording and final checks, with GPU synchronization; warm-up and disk I/O are excluded. All runs stop by the common cyclic-energy rule. This rule does not enforce equal final joint-gradient accuracy.
+
+\begin{figure}[pos=H]
+\centering\includegraphics[width=\linewidth]{figures/error_cdf.pdf}
+\caption{Matched-error empirical CDFs for all 240 curvature pairs. The dotted line marks 20 m. Logarithmic axes retain the full error range.}\label{fig:errors}
+\end{figure}
+
+Table~\ref{tab:results}A shows identical success/failure identities and comparable errors. Figure~\ref{fig:errors} retains every case, including the weak-source tail. Mean complete time falls by 83.77\%; resampling realizations within each fixed configuration, retaining their six gaps together, gives a paired 95\% interval of [81.73\%,85.58\%] from 4,000 draws. This interval is conditional on the tested configurations.
+
+\begin{figure}[pos=H]
+\centering\includegraphics[width=\linewidth]{figures/cost_cdf.pdf}
+\caption{Complete-runtime and cyclic-sweep CDFs for the same 240 pairs. All source-addition stages contribute to the cycle count.}\label{fig:cost}
+\end{figure}
+
+Mean Newton attempts decrease from 1498.82 to 135.55, and cycles from 810.90 to 47.97; rejected directions remain in the count. Figure~\ref{fig:cost} shows the reduction in the slow tail. VP--VP is faster in 170/240 cases, so the mean gain is particularly influenced by difficult updates. Recording and final checks together average 0.0254/0.0059 s, much less than the 4.669 s time difference. Fewer updates and cycles support the curvature explanation in \eqref{eq:rate}.
+
+\begin{table}[pos=H]
+\caption{Localization and complete runtime. $e_s,e_w$: strong/weak RMSE (m); $\bar t,t_{50},t_{95}$: mean, median and P95 time (s). Panels use different observations.}\label{tab:results}
+\centering
+\begin{tabular}{lrrrrrr}
+\toprule
+Method & Success & $e_s$ & $e_w$ & $\bar t$ & $t_{50}$ & $t_{95}$ \\
+\midrule
+\multicolumn{7}{l}{A. Curvature pairs ($n=240$)}\\
+FC--VP & 228/240 & 0.906 & 89.706 & 5.574 & 2.836 & 16.161 \\
+VP--VP & 228/240 & 0.875 & 86.177 & 0.905 & 0.567 & 2.538 \\
+\midrule
+\multicolumn{7}{l}{B. New source configurations ($n=480$)}\\
+AP1 & 480/480 & 0.958 & 2.194 & 0.461 & 0.456 & 0.545 \\
+AP5 & 480/480 & 0.958 & 2.194 & 0.906 & 0.893 & 1.078 \\
+VP-BNOMP & 390/480 & 202.882 & 206.261 & 1.051 & 0.629 & 4.245 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\FloatBarrier
+To examine the complete locator, frozen methods are evaluated at 16 new source configurations, five realizations each and the same six gaps ($n=480$). Receiver coordinates remain unchanged. The alternating-projection references AP1/AP5 retain one/five conditional projected-response peaks, jointly refine each position pair with coefficient elimination, and select the smallest residual; they use projected-gradient tolerance $10^{-8}$. Table~\ref{tab:results}B shows that both AP versions succeed throughout, while VP-BNOMP succeeds in 81.25\%. Its 90 failures concentrate in four configurations and already occur at the first saved two-source state. Local curvature improves block-update efficiency but does not remove the sequential locator's configuration-dependent failures.
+
+\begin{samepage}
+\section{Conclusion}
+Waveform elimination removes compensable position--coefficient coupling from the block-Newton curvature. The resulting frequency-wise update reduces repeated local steps while preserving residual-based discovery. Under common acceptance and stopping rules, the tested 240-observation comparison saves 83.77\% mean complete time with identical 20 m success decisions. New-source-position tests locate the remaining limitation in the complete sequential procedure, motivating candidate-discovery improvements beyond the local update studied here.
+\end{samepage}
+
+% AUTHOR ACTION: complete authorship, affiliations, funding, competing interests,
+% and data/code availability before submission. No repository URL is invented.
+\section*{Declaration of generative AI use}
+ChatGPT and Codex assisted manuscript drafting, translation and code preparation. The authors must review the content and confirm this declaration before submission.
+\bibliographystyle{template/cas-model2-names}
+\bibliography{references/references}
+\end{document}

@@ -20,7 +20,12 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--out', default='qa/assignment_cost_20261019')
     parser.add_argument('--submission', action='store_true', help='Also audit the English review manuscript and supplement')
+    parser.add_argument('--integrated', action='store_true',
+                        help='Audit the complete bilingual manuscripts without supplements')
     args = parser.parse_args()
+    if args.integrated or not (HERE/'paper_supplement_zh.tex').exists():
+        validate_integrated(args.out)
+        return
     text=(HERE/'paper_draft.tex').read_text(encoding='utf-8')
     extra = HERE/'paper_supplement_zh.tex'
     combined = text + ('\n'+extra.read_text(encoding='utf-8') if extra.exists() else '')
@@ -97,10 +102,10 @@ def main():
     print(json.dumps(result,ensure_ascii=False,indent=2))
 
 
-def validate_vector_assets():
+def validate_vector_assets(names=None):
     """Reject raster PDFs and unembedded fonts in all active figure assets."""
     assets = set()
-    for name in ('paper_draft', 'paper_submission', 'paper_supplement', 'paper_supplement_zh'):
+    for name in names or ('paper_draft', 'paper_submission', 'paper_supplement', 'paper_supplement_zh'):
         path = HERE/(name+'.tex')
         if path.exists():
             assets.update(re.findall(r'\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}',
@@ -121,8 +126,8 @@ def validate_vector_assets():
     return checked
 
 
-def validate_submission(bib):
-    names = ('paper_submission', 'paper_supplement')
+def validate_submission(bib, integrated=False):
+    names = ('paper_submission',) if integrated else ('paper_submission', 'paper_supplement')
     texts = {n: (HERE/(n+'.tex')).read_text(encoding='utf-8') for n in names}
     results = {}
     for name, src in texts.items():
@@ -135,13 +140,18 @@ def validate_submission(bib):
         for rel in re.findall(r'\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}', src):
             assert (HERE/rel).resolve(strict=True).is_relative_to(HERE.resolve())
         log = (HERE/'build'/(name+'.log')).read_text(encoding='utf-8', errors='replace')
-        issues = re.findall(r'^!.*|^.*(?:undefined references|Citation .* undefined|Reference .* undefined|Missing character:|Overfull \\hbox).*', log, re.M)
+        issues = manuscript_log_issues(log, integrated)
         assert not issues, (name, issues)
         pdf = fitz.open(HERE/(name+'.pdf'))
         assert all('??' not in p.get_text() and 'GOSPA' not in p.get_text() for p in pdf)
-        assert all(abs(p.rect.width-595.276) < 1 and abs(p.rect.height-841.89) < 1 for p in pdf)
-        assert r'\documentclass[a4paper,12pt,review]{cas-sc}' in src
-        results[name] = dict(pages=len(pdf), a4=True, review_double_spacing=True,
+        width, height = (192*72/25.4, 262*72/25.4) if integrated else (595.276, 841.89)
+        assert all(abs(p.rect.width-width) < 1 and abs(p.rect.height-height) < 1 for p in pdf)
+        expected_class = (r'\documentclass[a4paper,fleqn,review]{cas-sc}' if integrated
+                          else r'\documentclass[a4paper,12pt,review]{cas-sc}')
+        assert expected_class in src
+        results[name] = dict(pages=len(pdf), template_native=integrated,
+                             page_mm=[192,262] if integrated else [210,297],
+                             review_double_spacing=True,
                              manuscript_sha=sha(HERE/(name+'.tex')), pdf_sha=sha(HERE/(name+'.pdf')))
     assert results['paper_submission']['pages'] <= 30, 'English review manuscript exceeds 30 pages'
     en = texts['paper_submission']
@@ -183,11 +193,97 @@ def validate_submission(bib):
         expected=saved['positions'][0]+saved['positions'][1]
         assert actual==expected
         texrow=f"{i} & {saved['category']+1} & " + ' & '.join(f'{v:.6f}' for v in expected)
-        assert texrow in texts['paper_supplement']
+        assert texrow in texts['paper_submission' if integrated else 'paper_supplement']
     for claim in ('31.36','83.77','79.92','170','390','2376'):
         assert claim in en, claim
     results['metrics_and_coordinates_match_saved_results'] = True
     return results
+
+
+def manuscript_log_issues(log, native_template=False):
+    """Native CAS 2.4 overlays keywords in a zero-width box; audit it separately."""
+    issues = re.findall(
+        r'^!.*|^.*(?:undefined references|Citation .* undefined|Reference .* undefined|'
+        r'Missing character:|Overfull \\[hv]box).*', log, re.M)
+    if native_template:
+        # Exact, known template-only diagnostic, not a generic overfull waiver.
+        issues = [s for s in issues if not re.fullmatch(
+            r'Overfull \\hbox \(117\.0831pt too wide\) detected at line \d+', s)]
+    return issues
+
+
+def validate_integrated(out_relative):
+    """Validate content parity and saved evidence, without running localization."""
+    for name in ('paper_supplement', 'paper_supplement_zh'):
+        for suffix in ('.tex', '.pdf'):
+            assert not (HERE/(name+suffix)).exists(), 'Archive obsolete supplement: '+name+suffix
+    texts = {name: (HERE/(name+'.tex')).read_text(encoding='utf-8')
+             for name in ('paper_submission', 'paper_draft')}
+    bib = (HERE/'references/references.bib').read_text(encoding='utf-8')
+    bib_keys = set(re.findall(r'@\w+\{([^,]+),', bib))
+    en, zh = texts['paper_submission'], texts['paper_draft']
+    for name, src in texts.items():
+        labels = re.findall(r'\\label\{([^}]+)\}', src)
+        refs = re.findall(r'\\(?:eqref|ref)\{([^}]+)\}', src)
+        assert len(labels) == len(set(labels)) and not set(refs)-set(labels), name
+        cites = set(','.join(re.findall(r'\\cite\{([^}]+)\}', src)).split(','))-{''}
+        assert not cites-bib_keys, name
+        assert not re.search(
+            r'Supplement|补充材料|paper_supplement|GOSPA|\\externaldocument|'
+            r'\\(?:input|include)\{|\\geometry|@fleqnfalse|__make_.*caption|'
+            r'__first_footerline|\\(?:setstretch|linespread)', src), name
+        log = (HERE/'build'/(name+'.log')).read_text(encoding='utf-8', errors='replace')
+        assert not manuscript_log_issues(log, True), (name, manuscript_log_issues(log, True))
+        with fitz.open(HERE/(name+'.pdf')) as pdf:
+            assert all('??' not in p.get_text() and 'GOSPA' not in p.get_text() for p in pdf)
+    assert r'\documentclass[a4paper,fleqn]{cas-sc}' in zh
+    assert r'\documentclass[a4paper,fleqn,review]{cas-sc}' in en
+    patterns = {
+        'display_math': r'\\begin\{(?:equation|align)\}.*?\\end\{(?:equation|align)\}',
+        'labels': r'\\label\{[^}]+\}',
+        'citations': r'\\cite\{[^}]+\}',
+        'figures': r'\\includegraphics(?:\[[^\]]*\])?\{[^}]+\}',
+    }
+    parity = {}
+    for key, pattern in patterns.items():
+        left, right = re.findall(pattern, en, re.S), re.findall(pattern, zh, re.S)
+        assert left == right, 'Bilingual mismatch: '+key
+        parity[key] = len(left)
+    def numeric_rows(src):
+        found = []
+        for line in src.splitlines():
+            if '&' in line and re.search(r' & \d', line):
+                cells = line.split('&')[1:]
+                if len(cells) > 1 and all(re.match(r'\s*[-\d]', c) for c in cells):
+                    found.append(cells)
+        return found
+    assert numeric_rows(en) == numeric_rows(zh), 'Bilingual numeric table mismatch'
+    report = json.loads((HERE/'data/assignment_cost_20261019/report.json').read_text(encoding='utf-8'))
+    audit = json.loads((HERE/'data/review_supplement_20261020/audit.json').read_text(encoding='utf-8'))
+    assert audit['solves'] == 1920 and audit['historical_path_equivalent_checks'] == 480
+    for record in (report, audit):
+        for path, expected in record['source_files'].items():
+            assert sha(path) == expected, path
+    assert audit['exporter_sha'] == sha(HERE/'scripts/prepare_assignment_cost.py')
+    english = validate_submission(bib, integrated=True)
+    vectors = validate_vector_assets(tuple(texts))
+    template_files = {n: sha(HERE/'template'/n) for n in ('cas-sc.cls','cas-common.sty')}
+    with fitz.open(HERE/'paper_draft.pdf') as pdf:
+        zh_pages = len(pdf)
+    result = dict(
+        passed=True, protocol=report['protocol'], english=english, chinese_pages=zh_pages,
+        bilingual_parity=parity, numeric_table_rows=len(numeric_rows(en)),
+        source_identity=True, no_external_supplement=True, template_sha256=template_files,
+        vector_assets=vectors, manuscript_sha256={n:sha(HERE/(n+'.tex')) for n in texts},
+        pdf_sha256={n:sha(HERE/(n+'.pdf')) for n in texts},
+        native_template_notes=[
+            'CAS 2.4 native keyword-overlay overfull diagnostic is checked by exact signature and visual review.',
+            'Author fields are unfilled; native empty ORCID/anchor and footer remain until author information is supplied.'],
+        visual_review='Separate final per-page review required.')
+    out = HERE/out_relative
+    out.mkdir(parents=True, exist_ok=True)
+    (out/'validation.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
+    print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
 if __name__=='__main__':main()

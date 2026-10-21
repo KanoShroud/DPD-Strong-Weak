@@ -1,646 +1,541 @@
 % !TeX program = xelatex
-% Main manuscript: Elsevier CAS single-column, Chinese working draft.
-% Original CAS sample and the previous manuscript are preserved in archive/.
+% 完整中文审读稿；与英文稿保持相同内容、公式和结果。
 \providecommand{\PaperRoot}{./}
-\makeatletter
-\edef\input@path{{\PaperRoot}{\PaperRoot template/}}
-\makeatother
+\makeatletter\edef\input@path{{\PaperRoot}{\PaperRoot template/}}\makeatother
 \PassOptionsToPackage{no-math}{fontspec}
-\documentclass[a4paper]{cas-sc}
-% CAS enables fleqn internally; retain right-hand numbers but center displays.
-\makeatletter
-\@fleqnfalse
-\makeatother
+\documentclass[a4paper,fleqn]{cas-sc}
 \usepackage[UTF8,scheme=plain,fontset=windows]{ctex}
 \usepackage[numbers,sort&compress]{natbib}
-\usepackage{bm,tabularx,longtable}
-\usepackage{algorithm,algpseudocode}
-\usepackage{tikz}
-\usetikzlibrary{arrows.meta,positioning,fit}
-\usepackage{placeins,needspace,xr}\externaldocument{build/paper_supplement_zh}
-\hypersetup{unicode=true,hidelinks}
-\pdfstringdefDisableCommands{\def\\{ }}
+\usepackage{bm,tabularx,algorithm,algpseudocode,placeins}
 \graphicspath{{\PaperRoot}}
-\numberwithin{equation}{section}
-\numberwithin{figure}{section}
-\numberwithin{table}{section}
 \renewcommand{\figurename}{图}
 \renewcommand{\tablename}{表}
-\renewcommand{\abstractname}{摘要}
+\renewcommand{\refname}{参考文献}
 \floatname{algorithm}{算法}
 \algrenewcommand{\algorithmicrequire}{\textbf{输入：}}
-\renewcommand{\refname}{参考文献}
 \newcommand{\R}{\mathbb R}
 \newcommand{\C}{\mathbb C}
 \newcommand{\E}{\mathbb E}
 \newcommand{\Rea}{\operatorname{Re}}
 \newcommand{\tr}{\operatorname{tr}}
-\newcommand{\diag}{\operatorname{diag}}
-\setlength{\emergencystretch}{2em}
-\widowpenalty=10000
-\clubpenalty=10000
-% No author information has been supplied. Keep the draft footer factual.
-\ExplSyntaxOn
-% Local presentation override: center both short and multiline captions.
-\cs_set_protected:Npn \__make_tbl_caption:nn #1#2
-  {
-    \l_tbl_align_tl
-    \skip_vertical:N \l_tbl_abovecap_skip
-    \parbox{\l_tbl_width_dim}
-      {\centering\sffamily\small
-       \textbf{\color{scolor}#1}\par #2\par\vskip4pt}
-    \skip_vertical:N \l_tbl_belowcap_skip
-  }
-\cs_set_protected:Npn \__make_fig_caption:nn #1#2
-  {
-    \l_fig_align_tl
-    \skip_vertical:N \l_fig_abovecap_skip
-    \parbox{\l_fig_width_dim}
-      {\centering\sffamily\small
-       \textbf{\color{scolor}#1:}~#2\par}
-    \skip_vertical:N \l_fig_belowcap_skip
-  }
-\cs_set:Npn \__first_footerline:
-  { \small\rmfamily\itshape Signal~Processing\quad 中文初稿 }
-% CAS 2.4 uses a zero-width keyword overlay; stretchable glue preserves its
-% position while avoiding the template's artificial overfull-box diagnostic.
-\exp_args:Nc \patchcmd { environment~Abstract~code }
-  { \box \g_stm_key_box } { \box \g_stm_key_box \hss }
-  { } { \PackageError{paper}{CAS~abstract~compatibility~patch~failed}{} }
-\cs_new_eq:NN \paper_printorcid: \printorcid
-\RenewDocumentCommand \printorcid { }
-  { \seq_if_empty:NF \g_stm_orcid_seq { \paper_printorcid: } }
-\ExplSyntaxOff
 \begin{document}
 \let\WriteBookmarks\relax
 \shorttitle{未知宽带强弱重叠源的高效直接定位}
 \shortauthors{}
-\title[mode=title]{未知宽带强弱重叠源的高效直接定位：\\多候选联合精修与波形消元更新}
-% Add the real author, affiliation and correspondence here before submission.
-
-% BEGIN sections/abstract
+\title[mode=title]{未知宽带强弱重叠源的高效直接定位：多候选联合精修与波形消元更新}
+% Author names, affiliations, corresponding author, funding and declarations
+% must be supplied and confirmed by the authors before submission.
 \begin{abstract}[摘要]
-未知宽带源同频混叠且功率不均衡时，两步定位中的时延提取与跨站关联容易受强源干扰。直接位置估计（DPD）联合拟合多站观测，其可靠性与成本仍受候选选择和位置更新方式影响。本文在已知相对幅度与基带时延模型下研究同步单天线站的双源定位。多候选联合精修AP（MCJ-AP）保留条件候选，联合调整两源位置后按完整残差择优；波形消元块NOMP（VP-BNOMP）在每次位置试探中重估波形，以消元曲率减少重复小步。20个布局的2400条观测中，五候选将双源20\,m成功率由95\%提高至99\%，恢复集中于一个构型；同候选、同停止精度下，联合精修减少31.36\%的平均完整耗时。240条曲率配对中，相对采用固定系数曲率、相同消元接受准则的对照，消元曲率减少83.77\%的平均耗时。另16个新布局的480条观测中，两种AP均成功，VP成功81.25\%。结果揭示了候选保留的条件性恢复收益，以及消去位置--波形耦合对局部更新效率的作用。
+未知宽带源的频谱重叠、接收功率不均衡时，从混合观测恢复其位置较为困难。直接位置估计联合拟合多站观测，但其可靠性与成本仍受候选选择和位置精修影响。本文在已知相对幅度与基带时延模型下，研究同步单天线站的两项求解改进。多候选联合精修交替投影（MCJ-AP）保留多个条件候选，逐分支联合调整两源位置，按最终残差择优；波形消元块Newton正交匹配追踪（VP-BNOMP）在每次位置试探中重估当前源系数，并使用相应消元曲率。20个构型的2400条观测中，五候选将双源20\,m成功率由95\%提高至99\%，恢复集中于一个构型。同候选、同停止精度下，联合精修减少31.36\%的平均完整耗时。240条配对观测中，在使用相同消元接受目标时，消元曲率比固定系数曲率减少83.77\%的平均耗时。另16个新构型的480条观测中，单候选与五候选AP均成功，VP-BNOMP成功81.25\%。结果表明，候选保留提供依赖构型的可靠性收益，局部波形消元则减少位置--波形耦合引起的更新成本。
 \end{abstract}
 \begin{keywords}[关键词]
-直接位置估计 \sep 强弱重叠源 \sep 交替投影 \sep 块NOMP \sep 可分离非线性最小二乘
+直接位置估计\sep 重叠源\sep 交替投影\sep 块NOMP\sep 变量投影
 \end{keywords}
-
-% END sections/abstract
-
 \maketitle
 
-% BEGIN sections/introduction
-\section{引言}\label{sec:introduction}
-辐射源定位常先估计到达时间差等中间量，再由这些量求解位置。广义互相关与双曲线定位为这一流程提供了成熟工具\cite{KnappCarter1976,ChanHo1994}。当多个源使用重叠频带且波形未知时，各站接收的是不同传播响应下的混合信号，中间量的提取与跨站关联随之变难。直接位置估计（direct position determination，DPD）将传播关系直接带入观测模型，以位置作为主要待估参数，为多源联合处理提供了另一条途径\cite{ChenHudsonYao2002,WeissAmar2005}。
+\FloatBarrier
+\section{引言}
+辐射源定位常先估计到达时间差，再求解位置。广义互相关与双曲线定位为这一两步流程提供了成熟工具\cite{KnappCarter1976,ChanHo1994}。未知源占用相同频带时，各站收到的是不同传播响应下的混合信号，逐源时延的提取与关联随之变难，强源存在时的弱源尤其如此。直接位置估计（DPD）将传播关系纳入观测模型，联合利用多站数据估计位置\cite{ChenHudsonYao2002,WeissAmar2005}。
 
-本文研究四个同步单天线站对两个未知宽带源的直接定位。两源占用相同频带，接收功率可以明显不同；定位器已知站点坐标及相对传播规律，不知道发射波形与发射功率。目标是在有限计算时间内准确恢复两个位置。单源空间谱中的强源及其旁瓣可能占据多个高分位置，直接取两个峰容易漏掉弱源；同时搜索两个二维位置则需要检查大量位置组合。逐源发现后再连续精修可以减少搜索量，但其效果取决于两个具体选择：保留哪些起点，以及怎样更新源位置。
+本文研究四个同步单天线站观测两个独立未知宽带源的场景。源位置、发射波形与功率未知，站点坐标及相对传播响应已知。单源谱中的多个高峰可能都由强源形成，而同时穷举两个二维位置需要检查大量组合。逐源发现后连续精修可减少搜索量，但仍有两个关键选择：保留哪些候选区域，以及估计未知波形时怎样更新位置。
 
-已有直接定位方法从不同角度处理混合观测。宽带最大似然与交替投影（alternating projection，AP）固定部分位置、更新其余位置，降低联合搜索的维数\cite{ChenHudsonYao2002}。多重信号分类（MUSIC）型DPD根据候选响应与噪声子空间的正交性定位\cite{WeissAmar2005}；最小方差无失真响应（MVDR）利用协方差逆矩阵压低干扰\cite{Capon1969}，DPD-HR将这一思想用于直接定位\cite{TirerWeiss2016}。本文让这些方法使用相同观测、处理频带和传播信息，比较它们在强弱源混合时的实际表现。
+宽带最大似然与交替投影（AP）通过固定其他位置、更新当前源来降低联合搜索维数\cite{ChenHudsonYao2002}。MUSIC型DPD利用候选响应与估计噪声子空间的正交关系\cite{WeissAmar2005}；MVDR利用协方差逆矩阵抑制干扰\cite{Capon1969}，DPD-HR将其用于直接定位\cite{TirerWeiss2016}。这些方法处理混合信号的方式不同，表现也受协方差估计与搜索影响。因此，本文在相同数据和传播信息下比较具体实现。
 
-稀疏参数估计将粗搜索与离网精修结合起来。Newtonized orthogonal matching pursuit（NOMP）在贪心发现后进行Newton更新和循环精修\cite{Mamandipoor2016}。Yang等的多频率二维块NOMP以距离衰减和传播相位构造响应，将各频率的未知源系数组成一个块，并在位置更新后重估系数\cite{Yang2022}。其宽带模型与本文接近，是局部更新的直接参照。QNOMP则针对已知导频形成的信道观测，先以最小二乘消去路径增益，再联合优化各路径的时延和角度\cite{Zeng2025}。本文沿用这些多频拟合与连续优化基础，集中改进两个环节：在条件搜索后保留多个可精修分支，以及在块NOMP的位置试探中同步消去当前源的逐频系数。
+Newton正交匹配追踪（NOMP）结合贪心发现、Newton精修和循环更新\cite{Mamandipoor2016}。Yang等的二维多频块NOMP将同一位置的逐频未知系数组成一块，在位置更新后重估系数\cite{Yang2022}，是本文局部更新的直接参照。QNOMP从导频信道观测中消去路径增益，联合精修时延与角度\cite{Zeng2025}。本文的未知量则是各源在每个保留频点的波形系数，非线性参数为源位置。
 
-AP初始化的改进已有专门研究。Oh与Un采用顺序MUSIC型初始化，为各源逐次选取初值，再执行AP更新\cite{OhUn1991}。这一方法改善初始化与后续收敛，不对多个完整位置分支分别精修后再选择。前瞻正交最小二乘（look-ahead orthogonal least squares，LAOLS）则保留多个离散原子候选，向前补全支持集，再按最终残差决定当前选择\cite{Chatterjee2012}。本文面对的具体问题在于位置可连续变化：粗条件谱固定第一源位置，连续精修却允许两源共同移动，两种排序因而可能不同。MCJ-AP保留多个条件候选，分别与第一源组成分支，联合优化后按完整残差择优。新增计算集中在少量局部分支，不需要为每个分支重复全域扫描。
+候选选择也有相关研究。Oh与Un在AP更新前使用顺序MUSIC初始化\cite{OhUn1991}；LAOLS保留离散原子候选，补全临时支持集后比较残差\cite{Chatterjee2012}。本文的条件谱固定第一源位置，连续联合精修却允许两个位置共同移动，两者可能给出不同的分支排序。保留多个条件候选，可将选择推迟到连续拟合之后，而无需为每个分支重复全域扫描。
 
-未知波形的处理同样影响迭代效率。变量投影法先求最优线性系数，再优化非线性参数\cite{GolubPereyra1973}。这里线性系数是逐频波形，非线性参数是源位置。试探位置改变时重新估计波形，可以避免固定系数对位置步长的约束。本文据此构造波形消元块NOMP，并推导固定系数曲率与消元曲率的关系，解释局部更新为何可能需要不同的计算量。
-
-本文提出以下两项方法改进。
+未知波形的处理还影响精修成本。变量投影先消去线性系数，再优化非线性参数\cite{GolubPereyra1973}。本文将其用于块NOMP的局部位置更新，分析波形重估所消去的曲率项，形成两项方法改进：
 \begin{enumerate}
-  \item 提出多候选联合精修AP，通过精修后的完整残差选择分支，降低粗搜索过早舍弃有效位置的风险；在相同候选和停止精度下，联合位置更新进一步减少分支处理成本。
-  \item 构造块NOMP的波形消元位置更新，保持原有发现与循环结构，以消元曲率替换固定系数曲率。推导局部误差传播关系，并在相同接受目标、数值保护和外层停止规则下配对，检验曲率变化对迭代路径与计算成本的影响。
+\item MCJ-AP在联合连续精修后比较条件候选。候选保留增加初始化覆盖；在共同停止精度下，联合更新降低分支处理成本。
+\item VP-BNOMP保留残差发现和循环块更新，在每个局部位置试探中消去当前源波形。通过曲率推导及相同接受目标下的配对比较，检验其对重复小步的影响。
 \end{enumerate}
+实验在共同240条观测上比较八类方法，在2400条观测上评价主要方法，并以新源位置的480条观测检验冻结配置。各批次的接收站坐标不变，分别考察候选恢复与局部计算收益。
 
-下文依次给出观测模型、求解算法与计算量分析。20个源位置布局的2400条观测用于核心方法及消融，其中预先指定的240条用于八类方法比较与曲率配对；参数冻结后，再以16个新源位置布局的480条观测检查完整流程。各批次使用相同四站坐标。
-
-% END sections/introduction
-
-
-% BEGIN sections/model
-\section{观测模型与定位目标}\label{sec:model}
-\subsection{同步单天线站的宽带观测}
-在静态直达传播条件下，源位置决定了信号到各站的相对幅度与时延。设$L$个单天线站的已知位置为$\bm r_l\in\R^2$，$l=1,\ldots,L$；$K$个源的未知位置为$\bm p_k\in\Omega\subset\R^2$，$k=1,\ldots,K$，其中$\Omega$为二维搜索区域。各站时间、频率同步，接收链路相对幅相响应已标定；发射天线各向一致，接收天线具有相同响应并满足极化匹配。本文先研究已知源数的定位，实验取$L=4$、$K=2$。距离、时延与相对幅度分别为
+\FloatBarrier
+\section{观测模型与定位目标}
+\FloatBarrier
+\subsection{同步宽带观测}
+设第$l$个站的位置为$\bm r_l\in\R^2$，$l=1,\ldots,L$；第$k$个源的位置为$\bm p_k\in\Omega\subset\R^2$，$k=1,\ldots,K$。假设静态直达传播，站间时间与频率同步，接收链路相对响应已标定，天线极化匹配且方向响应一致。实验采用$L=4$和已知$K=2$。定义
 \begin{equation}
- d_{lk}=\|\bm p_k-\bm r_l\|_2,\qquad
- \tau_{lk}=d_{lk}/c_0,\qquad \beta_{lk}=d_{lk}^{-1},
- \label{eq:distance}
+d_{lk}=\|\bm p_k-\bm r_l\|_2,\qquad
+\tau_{lk}=d_{lk}/c_0,\qquad \beta_{lk}=d_{lk}^{-1},
+\label{en:distance}
 \end{equation}
-其中$c_0$为传播速度，$d_{lk}$和$\tau_{lk}$的单位分别为m和s。
-
-幅度模型来自自由空间路径损耗。对于远场、极化匹配的理想各向同性收发天线，接收功率$P_{\mathrm r}$与发射功率$P_{\mathrm t}$满足\cite{ITURP5252024}
+其中$c_0$为传播速度。远场、极化匹配的理想各向同性天线满足自由空间衰减关系
 \begin{equation}
- \frac{P_{\mathrm r}}{P_{\mathrm t}}
- =\left(\frac{\lambda}{4\pi d}\right)^2,\qquad
- a_{\mathrm{amp}}(d)=\sqrt{\frac{P_{\mathrm r}}{P_{\mathrm t}}}
- =\frac{\lambda}{4\pi d} .\label{eq:freespace}
+P_{\rm r}/P_{\rm t}=(\lambda/4\pi d)^2,\qquad
+a_{\rm amp}(d)=\sqrt{P_{\rm r}/P_{\rm t}}=\lambda/(4\pi d).
+\label{en:freespace}
 \end{equation}
-这里$\lambda$为工作波长，$d$为距离，$a_{\mathrm{amp}}$为幅度比。式\eqref{eq:freespace}说明，功率按$1/d^2$衰减，幅度按$1/d$衰减。工作波长和天线响应固定时，将公共因子$\lambda/(4\pi)$并入未知源波形，就得到$\beta_{lk}=1/d_{lk}$。定位器据此利用站间相对幅度，而无需知道发射功率。本文采用自由空间幅度规律与理想基带纯时延响应：给定位置后，跨站相位关系由基带频率和传播时延确定。接收链路标定用于消除站端固定响应；基带纯时延关系是另行规定的传播假设，不由链路标定自动推出。仿真与定位器均使用这一模型，不引入射频载波传播相位或额外随机链路增益。
+其中$P_{\rm r}$、$P_{\rm t}$分别为接收与发射功率，$\lambda$为波长\cite{ITURP5252024}。波长与天线响应固定时，公共因子$\lambda/(4\pi)$可并入未知波形，站间相对幅度因此与$1/d$成正比。
 
-令$s_k(t)$为已包含公共幅度因子和未知发射功率的第$k$个源基带波形。第$l$站以采样率$f_s$采集$N$点，接收信号为
+传播相位采用理想基带纯时延模型。链路标定消除站端响应，基带纯时延则是另外规定的传播假设。生成器与定位器使用同一基带模型，不引入射频载波相位或随机链路增益。采样率为$f_s$、记录为$N$点时，
 \begin{equation}
- x_l[n]=\sum_{k=1}^{K}\beta_{lk}s_k(n/f_s-\tau_{lk})+w_l[n],
- \quad n=0,\ldots,N-1 .\label{eq:time}
+x_l[n]=\sum_{k=1}^K\beta_{lk}s_k(n/f_s-\tau_{lk})+w_l[n],
+\quad 0\le n<N,
 \end{equation}
-其中$x_l[n]$为复数IQ样本，$n$为采样索引。源波形互相独立且未知，在仿真中采用独立、零均值的随机符号产生。噪声$w_l[n]\sim\mathcal{CN}(0,\sigma_t^2)$为圆对称复高斯白噪声，$\sigma_t^2=\E|w_l[n]|^2$，在站间及采样点间独立，并与源信号独立。给定候选位置后，其到各站的相对幅度与时延均由式\eqref{eq:distance}确定。
+其中$s_k$包含未知发射功率与公共幅度因子，各源波形独立。噪声在站间和采样点间独立，与信号独立，服从$\mathcal{CN}(0,\sigma_t^2)$。
 
-为利用宽带信号的时延信息，对每站记录作离散傅里叶变换（DFT）：
+离散傅里叶变换（DFT）为
 \begin{equation}
- X_l(f_m)=\frac1N\sum_{n=0}^{N-1}x_l[n]
- \exp(-\mathrm j2\pi mn/N),\qquad f_m=mf_s/N .\label{eq:dft}
+X_l(f_m)=N^{-1}\sum_{n=0}^{N-1}x_l[n]e^{-\mathrm j2\pi mn/N},
+\qquad f_m=mf_s/N,
+\label{en:dft}
 \end{equation}
-$m$采用移位后的有符号频率索引，$\mathrm j=\sqrt{-1}$。在DFT频率轴上保留公共处理频带内的频点，组成集合$\mathcal F$，其大小记为$F=|\mathcal F|$。以$\bm x_f=[X_1(f),\ldots,X_L(f)]^T\in\C^L$收集同一频点的各站观测，则宽带频域模型写为\cite{ChenHudsonYao2002}
+其中$m$为有符号频率索引。保留公共频带$\mathcal F$内的$F=|\mathcal F|$个频点，得到
 \begin{align}
- \bm x_f&=\bm A_f(\bm P)\bm s_f+\bm n_f,\quad f\in\mathcal F,\label{eq:frequency}\\
- [\bm a_f(\bm p)]_l&=\frac{1}{d_l(\bm p)}
-       \exp[-\mathrm j2\pi f d_l(\bm p)/c_0],\label{eq:response}\\
- \bm A_f(\bm P)&=[\bm a_f(\bm p_1),\ldots,\bm a_f(\bm p_K)],\quad
- \bm P=[\bm p_1,\ldots,\bm p_K].\nonumber
+\bm x_f&=\bm A_f(\bm P)\bm s_f+\bm n_f,\label{en:frequency}\\
+[\bm a_f(\bm p)]_l&=d_l(\bm p)^{-1}
+ \exp[-\mathrm j2\pi f d_l(\bm p)/c_0],\label{en:response}\\
+\bm A_f(\bm P)&=[\bm a_f(\bm p_1),\ldots,\bm a_f(\bm p_K)].\nonumber
 \end{align}
-其中$\bm s_f=[S_1(f),\ldots,S_K(f)]^T\in\C^K$为未知源频域系数，$\bm n_f\in\C^L$为噪声，$\bm a_f(\bm p)\in\C^L$为候选位置的跨站响应，$\bm A_f(\bm P)\in\C^{L\times K}$为各源响应组成的矩阵，$\bm P\in\R^{2\times K}$收集源坐标。式\eqref{eq:response}的相位项来自时移的傅里叶变换性质，$f$表示基带频率。全频带需要逐频计算响应，不能以单一频率的导向向量代替。
+这里$\bm x_f,\bm n_f\in\C^L$，$\bm s_f\in\C^K$，$\bm P=[\bm p_1,\ldots,\bm p_K]\in\R^{2\times K}$。$f$为有符号基带频率，$\mathrm j^2=-1$。共同窗近似忽略各站记录边缘的差异\cite{ChenHudsonYao2002}，其影响在第\ref{en:windowcheck}节核验。选频不改变噪声方差$\sigma_f^2=\sigma_t^2/N$或DFT归一化。
 
-上述频域模型采用共同观测窗的时延近似，忽略各站有限记录在窗边缘的差异。完整DFT的白噪声满足$\E[\bm n_f\bm n_f^H]=(\sigma_t^2/N)\bm I_L$。去除带外频点后，保留频点的噪声方差不变，DFT归一化仍使用原始点数$N$。所有方法采用这一处理，不对各站混合IQ作额外RMS归一化。
+计算中可采用单位范数响应$\bm q_f=\bm a_f/\|\bm a_f\|_2$。同一响应列的公共缩放可由自由系数吸收，不改变站间相对幅度。实现对小于1\,m的距离作保护，所有仿真源均远离该区域。上标$H$、$T$和$\dagger$分别表示共轭转置、转置与伪逆。
 
-计算中也可使用单位范数响应$\bm q_f(\bm p)=\bm a_f(\bm p)/\|\bm a_f(\bm p)\|_2$。这一操作对同一位置的整列响应除以同一个数，站间相对幅度不变。逐频源系数自由估计时，列缩放可由相应系数补偿，因此不改变联合拟合的最小残差。离散扫描包含站点坐标时，为避免$d_l=0$的数值奇点，实现将不足1\,m的距离按1\,m计算。在该开保护区内，对应站点响应对位置的一、二阶导数置零；保护区外使用下文解析导数。边界$d_l=1$\,m处为分段模型的非光滑点，不赋予唯一解析导数。仿真源位置均远离站点。
-
-下文粗体小写和大写分别表示向量与矩阵，$\C$和$\R$分别表示复数域和实数域；$(\cdot)^T$、$(\cdot)^H$及$(\cdot)^\dagger$分别表示转置、共轭转置和Moore--Penrose伪逆，$\|\cdot\|_2$表示欧氏范数，$\bm I_d$表示$d$阶单位矩阵。未标阶数的单位矩阵由相乘矩阵的维度确定。
-
-\subsection{带内信噪比与强弱源条件}
-记第$k$个源单独在第$l$站产生的时间平均接收功率为$P_{lk}$，名义信号带宽为$B$。对白噪声，带宽为$B$的频带占采样频带的比例为$B/f_s$，故其带内期望功率为$\sigma_t^2B/f_s$。以各站接收功率的平均值定义带内信噪比，以两个源接收总功率之比定义功率差：
+记$P_{lk}$为源$k$单独在站$l$产生的时间平均接收功率，$B$为名义信号带宽。定义
 \begin{equation}
- \mathrm{SNR}_{k,\mathrm{in}}
- =10\log_{10}\frac{L^{-1}\sum_{l=1}^L P_{lk}}
- {\sigma_t^2B/f_s},\qquad
- \Delta=10\log_{10}\frac{\sum_l P_{l1}}{\sum_l P_{l2}} .
- \label{eq:snr}
+\mathrm{SNR}_{k,\mathrm{in}}=10\log_{10}
+ \frac{L^{-1}\sum_lP_{lk}}{\sigma_t^2 B/f_s},\qquad
+\Delta=10\log_{10}\frac{\sum_lP_{l1}}{\sum_lP_{l2}}.
+\label{en:snr}
 \end{equation}
-式中$\mathrm{SNR}_{k,\mathrm{in}}$和$\Delta$均以dB表示。信噪比按名义信号带宽$B$定义，与含保护带的实际处理带宽区分。实验固定源2的波形、功率和噪声，仅缩放源1；这样改变功率差时，弱源自身的SNR保持不变。$\Delta>0$时称源1为强源、源2为弱源；$\Delta=0$时保留这两个身份编号。各站的局部功率差由传播距离决定，不必等于四站平均功率差。
+缩放源1时，源2与噪声保持不变，因此改变$\Delta$不改变弱源SNR。$\Delta>0$时称两源为强源和弱源；$\Delta=0$时仍保留A、B身份。单个站的局部功率差不必等于$\Delta$。
 
-\subsection{未知波形消元与联合位置估计}
-定位时将逐频未知波形视为确定性待估系数。根据式\eqref{eq:frequency}的独立、等方差复高斯噪声模型，负对数似然中与位置和波形有关的部分为$\sigma_f^{-2}\sum_f\|\bm x_f-\bm A_f\bm s_f\|_2^2$，其中$\sigma_f^2=\sigma_t^2/N$。因此，最大似然估计等价于联合最小二乘估计\cite{ChenHudsonYao2002}。取观测总能量$E_x=\sum_{f\in\mathcal F}\|\bm x_f\|_2^2>0$作固定归一化，定义
+\FloatBarrier
+\subsection{未知波形消元}
+将逐频系数视为确定性未知量。在独立、等方差复高斯噪声模型下，最大似然等价于最小二乘。以观测能量$E_x=\sum_f\|\bm x_f\|^2>0$归一化，定义
 \begin{align}
- \mathcal L(\bm P,\{\bm s_f\})
-   &=E_x^{-1}\sum_f\|\bm x_f-\bm A_f(\bm P)\bm s_f\|_2^2,\label{eq:fullLS}\\
- \widehat{\bm s}_f(\bm P)&=\bm A_f(\bm P)^\dagger\bm x_f,\label{eq:waveLS}\\
- J(\bm P)&=E_x^{-1}\sum_f\|\bm\Pi_{\bm A_f}^{\perp}\bm x_f\|_2^2,
- \quad \bm\Pi_{\bm A_f}^{\perp}=\bm I-\bm A_f\bm A_f^\dagger .\label{eq:profile}
+\mathcal L(\bm P,\{\bm s_f\})&=E_x^{-1}\sum_f
+ \|\bm x_f-\bm A_f(\bm P)\bm s_f\|^2,\\
+\widehat{\bm s}_f(\bm P)&=\bm A_f(\bm P)^\dagger\bm x_f,\label{en:waveLS}\\
+J(\bm P)&=E_x^{-1}\sum_f\|\bm\Pi_{\bm A_f}^{\perp}\bm x_f\|^2,
+\quad \bm\Pi_{\bm A_f}^{\perp}=\bm I-\bm A_f\bm A_f^\dagger.
+\label{en:profile}
 \end{align}
-这里所有求和均遍历$\mathcal F$。给定一组位置，式\eqref{eq:waveLS}直接求出最优波形；$\bm A_f\bm A_f^\dagger$提取这组位置能够解释的观测，$\bm\Pi_{\bm A_f}^{\perp}\in\C^{L\times L}$保留剩余部分。将最优波形代回式\eqref{eq:fullLS}，就得到只含位置变量的目标$J$，即波形消元\cite{GolubPereyra1973}。$J$为无量纲残差，值越小，位置组合对观测的拟合越好。
-
-所求位置为$\widehat{\bm P}=\arg\min_{\bm P\in\Omega^K}J(\bm P)$。当$K=2$时，非线性搜索只需处理两个二维位置，共四个实数。直接优化$J$时，每次试探新位置都共同重估两源波形。后文的AP联合精修采用这一方式；VP-BNOMP则交替更新位置与波形，在局部试探中只消去当前源的系数，逐源循环结束后再共同重估全部系数。
-
-单源最小二乘谱则为
+代入最小二乘波形后得到仅含位置的目标$J$\cite{GolubPereyra1973}，表示位置集合无法解释的观测能量比例。双源定位只含四个实位置变量，每次试探均重估系数。单源评分为
 \begin{equation}
- Q_0(\bm p)=E_x^{-1}\sum_f
- \frac{|\bm a_f(\bm p)^H\bm x_f|^2}{\|\bm a_f(\bm p)\|_2^2} .\label{eq:single}
+Q_0(\bm p)=E_x^{-1}\sum_f
+ \frac{|\bm a_f(\bm p)^H\bm x_f|^2}{\|\bm a_f(\bm p)\|^2}.
+\label{en:single}
 \end{equation}
-式中$|\cdot|$表示复数模。单源情况下有$J(\bm p)=1-Q_0(\bm p)$，故最大化$Q_0$与最小化$J$等价。双源情况下，从同一张单源谱取两个峰没有同时拟合两源，不能代替对位置组合$\bm P$的优化。后续算法以单源谱发现初值，再用多源拟合处理相互影响。
+单源时$J=1-Q_0$。从$Q_0$中取两个峰没有共同拟合两个源；后续算法通过多源目标处理源间影响。
 
-% END sections/model
-
-
-% BEGIN sections/methods
-\section{多候选联合AP与波形消元块NOMP}\label{sec:methods}
-本章给出同一定位问题的两条求解路线。MCJ-AP改进条件搜索后的候选选择：保留多个起点，联合精修后按完整残差择优。VP-BNOMP改进逐源位置更新：在试探位置时重估当前源的波形，减少固定系数带来的重复小步。前者直接优化完整消元目标$J$，后者使用固定其他源贡献的局部块目标，并在循环后共同重估波形。两种流程独立运行，其候选覆盖与更新效率分别通过对应消融检验。
-\subsection{条件投影搜索}
-寻找第二源时，应先区分哪些观测已由第一源解释。给定已发现位置，以$\bm B_f\in\C^{L\times K_{\mathrm B}}$收集其响应，$K_{\mathrm B}$为已固定的源数；搜索第二源时$K_{\mathrm B}=1$。对观测与候选响应作相同正交投影，定义
+\FloatBarrier
+\section{候选保留与波形消元精修}
+\FloatBarrier
+\subsection{条件搜索与MCJ-AP}
+以$\bm B_f$表示已选位置的响应，对数据和试探响应作相同投影：
 \begin{equation}
- \bm r_f=\bm\Pi_{\bm B_f}^{\perp}\bm x_f,\qquad
- \bm u_f(\bm p)=\bm\Pi_{\bm B_f}^{\perp}\bm a_f(\bm p).
+\bm r_f=\bm\Pi_{\bm B_f}^{\perp}\bm x_f,\qquad
+\bm u_f(\bm p)=\bm\Pi_{\bm B_f}^{\perp}\bm a_f(\bm p).
 \end{equation}
-其中$\bm\Pi_{\bm B_f}^{\perp}=\bm I_L-\bm B_f\bm B_f^\dagger$，$\bm r_f\in\C^L$为投影后的观测，$\bm u_f(\bm p)\in\C^L$为候选响应经过同一投影后的向量。对应的条件位置谱为
+AP条件评分为
 \begin{equation}
- Q_{\mathrm{AP}}(\bm p\mid\bm B)
- =E_x^{-1}\sum_f\frac{|\bm u_f(\bm p)^H\bm r_f|^2}
- {\|\bm u_f(\bm p)\|_2^2}.\label{eq:conditional}
+Q_{\rm AP}(\bm p\mid\bm B)=E_x^{-1}\sum_f
+ \frac{|\bm u_f(\bm p)^H\bm r_f|^2}{\|\bm u_f(\bm p)\|^2}.
+\label{en:conditional}
 \end{equation}
-条件谱衡量新增位置带来的拟合改善。将$\bm a_f$分解为已有响应空间内的部分与正交部分$\bm u_f$。当$\bm u_f\ne0$时，新方向与已有响应正交，投影矩阵满足
+当$\bm u_f\ne0$时，正交投影满足
 \begin{equation}
- \bm\Pi_{[\bm B_f,\bm a_f]}^{\perp}
- =\bm\Pi_{\bm B_f}^{\perp}
- -\frac{\bm u_f\bm u_f^H}{\|\bm u_f\|^2} .
+\bm\Pi_{[\bm B_f,\bm a_f]}^{\perp}
+=\bm\Pi_{\bm B_f}^{\perp}-\frac{\bm u_f\bm u_f^H}{\|\bm u_f\|^2},
+\qquad J_{\rm B}-J([\bm B,\bm a(\bm p)])=Q_{\rm AP},
+\label{en:gain}
 \end{equation}
-对上式作观测的二次型并求和，便有
-\begin{equation}
- J_{\mathrm B}-J([\bm B,\bm a(\bm p)])
- =\frac1{E_x}\sum_f\frac{|\bm u_f(\bm p)^H\bm r_f|^2}
- {\|\bm u_f(\bm p)\|^2}
- =Q_{\mathrm{AP}}(\bm p\mid\bm B),\label{eq:conditionalGain}
-\end{equation}
-其中$J_{\mathrm B}=E_x^{-1}\sum_f\|\bm r_f\|^2$为仅拟合已有源的残差，$J([\bm B,\bm a(\bm p)])$表示加入候选后、共同重估所有系数所得的残差。若$\bm u_f=0$，该候选没有提供新的响应方向，此频点贡献记为零。
+其中$J_{\rm B}=E_x^{-1}\sum_f\|\bm r_f\|^2$。固定已有位置时，最高条件评分对应最大的联合残差下降\cite{ChenHudsonYao2002}。计算采用归一化响应列；投影后范数平方不超过$10^{-20}$的频点评分置零，SVD伪逆的相对截断阈值为$10^{-10}$。投影恒等式适用于不受这些数值秩截断影响的区域。
 
-式\eqref{eq:conditionalGain}将条件搜索与联合拟合连接起来：固定已有位置时，条件得分最高的候选使联合残差最小\cite{ChenHudsonYao2002}。这一等价关系要求观测和候选响应使用相同投影。数值实现先将候选响应归一化；投影后的范数平方不超过$10^{-20}$时，该频点评分记为零，以避免除以近零量。共同最小二乘采用相对阈值$10^{-10}$的SVD伪逆处理秩退化，式\eqref{eq:conditionalGain}的数值核对应考虑两处截断对近退化方向的影响。
-
-\subsection{多候选联合精修AP（MCJ-AP）}\label{sec:mcj}
-MCJ-AP以AP条件投影生成第二源候选，随后转入多分支联合位置优化。AP在此承担条件初始化，联合精修完成分支内求解；两者的具体分工见算法\ref{alg:ap}。
-粗网格排序回答的是哪个网格点当前得分更高，连续精修则允许两源一起移动；二者得到的最佳分支可能不同。MCJ-AP据此保留多个可能起点。先在公共网格$\mathcal G\subset\Omega$上最大化$Q_0$，作单源连续精修，得到$\bm p_1^{(0)}$。固定该位置后，计算第二源条件谱，提取$3\times3$邻域内的局部极大值，再按得分从高到低保留间隔不少于$\Delta_{\mathrm c}$的点，得到$M$个候选$\bm c_1,\ldots,\bm c_M\in\R^2$。本文取$\Delta_{\mathrm c}=30$\,m。每个候选分别与第一源组成初值，进入相同的联合精修：
+MCJ-AP先在公共网格$\mathcal G$上最大化$Q_0$，连续精修第一源至$\bm p_1^{(0)}$。固定该位置后，扫描$Q_{\rm AP}$并保留间隔至少为$\Delta_c$的$M$个局部极大值$\bm c_m$，分别构成联合初值：
 \begin{equation}
- \widehat{\bm P}^{(m)}=\operatorname{LocalMin}_{\bm P\in\Omega^2}
+\widehat{\bm P}^{(m)}=\operatorname{LocalMin}_{\bm P\in\Omega^2}
  J(\bm P;[\bm p_1^{(0)},\bm c_m]),\qquad
- m^*=\arg\min_m J(\widehat{\bm P}^{(m)}).\label{eq:branch}
+m^*=\arg\min_m J(\widehat{\bm P}^{(m)}).
+\label{en:branch}
 \end{equation}
-其中$\operatorname{LocalMin}$表示在搜索边界内从给定初值局部最小化$J$，$\widehat{\bm P}^{(m)}$为第$m$个分支的结果。算法输出最终残差最小的分支$\widehat{\bm P}^{(m^*)}$。因此，候选质量由精修后的完整拟合决定，粗谱仅负责提供起点。
+输出为$\widehat{\bm P}^{(m^*)}$。AP完成条件初始化，随后联合精修同时调整两个位置，以连续拟合后的排序替代粗网格排序。若已有分支的解保持不变，扩大的嵌套候选集合不会增加最终最小残差；其位置误差仍需实验评价。
+
+联合精修采用有界L-BFGS-B\cite{Byrd1995}。令$\bm\theta=\operatorname{vec}(\bm P)$，$\bm e_f=\bm x_f-\bm A_f\widehat{\bm s}_f$。当$\bm A_f$局部满列秩时，$\bm A_f^H\bm e_f=0$使系数导数项消失，得到
+\begin{equation}
+\frac{\partial J}{\partial\theta_i}=-\frac{2}{E_x}\Rea\sum_f
+ \bm e_f^H\frac{\partial\bm A_f}{\partial\theta_i}\widehat{\bm s}_f.
+\label{en:gradient}
+\end{equation}
+令$\bm v_l=(\bm p-\bm r_l)/d_l$，响应导数为
+\begin{equation}
+\nabla_{\bm p}a_l(f,\bm p)=a_l(f,\bm p)
+ (-d_l^{-1}-\mathrm j2\pi f/c_0)\bm v_l.
+\end{equation}
+两项分别来自幅度与时延变化。联合Hessian由$2\times2$块$H_{ij}=\partial^2J/(\partial\bm p_i\partial\bm p_j^T)$组成：
+\begin{equation}
+H_{\rm joint}=\begin{bmatrix}H_{11}&H_{12}\\H_{21}&H_{22}\end{bmatrix}.
+\end{equation}
+L-BFGS-B由位置与梯度差近似联合曲率，不显式计算源间交叉块。
 
 \begin{algorithm}[H]
-\caption{多候选联合精修AP}\label{alg:ap}
+\caption{MCJ-AP}\label{en:algap}
 \begin{algorithmic}[1]
-\Require 观测$\{\bm x_f\}$，站点坐标，公共网格$\mathcal G$，候选数$M$
-\State 最大化$Q_0$并单源精修，得到$\bm p_1^{(0)}$
-\State 固定$\bm p_1^{(0)}$，以式\eqref{eq:conditional}扫描$\mathcal G$
-\State 提取邻域极大值，按条件得分和间距$\Delta_{\mathrm c}$保留$M$个候选
-\For{$m=1,\ldots,M$}
-  \State 从$[\bm p_1^{(0)},\bm c_m]$联合优化$J$；每次试探按式\eqref{eq:waveLS}重估波形
-  \State 保存该分支的目标、位置与停止状态
+\Require 观测、站点坐标、网格$\mathcal G$、候选数$M$
+\State 最大化$Q_0$，连续精修第一源位置
+\State 固定该位置，扫描$Q_{\rm AP}$
+\State 按评分降序保留$M$个满足间隔要求的局部极大值
+\For{每个保留候选}
+\State 从相应位置对联合最小化$J$，每次试探重新拟合全部系数
 \EndFor
-\State 按式\eqref{eq:branch}输出最小残差分支
+\State 输出最终$J$最小的分支
 \end{algorithmic}
 \end{algorithm}
 
-联合精修采用有界拟牛顿法L-BFGS-B同时优化两个位置\cite{Byrd1995}。将坐标按源排列为$\bm\theta=\operatorname{vec}(\bm P)\in\R^{2K}$，其第$i$个分量为$\theta_i$；联合拟合残差为$\bm e_f=\bm x_f-\bm A_f\widehat{\bm s}_f\in\C^L$。响应矩阵局部满列秩时，最小二乘解满足$\bm A_f^H\bm e_f=0$。这一正交条件使求导中含$\partial\widehat{\bm s}_f/\partial\theta_i$的项消失，因而位置梯度可直接写为\cite{GolubPereyra1973}
+\FloatBarrier
+\subsection{波形消元块NOMP}
+VP-BNOMP保留残差发现与循环位置更新\cite{Mamandipoor2016,Yang2022}。更新源$j$时，固定其他源已拟合的贡献：
 \begin{equation}
- \frac{\partial J}{\partial\theta_i}
- =-\frac{2}{E_x}\Rea\sum_f
- \bm e_f^H\frac{\partial\bm A_f}{\partial\theta_i}
- \widehat{\bm s}_f,\label{eq:gradient}
+\bm y_{j,f}=\bm x_f-\sum_{k\ne j}\bm a_f(\bm p_k)\widehat s_{k,f}.
 \end{equation}
-式中$\Rea$表示取实部，$\partial\bm A_f/\partial\theta_i\in\C^{L\times K}$为响应矩阵对该坐标的导数。记$\bm v_l=(\bm p-\bm r_l)/d_l\in\R^2$为从第$l$站指向候选位置的单位方向，$d_l=\|\bm p-\bm r_l\|_2$，响应的空间梯度为
-\begin{equation}
- \nabla_{\bm p}a_l(f,\bm p)
- =a_l(f,\bm p)\left(-\frac1{d_l}-\mathrm j\frac{2\pi f}{c_0}\right)\bm v_l.
- \label{eq:responseDerivative}
-\end{equation}
-这里$a_l(f,\bm p)=[\bm a_f(\bm p)]_l$。括号内两项分别来自距离幅度和传播时延的变化。联合优化每次重估波形，但计算式\eqref{eq:gradient}时不需要显式求波形估计的导数。
-
-增加候选数时，保持已有分支的初值、求解器与停止条件不变。较大集合包含较小集合的全部精修结果，故选择后的最小残差不会增大；对应的位置误差由实验评价。$M=1$为单候选版本，$M>1$以额外局部计算换取更多有效起点。
-
-\subsection{波形消元块NOMP（VP-BNOMP）}\label{sec:vpnomp}
-NOMP在当前拟合残差中发现新成分，再循环修正已有参数\cite{Mamandipoor2016}。二维多频率块NOMP将同一位置的逐频系数视为一个参数块\cite{Yang2022}。本文保留这一发现和循环结构，改进局部位置更新：每试探一个位置，就先求该源的最优信号系数，再判断位置是否更好。
-
-给定当前位置和共同估计的系数$\widehat s_{k,f}$，更新源$j$时先减去其他源的当前拟合贡献：
-\begin{equation}
- \bm y_{j,f}=\bm x_f-\sum_{k\ne j}\bm a_f(\bm p_k)\widehat s_{k,f} .
- \label{eq:targetResidual}
-\end{equation}
-其中$\bm y_{j,f}\in\C^L$为保留源$j$贡献的残差观测，在一次局部位置优化内固定。对任意试探位置$\bm p$，其最优复数系数$\widehat q_f(\bm p)\in\C$与局部目标$\phi_j(\bm p)$分别为
+对试探位置$\bm p$，消去当前源系数：
 \begin{align}
- \widehat q_f(\bm p)&=\frac{\bm a_f(\bm p)^H\bm y_{j,f}}
- {\|\bm a_f(\bm p)\|^2},\label{eq:localcoef}\\
- \phi_j(\bm p)&=\min_{\{q_f\}}E_x^{-1}\sum_f
- \|\bm y_{j,f}-\bm a_f(\bm p)q_f\|^2\nonumber\\
- &=E_x^{-1}\sum_f\left(\|\bm y_{j,f}\|^2-
+\widehat q_f(\bm p)&=\frac{\bm a_f(\bm p)^H\bm y_{j,f}}{\|\bm a_f(\bm p)\|^2},\\
+\phi_j(\bm p)&=E_x^{-1}\sum_f\left(\|\bm y_{j,f}\|^2-
  \frac{|\bm a_f(\bm p)^H\bm y_{j,f}|^2}{\|\bm a_f(\bm p)\|^2}\right).
- \label{eq:localprofile}
+\label{en:local}
 \end{align}
-这里$q_f$为标量信号系数，与单位范数响应向量$\bm q_f$区分。式\eqref{eq:localprofile}表示每个试探位置都配上其最优波形。Newton更新使用该消元目标的梯度与Hessian（二阶导数矩阵）；回溯时也重新求系数，仅接受局部残差不增的试探。更新后同步替换该源的响应、系数和显式残差。逐源循环结束后，再共同重估全部已发现源的系数。这样保持块NOMP的发现与循环结构，局部更新的区别集中在是否消去波形。
+$q_f$为复数标量，与响应向量$\bm q_f$区分。由$\phi_j$的梯度与Hessian计算Newton方向；每次回溯试探都重估$q_f$，仅接受局部残差不增的更新。接受后同步更新该源贡献与显式残差。每次加入源并完成循环精修后，以共同最小二乘重估全部系数。
 
-发现新源时，记当前共同拟合残差为$\bm r_f=\bm x_f-\sum_k\bm a_f(\bm p_k)\widehat s_{k,f}$；尚未发现源时$\bm r_f=\bm x_f$。扫描的残差谱为
+通过扫描当前共同拟合残差$\bm r_f$发现新位置：
 \begin{equation}
- Q_{\mathrm R}(\bm p)=E_x^{-1}\sum_f
- \frac{|\bm a_f(\bm p)^H\bm r_f|^2}{\|\bm a_f(\bm p)\|^2},
- \label{eq:residualScore}
+Q_{\rm R}(\bm p)=E_x^{-1}\sum_f
+ \frac{|\bm a_f(\bm p)^H\bm r_f|^2}{\|\bm a_f(\bm p)\|^2}.
 \end{equation}
-该谱评价候选对当前残差的解释能力。它用于发现初始位置，后续再以联合拟合修正所有已发现源。
+共同最小二乘后，$\bm r_f$与已有响应正交。此时AP与残差评分的分子相同，但分母分别采用投影后和未投影的响应范数。因此，两者即使最终都作最小二乘拟合，也可能发现不同的初始区域。
 
 \begin{algorithm}[H]
-\caption{波形消元块NOMP}\label{alg:nomp}
+\caption{VP-BNOMP}\label{en:algnomp}
 \begin{algorithmic}[1]
-\Require 观测，公共网格，源数$K$，循环与Newton停止参数
-\State 初始化源集合为空，$\bm r_f\gets\bm x_f$
+\Require 观测、网格、源数$K$、精修参数
+\State 源集合初始化为空，残差初始化为观测
 \For{$k=1,\ldots,K$}
-  \State 最大化残差谱\eqref{eq:residualScore}，发现新位置
-  \State 以式\eqref{eq:localprofile}作单源Newton精修，加入源集合并更新残差
-  \Repeat
-    \For{已发现的每个源$j$}
-      \State 构造$\bm y_{j,f}$，用$\phi_j$作有界Newton更新
-      \State 每个试探位置重估$q_f$，仅接受局部残差不增的更新，同步替换该源贡献
-    \EndFor
-  \Until{循环停止条件满足或达到安全上限}
-  \State 按式\eqref{eq:waveLS}共同重估全部已发现源的系数，更新共同拟合残差
+\State 最大化$Q_{\rm R}$，以$\phi_j$局部精修并加入新源
+\Repeat
+\For{已发现的每个源$j$}
+\State 固定其他源贡献，以带数值保护的Newton更新和波形重估精修$\phi_j$
+\EndFor
+\Until{满足循环能量条件或达到安全上限}
+\State 共同重估全部源系数并更新残差
 \EndFor
 \State 输出已发现位置
 \end{algorithmic}
 \end{algorithm}
 
-两种发现方式的区别在于如何处理已有源。共同LS拟合后，残差$\bm r_f$与已有响应的列空间正交，因此AP条件谱和NOMP残差谱的分子相同；分母则分别为$\|\bm\Pi_{\bm B_f}^{\perp}\bm a_f\|^2$和$\|\bm a_f\|^2$。AP还考虑候选与已有响应的相似程度，NOMP直接扫描当前残差，两者因而可能选中不同的初始区域。本文保留这两种发现机制。
-
-\subsection{消元更新的曲率与下降性质}\label{sec:curvature}
-下面说明为什么固定信号系数可能使位置更新缓慢。对于一次源位置更新，将二维坐标记为$\bm z\in\R^2$，将$F$个复信号系数的实部和虚部排列为$\bm u\in\R^{2F}$。对应的归一化局部损失记为$\mathcal L_{\mathrm{loc}}(\bm z,\bm u)$，给定位置的最小二乘系数记为$\widehat{\bm u}(\bm z)$，消元后损失为$\varphi(\bm z)=\mathcal L_{\mathrm{loc}}(\bm z,\widehat{\bm u}(\bm z))$，即式\eqref{eq:localprofile}。
-
-假设响应二阶连续可微，且系数最小二乘解局部唯一。定义$H_{zz}\in\R^{2\times2}$、$H_{uu}\in\R^{2F\times2F}$和$H_{zu}\in\R^{2\times2F}$分别为$\mathcal L_{\mathrm{loc}}$的位置、系数及混合二阶导数，$H_{uz}=H_{zu}^T$，所有导数在$(\bm z,\widehat{\bm u}(\bm z))$处计算。最优系数满足$\nabla_u\mathcal L_{\mathrm{loc}}=0$，对位置求导可得
+\FloatBarrier
+\subsection{曲率与计算成本}
+在一次局部更新中，将二维位置记为$\bm z$，系数实部、虚部记为$\bm u\in\R^{2F}$，归一化最小二乘损失记为$\mathcal L_{\rm loc}(\bm z,\bm u)$，其最优系数为$\widehat{\bm u}(\bm z)$。响应二阶连续可微且系数最优解局部唯一时，对$\nabla_u\mathcal L_{\rm loc}=0$求导得到
 \begin{equation}
- H_{uz}+H_{uu}\frac{\partial\widehat{\bm u}}{\partial\bm z}=0,
- \qquad\frac{\partial\widehat{\bm u}}{\partial\bm z}
- =-H_{uu}^{-1}H_{uz}.\label{eq:coefficientDerivative}
+\frac{\partial\widehat{\bm u}}{\partial\bm z}=-H_{uu}^{-1}H_{uz},\qquad
+H_{\rm VP}=H_{zz}-H_{zu}H_{uu}^{-1}H_{uz}.
+\label{en:schur}
 \end{equation}
-将这一关系代入$\varphi$的一、二阶导数，得到变量投影的梯度和曲率关系\cite{GolubPereyra1973}：
+所有Hessian块均在$(\bm z,\widehat{\bm u}(\bm z))$处计算，位置块、系数块和混合块的维度分别为$2\times2$、$2F\times2F$和$2\times2F$。消元梯度等于最优系数处的位置梯度\cite{GolubPereyra1973}。系数子问题的$H_{uu}$正定，因此
+\begin{equation}
+H_{zz}-H_{\rm VP}=H_{zu}H_{uu}^{-1}H_{uz}\succeq0.
+\label{en:psd}
+\end{equation}
+位置移动引起的部分响应变化可由波形调整补偿。固定系数曲率保留了这一部分，消元曲率则将其扣除；在耦合较强的正曲率方向上，前者可能产生较小的位置步长。
+
+在区域内部的局部极小点附近，假设$H_{zz}$与$H_{\rm VP}$均正定并使用完整Newton步。记相对该局部极小点的位置误差为$\bm\epsilon$，用固定曲率更新消元梯度的线性化为
+\begin{equation}
+\bm\epsilon^+\approx(\bm I_2-H_{zz}^{-1}H_{\rm VP})\bm\epsilon.
+\label{en:rate}
+\end{equation}
+由式\eqref{en:psd}，迭代特征值在$[0,1)$内；消元曲率相对固定曲率较小时，特征值接近1。精确消元Newton曲率可去掉这一线性误差项。回溯、数值保护和外层源更新影响实际成本，需另外测量。
+
+对$\bm u_f=[\Rea q_f,\operatorname{Im}q_f]^T$，系数块为
+\begin{equation}
+H_{uu,f}=2\|\bm a_f\|^2\bm I_2/E_x.
+\end{equation}
+各频点的独立系数块允许直接累加$2\times2$消元Hessian，无需构造稠密$2F\times2F$矩阵。为计算响应导数，令$\kappa=2\pi f/c_0$、$\ell_l=-\log d_l-\mathrm j\kappa d_l$，则$a_l=\exp(\ell_l)$。在1\,m保护距离以外，
 \begin{align}
- \nabla\varphi&=\nabla_z\mathcal L_{\mathrm{loc}},\label{eq:envelope}\\
- H_{\mathrm{VP}}&=H_{zz}-H_{zu}H_{uu}^{-1}H_{uz},\label{eq:schur}\\
- H_{zz}-H_{\mathrm{VP}}&\succeq0 .\label{eq:psd}
+\nabla\ell_l&=(-d_l^{-1}-\mathrm j\kappa)\bm v_l,\\
+\nabla^2\ell_l&=d_l^{-2}\bm v_l\bm v_l^T+
+\frac{-d_l^{-1}-\mathrm j\kappa}{d_l}(\bm I_2-\bm v_l\bm v_l^T),\\
+\nabla^2a_l&=a_l[\nabla^2\ell_l+(\nabla\ell_l)(\nabla\ell_l)^T].
+\label{en:responseHessian}
 \end{align}
-其中$H_{\mathrm{VP}}=\nabla^2\varphi\in\R^{2\times2}$，下标VP表示变量投影；$\succeq0$表示半正定。式\eqref{eq:psd}来自系数最小二乘子问题的$H_{uu}$正定，因此$H_{zu}H_{uu}^{-1}H_{uz}$为半正定矩阵。
+这些是复响应对实坐标的导数，使用普通转置。保护距离内，对应站点导数为零，边界处非光滑。解析导数已与有限差分、自动微分和小矩阵计算核对。
 
-式\eqref{eq:schur}解释了两种更新的步长差别。位置移动引起的部分响应变化，可以由重新估计波形补偿。固定系数曲率$H_{zz}$没有扣除这部分变化，因而在耦合较强的方向上可能过大；相同梯度除以较大的正曲率，就得到较小步长。消元曲率$H_{\mathrm{VP}}$扣除了位置--波形耦合项，使更新直接针对重估波形后的残差。
+表\ref{en:complexity}列出主要计算量。$G$为网格点数，$T$为连续目标／梯度调用数，$T_M$为各分支调用总数，$I$为逐源循环数，$T_{\rm loc}$为局部调用数，$I_B$为SBL迭代数。分段协方差方法以$S$、$F_s$表示段数和保留频点数。两种曲率的单步成本均随$F$线性增长，实际节省来自步数与循环数。
+\begin{table}[pos=H]\centering
+\caption{主要运算量；共同系数重估计入完整耗时。}\label{en:complexity}
+\begin{tabularx}{\linewidth}{@{}lX@{}}\toprule
+运算 & 计算量\\\midrule
+公共DFT & $\mathcal O(LN\log N)$\\
+MUSIC/MVDR & 统计$\mathcal O(F_sSL^2+F_sL^3)$；扫描$\mathcal O(F_sGL^2)$\\
+共同系数拟合 & $\mathcal O(F(LK^2+K^3))$\\
+MCJ-AP & $\mathcal O(FGLK+T_MF(LK^2+K^3))$\\
+VP-BNOMP & 扫描$\mathcal O(KFGL)$；局部更新$\mathcal O(IKT_{\rm loc}FL)$\\
+多初值／GA & $\mathcal O(TF(LK^2+K^3))$\\
+稠密宽带SBL & $\mathcal O(I_B(FGL^2+FL^3))$\\\bottomrule
+\end{tabularx}\end{table}
 
-在搜索区域内部的局部极小点$\bm z^*$附近，令位置误差$\bm\epsilon=\bm z-\bm z^*$。当$H_{zz}$和$H_{\mathrm{VP}}$均正定，且采用完整Newton步时，用固定系数曲率更新消元梯度的一阶误差传播为
-\begin{equation}
- \bm\epsilon^{+}\approx
- \left(\bm I_2-H_{zz}^{-1}H_{\mathrm{VP}}\right)\bm\epsilon .\label{eq:localrate}
-\end{equation}
-式中$\bm\epsilon^+$为更新后的位置误差，Hessian取局部极小点处的值。由式\eqref{eq:psd}，迭代矩阵的特征值落在$[0,1)$；当某方向的消元曲率远小于固定系数曲率时，该方向的误差收缩因子接近1，迭代便可能出现大量小步。采用精确消元Newton曲率可去掉这一局部线性误差项。实际算法还受回溯、步长限制和Hessian近似的影响，因此用目标与导数调用次数进一步评价计算效率。
-
-波形消元与联合精修处理两种不同的相互影响：前者允许波形随位置调整，后者允许两个位置一起调整。对联合目标$J$，双源的$4\times4$ Hessian为
-\begin{equation}
- H_{\mathrm{joint}}=
- \begin{bmatrix}H_{11}&H_{12}\\H_{21}&H_{22}\end{bmatrix} .
-\end{equation}
-其中$H_{ij}=\partial^2J/(\partial\bm p_i\partial\bm p_j^T)\in\R^{2\times2}$。逐源精修每次只改变一个位置，联合精修允许两个位置共同调整。MCJ-AP采用联合L-BFGS-B，以位置和梯度差构造曲率近似，并不显式计算上述精确交叉Hessian；该矩阵用于说明两源位置之间的耦合。VP-BNOMP改进每个源内部的位置--系数耦合，不额外叠加末端联合优化。
-
-MCJ-AP的联合精修仅接受完整目标不增的更新，即$J(\bm P^+)\le J(\bm P)$。VP-BNOMP的每次块更新降低或保持显式拟合残差，循环后的共同最小二乘重估也不增加该残差。因此，在固定已发现源数的精修阶段，两者各自接受的目标值序列非负、单调有界，因而收敛。这一性质描述拟合目标的变化，不等同于位置序列收敛到全局最优。实际计算中，AP检查共同投影梯度；VP-BNOMP检查相邻循环的归一化残差能量变化，并设置安全迭代上限。多候选搜索用于降低局部优化对单一起点的依赖。
-
-\subsection{计算量及方法关系}\label{sec:complexity}
-复杂度以保留频点数$F$、站数$L$、源数$K$和初始网格点数$G=|\mathcal G|$表示。记$I$为循环精修次数，$T$为连续目标或梯度的调用总数。单次联合系数求解需形成$K\times K$ Gram矩阵$\bm A_f^H\bm A_f$，并解相应线性方程，跨频主要计算量为$\mathcal O(F(LK^2+K^3))$。固定其他源后，投影可预计算，条件网格扫描约为$\mathcal O(FGLK)$。双源全组合搜索需检查$G^2$组位置，而逐源发现每次只扫描$G$点。
-
-完整计算量见补充材料表\ref{tab:complexity}。局部单源系数按频点独立，式\eqref{eq:schur}的$H_{uu}$为分块对角矩阵，每块仅$2\times2$；逐频累加即可得到$2\times2$位置曲率，无需构造完整$2F\times2F$矩阵。固定系数与消元更新的单次运算均随$F$线性增长，效率差别主要来自所需更新与循环次数。
-
-补充材料表\ref{tab:methodrelation}对齐近邻方法的系数处理和位置更新。宽带最小二乘、变量投影与准Newton提供数学基础；本文的具体改动是连续精修后的候选比较与块NOMP的局部消元更新。
+固定源数时，MCJ-AP接受的步和VP-BNOMP块更新均不增加各自拟合残差，共同系数重估也不增加残差。因此，非负的目标值序列收敛；这一性质不等于位置收敛到全局最优。AP检查联合投影梯度，VP-BNOMP检查循环能量变化，机制实验匹配相应的停止规则。
 
 \FloatBarrier
-% END sections/methods
-
-
-% BEGIN sections/experiments
-\section{仿真实验}\label{sec:experiments}
-\subsection{场景、比较方法与评价设置}\label{sec:baselines}
-四站坐标分别为$(500,0)$、$(0,500)$、$(-500,0)$和$(0,-500)$\,m。以最大站间距离定义基线$R=\max_{l,v}\|\bm r_l-\bm r_v\|_2=1000$\,m。搜索区域为$[-1000,1000]^2$\,m$^2$，真实源位置为连续坐标，不要求落在初始网格上。两源采用独立BPSK符号，经根升余弦（RRC）脉冲成形；符号率$R_s=10$\,MHz、滚降系数$\alpha_{\mathrm{RRC}}=0.25$，对应名义带宽$B=(1+\alpha_{\mathrm{RRC}})R_s=12.5$\,MHz。表\ref{tab:scenario}汇总公共设置。
-
+\section{仿真实验}
+\FloatBarrier
+\subsection{场景、对照与评价设置}
+站点位于$(500,0)$、$(0,500)$、$(-500,0)$和$(0,-500)$\,m，最大基线$R=1000$\,m，搜索区域为$[-1000,1000]^2$\,m$^2$。公共采集与搜索设置见表\ref{en:settings}，源位置连续取值。两路BPSK的符号序列、初相和定时独立，中心频率与带宽相同。
 \begin{table}[pos=H]\centering\small
-\caption{公共仿真参数。}\label{tab:scenario}
-\begin{tabularx}{.96\linewidth}{@{}lX@{}}\toprule
-参数 & 设置\\\midrule
-接收站／源数 & 四个同步单天线站；已知$K=2$\\
-传播 & 自由空间相对幅度$1/d$与基带时延；$c_0=299792458$\,m/s\\
-波形 & 独立BPSK；RRC成形，符号率10\,MHz，滚降0.25\\
-中心与名义带宽 & 两源中心均为0；带宽均为12.5\,MHz\\
-采样与记录 & 50\,MHz；8192点；163.84\,$\mu$s\\
+\caption{公共采集与搜索设置。}\label{en:settings}
+\begin{tabularx}{\linewidth}{@{}lX@{}}\toprule
+项目 & 设置\\\midrule
+站点与源数 & 四个同步单天线站；已知$K=2$\\
+传播 & 相对幅度$1/d$与基带时延；$c_0=299792458$\,m/s\\
+信号 & BPSK；RRC成形，符号率10\,MHz，滚降系数0.25；带宽12.5\,MHz\\
+采集 & 50\,MHz，8192点，163.84\,$\mu$s\\
 处理频带 & $[-7,7]$\,MHz；完整记录DFT保留2293个频点\\
-噪声与信噪比 & 时域复噪声方差1；源B四站平均带内SNR为6\,dB\\
-平均接收功率差 & 0、3、6、9、12、15\,dB；固定源B与噪声，仅缩放源A\\
-初始网格 & 各方法统一20\,m，$101\times101=10201$点\\
-候选间距 & 30\,m；AP联合版本分别保留1、2、5个候选\\
-正式规模 & 20布局$\times$20随机实现$\times$6档功率差，共2400条\\
-共同子集 & 各布局预先固定2次实现，保留全部功率差，共240条\\\bottomrule
-\end{tabularx}
-\end{table}
+功率 & 弱源平均带内SNR为6\,dB；$\Delta=0,3,6,9,12,15$\,dB\\
+搜索 & 公共20\,m网格，$101\times101$点；连续精修\\
+候选 & $3\times3$邻域极大值，最小间距30\,m；$M=1$--5\\\bottomrule
+\end{tabularx}\end{table}
+同一构型和随机实现的六档功率差复用相同波形与噪声，仅缩放源A。公共处理频带预先固定，在名义信号带宽两侧各留0.75\,MHz保护带；不提供逐源频谱，不作逐站RMS归一化。
 
-两源的符号、波形初相和定时独立。同一布局与随机实现的六档功率差共用波形和噪声，因而可以直接观察另一源增强带来的变化。源A为功率扫描源，源B为固定源；在正功率差下分别称强源和弱源，0\,dB时采用A／B标记。各方法只处理预先指定的公共频带$[-7,7]$\,MHz，在名义带宽两侧各留0.75\,MHz保护带，不提供逐源波形或频谱。筛选频点不重新缩放DFT，也不作逐站混合功率归一化。
-
-正式比较采用20个布局，覆盖双源均在站内、A外B内、A内B外和双源均在站外四类构型，每类5个。站内指四站凸包内部，站外仍位于搜索区域内。几何生成排除距任一站小于150\,m、距中心小于100\,m、距站点对连线小于50\,m的位置，两源间距至少300\,m。位置按预定几何约束生成，不按定位结果筛选。图\ref{fig:formalgeometry}展示全部布局。
-
-实验先在共同240条观测上比较八类方法，再将核心方法的随机重复从每布局2次增加到20次，形成2400条扩展验证。两组均覆盖全部20布局和六档功率差，区别在于随机重复次数；240条是2400条的预先固定子集，不额外增加样本总数。全面比较用于衡量各方法的可靠性与成本，扩展验证则用于检查核心方法的表现及收益来源。
-
-此外，冻结配置后按相同几何约束生成16个新源位置布局，每类4个，每布局5次新的波形与噪声实现，保留六档功率差，共480条观测。该组只比较单候选AP、五候选AP及VP-BNOMP，不依据定位成绩选择布局。它增加源位置覆盖，不改变接收站阵列。曲率配对复用原共同240条，不增加独立观测数。
-\begin{figure}[pos=htbp]\centering
-\includegraphics[width=.88\linewidth]{figures/formal_geometry.pdf}
-\caption{20个源站布局，每类5个。黑色三角形为接收站，灰色菱形边界为站点凸包；同一面板内，相同形状的两个标记为一对源，红色为源A、蓝色为源B。0\,dB时两源平均接收功率相同。}\label{fig:formalgeometry}
+20个源构型覆盖双源均在站点凸包内、A外B内、A内B外、双源均在外四类，每类5个（图\ref{en:geometry}）。生成时排除距任一站小于150\,m、距中心小于100\,m或距任意站点对连线小于50\,m的位置，两源间距至少300\,m，不依据定位成绩筛选。全部方法使用每构型预定的两次实现和六档功率差，共240条观测。核心方法扩展到20次实现，共2400条，包含前述240条。冻结方法再用于16个新构型、每构型五次实现和六档功率差，共480条。接收站坐标不变；新源坐标与种子见附录\ref{en:coordinates}。
+\begin{figure}[pos=H]\centering
+\includegraphics[width=.90\linewidth]{figures/formal_geometry.pdf}
+\caption{20个源构型，每类5个。黑色三角形表示接收站；每个面板内，同形状配对源A（红）与源B（蓝），菱形为站点凸包。}\label{en:geometry}
 \end{figure}
-\FloatBarrier
-图\ref{fig:formalgeometry}覆盖站内与站外的四类组合，使方法比较同时包含不同的源站位置关系。同一面板用五种形状区分五对源，颜色只区分源A与源B；各功率条件保持对应位置不变。
 
-所有方法共享IQ观测、已知传播信息、搜索区域和20\,m初始网格，保留各自的连续精修。LS谱、MUSIC、MVDR、AP、块NOMP、SBL、多初值联合ML和GA联合ML的本场景准则列于补充材料第\ref{app:baselines}节；具体参数见表\ref{tab:parameters}。多初值ML采用去重的谱峰组合与Sobol空间覆盖起点，GA采用128个体，避免因重复初始化削弱搜索覆盖。MUSIC以同一记录的四个片段估计协方差，按扣除噪声后的观测功率加权；MVDR-known使用八个片段，相对对角加载为0.01。两者均只分析公共处理带内的频点，不将MVDR-known称为原版DPD-HR。
-\par
-% BEGIN tables/generated_parameters
-\begin{table}[pos=H]\centering\footnotesize
-\caption{正式比较采用的方法参数。连续位置优化不受20\,m网格量化。}\label{tab:parameters}
-\begin{tabularx}{\linewidth}{@{}p{.18\linewidth}p{.27\linewidth}X@{}}\toprule
-版本 & 核心操作 & 参数\\\midrule
-LS谱 & 单源LS谱取两个峰 & 共同20 m网格；同谱连续精修\\
-MUSIC & 噪声子空间宽带汇聚 & 4段；超噪声功率加权；已知K\\
-MVDR-known & 加载协方差逆谱 & 8段；相对加载0.01\\
-充分AP & 反复全域条件更新 & 候选5；循环上限6；正常连续精修\\
-交替／联合AP & 相同分支，改变精修方式 & 候选1/2/5；每次局部上限100；共同投影梯度阈值$10^{-8}$\\
-VP-BNOMP & 残差发现、消元Newton、共同LS & 循环上限10000；能量变化阈值$10^{-8}$；每次Newton最多5步；步长上限50 m；局部小步阈值0.01 m\\
-固定系数BNOMP & 原文对应的固定系数更新 & 循环上限10000；能量阈值$10^{-8}$；局部小步阈值0.01 m\\
-多初值联合ML & 同一联合LS目标 & 8个唯一初值：4谱峰+4 Sobol；L-BFGS-B\\
-GA联合ML & 同一联合LS目标 & 种群128；最多200代；连续30代停滞停止\\
-宽带SBL & 共享功率、离网字典、单点$\gamma$ & 最多300轮；每5轮离网更新；8个活动点；原生停止\\
-\bottomrule\end{tabularx}\end{table}
+各方法使用相同IQ、传播信息、双精度计算和初始网格，保留各自初始化与连续精修。适配后的目标在下节说明。
 
-% END tables/generated_parameters
-\par
-表\ref{tab:parameters}区分每种方法的搜索、精修和停止设置。各方法共享初始网格，但不强求相同迭代次数；AP按共同梯度精度比较，固定系数与消元块NOMP则保留相同原生循环停止规则。
+AP分支在归一化目标上采用共同投影梯度阈值$10^{-8}$，关闭目标差停止项，局部迭代上限为100。VP-BNOMP及固定系数参照采用循环能量阈值$10^{-8}$，每次局部Newton最多五步，步长上限50\,m，小于0.01\,m的接受步触发局部退出，循环安全上限10000。梯度与能量条件不代表相同优化精度。完整方法比较使用冻结的原生规则，联合精修与曲率配对则明确匹配相应停止条件。
 
-% BEGIN tables/generated_environment
-运行环境为Windows、Python 3.10.20、NumPy 2.2.6和PyTorch 2.8.0+cu129，GPU为NVIDIA GeForce RTX 4070 Ti SUPER，CPU计算线程设为20。响应与目标使用双精度实数／复数运算。
+以$i$标记$n$条观测，每条先以平方距离作一次最优指派\cite{Kuhn1955}，所有位置指标共用这次匹配：
+\begin{equation}
+\pi^*=\arg\min_\pi\sum_k\|\widehat{\bm p}_{\pi(k)}-\bm p_k\|^2,
+\quad e_{ik}=\|\widehat{\bm p}_{i,\pi^*(k)}-\bm p_{ik}\|.
+\end{equation}
+RMSE为$\sqrt{n^{-1}\sum_i e_{ik}^2}$，经验CDF为$n^{-1}\sum_i\mathbf1(e_{ik}\le t)$，均包含全部观测。双源成功要求$\max_k e_{ik}\le20$\,m，这是预设的$0.02R$误差门槛，与网格间隔区分。无效输出作为失败保留在分母中；本报告各批次均返回两个有限位置。
 
-% END tables/generated_environment
-\par
+完整耗时包括DFT、选频、传输、搜索、系数估计、精修及必要输出检查，并同步GPU。若包含轨迹记录与末端诊断，其成本也计入；文件读取、磁盘写入及离线统计不计入，预热单列。加速比例使用同批结果。环境为Windows、Python 3.10.20、NumPy 2.2.6、PyTorch 2.8.0+cu129、RTX 4070 Ti SUPER和20个CPU线程，响应与目标采用双精度。重采样将同一实现的六档功率差作为一组。候选成本和曲率区间条件于固定布局，后文另行说明更广的分层区间。
 
 \FloatBarrier
-\paragraph{定位评价}
-设真实与估计集合分别为$X=\{\bm p_k\}$、$Y=\{\widehat{\bm p}_j\}$。每条观测先采用以平方欧氏距离为代价的匈牙利算法确定一对一匹配\cite{Kuhn1955}，再由同一组匹配误差计算RMSE、CDF、分位数和成功率：
+\subsection{基线目标与实现}
+LS谱取峰连续精修式\eqref{en:single}的两个分离极大值，不作双源联合拟合。协方差方法将同一记录划分为$S$个不重叠片段，长度$N_s=N/S$；片段DFT $\bm z_{bf}\in\C^L$按$1/N_s$归一化，
 \begin{equation}
- \pi^*=\arg\min_{\pi}\sum_{k=1}^{K}\|\bm p_k-\widehat{\bm p}_{\pi(k)}\|_2^2,
- \qquad e_{ik}=\|\bm p_{ik}-\widehat{\bm p}_{i,\pi^*(k)}\|_2 .\label{eq:assignment}
+\widehat{\bm C}_f=S^{-1}\sum_{b=1}^S\bm z_{bf}\bm z_{bf}^H.
 \end{equation}
-其中$i$为观测编号，$k$为源编号，$\pi$为估计编号的排列，$e_{ik}$单位为m。对$n$条观测，RMSE和经验累计分布函数（CDF）为
+零均值模型下相关矩阵等于协方差矩阵。片段噪声方差为$\sigma_t^2/N_s$，仅保留相同物理处理频带，不跨随机实现拼接快拍。
+
+MUSIC要求$K<L$、响应列线性独立、源协方差满秩及空间白噪声\cite{WeissAmar2005}。以$\bm E_{n,f}$收集最小$L-K$个特征值对应的特征向量，宽带评分与扣噪权重为
+\begin{align}
+S_{\rm MU}(\bm p)&=\left[\sum_f w_f\bm q_f^H
+\bm E_{n,f}\bm E_{n,f}^H\bm q_f\right]^{-1},\\
+\widetilde w_f&=\max\{\tr(\widehat{\bm C}_f)-L\sigma_t^2/N_s,0\},
+\qquad w_f=\widetilde w_f/\sum_v\widetilde w_v.
+\end{align}
+权重之和为零时使用均匀权重。已知$K$确定子空间维度，有限样本精度仍取决于有效快拍和各频点信号功率。
+
+MVDR在$\bm h_f^H\bm q_f=1$下最小化$\bm h_f^H\bm C_{f,\delta}\bm h_f$，其中$\bm h_f\in\C^L$为合成权重\cite{Capon1969}。对角加载与跨频平均给出
 \begin{equation}
- \operatorname{RMSE}_k=\sqrt{\frac1n\sum_{i=1}^{n}e_{ik}^2},\qquad
- \widehat F_k(t)=\frac1n\sum_{i=1}^{n}\mathbf 1(e_{ik}\le t).\label{eq:rmseCDF}
+\begin{split}
+\bm C_{f,\delta}&=\widehat{\bm C}_f+
+\delta\,\tr(\widehat{\bm C}_f)\bm I_L/L,\\
+S_{\rm MV}(\bm p)&=F_s^{-1}\sum_f
+[\bm q_f^H\bm C_{f,\delta}^{-1}\bm q_f]^{-1}.
+\end{split}
 \end{equation}
-式中$\mathbf 1$为示性函数，P95为第95百分位数，分位数采用相邻次序统计量的线性插值。RMSE和CDF使用全部样本，包括未达到成功门槛的样本。容许误差预先设为最大站点基线的2\%，即$r=0.02R=20$\,m，与初始网格步长分别定义。第$k$源成功率为$\widehat F_k(r)$，双源成功率为
+无量纲加载$\delta$乘以平均对角功率。MVDR-known使用已知相对响应与上述频率平均，与DPD-HR原式区分\cite{TirerWeiss2016}。
+
+SBL定义字典$\bm D_f=[\bm q_f(\bm g_1),\ldots,\bm q_f(\bm g_G)]$，逐频系数$\bm z_f\sim\mathcal{CN}(0,\bm\Gamma)$在频率间独立，共享非负功率$\bm\Gamma=\operatorname{diag}(\bm\gamma)$\cite{Nannuru2019}。协方差、后验均值、负对数证据与固定点更新为
+\begin{align}
+\bm C_f&=\sigma_f^2\bm I_L+\bm D_f\bm\Gamma\bm D_f^H,\qquad
+\bm\mu_f=\bm\Gamma\bm D_f^H\bm C_f^{-1}\bm x_f,\\
+\mathcal E(\bm\gamma)&=F^{-1}\sum_f
+[\log\det\bm C_f+\bm x_f^H\bm C_f^{-1}\bm x_f],\\
+\gamma_j^+&=\gamma_j\left[
+\frac{\sum_f|\bm d_{fj}^H\bm C_f^{-1}\bm x_f|^2}
+{\sum_f\bm d_{fj}^H\bm C_f^{-1}\bm d_{fj}}
+\right]^{1/2},
+\end{align}
+其中$\bm d_{fj}$为$\bm D_f$的第$j$列，更新通过证据回溯控制。每五轮对八个活动位置作离网优化，每维位移不超过20\,m；L-BFGS-B坐标尺度为1000\,m，最多20轮。最终以单点$\gamma_j$选峰。每五轮检查停止：归一化证据变化低于$10^{-5}$、功率$\ell_1$相对变化低于1\%、输出与活动位置移动低于0.05\,m，连续两次满足后停止，最多300轮。
+
+充分AP使用五个候选，反复条件搜索与位置精修，最多六个外层循环。多初值ML由四个唯一谱峰组合和四个Sobol空间初值最小化$J$，删除无序重复组合。GA-ML将四个坐标编码为个体，种群128、精英四个、锦标赛规模三，使用模拟二进制交叉（概率0.9、指数15）与多项式变异（每维概率0.25、指数20）\cite{DebAgrawal1995}；连续30代停滞或达到200代时停止，再联合精修最优个体。
+
+固定系数BNOMP方向由下式求导：
 \begin{equation}
- \widehat P_{\mathrm{both}}=\frac1n\sum_{i=1}^{n}
- \mathbf 1\!\left(\max\{e_{i1},e_{i2}\}\le r\right).
+L_{\rm FC}(\bm p)=E_x^{-1}\sum_f
+\|\bm y_f-\bm a_f(\bm p)q_f^{(0)}\|^2,
+\label{en:fixedcoef}
 \end{equation}
-同一估计不能对应两个真源。缺失或无效输出计为未成功，不从成功率分母中删除；本批正式结果均返回两个有限位置。误差CDF展示定位精度的整体分布，RMSE反映大误差的影响，双源成功率则衡量同时满足给定精度要求的比例。
+$q_f^{(0)}$在当前位置拟合，在求导及参照回溯中固定，接受后重新估计。多频块结构沿用\cite{Yang2022}，Hessian修正、边界和回溯为数值保护。VP使用消元曲率与消元接受目标。原始NOMP也将固定增益曲率与重估增益后的接受判断结合\cite{Mamandipoor2016}，因此另以相同消元接受目标比较两种方向，隔离曲率作用。
 
-\paragraph{成本与统计}
-完整算法时间包含IQ输入后的DFT、频带筛选、传输、搜索、系数重估、精修及输出检查，GPU计时同步，公共预热单列。正式适配器内部的轨迹记录与最终目标、梯度检查均计入完整耗时；输入文件读取、结果落盘和离线统计另行记录。各方法独立承担搜索与初始化成本。目标、梯度、响应及循环调用分别统计，包含梯度计算的目标请求不与梯度次数相加。布局内同一实现的六档功率差保持配对；不确定性按构型类别、布局及随机实现分层重采样。核心比较和共同子集比较分别统计。
+MUSIC使用四段；MVDR-known使用八段，$\delta=0.01$。AP局部调用最多25次线搜索、100轮迭代；交替精修最多12轮扫描，初始单源精修的相对容差为$10^{-12}$。BNOMP将Hessian特征值下限设为$10^{-9}$，在搜索边界内依次尝试$1,1/2,1/4,1/8,1/16$步长因子，其余上限及AP梯度阈值见前文。所有参数在比较前冻结。
 
-\subsection{八类方法的共同观测比较}\label{sec:commonformal}
-首先比较各类方法在相同混合观测上的恢复能力与完整计算成本。表\ref{tab:formalcommon}使用各布局两次固定实现及全部六档功率差，共240条，所有方法逐条配对。VP-BNOMP采用同批运行的消元实现，各方法成本均来自这组共同观测。
-
-% BEGIN tables/generated_formal_common
+\FloatBarrier
+\subsection{共同观测比较与扩大验证}
+表\ref{en:common}在同一240条观测上比较全部方法。MCJ-AP与充分AP、SBL均全部恢复，但完整成本明显较低。SBL的弱源误差分布更宽；两种BNOMP恢复相同228条，波形消元版平均成本较低。
 \begin{table}[pos=H]\centering\small
-\caption{同一240条观测上的基线与提出方法比较。成功率括号内为成功数/总数；RMSE单位为m，时间均值、中位数及P95单位为s。}\label{tab:formalcommon}
+\caption{共同240条观测。RMSE单位为m，耗时均值、中位数及P95单位为s；各指标保留全部观测。}\label{en:common}
 \begin{tabular}{@{}lrrrrrr@{}}\toprule
-方法 & 双源成功率/\% & 强源RMSE & 弱源RMSE & 时间均值 & 中位数 & P95\\\midrule
-LS谱取峰 & 15.83 (38/240) & 191.982 & 845.184 & 0.2368 & 0.2181 & 0.3297\\
-宽带MUSIC & 62.92 (151/240) & 93.515 & 646.892 & 0.2015 & 0.1893 & 0.2719\\
-MVDR-known & 31.25 (75/240) & 320.684 & 804.082 & 0.1925 & 0.1807 & 0.2625\\
-充分AP & 100.00 (240/240) & 0.876 & 1.596 & 8.9076 & 9.1483 & 12.2348\\
-固定系数BNOMP & 95.00 (228/240) & 0.906 & 89.706 & 2.9416 & 1.4625 & 8.1989\\
-VP-BNOMP & 95.00 (228/240) & 0.875 & 86.177 & 0.5907 & 0.3921 & 1.3971\\
-多初值联合ML & 18.75 (45/240) & 256.061 & 776.935 & 1.2227 & 1.0868 & 2.5595\\
-GA联合ML & 77.08 (185/240) & 279.056 & 501.231 & 8.0702 & 8.1102 & 9.0229\\
-宽带SBL & 100.00 (240/240) & 1.096 & 3.743 & 44.1296 & 36.8237 & 97.7075\\
-五候选联合AP & 100.00 (240/240) & 0.876 & 1.596 & 0.7081 & 0.6347 & 1.0232\\
-\bottomrule\end{tabular}\end{table}
+方法 & 成功/240 & RMSE A & RMSE B & 均值 & 中位数 & P95\\\midrule
+LS peaks & 38 & 191.982 & 845.184 & 0.2368 & 0.2181 & 0.3297\\
+WB-MUSIC & 151 & 93.515 & 646.892 & 0.2015 & 0.1893 & 0.2719\\
+MVDR-known & 75 & 320.684 & 804.082 & 0.1925 & 0.1807 & 0.2625\\
+Full AP & 240 & 0.876 & 1.596 & 8.9076 & 9.1483 & 12.2348\\
+Fixed BNOMP & 228 & 0.906 & 89.706 & 2.9416 & 1.4625 & 8.1989\\
+VP-BNOMP & 228 & 0.875 & 86.177 & 0.5907 & 0.3921 & 1.3971\\
+Multistart ML & 45 & 256.061 & 776.935 & 1.2227 & 1.0868 & 2.5595\\
+GA-ML & 185 & 279.056 & 501.231 & 8.0702 & 8.1102 & 9.0229\\
+WB-SBL & 240 & 1.096 & 3.743 & 44.1296 & 36.8237 & 97.7075\\
+MCJ-AP ($M=5$) & 240 & 0.876 & 1.596 & 0.7081 & 0.6347 & 1.0232\\\bottomrule
+\end{tabular}\end{table}
 
-% END tables/generated_formal_common
-
-在相同观测上，MCJ-AP以更低成本达到了充分AP和SBL的恢复水平。三者均全部成功，平均完整耗时分别为0.708\,s、8.908\,s和44.130\,s。固定系数BNOMP与VP-BNOMP均成功228条；消元版本的平均耗时由2.942\,s降至0.591\,s。两者保留相同发现和循环后共同LS结构，局部系数处理的差别在第\ref{sec:mechanismresults}节分析。
-\begin{figure}[pos=htbp]\centering
+\begin{figure}[pos=H]\centering
 \includegraphics[width=\linewidth]{figures/assignment_cost_20261019/common_error_cdf.pdf}
-\caption{共同240条观测的强、弱源误差CDF。上行展示完整误差范围，横轴在1\,m内线性、其外对数；下行为小误差区间的线性放大。所有面板均使用全部240条作分母，竖线为20\,m参考线。}\label{fig:commonerrorcdf}
+\includegraphics[width=\linewidth]{figures/assignment_cost_20261019/common_time_cdf.pdf}
+\caption{共同240条的误差与完整耗时CDF。误差图包含全范围与小误差放大，耗时图包含全范围与早期完成情况。全范围坐标近零线性、超过阈值后对数，误差竖线为20\,m；曲线分母均包含全部观测。}\label{en:commoncdf}
 \end{figure}
-\FloatBarrier
-图\ref{fig:commonerrorcdf}将定位精度与恢复概率放在同一分布中观察。MCJ-AP和充分AP的曲线几乎重合，两源误差均集中在较小范围；SBL也恢复全部双源，但弱源误差分布更宽。VP-BNOMP在大部分观测上接近AP的精度，仍有一段远距离错误尾部。谱方法与多初值ML的低成功率同时伴随较大误差，并非仅由20\,m门槛附近的轻微偏差造成。
+图\ref{en:commoncdf}区分典型精度与大误差尾部。AP误差曲线近乎重合；VP-BNOMP在多数观测中准确，但弱源仍有远距离错误，偶尔耗时较长。谱方法较快，其失败主要表现为大误差，而非轻微越过门槛。
 
-\begin{figure}[pos=htbp]\centering
+\begin{figure}[pos=H]\centering
 \includegraphics[width=\linewidth]{figures/formal_common.pdf}
-\caption{共同240条观测的功率差扫描，每档40条。左侧比较谱方法，右侧比较逐源与联合求解方法；两个面板使用同一五候选AP参照。}\label{fig:formalcommon}
+\caption{共同子集的功率差扫描，每档40条观测。两个面板使用同一五候选AP参照。}\label{en:power}
 \end{figure}
-\FloatBarrier
+功率差增大时，MUSIC和MVDR-known的恢复能力下降（图\ref{en:power}）；第\ref{en:windowcheck}节检查有限窗失配能否解释所测失败。充分AP与多初值ML优化同一联合目标却得到不同结果，表明初始化与搜索影响明显。GA有208条、SBL有14条达到迭代上限，其余方法无触顶退出；全部输出均保留。
 
-\begin{samepage}
-图\ref{fig:formalcommon}显示，当前分段MUSIC与MVDR-known在功率差增大后明显退化，整体成功率分别为62.92\%和31.25\%；LS谱取峰为15.83\%。补充材料第\ref{app:segmentcheck}节进一步检查了有限窗近似：在所测开发案例中，加窗降低模型偏差、真值辅助对照去除该偏差，均未恢复原失败。因此，这些失败不能仅由窗口近似解释，还反映了当前有限快拍、强弱混合条件下谱评分与取峰流程的限制。多初值ML成功率为18.75\%，充分AP则达到100\%；二者使用同一联合目标，差别主要在初始化与搜索路径。GA成功率为77.08\%，平均耗时为8.070\,s。
-\end{samepage}
+\begin{figure}[pos=H]\centering
+\includegraphics[width=\linewidth]{figures/formal_time.pdf}
+\caption{240条观测的保存输出轨迹。上排为对数时间轴，下排放大0--3\,s；各列依次为双源成功率、完整输出比例及汇总RMSE。尚无输出计为未成功，全部观测有输出后才绘制RMSE。}\label{en:time}
+\end{figure}
+五候选AP、充分AP与SBL分别在保存时刻0.75、1.5和30\,s首次全部成功（图\ref{en:time}）。连接检查点不构成新的停止规则；本批VP仅发布最终完整输出，曲线不展示其中间循环。
 
-MCJ-AP兼顾高恢复率与较低计算成本，VP-BNOMP则以较少计算取得95\%的双源成功率。SBL有226条按原生稳定条件停止、14条达到300轮上限。共同子集的停止状态见表\ref{tab:auxiliary}。
-
-\FloatBarrier
-\subsection{核心方法的2400条扩展验证}\label{sec:coreformal}
-增加随机重复后，MCJ-AP保持较高的恢复率，VP-BNOMP相对固定系数块更新的效率由第\ref{sec:mechanismresults}节单独评价。表\ref{tab:formalcore}汇总全部20布局、2400条观测；VP-BNOMP采用第\ref{sec:vpnomp}节的消元Newton实现。
-
-% BEGIN tables/generated_formal_core
 \begin{table}[pos=H]\centering\small
-\caption{全部2400条观测的核心比较。成功率括号内为成功数/总数；RMSE单位为m，时间均值、中位数及P95单位为s。}\label{tab:formalcore}
+\caption{2400条扩大验证。RMSE单位为m，完整耗时单位为s。VP-BNOMP耗时来自另一个同输入批次，受控加速比例使用配对批次计算。}\label{en:core}
 \begin{tabular}{@{}lrrrrrr@{}}\toprule
-方法 & 双源成功率/\% & 强源RMSE & 弱源RMSE & 时间均值 & 中位数 & P95\\\midrule
-单候选联合AP & 95.00 (2280/2400) & 0.897 & 107.265 & 0.3958 & 0.3700 & 0.5104\\
-双候选联合AP & 95.00 (2280/2400) & 0.897 & 103.698 & 0.4704 & 0.4329 & 0.6340\\
-五候选联合AP & 99.00 (2376/2400) & 0.896 & 46.984 & 0.7180 & 0.6495 & 1.0267\\
-VP-BNOMP & 94.92 (2278/2400) & 0.892 & 74.193 & 0.5855 & 0.3693 & 1.2470\\
-\bottomrule\end{tabular}\end{table}
+方法 & 成功/2400 & RMSE A & RMSE B & 均值 & 中位数 & P95\\\midrule
+AP ($M=1$) & 2280 & 0.897 & 107.265 & 0.3958 & 0.3700 & 0.5104\\
+AP ($M=2$) & 2280 & 0.897 & 103.698 & 0.4704 & 0.4329 & 0.6340\\
+MCJ-AP ($M=5$) & 2376 & 0.896 & 46.984 & 0.7180 & 0.6495 & 1.0267\\
+VP-BNOMP & 2278 & 0.892 & 74.193 & 0.5855 & 0.3693 & 1.2470\\\bottomrule
+\end{tabular}\end{table}
+2400条观测中，五候选将AP成功率从95\%提高至99\%（表\ref{en:core}）。分层重采样所得成功率95\%区间为[96.83\%,100\%]；相对两候选增加四个百分点，其区间为[0,12.17]个百分点，反映了收益集中于一个构型。共同240条与扩大样本分开报告，不作为独立观测累加。
 
-% END tables/generated_formal_core
-
-五候选MCJ-AP成功2376条，将单候选的95\%成功率提高至99\%，平均耗时为0.718\,s。两者的强源RMSE均约0.897\,m，弱源恢复没有降低强源精度。五候选成功率的95\%分层重采样区间为$[96.83\%,100\%]$；相对双候选的成功率增加4个百分点，对应配对区间为$[0,12.17]$个百分点。恢复收益集中在本批困难布局，逐布局分布见第\ref{sec:timecases}节。VP-BNOMP成功2278条，成功率为94.92\%，平均耗时0.586\,s。该版本由单独完成的同输入验证计时，严格的消元更新效率比较采用第\ref{sec:mechanismresults}节的同批共同观测。
-
-\begin{figure}[pos=htbp]\centering
+\begin{figure}[pos=H]\centering
 \includegraphics[width=\linewidth]{figures/assignment_cost_20261019/core_error_cdf.pdf}
-\caption{全部2400条核心观测的强、弱源误差CDF。上行横轴在1\,m内线性、其外对数，下行线性放大小误差区间；每条曲线保留全部样本，竖线标出20\,m。}\label{fig:formalcdfcost}
+\caption{全部2400条核心观测的强、弱源误差CDF。上排展示全范围，下排放大小误差；各曲线均包含失败观测。}\label{en:corecdf}
 \end{figure}
-\FloatBarrier
-图\ref{fig:formalcdfcost}中，四种版本的强源CDF几乎重合。弱源小误差区间内，VP-BNOMP与单、双候选AP接近；远端尾部不同，使VP-BNOMP的总体RMSE低于这两种AP。五候选MCJ-AP则恢复更多弱源，CDF在20\,m附近达到更高水平，其弱源P95为3.85\,m、RMSE为46.98\,m。CDF与RMSE共同表明：多数案例的精度、未恢复比例和严重错误大小是不同的性能方面。
-
-\FloatBarrier
-\subsection{候选保留提高可靠性，联合精修减少计算}\label{sec:apresults}
-图\ref{fig:formalablation}分别检验候选数量与位置更新方式：前者决定搜索覆盖，后者决定处理同一组候选所需的计算。
-\begin{figure}[pos=htbp]\centering
-\includegraphics[width=\linewidth]{figures/formal_ablation.pdf}
-\caption{AP的候选与精修消融，四面板单行排列。左两图为原2400条主批的成功率与耗时，右两图为同一2400条输入上的五候选配对耗时与梯度计算。ALT为交替精修，joint为联合精修；左、右两批分别计时，不跨批计算加速比。}\label{fig:formalablation}
+强源CDF近乎重合（图\ref{en:corecdf}），弱源的小误差部分也相近，但尾部不同。五候选AP弱源P95为3.85\,m，RMSE为46.98\,m；构型4包含其全部24例失败，并贡献各档功率差下超过99.7\%的弱源平方误差。
+\begin{figure}[pos=H]\centering
+\includegraphics[width=.92\linewidth]{figures/formal_core.pdf}
+\caption{其余19个构型（2280条）与构型4（120条）的功率差结果。这一诊断分组不从总体统计中删除任何观测。}\label{en:powergroups}
 \end{figure}
+其余构型中，AP弱源RMSE随功率差从1.31增至1.93\,m（图\ref{en:powergroups}）。VP在构型1的15\,dB下有两例失败，使这19个构型的RMSE为15.25\,m，AP约为1.52\,m。在构型4中，VP将弱源RMSE从单候选AP的479.66\,m降至325.07\,m，但仍未达到20\,m门槛。总体RMSE的非单调变化主要由构型4造成，各档功率差的几何不变。
+
 \FloatBarrier
-左两图显示，候选数为1和2的联合AP均成功2280条，五候选增至2376条。第二候选尚未覆盖本批困难区域，保留更多有效起点才带来恢复。右两图显示，在候选数相同的条件下，联合精修同时减少实际耗时和梯度计算。
+\subsection{候选覆盖与联合精修成本}
+AP的96例恢复均位于构型4，涉及20次波形／噪声实现中的18次。单候选在该构型120条中全部失败，五候选恢复96条；其他构型没有成功转为失败的情况。保存分支显示，恰有2376条至少包含一个成功精修分支，最终残差选择在这些观测中均选中成功分支；剩余24条的五个精修分支均未成功。
 
-\paragraph{候选数量与完整计算成本}
-为直接比较候选数量与逐源更新的实际取舍，在共同240条观测上交错运行候选数$M=1,2,3,4,5$的联合AP和VP-BNOMP，共1440次求解。各版本独立完成预处理、候选搜索、精修和输出检查，配置及原生停止条件保持不变。以下耗时均来自这一同批重测，不与表\ref{tab:formalcommon}的历史墙钟拼接计算加速比。三、四候选的位置与五分支前缀择优结果逐例一致。
+\begin{figure}[pos=H]\centering
+\includegraphics[width=\linewidth]{figures/formal_candidates.pdf}
+\caption{构型4在0\,dB下的两个事后诊断案例。各列为单源谱、条件谱及精修前后分支残差。上例由第五候选恢复，下例没有有效候选；右图连线连接分支编号，并非优化轨迹。}\label{en:cases}
+\end{figure}
+图\ref{en:cases}上例的前四分支进入远端区域，第五分支获得更低的最终残差，弱源误差约0.09\,m。下例最近候选距源B仍约397\,m，精修未能恢复。这解释了保留候选的作用，也说明局部精修难以修复候选覆盖缺失。
 
-\begin{figure}[pos=htbp]\centering
+\begin{figure}[pos=H]\centering
 \includegraphics[width=\linewidth]{figures/assignment_cost_20261019/candidate_tradeoff.pdf}
-\caption{同一240条观测的可靠性、误差与平均完整耗时。误差棒为固定20布局内按随机实现配对重采样的95\%区间，同一实现的六档功率差保持在一起；区间不表示对任意几何总体的推断。}\label{fig:candidatetradeoff}
+\caption{同批交错运行的240条观测中，候选数与完整平均耗时、成功率和弱源RMSE的关系。误差线为固定布局内按实现配对重采样的95\%区间，保留六档功率差的关联。}\label{en:tradeoff}
 \end{figure}
-\FloatBarrier
-图\ref{fig:candidatetradeoff}中，$M=1$至$4$均成功228条，平均耗时从0.3556\,s增至0.5420\,s，弱源RMSE约111.2\,m；VP-BNOMP同样成功228条，以0.5474\,s平均耗时取得86.18\,m弱源RMSE。它与四候选AP的平均耗时接近，但部分错误位置的偏差更小。五候选AP成功240条，弱源RMSE降至1.60\,m，平均耗时0.6079\,s。因而，单候选AP强调低成本，VP-BNOMP降低了本批小候选AP的严重错误幅度，五候选AP提供更高恢复率；这一取舍不能概括为VP-BNOMP总体最快。
+该批$M=1$--4均成功228条，平均耗时从0.3556增至0.5420\,s，弱源RMSE约111.2\,m。VP-BNOMP成功228条，弱源RMSE为86.18\,m，平均耗时0.5474\,s；五候选AP全部成功，平均0.6079\,s、弱源RMSE为1.60\,m。VP中位耗时0.3674\,s，单候选AP为0.3514\,s；VP耗时P95为1.3147\,s，五候选AP为0.7201\,s。双方均成功的228条中，VP在197条上比五候选AP快，后者恢复其余12条。这些结果区分了典型速度、恢复能力与耗时尾部。完整样本的保存分支前缀回放中，三、四候选分别成功2281、2289条，仅用于位置结果分析。
 
-在双方均成功的228条观测中，VP-BNOMP有197条比五候选AP更快；五候选AP则额外恢复其余12条。三、四候选在全部2400条已保存分支上的离线位置消融分别成功2281和2289条，说明共同子集没有包含所有候选恢复变化；该全批消融只评价位置，不将240条耗时外推为2400条实测成本。这里比较各方法原生停止后的完整表现；共同优化精度的诊断见补充材料第\ref{app:stoppingprecision}节，不将原生耗时差全部归因于更新机制。
-
-单候选配对先说明了联合精修的省时作用：相同成功数和接近的RMSE下，平均耗时从0.439\,s降至0.396\,s，减少9.84\%。平均耗时差（联合减交替）的95\%分层配对区间为$[-0.0496,-0.0367]$\,s；目标计算从39.76次降至28.69次，梯度计算从37.76次降至26.69次。
-
-为确认省时不是降低求解精度造成的，表\ref{tab:fivepair}单独列出五候选配对的精度和尾部指标。两种版本对每条观测使用相同的五个初始候选，在同一完整目标和投影梯度阈值下停止；运行顺序交错，共2400对、4800次求解。
-
-% BEGIN tables/generated_formal_pair
 \begin{table}[pos=H]\centering\small
-\caption{相同五候选配对的定位精度，2400对；计算成本见图\ref{fig:formalablation}。}\label{tab:fivepair}
-\begin{tabular}{@{}lrrrr@{}}\toprule
-精修方式 & 双源成功 & 强源RMSE/m & 弱源RMSE/m & 弱源P95/m\\\midrule
-交替 & 2376 & 0.896 & 46.983 & 3.846\\
-联合 & 2376 & 0.896 & 46.984 & 3.845\\
-\bottomrule\end{tabular}\end{table}
-
-% END tables/generated_formal_pair
-
-表\ref{tab:fivepair}中，两者均成功2376条，成功／失败身份逐例一致；强源RMSE约0.896\,m，弱源P95约3.85\,m，弱源RMSE也几乎相同。联合更新保持了交替更新的定位质量。图\ref{fig:formalablation}右两图显示，平均完整耗时从1.0840\,s降至0.7441\,s，减少31.36\%；耗时差的95\%分层配对区间为$[-0.3691,-0.3121]$\,s。20个布局的平均耗时均减少，逐布局节省11.42\%--48.04\%，省时作用不依赖单一构型。
-
-省时与计算量减少一致：平均联合目标计算从204.21次降至120.36次，梯度计算从198.21次降至114.36次，后者减少约42.30\%。两种版本选中分支均满足共同梯度条件，全部候选中有两次交替精修触及安全迭代上限，其结果仍计入统计。由此，多候选保留了困难弱源的有效起点，联合精修则以更少局部计算处理这些候选，两者共同构成MCJ-AP的可靠性与效率收益。
+\caption{2400条观测上，对相同五候选作交替与联合精修。两种选中输出均满足同一投影梯度阈值。}\label{en:apjoint}
+\begin{tabular}{@{}lrrrrr@{}}\toprule
+精修 & 成功数 & RMSE B/m & 平均耗时/s & $J$调用 & 梯度调用\\\midrule
+交替 & 2376 & 46.983 & 1.0840 & 204.21 & 198.21\\
+联合 & 2376 & 46.984 & 0.7441 & 120.36 & 114.36\\\bottomrule
+\end{tabular}\end{table}
+表\ref{en:apjoint}将精修成本与候选覆盖分开。两者逐条成功／失败身份一致，强源RMSE均约0.896\,m，弱源P95均约3.85\,m。联合精修降低31.36\%的平均完整耗时和42.30\%的梯度调用；联合减交替耗时的配对分层95\%区间为$[-0.3691,-0.3121]$\,s。每个构型的平均成本均降低，节省11.42\%--48.04\%。两个未选中的交替分支达到局部上限，仍计入成本。候选保留增加起点，联合精修则在相同精度下以更少调用处理它们。
 
 \FloatBarrier
-\subsection{波形消元更新的机制与效率}\label{sec:mechanismresults}
-式\eqref{eq:schur}给出了固定系数与消元曲率之间的关系。位置改变时，波形系数可以补偿一部分响应变化，固定系数曲率没有扣除这部分耦合，可能产生反复的小步。局部消元同时改变更新方向和试探位置的目标计算，因此应与保留相同外层时序的参照配对，区分局部更新收益与整套实现差别。
-
-在同批共同240条上，固定系数与消元版本都成功228条，平均完整耗时分别为2.9416\,s和0.5907\,s，消元版本减少约79.92\%的计算时间，见表\ref{tab:formalcommon}。这一对照保持残差发现、逐源循环和循环后共同LS的时序，局部更新将固定系数Newton及其回溯目标改为式\eqref{eq:localprofile}的消元形式。因此，79.92\%衡量整套局部消元更新的效率收益；曲率关系和保存轨迹进一步解释了重复小步减少的原因。
-
-为进一步隔离曲率的作用，在同一240条观测上统一采用消元目标接受试探位置，仅替换局部方向的曲率：FC--VP使用$H_{zz}$，VP--VP使用$H_{\mathrm{VP}}$。两者的当前位置系数重估、发现顺序、回溯、步长保护及外层能量停止规则一致。表\ref{tab:curvaturepair}给出这一批次的直接配对结果。
-
-\begin{table}[pos=htbp]\centering\small
-\caption{共同接受目标下的曲率配对，240条观测。更新次数、循环数及时间均为每例均值；RMSE单位为m，时间单位为s。}\label{tab:curvaturepair}
+\subsection{隔离波形消元曲率的作用}
+表\ref{en:common}的固定系数／VP对照同时改变局部曲率与接受目标，平均耗时减少79.92\%。为隔离曲率，另一配对批次统一以$\phi_j$接受试探。FC--VP使用$H_{zz}$求方向，VP--VP使用$H_{\rm VP}$；两者使用相同的当前条件系数估计、梯度、发现流程、数值保护、回溯和循环能量停止规则。
+\begin{table}[pos=H]\centering\small
+\caption{相同波形消元接受目标下的曲率比较，共240条配对观测；更新与循环数为每条均值。}\label{en:curvaturetable}
 \begin{tabular}{@{}lrrrrrr@{}}\toprule
-曲率／接受目标 & 双源成功 & 强源RMSE & 弱源RMSE & 完整耗时 & 局部更新 & 循环数\\\midrule
+版本 & 成功数 & RMSE A/m & RMSE B/m & 平均耗时/s & 更新数 & 循环数\\\midrule
 FC--VP & 228/240 & 0.906 & 89.706 & 5.574 & 1498.82 & 810.90\\
 VP--VP & 228/240 & 0.875 & 86.177 & 0.905 & 135.55 & 47.97\\\bottomrule
 \end{tabular}\end{table}
+两者成功／失败身份相同，均按原生能量规则停止。平均完整耗时下降83.77\%，固定布局配对95\%区间为[81.73\%,85.58\%]；中位数由2.836降至0.567\,s，P95由16.161降至2.538\,s。VP--VP在240条中的170条更快，平均节省尤其来自较慢案例的改善。更新与循环次数的下降支持式\eqref{en:rate}的曲率机制。
 
-两者的成功与失败样本逐例一致，均按原生能量条件停止。消元曲率使平均完整耗时降低83.77\%，固定布局内按随机实现配对重采样所得95\%区间为81.73\%--85.58\%；重采样始终保留同一实现的六档功率差。耗时中位数从2.836\,s降至0.567\,s，P95从16.161\,s降至2.538\,s。VP--VP在170/240条上更快，平均收益主要来自较慢案例的重复更新减少。表中RMSE保留全部观测。
-
-该配对包含相同范围的预处理、求解、轨迹记录和最终检查。记录与检查平均合计分别约0.0254\,s和0.0059\,s，远小于完整成本差。VP--VP与历史两批VP结果的位置、目标、配置、调用次数和保存位置轨迹逐例一致，但跨批墙钟耗时不同；现有记录不能确定环境波动的具体来源。因此，本表的83.77\%只由本批配对计算，不将其与历史79.92\%拼接成同一加速比。前者隔离共同接受目标下的曲率作用，后者评价整套局部更新的变化。
-
-在全部2400条上，VP-BNOMP成功2278条，整体精度与成本见表\ref{tab:formalcore}。成功观测中的弱源RMSE约1.52\,m，表中的总体RMSE则同时计入未恢复观测。MCJ-AP通过分支保留扩大有效候选覆盖，VP-BNOMP通过局部消元降低逐源更新成本，两者的贡献分别由候选消融与固定系数对照检验。
-
-VP-BNOMP全部观测均按相邻循环的归一化残差能量变化不超过$10^{-8}$停止，平均记录约51.03轮，没有达到10000轮安全上限。该上限仅防止异常长循环，不代表实际需要接近此数量的迭代。每次局部Newton最多5步，位置试探上限50\,m，接受小步小于0.01\,m时结束本次局部调用。推导、伪代码、参数表及上述统计均对应同一消元实现。
+两版本平均核心耗时为5.5483、0.8987\,s，记录与最终检查另计0.0254、0.0059\,s。480组历史／当前VP配对的输入、位置、目标、计数、停止原因及保存路径一致，但绝对墙钟不同。因此各加速比例使用本批配对：79.92\%对应整个局部更新变化，83.77\%对应同接受目标下的曲率变化。后者区间采用布局内4000次配对bootstrap（种子20261020），保留每次实现的六档功率差。能量阈值相同不代表最终联合梯度精度相同，第\ref{en:localchecks}节进一步检查这一差别。
 
 \FloatBarrier
-\subsection{独立源位置布局验证}\label{sec:newlayouts}
-表\ref{tab:newlayouts}评价参数冻结后的16个新源位置布局。单候选与五候选AP均恢复全部480条观测，强弱源RMSE接近；五候选平均耗时约为单候选的1.96倍。第一候选已经有效时，保留更多分支没有增加定位收益。这与原布局4的恢复结果共同说明，候选保留的价值来自补救初始分支遗漏，而不是对所有源位置构型提供同样的增益。
-
-\begin{table}[pos=htbp]\centering\small
-\caption{16个新源位置布局的480条观测，接收站坐标不变。时间包含诊断记录与输出检查；RMSE单位为m，时间单位为s。}\label{tab:newlayouts}
+\subsection{新源位置上的冻结方法验证}
+表\ref{en:new}与图\ref{en:newcdf}评价16个新构型。两种AP均恢复全部480条，误差近乎相同，五候选成本约为单候选的1.96倍。首分支已经有效，新增分支没有增加成功数。结合构型4可见，候选保留以成本换覆盖，其恢复收益取决于初始化情况。
+\begin{table}[pos=H]\centering\small
+\caption{新源构型480条观测，接收站位置不变。RMSE单位为m，完整耗时单位为s。}\label{en:new}
 \begin{tabular}{@{}lrrrrrr@{}}\toprule
-方法 & 双源成功 & 强源RMSE & 弱源RMSE & 时间均值 & 中位数 & P95\\\midrule
-单候选AP & 480/480 & 0.958 & 2.194 & 0.461 & 0.456 & 0.545\\
-五候选MCJ-AP & 480/480 & 0.958 & 2.194 & 0.906 & 0.893 & 1.078\\
-VP-BNOMP & 390/480 & 202.882 & 206.261 & 1.051 & 0.629 & 4.245\\\bottomrule
+方法 & 成功/480 & RMSE A & RMSE B & 均值 & 中位数 & P95\\\midrule
+AP ($M=1$) & 480 & 0.958 & 2.194 & 0.461 & 0.456 & 0.545\\
+MCJ-AP ($M=5$) & 480 & 0.958 & 2.194 & 0.906 & 0.893 & 1.078\\
+VP-BNOMP & 390 & 202.882 & 206.261 & 1.051 & 0.629 & 4.245\\\bottomrule
 \end{tabular}\end{table}
-
-\begin{figure}[pos=htbp]\centering
+\begin{figure}[pos=H]\centering
 \includegraphics[width=\linewidth]{figures/review_supplement_20261020/independent_cdf.pdf}
-\caption{新布局的误差与完整耗时CDF，每方法480条。误差轴在1\,m内线性、其外对数，时间轴在0.1\,s内线性、其外对数；竖线为20\,m。两种AP误差曲线几乎重合，全部样本均计入CDF。}\label{fig:newlayoutcdf}
+\caption{新480条观测的误差与完整耗时CDF。AP误差曲线近乎重合；保留全部观测，误差参考线为20\,m。全范围坐标近零线性，超过标注阈值后为对数。}\label{en:newcdf}
 \end{figure}
-\FloatBarrier
-
-VP-BNOMP的90条失败集中于新布局8、9、14、15，分别为30、25、30、5条，其余12布局全部成功；六档功率差各有15条失败。失败中55条仅弱源未达标，33条两源均未达标，2条仅强源未达标。这一分布显示完整逐源流程对部分源位置构型敏感，不能仅用强弱功率差解释。
-
-保存轨迹进一步表明，这90条在首次记录的完整双源输出中均未达标，后续保存状态也未恢复；最终拟合目标全部高于同观测AP结果。它们均以原生能量稳定条件停止，平均耗时1.448\,s，高于成功观测的0.959\,s。这些记录未显示正确结果被最终输出丢弃，也不是迭代上限截断；候选发现与后续局部求解没有找到AP获得的较好解。由于完整双源轨迹从第一次循环后开始记录，不能进一步把全部损失归为粗候选选择或某一步局部更新。局部消元确实改善块更新成本，但没有消除完整逐源流程的构型敏感性。
-
-两组验证说明了候选保留的作用条件：原2400条中，多候选在一个困难构型内跨随机实现恢复有效解；新480条中，第一分支已足够准确，额外候选只增加成本。AP在这两组观测中具有更高的完整定位可靠性，VP的主要收益则体现于块NOMP内部的局部更新效率。
-
-\subsection{候选恢复与适用范围}\label{sec:timecases}
-图\ref{fig:formalcandidates}给出同一困难布局的恢复与未恢复案例，以对照候选覆盖和最终选择。
-\begin{figure}[pos=htbp]\centering
-\includegraphics[width=\linewidth]{figures/formal_candidates.pdf}
-\caption{同一困难构型的两个0\,dB事后机制案例。左列为单源LS谱，中列为条件谱，右列为候选精修前后残差；上行为恢复案例，下行为未恢复案例。红色和白色星号分别标示源A、源B，空心圆为条件候选。谱图采用对数色标，右列连接线仅连接候选编号，不表示实际迭代路径。}\label{fig:formalcandidates}
-\end{figure}
-\FloatBarrier
-上行中，前四个候选都进入远端错误区域，第五候选则接近真实源B。联合精修后，第五分支得到更低残差，源B误差约0.09\,m。下行的五个候选均落在远端高分带，最近起点仍距源B约397\,m，局部精修未能恢复。这表明粗谱最高分与精修后的最佳位置并不等价；多候选增加有效起点，最终拟合负责择优，两者共同提高恢复能力。若候选全部落在错误区域，局部精修本身不能补足全域覆盖。
-
-第\ref{sec:complexity}节的复杂度分析与实际调用量相对应：单／五候选AP均只作两次全域网格扫描，增加分支主要增加连续目标和梯度计算；固定系数与消元NOMP则需比较局部导数调用和循环成本。这些计数用于解释候选覆盖与局部更新各自带来的开销和收益。
-
-% END sections/experiments
+VP-BNOMP的90例失败分布于新构型8、9、14、15，分别为30、25、30、5例。每档功率差15例，其中55例仅B失败、33例双源失败、两例仅A失败，涉及全部五次随机实现。失败样本平均耗时1.448\,s，成功样本为0.959\,s；失败样本均按能量稳定停止，最终目标高于AP。它们从首个保存完整位置对起就失败，后续也未成功，因而不能归因于丢弃已保存的成功解或安全上限截断。记录从一次双源循环后开始，无法进一步区分最初的发现错误与某一步更新错误。
 
 \FloatBarrier
+\subsection{有限窗与数值核验}
+\label{en:windowcheck}
+八条开发观测（四类构型，各取0、15\,dB）提供保存的无噪声分量。在真实位置处，定义有限窗残差和预计投影后噪声能量
+\begin{equation}
+E_{\rm win}=\sum_{b,f}\|\bm\Pi_{\bm A_f}^{\perp}\bm z_{bf}^{(0)}\|^2,
+\qquad E_n=SF_s(L-K)\sigma_t^2/N_s.
+\end{equation}
+所有$\bm A_f$均满列秩。一、四、八段时，残差占比分别为0.209--0.382\%、0.756--1.387\%、1.529--2.854\%；相应$E_{\rm win}/E_n$为0.035--0.882、0.126--3.210、0.238--6.611。较短窗口增加模型失配。
 
-% BEGIN sections/conclusion
-\section{结论}\label{sec:conclusion}
-本文针对未知宽带强弱重叠源，将波形消元与位置搜索结合，形成多候选联合AP和波形消元块NOMP。前者保留可能的起点，再联合调整两源位置；后者在位置试探时重估波形，减少固定系数带来的重复小步。
+在同观测上比较矩形窗、周期Hann窗及4096点Hann长窗的四个重叠帧。窗化噪声方差为$\sigma_t^2\sum_n w[n]^2/N_s^2$，重叠帧不视为独立快拍。15\,dB下，长窗将$E_{\rm win}/E_n$降至0.076--0.294，但MUSIC与MVDR-known仍仅恢复1/4、0/4，失败身份不变；0\,dB时均为4/4。将干净源分量投影到真实响应后再恢复原噪声，可消除几乎全部模型残差，但七个失败方法--观测对仍无恢复。该真值辅助诊断不参加排名，说明有限窗失配不足以解释所测失败。
 
-2400条观测中，五候选MCJ-AP达到99\%的双源20\,m成功率，相对单候选恢复96条，平均耗时0.718\,s。相同五候选配对中，联合精修保持定位表现，将平均耗时从1.084\,s降至0.744\,s，减少31.36\%，梯度计算减少42.30\%。构型分组与候选案例表明，多候选改善困难区域的恢复，联合精修降低分支处理成本。
+\label{en:localchecks}
+数值收敛与定位误差分别检查。在八条开发观测上，将原生VP路径继续迭代至联合投影梯度达到$10^{-8}$，成功数仍为8/8，弱源RMSE从3.22变为3.25\,m，含梯度检查的平均完整耗时由0.382增至0.860\,s。
 
-在共同接受目标的240条曲率配对中，消元更新保持逐例成功判定，将平均完整耗时从5.574\,s降至0.905\,s，减少83.77\%。局部更新与循环次数同步减少，支持位置--波形耦合修正对块NOMP效率的作用。该结果针对局部求解机制，不意味着完整逐源流程具有与AP相同的恢复能力。
+另以八条观测检查固定系数小步机制。循环能量容差取$10^{-8}$、$10^{-7}$、$10^{-6}$时，成功数为8/8、7/8、6/8，平均耗时为5.478、2.318、0.971\,s，导数调用为2679.5、1133.9、467.4。仅取消小步局部退出，得到8/8、8.011\,s和4758.4次调用；$10^{-8}$下的波形消元得到8/8、0.436\,s和70.4次调用。参照的21436次更新全部接受，83.67\%短于0.01\,m，没有Hessian修正、步长裁剪、回溯缩步或边界裁剪。两个站外源诊断位置的原始步长经消元从0.0138／0.0111\,m增至11.25／32.26\,m，实际仍需回溯接受。四个保存位置的解析消元Hessian与自动微分的最大绝对差约$1.4\times10^{-18}$。这些检查为正式曲率配对提供机制依据，完整成本仍以配对测量为准。
 
-参数冻结后的16个新源位置布局中，单候选和五候选AP均成功480/480条，VP-BNOMP成功390/480条。两批结果共同表明，多候选以额外局部计算补救有效起点遗漏；波形消元提高块更新效率，但完整逐源流程仍受构型影响。上述结论针对已知双源数、同步多站及匹配基带传播模型。后续可研究按需候选覆盖与未知源数定位。
+\FloatBarrier
+\section{总结}
+未知宽带重叠源定位中，候选覆盖和位置--波形耦合影响不同求解环节。MCJ-AP保留条件候选，联合精修每个位置对并按最终残差择优，在2400条观测上将双源成功率从95\%提高至99\%；同精度联合精修减少31.36\%的五候选处理成本。VP-BNOMP从局部曲率中扣除波形耦合，在相同接受准则下减少83.77\%的平均耗时，同时减少局部更新与循环。新源构型中，AP保持可靠，但增加候选未带来额外恢复，VP仍有构型相关失败。因此，候选保留提供条件性恢复收益，消元曲率提供局部效率收益。结论适用于已知双源数、同步站点及匹配基带传播模型；候选分配与未知源数可作为后续方向。
 
-% END sections/conclusion
-
+% Before submission, the authors must confirm authorship, affiliations, funding,
+% competing interests, data/code availability and the applicable AI-use statement.
+% No such declarations are inferred from the research results.
+\FloatBarrier
+\appendix
+\FloatBarrier
+\section{新源位置坐标}\label{en:coordinates}
+表\ref{en:coordinates-table}列出新源坐标，单位为m，保留六位小数。类别1--4依次表示双源均在接收站凸包内、A外B内、A内B外、双源均在外。几何与波形种子为20261020071、20261020072，随机实现编号1000--1004，构型按一基编号。新位置满足与原样本相同的几何排除条件，不依据方法成绩筛选。
+\begin{table}[pos=H]\centering
+\caption{新源位置。仅缩放A，B与噪声固定。}\label{en:coordinates-table}
+\begin{tabular}{@{}rrrrrr@{}}\toprule
+编号 & 类别 & $x_A$ & $y_A$ & $x_B$ & $y_B$\\\midrule
+1 & 1 & -209.742960 & -211.672998 & -135.426339 & 121.578497\\
+2 & 1 & -115.361316 & 76.809910 & 67.769590 & -192.728293\\
+3 & 1 & -208.559801 & 115.499630 & 268.616751 & -92.726639\\
+4 & 1 & 173.459164 & -110.441904 & -168.154517 & -145.923194\\
+5 & 2 & -926.529606 & 771.380729 & -198.481435 & 152.456653\\
+6 & 2 & -628.314566 & -929.843027 & -55.519139 & -297.939120\\
+7 & 2 & -195.757938 & -496.419920 & 157.528284 & 224.885259\\
+8 & 2 & -734.894082 & -306.033731 & -249.535479 & 71.485648\\
+9 & 3 & -64.564529 & 351.783227 & 663.100329 & 428.023655\\
+10 & 3 & -166.451414 & 260.105867 & 823.995321 & 431.176047\\
+11 & 3 & 74.808116 & 299.580428 & -702.622192 & 474.464614\\
+12 & 3 & -162.472651 & -112.907043 & 765.537745 & -808.531366\\
+13 & 4 & 313.792247 & 602.900501 & 700.222844 & -274.728424\\
+14 & 4 & 482.010461 & 239.752856 & 888.180085 & 90.857032\\
+15 & 4 & -374.838719 & 599.269525 & 240.800462 & 663.866438\\
+16 & 4 & 624.598019 & 542.011213 & -163.287363 & 904.989973\\\bottomrule
+\end{tabular}\end{table}
 \FloatBarrier
 \bibliographystyle{\PaperRoot template/cas-model2-names}
 \bibliography{\PaperRoot references/references}

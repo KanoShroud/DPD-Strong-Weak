@@ -14,12 +14,23 @@
 \begin{document}
 \let\WriteBookmarks\relax
 \shorttitle{Efficient direct localization of overlapping wideband sources}
-\shortauthors{}
+\shortauthors{B. Hao et al.}
 \title[mode=title]{Efficient direct localization of overlapping wideband sources with unequal powers: multi-candidate joint refinement and waveform-eliminated updates}
-% Author names, affiliations, corresponding author, funding and declarations
-% must be supplied and confirmed by the authors before submission.
+\author[inst1]{Benjian Hao}[orcid=0000-0002-6676-7306]
+\ead{bjhao@xidian.edu.cn}
+% TODO(CRediT): Add approved roles after all authors confirm them.
+\author[inst1]{Xinlei Wang}[orcid=0000-0002-6855-3686]
+\ead{wangxinlei@stu.xidian.edu.cn}
+% TODO(CRediT): Add approved roles after all authors confirm them.
+\author[inst1]{Zan Li}[orcid=0000-0002-5207-6504]
+\cormark[1]
+\ead{zanli@xidian.edu.cn}
+% TODO(CRediT): Add approved roles after all authors confirm them.
+\cortext[cor1]{Corresponding author.}
+\affiliation[inst1]{organization={State Key Laboratory of Integrated Service Networks, School of Telecommunications Engineering, Xidian University},
+  city={Xi'an}, postcode={710071}, country={China}}
 \begin{abstract}
-Localizing unknown wideband emitters from mixed observations becomes difficult when their spectra overlap and their received powers differ. Direct position determination fits the station observations jointly, but its reliability and cost depend on candidate selection and position refinement. This paper studies two improvements for synchronized single-antenna stations under a known relative-amplitude and baseband-delay model. Multi-candidate joint-refinement alternating projection (MCJ-AP) retains several conditional candidates, jointly refines both positions for each branch, and selects the smallest final residual. Waveform-eliminated block Newtonized orthogonal matching pursuit (VP-BNOMP) re-estimates the current source coefficients at each trial position and uses the resulting reduced curvature. Across 2,400 observations from 20 source configurations, five-candidate MCJ-AP increases the two-source success rate within 20 m from 95\% to 99\%, with the recoveries concentrated in one configuration. At matched candidates and stopping accuracy, joint refinement reduces mean complete runtime by 31.36\%. In 240 paired observations, reduced curvature lowers mean runtime by 83.77\% relative to fixed-coefficient curvature with the same waveform-eliminated acceptance objective. On 480 observations from 16 new source configurations, both single- and five-candidate AP succeed throughout, whereas VP-BNOMP succeeds in 81.25\%. The results identify the conditional reliability benefit of candidate retention and the computational benefit of removing position--waveform coupling from local updates.
+Spectral overlap and unequal received powers complicate the extraction and association of source-specific delays in two-step localization. Direct position determination instead fits the mixed station observations jointly, but a tractable solver must choose candidate regions and refine positions coupled to unknown waveforms. This paper addresses these two operations for synchronized single-antenna stations with known relative amplitudes and baseband delays. Multi-candidate joint-refinement alternating projection (MCJ-AP) retains separated conditional peaks and selects a branch only after jointly refining both positions. Waveform-eliminated block Newtonized orthogonal matching pursuit (VP-BNOMP) incorporates current-source waveform elimination into the local position curvature. On 2,400 observations from 20 source configurations, five-candidate MCJ-AP raises two-source success within 20 m from 95\% to 99\%; the additional recoveries occur in one configuration and mostly require the fifth-ranked candidate. Joint refinement reduces mean complete runtime by 31.36\% with the same candidates and projected-gradient stopping tolerance. A separate 240-observation pair isolates an 83.77\% mean runtime reduction from reduced curvature under a common waveform-eliminated acceptance objective. Tests at new source positions show when extra AP candidates add cost without recovery and when VP retains localization failures. The results quantify candidate retention's recovery--cost tradeoff and the local computational benefit of waveform-eliminated curvature.
 \end{abstract}
 \begin{keywords}
 Direct position determination\sep Overlapping sources\sep Alternating projection\sep Block NOMP\sep Variable projection
@@ -30,18 +41,18 @@ Direct position determination\sep Overlapping sources\sep Alternating projection
 \section{Introduction}
 Emitter localization often estimates time differences of arrival before solving for position. Generalized correlation and hyperbolic localization provide established tools for this two-step approach \cite{KnappCarter1976,ChanHo1994}. When unknown emitters occupy the same frequency band, each station receives a mixture with different propagation responses. Extracting and associating individual delays then becomes difficult, particularly for a weak emitter in the presence of a stronger one. Direct position determination (DPD) incorporates propagation into the observation model and estimates positions from the station data jointly \cite{ChenHudsonYao2002,WeissAmar2005}.
 
-This paper considers two independent unknown wideband sources observed by four synchronized single-antenna stations. The positions, transmitted waveforms and powers are unknown; station coordinates and relative propagation responses are available. A single-source spectrum can assign several large peaks to the stronger source, whereas an exhaustive search over two two-dimensional positions requires many combinations. Sequential discovery followed by continuous refinement reduces this search, but leaves two decisions: which candidate regions to retain, and how to update positions while estimating the unknown waveforms.
+This paper considers two independent unknown wideband sources observed by four synchronized single-antenna stations. The positions, transmitted waveforms and powers are unknown; station coordinates and relative propagation responses are available. A single-source spectrum can assign several large peaks to the stronger source, whereas an exhaustive search over two two-dimensional positions requires many combinations. Sequential discovery and continuous refinement reduce this search. Their remaining difficulties occur at different stages: discarding a candidate can exclude an effective refinement branch, while coupling between positions and unknown waveforms can make local updates expensive.
 
 Wideband maximum likelihood and alternating projection (AP) reduce joint search dimensionality by updating one position conditional on the others \cite{ChenHudsonYao2002}. MUSIC-type DPD uses orthogonality to an estimated noise subspace \cite{WeissAmar2005}. MVDR uses the inverse covariance to suppress interfering components \cite{Capon1969}, and DPD-HR applies this principle to direct localization \cite{TirerWeiss2016}. These methods process mixtures differently, and their relative performance also depends on covariance estimation and search. We therefore compare concrete implementations using the same data and propagation information.
 
 Newtonized orthogonal matching pursuit (NOMP) combines greedy discovery, Newton refinement and cyclic updates \cite{Mamandipoor2016}. The two-dimensional multi-frequency block NOMP of Yang et al. groups the unknown frequency coefficients at a common position and re-estimates them after position updates \cite{Yang2022}. It supplies a close reference for the local update studied here. QNOMP eliminates path gains and jointly refines delays and angles from pilot-based channel observations \cite{Zeng2025}. In our model the unknown coefficients are the per-frequency amplitudes of independent source waveforms, and the nonlinear parameters are source positions.
 
-Candidate selection also has relevant precedents. Oh and Un use sequential MUSIC initialization before AP updates \cite{OhUn1991}. LAOLS retains discrete atom candidates and completes a tentative support before comparing its residual \cite{Chatterjee2012}. Here, a conditional spectrum holds the first position fixed, while continuous joint refinement allows both positions to move. The two operations can rank branches differently. Retaining several conditional candidates delays the decision until after continuous fitting, without repeating the full spatial scan for each branch.
+Candidate selection also has relevant precedents. Oh and Un form a sequential MUSIC initialization and then apply AP updates \cite{OhUn1991}. LAOLS compares discrete atom candidates through residuals after tentative support completion \cite{Chatterjee2012}. MCJ-AP uses conditional projection scores to retain separated spatial peaks, then continuously refines both source positions for each retained branch. The conditional score already eliminates both waveforms, but fixes the first position; joint fitting also allows that position to move. Thus a lower-ranked conditional peak may yield a better jointly fitted position pair. MCJ-AP delays branch selection until this fit, without repeating the full spatial scan for each branch.
 
-The treatment of unknown waveforms affects refinement cost as well. Variable projection eliminates linear coefficients before optimizing nonlinear parameters \cite{GolubPereyra1973}. We apply this principle to local block-NOMP position updates and examine the curvature term removed by waveform re-estimation. The paper makes two methodological contributions:
+The treatment of unknown waveforms affects refinement cost as well. Variable projection eliminates linear coefficients before optimizing nonlinear parameters \cite{GolubPereyra1973}. We incorporate the resulting frequency-separable curvature into local block-NOMP position updates and compare it with fixed-coefficient curvature under the same acceptance objective. The two methods address candidate selection and local update cost within the same wideband localization model; they are separate solvers. The contributions are:
 \begin{enumerate}
-\item MCJ-AP compares conditional candidates after joint continuous refinement. Candidate retention improves initialization coverage, while joint updates reduce the cost of processing the retained branches at a common stopping accuracy.
-\item VP-BNOMP retains residual discovery and cyclic block updates, but eliminates the current source waveform during each local position trial. A curvature analysis and a paired comparison with the same acceptance objective isolate its effect on repeated small updates.
+\item MCJ-AP postpones branch selection until after continuous joint fitting. Saved-branch analysis identifies the recoveries supplied by lower-ranked conditional peaks, and a matched-candidate comparison separates this coverage benefit from the computational savings of joint over alternating refinement.
+\item VP-BNOMP uses waveform-eliminated position curvature while retaining residual discovery and cyclic block updates. Its frequency-wise small-matrix construction and local curvature analysis explain the update, and a common-acceptance comparison isolates its effect on refinement cost from complete localization reliability.
 \end{enumerate}
 Experiments compare eight method families on a common 240-observation subset, examine the principal methods on 2,400 observations, and test frozen configurations on 480 observations at new source positions. The receiver coordinates remain fixed. These experiments distinguish candidate recovery from local computational savings.
 
@@ -146,7 +157,7 @@ MCJ-AP first maximizes $Q_0$ on the common grid $\mathcal G$, then continuously 
 m^*=\arg\min_m J(\widehat{\bm P}^{(m)}).
 \label{en:branch}
 \end{equation}
-The output is $\widehat{\bm P}^{(m^*)}$. AP supplies conditional initialization; joint refinement subsequently adjusts both positions. Conditional grid ranking is therefore replaced by ranking after continuous fitting. A larger nested candidate set cannot increase the selected final residual when existing branch solutions remain unchanged; its position error must still be assessed empirically.
+The output is $\widehat{\bm P}^{(m^*)}$. The conditional score ranks candidates with the first position fixed; joint refinement moves both positions and re-estimates both waveforms. MCJ-AP therefore retains a candidate set at the grid stage and makes the final branch choice using the refined $J$. A larger nested set cannot increase the selected residual when existing branch solutions remain unchanged. This property concerns the fitted objective; localization errors are evaluated separately.
 
 Joint refinement uses bounded L-BFGS-B \cite{Byrd1995}. Write $\bm\theta=\operatorname{vec}(\bm P)$ and $\bm e_f=\bm x_f-\bm A_f\widehat{\bm s}_f$. When $\bm A_f$ is locally full column rank, $\bm A_f^H\bm e_f=0$ eliminates the coefficient derivative from
 \begin{equation}
@@ -163,7 +174,7 @@ The two terms account for amplitude and delay. The joint Hessian has $2\times2$ 
 \begin{equation}
 H_{\rm joint}=\begin{bmatrix}H_{11}&H_{12}\\H_{21}&H_{22}\end{bmatrix}.
 \end{equation}
-L-BFGS-B approximates this joint curvature from position and gradient differences, without explicitly evaluating the cross-source blocks.
+L-BFGS-B approximates this joint curvature from position and gradient differences, without explicitly evaluating the cross-source blocks. Updating the positions together can reduce repeated conditional fits; the matched-candidate experiment in Section~\ref{en:refinementcost} measures this cost separately from candidate recovery.
 
 \begin{algorithm}[H]
 \caption{MCJ-AP}\label{en:algap}
@@ -227,7 +238,7 @@ For one local update, collect the two position coordinates in $\bm z$ and the re
 H_{\rm VP}=H_{zz}-H_{zu}H_{uu}^{-1}H_{uz}.
 \label{en:schur}
 \end{equation}
-All Hessian blocks are evaluated at $(\bm z,\widehat{\bm u}(\bm z))$. The position, coefficient and mixed blocks have dimensions $2\times2$, $2F\times2F$ and $2\times2F$, respectively. The reduced gradient equals the position gradient at the coefficient optimum \cite{GolubPereyra1973}. Since the coefficient subproblem has positive-definite $H_{uu}$,
+All Hessian blocks are evaluated at $(\bm z,\widehat{\bm u}(\bm z))$. The position, coefficient and mixed blocks have dimensions $2\times2$, $2F\times2F$ and $2\times2F$, respectively. Here $H_{\rm VP}$ is the Hessian of the conditional single-source objective $\phi_j$, with other-source contributions fixed, not of the fully concentrated joint objective $J$. The reduced gradient equals the position gradient at the coefficient optimum \cite{GolubPereyra1973}. Since the coefficient subproblem has positive-definite $H_{uu}$,
 \begin{equation}
 H_{zz}-H_{\rm VP}=H_{zu}H_{uu}^{-1}H_{uz}\succeq0.
 \label{en:psd}
@@ -291,6 +302,8 @@ Candidates & $3\times3$ local maxima, minimum separation 30 m; $M=1$--5\\\bottom
 \end{tabularx}\end{table}
 Within each source configuration and realization, all six power gaps reuse the same waveforms and noise. Only source A is scaled. The band is fixed in advance, includes 0.75 MHz guards around the nominal signal band, and is shared by every method; no per-source spectrum or per-station RMS normalization is supplied.
 
+The five-candidate setting was fixed in the evaluation protocol before the 2,400-observation run. It was retained unchanged for the new source configurations. Candidate-count comparisons evaluate this fixed choice's cost and recovery, rather than establish an optimal value of $M$.
+
 Twenty source configurations cover both sources inside the station convex hull, A outside/B inside, A inside/B outside, and both outside, with five configurations per category (Fig.~\ref{en:geometry}). Generation excludes sources within 150 m of a station, 100 m of the center or 50 m of a station-pair line, and requires at least 300 m between sources. Positions are not selected by localization performance. All methods use two preassigned realizations per configuration and all power gaps, giving 240 observations. Core methods use 20 realizations, giving 2,400 observations including those 240. Frozen methods are then tested at 16 new source configurations with five realizations and six gaps, giving 480 observations. Receiver coordinates remain fixed; Appendix~\ref{en:coordinates} supplies new source coordinates and seeds.
 \begin{figure}[pos=H]\centering
 \includegraphics[width=.90\linewidth]{figures/formal_geometry.pdf}
@@ -353,13 +366,13 @@ where $\bm d_{fj}$ is column $j$ of $\bm D_f$. Evidence backtracking controls up
 
 Full AP repeatedly searches the conditional objective and refines positions, using five candidates and up to six outer cycles. Multistart ML minimizes $J$ from four unique spectral peak combinations and four Sobol spatial starts, removing unordered duplicates. GA-ML encodes four coordinates, with 128 individuals, four elites, size-three tournament selection, simulated binary crossover (probability 0.9, index 15), and polynomial mutation (per-coordinate probability 0.25, index 20) \cite{DebAgrawal1995}. It stops after 30 stagnant generations or 200 generations, then jointly refines the best individual.
 
-The fixed-coefficient BNOMP direction differentiates
+The fixed-coefficient BNOMP reference (FC--FC) differentiates
 \begin{equation}
 L_{\rm FC}(\bm p)=E_x^{-1}\sum_f
 \|\bm y_f-\bm a_f(\bm p)q_f^{(0)}\|^2,
 \label{en:fixedcoef}
 \end{equation}
-where $q_f^{(0)}$ is fitted at the current position, held fixed for differentiation and reference backtracking, and re-estimated after acceptance. The multi-frequency block structure follows \cite{Yang2022}; Hessian repair, bounds and backtracking are numerical safeguards. VP uses reduced curvature and reduced acceptance. Since original NOMP combines fixed-gain curvature with re-estimated-gain acceptance \cite{Mamandipoor2016}, we also isolate curvature by testing both directions with reduced acceptance.
+where $q_f^{(0)}$ is fitted at the current position, held fixed for differentiation and reference backtracking, and re-estimated after acceptance. The multi-frequency block structure follows \cite{Yang2022}; Hessian repair, bounds and backtracking are numerical safeguards. The two tags specify curvature and trial acceptance, respectively. VP-BNOMP uses reduced curvature and reduced acceptance (VP--VP). Since original NOMP combines fixed-gain curvature with re-estimated-gain acceptance \cite{Mamandipoor2016}, we also test fixed-coefficient curvature with reduced acceptance (FC--VP) to isolate the curvature change.
 
 MUSIC uses four segments; MVDR-known uses eight and $\delta=0.01$. AP local calls allow 25 line-search trials and 100 iterations; alternating refinement allows 12 sweeps and initial single-source refinement uses relative tolerance $10^{-12}$. BNOMP floors Hessian eigenvalues at $10^{-9}$ and tries step factors $1,1/2,1/4,1/8,1/16$ within the search bounds. Its other limits and AP's common gradient tolerance were specified above. Parameters are fixed before the reported comparisons.
 
@@ -374,7 +387,7 @@ LS peaks & 38 & 191.982 & 845.184 & 0.2368 & 0.2181 & 0.3297\\
 WB-MUSIC & 151 & 93.515 & 646.892 & 0.2015 & 0.1893 & 0.2719\\
 MVDR-known & 75 & 320.684 & 804.082 & 0.1925 & 0.1807 & 0.2625\\
 Full AP & 240 & 0.876 & 1.596 & 8.9076 & 9.1483 & 12.2348\\
-Fixed BNOMP & 228 & 0.906 & 89.706 & 2.9416 & 1.4625 & 8.1989\\
+BNOMP (FC--FC) & 228 & 0.906 & 89.706 & 2.9416 & 1.4625 & 8.1989\\
 VP-BNOMP & 228 & 0.875 & 86.177 & 0.5907 & 0.3921 & 1.3971\\
 Multistart ML & 45 & 256.061 & 776.935 & 1.2227 & 1.0868 & 2.5595\\
 GA-ML & 185 & 279.056 & 501.231 & 8.0702 & 8.1102 & 9.0229\\
@@ -383,8 +396,7 @@ MCJ-AP ($M=5$) & 240 & 0.876 & 1.596 & 0.7081 & 0.6347 & 1.0232\\\bottomrule
 \end{tabular}\end{table}
 
 \begin{figure}[pos=H]\centering
-\includegraphics[width=\linewidth]{figures/assignment_cost_20261019/common_error_cdf.pdf}
-\includegraphics[width=\linewidth]{figures/assignment_cost_20261019/common_time_cdf.pdf}
+\includegraphics[width=\linewidth]{figures/assignment_cost_20261019/common_cdf.pdf}
 \caption{Error and complete-runtime CDFs on the common 240 observations. The error panels show full ranges and small-error enlargements; the time panels show the full range and early completion. Full-range axes are linear near zero and logarithmic beyond their thresholds. Vertical error lines indicate 20 m. All curves retain the full denominator.}\label{en:commoncdf}
 \end{figure}
 Figure~\ref{en:commoncdf} distinguishes typical precision from large-error tails. The AP error curves nearly coincide. VP-BNOMP is accurate on most observations, but retains a distant weak-source tail and occasional long runtimes. Spectral methods are fast, yet their failures involve large errors rather than small threshold crossings.
@@ -395,11 +407,7 @@ Figure~\ref{en:commoncdf} distinguishes typical precision from large-error tails
 \end{figure}
 As the power gap increases, MUSIC and MVDR-known lose recovery (Fig.~\ref{en:power}); Section~\ref{en:windowcheck} examines whether finite-window mismatch explains the tested failures. Full AP and multistart ML optimize the same joint objective but have very different outcomes, demonstrating the importance of initialization and search. GA reaches its generation limit in 208 observations and SBL in 14; the other methods have no limit exits. All outputs remain included.
 
-\begin{figure}[pos=H]\centering
-\includegraphics[width=\linewidth]{figures/formal_time.pdf}
-\caption{Saved output trajectories on 240 observations. Upper panels use logarithmic time; lower panels enlarge 0--3 s. Columns show two-source success, complete-output fraction and pooled RMSE. Missing outputs count as unsuccessful; RMSE is shown after all observations have outputs.}\label{en:time}
-\end{figure}
-Five-candidate AP, full AP and SBL first reach complete success at saved times of 0.75, 1.5 and 30 s (Fig.~\ref{en:time}). Connected checkpoints do not define new stopping rules. VP publishes only its final complete output in this batch, so its curve does not expose intermediate cycles.
+Saved outputs on the common subset first show complete success at 0.75, 1.5 and 30 s for five-candidate AP, full AP and SBL, respectively. These checkpoints describe recorded results, not executable early-stopping rules. VP records only its final complete output in this batch, so the different recording schedules do not support a strict anytime ranking.
 
 \begin{table}[pos=H]\centering\small
 \caption{Expanded 2,400-observation evaluation. RMSE in m and complete time in s. VP-BNOMP timing is from a separate same-input batch; controlled speedups are evaluated in paired batches.}\label{en:core}
@@ -424,18 +432,26 @@ The strong-source CDFs nearly coincide (Fig.~\ref{en:corecdf}). Small weak-sourc
 In the other configurations, AP weak-source RMSE rises from 1.31 to 1.93 m across the power sweep (Fig.~\ref{en:powergroups}). VP has two failures in configuration 1 at 15 dB, producing 15.25 m RMSE over those 19 configurations versus about 1.52 m for AP. In configuration 4, VP reduces weak-source RMSE from single-candidate AP's 479.66 m to 325.07 m without meeting the 20 m tolerance. Configuration 4 drives the nonmonotone overall RMSE; geometry is unchanged across power bins.
 
 \FloatBarrier
-\subsection{Candidate coverage and joint-refinement cost}
-The 96 AP recoveries occur in configuration 4 and involve 18 of its 20 waveform/noise realizations. Single-candidate AP fails on all 120 observations there, whereas five candidates recover 96. No observation is changed from success to failure in the other configurations. Saved branch results show that exactly 2,376 observations have at least one successful refined branch, and final residual selection chooses a successful branch in every such observation. The remaining 24 have no successful branch among the five refined candidates.
+\subsection{Candidate coverage and joint-refinement cost}\label{en:refinementcost}
+Lower-ranked conditional candidates account for all 96 additional AP recoveries. Table~\ref{en:candidaterank} records the first successful refined branch in the original conditional-score order. Success uses the true positions only for offline evaluation; MCJ-AP selects solely by the final residual $J$. The recoveries all occur in configuration 4 and involve 18 of its 20 waveform/noise realizations. Its other 24 observations have no successful branch among the five refined candidates.
+
+\begin{table}[pos=H]\centering\small
+\caption{First successful refined branch by initial conditional-score rank, all 2,400 observations. Success requires both matched errors to be at most 20 m.}\label{en:candidaterank}
+\begin{tabular}{@{}lrrrrrr@{}}\toprule
+First successful rank & 1 & 2 & 3 & 4 & 5 & None\\\midrule
+Observations & 2280 & 0 & 1 & 8 & 87 & 24\\\bottomrule
+\end{tabular}\end{table}
+Of the 96 recoveries, 87 require the fifth-ranked candidate. Final residual selection chooses a successful branch in all 2,376 observations that contain one, with no loss of success elsewhere. Thus lower initial scores do not preclude effective continuous solutions in this configuration.
 
 \begin{figure}[pos=H]\centering
 \includegraphics[width=\linewidth]{figures/formal_candidates.pdf}
 \caption{Two post hoc cases from configuration 4 at 0 dB. Columns show the single-source spectrum, conditional spectrum and pre-/post-refinement branch residuals. The upper case is recovered by the fifth candidate; the lower case has no effective candidate. Lines in the right panels connect branch indices, not optimization trajectories.}\label{en:cases}
 \end{figure}
-In the upper case of Fig.~\ref{en:cases}, the first four branches enter a distant region; the fifth gives a lower final residual and approximately 0.09 m weak-source error. In the lower case, even the nearest candidate is about 397 m from source B and refinement cannot recover it. These cases explain why retaining candidates can help while local refinement alone cannot repair missing coverage.
+In the upper case of Fig.~\ref{en:cases}, the first four branches enter a distant region; the fifth gives a lower final residual and approximately 0.09 m weak-source error. In the lower case, even the nearest candidate is about 397 m from source B and refinement does not recover it. These cases illustrate recovery through a lower-ranked branch and failure of all five local fits, respectively.
 
 \begin{figure}[pos=H]\centering
 \includegraphics[width=\linewidth]{figures/assignment_cost_20261019/candidate_tradeoff.pdf}
-\caption{Candidate count versus complete mean runtime, success and weak-source RMSE on 240 observations, measured in one interleaved batch. Error bars are 95\% paired intervals resampling realizations within fixed layouts while retaining the six gaps together.}\label{en:tradeoff}
+\caption{Independent complete solves for AP with $M=1$--5 and VP-BNOMP on the same 240 observations, timed in one interleaved batch. Error bars are 95\% paired intervals resampling realizations within fixed source configurations while retaining the six gaps together.}\label{en:tradeoff}
 \end{figure}
 In this batch, $M=1$--4 each succeeds on 228 observations; mean runtime increases from 0.3556 to 0.5420 s and weak-source RMSE remains about 111.2 m. VP-BNOMP has 228 successes, 86.18 m weak-source RMSE and 0.5474 s mean runtime. Five-candidate AP succeeds throughout at 0.6079 s and 1.60 m weak-source RMSE. VP median time is 0.3674 s versus single-candidate AP's 0.3514 s; its P95 is 1.3147 s versus five-candidate AP's 0.7201 s. Among 228 common successes, VP is faster than five-candidate AP in 197; five candidates recover the other 12 observations. These results distinguish typical speed from recovery and runtime tails. Saved full-cohort prefixes give 2,281 and 2,289 successes for three and four candidates, respectively; these are position-only replays.
 
@@ -446,11 +462,11 @@ Refinement & Success & RMSE B/m & Mean time/s & $J$ calls & Gradient calls\\\mid
 Alternating & 2376 & 46.983 & 1.0840 & 204.21 & 198.21\\
 Joint & 2376 & 46.984 & 0.7441 & 120.36 & 114.36\\\bottomrule
 \end{tabular}\end{table}
-Table~\ref{en:apjoint} isolates the cost of refinement from candidate coverage. Success/failure identities agree observation by observation, strong-source RMSE is about 0.896 m, and weak-source P95 is about 3.85 m for both. Joint refinement reduces mean complete time by 31.36\% and gradient calls by 42.30\%. The paired hierarchical 95\% interval for joint-minus-alternating time is $[-0.3691,-0.3121]$ s. Every configuration has lower mean cost, with savings from 11.42\% to 48.04\%. Two unselected alternating branches reach the local safety limit and remain included. Candidate retention supplies additional starts; joint refinement processes them with fewer calls at matched accuracy.
+Joint refinement reduces the cost of processing the same five candidates by 31.36\% (Table~\ref{en:apjoint}). Both methods use the same full projection objective and selected-output projected-gradient tolerance; success/failure identities agree observation by observation. Strong-source RMSE is about 0.896 m and weak-source P95 about 3.85 m for both. Gradient calls fall by 42.30\%, consistent with fewer optimization calls rather than a looser stopping rule. The paired hierarchical 95\% interval for joint-minus-alternating time is $[-0.3691,-0.3121]$ s. Every configuration has lower mean cost, with savings from 11.42\% to 48.04\%. Two unselected alternating branches reach the local safety limit and remain included. These savings concern refinement at fixed candidate count; the added candidates' recovery and extra cost are measured separately in Fig.~\ref{en:tradeoff}.
 
 \FloatBarrier
 \subsection{Isolating waveform-eliminated curvature}
-The common-data fixed-coefficient/VP comparison in Table~\ref{en:common} changes both local curvature and the trial acceptance objective, reducing mean runtime by 79.92\%. To isolate curvature, a separate paired batch applies the same waveform-eliminated objective $\phi_j$ to trial acceptance. FC--VP computes directions with $H_{zz}$ and VP--VP with $H_{\rm VP}$. Both use the same current conditional coefficient estimate, gradient, discovery sequence, safeguards, backtracking and cyclic energy stopping rule.
+The common-data fixed-coefficient/VP comparison in Table~\ref{en:common} changes both local curvature and the trial acceptance objective, reducing mean runtime by 79.92\%. To isolate curvature, a separate paired batch applies the same waveform-eliminated objective $\phi_j$ to trial acceptance. FC--VP computes directions with $H_{zz}$ and VP--VP with $H_{\rm VP}$. Both use identical source-discovery and initialization procedures, conditional coefficient and gradient formulas, safeguards, reduced-objective backtracking and cyclic energy stopping criteria. Only the local curvature construction is changed; the resulting positions and residual paths can differ.
 \begin{table}[pos=H]\centering\small
 \caption{Curvature comparison with a common waveform-eliminated acceptance objective, 240 paired observations. Update and cycle counts are means per observation.}\label{en:curvaturetable}
 \begin{tabular}{@{}lrrrrrr@{}}\toprule
@@ -460,11 +476,13 @@ VP--VP & 228/240 & 0.875 & 86.177 & 0.905 & 135.55 & 47.97\\\bottomrule
 \end{tabular}\end{table}
 Success/failure identities agree and all outputs stop under the native energy rule. Mean complete runtime falls by 83.77\%, with fixed-layout paired 95\% interval [81.73\%,85.58\%]. Median time falls from 2.836 to 0.567 s and P95 from 16.161 to 2.538 s. VP--VP is faster in 170 of 240 observations: the mean saving is driven especially by reductions in slow cases. The associated update and cycle reductions support the curvature mechanism in \eqref{en:rate}.
 
-Mean core times are 5.5483 and 0.8987 s; recording and final checks add 0.0254 and 0.0059 s. Audits of 480 historical/current VP pairs find matching inputs, positions, objectives, counts, stopping reasons and saved paths despite different absolute wall times. Each speedup therefore uses its own paired batch: 79.92\% measures the complete local-update change, while 83.77\% isolates curvature under common acceptance. The latter interval uses 4,000 within-configuration paired bootstrap draws (seed 20261020), retaining all six gaps of a realization. Equal energy thresholds do not imply equal final joint-gradient accuracy; Section~\ref{en:localchecks} examines that distinction.
+Mean core times are 5.5483 and 0.8987 s; recording and final checks add 0.0254 and 0.0059 s. Audits of 480 historical/current VP pairs find matching inputs, positions, objectives, counts, stopping reasons and saved paths despite different absolute wall times. Each speedup therefore uses its own paired batch: 79.92\% measures the complete local-update change, while 83.77\% isolates curvature under common acceptance. The latter interval uses 4,000 within-configuration paired bootstrap draws (seed 20261020), retaining all six gaps of a realization. Equal energy thresholds do not impose a common final joint-gradient tolerance; Section~\ref{en:localchecks} examines that distinction.
+
+Terminal quality is evaluated using the same fully concentrated $J$ and the infinity norm of its box-projected gradient in meter coordinates. At an absolute objective-comparison tolerance of $10^{-10}$, VP--VP gives a lower $J$ in 199 pairs and an approximately equal value in 41, with none higher; at $10^{-8}$ the counts are 167, 73 and zero. Absolute objective differences have median $3.34\times10^{-7}$ and P95 $7.37\times10^{-6}$. The largest difference, $1.97\times10^{-3}$, occurs in an observation where both methods fail localization. Projected-gradient norms are smaller for VP--VP in all 240 pairs, with medians $1.30\times10^{-7}$ versus $2.03\times10^{-6}$ for FC--VP. Thus the measured cost saving is accompanied by no deterioration in these terminal fitting and stationarity measures under the native stopping rule; localization quality remains assessed by the position errors.
 
 \FloatBarrier
 \subsection{Frozen methods at new source positions}
-Table~\ref{en:new} and Fig.~\ref{en:newcdf} assess the 16 new source configurations. Both AP variants recover all 480 observations with nearly identical errors, while five candidates cost approximately 1.96 times as much as one. The first branch is already effective, so additional branches do not increase success. Together with configuration 4, this identifies candidate retention as a cost-for-coverage choice whose recovery benefit depends on initialization.
+Table~\ref{en:new} and Fig.~\ref{en:newcdf} assess the 16 new source configurations. Both AP variants recover all 480 observations with nearly identical errors, while five candidates cost approximately 1.96 times as much as one. The first branch is already effective, so additional branches do not increase success. Together with configuration 4, this shows the fixed candidate budget's tradeoff: it preserves recovery opportunities when the leading candidate is ineffective, but does not reduce work when the first branch already suffices.
 \begin{table}[pos=H]\centering\small
 \caption{New source configurations, 480 observations; receiver positions unchanged. RMSE in m and complete runtime in s.}\label{en:new}
 \begin{tabular}{@{}lrrrrrr@{}}\toprule
@@ -494,14 +512,13 @@ Rectangular and periodic Hann windows were compared with a 4,096-sample Hann win
 \label{en:localchecks}
 Numerical convergence was also checked separately from localization error. Continuing native VP paths on eight development observations until the joint projected gradient reaches $10^{-8}$ keeps success at 8/8, changes weak-source RMSE from 3.22 to 3.25 m and raises mean complete time, including gradient checks, from 0.382 to 0.860 s.
 
-The fixed-coefficient small-step mechanism was examined on eight observations. With cyclic energy tolerances $10^{-8}$, $10^{-7}$ and $10^{-6}$, successes are 8/8, 7/8 and 6/8; mean times are 5.478, 2.318 and 0.971 s, and derivative calls are 2679.5, 1133.9 and 467.4. Removing only the small-step local exit gives 8/8 at 8.011 s and 4758.4 calls; waveform elimination at $10^{-8}$ gives 8/8 at 0.436 s and 70.4 calls. All 21,436 reference updates are accepted, 83.67\% shorter than 0.01 m, without Hessian repair, step clipping, backtracking reduction or boundary clipping. At two outside-source diagnostic positions, raw steps increase from 0.0138/0.0111 m to 11.25/32.26 m after elimination, before backtracking. At four saved positions, analytic reduced Hessians match automatic differentiation within about $1.4\times10^{-18}$ maximum absolute difference. These checks motivate the formal curvature pair; they are not substitutes for its complete cost measurements.
+The FC--FC small-step mechanism was examined on eight development observations, separately from the formal FC--VP/VP--VP pair. With cyclic energy tolerances $10^{-8}$, $10^{-7}$ and $10^{-6}$, successes are 8/8, 7/8 and 6/8; mean times are 5.478, 2.318 and 0.971 s, and derivative calls are 2679.5, 1133.9 and 467.4. Removing only the small-step local exit gives 8/8 at 8.011 s and 4758.4 calls; waveform elimination at $10^{-8}$ gives 8/8 at 0.436 s and 70.4 calls. All 21,436 reference updates are accepted, 83.67\% shorter than 0.01 m, without Hessian repair, step clipping, backtracking reduction or boundary clipping. At two outside-source diagnostic positions, raw steps increase from 0.0138/0.0111 m to 11.25/32.26 m after elimination, before backtracking. At four saved positions, analytic reduced Hessians match automatic differentiation within about $1.4\times10^{-18}$ maximum absolute difference. These checks motivate the formal curvature pair; they are not substitutes for its complete cost measurements.
 
 \FloatBarrier
 \section{Conclusions}
-For unknown overlapping wideband sources, candidate coverage and position--waveform coupling affect different parts of direct localization. MCJ-AP retains conditional candidates, jointly refines each pair and selects the final residual. It raises two-source success from 95\% to 99\% on 2,400 observations, while matched-accuracy joint refinement reduces the cost of processing five candidates by 31.36\%. VP-BNOMP removes waveform coupling from local curvature; a common-acceptance paired comparison reduces mean runtime by 83.77\%, together with fewer local updates and cycles. On new source configurations, AP remains reliable but extra candidates provide no additional recovery, and VP retains configuration-dependent failures. Candidate retention therefore supplies conditional recovery benefits, whereas reduced curvature supplies a local efficiency benefit. The conclusions concern known two-source count, synchronized stations and the matched baseband propagation model. Candidate allocation and unknown source count provide directions for further work.
+This paper addresses candidate selection and local update cost in direct localization of two unknown overlapping wideband sources. MCJ-AP retains conditional peaks until both positions have been jointly refined. The saved branches show why initial score alone can discard effective solutions: most additional recoveries in the tested difficult configuration require the fifth-ranked peak. Joint L-BFGS-B reduces the cost of refining the same candidates under a common projected-gradient stopping tolerance. VP-BNOMP incorporates waveform elimination into the local position curvature, and the common-acceptance comparison confirms lower average cost and fewer updates without worsening the measured terminal residual and projected-gradient norm. The new source configurations separate these benefits from complete-flow reliability: extra AP candidates add no recovery there, and VP retains failures. Under the stated synchronized, known-response baseband model, the evidence supports delayed branch selection for candidate recovery and reduced curvature for local computational efficiency. Future work can examine candidate-budget allocation and unknown source count.
 
-% Before submission, the authors must confirm authorship, affiliations, funding,
-% competing interests, data/code availability and the applicable AI-use statement.
+% Before submission, confirm funding, competing interests and data/code availability.
 % No such declarations are inferred from the research results.
 \FloatBarrier
 \appendix

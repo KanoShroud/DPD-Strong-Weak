@@ -1,5 +1,7 @@
 # 论文独立工作目录
 
+2026-10-21完成长文两轮审稿修订：保留候选排名与配置冻结证据，补齐240条FC–VP／VP–VP配对的终态目标与投影梯度核验，区分共同停止规则和实际终态精度、条件局部曲率和完整联合目标。CDF合并为共享图例的六面板图，候选图标注同步改善。作者依次为Benjian Hao、Xinlei Wang、Zan Li（通讯作者），完整单位、ORCID和邮箱按用户信息填写；资助和CRediT角色待确认。英文27页、中文19页，当前完整检查见[修订与核验第二轮](qa/review_revision_20261021/修订与核验.md)。本轮只分析保存结果并修订稿件，不运行定位。
+
 2026-10-20按最新批准改为完整单稿：只维护中文审读稿`paper_draft.tex`和英文投稿稿`paper_submission.tex`，不另交补充材料。原补充材料的基线公式、数值与窗口核验、停止条件、复杂度和新源坐标已并入论文；重复文字与图表合并，中英文的章节、公式、结果和图表对应。详见[当前核验](qa/review_supplement_20261020/核验说明.md)。
 
 两稿直接使用项目CAS单栏模板，未修改`template/cas-sc.cls`或`cas-common.sty`。取消自定义页边距、公式居中、图题居中和页脚；英文仅启用模板原生`review`双倍行距选项，其余沿用模板默认字体与192×262 mm版面。英文27页，含图表、内附坐标表和参考文献，不超过研究长文30页上限；中文19页，仅按内容一致性维护，不限制页数。原主稿、四份旧稿及构建/验证配置保存在`archive/single_manuscript_20261020.zip`，可恢复。
@@ -14,7 +16,7 @@
 
 2026-10-18已完成独立审稿后获批的内容修订：补充LAOLS近邻、明确局部与联合消元及参照实现、补报既有区间并修正轨迹时间。最新检查见[审稿后修订核验](qa/review_followup_20261018/修订与核验.md)。此前的[机制证据与有限分段核验](qa/evidence_revision/修订与核验.md)继续保留。
 
-中文修改 [paper_draft.tex](paper_draft.tex)，英文修改 [paper_submission.tex](paper_submission.tex)。两稿均内联完整内容，不通过`\input`引入章节或表格，也不依赖其他论文的辅助文件。作者、单位、资助与声明须由作者据实补全后再投稿。
+中文修改 [paper_draft.tex](paper_draft.tex)，英文修改 [paper_submission.tex](paper_submission.tex)。两稿均内联完整内容，不通过`\input`引入章节或表格，也不依赖其他论文的辅助文件。作者和单位已按用户信息填写；正式投稿前仍需确认其余元数据及期刊要求的声明。当前审读稿不含AI使用声明；投稿时应依据[Elsevier政策](https://www.elsevier.com/en-gb/about/policies-and-standards/generative-ai-policies-for-journals)据实披露实际使用情况。
 
 ## 独立编译
 
@@ -28,7 +30,7 @@
 
 脚本优先查找PATH中的TeX工具，也支持 `-TexBin '你的TeX工具目录'`。`-Document Chinese`（默认）只生成中文稿，`English`只生成英文稿，`All`生成两稿；中间文件放在`build/`。
 
-最小编译包需要对应的`.tex`文件、`build.ps1`、`figures/`、`references/`、`template/`。图片和BibTeX文献使用本文件夹内的相对路径，不依赖原项目。新源位置已列于论文内附表，全精度本地数据仍在`data/submission/new_layouts.csv`。
+最小编译包需要对应的`.tex`文件、`build.ps1`、`figures/`、`references/`、`template/`、`thumbnails/`。最后一项保存CAS原生邮件图标，原样取自随TeX发行的模板。图片和BibTeX文献使用本文件夹内的相对路径，不依赖原项目。新源位置已列于论文内附表，全精度本地数据仍在`data/submission/new_layouts.csv`。
 
 ## 素材分类和维护
 
@@ -39,6 +41,7 @@
 | `figures/` | 投稿矢量PDF、PNG预览、绘图CSV及图注／来源文件 |
 | `references/` | BibTeX文献库 |
 | `template/` | CAS模板类、样式与说明 |
+| `thumbnails/` | CAS模板原生邮件图标 |
 | `data/` | 已导出统计数据、图注及来源清单 |
 | `build/` | 可重新生成的编译中间文件 |
 | `qa/` | 核验记录和渲染页面 |
@@ -46,6 +49,6 @@
 | `sections/`、`tables/` | 上版拆分源文件，保留追溯，不参与编译，也不作为后续正文编辑入口 |
 | `scripts/` | 研究结果重绘和历史核验工具，不是独立编译依赖 |
 
-`scripts/`中的来源核验和重绘工具只读取本项目已完成的证据，普通编译不调用它们。`prepare_assignment_cost.py`重绘CDF和成本图，追加`--review-supplement`重绘正式补证中的新布局CDF（这是实验阶段名，不是额外稿件）；`prepare_formal_assets.py --vector-only`只重绘正式图；`validate_assignment_cost.py --integrated --out build/single_manuscript_qa`核对来源、数值、两稿公式与图表一致性、原生模板及英文页数；`render_review.py`核验全页排版。历史迁移工具及旧QA记录不用于覆盖现行稿件。
+`scripts/`中的来源核验和重绘工具只读取本项目已完成的证据，普通编译不调用它们。`prepare_assignment_cost.py`重绘基础CDF和成本图，追加`--review-supplement`重绘正式补证中的新布局CDF（这是实验阶段名，不是额外稿件）；`prepare_formal_assets.py --common-cdf-only`生成当前共享图例的六面板CDF，`--vector-only`只重绘正式图；`validate_assignment_cost.py --integrated --out build/terminal_revision_20261021`核对来源、候选排名、终态质量、作者信息、数值、双语对应、原生模板及英文页数，并导出240条终态核验CSV；`render_review.py`核验全页排版。历史迁移工具及旧QA记录不用于覆盖现行稿件。
 
 本次完整展开保持文字、公式和统计不变；独立编译验证见 [qa/独立编译核验.md](qa/独立编译核验.md)。

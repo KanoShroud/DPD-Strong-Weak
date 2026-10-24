@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 from itertools import combinations, permutations
 import json
 from pathlib import Path
@@ -33,7 +34,7 @@ COLORS = {'AP_1_ALT': '#8491B4', 'AP_1_JOINT': '#4DBBD5', 'AP_2_JOINT': '#7E6148
 LABELS = {'AP_1_ALT': 'AP-1 ALT', 'AP_1_JOINT': 'AP-1 joint', 'AP_2_JOINT': 'AP-2 joint',
           'AP_5_JOINT': 'MCJ-AP (M=5)', 'NOMP': 'Legacy NOMP', 'NOMP_JOINT': 'Legacy NOMP + joint',
           'LS': 'LS peaks', 'MUSIC': 'WB-MUSIC', 'MVDR': 'MVDR-known',
-          'AP_FULL': 'Full AP', 'BNOMP_REF': 'BNOMP-REF',
+          'AP_FULL': 'Full AP', 'BNOMP_REF': 'BNOMP (FC-FC)',
           'MULTISTART_FIXED': 'Multistart ML', 'GA': 'GA-ML', 'SBL': 'WB-SBL',
           'PROFILE': 'VP-BNOMP', 'PROFILE_DIAG': 'VP-BNOMP'}
 ZH = {'AP_1_ALT': '单候选交替AP', 'AP_1_JOINT': '单候选联合AP',
@@ -392,9 +393,9 @@ def performance(rows):
     methods = ['AP_1_JOINT', 'AP_5_JOINT', 'PROFILE']
     fig, axes = plt.subplots(2, 2, figsize=(7.1, 4.1), layout='constrained')
     data = []
-    groups = [('All geometries', rows, 'all'),
-              ('Difficult geometry', [r for r in rows if r['layout'] == 3], 'geometry_4'),
-              ('Other 19 geometries', [r for r in rows if r['layout'] != 3], 'other_19')]
+    groups = [('All source configurations', rows, 'all'),
+              ('Source configuration 4', [r for r in rows if r['layout'] == 3], 'geometry_4'),
+              ('Other 19 source configurations', [r for r in rows if r['layout'] != 3], 'other_19')]
     group_summaries = []
     for m in methods:
         parts = [dict(method=m, group=g, **summarize([r for r in sub if r['method'] == m]))
@@ -422,7 +423,7 @@ def performance(rows):
     handles, labels = axes[0, 0].get_legend_handles_labels()
     fig.legend(handles, labels, loc='outside upper center', ncol=3, fontsize=7)
     export('formal_core', fig, data, '左为其余19布局，右为困难布局4；每档分别380和20条，总体2400条完整保留。',
-           'Power-gap effects: other 19 geometries (left, 380 per gap) and difficult geometry 4 (right, 20 per gap).',
+           'Power-gap effects: other 19 source configurations (left, 380 per gap) and source configuration 4 (right, 20 per gap).',
            'Post-hoc geometry partition; full 2400-observation cohort retained in the overall table and CDF, not independent validation.')
     common = [r for r in rows if r['realization'] in (400, 410)]
     methods = ['LS', 'MUSIC', 'MVDR', 'AP_FULL', 'PROFILE_DIAG', 'MULTISTART_FIXED', 'GA', 'SBL', 'AP_5_JOINT']
@@ -588,8 +589,8 @@ def candidate_cases(details):
     audit = json.loads(audit_path.read_text(encoding='utf-8'))
     if not audit['passed'] or not audit['no_optimizer_called']:
         raise AssertionError('Case reconstruction audit failed')
-    fig, axes = plt.subplots(2, 3, figsize=(7.6, 4.6),
-                             gridspec_kw={'width_ratios': [1, 1, 1.35]}, layout='constrained')
+    fig, axes = plt.subplots(2, 3, figsize=(7.6, 4.8),
+                             gridspec_kw={'width_ratios': [1.05, 1.05, 1.2]}, layout='constrained')
     plotted = []
     for i, realization in enumerate([400, 405]):
         tag = f'3_{realization}_0'
@@ -616,29 +617,29 @@ def candidate_cases(details):
             ax = axes[i, j]
             im = ax.pcolormesh(x, y, z, cmap='viridis', shading='auto',
                                norm=LogNorm(vmin=max(z.min(), 1e-8), vmax=z.max()))
-            ax.scatter(*truth[0], c='#E64B35', marker='*', s=65, edgecolors='white', lw=.5)
-            ax.scatter(*truth[1], c='white', marker='*', s=65, edgecolors='black', lw=.5)
+            ax.scatter(*truth[0], c='#E64B35', marker='*', s=85, edgecolors='white', lw=.6)
+            ax.scatter(*truth[1], c='white', marker='*', s=85, edgecolors='black', lw=.6)
             if j == 1:
                 for b in bb:
                     p = np.asarray(b['initial_positions'])[1]
-                    ax.scatter(*p, facecolors='none', edgecolors='white', s=24, marker='o')
-                    ax.annotate(str(b['rank']), p, xytext=(4, 3), textcoords='offset points', color='white', fontsize=6,
+                    ax.scatter(*p, facecolors='none', edgecolors='white', s=32, marker='o')
+                    ax.annotate(str(b['rank']), p, xytext=(4, 3), textcoords='offset points', color='white', fontsize=7.5,
                                 bbox=dict(boxstyle='round,pad=.1', fc='black', ec='none', alpha=.45))
             ax.set(xlim=(-1000, 1000), ylim=(-1000, 1000), aspect='equal',
                    xlabel='x (m)', ylabel='y (m)', title=('Single-source LS' if j == 0 else 'Conditional spectrum'))
             ax.set_xticks([-1000, 0, 1000]); ax.set_yticks([-1000, 0, 1000])
-            ax.tick_params(labelsize=7)
+            ax.tick_params(labelsize=8)
             cb = fig.colorbar(im, ax=ax, orientation='horizontal', fraction=.07, pad=.15,
                               shrink=.85, ticks=np.geomspace(max(z.min(), 1e-8), z.max(), 3))
             # Matplotlib otherwise rasterizes colorbar solids automatically.
             cb.solids.set_rasterized(False)
             cb.ax.xaxis.set_major_formatter(FuncFormatter(lambda value, _: f'{value:.2g}'))
-            cb.ax.minorticks_off(); cb.ax.tick_params(labelsize=6)
+            cb.ax.minorticks_off(); cb.ax.tick_params(labelsize=7)
         ax = axes[i, 2]
         initial = [float(r['initial_objective']) for r in branches]
         final = [float(r['final_objective']) for r in branches]
-        ax.plot(range(1, 6), initial, '--o', color='#4DBBD5', ms=3, label='Before refinement')
-        ax.plot(range(1, 6), final, '-s', color='#E64B35', ms=3, label='After refinement')
+        ax.plot(range(1, 6), initial, '--o', color='#4DBBD5', ms=4, label='Before refinement')
+        ax.plot(range(1, 6), final, '-s', color='#E64B35', ms=4, label='After refinement')
         ax.set(xlabel='Candidate rank', ylabel='Normalized residual J', xticks=range(1, 6),
                title='Recovered' if i == 0 else 'Not recovered')
         for a, b in zip(branches, bb):
@@ -646,7 +647,7 @@ def candidate_cases(details):
             plotted.append(dict(case=tag, rank=b['rank'], initial_objective=float(a['initial_objective']),
                                 final_objective=b['objective'], source_b_error_m=float(error[1])))
         if i == 0:
-            ax.legend(fontsize=6)
+            ax.legend(fontsize=7.5)
         plotted.extend(dict(case=tag, **r) for r in spectra)
     # CSV has two record types with an explicit union schema.
     keys = list(dict.fromkeys(k for r in plotted for k in r))
@@ -679,7 +680,79 @@ def prepare(offline=True):
     print(f'已导出{len(art.FIGURES)}幅正式图；仅读取完成结果，未运行定位。', flush=True)
 
 
-def vector_redraw():
+def common_cdf():
+    """One shared legend for the saved common-cohort error and runtime CDFs."""
+    source = HERE/'data/assignment_cost_20261019/common_per_case.csv'
+    assert source.resolve(strict=True).is_relative_to((HERE/'data').resolve())
+    with source.open(encoding='utf-8-sig', newline='') as stream:
+        rows = list(csv.DictReader(stream))
+    methods = ('LS', 'MUSIC', 'MVDR', 'AP_FULL', 'BNOMP_REF', 'PROFILE_DIAG',
+               'MULTISTART_FIXED', 'GA', 'SBL', 'AP_5_JOINT')
+    assert len(rows) == 2400 and {r['method'] for r in rows} == set(methods)
+    cases = {r['case'] for r in rows if r['method'] == methods[0]}
+    assert len(cases) == 240
+    for method in methods:
+        group = [r for r in rows if r['method'] == method]
+        assert len(group) == 240 and {r['case'] for r in group} == cases
+    styles = (':', '--', '-.', (0,(6,2)), ':', '-.', (0,(5,1,1,1)),
+              (0,(3,1,1,1)), (0,(1,1)), '-')
+    markers = ('x', 'o', 'v', 's', '^', 'D', 'P', '>', '<', '*')
+    with plt.rc_context({'font.family':'DejaVu Sans', 'font.size':8.5,
+                         'axes.titlesize':9.5, 'axes.labelsize':9,
+                         'xtick.labelsize':8, 'ytick.labelsize':8,
+                         'axes.spines.top':False, 'axes.spines.right':False,
+                         'pdf.fonttype':42}):
+        fig, axes = plt.subplots(3, 2, figsize=(7.6, 7.2), layout='constrained')
+        fields = ('strong_error_m', 'weak_error_m', 'seconds')
+        for i, method in enumerate(methods):
+            group = [r for r in rows if r['method'] == method]
+            for col, field in enumerate(fields):
+                v = np.sort([float(r[field]) for r in group])
+                assert np.isfinite(v).all() and np.all(v >= 0)
+                end = max(float(r[field]) for r in rows)*1.1
+                x, y = np.r_[0.,v,end], np.r_[0.,np.arange(1,241)/240.,1.]
+                targets = (axes[0,col],axes[1,col]) if col < 2 else axes[2]
+                for ax in targets:
+                    ax.step(x, y, where='post', label=LABELS[method], color=COLORS[method],
+                            linestyle=styles[i], linewidth=1.65 if method=='AP_5_JOINT' else 1.2,
+                            marker=markers[i], markersize=3.0, markerfacecolor='white',
+                            markeredgewidth=.7, markevery=(4+2*i,32))
+        for col in (0,1):
+            end = max(float(r[fields[col]]) for r in rows)*1.1
+            axes[0,col].set_xscale('symlog', linthresh=1)
+            axes[0,col].set_xlim(0,end)
+            axes[0,col].axvline(20, color='#888888', lw=.8, ls=':')
+            axes[1,col].set_xlim(0,5 if col==0 else 10)
+            for ax in axes[:2,col]:
+                ax.set_xlabel('Position error (m)')
+        axes[2,0].set_xscale('symlog', linthresh=.1)
+        axes[2,0].set_xlim(0,max(float(r['seconds']) for r in rows)*1.1)
+        axes[2,1].set_xlim(0,1.5)
+        titles = ('(a) Strong source', '(b) Weak source', '(c) Strong: small errors',
+                  '(d) Weak: small errors', '(e) Complete runtime', '(f) Early completion')
+        for ax,title in zip(axes.flat,titles):
+            ax.set(title=title, ylim=(0,1.015), ylabel='Empirical CDF')
+            ax.grid(alpha=.14)
+        for ax in axes[2]:
+            ax.set_xlabel('Complete algorithm time (s)')
+        handles, labels = axes[0,0].get_legend_handles_labels()
+        fig.legend(handles, labels, loc='outside lower center', ncol=4, frameon=False,
+                   fontsize=8, handlelength=3.3, columnspacing=1.2)
+        folder = HERE/'figures/assignment_cost_20261019'
+        fig.savefig(folder/'common_cdf.pdf', bbox_inches='tight')
+        fig.savefig(folder/'common_cdf.png', dpi=600, bbox_inches='tight')
+        plt.close(fig)
+        (folder/'common_cdf_caption.json').write_text(json.dumps(dict(
+            en='Common 240-observation error and complete-runtime CDFs; shared method legend. All observations retained.',
+            zh='共同240条观测的误差与完整耗时CDF，使用统一方法图例，保留全部观测。',
+            source=str(source.relative_to(HERE)), source_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
+            n_per_method=240, methods=list(methods),
+            evaluation='EVAL-20261019-v3-SINGLE-SQUARED-ASSIGNMENT'),
+            ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+    print('Common CDF redrawn from unchanged saved data; no solver calls.')
+
+
+def vector_redraw(only=None):
     """Replot saved evidence without rewriting historical tables or manifests.
 
     Compatibility adapters apply only during this rendering call. Original
@@ -696,6 +769,9 @@ def vector_redraw():
             active_figures.update(Path(p).stem for p in re.findall(
                 r'\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}',
                 manuscript.read_text(encoding='utf-8')))
+    if only is not None:
+        assert set(only) <= active_figures, 'Requested figure is not in an active manuscript'
+        active_figures.intersection_update(only)
 
     original_read = art.read
     original_json = read_json
@@ -728,11 +804,16 @@ def vector_redraw():
         rows, details, contract, _ = load_evidence()
         paired = paired_results(rows)
         rows += profile_results(rows)
-        geometry(contract)
-        performance(rows)
-        layouts_and_ablation(rows, paired)
-        time_curves(details)
-        candidate_cases(details)
+        if 'formal_geometry' in active_figures:
+            geometry(contract)
+        if active_figures & {'formal_core', 'formal_common', 'formal_cdf_cost'}:
+            performance(rows)
+        if active_figures & {'formal_layouts', 'formal_ablation'}:
+            layouts_and_ablation(rows, paired)
+        if 'formal_time' in active_figures:
+            time_curves(details)
+        if 'formal_candidates' in active_figures:
+            candidate_cases(details)
         print('Vector redraw complete; historical tables and manifests unchanged.')
     finally:
         art.read = original_read
@@ -742,7 +823,9 @@ def vector_redraw():
 
 if __name__ == '__main__':
     import sys
-    if '--vector-only' in sys.argv:
+    if '--common-cdf-only' in sys.argv:
+        common_cdf()
+    elif '--vector-only' in sys.argv:
         vector_redraw()
     else:
         prepare()

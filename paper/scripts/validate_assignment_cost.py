@@ -8,6 +8,8 @@ from pathlib import Path
 from relocated_evidence import local_path
 
 import fitz
+import numpy as np
+from scipy.optimize import linear_sum_assignment
 
 HERE = Path(__file__).resolve().parents[1]
 
@@ -160,7 +162,7 @@ def validate_submission(bib, integrated=False):
             return {r['method']:r for r in csv.DictReader(f) if r['group']=='all'}
     maps = {
         'common_summary.csv': [('LS','LS peaks'), ('MUSIC','WB-MUSIC'), ('MVDR','MVDR-known'),
-          ('AP_FULL','Full AP'), ('BNOMP_REF','Fixed BNOMP'), ('PROFILE_DIAG','VP-BNOMP'),
+          ('AP_FULL','Full AP'), ('BNOMP_REF','BNOMP (FC--FC)' if integrated else 'Fixed BNOMP'), ('PROFILE_DIAG','VP-BNOMP'),
           ('MULTISTART_FIXED','Multistart ML'), ('GA','GA-ML'), ('SBL','WB-SBL'), ('AP_5_JOINT','MCJ-AP ($M=5$)')],
         'core_summary.csv': [('AP_1_JOINT','AP ($M=1$)'),('AP_2_JOINT','AP ($M=2$)'),
           ('AP_5_JOINT','MCJ-AP ($M=5$)'),('PROFILE_DIAG','VP-BNOMP')]}
@@ -212,6 +214,140 @@ def manuscript_log_issues(log, native_template=False):
     return issues
 
 
+def validate_candidate_ranks(texts):
+    """Replay saved branch positions and verify the pre-run AP5 configuration chain."""
+    base = HERE.parent/'outputs_e2e/unified/e2e_g10/r4'
+    evidence = base/'review_boundary_20261020_122047_490569/branches.json'
+    saved = json.loads(evidence.read_text(encoding='utf-8'))
+    assert saved['protocol'] == 'EVAL-20261019-v3-SINGLE-SQUARED-ASSIGNMENT'
+    assert saved['n'] == len(saved['rows']) == 2400
+    for path, expected in saved['source_sha256'].items():
+        assert sha(path) == expected, path
+    run = base/'formal_recovered_20261017_093236_136920'
+    audited = {r['case']: r for r in saved['rows']}
+    counts = {str(i): 0 for i in range(1, 6)}
+    counts['none'] = 0
+    recovered, selected_success, selection_loss = [], 0, 0
+
+    def success(truth, positions):
+        truth, positions = np.asarray(truth, float), np.asarray(positions, float)
+        assert truth.shape == positions.shape == (2, 2)
+        assert np.isfinite(positions).all()
+        cost = np.sum((truth[:, None, :]-positions[None, :, :])**2, axis=2)
+        a, b = linear_sum_assignment(cost)
+        return bool(np.all(np.sqrt(cost[a, b]) <= 20.0))
+
+    for case, expected in audited.items():
+        path = run/'rows'/(case+'_AP_5_JOINT.json')
+        row = json.loads(path.read_text(encoding='utf-8'))
+        mechanism = row['result']['mechanism']
+        branches = mechanism['branches']
+        assert [b['rank'] for b in branches] == [1, 2, 3, 4, 5]
+        ranks = [b['rank'] for b in branches if success(row['truth'], b['positions'])]
+        assert ranks == expected['successful_ranks'], case
+        chosen = success(row['truth'], row['result']['positions'])
+        assert chosen == expected['selected_success'], case
+        assert mechanism['selected_rank'] == expected['selected_rank'], case
+        counts[str(min(ranks)) if ranks else 'none'] += 1
+        selected_success += int(chosen)
+        selection_loss += int(bool(ranks) and not chosen)
+        if ranks and 1 not in ranks:
+            recovered.append(tuple(map(int, case.split('_'))))
+    assert counts == dict(zip(('1','2','3','4','5','none'), (2280,0,1,8,87,24)))
+    assert selected_success == 2376 and selection_loss == 0 and len(recovered) == 96
+    assert {r[0] for r in recovered} == {3}
+    assert len({r[1] for r in recovered}) == 18
+    for src in texts.values():
+        assert '& 2280 & 0 & 1 & 8 & 87 & 24' in src
+
+    names = ('formal_ready_20261017_023133_631280',
+             'formal_20261017_023343_260288',
+             'formal_recovered_20261017_093236_136920',
+             'review_supplement_formal_20261020_122624_540128')
+    paths = {n: base/n/'contract.json' for n in names}
+    contracts = {n: json.loads(p.read_text(encoding='utf-8')) for n,p in paths.items()}
+    ready, original, resumed, independent = [contracts[n] for n in names]
+    assert ready['stage'] == 'formal_release' and not ready['formal_observations_generated']
+    assert original['preparation_sha'] == sha(paths[names[0]])
+    assert resumed['io_recovery']['previous_contract_sha'] == sha(paths[names[1]])
+    configs = [c['configurations']['AP_5_JOINT'] for c in (ready, original, resumed)]
+    assert configs[0] == configs[1] == configs[2] and configs[0]['top'] == 5
+    assert independent['configs']['AP_5_JOINT'] == configs[0]
+    return dict(observations=2400, first_success_rank=counts,
+                selected_success=selected_success, selection_loss=selection_loss,
+                recovered=96, recovered_configuration_one_based=4, recovered_realizations=18,
+                evidence_sha256=sha(evidence), evidence_sources_checked=len(saved['source_sha256']),
+                formal_ap5_configuration_unchanged=True,
+                new_source_configuration_ap5_unchanged=True,
+                contract_sha256={n:sha(p) for n,p in paths.items()})
+
+
+def terminal_quality(texts, audit):
+    """Compare saved joint terminal certificates; never rerun a solver."""
+    path = HERE/'data/review_supplement_20261020/per_case.csv'
+    with path.open(encoding='utf-8-sig', newline='') as stream:
+        saved = {(r['case'], r['method']): r for r in csv.DictReader(stream)
+                 if r['stage'] == 'mechanism'}
+    rows = []
+    for raw, expected_sha in sorted(audit['source_files'].items()):
+        p = local_path(raw)
+        if p.parent.name != 'pairs' or not p.name.startswith('mechanism_'):
+            continue
+        assert sha(p) == expected_sha
+        pair = json.loads(p.read_text(encoding='utf-8'))
+        assert pair['stage'] == 'mechanism' and pair['iq_sha']
+        case = '_'.join(map(str, pair['task']))
+        methods = {r['method']: r for r in pair['rows']}
+        assert set(methods) == {'FC_VP', 'VP_VP'}
+        values = {}
+        for method, row in methods.items():
+            result, csvrow = row['result'], saved[case, method]
+            assert result['stop_reason'] == 'NATIVE_ENERGY_STABLE'
+            assert result['native_objective'] == float(csvrow['objective'])
+            assert result['projected_gradient'] == float(csvrow['gradient'])
+            assert row['metrics']['both20'] == (csvrow['both20'] == 'True')
+            assert result['config'] == methods['FC_VP']['result']['config']
+            values[method] = result
+        fc, vp = values['FC_VP'], values['VP_VP']
+        rows.append(dict(case=case, configuration_one_based=pair['task'][0]+1,
+            realization=pair['task'][1], power_gap_db=pair['task'][2], iq_sha=pair['iq_sha'],
+            fc_joint_objective=fc['native_objective'], vp_joint_objective=vp['native_objective'],
+            fc_minus_vp_objective=fc['native_objective']-vp['native_objective'],
+            fc_projected_gradient=fc['projected_gradient'], vp_projected_gradient=vp['projected_gradient'],
+            fc_success=methods['FC_VP']['metrics']['both20'],
+            vp_success=methods['VP_VP']['metrics']['both20'], source=str(p), source_sha256=expected_sha))
+    assert len(rows) == 240 and len(saved) == 480 and len({r['case'] for r in rows}) == 240
+    delta = np.asarray([r['fc_minus_vp_objective'] for r in rows])
+    gradients = np.asarray([[r['fc_projected_gradient'], r['vp_projected_gradient']] for r in rows])
+    assert np.isfinite(delta).all() and np.isfinite(gradients).all()
+    comparisons = {}
+    for tol in (1e-10, 1e-8):
+        comparisons[str(tol)] = dict(vp_lower=int(np.sum(delta > tol)),
+            approximately_equal=int(np.sum(np.abs(delta) <= tol)), vp_higher=int(np.sum(delta < -tol)))
+    biggest = rows[int(np.argmax(np.abs(delta)))]
+    result = dict(n=240, objective='Full joint normalized projection residual J',
+        gradient='Infinity norm of box-projected joint gradient, original meter coordinates',
+        tolerance_role='Absolute descriptive comparison tolerance, not a solver stop or significance test',
+        objective_comparisons=comparisons,
+        absolute_objective_difference_median_p95_max=np.quantile(np.abs(delta), [.5,.95,1]).tolist(),
+        gradient_medians=np.median(gradients, axis=0).tolist(),
+        vp_gradient_smaller=int(np.sum(gradients[:,1] < gradients[:,0])),
+        largest_difference=biggest, original_csv_sha256=sha(path),
+        original_audit_sha256=sha(HERE/'data/review_supplement_20261020/audit.json'))
+    assert comparisons['1e-10'] == dict(vp_lower=199, approximately_equal=41, vp_higher=0)
+    assert comparisons['1e-08'] == dict(vp_lower=167, approximately_equal=73, vp_higher=0)
+    assert result['vp_gradient_smaller'] == 240
+    assert biggest['case'] == '3_410_0' and not biggest['fc_success'] and not biggest['vp_success']
+    def sci(value):
+        mantissa, exponent = f'{value:.2e}'.split('e')
+        return mantissa+r'\times10^{'+str(int(exponent))+'}'
+    numbers = result['absolute_objective_difference_median_p95_max']+result['gradient_medians']
+    for text in texts.values():
+        assert all(sci(v) in text for v in numbers)
+        assert '199' in text and '41' in text and '167' in text and '73' in text
+    return result, rows
+
+
 def validate_integrated(out_relative):
     """Validate content parity and saved evidence, without running localization."""
     for name in ('paper_supplement', 'paper_supplement_zh'):
@@ -238,6 +374,19 @@ def validate_integrated(out_relative):
             assert all('??' not in p.get_text() and 'GOSPA' not in p.get_text() for p in pdf)
     assert r'\documentclass[a4paper,fleqn]{cas-sc}' in zh
     assert r'\documentclass[a4paper,fleqn,review]{cas-sc}' in en
+    for src in texts.values():
+        authors = [('Benjian Hao', '0000-0002-6676-7306', 'bjhao@xidian.edu.cn'),
+                   ('Xinlei Wang', '0000-0002-6855-3686', 'wangxinlei@stu.xidian.edu.cn'),
+                   ('Zan Li', '0000-0002-5207-6504', 'zanli@xidian.edu.cn')]
+        assert re.findall(r'\\author\[inst1\]\{([^}]+)\}', src) == [a[0] for a in authors]
+        for author, orcid, email in authors:
+            assert rf'\author[inst1]{{{author}}}[orcid={orcid}]' in src
+            assert rf'\ead{{{email}}}' in src
+        assert r'\cormark[1]' in src and r'\cortext[cor1]{Corresponding author.}' in src
+        assert 'State Key Laboratory of Integrated Service Networks, School of Telecommunications Engineering, Xidian University' in src
+        assert "city={Xi'an}, postcode={710071}, country={China}" in src
+        assert not re.search(r'\\ead\{\[|\\credit\{', src)
+        assert 'same current conditional coefficient estimate, gradient, discovery sequence' not in src
     patterns = {
         'display_math': r'\\begin\{(?:equation|align)\}.*?\\end\{(?:equation|align)\}',
         'labels': r'\\label\{[^}]+\}',
@@ -265,6 +414,8 @@ def validate_integrated(out_relative):
         for path, expected in record['source_files'].items():
             assert sha(path) == expected, path
     assert audit['exporter_sha'] == sha(HERE/'scripts/prepare_assignment_cost.py')
+    candidate_ranks = validate_candidate_ranks(texts)
+    terminal, terminal_rows = terminal_quality(texts, audit)
     english = validate_submission(bib, integrated=True)
     vectors = validate_vector_assets(tuple(texts))
     template_files = {n: sha(HERE/'template'/n) for n in ('cas-sc.cls','cas-common.sty')}
@@ -273,15 +424,21 @@ def validate_integrated(out_relative):
     result = dict(
         passed=True, protocol=report['protocol'], english=english, chinese_pages=zh_pages,
         bilingual_parity=parity, numeric_table_rows=len(numeric_rows(en)),
+        candidate_rank_evidence=candidate_ranks,
+        terminal_quality_evidence=terminal,
         source_identity=True, no_external_supplement=True, template_sha256=template_files,
         vector_assets=vectors, manuscript_sha256={n:sha(HERE/(n+'.tex')) for n in texts},
         pdf_sha256={n:sha(HERE/(n+'.pdf')) for n in texts},
         native_template_notes=[
             'CAS 2.4 native keyword-overlay overfull diagnostic is checked by exact signature and visual review.',
-            'Author fields are unfilled; native empty ORCID/anchor and footer remain until author information is supplied.'],
+            'Three authors, corresponding author, affiliation, ORCIDs and emails supplied by user; funding and CRediT remain unfilled.'],
         visual_review='Separate final per-page review required.')
     out = HERE/out_relative
     out.mkdir(parents=True, exist_ok=True)
+    with (out/'terminal_quality.csv').open('w', encoding='utf-8-sig', newline='') as stream:
+        writer = csv.DictWriter(stream, fieldnames=list(terminal_rows[0]))
+        writer.writeheader()
+        writer.writerows(terminal_rows)
     (out/'validation.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
     print(json.dumps(result, ensure_ascii=False, indent=2))
 

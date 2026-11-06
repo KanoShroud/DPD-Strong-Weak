@@ -1,0 +1,43 @@
+                                                                                          Y. Zeng et al.: QNOMP: A Quasi-Newton-Based Joint Multipath Optimization Method
+
+
+
+
+
+  FIGURE 3. Algorithm performance comparison in clustered channel simulations under three scenarios: (1) sparse delays and angles
+   (C1 = 2, C2 = 2); (2) dense delays and sparse angles (C1 = 1, C2 = 2); (3) dense delays and angles (C1 = 1, C2 = 0.5). Subplots (a)(b)(c): estimation
+   error versus SNR for Scenarios 1–3; (d)(e)(f): extrapolation error versus SNR for Scenarios 1–3, with extrapolation to bandwidth with label 48 (K = 2).
+
+
+ QNOMP provides significantly improved extrapolation    with an angular spread of γ =  4. The high-energy path
+accuracy and consistent improvements in channel estimation     selection step is omitted by setting ϵ = 0.
+compared  to NOMP. These gains stem from enhanced     We evaluate the algorithms under three distinct scenarios:
+super-resolution parameter estimation  capability, as  evi-     Scenario 1 (C1 = C2 = 2) corresponds to sparse paths in both
+denced in Fig. 2(e)(f). Regardless of path density, QNOMP     delay and angular domains; Scenario 2 (C1 = 1, C2 = 2)
+demonstrates substantial improvements over conventional    has dense delays but sparse angles; and Scenario 3 (C1 = 1,
+OMP and NOMP in both CSI estimation and extrapola-    C2 = 0.5) features dense paths in both domains.
+tion. When paths are not densely distributed, QNOMP’s        Fig. 3 shows the channel estimation and extrapolation
+estimation error approaches the CRB across a wide SNR     errors  of  various  algorithms  under  different  scenarios.
+range. The LOX method yields additional gains over the    The  results demonstrate that QNOMP achieves superior
+two-stage QNOMP approach, particularly in dense delay    performance in both estimation and extrapolation, outper-
+scenarios.                                                forming EM-IF-SBL and OG-ISTA. Moreover, when com-
+                                                           bined with the block reweighting technique (QNOMP+BR),
+                                                                the algorithm exhibits significantly improved extrapolation
+B. SIMULATED CHANNEL WITH ANGULAR BLOCK            performance compared to standalone QNOMP and other
+STRUCTURE                                                    baseline  methods,  effectively  exploiting  the  underlying
+To evaluate the performance improvement of the block     angular block structure. This improvement is supported by
+reweighting technique, we construct a clustered channel    more accurate super-resolution delay parameter estimates,
+model with M = 24 subcarriers and N = 64 antennas.     as shown in Fig. 4. In Scenario 3, which features dense
+The model comprises three clusters with delays τ1, τ2, τ3 and     angular distributions, the block reweighting technique also
+angular centers θ1, θ2, θ3. Each  cluster contains angular    enhances estimation accuracy.
+blocks defined as Bi =  θi + jC21θdft | j = −2, . . . , 2 for      Compared with SS-Turbo-IF-VBI, which also  utilizes
+i = 1, 2, 3. The sub-path gains are set as β = ej2πφ, where     angular block-sparse structure, QNOMP+BR maintains a
+     i.i.d.
+φi ∼Uniform[0, 1]. We evaluate both channel estimation     clear advantage, particularly in channel extrapolation. In Sce-
+(k = 1) and extrapolation (k = 2) performance.                 nario 3, although both algorithms achieve similar channel
+  The parameter settings for QNOMP and the baseline OMP     estimation accuracy, QNOMP+BR provides  significantly
+algorithm are the same as in Section V-A. For the block     better  extrapolation performance. SS-Turbo-IF-VBI only
+reweighting technique, the unit block width is 1θ = 0.51θdft     attains extrapolation accuracy comparable to that of QNOMP
+
+
+212664                                                                                                              VOLUME 13, 2025

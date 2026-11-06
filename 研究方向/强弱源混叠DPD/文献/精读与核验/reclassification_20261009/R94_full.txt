@@ -1,0 +1,1686 @@
+--- PDF PAGE 1 ---
+22190
+IEEE SENSORS JOURNAL, VOL. 25, NO. 12, 15 JUNE 2025
+Efficient 2-D Direction of Arrival Estimation
+Using Adaptive Grid Integrated Dictionaries
+Yanan Wu , Member, IEEE, Xiaotong Tu , Member, IEEE, and Bing Zheng, Member, IEEE
+Abstract—This article proposes a novel 2-D direction-of-
+arrival (DOA) estimation method based on sparse constraints
+and adaptive optimization, aiming to address issues such
+as grid mismatch and high computational complexity in tra-
+ditional DOA estimation techniques. In contrast to using a
+traditional grid over distinct angles, combined angle informa-
+tion atoms are adopted to construct the dictionary, using a
+power-based covariance matrix fitting method to estimate the
+noise power and then to select the active regions. To com-
+pensate for off-grid bias effects, a 2-D dictionary learning
+procedure is proposed, which is able to yield accurate esti-
+mates even in single snapshot scenarios, without assuming prior information about the number of sources. Numerical
+simulations illustrate the preferable performance of the proposed method as compared to recent 2-D DOA estimation
+algorithms.
+Index Terms— 2-D dictionary learning, 2-D direction-of-arrival (DOA) estimation, adaptive optimization, integrated
+dictionary.
+I. INTRODUCTION
+D
+ETERMINING the azimuth and elevation angles of
+various forms of reflectors is a commonly occurring
+problem in a wide range of applications, enabling precise
+spatial location information [2]. Various classical uniform
+linear array (ULA) methods have been extended to allow
+for 2-D direction-of-arrival (DOA) estimation, including the
+classical MUSIC [3] and ESPRIT [4] algorithms. As is well
+known, the estimation performance of these methods degrades
+significantly as the signal-to-noise ratio (SNR) decreases,
+when limited data samples are available, when the number of
+sources is unknown, or when the background noise not suffi-
+ciently white. These shortcoming has led to the development
+of several alternative approaches.
+Received 21 March 2025; accepted 24 April 2025. Date of publication
+5 May 2025; date of current version 16 June 2025. This work was
+supported in part by Shandong Province Natural Science Foundation
+under Grant ZR2024QF014. An earlier version of this paper was pre-
+sented at ICASSP Conference 2024. [DOI: 10.1109/ICASSP48485.
+2024.10445892]. The associate editor coordinating the review of
+this article and approving it for publication was Prof. Dongsoo Har.
+(Corresponding author: Bing Zheng.)
+Yanan Wu is with the Faculty of Information Science and Engi-
+neering, Ocean University of China, Qingdao 266404, China (e-mail:
+wuyanan@ouc.edu.cn).
+Xiaotong Tu is with the Smart DSP Laboratory, School of Informatics,
+Xiamen University, Xiamen 361005, China (e-mail: xttu@xmu.edu.cn).
+Bing Zheng is with the Underwater Vision Laboratory, College of
+Electronic Engineering, Ocean University of China, Qingdao 266100,
+China, and also with Sanya Oceanographic Institution, Ocean University
+of China, Sanya 572024, China (e-mail: bingzh@ouc.edu.cn).
+Digital Object Identifier 10.1109/JSEN.2025.3564909
+Recently, sparsity-driven approaches have attracted notable
+attention as an alternative to enforce sparse solutions. It has
+been shown that convex relaxation algorithms, such as
+the LASSO-based DOA estimation algorithms [5], [6],
+demonstrate
+excellent
+performance
+for
+grid-based
+DOA
+estimation. However, these methods strongly rely on that the
+source is on the assumed grid, rapidly losing performance as
+the source moves off the grid. Several other approaches have
+been proposed. A cross-covariance matrix of an L-shaped
+sparse array method was proposed in [7] to increase the
+degrees of freedom (DOF), though it requires a strictly
+defined array structure. The eigenvalue decomposition-based
+estimation methods in [8] and [9] and the 2-D grids searching
+methods in [10] and [11] typically require fine grid resolutions
+to maintain accuracy [12], [13], as does the Newtonized
+orthogonal matching pursuit (NOMP) algorithm introduced
+in [14]. Extending these approaches further, the the CFAR
+based Newtonized OMP (NOMP-CFAR) algorithm [15]
+further enhances robustness in line spectral estimation for
+radar and sonar applications. By incorporating CFAR detection
+into the iterative Newton refinement process, NOMP-CFAR
+not only mitigates off-grid bias but also maintains a constant
+false alarm rate under unknown and varying noise conditions,
+making it well-suited for practical signal processing tasks.
+As an alternative, grid-free techniques, such as atomic
+norm minimization (ANM)-based algorithms [16], [17], [18],
+eliminate the dependency on a fixed grid. Initially devel-
+oped for single-snapshot problems, these algorithms offer
+1558-1748 © 2025 IEEE. All rights reserved, including rights for text and data mining, and training of artificial intelligence
+and similar technologies. Personal use is permitted, but republication/redistribution requires IEEE permission.
+See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:33:27 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 2 ---
+WU et al.: EFFICIENT 2-D DIRECTION OF ARRIVAL ESTIMATION USING ADAPTIVE GRID
+22191
+performance comparable to conventional approaches in such
+cases and further improve with the availability of multiple
+snapshots. For example, the gridless DOA estimation method
+introduced in [19] primarily considers static targets, and addi-
+tional consideration are required to allow for tracking dynamic
+targets. In [20], two gridless methods were proposed that
+provides a new perspective in the field of DOA trajectory
+localization using polynomial and harmonic trajectory models,
+but the probability of detection varies significantly with the
+used threshold adjustments, particularly at low SNRs. Overall,
+in cases when the sample support is low, and/or for cases with
+low SNR, most available methods struggle to yield reliable
+estimates. In this article, striving to reduce the likelihood
+of missing off-grid components and to reduce the required
+computational complexity, we propose a 2-D DOA estimation
+method that allows for single snapshot data without requiring
+prior knowledge of the number of sources. Instead of using a
+conventional dictionary, treating the azimuth, θ, and elevation,
+φ, angles as separated atoms, we here use a dictionary over
+the combined angles sin θ sin φ and sin θ cos φ to lower the
+dimension of the dictionary, effectively reducing the dictionary
+size. Inspired by the 1-D-integrated dictionary framework [21],
+we introduced an integrated 2-D dictionary employing a
+power-based covariance fitting formulation [22], [23], such
+that the dictionary atoms are formed over a continuous range,
+thereby reducing grid mismatch effects and enhancing robust-
+ness in dynamic noisy environments. To further improve the
+computational efficiency, the estimated noise powers obtained
+using the integrated dictionary are then employed to form an
+adaptive threshold allowing only active atoms to be retained
+in each iteration. This efficiently shrinks the active regions in
+each iteration, substantially lowering the overall complexity.
+Additionally, an adaptive grid dictionary learning step is
+proposed to compensate for the off-grid bias, ensuring accurate
+DOA estimates across varying signal conditions. We show
+by numerical simulations that the proposed algorithm can
+achieve preferable performance as compared to the state-of-
+the-art, at a low computational cost, for off-grid sources, while
+being robust to the number of used bands and to the choice
+of the used regularization parameter, without requiring prior
+knowledge of the number of signals impinging on the array.
+As shown, the proposed method allows for reliable DOA
+estimates from a single snapshot, enabling an efficient tracking
+of moving targets.
+The rest of this article is organized as follows. Section II
+introduces the signal model for the rectangular array 2-D
+DOA estimation problem. In Section III, the novel angle infor-
+mation integrated dictionary is introduced and the efficiency
+of using the estimated power as a threshold retaining the
+regions of interest is shown. In Section IV, a computation-
+ally efficient solution to solve the proposed problem using
+the alternating direction method of multipliers (ADMM) is
+derived and analyzed for both the single and multiple snapshot
+cases. In Section V, we developed an adaptive grid dictionary
+learning step to compensate further for the off-grid bias,
+whereas Section VI summarizes the computational complexity
+of the proposed method. We evaluate the performance of the
+Fig. 1. Illustration of the geometry of the considered setup.
+method in Section VII, whereas Section VIII contains our
+conclusions.
+II. DATA MODEL
+Consider
+K
+far-field
+noncoherent
+narrowband
+signals
+impinging on a uniform rectangular array with Mx × My
+omnidirectional sensors in the X −Y plane, the interelement
+spacing between sensors in both axes being d, equaling half
+of the signal wavelength, λ f . An illustration of the geometry
+of the considered array setup is shown in Fig. 1. The DOAs
+for the kth signal can be represented as {θk, φk}, where θk ∈
+(0◦, 90◦] is the elevation angle and φk ∈(−180◦, 180◦) the
+azimuth angle. The received signal data yt, for t = 1, 2, . . . , L,
+may then be expressed as
+yt = As(t) + n(t)
+=
+
+Ay ⊙Ax
+
+s(t) + n(t)
+(1)
+where A denotes the array manifold matrix, s(t) denotes
+the signal vector, n(t) denotes an additive noise vector, and
+⊙denotes the Khatri–Rao product.
+Ay =
+
+ay(θ1, φ1), ay(θ2, φ2), . . . , ay(θK, φK)
+
+Ax = [ax(θ1, φ1), ax(θ2, φ2), . . . , ax(θK, φK)]
+(2)
+with
+ay
+ 1yk
+
+=
+h
+1, e−j2πd/λ f 1yk , . . . , e−j2πd/λ f (My−1)1yk
+iT
+ax
+ 1xk
+
+=
+h
+1, e−j2πd/λ f 1xk , . . . , e−j2πd/λ f (Mx−1)1xk
+iT
+where 1xk = sin θk sin φk ∈[−1, 1], 1yk = sin θk cos φk ∈
+[−1, 1], and (·)T denotes the transpose.
+III. CONSTRUCTION OF A 2-D-INTEGRATED DICTIONARY
+BASED ON THE AUGMENTED DICTIONARY MATRIX
+Let D denote an (Mx My) × G oversampled dictionary
+formed as
+D = Dy ⊙Dx
+(3)
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:33:27 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 3 ---
+22192
+IEEE SENSORS JOURNAL, VOL. 25, NO. 12, 15 JUNE 2025
+where the G columns in the dictionary matrix D refer to the
+corresponding azimuth and elevation candidate regions. When
+multiple samples are available, the measured data matrix may
+thus be expressed as
+Y =
+
+y1, y2, . . . , yL
+
+= DX + N
+(4)
+where X is an G × L unknown coefficients matrix.
+Let B denote number of bands for both 1x and 1y axes
+1x =
+
+−1, −1 + 2
+B , −1 + 2 2
+B , . . . , 1
+
+=
+
+1x1, 1x2, . . . , 1xB+1
+
+1y =
+
+−1, −1 + 2
+B , −1 + 2 2
+B , . . . , 1
+
+=
+
+1y1, 1y2, . . . , 1yB+1
+
+.
+(5)
+To form the wideband dictionary, let the internal dictionaries
+D(1x) and D(1y) be formed as
+D(1x) =
+
+dx1
+ 1x1
+
+dx2
+ 1x2
+
+· · ·
+dxB
+ 1xB
+
+D
+ 1y
+
+=
+
+dy1
+ 1y1
+
+dy2
+ 1y2
+
+· · ·
+dyB
+ 1yB
+
+(6)
+where 1xi ≤1xi ≤1xi+1 forms a band for xi = 1, 2, . . . , B,
+and 1yi ≤1yi ≤1yi+1 a band for yi = 1, 2, . . . , B, where
+dxi
+ 1xi
+
+=
+
+1, ˜dxi
+ 1xi
+
+, 2˜dxi
+ 1xi
+
+, . . . , Mx ˜dxi
+ 1xi
+H
+dyi
+ 1yi
+
+=
+
+1, ˜dyi
+ 1yi
+
+, 2˜dyi
+ 1xi
+
+, . . . , My ˜dyi
+ 1yi
+H
+with
+˜dxi
+ 1xi
+
+=
+Z 1xi+1
+1xi
+e
+−j2πd1
+λ f
+d1
+= e−j2πd/λ f 1xi+1 −e−j2πd/λ f 1xi
+−j2πd/λ f
+˜dyi
+ 1yi
+
+=
+Z 1yi+1
+1yi
+e
+−j2πd1
+λ f
+d1
+= e−j2πd/λ f 1yi+1 −e−j2πd/λ f 1yi
+−j2πd/λ f
+.
+Thus, the integrated dictionary has dimension Mx My × B2,
+taking the form
+D =
+
+dx1(1x1) ⊙dy1
+ 1y1
+
+· · · dx B(1x B) ⊙dyB
+ 1yB
+
+.
+Let 1 denote a vector of ones. Then, the covariance matrix of
+the measured signals can be represented as
+Ry = E
+
+y(t)y(t)H	
+= E
+n
+DX
+
+DX
+Ho
+= E
+n
+D
+
+XX
+H
+D
+Ho
+= DRXD
+H
+(7)
+where X is the coefficient matrix under the dictionary D,
+and E{·} and (·)H denote the statistical expectation and the
+conjugate transpose, respectively, and
+D =
+
+D
+1
+pMx My
+1
+
+=
+
+D1
+D2
+· · ·
+DB2
+1
+pMx My
+1
+
+RX =
+
+
+p1
+0
+· · ·
+0
+0
+0
+p2
+0
+· · ·
+0
+...
+0
+...
+...
+...
+0
+· · ·
+· · ·
+pB2
+0
+0
+· · ·
+· · ·
+· · ·
+σ 2
+n
+
+
+(8)
+with Di representing the ith column of the Mx My × B2 dictio-
+nary matrix D, pi representing the power corresponding to the
+ith column in D, and σ 2
+n the noise power. An initial estimate
+of X ∈C(B2+1)×L can be formed using least squares, such that
+bX =
+
+D
+HD
+−1
+DY.
+(9)
+Given (9), an estimate of (the diagonal of) RX may be formed
+as
+bRX = diag
+
+bXbX
+H
+= diag
+
+bp1, bp2, . . . , bpB2,bσ 2
+n
+
+(10)
+where diag[·] forms a diagonal matrix with either the diagonal
+elements of the given matrix or the given vector along the
+diagonal. The diagonal entries bpi in RX correspond to the
+estimated signal power within the ith angular region. This
+equivalence arises because the integrated atoms ˜dxi and ˜dyi
+are formed by integrating steering vectors over continuous
+angular intervals, and the diagonal structure of RX enforces
+region-wise energy independence. The least-squares estimation
+ensures that bpi aggregates the signal energy projected onto
+the ith region, effectively suppressing grid mismatch effects
+within the integrated angular bands. Using this estimate, one
+may determine the active atoms in D as the set
+A =
+
+i : bpi > bσ 2
+n, for i = 1, 2, . . . , B2	
+.
+(11)
+Thus, the active region dictionary can be formed as
+DA = {Di : i ∈A}.
+(12)
+Fig. 2 illustrates the resulting pruning process for a case with
+two sources, with Fig. 2(a) showing the estimated signal power
+bRX and Fig. 2(b) the retained atoms. Here, B = 20, so that the
+integrated dictionary contains 20 × 20 blocks, with each block
+representing a region. It can be seen that each block has an
+estimated power value, with the blocks around the true DOAs
+having higher power than the others. Fig. 2(b) shows that only
+24 blocks with powers higher than the estimated noise power
+were retained after the pruning process, with the others being
+set to zero, thereby being omitted from the further estimation
+process.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:33:27 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 4 ---
+WU et al.: EFFICIENT 2-D DIRECTION OF ARRIVAL ESTIMATION USING ADAPTIVE GRID
+22193
+Fig. 2. Integrated dictionary (a) before and (b) after the pruning process,
+showing that using the noise power one may reduce the active regions
+efficiently. After the pruning process, the active regions focus on the two
+true DOAs, shown as the red circles.
+IV. ZOOMING THE ACTIVE REGIONS USING
+THE ADMM ALGORITHM
+Using the selected active regions, we proceed to form a
+refined dictionary using a grid focused on these regions. Let
+Ai, i = 1, 2, . . . , |A|, denote the ith active region, which are
+then mapped back to the corresponding 2-D bands, where |A|
+represents the number of retained active regions.
+Defining X =
+[x1, x2, . . . , xL] , with xi
+∈CB2×1, the
+updated cost function can be represented as
+minimize
+X
+L
+X
+i=1
+∥DAxi −yi∥2
+2 + 1
+L
+L
+X
+i=1
+∥xi∥1
+(13)
+where ∥·∥2 and ∥·∥1 represent the l2 and l1 norms, respectively.
+Under the assumption that the DOAs are not varying during the
+L snapshots and introduce a constraint term, the minimization
+can be reformulated as
+minimize
+X,z
+L
+X
+i=1
+∥DAxi −yi∥2
+2 + ∥z∥1
+s.t. xi −z = 0,
+i = 1, 2, . . . , L
+(14)
+where the positions of the nonzeros elements in z represents
+that the signals have a high probability of impinging from
+the corresponding regions. Let c(xi) = xi −z. The above
+minimization problem have the augmented Lagrangian
+Lρ(x1, x2, . . . , xL, z, λ1, λ2, . . . , λL)
+=
+L
+X
+i=1
+∥DAxi −yi∥2
+2 + ∥z∥1 +
+L
+X
+i=1
+λT
+i c(xi) + ρ
+2
+L
+X
+i=1
+∥c(xi)∥2
+2
+(15)
+where λi are the Lagrange multipliers for the constraint xi −
+z = 0, and ρ the step length, with ρ ∈(0, ((1 +
+√
+5)/2)).
+Here, we set
+λi = α max
+DAi
+TY
+
+(16)
+where α is a threshold value, here selected as α ∈(0, 0.5).
+Such thresholds often require careful selection, although as
+shown below, this is not the case here. Let r(xi) = ∥DAxi −
+yi∥2
+2 and ui = (1/ρ)λi. Then, the ADMM iterations can be
+expressed in an unscaled form as (see Appendix for further
+details)
+Lρ(x1, x2, . . . , xL, z, λ1, λ2, . . . , λL)
+=
+L
+X
+i=1
+r(xi) + ∥z∥1 + ρ
+2
+L
+X
+i=1
+ ∥c(xi) + ui∥2
+2 −∥ui∥2
+2
+
+.
+(17)
+The update of X(t+1) can be estimated in parallel using the
+fixed z(t) and u(t), for i = 1, 2, . . . , L, where t denotes the tth
+iteration. Further
+X(t+1) = arg min
+X Lρ
+
+x1, . . . , xL, z(t), u(t)
+1 , . . . , u(t)
+L
+
+= arg min
+X
+L
+X
+i=1
+r(xi) + ρ
+2
+L
+X
+i=1
+xi −z(t) + u(t)
+i
+
+2
+2
+(18)
+where the update of the ith column in X is
+x(t+1)
+i
+= arg min
+xi ∥DAxi −yi∥2
+2 + ρ
+2
+xi −z(t) + u(t)
+i
+
+2
+2.
+(19)
+Similarly, z can be updated with X(t+1) and u(t)
+i
+fixed as
+z(t+1) = arg min
+z Lρ
+
+x(t+1)
+1
+, . . . , x(t+1)
+L
+, z, u(t)
+1 , . . . , u(t)
+L
+
+= arg min
+z ∥z∥1 + ρ
+2
+L
+X
+i=1
+x(t+1)
+i
+−z + u(t)
+i
+
+2
+2
+= arg min
+z ∥z∥1 + ρ
+2
+L
+X
+i=1
+z −γ (t)
+i
+
+2
+2
+(20)
+where γ (t)
+i
+= x(t+1)
+i
++ u(t)
+i . It is worth noting that
+L
+X
+i=1
+z −γ (t)
+i
+
+2
+2 = L∥z∥2
+2 −2
+*
+z,
+L
+X
+i=1
+γ (t)
+i
++
++
+L
+X
+i=1
+γ (t)
+i
+
+2
+2
+= L
+
+∥z∥2
+2 −2
+
+z, γ (t)
++
+γ (t)2
+2
+
++
+ 
+−L
+γ (t)2
+2 +
+L
+X
+i=1
+γ (t)
+i
+
+2
+2
+!
+= L
+z −γ (t)2
+2 +
+ 
+−L
+γ (t)2
+2+
+L
+X
+i=1
+γ (t)
+i
+
+2
+2
+!
+(21)
+where ⟨·⟩denotes the inner product. Thus, the update of z(t+1)
+can be written in terms of the average of the γ (t)
+i , such that
+z(t+1) = arg min
+z ∥z∥1 + Lρ
+2
+z −γ (t)2
+2
+= arg min
+z ∥z∥1 + Lρ
+2
+z −x(t+1) −u(t)2
+2
+(22)
+where x(t+1) = (1/L) PL
+i=1 x(t+1)
+i
+and u(t) = (1/L) PL
+i=1 u(t)
+i .
+Proceeding, with X(t+1) and z(t+1) updated, the update of u(t+1)
+can be formed as
+U(t+1) = arg min
+U Lρ
+
+x(t+1)
+1
+, . . . , x(t+1)
+L
+, z(t+1), u1, . . . , uL
+
+= arg min
+U
+ρ
+2
+L
+X
+i=1
+x(t+1)
+i
+−z(t+1)+ui
+
+2
+2−∥ui∥2
+2
+
+(23)
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:33:27 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 5 ---
+22194
+IEEE SENSORS JOURNAL, VOL. 25, NO. 12, 15 JUNE 2025
+with each column u(t+1)
+i
+being updated as
+u(t+1)
+i
+= arg min
+ui
+x(t+1)
+i
+−z(t+1) + ui
+
+2
+2 −∥ui∥2
+2
+= u(t)
+i
++ x(t+1)
+i
+−z(t+1).
+(24)
+This allows the ADMM iterations to be formed as (19), (22),
+and (24). With z(t) and u(t)
+i
+fixed, the update of x(t+1)
+i
+implies
+solving the least-squares problem
+x(t+1)
+i
+= arg min
+xi
+
+" DA
+q
+ρ
+2 I
+#
+xi −
+"
+yi
+q
+ρ
+2
+
+z(t) −u(t)
+i
+
+#
+2
+2
+=
+
+DH
+ADA + ρ
+2 I
+−1
+" DH
+A
+q
+ρ
+2 I
+#T"
+yi
+q
+ρ
+2
+
+z(t) −u(t)
+i
+
+#
+=
+
+DH
+ADA + ρ
+2 I
+−1
+DH
+Ayi + ρ
+2
+
+z(t) −u(t)
+i
+
+.
+(25)
+As the column number of columns in the dictionary matrix
+DA, G, is always larger than the number of rows in the
+dictionary matrix DA, Mx My, the matrix DH
+ADA + (ρ/2)I is
+always invertible. Thus, using the matrix inverse lemma
+
+DH
+ADA + ρ
+2 I
+−1
+= 2
+ρ I −2
+ρ DH
+A
+ρ
+2 I + DADH
+A
+−1
+DA (26)
+which may be formed in O(M3
+x M3
+y) operation. Let 0 ≜
+(2/ρ)I−(2/ρ)DH
+A((ρ/2)I+DADH
+A)−1DA, the update of x(t+1)
+i
+may thus be formed as
+x(t+1)
+i
+= 0
+
+DH
+Ayi + ρ
+2
+
+z(t) −u(t)
+i
+
+.
+(27)
+It should be noted that one only needs to compute 0
+once, allowing the update of X(t+1) to be implemented in a
+parallel implementation, each x(t+1)
+i
+update being a regularized
+least-squares problem with G variables. Proceeding
+z(t+1) = arg min
+z ∥z∥1 + Lρ
+2
+z −x(t+1) −u(t)2
+2
+= Soft 1
+Lρ
+ x(t+1) + u(t)
+(28)
+where Softη(ν) = sign(ν) max{0, |ν| −η} denotes the soft
+threshold operation, yielding the ADMM iterations
+x(t+1)
+i
+= 0
+
+DH
+Ayi + ρ
+2
+
+z(t) −u(t)
+i
+
+z(t+1) = Soft 1
+Lρ
+ x(t+1) + u(t)
+u(t+1)
+i
+= u(t)
+i
++ x(t+1)
+i
+−z(t+1).
+(29)
+By identifying the positions of the nonzero elements in z(t+1),
+one can (in an ideal situation) determine the sought DOAs
+as well as the number of signal sources. Since z(t+1) is a
+vector containing |A|B2 elements, the vector z(t+1) can be
+mapped back to |A| modules, with each module containing
+B2 elements. Then, remapping the nonzero values in z to
+the corresponding 2-D form, the dictionary columns may
+be assigned the estimated values. The transformation from
+¯1i = ( ¯1xi, ¯1yi) to (θi, φi) may be formed as
+bφi = atan
+  ¯1yi/ ¯1xi
+
+,
+bθi = asin
+  ¯1xi/ cos bφ
+
+(30)
+Fig. 3.
+Illustration of estimates of the proposed method using (a) initial
+integrated dictionary determining regions of interests, also shown in
+Fig. 2 and (b) resulting refined dictionary. The true signal sources are
+shown as the red circles.
+with the coarse DOA estimates being formed as
+[b2, b8] =
+ bθ1, bφ1
+
+,
+ bθ2, bφ2
+
+, . . . ,
+ bθ b
+K, bφ b
+K
+
+.
+(31)
+These estimates are then used to construct the dictionary D,
+such that
+D =
+
+dx(bθ1, bφ1) ⊙dy(bθ1, bφ1), . . . , dx(bθ b
+K, bφ b
+K) ⊙dy(bθ b
+K, bφ b
+K)
+
+(32)
+where
+dx
+ θg, φg
+
+= e−j2πd/λ f [0:Mx−1]T sin θg cos φg
+dy
+ θg, φg
+
+= e−j2πd/λ f [0:My−1]
+T sin θg sin φg
+(33)
+for g = 1, 2, . . . , b
+K. An illustration of the refined estimate
+obtained after a single zoom step is shown in Fig. 3.
+V. DICTIONARY LEARNING STEP
+Given the updated dictionary, the residual sum of squares
+function can be defined as
+F(θ, φ) = ∥Y −DX∥2
+F
+= Tr
+ YHY −2YHDX + XHDHDX
+
+.
+(34)
+Taking the first-order gradient with respect to θ yields
+∂F(θ, φ)
+∂θ
+= Re
+
+Tr
+
+−2YH ∂
+∂θ (DX) + 2(DX)H ∂
+∂θ (DX)
+
+= 2Re
+
+Tr
+
+(DX −Y)H ∂
+∂θ (DX)
+
+(35)
+where Re{·} denotes the real operator, and
+∂
+∂θg
+(DX) =
+∂dx
+∂θg
+⊙dy + dx ⊙∂dy
+∂θg
+
+X
+(36)
+and
+∂dx
+∂θg
+= −j 2πd
+λ f
+cos φg
+
+Bxg ◦dx
+
+∂dy
+∂θg
+= −j 2πd
+λ f
+sin φg
+h
+Byg ◦dy
+i
+(37)
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:33:27 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 6 ---
+WU et al.: EFFICIENT 2-D DIRECTION OF ARRIVAL ESTIMATION USING ADAPTIVE GRID
+22195
+where for the purpose of simplification, dx(θg, φg) is denoted
+as dx, while dy(θg, φg) is represented as dy, and ◦denoting
+the element-wise product, and
+Bxg =
+
+0, cos θg, 2 cos θg, . . . , (Mx −1) cos θg
+T
+Byg =
+
+0, cos θg, 2 cos θg, . . . ,
+ My −1
+
+cos θg
+T.
+(38)
+Thus, the DOA estimates can be updated using coordinate
+gradient descent with
+bθ(l+1)
+k
+= bθ(l)
+k
+−η∂F
+ b2(l+1), b8(l)
+∂bθ(k)
+k
+,
+for k = 1, 2, . . . , K
+(39)
+where η is the stepsize, which may be selected efficiently using
+the technique presented in [23]. Then, 8 can be updated with
+fixed 2(l+1) using
+bφ(l+1)
+k
+= bφ(l)
+k −η∂F
+ b2(l+1), b8(l)
+∂bφ(k)
+k
+,
+for k = 1, 2, . . . , K
+(40)
+where
+∂F(θ, φ)
+∂φ
+= 2Re
+
+Tr
+
+(DX −Y)H ∂
+∂φ DX
+
+∂
+∂φg
+DX = ∂dx
+∂φg
+⊙dy + dx ⊙∂dy
+∂φg
+X
+(41)
+with
+∂dx
+∂φg
+= j 2πd
+λ f
+sin θg
+
+Cxg ◦dx
+
+∂dy
+∂φg
+= −j 2πd
+λ f
+sin θg
+h
+Cyg ◦dy
+i
+(42)
+and
+Cxg =
+
+0, sin φg, 2 sin φg, . . . , (Mx −1) sin φg
+T
+Cyg =
+
+0, cos φg, 2 cos φg, . . . ,
+ My −1
+
+cos φg
+T.
+(43)
+A summary of the proposed algorithm is detailed1 in
+Algorithm 1.
+VI. COMPLEXITY ANALYSIS
+The computational load of the algorithm primarily comes
+from the following three steps.
+1) Calculating
+bX
+(1)
+,
+done
+once
+using
+(8),
+requiring
+O(B)6 operations.
+2) Computing ((2/ρ)I −(2/ρ)DH
+A((ρ/2)I + DADH
+A)−1
+DA)−1, done once, requiring O(M3
+x M3
+y) operations.
+3) Then, during each iteration, the gradient calcula-
+tion needs to be formed, requiring O(Mx My( ˆK)2L)
+operations.
+1An implementation of the algorithm will be made available on the authors’
+webpages upon publication.
+Algorithm 1 DOA Estimation Using an Integrated Dictio-
+nary as Well as a Narrowband Dictionary Learning Step
+Data: array output data Y, initial wideband dictionary
+matrix D, initial stepsize η(0)
+k
+= 1, ρ = 1, X(0) = 1,
+maximum iteration number T , stop criterion ϵ
+1. estimate bX
+(1)
+using (8) and (9), estimating the power bp
+using (10)
+2. select active sets using (11)
+3. construct the active region dictionary DA using (12)
+and (6)
+4. compute the ADMM iteration using (29)
+5. compute a coarse DOA estimation using (30)
+6. update dictionary using (32)
+while
+θ(l+1)
+g
+−θ(l)
+g
+ > ϵ or
+φ(l+1)
+g
+−φ(l)
+g
+ > ϵ and l ≤T
+do
+update candidate DOAs using (39) and (40)
+end
+VII. NUMERICAL RESULTS
+Proceeding, we examine the performance of the proposed
+estimator. To compare the estimation accuracy, we examine
+the summed root-mean-squared errors (RMSEs), defined as
+RMSE =
+v
+u
+u
+t
+1
+KM
+K
+X
+k=1
+M
+X
+m=1
+  ˆθk,m −θk
+2 +
+  ˆφk,m −φk
+2
+(44)
+where (θk, φk) denotes the kth DOA values, ( ˆθk,m, ˆφk,m)
+denotes the kth estimated values from the mth Monte Carlo
+simulation, and M denotes the number of Monte Carlo simu-
+lations. Here, the simulation results are calculated using M =
+500 Monte Carlo simulations for each SNR level or number
+of used snapshots, where the SNR is defined as SNR =
+10 log(PS/σ 2
+n), with PS denoting the power of the noiseless
+signal and σ 2
+n is the power of the noise. In the simulations,
+we compare the performance of the proposed method with
+MUSIC [3], 2-D unitary ESPRIT [4], Toeplitz-based covari-
+ance matrix reconstruction gridless approach (CMRA) [16],
+integrated wideband dictionary DOA estimation (IWBD) [21],
+as well as the Cramér–Rao lower bound (CRB) [24]. In the
+initial example, we consider an Mx × My = 6 × 6 uni-
+form rectangle array measuring L = 200 samples of the
+wavefonts from two uncorrelated far-field point sources with
+equal power located with DOAs (θ1, φ1) drawn within the
+intervals ([9◦, 11◦], [29◦, 31◦]) and (θ2, φ2) drawn within the
+intervals ([39◦, 41◦], [69◦, 71◦]), respectively, for each Monte
+Carlo simulation. The grid spacing for MUSIC is formed with
+a grid spacing of 0.01◦for the on-grid case, and with a grid
+spacing of 1◦for the off-grid case. For the proposed method,
+we use only a single zooming step. Here, the 2-D MUSIC
+and the 2-D unitary ESPRIT algorithms are allowed oracle
+knowledge of the number of sources, whereas IWBD, CMRA,
+and the proposed method estimate the number of sources as
+part of the estimation process.
+The simulations are arranged as follows. First, we show how
+the methods perform for varying SNRs and number of snap-
+shots in Fig. 4. The number of block regions Bx and By for
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:33:27 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 7 ---
+22196
+IEEE SENSORS JOURNAL, VOL. 25, NO. 12, 15 JUNE 2025
+Fig. 4. RMSE of the DOA estimates as a function of SNR and snapshot.
+(a) SNR. (b) Snapshots.
+Fig. 5.
+Running time as a function of the SNR and the number of
+snapshots. (a) SNR. (b) Snapshots.
+Fig. 6.
+Robust performance of the DOA estimates as a function of
+the regularized parameter α. (a) RMSE of the DOA estimates as a
+function of different regularization parameter α and SNR of the proposed
+method. (b) RMSE of the DOA estimates as a function of different
+regularization parameter α and SNR of IWBD. (c) Success probability
+of the DOA estimation as a function of different regularization parameter
+α and SNR of the proposed method. (d) Average running time as a
+function of different regularization parameter α and SNR of the proposed
+method.
+IWBD and the proposed method are set to 8. As can be seen in
+Fig. 4(a), MUSIC-offgrid and IWBD exhibit limited accuracy
+improvement even as SNR increases. Their dependence on
+predefined grids imposes a fundamental constraint, where the
+discrete angular resolution limits their ability to resolve off-
+grid sources, making grid mismatch errors even in high-SNR.
+The proposed method, CMRA, and the on-grid MUSIC do
+Fig. 7.
+Convergence performance of the DOA estimates, for
+SNR = 20 dB. (a) Convergence performance as a function of SNR.
+(b) Convergence performance as a function of snapshot, using L = 200.
+Fig. 8.
+Estimation ability of tracking moving target. (a) Tracking
+trajectory of the proposed method. (b) Tracking trajectory of the IWBD
+method. (c) Estimation error comparison of the proposed method (lower
+fig) and the IWBD method (top fig). (d) RMSE of the DOA estimates as
+a function of SNR for single snapshot case.
+Fig. 9.
+Ability of estimating multiple DOAs. (a) RMSE of the different
+signal number DOA estimates in terms of signal numbers. (b) Running
+time complexity in terms of signal numbers.
+not suffer a loss of performance due to the grid’s insufficient
+resolution. Fig. 4(b) shows how the techniques perform for
+varying data lengths for an SNR of 10 dB. As shown in the
+figure, all methods suffer a loss of performance when less
+data are available, with ESPRIT, MUSIC, and CMRA failing
+to resolve the sources efficiently due to the limited data length.
+The IWBD method is found to be robust to the single snapshot
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:33:27 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 8 ---
+WU et al.: EFFICIENT 2-D DIRECTION OF ARRIVAL ESTIMATION USING ADAPTIVE GRID
+22197
+Fig. 10. Estimation scatters of the DOA estimates. (a) CMRA. (b) ESPRIT. (c) On-grid MUSIC. (d) Off-grid MUSIC. (e) IWBD. (f) Proposed method.
+case, although the proposed method can be seen to yield the
+best performance.
+Next, in Fig. 5, we measure the complexity of each
+method. The theoretical complexities of the compared algo-
+rithms are dominated by the following operations: CMRA
+requires O(T (Mx My)3) + O((Mx My)2) complexity, primarily
+from nuclear norm minimization and root-MUSIC polyno-
+mial rooting, where T denotes the iteration times, IWBD
+involves O(GMx My) + O(T (G3 + G2L)) + O(K 3), driven
+by wideband dictionary construction, ADMM iterations, and
+eigenvalue refinement, with G as the grid size; 2D-ESPRIT
+achieves O((Mx My)2L) + O(Mx MyK 2) + O(K 3) complexity
+due to signal subspace decomposition, invariance equation
+solving, and eigenvalue decomposition; 2D-MUSIC exhibits
+O((Mx My)2L) + O((Mx My)3) + O(G(Mx My)2), dominated
+by covariance matrix computation, noise subspace, and spec-
+tral search. The running time was measure using MATLAB
+R2018a on a macOS Monterey, 2.3-GHz PC. The execution
+time was measured as a function of the SNR and of the
+data length. To allow for a fair comparison, the singular
+value decomposition (SVD), used by some of the methods,
+is implemented using a QR decomposition and a modi-
+fied Gram–Schmidt orthogonalization technique in place of
+MATLAB’s precompiled SVD function. As can be seen in the
+figure, varying SNRs only mildly affects the execution time of
+all methods. The complexity of the IWBD method can be seen
+to increase significantly with increasing number of snapshots,
+whereas the complexity of the proposed method only increases
+marginally.
+We proceed to illustrate the superiority and robustness of
+the proposed method in selecting the regularization parameter
+as compared to IWBD. Fig. 6 shows how the performance
+of the proposed method and IWBD are changing with α
+and SNR. As can be seen from Fig. 6(a) and (c), different
+choices of the regularization parameter α only mildly affect
+the estimation performance for the proposed method, whereas
+Fig. 6(b) shows how the performance of the IWBD method
+varies with α and SNR. Furthermore, Fig. 6(d) shows that
+larger regularization may increase the complexity slightly.
+The results show that the proposed method is robust to the
+choice of the regularization parameter, in this sense being
+preferable to the IWBD method. Fig. 7 shows the convergence
+rate for varying SNRs, computed using M = 500 Monte Carlo
+simulations, illustrating that the proposed method can converge
+in few iterations.
+To better show the performance ability of the DOA esti-
+mates in the single snapshot case, we examine how the
+proposed method can be used to track a moving target. The
+data are sampled at 10 dB with only a single snapshot being
+used for each estimate. Fig. 8(a) and (b) show the estimated
+trajectories of the proposed method and the IWBD method,
+respectively. As can be seen from Fig. 8(c) and (d), the
+proposed method yields preferable estimation performance as
+compared with the IWBD method.
+Then, we examine how the performance of the discussed
+methods are effected by the number of signal sources, K.
+As seen in Fig. 9, the proposed method has satisfactory
+performance in estimating multiple signals, without provided
+oracle knowledge of the number of sources.
+Proceeding, Fig. 10 examines the scatters distribution of the
+DOA estimates. In each figure, the scatter show the estimates
+from 100 Monte Carlo simulation, with SNR = 10 dB
+and L = 200. Here, for each Monte Carlo simulation, the
+DOAs are drawn within the intervals ([9◦, 11◦], [29◦, 31◦]) and
+([39◦, 41◦], [69◦, 71◦]), with the red dot showing the center
+of the intervals of the true DOAs. As can be seen from the
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:33:27 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 9 ---
+22198
+IEEE SENSORS JOURNAL, VOL. 25, NO. 12, 15 JUNE 2025
+Fig. 11.
+Estimation performance of varying stopping threshold ϵ.
+(a) RMSE of DOA estimation under different ϵ. (b) Running time of DOA
+estimation under different ϵ.
+figure, the estimation performance of the MUSIC and IWBD
+methods are limited to the grid resolution or initial space
+region set. Clearly, the scatters of the proposed method are
+more concentrated as compared to other methods, indicating
+the proposed method’s superior estimation performance.
+Finally, we examine how the threshold (ϵ) affects both the
+running time and estimation accuracy As seen in Fig. 11,
+as ϵ decreases, the algorithm requires more iterations to
+meet the stopping criterion, leading to a longer running time.
+Conversely, smaller ϵ values improve estimation accuracy.
+VIII. CONCLUSION
+In this article, a novel 2-D DOA estimation method is
+proposed, wherein a novel 2-D-integrated dictionary is con-
+structed to reduce the computational cost. The dictionary’s
+active regions are selected using an initial coarse estimate
+of the noise power, allowing for a refined high-resolution
+estimate without a substantial increase in computational com-
+plexity. Additionally, an efficient dictionary learning strategy
+is introduced to compensate for the inevitable off-grid bias.
+Numerical results illustrate the proposed method’s preferable
+performance as compared to the state-of-the art.
+Given its computational efficiency and adaptability, this
+framework naturally extends to more complex scenarios.
+Future work will generalize the adaptive dictionary framework
+to 3-D spatial parameter estimation for applications such as
+drone swarm tracking and distributed sensor networks, while
+preserving
+computational
+efficiency
+through
+noise-aware
+region pruning. Furthermore, the method will be extended
+to handle irregular array geometries, which are critical for
+next-generation
+MIMO
+radar
+systems
+requiring
+flexible
+hardware configurations.
+APPENDIX
+Let ui = (1/ρ)λi and f (xi, z) = ∥DAxi −yi∥2
+2 + ∥z∥1,
+then (15) becomes
+Lρ(x1, x2, . . . , xL, z, λ1, λ2, . . . , λL)
+(45)
+=
+L
+X
+i=1
+f (xi, z) + Re
+( L
+X
+i=1
+λT
+i (xi −z)
+)
++ ρ
+2
+L
+X
+i=1
+∥xi −z∥2
+2.
+(46)
+Define ξi = xi −z, allowing the cost function to be represented
+as
+Lρ(x1, x2, . . . , xL, z, λ1, λ2, . . . , λL)
+(47)
+=
+L
+X
+i=1
+f (xi, z) + ρ
+2
+ 
+Re
+( L
+X
+i=1
+2λT
+i
+ρ ξi
+)
++
+L
+X
+i=1
+∥ξi∥2
+2
+!
+=
+L
+X
+i=1
+f (xi, z) + ρ
+2
+L
+X
+i=1
+ ∥ξi∥2
+2 + 2 Re
+
+uT
+i ξi
+	
+=
+L
+X
+i=1
+f (xi, z) + ρ
+2
+L
+X
+i=1
+ ∥ξi∥2
+2 + 2Re
+
+uT
+i ξi
+	
++ ∥ui∥2
+2 −∥ui∥2
+2
+
+=
+L
+X
+i=1
+f (xi, z) + ρ
+2
+L
+X
+i=1
+∥ξi + ui∥2
+2 −ρ
+2
+L
+X
+i=1
+∥ui∥2
+2
+(48)
+where the third equality is achieved by completing the square.
+REFERENCES
+[1] Y. Wu and A. Jakobsson, “Adaptive grid 2-D direction of arrival esti-
+mation method using an integrated dictionary,” in Proc. IEEE Int. Conf.
+Acoust., Speech Signal Process. (ICASSP), Apr. 2024, pp. 8471–8475.
+[2] S. Haykin and K. R. Liu, Handbook on Array Processing and Sensor
+Networks. Hoboken, NJ, USA: Wiley, 2010.
+[3] R. Schmidt, “Multiple emitter location and signal parameter estima-
+tion,” IEEE Trans. Antennas Propag., vol. AP-34, no. 3, pp. 276–280,
+Mar. 1986.
+[4] M. Haardt, M. D. Zoltowski, C. P. Mathews, and J. Nossek, “2D unitary
+ESPRIT for efficient 2D parameter estimation,” in Proc. Int. Conf.
+Acoust., Speech, Signal Process., vol. 3, May 1995, pp. 2096–2099.
+[5] J. Luo et al., “Online sparse DOA estimation based on sub–aperture
+recursive LASSO for TDM–MIMO radar,” Remote Sens., vol. 14, no. 9,
+p. 2133, 2022.
+[6] J. Yang and Y. Yang, “Sparse Bayesian DOA estimation using hierar-
+chical synthesis lasso priors for off-grid signals,” IEEE Trans. Signal
+Process., vol. 68, pp. 872–884, 2020.
+[7] A. M. Elbir, “Two-dimensional DOA estimation via shifted sparse arrays
+with higher degrees of freedom,” Circuits, Syst., Signal Process., vol. 38,
+no. 12, pp. 5549–5575, 2019.
+[8] Y. Zhang and L. Jiang, “A direct data approach to joint 2-D DOA and
+frequency estimation with l-shaped array,” IEEE Trans. Aerosp. Electron.
+Syst., vol. 59, no. 4, pp. 3684–3694, Aug. 2023.
+[9] A. M. Molaei and M. Hoseinzade, “High-performance 2D DOA esti-
+mation and 3D localization for mixed near/far-field sources using
+fourth-order spatiotemporal algorithm,” Digit. Signal Process., vol. 100,
+May 2020, Art. no. 102696.
+[10] L. Chen, W. Qi, P. Liu, E. Yuan, Y. Zhao, and G. Ding, “Low-complexity
+joint 2-D DOA and TOA estimation for multipath OFDM signals,” IEEE
+Signal Process. Lett., vol. 26, no. 11, pp. 1583–1587, Nov. 2019.
+[11] M. Fu, Z. Zheng, and W.-Q. Wang, “2-D DOA estimation for nested con-
+formal arrays via sparse reconstruction,” IEEE Commun. Lett., vol. 25,
+no. 3, pp. 980–984, Mar. 2021.
+[12] L. Han, X. Liu, N. Zhang, S. Wu, J. Zhu, and Z. Xu, “Two-dimensional
+multi-snapshot Newtonized orthogonal matching pursuit for DOA esti-
+mation,” Digit. Signal Process., vol. 121, Mar. 2022, Art. no. 103313.
+[13] S. Yin, Y. Yang, Z. Chu, and Y. Yang, “Newtonized orthogonal
+matching pursuit-based compressive spherical beamforming in spherical
+harmonic domain,” Mech. Syst. Signal Process., vol. 177, Sep. 2022,
+Art. no. 109263.
+[14] B. Mamandipoor, D. Ramasamy, and U. Madhow, “Newtonized orthog-
+onal matching pursuit: Frequency estimation over the continuum,” IEEE
+Trans. Signal Process., vol. 64, no. 19, pp. 5066–5081, Oct. 2016.
+[15] M. Xu, J. Zhu, J. Fang, N. Zhang, and Z. Xu, “CFAR based NOMP for
+line spectral estimation and detection,” IEEE Trans. Aerosp. Electron.
+Syst., vol. 59, no. 5, pp. 6971–6990, Jun. 2023.
+[16] X. Wu, W.-P. Zhu, and J. Yan, “A Toeplitz covariance matrix recon-
+struction approach for direction-of-arrival estimation,” IEEE Trans. Veh.
+Technol., vol. 66, no. 9, pp. 8223–8237, Sep. 2017.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:33:27 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 10 ---
+WU et al.: EFFICIENT 2-D DIRECTION OF ARRIVAL ESTIMATION USING ADAPTIVE GRID
+22199
+[17] X. Zhang, Z. Zheng, W.-Q. Wang, and H. C. So, “DOA estimation of
+coherent sources using coprime array via atomic norm minimization,”
+IEEE Signal Process. Lett., vol. 29, pp. 1312–1316, 2022.
+[18] Q. Gong, S. Ren, S. Zhong, and W. Wang, “DOA estimation using sparse
+array with gain-phase error based on a novel atomic norm,” Digit. Signal
+Process., vol. 120, Jan. 2022 Art. no. 103266.
+[19] W.-G. Tang, H. Jiang, and Q. Zhang, “Gridless DOD and DOA esti-
+mation in bistatic MIMO radar using 2D-ANM and its low complexity
+algorithms,” Digit. Signal Process., vol. 108, Jan. 2021, Art. no. 102900.
+[20] R. Pandey and S. Nannuru, “Grid-free algorithms for direction-of-
+arrival trajectory localization,” J. Acoust. Soc. Amer., vol. 155, no. 2,
+pp. 1379–1390, 2024.
+[21] M. Butsenko, J. Swärd, and A. Jakobsson, “Estimating sparse signals
+using integrated wideband dictionaries,” IEEE Trans. Signal Process.,
+vol. 66, no. 16, pp. 4170–4181, Aug. 2018.
+[22] Y. Wu, A. Jakobsson, and L. Liu, “Super-resolution direction of arrival
+estimation using a minimum mean-square error framework,” Signal
+Process., vol. 212, Nov. 2023, Art. no. 109164.
+[23] Y. Wu, A. Jakobsson, and L. Liu, “Computationally efficient direction
+of arrival estimation using adaptive grid selection,” IET Radar, Sonar
+Navig., vol. 17, no. 11, pp. 1599–1611, 2023.
+[24] P. Stoica and A. Nehorai, “MUSIC, maximum likelihood, and Cramér–
+Rao bound: Further results and comparisons,” IEEE Trans. Acoust.,
+Speech, Signal Process., vol. 38, no. 12, pp. 2140–2150, Dec. 1990.
+Yanan Wu (Member, IEEE) received the bach-
+elor’s
+degree
+in
+measurement
+and
+control
+technology and instrumentation from Chang’an
+University, Xi’an, China, in 2015, and the Ph.D.
+degree in engineering from Harbin Engineering
+University, Harbin, China, in December 2023.
+During her doctoral studies, she was jointly
+trained
+at
+Lund
+University,
+Lund,
+Sweden,
+from 2019 to 2021, under the sponsorship of
+China Scholarship Council. Since March 2024,
+she has been a Postdoctoral Researcher at the
+Faculty of Information Science and Engineering, Ocean University of
+China, Qingdao, China. Her research focuses on array signal pro-
+cessing, statistical signal processing, and underwater acoustic signal
+processing, with applications in marine engineering and underwater
+technology.
+Xiaotong Tu (Member, IEEE) received the
+bachelor’s degree from Northeastern University,
+Shenyang, China, in 2014, and the Ph.D. degree
+from Shanghai Jiao Tong University, Shanghai,
+China, in 2020.
+During his Ph.D. program, he spent half a
+year at Lund University, Lund, Sweden, from
+September 2019 to February 2020. He is cur-
+rently an Assistant Professor with the School of
+Informatics, Xiamen University, Xiamen, Fujian,
+China, and a member with the Smart DSP Lab-
+oratory, School of Informatics, Xiamen University. His research interests
+include mainly in nonstationary signal processing, sound localization,
+industrial anomaly detection, and machine learning.
+Bing Zheng (Member, IEEE) received the B.S.
+degree in electronics and information system,
+the M.S. degree in marine physics, and the Ph.D.
+degree in computer application technology from
+the Ocean University of China, Qingdao, China,
+in 1991, 1995, and 2013, respectively.
+He is currently a Professor with the Depart-
+ment of Electronic Engineering, Ocean Univer-
+sity of China. His research interests include
+ocean optics, underwater imaging, and optical
+detection.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:33:27 UTC from IEEE Xplore.  Restrictions apply. 

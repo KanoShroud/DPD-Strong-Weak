@@ -1,0 +1,606 @@
+--- PDF PAGE 1 ---
+IEEE SIGNAL PROCESSING LETTERS, VOL. 32, 2025
+1241
+Contextual Direct Position Determination for Path
+Loss Informed Localization
+Licheng Zhao
+, Wenqiang Pu
+, Rui Zhou
+, Ming-Yi You
+, and Qingjiang Shi
+, Member, IEEE
+Abstract—In this letter, we look into the emitter localization
+task within the Direct Position Determination (DPD) paradigm.
+This paradigm is by essence a largest eigenvalue problem which
+treats the channel attenuation variables as free parameters. We
+consider the channel fading physical rule on electromagnetic signal
+propagation and reformulate the traditional DPD problem with a
+channel contextual prior. Thereafter, we develop iterative optimiza-
+tion algorithms based on the majorization-minimization (MM)
+framework. Numerical results show that the proposed algorithms
+outperform the traditional DPD estimators with better localization
+performance.
+Index Terms—Emitter localization, direct position determina-
+tion, channel contextual prior, majorization-minimization.
+I. INTRODUCTION
+E
+MITTER localization holds signiﬁcant importance in var-
+ious application ﬁelds, particularly in signal process-
+ing, wireless communications, environmental monitoring, and
+geographical navigation [1]. Traditional localization methods
+mostly adopt a two-step scheme: the ﬁrst step is parameter
+estimation, such as angle of arrival, time of arrival, and Doppler
+frequency shift estimation, and the second step is location in-
+ference with the aid of the estimated parameters and receiver
+coordinates. However, the classical methods are often subopti-
+mal because they miss out the fundamental connection that all
+location-related parameters should imply the same location of
+the emission source. To take account of this inherent connec-
+tion, Weiss developed the Direct Position Determination (DPD)
+paradigm for both single-emitter [1] and multiple-emitter [2]
+scenarios. In this letter, we choose to focus on the single-emitter
+situation.
+Received 5 February 2025; revised 4 March 2025; accepted 5 March 2025.
+Date of publication 10 March 2025; date of current version 24 March 2025. The
+work of Licheng Zhao was supported in part by the National Nature Science
+Foundation of China under Grant 62206182 and in part by Guangdong Basic
+and Applied Basic Research Foundation under Grant 2024A1515010154. The
+work of Wenqiang Pu was supported by the National Nature Science Foundation
+of China under Grant 62101350. The work of Rui Zhou was supported in part
+by the National Nature Science Foundation of China under Grant 62201362
+and in part by the Shenzhen Science and Technology Program under Grant
+RCBS20221008093126071. The associate editor coordinating the review of this
+article and approving it for publication was Prof. Giuseppe Thadeu Freitas de
+Abreu. (Corresponding author: Wenqiang Pu.)
+Licheng Zhao, Wenqiang Pu, and Rui Zhou are with Shenzhen Research
+Institute of Big Data, Shenzhen 518172, China (e-mail: zhaolicheng@sribd.cn;
+wpu@sribd.cn; rui.zhou@sribd.cn).
+Ming-Yi You is with the National Key Laboratory of Electromagnetic Space
+Security, Jiaxing 314033, China (e-mail: youmingyi@126.com).
+Qingjiang Shi is with the School of Software Engineering, Tongji University,
+Shanghai 201804, China, and also with Shenzhen Research Institute of Big Data,
+Shenzhen 518172, China (e-mail: shiqj@tongji.edu.cn).
+Digital Object Identiﬁer 10.1109/LSP.2025.3550047
+Consider a stationary emitter and M scattered receivers in
+the far ﬁeld region. Each receiver contains a uniform linear array
+(ULA) with N antennas. The emitter location is unknown and to
+be estimated from the received signal samples. The transmitted
+signal at time slot t is represented as s(t) ∈C and the m-th
+receiver captures a signal xm(t) ∈CM expressed as
+xm(t) = am (p) hms (t −τm (p)) + nm(t),
+(1)
+where p ∈R2 is the planar coordinates of the emitter location,
+am(p) ∈CN is the array response of receiver m from location
+p, τm(p) = distm(p)/c is the propagation time from location p
+to receiver m, distm(p) denotes the distance between receiver
+m and location p, c stands for the speed of light, hm ∈C
+is a free parameter measuring channel path loss, and nm(t)
+represents zero-mean complex white Gaussian noise. Every K
+signal samples are grouped into a section and rowwise Discrete
+Fourier Transform (DFT) is applied within each section. For any
+section index j = 1, 2, . . . and any k = 0, . . . , K −1, the DFT
+transformed signal of the m-th receiver, ¯xm(k, j), is expressed
+as
+¯xm(k, j) = am (p) hm¯s(k, j)
+· exp
+
+−j2π k
+K fsτm (p)
+
++ ¯nm(k, j),
+(2)
+where ¯s(k, j) is the DFT representation of s(t) and fs is the
+sampling rate. By vertically stacking the transformed signals
+of M receivers, i.e., ¯x(k, j) = [¯x1(k, j); . . . ; ¯xM(k, j)] and
+¯n(k, j) = [¯n1(k, j); . . . ; ¯nM(k, j)], we obtain a compact signal
+representation:
+¯x(k, j) = A (k, p) h¯s(k, j) + ¯n(k, j),
+(3)
+where h = [h1, . . . , hM]T ∈CM is the channel attenuation
+vector, A(k, p) = Blkdiag{b1(p), . . . , bM(p)} which con-
+structs a block diagonal matrix as
+⎡
+⎢⎣
+b1(p)
+...
+bM(p)
+⎤
+⎥⎦,
+and bm(p) = am(p) exp(−j2π k
+K fsτm(p)), ∀m. The DPD
+paradigm [1], [2], [3] constructs a statistic of M(p) in the
+following form:
+M(p) =
+K−1
+
+k=0
+AH (k, p) ρ(Rk)A (k, p) ,
+(4)
+where Rk = 1
+J
+J
+j=1 ¯x(k, j)¯xH(k, j) and ρ(R) : HM →HM
+is a multivariate function on covariance matrix R. As a result,
+the DPD problem is formulated as a largest eigenvalue problem,
+1070-9908 © 2025 IEEE. All rights reserved, including rights for text and data mining, and training of artiﬁcial intelligence and similar technologies.
+Personal use is permitted, but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 11:16:56 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 2 ---
+1242
+IEEE SIGNAL PROCESSING LETTERS, VOL. 32, 2025
+written as:
+maximize
+h:∥h∥2=1
+hHM (p) h.
+(5)
+When the ML estimator is adopted [3], ρ(R) = R; when the
+MVDR rationale is applied [3], ρ(R) = R−1 and problem (5) is
+converted to minimization; when the principles of MUSIC algo-
+rithm are followed [2], ρ(R) = UUH where U is composed of
+the eigenvectors corresponding to the k-largest eigenvalues. The
+optimal value of problem (5) is the largest eigenvalue of M(p),
+written as λmax(M(p)). Subsequently, the emitter location can
+be obtained from a grid search over a predeﬁned bounded region
+P that maximizes the largest eigenvalues, i.e.,
+p⋆= arg max
+p∈P λmax(M(p)).
+(6)
+The current DPD paradigm treats the channel attenuation vector
+hasfreeparametersindependentoftheemitterlocation,neglect-
+ing the channel fading effect in the process of electromagnetic
+signal propagation. Actually, the magnitude of each channel
+coefﬁcient should be inversely proportional to the γ/2-th power
+of the propagation distance and and scaled by a log-normal
+shadowing factor ξ [4, Chap. 2]. Thus, the consideration of
+the channel fading rule in DPD paradigm improves modeling
+accuracy, but the proper way of mathematical implementation
+remains unclear.
+Ourworkisbasedonthehypothesisthatusingchannelcontex-
+tual prior (like path loss) in the traditional DPD method would
+produce better localization results. This prior can be naturally
+embedded into problem (5), giving rise to a context-constrained
+DPD problem:
+maximize
+h:∥h∥2=1, h∈H(p)
+  
+contextual prior
+hHM(p)h,
+(7)
+where H(p) ⊆CM is a location-aware contextual feasible set
+and p serves as the context for channel prior. This problem
+is named as the contextual DPD problem. The contribution of
+this work is two-fold: 1) we incorporate the channel contextual
+prior in the DPD problem, as opposed to the traditional formu-
+lation which treats path loss as free parameters, and 2) while
+the traditional DPD method solves a largest-eigenvalue prob-
+lem, we develop iterative optimization algorithms using the
+majorization-minimization (MM) framework [5], introducing a
+new style of solution.
+II. PROBLEM FORMULATION
+For modeling improvement, we exploit the physical rule on
+electromagnetic signal propagation and establish a connection
+betweenpandhm byintroducingapathlossprior.Tobespeciﬁc,
+the channel coefﬁcient hm is modeled as a location-dependent
+path loss hm(p) and
+|hm (p)| ∝
+ξm
+[distm (p)]γ/2 ,
+(8)
+with ξm’s being independent and identically distributed (i.i.d)
+log-normal random variables of mean μ and variance σ2.
+In order to incorporate the path loss (8) into a contextual
+constraint set H(p), we perform pairwise division between |hm|
+and |h1| for any m > 1:
+|hm|
+|h1| = ξm
+ξ1
+ dist1 (p)
+distm (p)
+γ/2
+= ξm
+ξ1
+dγ/2
+1,m (p) ,
+(9)
+where d1,m(p) = dist1(p)/distm(p). Since ξm’s are i.i.d log-
+normal random variables, log(ξm/ξ1)’s are identically Gaussian
+distributed with zero mean and variance 2σ2. According to the
+concentration property of Gaussian distribution, for any m > 1,
+there always exists a ﬁnite-length interval [−Um, Um] (Um > 0)
+such that the event
+−Um ≤log
+|hm|
+|h1| d−γ/2
+1,m (p)
+
+≤Um
+(10)
+occurs with a given probability P < 1. In this case, Um =
+√
+2σΦ−1( 1+P
+2 ) and Φ is the cumulative distribution function
+of the standard Gaussian distribution. Note that log(ξm/ξ1)’s
+are identically distributed, and therefore the value of Um is
+index invariant for a given P. Setting P close enough to 1, we
+deduce that the path loss knowledge can be transformed with
+high probability into a contextual constraint set, given as
+H(p) =
+
+h
+dγ/2
+1,m (p) · l ≤|hm|
+|h1| ≤dγ/2
+1,m (p) · u, ∀m > 1
+
+,
+(11)
+where
+u = exp(
+√
+2σΦ−1( 1+P
+2 ))
+and
+l =
+exp(−
+√
+2σΦ−1( 1+P
+2 )). In words, the path loss ratio
+|hm|
+|h1|
+is constrained within an interval that depends on p and
+receiver positions. In practical implementation, l and u are
+customized hyperparameters. In this letter, we adopt the MVDR
+estimator, i.e., M(p) = K−1
+k=0 AH(k, p)R−1
+k A(k, p), and
+solve a minimization problem. Eventually, the contextual DPD
+problem is described as
+minimize
+h
+hHMh
+(12a)
+subject to
+dγ/2
+1,m · l ≤|hm|
+|h1| ≤dγ/2
+1,m · u, ∀m > 1,
+(12b)
+∥h∥2 = 1,
+(12c)
+where d1,m is an abbreviation for d1,m(p). The emitter location
+is selected as the grid point in P achieving the maximum of
+objective reciprocals of (12) [3].
+III. CONTEXTUAL DPD OPTIMIZATION
+In this section, we present an algorithmic solution to the con-
+textual DPD problem. We are going to apply the MM framework
+in pursuit of an iterative algorithm with stationarity convergence
+guarantees. The solution to problem (12) will be discussed in two
+separate scenarios, as are elaborated below.
+A. Exact Path Loss Exponent
+When the path loss exponent γ is exactly known, h is the only
+optimizationvariable.Inthefreespaceenvironment,γ isequalto
+2 [6] and we take this environmental condition as an illustrative
+example. The ﬁrst step of the MM framework is to construct a
+majorizing function. The q-th iterate of h is represented as h(q).
+In order to elementwisely decouple the variable h, we majorize
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 11:16:56 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 3 ---
+ZHAO et al.: CONTEXTUAL DIRECT POSITION DETERMINATION FOR PATH LOSS INFORMED LOCALIZATION
+1243
+the quadratic objective at h(q) by [7, Lemma 1]:
+hHMh ≤
+
+h(q)H
+(∥M∥2 I −M) h(q)
++ 2Re
+
+hHb
+
++ ∥M∥2 · hHh,
+(13)
+where b = (M −∥M∥2I)h(q). The second step is to solve the
+minimization problem. The ﬁrst term of (13) is a constant.
+Besides, the last term is also a constant due to the constraint
+∥h∥2 = 1. Removing all the constant terms, we obtain the
+following minimization problem:
+minimize
+h
+2Re
+
+hHb
+
+(14a)
+subject to
+d1,ml ≤|hm|
+|h1| ≤d1,mu, ∀m > 1,
+(14b)
+∥h∥2 = 1.
+(14c)
+We notice that the phase of h does not affect the feasibility in
+problem (14), so the optimal phase solution of h is only related
+to b and
+arg (h⋆) = arg (b) + π.
+(15)
+Thus, we can concentrate on magnitude optimization. We denote
+|h| and |b| as ˜h and ˜b, respectively, and problem (14) becomes
+minimize
+˜h
+−2˜hT ˜b
+(16a)
+subject to
+d1,ml · ˜h1 ≤˜hm ≤d1,mu · ˜h1, ∀m > 1,
+(16b)
+˜hT ˜h = 1.
+(16c)
+The ﬁrst constraint of (16) is linear while the second one is still
+nonconvex, so we do a change of variable ˜g = ˜h ⊙˜h (⊙is the
+Hadamard product) and derive the following equivalent convex
+reformulation:
+minimize
+˜g
+−2
+M
+
+m=1
+˜bm
+
+˜gm
+(17a)
+subject to
+(d1,ml)2 · ˜g1 ≤˜gm ≤(d1,mu)2 · ˜g1, ∀m > 1,
+(17b)
+1T ˜g = 1.
+(17c)
+We successively solve problem (17) via an off-the-shelf solver
+until convergence.
+B. Inexact Path Loss Exponent
+When the path loss exponent γ is not exactly known but lies
+within an interval [γl, γu], we can still apply the MM framework.
+The majorization step and the optimal phase solution follow the
+previous case but the minimization problem on magnitude is
+slightly different:
+minimize
+˜h,γ
+−2˜hT ˜b
+(18a)
+subject to
+dγ/2
+1,ml ≤
+˜hm
+˜h1
+≤dγ/2
+1,mu, ∀m > 1,
+(18b)
+γl ≤γ ≤γu,
+(18c)
+˜hT ˜h = 1.
+(18d)
+To solve problem (18), we relax the equality constraint ˜hT ˜h = 1
+to be inequality and the relaxation is tight without affecting
+optimality. The reason is given by contradiction. Suppose that
+the norm of optimal ˜h is strictly less than 1, i.e., ∥˜h⋆∥2 < 1,
+and we can always scale up ˜h⋆by 1/∥˜h⋆∥2(> 1) without
+violating the constraints. However, the objective function value
+decreases: −1/∥˜h⋆∥2 · (˜h⋆)T ˜b < −(˜h⋆)T ˜b, which contradicts
+the optimality assumption. After relaxation, we do a change of
+variable: ˜hm = exp(˜gm), and problem (18) is recast as
+minimize
+˜g,γ
+−2
+M
+
+m=1
+˜bm exp (˜gm)
+(19a)
+subject to
+γ
+2 log d1,m + log l ≤˜gm −˜g1
+≤γ
+2 log d1,m + log u, ∀m > 1,
+(19b)
+γl ≤γ ≤γu,
+(19c)
+log
+ M
+
+m=1
+exp (2˜gm)
+
+≤0.
+(19d)
+The last constraint is expressed in a “log-sum-exp” format for
+numerical stability.
+To this point, the constraint set is convex but the objective is
+not. We consider solving (19) with an inner loop using MM as
+well. In view of the concavity of −exp(x), we further majorize
+the objective with its ﬁrst order Taylor expansion at the current
+iterate ˜g(q)
+m :
+−2
+M
+
+m=1
+˜bm exp (˜gm) ≤−2
+M
+
+m=1
+˜bm exp
+
+˜g(q)
+m
+
+−2
+M
+
+m=1
+˜bm·
+exp
+
+˜g(q)
+m
+ 
+˜gm −˜g(q)
+m
+
+.
+(20)
+Removing all the constant terms, we obtain the inner minimiza-
+tion problem:
+minimize
+˜g,γ
+−2
+M
+
+m=1
+˜bm exp
+
+˜g(q)
+m
+
+˜gm
+(21a)
+subject to
+γ
+2 log d1,m + log l ≤˜gm −˜g1
+≤γ
+2 log d1,m + log u, ∀m > 1,
+(21b)
+γl ≤γ ≤γu,
+(21c)
+log
+ M
+
+m=1
+exp (2˜gm)
+
+≤0.
+(21d)
+The overall solution scheme is a double loop and problem
+(21) is iteratively solved until convergence.
+IV. SIMULATION
+In this section, we present simulation results to evaluate
+the performance of the proposed algorithm. All simulations
+are performed on a PC with a 2.90 GHz i7-10700 CPU and
+16.0 GB RAM. The benchmark algorithm is DPD-HR in [3].
+The proposed algorithm is based on the MVDR estimator and
+additionally considers channel contextual prior. For simplic-
+ity, the proposed algorithms are named as Contextual-Exact
+(Section III-A) and Contextual-Inexact (Section III-B).
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 11:16:56 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 4 ---
+1244
+IEEE SIGNAL PROCESSING LETTERS, VOL. 32, 2025
+Fig. 1.
+Miscellaneous numerical results.
+We focus on the single emitter scenario and consider two
+distinct emitter location cases. In Case I, the emitter’s location
+is (19.8, 0.4) km and in Case II, the location is (22.1, −0.7) km.
+Inbothcases, theemitter transmits narrowbandquaternaryphase
+shift keying (QPSK) signals. Five receivers (M = 5) are placed
+in the far ﬁeld region of the emitter at coordinates (−21, −12),
+(12, 12), (40, −20), (55, 7), and (10, −52) km, each equipped
+with 10 antennas (N = 10) at half-wavelength spacing. The
+magnitude of channel coefﬁcient is characterized by (8) with
+ξm’s being i.i.d and log ξm ∼N(0, 0.003). The phase is uni-
+formly distributed between 0 and 2π. Sampling frequency fs
+is 120 kHz, observation time T is 0.5 seconds, DFT sequence
+length K is 512, and thus the total number of sections J is
+ﬂoor((fsT)/K) = 117. The search region for emitter localiza-
+tion is speciﬁed as a square area and the coordinates of the four
+corners are (15, −15), (35, −15), (15, 5), and (35, 5) km. This
+area is evenly divided into 20 × 20 grids and the evaluation
+is conducted on the grid point (edges included). When γ is
+not exactly known, we assume γ ∈[1.8, 2.2] by default. Each
+antenna array is oriented to the geometric center of the search
+region and the reference receiver is selected as the closest node
+to the center.
+Case I: As shown in Fig. 1(a), (b), and (c), the proposed
+algorithms can spot the target with greater precision than the
+benchmark at a −5 dB received SNR on the reference node. The
+black cross is the estimated position and the red dot is the ground
+truth. The benchmark DPD-HR causes a localization error of
+4.05 km while the error distance of the proposed algorithms
+is merely 0.45 km. Case II: when the emitter is shifted to
+(22.1, −0.7) km, the proposed algorithms occasionally give
+differentlocalizationresultsata0dBreceivedSNR,cf.Fig.1(d),
+(e), and (f). The localization error of DPD-HR is 1.58 km while
+those of Contextual-Exact and Contextual-Inexact are 0.32 km
+and 0.95 km, respectively.
+Next, we extend the SNR range for further algorithmic ex-
+amination. The simulation results are presented in Fig. 1(g)
+and (h). The received SNR on the reference node varies from
+−20 dB to 10 dB. The emitter location is uniformly randomized
+within the detection region. In Fig. 1(g), each reported data point
+is averaged over 150 random instances. In terms of average
+performance, both proposed algorithms always reach a lower
+localization error level than the benchmark. Quantitatively,
+the average improvement to DPD-HR is about 40% for both
+Contextual-Exact and Contextual-Inexact. However, of all the
+compared algorithms, the estimates demonstrate high volatility,
+so we plot a 95% conﬁdence interval around the mean value
+(cf. Fig. 1(g)) and also investigate the cumulative distribution
+function (CDF) of the estimates at a −5 dB received SNR (cf.
+Fig. 1(h)). From Fig. 1(g), we can deduce that the proposed
+algorithms offer better guarantees against extreme error levels
+because the upper limits of conﬁdence intervals generated by the
+proposed algorithms are about 60% lower than the benchmark.
+In Fig. 1(h), we increase the number of random instances to
+400 and observe that in Case I, the error level of DPD-HR is
+quite extreme and very close to the boundary of the conﬁdence
+interval while those of Contextual-Exact and Contextual-Inexact
+are controllable.
+V. CONCLUSION
+In this letter, we have investigated into emitter localization
+within the DPD paradigm for end-to-end optimization. In the
+traditional DPD paradigm, the channel attenuation vector is
+independent of the emitter location. By contrast, we have con-
+sidered the channel fading effect on signal propagation and
+improved the system modeling with a contextual prior. The
+essence of the contextual DPD problem is to incorporate prior
+information as optimization constraints. To solve the contextual
+DPD problem, we have put forward iterative optimization al-
+gorithms using the MM framework. We have derived a convex
+formulation for variable update in every iteration. Numerical
+results have revealed that the proposed algorithms are superior
+to the traditional DPD estimators. An interesting ﬁnding is that
+the concept of contextual optimization can be extended to other
+data processing ﬁelds such as data clustering tasks [8]. The
+class-dependent characteristics like clustering centre, scatter-
+ing pattern, and/or statistical distribution could be modeled as
+contextual constraints, which may enhance the accuracy of the
+clustering results.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 11:16:56 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 5 ---
+ZHAO et al.: CONTEXTUAL DIRECT POSITION DETERMINATION FOR PATH LOSS INFORMED LOCALIZATION
+1245
+REFERENCES
+[1] A. J. Weiss, “Direct position determination of narrowband radio frequency
+transmitters,” IEEE Signal Process. Lett., vol. 11, no. 5, pp. 513–516,
+May 2004.
+[2] A. J. Weiss and A. Amar, “Direct position determination of multiple radio
+signals,” EURASIP J. Adv. Signal Process., vol. 2005, pp. 1–13, 2005.
+[3] T. Tirer and A. J. Weiss, “High resolution direct position determination
+of radio frequency sources,” IEEE Signal Process. Lett., vol. 23, no. 2,
+pp. 192–196, Feb. 2016.
+[4] A. Goldsmith, Wireless Communications. Cambridge, U.K.: Cambridge
+Univ. Press, 2005.
+[5] Y. Sun, P. Babu, and D. P. Palomar, “Majorization-minimization algorithms
+in signal processing, communications, and machine learning,” IEEE Trans.
+Signal Process., vol. 65, no. 3, pp. 794–816, Feb. 2016.
+[6] M. Viswanathan, Wireless Communication Systems in Matlab. India: Math-
+uranathan Viswanathan, 2020.
+[7] J. Song, P. Babu, and D. P. Palomar, “Sequence design to minimize the
+weighted integrated and peak sidelobe levels,” IEEE Trans. Signal Process.,
+vol. 64, no. 8, pp. 2051–2064, Apr. 2016.
+[8] J. V. de Miranda Cardoso, J. Ying, and D. P. Palomar, “Learning bipartite
+graphs: Heavy tails and multiple components,” Adv. Neural Inf. Process.
+Syst., vol. 35, pp. 14044–14057, 2022.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 11:16:56 UTC from IEEE Xplore.  Restrictions apply. 

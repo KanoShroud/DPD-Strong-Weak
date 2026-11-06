@@ -1,0 +1,65 @@
+                                                                                          Y. Zeng et al.: QNOMP: A Quasi-Newton-Based Joint Multipath Optimization Method
+
+
+
+E. COMPUTATIONAL COST AND REMARKS                       enhancement lies in the use of the BFGS quasi-Newton
+This section analyzes the computational complexity of the         method instead of the classical Newton method for
+QNOMP algorithm.                                                     off-grid parameter estimation. BFGS enables the joint
+  By  leveraging  the  tensor  structure  of  aτ ⊗aθ  and          optimization of all estimated path parameters, a task
+utilizing  the  Fast  Fourier  Transform (FFT)  for  initial            that is computationally infeasible in NOMP due to the
+correlation computations, the total computational cost of          high complexity of explicit Hessian matrix inversion in
+Algorithm 1 is O MN log(MN) + nLRMN(k1 + k2)  , where          each Newton step. This joint optimization concurrently
+nLR denotes the number of local refinement iterations. This           mitigates the risk of being trapped in local minima
+multi-resolution  refinement approach  is  computationally           associated with sequential optimization. Furthermore,
+efficient compared to conventional OMP with a finer grid,          performing a full-variable BFGS optimization after the
+which would require O kn1kn2MN log(kn1kn2MN)  operations      OMP stage consistently yields more accurate parameter
+to achieve equivalent resolution.                                      estimates in practical scenarios.
+  Since most optimization algorithms require gradient infor-       2) In the conventional OMP method, the residual vector
+mation, we focus specifically on the additional computational          r remains orthogonal to the columns of the sensing
+overhead introduced by the BFGS method. Compared to          matrix that have already been selected. Moreover, each
+gradient-based approaches such as gradient descent, the         column can be chosen at most once during the OMP
+BFGS scheme primarily incurs extra cost from updating the           process. However, in QNOMP, the introduction of
+approximation matrix H.                                                off-grid optimization violates this orthogonality con-
+  In the k-th OMP iteration, H ∈R2k×2k, and each update             straint. As a result, the same on-grid point (τi0 , θ0j ) may
+of H requires O(k2) operations. Thus, the total additional cost         be selected multiple times in successive on-grid OMP
+                              =            steps. This mechanism, counterintuitively, enhancesdue to BFGS over all Np path iterations is nin ·PNpk=1 O(k2)
+nin·O(N p3 ), where nin denotes the number of BFGS iterations.          performance. While conventional OMP with a fixed
+  In practice, this overhead is generally negligible, making           grid spacing 1τdft, 1θdft struggles to resolve two paths
+the BFGS approach highly computationally efficient in the           separated by less than the grid resolution, QNOMP’s
+present context.                                                       multi-resolution refinement and off-grid BFGS opti-
+  By similarly leveraging the tensor structure of A(τ, θ),          mization allow it to successively identify and refine
+the  computational  cost  of  the  pseudo-inverse  solution          such closely spaced paths, thereby improving super-
+(or LMMSE)  for  the  matrix A(τ, θ)  ∈  CMN×k  is           resolution capability.
+O(k3 + k2(M + N) + kMN).  Thus,  the  total  cost       3) The number of BFGS steps during the OMP iteration
+for Step 7  in QNOMP amounts  to O(Np4 + Np3 (M +          can be small in practice. Typically, two to three steps
+N) + Np2 MN). The  remaining  computational overhead           are sufficient to yield satisfactory refinement. In the
+                                                                subsequent joint BFGS optimization stage after thein  the  optimization  stage can be  similarly  derived  as
+                                        OMP iterations, a moderately larger number of steps
+O (Np3 + Np2 (M + N) + NpMN)(ninNp + nout)  . Given that                                                  may be used to further enhance the estimation accuracy.
+Np  is generally small, the dominant term  simplifies  to
+     2                                                                 Additionally, while  it  is feasible to select multiple
+O(Np MN).                                                                       indices with the strongest correlations in each OMP
+  For  comparison,  the  per-iteration  cost  of computing
+                                                         2                   iteration, empirical results demonstrate that refining
+the Hessian matrix using Newton’s method is O(Np MN),                                                                only the index with the largest correlation is generally
+while the total computational overhead reaches O(Np3 MN)—            sufficient to achieve high-resolution channel estimates.
+significantly exceeding that of the BFGS update and poten-                                                                 4) The BFGS method for joint optimization yields sig-
+tially surpassing the overall complexity of QNOMP. As a                                                                           nificant advantages in efficiency and accuracy. Under
+result, Newton’s method proves prohibitively inefficient in                                                                          suitable conditions, BFGS achieves a local superlinear
+this context.                                                               convergence rate, while gradient descent  is limited
+  In summary, QNOMP maintains high computational effi-                                                                          to  linear convergence  [57]. In  contrast, sequential
+ciency. Compared to conventional OMP, it incurs only min-                                                                    single-parameter optimization not only converges more
+imal additional cost while achieving substantially improved                                                                 slowly but can also fail to converge in non-convex
+accuracy in channel parameter estimation and enhanced                                                                              settings, a classic example of which is documented
+extrapolation capability, as demonstrated in the subsequent                                                                          in [58].
+numerical results.
+  We conclude with several key observations regarding                                                                      IV. LINEAR OPTIMAL EXTRAPOLATION AND
+QNOMP:                                            IMPROVEMENT OF QNOMP
+  1) QNOMP represents a significant improvement and    Using the optimized parameters (τ, θ, β), the channel can
+      extension of the Newtonized Orthogonal Matching Pur-    be extrapolated to different frequency bands by utilizing
+       suit (NOMP) method [34], [35]. In each OMP iteration,     the multipath model  in  (2). The extrapolation accuracy
+   QNOMP incorporates a multi-resolution refinement      is evaluated over the entire frequency domain rather than
+     module to enhance estimation accuracy. The primary     solely on the pilot subcarriers. In Sections IV-A and IV-B,
+
+
+212658                                                                                                              VOLUME 13, 2025

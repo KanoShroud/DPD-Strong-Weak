@@ -1,0 +1,210 @@
+
+--- PDF PAGE 3 ---
+JIN et al.: INDOOR DIRECT LOCALIZATION METHOD UTILIZING STRUCTURAL SPARSITY AND LOW-RANKNESS                                      25409
+
+
+                                                               coordinate system. Each BS is equipped with a linear array
+                                                                 consisting of Ml antennas, each connecting an independent
+                                                                radio frequency link, facilitating digital processing capabilities.
+                                                   The antenna position set of the lth BS is given by
+
+                                                                                                         T
+                                                                  Bl =  pl,m|pl,m = pl + (m −1)d cos(ϕl), sin(ϕl)
+
+                                                                  1 ≤m ≤Ml, m ∈Z                        (1)
+
+                                                      where d is the known interelement spacing and ϕl represents
+                                                                 the angle between the end-ﬁre direction of the lth array and
+                                                                 the positive direction of the x-axis.
+                                                                  In the multipath environment, signals emitted by the target
+                                                            propagate through both LOS and several NLOS paths, arriving
+                                                                         at the lth receiver from multiple directions after undergoing
+Fig. 1.   Localization system for a wireless sensing network.               various reﬂections. For the lth BS, the incident AOA along the
+                                          LOS path is deﬁned as θl(pt), whereas the AOAs associated
+                                                             = 1, . . . , J                                                           with the NLOS paths are denoted as θ(j)l   , where j
+      applied in the localization context to incorporate the low-   with J denoting the number of NLOS paths. Capturing spatial
+      rankness of steering vectors.                           phase differences, the multipath signal model can be described
+  3) An efﬁcient DP algorithm with a jointly convex objective  below
+      function  is designed  to  guarantee  global  optimality                                          J
+                                                             + nl(t)     through alternating updates. To tackle the nonsmooth      xl(t) =  al(θl(pt))sLOS(t) +     al  θ(j)l    s(j)NLOS(t)
+      trace norm, an auxiliary variable  is introduced,  fol-                                   j=1
+     lowed by the utilization of Alternating Direction Method               LOS term
+                                                                                   NLOS terms
+      of Multipliers (ADMM) to decouple high-dimensional
+                                                                                                                                  (2)
+      optimization  problem  into  three  local  optimization
+     subproblems. Update  rules  are then derived  for  the  where xl(t) ∈CMl×1 denotes the array receiving signal of the
+    new  sparse  localization  variables. Furthermore,  grid   lth BS at time slot  t, nl(t) is circular white Gaussian noise
+     reﬁnement is employed to overcome the limitation of   signal with mean zeros and noise power σ 2, and sLOS is the
+     predeﬁned locations. Extensive simulation results vali-   source signal that absorbs the direct path loss, while sNLOS
+      date that SaDPD signiﬁcantly improves the precision of   denotes the signal that propagates through unknown reﬂections
+      sparse reconstructions and enhances localization robust-  and fading. Note that all the signals are far-ﬁeld and narrow-
+      ness.                                             band for each array. Now, considering the rotation angle ϕl
+  The remainder of this article is organized as follows. In   as in (1), the LOS AOA parameter can be represented by the
+Section  II, a signal model as well as a sparse localization   target and the BS position, that is
+framework are introduced. The proposed DP method with                                                                                     py −pyl
+unknown  multipath  propagation  is  presented  in  detail  in         θl(pt) = arctan      + π · 1(px < pxl) −ϕl    (3)
+                                                                                     px −pxlSection III. Section V presents simulation results to compare
+the performance achieved by the previously reported and  where 1(P) denotes the indicating function, which is deﬁned
+proposed methods for various scenarios. Finally, conclusions   as one when the logical proposition P is satisﬁed and zero
+are drawn in Section VI.                                       otherwise. Let the vector q(θ) =  [ cos θ, sin θ]T be a unit-
+  Notations: Throughout  this  article, bold type  letters are   length vector pointing toward direction θ. The typical steering
+reserved for vectors and matrices. XT and XH denote the   vector can be denoted as
+                                                                                                    T                                                           thetranspose         and              conjugate                        transpose                                  of                                X,                                           respectively.                                                              xi is                                                                                                                                 λ pTl,Mlq(θ)                                                                                                            λ pTl,1q(θ),  . . .  ej 2π                                                                                                                                  (4)                                                                          al(θ) =   ej 2πith   element             of                the vector                              x. For                                a                                   matrix                                       X, Xi,: and                                                                      X:,j
+denote the ith row and the jth column of X, respectively. Xij
+                                                      where λ is the carrier wavelength. The array manifold candenotes the (i, j)th element of X. diag{·} and blkdiag{·} denote
+                                                        be formed by collecting steering vectors al(θl) with differenta diagonal matrix and a block-diagonal matrix, respectively.
+                                           AOAs θl. Note that any prior statistical channel model andFinally, x denotes the average value of x.
+                                                                 the NLOS parameters are unknown in practice, including the
+                                                    number of NLOS paths J and the order of reﬂection.
+                        II. SYSTEM MODEL
+
+A. Receiving Signal Model                                    B. Sparse Localization Framework
+
+ A general indoor positioning system for a 2-D scenario    To cast the direct localization as a sparse representation
+is considered with one  target and L  distributed BSs,  as   problem, the ROI P is discretized into uniform location grid
+shown in Fig. 1. The target  is located  at pt =  [px, py]T  U = {u1,  . . . uK}, where K denotes the total grid number
+in ROI  denoted  as P and  the  lth BS  is  positioned  at   for which K ≫Ml. Deﬁne the coordinates of the kth grid
+pl =  [pxl, pyl]T(l = 1, 2, . . . , L)  in a predeﬁned Cartesian   point uk as (uxk, uyk). The sparse DP framework introduces
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:45:05 UTC from IEEE Xplore. Restrictions apply.
+--- PDF PAGE 4 ---
+25410                                                                         IEEE INTERNET OF THINGS JOURNAL, VOL. 12, NO. 13, 1 JULY 2025
+
+
+the sparse signals to infer the probability of signal emitting at
+each grid point uk. Since sparse signals exhibit a consistent
+support set across the temporal dimension, where the indices
+of nonzero elements remain ﬁxed,  statistical averaging of
+receiving signals over time is feasible to effectively utilize the
+temporal consistency. Therefore, by substituting K grid points
+for the target position pt in (2), the basic sparse model can be
+represented as
+
+                          xl = A  lsl + nl                      (5)
+
+where
+       A    l :=  a(1)l                              , a(2)l                                     ,  . . . a(K)l   ∈CMl×K
+                            l := [θl(u1), θl(u2),  . . . θl(uK)]
+                 = 1, 2, . . . , K)              a(k)l  := al(θl(uk)) (k
+                     T                T
+               1             1
+              xl :=        xl(t), nl :=       nl(t)             (6)    Fig. 2.  Schematic representation of multipath localization and sparse solution
+             T            T                                    structures using W and H with spectral fusion result.                     t=1               t=1
+and sl ∈CK×1 is deﬁned as the positioning sparse signal of
+the lth BS, where T is the snapshot number and the locational                                                                     point, resulting in identical nonzero elements in  all sparse
+indices of nonzero elements within the grid U serve as the                                                                    solutions. Parallelization of these solutions effectively captures
+coordinates of the estimated target.                                                                 the row sparsity induced by LOS paths. In contrast, NLOS
+  The individual sparse signal model in (5), developed exclu-                                                               paths introduce unpredictable errors, leading to random ele-
+sively  at  the BS  level,  is suboptimal  for  leveraging  the                                                     ment sparsity and disrupting row sparsity. Consequently, the
+correlation inherent across the receiving signals. To exploit the                                                                   interplay of multipath components gives rise to a composite
+consistent information among the sparse vectors {sl}Ll=1 and   sparse structure, combining row sparsity from consistency with
+further design the structural sparsity, L positioning tasks are                                                          element sparsity from variability. Additionally, as mentioned
+integrated to a uniﬁed sparse model, given by                                                             above, the receiving signal from a single BS conveys only
+                    x = As + n                        (7)   angular information, leading to redundancy in the positioning
+                                                                       grid. This redundancy arises because a single ray from the BS
+where                                                              passes through multiple grid points, yielding highly similar
+         x := xT1, . . . , xTL T ∈CMlL×1                AOAs and steering vectors. As a result, the steering vectors for
+                                                                               all grid points exhibit pronounced low-rankness in the sparse
+       A := blkdiag{A  1, . . . , A  L} ∈CMlL×KL                                                                  solution of a single BS.
+                        T
+            s := sT1, . . . , sTL  ∈CKL×1                           Building  upon  this  foundation,  the  proposed  method
+                                T                           leverages  the  sparse  solution  structure  provided by  joint        n := n1(t)T, . . . , nL(t)T  ∈CMlL×1.           (8)
+                                                                 positioning as a priori for the designed optimization function in
+  Note that the steering vectors  {a(k)l  }Kk=1 are not entirely   Section III-B. Crucially, the inherent structure, including com-
+linearly  independent, owing  to  the many-to-one mapping   posite sparsity and often overlooked low-rankness, is explicitly
+function in (3), which introduces redundancy into manifold   incorporated to enhance the positioning performance, espe-
+A  l. Speciﬁcally, when multiple grid points align collinearly   cially in complex multipath environments. Subsequently, to
+with respect to the lth BS, they share identical angular values,   address the challenging nonsmooth problem of multivariable
+resulting in linear dependence among the corresponding steer-   coupling, Section  III-C decouples  the global optimization
+ing vectors. Consequently, the associated sparse model exhibits   objective into subproblems from the perspective of ADMM.
+low-rankness, unlike sparse AOA estimation problems.        The solution process for these subproblems is next derived
+                                                                    in detail in Section III-D. Finally, to improve the localization
+                                                                  resolution at predetermined grid, an update process of grid     III. PROPOSED METHOD BASED ON STRUCTURAL
+                                                        reﬁnement is presented in Section III-E. Note that the newSPARSITY AND LOW-RANKNESS WITH GRID REFINEMENT
+                                                     method given in this article operates without prior knowledge
+A. Overview
+                                                               of multipath channels or path classiﬁcation.
+  The proposed sparse framework models each grid point as
+a potential location, with the actual source conﬁned to a small
+                                                             B. Problem Formulationsubset. By using grid as facilitators, this sparsity enables the
+consolidation of all BS positioning tasks into a cohesive sparse     Let S be the weight sparse matrix, where the lth column
+domain, allowing the ﬂexible integration of receiving signals.   corresponds to the sparse vector sl of the lth BS,  i.e., S =
+  In multipath environments, although  the AOA of LOS   [s1, . . . , sL]. In order to efﬁciently capture the relationship and
+paths varies across BSs, they originate from the same grid   the inconsistent features of multipath effect, S is explicitly split
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:45:05 UTC from IEEE Xplore. Restrictions apply.
+--- PDF PAGE 5 ---
+JIN et al.: INDOOR DIRECT LOCALIZATION METHOD UTILIZING STRUCTURAL SPARSITY AND LOW-RANKNESS                                      25411
+
+
+into two parts W and H, absorbing distinct signal features.  where each diagonal block corresponds to a distinct grid point,
+The consistent-feature matrix W models LOS correlations   contains predictions from each position relative to the array
+among localization tasks while the speciﬁc-feature matrix H   manifold A  l. The trace norm, i.e., ∥x∥∗=     ri=1 σi with σi
+represents NLOS paths and noise interference, which cannot   being singular values, exhibits favorable convexity and cap-
+be ﬁt into W. Note that by attributing unstructured interference   tures the inherent spatial interdependencies in receiving signals
+to H, the noise term in (7) is implicitly incorporated, thereby   as a relaxed version of the matrix rank. In a consequence,
+unifying  signal reconstruction and noise suppression. The  from the perspective of the lth BS, the imposition of low-rank
+sparse solution structure can be ﬂexibly encoded into con-   structural constraints by trace norm facilitates the utilization
+straints on these two components, facilitated by the extended   of redundant priors to improve the reconstruction accuracy.
+optimization dimensions of the objective function. Thus, con-   Overall, R(W) is modeled as
+sidering the uniﬁed sparse model in (7) and the empirical noise                                                                                                  L
+minimization with least square, the multivariate optimization                                                     R(W) = α∥W∥2,1 + β   ∥AlWl∥∗         (11)
+problem of joint localization can be represented as a structural
+                                                                                                       l=1
+sparse learning task
+                                                      where α  and β  are  positive  hyperparameters  expressing
+                1
+           min     −As∥22 + R(W) + R(H)           (9)   the contribution of ℓ2,1−norm and trace norm to the total        S=W+H 2∥x                                            regularizer, respectively.
+                                                                  2) R(H): Due to the uncertainty in free-space propagation,where R(W) and R(H) are the  regularization terms with
+W = [w1, . . . , wL] and H = [h1, . . . , hL], respectively. Fig. 2  NLOS paths and noise perturbations may impact any value
+                                                               of H, demonstrating element-sparsity that nonzero elementsillustrates the sparse framework of capturing signal paths from
+                                                       randomly  distribute throughout the matrix H. For the kthmultiple BSs using discrete location grid U. The blue and
+                                                                  grid point, outliers across BSs are captured by regulatingyellow blocks represent LOS-dominated nonzero elements in                                                                 L
+                                                                     l=1 |Hkl|.  Similarly,  inconsistent  positions  are  identiﬁedW and NLOS-induced randomly sparse features in H, respec-
+tively. These nonzero elements are synthesized to construct  by  minimizing   Kk=1 |Hkl|  for  the  lth  localization  task.
+the ﬁnal localization spectrum. Additionally, the white areas   Sequentially, R(H) is designed by
+predominantly highlight zero elements, visually underscoring                         L  K
+the  sparsity. Next, the  structure of row-sparsity and low-           R(H) = γ         |Hkl| = γ ∥vec(H)∥1        (12)
+rankness  is managed by applying R(W).  Simultaneously,                          l=1 k=1
+R(H) identiﬁes element-sparsity, detecting outliers and incon-
+                                                      where ∥·∥1 denotes the ℓ1−norm, which is the optimal convexsistent paths that deviate from typical patterns. Subsequent
+                                                           approximation of the ℓ0−norm and γ  is a positive hyperpa-sections illustrate in detail the roles of R(W) and R(H).
+                                                                 rameter. When the kth grid point is identiﬁed as an outlier
+  1) R(W): Since all signal models utilize a uniform spatial
+                                                             during the lth positioning task, or when the performance of the
+support of target locations across the shared ROI, R(W) aims
+                                                                kth grid point is inconsistent across L positioning tasks, the
+to enforce a uniformity in the indices of nonzero elements
+                                                            corresponding weight element Hkl prefers to adopt a nonzero
+in {wl}Ll=1, which are typically row-clustered in W. As a                                                                  value; otherwise,  it remains zero. R(H) strategically isolates
+result, the ℓ2,1-norm,  i.e., ∥W∥2,1 =   Kk=1     Ll=1 |wkl|2,   these perturbative elements from the estimation of W, thereby
+is  applied  to induce  the  spatial  distribution  of  elements,   enhancing  the  robustness  of  sparse  signal  reconstruction,
+promoting interrow sparsity when preserving intrarow non-  which is crucial for accurate user location estimation.
+sparsity. Furthermore, by integrating additional information     3) Joint Optimization Problem: On the basis of (9), (11),
+from co-located positioning  tasks,  it efﬁciently suppresses  and (12) and   Ll=1 ∥AlWl∥∗= ∥AW∥∗proved in [42], the
+irrelevant positional features, thereby enhancing the resolution   optimization problem can be further modeled as
+at locations proximate to multiple BSs.
+                                                                          1
+  Contrasting              with                    the                        sparse                              angle                                  framework,                                          where                                                   each               Sopt =                                                                                          F + α∥W∥2,1                                                                        argmin 2∥x −As∥2                                                         S=W+Hangle      uniquely            maps                       to                       a speciﬁc                                     steering                                            vector                                                      [39], posi-
+tional grid indirectly derives the corresponding steering vectors              +β∥AW∥∗+ γ ∥vec(H)∥1          (13)
+by calculating AOAs relative to the BS. Redundant grid points
+                                                      where A ∈RMlKL×KL and W ∈RKL×KL are block diagonal
+caused by collinear positions relative to a single BS may result
+                                                              matrices with the lth blocks being Al and Wl, respectively.
+in partial linear dependency in the array manifold A    l and thus                                                         Adjustments to the parameters {α, β, γ }  directly inﬂuence
+against the restricted isometry property (RIP) [40] fundamental
+                                                                 the model  structure. Increasing α and γ  promotes  differ-
+to compressive sensing theory. For this reason, a novel trace
+                                                                 ent sparsity in the matrices W and H, respectively, which
+norm ∥AlWl∥∗[41] is introduced to capture the redundancy,
+                                                          enhances feature selection and reduces the model complexity.
+where Al is a block diagonal matrix whose diagonal elements
+                                                        Meanwhile, a higher β lowers the rank of AW to facilitate
+are steering vectors {a(k)l  }Kk=1, denoted as                                                        key feature extraction. Through tuning these parameters, the
+                                                                 representation of LOS or NLOS features in matrices W and                                          } ∈RMlK×K        (10)        Al = blkdiag{a(1)l                                   , . . . , a(K)l
+                                  H can be selectively enhanced, thereby modulating the dis-
+and Wl ∈RK×K is a diagonal matrix with respect to sparse   tribution of weight elements between these features. Detailed
+vector wl, i.e., Wl = diag(wl). The low-rank matrix AlWl,   discussions are presented in Section IV-A.
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:45:05 UTC from IEEE Xplore. Restrictions apply.

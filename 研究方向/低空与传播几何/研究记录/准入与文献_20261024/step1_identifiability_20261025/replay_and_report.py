@@ -1,0 +1,130 @@
+"""Independent saved-array replay and reader report for the small model audit."""
+import hashlib
+import json
+from pathlib import Path
+
+import numpy as np
+
+ROOT = Path(__file__).resolve().parent
+RUN = ROOT/'run_20261025_135621_452892'
+
+
+def main():
+    r = json.loads((RUN/'result.json').read_text(encoding='utf-8'))
+    data = np.load(RUN/'iq_witness.npz')
+    orig, alt = [], []
+    for coeff, lengths in [(data['coefficients'], data['path_lengths_original_m']),
+                           (data['alternate_coefficients'], data['path_lengths_alternate_m'])]:
+        # Rebuild in frequency-domain factors then synthesize; original code evaluated delayed waveforms.
+        factors = np.zeros((5, len(data['frequencies_hz'])), complex)
+        for q in range(2):
+            factors += (data['gains'][q, :, None] * coeff[q, None, :]
+                        * np.exp(-2j*np.pi*lengths[q, :, None]/299792458.0*data['frequencies_hz'][None, :]))
+        signal = factors @ np.exp(2j*np.pi*data['frequencies_hz'][:, None]*data['t_s'][None, :])
+        if not len(orig):
+            orig = signal
+        else:
+            alt = signal
+    rel = lambda a, b: float(np.linalg.norm(a-b)/np.linalg.norm(a))
+    audit = {'original_replay_error': rel(data['original'], orig),
+             'alternate_replay_error': rel(data['alternate'], alt),
+             'replayed_pair_difference': rel(orig, alt),
+             'station_affine_rank': int(np.linalg.matrix_rank(np.array(r['stations_m'])[1:]-np.array(r['stations_m'])[0])),
+             'source_and_contract_identity': all(hashlib.sha256(Path(p).read_bytes()).hexdigest() == h for p, h in r['identity']['input_sha256'].items())}
+    audit['pass'] = max(audit[k] for k in ['original_replay_error', 'alternate_replay_error', 'replayed_pair_difference']) < 1e-10 and audit['source_and_contract_identity'] and audit['station_affine_rank'] == 3
+    (RUN/'independent_replay.json').write_text(json.dumps(audit, indent=2), encoding='utf-8')
+    if not audit['pass']:
+        raise RuntimeError('Saved numerical evidence did not replay.')
+    pos = np.array(r['sources_m'])
+    other = np.array(r['alternate_sources_m'])
+    coordinate_rows = '\n'.join(f'| 源{q+1} | ({pos[q,0]:.2f}, {pos[q,1]:.2f}, {pos[q,2]:.2f}) | ({other[q,0]:.2f}, {other[q,1]:.2f}, {other[q,2]:.2f}) | {r["position_separations_m"][q]:.4f} m |' for q in range(2))
+    text = f'''# 五站、每源三直达：第一步核验结果
+
+2026-10-25｜已执行模型推导与轻量数值核验，未进入定位性能比较。
+
+## 结论先说
+
+**当前“每源3个直达站＋其余反射路径独立未知”的三维模型没有通过可辨识性门禁。** 找到了位置不同、5站双源混合IQ相同的合法参数解释。不能靠增加候选、优化器或提高SNR弥补这一信息缺口。
+
+这不等于“五个站不够”，也不等于“所有无地图多径定位都不可解”。关键是每个源实际获得多少独立几何约束，以及反射路径是否有可以利用的额外共享结构。本次没有否定共同未知墙面等更强结构模型。
+
+## 本轮按你的设置执行了什么
+
+- 5个固定单天线同步站，位置有高度差；两个独立未知波形，频带完全重叠；静止记录是悬停的合法起点。
+- 每源3站直达、另外2站各一条弱反射；直达路径幅度为1、反射幅度为0.2，单链路反射功率为直达的4%。不是靠强反射压倒直达制造失败。
+- 不给地图、已知发射时间、真实高度、精确距离幅度比或干净波形；未知路径复系数沿用当前方案。
+- 3个预定源站构型、每构型2源，每个源跟踪21个高度点；反例不靠选某次噪声失败。
+- 静态核验、10项数值检查与保存数组独立重放通过；未跑36条混合性能实验，未修改旧定位算法。
+
+## 1．三个直达站到底缺什么
+
+对同一个源，三个到达时刻只能形成两条独立时差。源有x、y、高度三个未知坐标，因此正常情况下会留下一条等时差曲线，而不是唯一一点。
+
+即便提前告诉算法“哪些信号来自哪个源、哪三个站是直达”，这条曲线仍存在。实际盲问题的信息更少，不能因加入分组算法就自动解决。
+
+数值中6个源—构型组合的三LOS距离差Jacobian均为秩2；允许另外两站有未知超额时延、再消去这些未知量后，位置秩仍为2。解析导数与有限差分最大差为{r['jacobian_fd_max_abs_error']:.3e}；等时差曲线最大距离差残差为{r['curve_max_range_difference_residual_m']:.3e} m。
+
+![等时差位置曲线]({RUN.name}/ambiguity.png)
+
+图中星号为原位置、叉号为替代位置，彩色曲线上的位置有相同的三站LOS时差。连线仅示意直达关系，不是算法轨迹。由于站点高度跨度有限，本例主要呈现高度方向的歧义；“存在一维等值集合”的结论不依赖这一个方向。
+
+## 2．不仅时差相同，混合IQ也相同
+
+| 目标 | 原位置（m） | 替代位置（m） | 位置距离 |
+|---|---|---|---|
+{coordinate_rows}
+
+保持各路径复系数不变，将每源未知波形的时间原点平移，并对该源未知反射延迟作对应平移，所有站的接收数据保持不变。波形频谱能量、两源独立性及路径数不变。
+
+- 5站原始混合IQ相对差：**{r['iq_relative_difference']:.3e}**。
+- 同样选取±7MHz有效频带后相对差：**{r['band_iq_relative_difference']:.3e}**。
+- 从保存系数用另一种合成顺序重放，两套观测相对差：{audit['replayed_pair_difference']:.3e}。
+
+这些约1e-14的差异属于数值舍入。连续时间恒等式见[详细推导](推导与模型边界.md)，不是用周期FFT边界“凑”出的相等。1024点、50MHz只是本次数值见证；记录加长不会打破同一个连续时间恒等式。
+
+构造替代解使用真值是反例验证所需，不是给可部署算法输入真值。这里没有输出定位RMSE、成功率或算法速度排名。
+
+## 3．反射是否被设置得不物理
+
+两套解释的NLOS路径均长于对应直线距离，并可逐链路构造满足镜面反射定律的一次反射点。每源只有两条反射，幅度也较小。
+
+**边界：** 本轮检查的是每条反射可行，并没有证明所有路径由同一组共享建筑平面共同产生。原/替代解释允许具有不同的未知反射结构。若研究要利用“多个源或站共享同一个墙面”，必须明确这种结构及其观测支持，再检查它是否消除歧义；不能把它偷偷加入“无地图”模型。
+
+## 4．四／五条直达的诊断结果
+
+保持总共5站，只把直达数改为4或5作正对照，六组位置的局部Jacobian均恢复秩3。这说明站数不是唯一因素；被确认可用的直达几何信息才关键。
+
+但四LOS还出现离散双解。一个源的另一解高度约120.53m，不能仅因示意搜索高度上限设为120m就宣布它不存在。因此，**“改成4个直达”是值得进一步审议的最小调整，不是已经证明的最终解决方案。** 本轮也没有证明五LOS在未知关联条件下全局唯一。
+
+## 5．运动近似检查
+
+本次反例采用静止目标，严格符合悬停起点。另按2.4GHz、50MHz计算尺度：1024点时记录20.48μs，速度1m/s的最大位移约20.48μm，单链路载波多普勒相位变化上界约0.00103rad，站间差上界约0.00206rad。
+
+这是量级核查，不是“任何慢速都可忽略”的精度保证。8192点或更高速度的上界更大，完整数值保存在结果文件。2.4GHz是此次量级示例，并未冻结未来无人机工作频段。
+
+## 6．研究决策
+
+第一步找到了需要先解决的模型条件，暂不进入后面的36条混合/72条孤立性能比较。
+
+建议优先保持5站、三维、盲定位和无地图不变，讨论是否将可定位主场景收紧为**每源至少4条有效直达，3条作为信息不足/边界条件**，随后检查离散假解和未知路径关联。该调整未擅自执行为新主场景。
+
+若必须在恰好3条直达下完成三维定位，就需要明确另外的信息来自哪里，例如可靠高度约束，或有实际依据的共享反射结构。已知反射面帮助三站定位已有文献，不能直接作为新贡献；本轮不自行添加高度、地图或跟踪。
+
+这个结果避免了继续用调参掩盖信息不足。它是已知几何限制在本模型中的确认，不是本项目已经获得新的可发表理论创新。
+
+## 7．证据与执行记录
+
+- [执行合同](执行合同.md) · [模型与推导](推导与模型边界.md)
+- [结果JSON]({RUN.name}/result.json) · [等时差曲线CSV]({RUN.name}/equal_tdoa_curves.csv) · [独立重放]({RUN.name}/independent_replay.json)
+- [源码与参数](check_model.py) · [源码身份]({RUN.name}/preflight.json) · [运行和小错修复记录](运行说明与修复记录.md)
+- 单例脚本计算记录约{r['wall_seconds']:.3f}秒，进程启动另计；不是定位算法耗时。
+- 补充原文：[IEEE ICUWB 2010](https://doi.org/10.1109/ICUWB.2010.5616909)、[IEICE 2011](https://doi.org/10.1587/transfun.E94.A.964)、[Sensors 2019](https://doi.org/10.3390/s19132892)。阅读范围见推导文档，不冒充全文复现。
+
+状态：`STEP1_COMPLETED / THREE_LOS_FREE_PATH_MODEL_NOT_IDENTIFIABLE / PERFORMANCE_STAGE_HOLD`。
+'''
+    (ROOT/'第一步核验报告.md').write_text(text, encoding='utf-8')
+    print(json.dumps(audit, ensure_ascii=False))
+
+
+if __name__ == '__main__':
+    main()

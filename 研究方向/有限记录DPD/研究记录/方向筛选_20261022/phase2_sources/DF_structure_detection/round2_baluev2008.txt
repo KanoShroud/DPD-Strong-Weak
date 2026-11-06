@@ -1,0 +1,624 @@
+                                          Mon. Not. R. Astron. Soc. 000, 1–7 (2007)       Printed 13 February 2013     (MN LATEX style file v2.2)
+
+
+
+
+                                          Assessing statistical significance of periodogram peaks
+
+                                          R.V.
+                                          1
+                                               Baluev1 ⋆
+                                           Sobolev Astronomical Institute, Saint Petersburg State University,
+                                          Universitetskij prospekt 28, Petrodvorets, Saint Petersburg 198504, Russia
+arXiv:0711.0330v1 [astro-ph] 2 Nov 2007
+
+
+
+
+                                          Accepted 2007 November –. Received 2007 October 16; in original form 2007 June 13
+
+
+
+                                                                             ABSTRACT
+                                                                             The least-squares (or Lomb-Scargle) periodogram is a powerful tool which is used rou-
+                                                                             tinely in many branches of astronomy to search for periodicities in observational data.
+                                                                             The problem of assessing statistical significance of candidate periodicities for different
+                                                                             periodograms is considered. Based on results in extreme value theory, improved an-
+                                                                             alytic estimations of false alarm probabilities are given. They include an upper limit
+                                                                             to the false alarm probability (or a lower limit to the significance). These estimations
+                                                                             are tested numerically in order to establish regions of their practical applicability.
+                                                                             Key words: methods: data analysis - methods: statistical - surveys
+
+
+
+                                          1    INTRODUCTION                                                    analytic approximations which could allow to avoid Monte-
+                                                                                                               Carlo simulations (at least in many practical cases). Such
+                                          Analysing astronomical time series, one often has to choose
+                                                                                                               approximations of the distribution of the maximum have al-
+                                          between at least two hypotheses, a base one H and an alter-
+                                                                                                               ready been constructed by mathematicians specializing in
+                                          native one K, based on the existing data array. In the signal
+                                                                                                               the field of extreme values of random processes. In the Sec-
+                                          detection problem, one should check whether the observa-
+                                                                                                               tion 3, these results are adapted for and extended to the
+                                          tions are consistent with some base model or they contain an
+                                                                                                               specific features of the periodogram analysis of astronomi-
+                                          extra deterministic signal. Under presence of random errors,
+                                                                                                               cal time series. In the Section 4, numerical simulations are
+                                          such problem can be solved in a probabilistic sense only. We
+                                                                                                               used to explore the quality of the analytic results and to
+                                          are never protected from mistakes of two kinds. They are the
+                                                                                                               show regions of their practical applicability.
+                                          false retraction of H (the ‘false alarm’) and the false non-
+                                          retraction of H (the false non-detection). False alarms are
+                                          generally believed to be more dangerous, hence the problem
+                                          of estimation of the false alarm probability (hereafter FAP)         2     GENERAL FORMULATIONS
+                                          associated with a candidate signal is very important. Given          Let us recover the principles of the periodogram analysis in
+                                          some small critical value FAP∗ (between 10−3 and 0.1 usu-            a somewhat more general formulation than usually.1
+                                          ally), we could claim that the candidate signal is statistically            Let x1 , x2 . . . xN be observations made at N epochs
+                                          significant (if its FAP < FAP∗ ) or is not (FAP > FAP∗ ).            t1 , t2 , . . . tN . The errors of xi are assumed to be indepen-
+                                               For the Lomb (1976) – Scargle (1982) periodogram                dent and Gaussian with standard deviations σi . Each value
+                                          (hereafter also L–S), the base hypothesis is that the observa-       of the periodogram can be recovered as a test statistic that
+                                          tions are pure zero-mean uncorrelated and Gaussian errors            allows to conclude, how likely is the hypothesis that the
+                                          (also called the white Gaussian noise). The alternative one is       data contain a signal of a given frequency f . Mathemat-
+                                          that a sinuous harmonic is also present. Every single value of       ically we should check, whether the observations are fit-
+                                          the L–S periodogram represents a test statistic for the corre-       ted well by some base model having only dH free param-
+                                          sponding problem of hypotheses testing. In routine practical         eters θH , or they require an enlarged model of dK pa-
+                                          cases, however, the period of a possible signal is not known a       rameters θK = {θH , θ} with d = dK − dH parameters θ
+                                          priory and we have to scan many periodogram values within            of an extra periodic signal. We will assume that for any
+                                          a wide frequency range. In this case, the FAP is provided by         fixed frequency both models are linear and construct them
+                                          the probability distribution of the maximum periodogram              by means of dH and dK base functions forming vectors
+                                          value under the base hypothesis (i.e., without signal in the         ϕH (t) and ϕK (t, f ) = {ϕH (t), ϕ(t, f )}. Thus the base fit
+                                          data). Existing methods of calculating this distribution for a       model is µH (t, θH ) = θH · ϕH (t), the model of the sig-
+                                          continuous frequency range require time-consuming Monte-             nal is µ(t, θ, f ) = θ · ϕ(t, f ) and the complete fit model
+                                          Carlo simulations. The aim of the present paper is to propose
+                                                                                                               1 Several mathematical notations, used in the present paper, are
+                                          ⋆   E-mail: roman@astro.spbu.ru                                      described in the Appendix A.
+2     R.V. Baluev
+is µK (t, θK , f ) = θK · ϕK (t, f ) = µH (t, θH ) + µ(t, θ, f ). We           Now let us assume that we scan all frequencies from the
+wish to test, whether the hypothesis H : θ = 0 should be                  interval [0, fmax ] and look for the maximum value Zmax =
+rejected in favour of the alternative K(f ) : θ 6= 0.                     max[0,fmax ] Z(f ). Then the false alarm probability, associ-
+      For the L–S periodogram dH = 0, d = 2, and the signal               ated with this maximum, is FAPmax = 1−Pmax (Zmax , fmax ),
+model is given by a harmonic function θ1 cos ωt + θ2 sin ωt               where Pmax (Zmax , fmax ) denotes the cumulative distribu-
+(here ω = 2πf ). Schwarzenberg-Czerny (1998a,b) consid-                   tion function of Zmax (under the base hypothesis). Pre-
+ered cases with dH = 0 and arbitrary d. Ferraz-Mello (1981)               cise expression for the latter distribution is not known
+put dH = 1 and added a floating constant term to the har-                 even for equally spaced time series. It is always possi-
+monic model with d = 2, whereas Cumming et al. (1999)                     ble to use Monte-Carlo simulations to obtain this func-
+accounted also for possible linear trend (dH = 2).                        tion, but this way is very time-consuming, especially for
+      An optimal statistical test, solving such problem in gen-           the most important region of low false alarm probabili-
+eral, is developed rather well (Lehman 1979, chapter 7). At               ties (high significances). The function Pmax (Z, fmax ) is often
+first, one should   compute
+                         ¸ the minima (by θH,K ) of the func-             computed (Schwarzenberg-Czerny 1998a,b) as
+tion χ2 = (x − µK )2 under hypotheses H and K(f ). This
+            ˙
+
+may be done by means of any accessible linear least-squares               Pmax (Z, fmax ) ≈ Psingle (Z)Nind (fmax ) ,                    (4)
+algorithm (see also Schwarzenberg-Czerny 1998a,b). If σi are              where Nind (fmax ) is an effective ‘number of independent fre-
+known precisely, both minima χ2H and χ2K (f ) can be com-                 quencies’ found within [0, fmax ]. There is no general analytic
+puted and the least-squares periodogram may be defined as                 expression for the quantity Nind , but it is often suggested to
+an advance in χ2 provided by the transition from H to K(f ):              use a short Monte-Carlo simulation to assess it and then ex-
+z(f ) = χ2H − χ2K (f ) /2.
+         ˆ             ˜
+                                                                  (1)     trapolate (4) to low FAP (Cumming 2004; Horne & Baliunas
+                                                                          1986). However, the multiple-trial formula (4) is only heuris-
+The error variances are often not known precisely and we                  tic and is not necessarily precise even for equally spaced
+have to estimate them from the time series, explicitly or                 observations which don’t produce significant aliasing.
+implicitly. It is usually assumed that σi = κσmes,i , where                    A better estimation of Pmax (Z, fmax ) may be obtained
+the ‘measured’ uncertainties σmes,i determine the weighting               using the theory of stochastic processes. The theory of ex-
+pattern of the time series, whereas the coefficient κ is uncon-           tremes of random processes is developed in mathematical
+strained. In this case, only the ratio χ2H /χ2K can be computed           literature rather deeply. For our aims, it is worth to men-
+exactly, and the periodogram (1) has to be modified. We will              tion the series of works by Davies (1977, 1987, 2002). This
+consider the following modified periodograms:                             author considered (in rather general formulations) extreme
+               χ2H − χ2K (f )                    χ2H − χ2K (f )           value distributions for χ2 , F , and beta random processes
+z1 (f ) = NH                  ,   z2 (f ) = NK                  ,         that may include our periodograms z and z1,2 as special
+                   2χ2H                             2χ2K (f )
+                                                                          cases. The main result of these works is an analytic lower
+                                                 NK    χ2                 limit to the corresponding extreme value distributions. This
+                                     z3 (f ) =      ln 2 H .        (2)
+                                                  2   χK (f )             result is potentially very useful for astronomical applica-
+Here, NH = N − dH and NK = N − dK are the numbers                         tions, because it yields directly an upper limit to the false
+of degrees of freedom in χ2H and χ2K , correspondingly. The               alarm probability and a lower limit to the significance of
+periodograms z1 (f ) and z2 (f ) are the well-known normaliza-            a candidate periodicity. However, the formulae published in
+tions of z(f ) by variances of residuals under the respective             the cited papers are not yet ready for usage and require some
+hypotheses. All periodograms (2) are entirely equivalent be-              adaptation to specific applications. Moreover, these results
+cause they are unique functions of each other:                            can be improved to obtain not only an upper limit, but an
+                                                                          uniform approximation to the false alarm probability, that
+2z1 /NH = 1 − e−2z3 /NK ,         2z2 /NK = e2z3 /NK − 1,                 would be good for low spectral leakage at least.
+                       (1 − 2z1 /NH )(1 + 2z2 /NK ) = 1.            (3)        A brief description of these results, adapted for the un-
+                                                                          even time series analysis, along with detailes of my exten-
+                                                                          sions, is given in the Appendix B. Summarizing them, the
+3   FALSE ALARM PROBABILITY                                               ‘Davies bound’ may be written down as
+
+Let us pick any of the periodograms introduced above, and                 FAPmax (Z, fmax ) ⩽ FAPsingle (Z) + τ (Z, fmax ).              (5)
+denote it as Z(f ). If the frequency of a possible signal was             The function τ will be specified below. If the aliasing effects
+known, the false alarm probability could be retrieved as                  may be neglected within the frequency band being scanned2 ,
+FAPsingle = 1 − Psingle (Z), where Psingle (Z) is the cumu-               and if also fmax is large enough, then
+lative distribution function of Z(f ) (taken under the base
+hypothesis). Under the hypothesis H, the statistic 2z follows             Pmax (Z, fmax ) ≈ Psingle (Z) e−τ (Z,fmax ) .                  (6)
+a χ2 -distribution with d degrees of freedom, 2z2 /d obeys a              The right hand side in (5) should approach the false alarm
+Fisher-Snedecor F -distribution with d and NK degrees of                  probability more closely for large Z (even the asymptotic
+freedom, and 2z1 /NH obeys a beta distribution with the                   equality under Z → ∞ is expected, but not proved strictly
+same numbers of degrees of freedom (Lehman 1979, §7.1).                   yet). In general, the quantity τ (Z, fmax ) looks like
+Using relations (3), the distribution function of z3 can be
+derived easily. The corresponding expressions of false alarm
+probability for d = 2 are given in Table 1. Note that the                 2  This means that the spectral window of the time series has no
+third modified periodogram obeys exactly the same distri-                 significant peaks in the doubled frequency band [0, 2fmax ], except
+bution as the basic one, if d = 2.                                        for the main one at f = 0.
+                                                                      Assessing statistical significance of periodogram peaks                         3
+      “ z ” d−1 e−z
+            2
+τ =                   A(fmax )                                            (7)    Table 1. False alarm probabilities for the Lomb–Scargle peri-
+       π        2π                                                               odogram and its modifications (d = 2).
+for the basic least-squares periodogram (1) and like
+                                                                                 Z(f )     FAPsingle (Z)         τ (Z, fmax ), approximately
+                    8“       ” d−1 “          ” NK −1
+                         2z1    2        2z1      2                                                                         √
+                                     1 −               ,
+                    >
+                                                                                 z(f )     e−Z                       W e−Z Z
+                    >
+                        πN               N
+                    >
+                    <“ H ” d−1 “           H
+                    >
+                    >
+      γ                                      ”   NH
+                                               − 2 +1
+                                                                                           “      ” NK                  “         ” NK −1 √
+τ =     A(fmax ) ×       2z2    2        2z2                              (8)                  2Z    2                         2Z      2
+                                     1+ N                ,                       z1 (f )    1− N                 γH W 1 − N                 Z
+     2π             >
+                    >   πNK                K                                                    H
+                                                                                                  ”− NK
+                                                                                                                                H
+                                                                                                                                     N
+                                                                                                                                  ”− K √
+                    > “          ” d−1      “
+                                                 d−3
+                                                     ”                                     “
+                                                                                               2Z      2
+                                                                                                                        “
+                                                                                                                               2Z      2
+                                        −z   1+                                  z2 (f )    1+ N                 γK W 1 + N                Z
+                    >               2
+                    : 2 sh z3
+                    >
+                                       e 3       2NK
+                                                       .
+                          π      NK                                                               K                         “ K      ”
+                                                                                                                         −Z 1− 2N 1    q
+                                                                                 z3 (f )   e−Z                   γK W e            K     NK sh NZ
+             ” . periodograms
+for the modified
+        “         “      ”    (2). Here the coefficient                                                                                         K
+
+
+γ = Γ N2H          Γ NK2+1 . Note that the asymptotic
+                                                                                                        q             “   ”. “     ”
+                                                                                 The factors γH,K =           2
+                                                                                                             NH,K
+                                                                                                                    Γ N2H   Γ NH2−1 may be ne-
+(2/NH,K )(d−1)/2 γ → 1 holds true for N → ∞. The factor                          glected for NH ⩾ 10. If the spectral leakage is low, FAPmax ≈
+A(fmax ) depends on the bases ϕ and ϕH , on the time series                      τ (Z, fmax ) for realistic values of parameters (see text).
+sampling and on the weighting pattern. Unfortunately, the
+general form of A(fmax ), obtained in the Appendix B, is not                     Such alias-free approximations are valid if fmax is well re-
+simple. For now, let us restrict ourselves to the L–S peri-                      solved (W & 1) and if the spectral leakage is low. Only the
+odograms and neglect by aliasing effects. In the next section                    latter assumption is practically significant. If one worries
+we will show that such approximation for A(fmax ) works well                     about strong spectral leakage, the approximate inequality
+even for strong aliasing. Of course, anyone is welcome to cal-                                                   √            √
+                                                                                 FAPmax (z, fmax ) / e−z + W e−z z ≈ W e−z z,           (12)
+culate A(fmax ) numerically from the formulae given in the
+Appendix: such work is still much less computationaly ex-                        holds true for the basic L–S periodogram. The rela-
+pensive than Monte-Carlo simulation of Pmax (Z, fmax ). The                      tions (11,12) are equally valid if the base model is not empty,
+practical quality of the expressions (5,6) will be also explored                 but includes a low-order polynomial drift and/or several har-
+numerically in the next section.                                                 monics of fixed frequencies that may be considered as inde-
+     To derive A(fmax ) from the formula (B7), we should                         pendent on any frequency within the range being scanned.
+calculate the eigenvalues of the matrix M, which is defined                            For large N , every modified periodogram z1,2,3 obeys
+by the group of equalities (B4). To perform this, we have                        approximately the same extreme value distribution as the
+to concretize the functions ϕ(t, f ). For the usual L–S peri-                    basic one. However, this convergence is not uniform in Z.
+odogram the harmonic base                                                        It is easy to derive from (7,8) that √ for the periodograms
+                                                                                 z1,2 (f ) an extra condition Z ≪ N must be satisfied to
+ϕ(t, f ) = {cos ωt, sin ωt}      (ω = 2πf )                               (9)
+                                                                                 keep relative errors of FAP low. This condition is rarely sat-
+produces the matrices                                                            isfied in practice. For the periodogram z3 , a corresponding
+          „                                «                                     condition Z ≪ N is mild and is often satisfied in practical
+        1    1 + cos 2ωt       sin 2ωt                                           applications. This fact requires to consider the third mod-
+Q =                                           ,
+        2       sin 2ωt      1 − cos 2ωt                                         ified periodogram more closely. The log-likelihood function
+          „                                     «
+               −t sin 2ωt      t̄ + t cos 2ωt                                    of our Gaussian observations is given by
+ S = π                                            ,
+             −t̄ + t cos 2ωt      t sin 2ωt                                                           N
+                                                                                                      X
+                                                                                 ln L = −χ2 /2 −            ln σi + const .                         (13)
+            „                                       «
+               t2 − t2 cos 2ωt       −t2 sin 2ωt
+R = 2π 2                                              ,                                               i=1
+                  −t2 sin 2ωt      t2 + t2 cos 2ωt
+                                                                                 As we adopted σi = κσmes,i , this expression may be rewrit-
+M     =    Q−1 (R − ST Q−1 S).                                           (10)
+                                                                                 ten as ln L = −χ̃2 /(2κ2 ) − N ln κ + const, where χ̃2 does
+If we consider the alias-free case, the terms in (10) contain-                   not depend on κ. Maximizing ln L by κ under the hypothe-
+ing sine and cosine functions of frequencies 2f ⩽ 2fmax are                      ses K and H yields that the logarithm of the ratio of the
+averaged out. Under this approximation M ≈ 4π 2 Dt I, where                      corresponding likelihood maxima equals to NNK z3 .
+Dt = t2 − t̄2 is the weighted variance of the observational
+epochs. Then both eigenvalues required are equal to the con-
+stant 4π 2 Dt and A(fmax ) ≈ 2π 3/2 W , where W√ = fmax Teff is                  4       NUMERICAL SIMULATIONS
+a rescaled frequency bandwidth and Teff = 4πDt is an ef-
+fective time series length. If ti are spanned uniformly and all                  Let us test the analytic results introduced above. For this
+σi are equal, then Teff almost coincides with an actual time                     purpose, we will use simulations of time series of N quasi-
+series span. Table 1 contains the alias-free approximations                      random data points imitating the white Gaussian noise. The
+of τ (Z, fmax ) for all L–S periodograms considered. One may                     temporal moments ti cover a segment of a length T . The
+use these expressions and the ones (5,6) to write down the                       uncertainties σi are equal to each other unless otherwise
+corresponding alias-free approximation of Pmax (Z, fmax ) and                    stated. For every simulation discussed below, no less than
+its Davies bound. Routinely we deal with rather large values                     105 Monte-Carlo trials were generated (ti and σi were fixed
+of z and W . In this case either the factor Psingle (Z) in (6)                   during every such simulation, of course). This should provide
+or the term FAPsingle (Z) in (5) may be safely neglected. For                    accuracies of simulated FAPs about 1% for FAP = 0.1 and
+instance, for the usual L–S periodogram                                          about 10% for FAP = 10−3 . The simulated tale of FAP <
+                                      −z √             −z √
+                                                                                 10−3 often showed unstable deviations comparable with the
+Pmax (z, fmax ) ≈ (1 − e−z ) e−W e           z
+                                                 ≈ e−W e      z
+                                                                  .      (11)    false alarm probability.
+4                             R.V. Baluev
+                              1                                                                                   1
+                                                                                                                                                   Simulated: z_2
+                                                                                                                                                   Alias-free:   z
+                                                                                                                                                   Alias-free: z_1
+                                                                                                                                                   Alias-free: z_2
+                             0.1                                                                                 0.1
+
+
+
+
+                                                                                     false alarm probability
+ false alarm probability
+
+
+
+
+                            0.01                                                                                0.01
+
+
+
+
+                           0.001       Simulated: N=1000, even                                                 0.001
+                                       Simulated: N=100, random
+                                       Simulated: N=30, random
+                                          Analytic:     alias-free
+                                          Analytic: Davies bound
+                           1e-04                                                                               1e-04
+                                   0                 5             10     15   20                                      2   4     6      8       10      12           14   16
+                                                               max z(f)                                                        maximum periodogram value
+
+Figure 1. Simulated vs. analytic false alarm probability for                        Figure 2. Simulated vs. analytic false alarm probability for the
+the L–S periodogram with no forced data gapping. Simulations                        modification z2 of the L–S periodogram: 100 evenly spaced ob-
+for 1000 evenly, 100 and 30 randomly spaced observations, 105                       servations, 105 Monte-Carlo trials, fmax T = 50. For comparison,
+Monte-Carlo trials, fmax T = 50, 500, 5000 (bunches from left                       the theoretical distribution curves for the periodograms z and z1
+to right). In the even cases, the simulated curves almost coin-                     are also plotted (the curve for z3 almost coincides with that for
+cide with their alias-free approximations. Due to exceedance of                     z and is not shown).
+the Nyquist frequency, there is no curve for the even case and
+fmax T = 5000. All graphs of analytic expressions are plotted for
+                                                                                                                  1
+Teff = T (this equality holds true within a few per cent for the                                                                                       Simulated
+                                                                                                                                                        Alias-free
+three time series used here).                                                                                                                       Davies bound
+
+                                                                                                                 0.1
+                                                                                     false alarm probability
+
+
+
+
+     If the time series consists of large number of equally
+spaced observations, any aliasing should be negligible. In-                                                     0.01
+deed, in such a case the Davies bound (12) appears very
+sharp (for FAP < 0.1) and the analytic approximation (11)
+perfectly follows the simulated distribution (Figs. 1,2). How-                                                 0.001
+ever, even time series don’t allow to search frequencies less
+than the Nyquist one fNy = (N − 1)/(2T ). An uneven time
+series allows to access much lower frequencies. However, this                                                  1e-04
+                                                                                                                       0        5           10             15             20
+access cannot be free of any charge. Within a wide fre-                                                                                 max z(f)
+quency range (fmax & fNy ), an essential aliasing is normally
+                                                                                    Figure 3. Simulated vs. analytic false alarm probability for the
+present purely due to random fluctuations of observational
+                                                                                    L–S periodogram with forced data gapping. N = 100 observations
+moments, even if there is no physical necessity for their gap-                      were clumped in ten equal groups, each group spans (randomly)
+ping. Thus we may expect that for W & N a significant ‘nat-                         only a fifth fraction of its natural duration. About 1.7·105 Monte-
+ural’ aliasing should take place. According to the numerical                        Carlo trials, fmax T = 5, 50, 500, 5000 (from left to right).
+results shown on Fig. 1, the alias-free approximation indeed
+becomes significantly less precise when N decreases, but for
+large FAP only (say, larger than a few per cent). Even for                          crease the detectability of low-amplitude signals (if numer-
+W > 100N the loss of precision remains moderate for prac-                           ical simulations are not used). In this case, the error of the
+tically important values of FAP. We can quite use (11) for                          threshold level (i.e., the critical level z∗ , corresponding to a
+practical calculations even if W is ten times larger than N                         given FAP∗ ) is more important. Examining Fig. 3 yields that
+(or even larger, depending on the desirable precision).                             the relative shift ∆z∗ /z∗ does not exceed 10% for FAP < 0.1.
+                                                                                                                                             √
+     When a ‘physical’ spectral leakage is large, the quality                       As an amplitude of corresponding signal scales as z, this
+of the alias-free approximation depends on the frequency                            turns into only 5% relative error of an amplitude threshold.
+range too. If fmax does not exceed the Nyquist frequency of                         Remind, that this 5% offset corresponds to a very strong
+periodic breaking of observations then the interval [0, fmax ]                      aliasing. Such spectral leakage takes place, for instance, for
+is free from aliasing and we may use (11) without signifi-                          the sequence of observations that are made during 10 days
+cant loss of precision. If the frequency range increases, the                       with only 4.8 night hours in a day, or during 10 years with
+model (11) comes off from the real distribution and some-                           only 2.4 observational months in a year.
+what overestimates the false alarm probability. Such a sim-                              Note that the multiple-trial formula (4) can work well
+ulation is shown in Fig. 3. In this example, the frequency                          in restricted regions only. When constructed from a short
+of periodic data breaks corresponds to fmax T = 9 and the                           Monte-Carlo simulation, it can fit well the centre of the dis-
+respective Nyquist frequency corresponds to a half of this                          tribution (i.e., large FAPs), but fails to fit low FAPs. This
+value (fmax T = 4.5).                                                               takes place even for negligible aliasing. The spectral leakage
+     Although errors of the alias-free model may become                             perturbs strongly the distribution centre but affects weakly
+practically significant for some extremal situations, they are                      its high-significance tail. Hence, any multiple-trial models
+not very large and (more important) not fatal. The signif-                          constructed from short Monte-Carlo simulations cannot be
+icance of a candidate periodicity is underestimated, what                           extrapolated to the most important region of low false alarm
+does not favour to false alarms. The aliasing may only de-                          probabilities. Such extrapolation overestimates statistical
+                                                                                   Assessing statistical significance of periodogram peaks                                               5
+                                 1                                                                                      14
+        spectral window
+
+
+
+
+                                0.8
+                                                                                                                        12
+                                0.6
+
+
+
+
+                                                                                               ratio A(f_max) / (T f_max)
+                                0.4                                                                                     10
+                                0.2
+                                 0                                                                                          8
+                                          1       10      100       1000    1e04      1e05
+                                                         period [days]                                                      6
+                                 1
+                                                                                                                            4
+
+
+                                0.1                                                                                         2                                        function itself
+    false alarm probability
+
+
+
+
+                                                                                                                                                                  Carlson’s bound
+                                                                                                                                                                  alias-free model
+                                                                                                                            0
+                                                                                                                                0             5            10               15          20
+                                                                                                                                                        T f_max
+                               0.01
+
+                                                                                                                                Figure 6. The factor A(fmax ) and its approximations.
+                              0.001
+
+                                             Simulated                                         indicating periodic gapping of observations. For the star
+                                            Alias-free
+                              1e-04
+                                          Davies bound                                         70 Vir, the time series has Teff ≈ 8.5 yrs, T ≈ 7.2 yrs and
+                                      0            5         10            15             20   posesses a more ‘noisy’ spectral window (Fig. 5) indicating
+                                                         max z(f)
+                                                                                               significant natural aliasing. In the first case, the simulated
+Figure 4. Top: spectral window function for ELODIE radial                                      extreme value distributions for the L–S periodogram don’t
+velocities of 51 Peg. Bottom: Simulated and analytic FAP for                                   show large deviations from alias-free models (relative error
+this time series for 105 Monte-Carlo trials, Pmin = 1/fmax =                                   ∆(FAP)/FAP . 30% and ∆z∗ /z∗ . 5% for FAP < 0.1). In
+100, 10, 1 days (from left to right).                                                          the second case, the simulated FAP may be two times less
+                                                                                               than its alias-free approximation, but this still may be tol-
+                                 1                                                             erated because ∆z∗ /z∗ . 10% (again for FAP < 0.1). Note
+        spectral window
+
+
+
+
+                                0.8                                                            that the both time series possess a strong leakage with one
+                                0.6                                                            day period. Such gapping affects extreme value distributions
+                                0.4                                                            for Pmin = 1/fmax ⩽ 2 days only. In the case of 51 Peg, this
+                                0.2                                                            aliasing could introduce a significant error in FAP for unre-
+                                 0                                                             alistic frequency ranges (say, for Pmin = 1/fmax . 0.1 days).
+                                          1       10      100       1000    1e04      1e05     In the case of 70 Vir, the respective deviation is enforced by
+                                                         period [days]
+                                 1                                                             low number of observations, what leads to rather large er-
+                                                                                               rors of FAP already for Pmin = 1 day. Note also that in the
+                                                                                               both cases the errors of alias-free approximations decrease
+                                0.1                                                            significantly when FAP drops to the values 10−3 ÷ 10−2 .
+    false alarm probability
+
+
+
+
+                                                                                                    At last, we need to consider the quality of the alias-
+                                                                                               free approximation for the factor A(fmax ). Fig. 6 shows a
+                               0.01
+                                                                                               graph of the ratio A(fmax )/(T fmax ) along with graphs of
+                                                                                               its alias-free approximation and upper Carlson bound (see
+                              0.001
+                                                                                               Appendix B). The observations were spanned in the same
+                                                                                               way as for Fig. 3. The spectral leakage appears only in small
+                                             Simulated
+                                            Alias-free                                         splashes near the Nyquist frequency of the periodic data
+                                          Davies bound
+                              1e-04                                                            breaks and near its overtones (i.e., at fmax T = 4.5, 9.0, 13.5).
+                                      0            5         10            15             20
+                                                         max z(f)                              For W > 3, the function A(fmax ) is well approximated by
+                                                                                               the alias-free model regardless the strong aliasing.
+                              Figure 5. The same as in Fig. 4, but for the star 70 Vir.
+
+
+significances of candidate periodicities, what favours to false                                5                            CONCLUSIONS
+alarms.
+                                                                                               The problem of estimating statistical significance of peri-
+     The last pair of Monte-Carlo simulations in this pa-
+                                                                                               odogram peaks is discussed in the paper. The results pub-
+per deals with real astronomical time series. I used epochs
+                                                                                               lished in the field of extreme values of random processes are
+and standard errors of 153 and 35 radial velocity measure-
+                                                                                               adapted for and extended to the periodogram analysis of as-
+ments of the stars 51 Pegasi and 70 Virginis, obtained with
+                                                                                               tronomical time series. For the Lomb–Scargle periodogram
+ELODIE spectrograph (Naef et al. 2004)3 . These time series
+                                                                                               and its modifications the corresponding extreme value distri-
+are not even. For the star 51 Peg, the effective time series
+                                                                                               butions are given by a closed formulae being ready for usage.
+length Teff ≈ 9.0 yrs is close to the actual one T ≈ 9.2 yrs,
+                                                                                               If the spectral leakage cannot be neglected, the similar ex-
+but the spectral window (Fig. 4) shows several high peaks
+                                                                                               pressions provide upper limits to the false alarm probability
+                                                                                               (or lower ones to the significance).
+3 Note that both stars 51 Peg and 70 Vir have a planetary com-                                      It is established numerically that the region of validity
+panion (Mayor & Queloz 1995; Marcy & Butler 1996).                                             of these approximations is large and has no sharp bound-
+6     R.V. Baluev
+aries. Even if the aliasing is very strong, the error of the an-    Schwarzenberg-Czerny A., 1998a, MNRAS, 301, 831
+alytic estimation of false alarm probability does not favour        Schwarzenberg-Czerny A., 1998b, Baltic Astron., 7, 43
+false alarms and thus is not fatal. For strong aliases, the         Tee G., 2005, New Zealand Journ. Math., 34, 165
+usage of this analytic approximation slightly decreases the
+sensitivity to low-amplitude signals. However, the respective
+increasing of amplitude thresholds should not exceed several
+per cent in the worst practical cases (like a strong aliasing      APPENDIX A: SEVERAL NOTATIONS
+enforced by lack of observations).
+     These results may be very useful in a wide variety of         Let us introduce the following averaging operations:
+astronomical applications. They would be useful especially                    N
+for systematic surveys that deal with large amounts of data
+                                                                              X
+                                                                   hφ(t)i =         φ(ti )/σi2 ,           φ(t) = hφ(t)i/h1i,
+consisting of many separate time series. Indeed, it would be                  i=1
+very difficult and even impossible to perform Monte-Carlo
+simulation for every of such time series. Vice versa, it is easy   with σi2 being the error variance at the observational epoch
+to use simple analytic formulae (11,12) or their analogs for       ti . The function φ(t) may be defined at the set of ti only,
+the modified L–S periodograms. This will eliminate the need        that is to be a discrete sequence. The quantity hφ1 (t)φ2 (t)i
+for Monte-Carlo simulations in the cases when the observed         may be treated as a scalar product in the Hilbert space
+periodogram peak exceeds the adopted threshold and in the          (Schwarzenberg-Czerny 1998a).
+opposite cases when this peak is lower than this threshold               All vectors are assumed to be column ones by default.
+by more than, say, 10%. The rare intermediate cases are            The notation {x1 , x2 , . . .} corresponds to a column vec-
+easy to be studied by means of Monte-Carlo simulations. It         tor formed by the quantities inside the braces. Similarly,
+is also admissible not to use numerical simulations at all,        {x1 , x2 , . . .} is a vector constituted by elements of the vec-
+especially for large datasets (N & 100). In this case, the         tors x1 , x2 , . . .
+number of undetected low-amplitude periodicities may be                  I is the identical matrix.
+increased by a negligible quantity only.                                 ∗T denotes the transpose of a matrix or a vector.
+                                                                         If x is a vector then x⊗x := xxT is a matrix constituted
+                                                                   by the pairwise products xi xj .
+                                                                         p(x1 , x2 , . . .) is the joint probability density of the ran-
+ACKNOWLEDGMENTS                                                    dom variables x1 , x2 , . . . and p(x1 = a1 , x2 = a2 , . . .)
+I would thank Drs. V.V. Orlov, K.V. Kholshevnikov,                 is the same joint probability density, taken in the point
+L.P. Ossipkov and the anonymous referee for critical read-         (a1 , a2 , . . .).
+ing of this paper, fruitful suggestions and linguistic correc-
+tions. This work is supported by the Russian Foundation
+for Basic Research (Grants 05-02-17408, 06-02-16795) and           APPENDIX B: RICE METHOD AND
+by the President Grant NS-4929.2006.2 for the state sup-           PERIODOGRAMS
+port of leading scientific schools.
+                                                                   In the so-called ‘Rice method’, one considers an integer
+                                                                   random variable N + (Z0 , fmax ), the number of up-crossings
+                                                                   of a given level Z0 by the random process Z(f ) within
+REFERENCES                                                         [0, fmax ]. The distribution function of the maximum Zmax =
+ Azaı̈s J.-M., Wschebor M., 2002, in Sidoravicius V., ed.,         max[0,fmax ] Z(f ) can be represented by the expansion
+  In and Out of Equilibrium: Probability with a Physics                                                                    ∞
+                                                                                                                           X (−1)j
+  Flavor. Vol. 51 of Prog. Prob., The distribution of the          Pr{Zmax ⩽ Z0 } = Pr{Z(0) ⩽ Z0 }                                    νj ,     (B1)
+  maximum of a Gaussian process: Rice method revisited.                                                                    j=0
+                                                                                                                                 j!
+  Birkhäuser book, Boston, pp 321–348
+                                                                   where ν0 = 1 and νj being the conditional factorial mo-
+ Cumming A., 2004, MNRAS, 354, 1165
+                                                                   menta of N + (Z0 , fmax ) under condition that Z(0) ⩽ Z0 .
+ Cumming A., Marcy G. W., Butler R. P., 1999, ApJ, 526,
+                                                                   Let ν̃j being the unconditional factorial momenta of N + .
+  890
+                                                                   The quantities νj and ν̃j are explicitly expressed in terms of
+ Davies R. B., 1977, Biometrika, 64, 247
+                                                                   the so-called ‘Rice formulae’. For instance,
+ Davies R. B., 1987, Biometrika, 74, 33
+ Davies R. B., 2002, Biometrika, 89, 484                                                               fZ
+                                                                                                        max        Z∞
+ Ferraz-Mello S., 1981, AJ, 86, 619                                            ν̃1 (Z, fmax ) =              df         Z ′ p(Z, Z ′ )dZ ′ ,   (B2)
+ Horne J. H., Baliunas S. L., 1986, ApJ, 302, 757                                                      0           0
+ Kratz M. F., 2006, Probability Surveys, 3, 230                                           Z                            Z
+ Lehman E. L., 1979, Testing Statistical Hypotheses [Rus-          ν̃j (Z, fmax ) =                df1 . . . dfj             Z1′ . . . Zj′ ×
+  sian translation]. Nauka, Moscow                                                    [0,fmax ]j                   [0,∞)j
+ Lomb N. R., 1976, Ap&SS, 39, 447
+                                                                         × p(Z1 = Z, Z1′ ; . . . ; Zj = Z, Zj′ ) dZ1′ . . . dZj′ ,             (B3)
+ Marcy G. W., Butler R. P., 1996, ApJ, 464, L147
+                                                                                      ′
+ Mayor M., Queloz D., 1995, Nature, 378, 355                       where p(Z, Z ) being the joint probability density of Z
+ Naef D., Mayor M., Beuzit J. L., Perrier C., Queloz D.,           and Z ′ = dZ/df , both taken at the same frequency f ,
+  Sivan J. P., Udry S., 2004, A&A, 414, 351                        and p(Z1 , Z1′ ; . . . ; Zj , Zj′ ) being the joint probability den-
+ Scargle J. D., 1982, ApJ, 263, 835                                sity of the pairs Zi = Z(fi ), Zi′ = Z ′ (fi ). For details on
+                                                                   Assessing statistical significance of periodogram peaks                            7
+the Rice method and further references see the paper by                       these eigenvalues. They satisfy the characteristic equation
+                                                                                         T −1
+Azaı̈s & Wschebor (2002).                                                     det(R̃ − S̃ Q̃ S̃ − λQ̃) = 0.
+      The expected number of up-crossings plays an impor-                          The factor A(fmax ) appears implicitly in the papers
+tant role in what follows. For the sake of convenience, we                    by Davies after integration of the mathematical expecta-
+introduce the synonymous notation τ ≡ ν̃1 . Exact ana-                        tion E|η| by f , where the random vector η is Gaussian with
+lytic expressions of τ (Z, fmax ) for the periodograms z(f ) and              zero mean and statistically independent componets having
+z1,2 (f ) may be derived from results by Davies (1977, 1987,                  Dηi = λi (f ). Davies (1987) gave some exact and approxi-
+2002). Actually, Davies dealt with the case when the weights                  mate integral formulae for this expectation. I present here
+of measurements are equal to each other. Nevertheless, his                    (in terms of the factor A) a number of new integral repre-
+results may be directly extended to the unequal weights.                      sentations that may be useful in practice. The first two may
+The quantity τ provides not only the upper bound (5) on                       be derived easily and are given by
+the false alarm probability, but also yields its asymptotic                                    fZ
+                                                                                                max
+representation for large z (low FAP) levels. Unfortunately,                                                I
+the asymptotic character of the Davies bound was strictly                     A(fmax )     =          df         m(n) dΩ,       m2 (n) = nT Mn,
+proved only for restricted families of random processes, such                                     0        Sd
+as stationary Gaussian and stationary χ2 ones. Nevertheless,                                   fZ
+                                                                                                max          Z      √            dx
+this asymptotic seems to be non-specific to the distribution                  A(fmax )     =          df                xT Mx        ,              (B5)
+of the process values and to the strict stationariness (see                                                                     |x|d
+                                                                                                  0        x 2 <1
+references and discussion in the cited works by Davies and
+in the review by Kratz (2006)). Hence, we may expect the                      where dΩ denotes an infinitesimal solid angle in Rd , directed
+asymptotic character of (5) for all of our periodograms. Note                 by the unit-length integration vector n. The integration in
+that the periodogram 2z(f ) may be treated as a χ2 random                     the first formula is performed over all possible directions
+process, 2z2 /d as an F process, and 2z1 /NH as a beta pro-                   within the whole space solid angle Sd = 2π d/2 /Γ(d/2). Note
+cess, according to Davies (2002).                                             that the matrix M may be diagonalizedP by       means of a solid-
+      The high-order Rice formulae are significantly more                     body rotation of n, so that m2 =        λi n2i and the function
+complicated with respect to the first-order one. We will                      A(fmax ) is determined by the eigenvalues λi only. Inner inte-
+not compute here the high-order Rice terms for our pe-                        grals in (B5) are equal to each other. They may be expressed
+riodograms in general case. However, the calculations are                     in terms of the (hyper)area of an ellipsoidal (hyper)surface in
+essentially simplified if the long-distance correlations of                   d dimensions, having semi-axes qi = λi
+                                                                                                                      −1/2
+                                                                                                                            . Indeed, changing
+the periodogram may be neglected (equivalently, the alias-                    the integration variable in the inner integral in the second
+ing is negligible). Indeed, under the approximation stated                    of equations (B5) as x = M1/2 x̃, then x̃ = x̃ñ (ñ2 = 1) and
+the density p(Z1 , Z1′ ; . . . ; Zj , Zj′ ) may be factorized as              integrating by x̃ we obtain
+p(Z1 , Z1′ ) . . . p(Zj , Zj′ ) for all frequencies except for the nar-                                           I √ T 2
+row vicinities of the diagonals fi = fj . This property allows
+                                                                               I                 √                        ñ M ñ
+                                                                                  m(n)dΩ = Πd det M, Πd =                         ´ d+1 dΩ̃. (B6)
+us to obtain that if fmax is large enough to be resolved by                                                           ` T
+                                                                                                                       ñ  M   ñ    2
+                                                                              Sd                                  Sd
+the periodogram well, the relations νj ≈ ν̃j ≈ τ j hold true.
+Then the extreme value distribution of Z(f ) is given by (6).                 It can be directly checked that the integrand in the last
+An alternative way to obtain the latter expression is to as-                  expression represents an infinitesimal (within dΩ̃) area el-
+sume a Poisson distribution for N + (Kratz 2006).                             ement on the surface x̃T Mx̃ = x̃2 ñT Mñ = 1, and Πd
+      The factor A(fmax ) in equalities (7,8) determines the                  equals to its total area. It is not hard to show that Π1 = 2.
+dependence on the frequency range (so-called bandwidth                        The circumference of an ellipse, Π2 , and the usual surface
+penalty). Before considering it, let us denote ϕ′f = ∂ϕ/∂f                    area of an ellipsoid, Π3 , can be expressed by means of el-
+and define the matrices                                                       liptic integrals (complete and incomplete, respectively). For
+                                                                              d ⩾ 4 an Abelian integral can be used to compute Πd (Tee
+        Q = ϕ ⊗ ϕ,       S = ϕ ⊗ ϕ′f ,       R = ϕ′f ⊗ ϕ′f ,                  2005). There are useful inequalities for Πd , e.g. the Carl-
+                 QH = ϕH ⊗ ϕ,            SH = ϕH ⊗ ϕ′f ,                         p one bounds the inner integrals
+                                                                              son’s                         p        in (B5) by the quantity
+                                                                              Sd (λ1 + . . . + λd )/d = Sd Tr M/d. Finally,
+                                     QH,H = ϕH ⊗ ϕH ,
+                                                                                           fZ                                    fZ
+  Q̃ = Q − QTH Q−1                S̃ = S − QTH Q−1
+                                                                                            max                                   maxr
+                H,H QH ,                        H,H SH ,                                          Πd (q1 . . . qd )                      Tr M
+                                       −1          T   −1                     A(fmax ) =                            df ⩽ Sd                   df.   (B7)
+R̃ = R − STH Q−1
+              H,H SH ,         M = Q̃       (R̃ − S̃ Q̃     S̃).      (B4)                          q1 . . . qd                           d
+                                                                                           0                                      0
+
+In general, all these matrices, except for the matrix QH,H ,                  The latter inequality seems to be very sharp in practical
+depend on the frequency. Note the relations SH = Q′H and                      situations (Fig. 6).√Note also, that if every λi (f ) ≡ λ then
+ST + S = Q′ . The definitions (B4) look rather bulky, but                     A(fmax ) = Sd fmax λ.
+they are essentially simplified under certain conditions. For
+example, if the base functions ϕ for any f are orthogonal                     This paper has been typeset from a TEX/ LATEX file prepared
+to the functions ϕH , then QH = SH = 0 and the matrices                       by the author.
+in (B4) labelled with a tilde are equal to the same matrices
+without tilde mark. Also if the base ϕ is orthonormal for
+any f , then Q = I, ST = −S and M = R + S2 . The last
+matrix M(f ) is necessarily positively definite and possesses
+the positive eigenvalues λi (f ). In fact, we need below only
+

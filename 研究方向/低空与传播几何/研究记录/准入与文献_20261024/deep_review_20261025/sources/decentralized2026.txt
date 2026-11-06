@@ -1,0 +1,969 @@
+
+=== PAGE 1 ===
+IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 25, 2026                                                                             3091
+
+   Decentralized Indoor Direct Localization With
+           Multiple Wi-Fi Access Points
+
+          Ziqiang Wang   , Member, IEEE, Bo Tan   , Member, IEEE, Mikko Valkama   , Fellow, IEEE,
+                      Lei Xie   , Member, IEEE, and Qun Wan   , Senior Member, IEEE
+
+  Abstract—In this paper, a decentralized iterative maximum  from the coordination of connected vehicles and drones in
+likelihood (ML) direct position determination (DIM-DPD) algo-   outdoor space to the navigation of personnel and robots in
+rithm is proposed based on the expectation maximization (EM)                                                                buildings and other indoor environments  [1],  [2],  [3],  [4].
+concept for user equipment (UE) localization in Wi-Fi systems.
+                                                   The  activation of wideband and  large aperture millimeterBy innovatively treating the non-line-of-sight (NLoS) angles-of-
+arrival (AoAs) and observed times-of-arrival (ToAs) as nuisance  wave (mmWave) transceivers provide large expectations on
+parameters in the received signal model and parameter  esti-   precise range and angular resolutions [5], [6]. However, factors
+mation procedure, the proposed DIM-DPD demonstrates  its   such as high cost [7] and intermittent blockage caused by
+adaptability and localization efﬁciency in dense multipath indoor                                                        narrow beam coverage [8] may hinder the popularity of the
+environments. In the proposed method, the position of the UE
+                                          mmWave localization systems. Therefore, the Wi-Fi-based 2.4is incorporated in the vectors denoting the location differences
+between the UE and the access point (APs), referred to as   or 5.8 GHz localization systems remain widely used and hold
+the UE-AP location difference vectors. The set of UE-AP location   also promise for further exploration [9], [10] – particularly
+difference vectors allows constructing the related UE-AP vari-   indoors – despite the intensive studies in the past two decades
+ables, serving as the latent variables in the EM iterations. Then,                                                                     [11], [12], [13]. In many existing works, the received signal
+by taking advantage of the alternating projection technique,
+                                                                  strength indicator (RSSI) is a popular indicator to estimate thethe nuisance parameters and UE-AP variables in the DIM-
+DPD algorithm are alternatively updated on separated APs in   location of user equipment (UE) using a pathloss model [14]
+parallel. Furthermore, instead of traditional grid search, the   or utilizing ﬁngerprint-based approaches [15]. Unfortunately,
+UE position  is updated with an efﬁcient closed-form solution   pathloss-based approaches only achieve coarse localization
+by aggregating the distributed estimated low-dimensional UE-                                                       due to the intractable environmental factors that affect the
+AP variables. Thus, overall, the proposed DIM-DPD approach
+                                                  RSSI while the ﬁngerprint-based methods require additionalfacilitates  decentralized  direct  localization with implementa-
+tion  feasible processing  complexity. The provided numerical   server infrastructure and costly data collection campaigns.
+simulation  results demonstrate  that the proposed DIM-DPD   Also, both  the  pathloss- and ﬁngerprint-based approaches
+algorithm achieves high positioning accuracy, fast convergence,  show low adaptability to environmental changes. In addition
+and a good balance between computational complexity and                                                                    to RSSI, the channel state information (CSI) [16], [17], [18]
+performance.
+                                                               of the Wi-Fi devices provides another opportunity to estimate
+  Index Terms—Direct position determination (DPD), expecta-   ﬁne-grained information, for example, time-of-arrival (ToA)
+tion maximization (EM), decentralization, alternating projection,                                                               or time-difference-of-arrival (TDoA) for localization. How-
+multipath, indoor localization, Wi-Fi.
+                                                                      ever, due to the timing offsets between the digital-to-analog
+                                                                converter (DAC) of the access point (AP) and the analog-
+                           I. INTRODUCTION                           to-digital converter (ADC) of the UE, the direct estimation
+                                                               of ToA based on commodity Wi-Fi devices does not rep-      IRELESS localization and sensing will play an increas-
+                                                                  resent the signal propagation distance [19], [20]. Therefore,        ingly important role in many emerging applications,W                                                                  additional procedures, such as time-of-ﬂight (ToF) sanitization
+  Received 9 September 2024; revised 19 February 2025 and 16 June 2025;   or the Fine Timing Measurement (FTM) protocol [21], are
+accepted 15 August 2025. Date of publication 29 August 2025; date of current  commonly required to eliminate excessive delays and biases
+version 22 December 2025. This work was supported in part by the Research
+Council of Finland (RCF) under Grant 339519, Grant 352754, Grant 357730,   before using the ToA estimation for positioning.
+and Grant 359095; in part by the Business Finland under Grant 6868/31/2021;     In addition to ToA, the angle-of-arrival (AoA) is another
+and in part by H2020 MSCA RISE under Grant 10100828. The associate   important feature for localization due to the wide-scale adop-
+editor coordinating the review of this article and approving it for publication
+was A. Guerra. (Corresponding author: Bo Tan.)                          tion of multiple antennas in commodity Wi-Fi devices and
+  Ziqiang Wang and Mikko Valkama are with Tampere Wireless Research   the relaxed synchronization requirements between the UE and
+Center, Unit of Electrical Engineering, Tampere University, 33720 Tampere,   the APs. The work in [22] proved that sub-meter precision
+Finland (e-mail: ziqiang.wang@tuni.ﬁ; mikko.valkama@tuni.ﬁ).
+  Bo Tan is with the Department of Electronics and Electrical Engineering,   can be achieved using up to six APs that are equipped with
+University College London, WC1E 6BT London, U.K., and also with Tampere   eight-element antenna arrays in indoor multipath scenarios.
+Wireless Research Center, Unit of Electrical Engineering, Tampere University,   In practice,  it is not easy to achieve similar accuracy with
+33720 Tampere, Finland (e-mail: bo.tan@tuni.ﬁ; tan.bo@ucl.ac.uk).
+  Lei Xie is with the School of Cyber Science and Engineering, Southeast   commercial off-the-shelf (COTS) devices (equipped typically
+University, Nanjing 210096, China (e-mail: leixie@seu.edu.cn).            with three or four antenna elements), particularly in a dense
+  Qun Wan is with the School of Information and Communication Engi-   indoor environment where the number of non-line-of-sight
+neering, University of Electronic Science and Technology of China, Chengdu
+611731, China (e-mail: wanqun@uestc.edu.cn).                     (NLoS) multipaths is difﬁcult to resolve by a limited number
+   Digital Object Identiﬁer 10.1109/TWC.2025.3601543                   of antennas. To this end, the researchers in [23], [24] and
+
+
+                © 2025 The Authors. This work is licensed under a Creative Commons Attribution 4.0 License.
+                                       For more information, see https://creativecommons.org/licenses/by/4.0/
+
+=== PAGE 2 ===
+3092                                                                       IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 25, 2026
+
+
+[25] discriminate the multipaths using joint angle and delay  work in [42] proved that grid search is an effective means
+estimation algorithms where ToA is used as an extra dimension   of ensuring fast convergence and global optimality for sparse
+to separate the line-of-sight (LoS) path and the NLoS paths  DPD algorithms. However, choosing the grid size is always
+[19]. It should be noted that the above algorithms comprise two   a dilemma between complexity and accuracy. Furthermore,
+steps: ﬁrst, to estimate intermediate parameters such as ToA  when summarizing DPD algorithms for dense multipath envi-
+and AoA on different APs; second, to aggregate intermediate   ronments, one can observe that ToA (or more generally, timing
+parameters for position calculation. Since APs estimate inter-   information) is commonly neglected as an ingredient in the
+mediate parameters independently, such two-step approaches   received signal models.
+neglect the constraint that all parameters should be estimated     In addition to accuracy and complexity concerns, the possi-
+from observations from the same signal source [26]. Extra data   ble implementation constraints form another factor that hinders
+association will be needed to maintain performance, especially   the popularity of DPD. To date, most DPD methods require
+in a low signal-to-noise ratio (SNR) scenario. Therefore, the   centralized implementation due to the need to aggregate radio
+technology of one-step direct position determination (DPD)   signal samples from different APs to execute estimation and
+has drawn increasing  attention  recently. By modeling the   other processing algorithms. This requirement imposes addi-
+source position as vector parameter in the received signal   tional investments in the servers and network infrastructure
+model, DPD turns the positioning into a parameter estimation   while also resulting into extra network trafﬁc to convey data
+problem [27].                                           from the APs to the central server. Even with the advantages
+                                                               of high accuracy and suitability for dense multipath environ-
+A. State-of-the-Art in DPD Methods                          ments, high cost and inefﬁcient network utilization still hinder
+  DPD is a generic method for different hardware or system   the popularity of DPD methods [43], [44] in practice.
+setups such as the number of antennas, bandwidth, and number
+of subcarriers. To this end, array-based DPD methods have
+                                                             B. Proposed Decentralized Maximum Likelihood DPD
+been studied extensively  [28],  [29],  [30]. An early study
+                                                    Method
+proposed a maximum likelihood DPD (ML-DPD) algorithm
+for a single stationary source [31], followed by a fast Fourier     In this paper, motivated by the above theoretical and prac-
+transform (FFT)-based implementation variant [32]. The DPD   tical analysis of state-of-the-art DPD methods, we propose
+study was then extended to multiple sources in [33], which   a decentralized DPD algorithm with modest computational
+reached a balance between complexity and precision using the   load and adaptivity in high-density multipath environments.
+subspace data fusion (SDF) DPD algorithm, however, requir-  The considered  scenario  includes a  single  stationary UE
+ing prior knowledge of the number of sources. Then, a DPD   under position estimation and multiple asynchronous station-
+algorithm derived from the distortionless minimum-variance   ary commercial  off-the-shelf (COTS) Wi-Fi APs with the
+response (MVDR) in [34] and [35] further excludes the need   typical 4-antenna conﬁguration (as deﬁned in IEEE 802.11ac
+for the number of sources. Except for the computationally   standard). To  this end, a decentralized  iterative ML DPD
+heavy and complex ML-DPD, the aforementioned methods   algorithm (DIM-DPD)  is proposed based on  the  iterative
+experience a signiﬁcant performance drop in the low SNR   expectation maximization (EM) technique [45]. In particu-
+regions as a trade-off for computing efﬁciency. Thus, recently,    lar, the position of the UE is incorporated into the speciﬁc
+importance sampling (IS) was introduced in DPD processing  UE-AP location difference vectors based on which the UE-AP
+context in [36] and [37] to trade-off between complexity and   variables are constructed as latent variables and estimated
+accuracy over a wide SNR range.                             using the Laplace approximation technique. Thus, a speciﬁc
+  Though designed for the LoS environment, DPD methods  UE-AP variable and the corresponding nuisance parameters,
+are often capable for localizing a signal source in multipath    i.e., AoAs of the NLoS paths and the observed ToAs of all
+environments – however, with limited performance in the   paths, can be estimated by multiple line searches with the
+dense multipath scenario due to the limited capacity to handle   alternating projection technique, and further implemented in
+the resulting energy dispersion. Thus, it becomes necessary to   parallel in each AP. That is, the traditional multi-dimensional
+model the NLoS paths in the received signal for improving   search involving grid points is avoided.
+the DPD performance in dense multipath environments. In     Furthermore, the estimation of the UE position is updated
+[38], a variant of the ML-DPD algorithm was proposed for   via  the aggregation of low-dimensional UE-AP  variables,
+the dense multipath scenario with the requirement of statistical   allowing for a closed-from solution rather than grid searching
+multipath information. An SDF-based algorithm called multi-   method. Thus, the aggregation and processing are simple
+path scenario DPD (SM-DPD) was proposed for a multipath  enough to be implemented in light-weight UE itself rather
+environment in [39], with a decrease in localization accuracy   than at an extra central server. Finally, k-means clustering
+as a trade-off for computational simplicity. In [40], DPD was  and multiple initializations are used to ensure the global opti-
+modeled as a sparse signal recovery problem in the dense   mality of ﬁnal position estimation. The provided simulation
+multipath environment to eliminate the need for  statistical   results demonstrate that the proposed DIM-DPD outperforms
+channel information in ML based DPD methods. The work   the existing baseline solvers even in decentralized manner
+was extended to the MIMO conﬁguration in [41], however,  by comprising  the observed ToA  in  the  received  signal
+leading to a second-order cone programming (SOCP) convex  model and by harnessing the proposed parameter estimating
+problem that results in high computational complexity. Recent   procedure.
+
+=== PAGE 3 ===
+WANG et al.: DECENTRALIZED INDOOR DIRECT LOCALIZATION WITH MULTIPLE Wi-Fi ACCESS POINTS                                              3093
+
+
+  In general, the proposed decentralized DIM-DPD approach                         TABLE I
+differentiates from the other existing DPD methods in the           MOST IMPORTANT QUANTITIES AND VARIABLES
+following aspects: (i) The method is free from the requirement
+of any dedicated server for aggregating intermediate estimates
+and for ﬁnal position determination; (ii) The method allows
+saving network trafﬁc which is classically used for transmitting
+the raw samples between the central server and APs; (iii) The
+method avoids leaking or disclosing the position information
+which is usually consider private and sensitive information, by
+using directly the UE rather than any dedicated and external
+server to determine the UE position.
+  The contributions, novelty and advantages of the methods
+proposed in this paper can be summarized as follows:
+
+
+  1) A computationally efﬁcient iterative DPD algorithm is
+     proposed for UE positioning in dense multipath indoor
+      scenarios. On the AP side, the efﬁciency is achieved by   C. Deﬁnition of Notations
+      multiple line searching which is activated by alternating    The Euclidean norm of any  vector  is denoted as  ∥·∥.
+      projection technique. On the UE side, a closed-form                                                          Moreover, (·)T , (·)H, (·)c, (·)−1, Re{·} and Im{·} denote
+    UE-AP variable aggregation and estimation method is                                                                 the transpose, Hermitian transpose, conjugate, inverse and
+     proposed and deployed to avoid the burdensome posi-                                                                      real and imaginary part operators, respectively. |·| stands for
+      tion grid search for the ﬁnal determination of the UE                                                                 the absolute value, ⊗denotes the Kronecker product and ⊙
+      position.                                                            denotes the Hadamard product. IM0 denotes the M0 × M0
+  2) Decentralized DPD implementation  is manifested by                                                                     identity matrix, 1M0 is an M0 ×1 vector of ones. For a vector
+     two enablers.  First,  all searches can be implemented   ν, [ν]g stands for g-th element in ν, diag{ν} is a diagonal
+     on separate APs in parallel by choosing UE-AP loca-                                                             matrix with the elements of ν on its diagonal. For a matrix X,
+      tion difference vectors to construct latent variables in   [X]g,h and [X]g denote its (g, h)-th element and g-th column,
+      the expectation step of EM iteration. Second, closed-                                                                     respectively. The notation blkdig {X1, . . . , XN0} represents
+     form  aggregation  of  low-dimension UE-AP  vectors                                                           a block diagonal matrix with {X1, . . . , XN0} on the main
+      (rather than complete CSI data) signiﬁcantly reduces                                                                diagonal. ≡denotes identity and ∝stands for proportionality.
+      the computational load and network trafﬁc. This fact                                                                      Finally, j is the pure complex number that veriﬁes j2 = −1,
+      allows avoiding centralized server processing and the                                                       and ∆= is used for deﬁnitions.
+      related burden on the network, both being notable chal-                                                            For the sake of readability and clarity, we summarize the
+      lenges in traditional DPD approaches, thus allowing the                                                              dimensionality and brief meanings of the most important vari-
+      light-weight UE to directly execute the ﬁnal position                                                                ables used in the subsequent sections in Table I. Additionally,
+      determination.                                                                    for presentation clarity, we state that the phrasing of UE-AP
+  3) From a performance perspective, the proposed DIM-                                                                      refers to quantities involving both the UE and the AP(s).
+    DPD is shown to achieve the Cram´er-Rao lower bound
+     (CRLB, derived  in closed form  in the Appendices)        II. SIGNAL MODELS AND PROBLEM FORMULATION
+      over  a wide SNR  range.  In  addition,  it  is shown
+                                                 As shown  in  Fig.  1, we  consider  a  multipath  two-
+      that incorporating  the observed ToAs as parameters
+                                                           dimensional (2)-D) scenario with stationary UE and L static
+      into the received signal model and EM iteration can                                          COTS APs, where the p0 ∈R2 and ul ∈R2 denote the
+     improve the accuracy of position estimation, despite the
+                                                                  position vectors of UE and l-th AP, respectively. Each AP is
+      involved clock biases. This stems from the enhanced
+                                                          equipped with a uniform linear array (ULA) of M antennas
+       ability to differentiate between the involved multipath
+                                                           with d referring to the adjacent antenna element spacing. UE
+     components.
+                                                                               is assumed to transmit the narrowband orthogonal frequency
+                                                                  division multiplexing (OFDM) signal, for which the number of
+  The rest of this paper is organized as follows: Section II   subcarriers is N, the bandwidth is B, and the carrier frequency
+presents the signal model and problem formulation of indoor    is fc. After deconvolution with the known pilot, the CSI vector
+DPD with APs and dense multipath. The proposed algorithms   obtained by the l-th AP is given by
+are derived and described in Section  III, where the main                                            Ql
+contributions of the paper are given. In Section IV, we analyze      rl(n)=bl0al(p0)e−j2πn∆f[tl(p0)+τ∆l]+ X blqlal(˜θlql)
+and discuss the properties of the proposed DPD methods.                                             ql=1
+Numerical simulation results are presented and discussed in                                       × e−j2πn∆f[tlql+τ∆l] + wl(n),                    (1)
+Section V.  Finally, conclusions are drawn  in Section VI.
+Selected derivations related to the involved CRLBs are pro-  where  bl0 and {blql}Qlql=1  are complex attenuation  factors.
+vided in the Appendices.                                            {˜θlql}Qlql=1 are the AoAs of NLoS paths; tl(p0) and tlql denote
+
+=== PAGE 4 ===
+3094                                                                       IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 25, 2026
+
+                                                                                      ˜Fl ∆= [¯fl(˜tl1, ˜θl1), . . . ,¯fl(˜tlQl, ˜θlQl)],
+                                                                                              ˜bl ∆= [bl1, . . . , blQl]T ,
+                                                                              ¯wl ∆= wTl (0), . . . , wTl (N −1) T ,
+                                                                                                       ¯fl(˜tlql, ˜θlql) ∆= hl(˜tlql) ⊗al(˜θlql),
+                                                                                   hl(˜tlql) = [1, e−j2π∆f˜tlql , . . . , e−j2π(N−1)∆f˜tlql ]T .    (4)
+                                                        Note that hl(˜tl0) has the same form as hl(˜tlql) based on
+                                                                                                    ˜tl0. Therefore, the problem now is to estimate the location of
+                                                                 the UE p0 from all CSIs {¯rl}Ll=1. From (3) it can be seen that
+                                                             except for the user location p0, other parameters can also be
+                                                                 written in a vector form
+                                                                                                            ¯t = [tT1 , tT2 , . . . , tTL]T , ¯θ = [˜θ T1 , ˜θ T2 , . . . , ˜θ TL]T ,
+                                                              ¯b=[¯bT1 , ¯bT2 . . . , ¯bTL]T=[b10, ˜bT1 , b20, ˜bT2 , . . . , bL0, ˜bTL]T. (5)
+                                                      where tl = [˜tl0, ˜tl1, . . . , ˜tlQl]T and ˜θl = [˜θl1, ˜θl2, . . . , ˜θlQl]T .
+                                                           Thus,  the  completely unknown  parameter  vector can be
+Fig. 1.  Illustration of the considered multipath indoor localization scenario                            T
+consisting of one UE to be located and multiple APs equipped with ULAs.    expressed as ξ ∆= [pT0 ,¯tT , ¯θ  , ¯bT ]T . Then we focus on the
+                                   ML estimation of ξ, whose ML function is given by
+                                         YL                                                                                                                        p¯rl(¯rl;p0, ϕl),          (6)the propagation delays of LoS path and ql-th NLoS path on                p({¯rl}Ll=1;ξ)=                                                                                            l=1
+l-th AP; τ∆l reﬂects the random sampling offset or clock bias                     T
+caused by the asynchronous nature between 802.11 APs. For  where ϕl  ∆=  [tTl , ˜θ l , bl0, ˜bTl ]T  is the nuisance parameter
+notational simplicity, the time of departure (ToD) is treated as   vector since only UE location p0  is the parameter of our
+zero for all paths since there is only one UE.                      interest. Note that the ML function of ξ is expressed as the
+  ∆f  =  B/N   is  the  subcarrier  spacing  and n =   multiplication of multiple probability density functions (PDFs)
+{0, . . . , N −1}. The noise wl(n) is independent of the source   since {¯rl}Ll=1 are mutually independent, and the l-th PDF is
+signal and follows the complex normal distribution CN(0, σ2).   given by
+Finally, by deﬁning the l-th UE-AP location difference vector                                                               2
+                                                              e−1σ2 ∥¯rl−bl0fl(p0)−˜Fl˜bl∥
+βl(p0)  ∆= p0 −ul, the time delay (TD)  tl (p0) and the               p¯rl(¯rl;p0, ϕl)=                                     .       (7)
+(m + 1)-th element (m =  {0, . . . , M −1}) of the array                           (πσ2)MN
+manifold vector al can be given, respectively, by              The expression in (7) indicates that in the conventional
+                                                           implementation for the ML estimation of ξ, for each can-
+  tl(p0) = ∥βl(p0)∥/c0,
+                      d                                            didate  position, the calculation of  (6)  is followed by the
+      (e−j2π λ mβTl (p0)dl/∥βl(p0)∥operand is p0         multi-dimensional search of {ϕl}Ll=1. Such approach is com-  [al]m+1=         d
+            e−j2π λ m[cos(˜θlql),sin(˜θlql)]dl operand is ˜θlql         putationally extremely heavy to execute, even if ¯b could be
+                                                              (2)   replaced by closed-form expression relating p0 and ϕl (Equa-
+                                                                    tion (6) in [46]). To this end, we resort to the EM approach
+where c0 is the signal’s propagation speed, dl is the known                                                                    to alternatively estimate p0 and the nuisance parameters.
+array orientation unit vector of the l-th AP and λ ∆= c0/fc is
+the carrier wavelength.                                                                                        III. THE PROPOSED DECENTRALIZED
+  Note that tl(p0),  tlql and τ∆l  are unknown. Therefore,         EXPECTATION-MAXIMIZATION APPROACH
+the estimation of them can be replaced by estimating sums
+like  ˜tl0 ∆= [tl(p0) + τ∆l] and ql-th  ˜tlql  ∆=  [tlql + τ∆l] that     In  general, EM  is  a  technique  to  iteratively  estimate                                                  unknown parameters from the observation data by constructing
+are observed ToAs of LoS and NLoS paths on the l-th AP,
+                                                          hidden data (or latent variables). In this work and article, the
+respectively. This fact indicates that the observed ToA here
+                                                               observation data contains the received signal CSI at the L APs,
+cannot be directly used for position estimation. All {˜tlql}Qlql=1                               R ∆= {¯rl}Ll=1; the hidden data (latent variables) are constructedand  ˜tl0 are considered within the Rayleigh resolution limit,
+                                                             using the UE-AP variables U  ∆= {µl}Ll=1 deﬁned in  (9);which is tricky to process yet common in practical scenarios.
+                                                                 the complete unknown parameter vector under estimation isThen, the received CSI (1) can be written in a long vector                                                                      T
+form as                                              ξ = [pT0 ,¯tT , ¯θ  , ¯bT ]T which contains the UE position p0
+                                                                                           T
+                             ¯rl = bl0fl + ˜Fl˜bl + ¯wl,                 (3)  and the nuisance parameters ϕl = [tTl , ˜θ l , bl0, ˜bTl ]T . The EM
+                                                                       iterations [47] for the estimation of all the unknown parameters
+where                                                                    in ξ can be expressed as
+      ¯rl ∆= rTl (0), . . . , rTl (N −1) T ,                         Estep: Evaluate E {log pU,R (U, R; ξ)} ,
+     fl ∆= hl(˜tl0) ⊗al(p0),                              Mstep: Solve ξi+1 =arg max E {log pU,R (U, R; ξ)},  (8)
+                                                                                              ξ
+
+=== PAGE 5 ===
+WANG et al.: DECENTRALIZED INDOOR DIRECT LOCALIZATION WITH MULTIPLE Wi-Fi ACCESS POINTS                                              3095
+
+where pU,R (·) is the PDF of joint distribution of U and R,    Mstep: Solve argmax L1(p0) and arg max L2({ϕl}Ll=1),
+                                                                                    p0              {ϕl}Ll=1
+and E ≡E(U|R ;ξi) denotes the expectation with respect to                                                                                                                        (14)
+the conditional PDF pU|R U |R ; ξi  of U given R, while ξi
+is an arbitrary yet given value of the parameter vector ξ in the  where
+i-th iteration.                                                  L1 (p0)=−1  0 XL  Eξ′∥µl −βl (p0)∥2,         (15a)  In this section, we propose and describe a fast and decentral-            2σ−2    l=1
+ized interaction method for the above EM processing referred   L2({ϕl}Ll=1)=−σ−2XL                                       2. (15b)                                                                                         l=1Eξ′∥¯rl−bl0fl(µl)−˜Fl˜bl∥to as the DIM-DPD approach. The general procedure of the
+DIM-DPD algorithm can be stated as follows:                           It can be observed from (14) and (15) that the estimation
+                                                               of p0 and that of the nuisance parameters are separated. Next,  1) We ﬁrst introduce the method of separating the estima-
+                                             we derive the solutions for the EStep and MStep in (14),      tion of the UE position p0 and that of the other nuisance
+                                                                     respectively.      parameters in Section III-A;
+  2) The Estep and Mstep are then introduced and described
+      in Sections III-B and III-C, respectively;                 B. Estep
+  3) Section III-D describes the Estep acceleration method     Estep in (14)  is equivalent to estimating the conditional
+     which  is enabled by alternating projection technique   expectation Eξ′{µl} and Eξ′{fl(µl)} because random vari-
+      [48];                                                      ables in (15a) and (15b) are, respectively, µl and fl(µl).
+  4) In Section  III-E, a k-means  clustering based  multi-     For the estimation of both, we recall the following lemma
+      ple initialization strategy is introduced and adopted to   [49]:
+     reduce the possibility of the proposed decentralized EM    Lemma  1:  Consider  the  multivariate  function g (υ)   :
+       iteration being trapped in a local maxima.            RN0 →RM0, f (υ)  : RN0 →R and the integral If =
+                                                        R                                              υ∈V g (υ) ef(υ)dυ. Supposing that f (υ) has a global maxi-
+                                       mum strictly within the interval V, the Laplace approximation
+A. Separation of the UE Position and Nuisance Parameters
+                                                                    for If is given by
+  To      separate               the estimation                             of                                      nuisance                                                 parameters,                          p0 and                                                                Z                                                                    Z
+                                                                                                                                    · · ·                                                                                    e 21 (υ−υ∗)T F(υ∗)(υ−υ∗)dυ,we    construct          UE-AP                       variables                                         building                                          on vectors     If≈g (υ∗) ef(υ∗)                          {µl}L                                    l=1
+{βl(p0)}Ll=1 as the hidden data in our scenario, i.e.,                                                           =(2π)N0/2(det [−H (υ∗)])−1/2g (υ∗) ef(υ∗).    (16)
+
+
+                                            0           YL                         e−12 σ−2        p {µl}Ll=1 ∝                                       ∥µl−βl(p0)∥2,       (9)  where H (υ∗)  is the Hessian matrix of f (υ) evaluated at                           l=1
+                                                                 the global maximum point υ∗while det [·] stands for the
+where µl is normally distributed with mean vector βl (p0) and                                                             determinant operator.
+covariance matrix σ20I2.                                                 Due to the fact that both fl(µl) and µl are only related to
+  With {¯rl}Ll=1 and {µl}Ll=1, the EM cycle for our scenario                                                                 the l-th AP, we deﬁne ˇg (µl) ∆= E(µl|¯rl ;ξ′) {g (µl)}. For thecan then be expressed as
+                                                            sake of presentation brevity, the subscript l is omitted in the
+          Estep : Evaluate L  ξ, ξ′  ,                   below derivations (17) to (20). To this end, we can now write
+         Mstep : Solve  arg max L  ξ, ξ′  ,         (10)            Z             Z         p¯r|µ pµ                                    ξ                                              ˇg (µ) =   g (µ) pµ|¯r dµ =   g (µ)       dµ,                                                                                                                                                   p¯r
+                                                                                                                             F˜b∥2 −∥µ−β∥2                                                                                                        σ2where ξ′ is an value-known vector of ξ and              ∝1 Z g (µ)e−∥¯r−b0f−˜                                                                                                                        2σ20  dµ,     (17)
+                                                                                                         p¯r
+                                                          ξ)},   L(ξ, ξ′) ∆=E({µl}Ll=1|{¯rl}Ll=1;ξ′){log p({µl}Ll=1,{¯rl}Ll=1;                                                          Turning next to the polar coordinate system and redeﬁning                                                         (11)
+  Let next Eξ′ ≡E({µl}Ll=1|{¯rl}Ll=1;ξ′) for presentation brevity.    µ=ρµ[cos ψµ, sin ψµ]T and β=ρβ[cos ψβ, sin ψβ]T ,   (18)
+Then L(ξ, ξ′) in (11) can be rewritten as
+                                                             then (17) can be rewritten as
+   L(ξ, ξ′)      =                           |U)},                                                                           π                                                                                                             ρ2µ              Eξ′{log p(U)p(R                                                            −                                                          Z                                         ∞ Z                                                                                                       2σ2                                                                                                                  0 ×                                                                                             ˇg (µ) ∝1                                                                       ρµe      =                              p(R |U)},    (12)              Eξ′{log                   p({µl}Ll=1)}+Eξ′{log                                                                                                     p¯r                                                                                  0                                                               −π
+                                                                                 ρβ                                F˜b∥2                                                                               ρµ cos(ψµ−ψβ)−∥¯r−b0¯f(ψµ)−˜σ2where p {µl}Ll=1   is regarded as the prior distribution, and                                                                                                0                                                g (ρµ, ψµ)e σ2                                                                                          dρµdψµ,  (19)
+its corresponding conditional PDF is given by
+                                                           while similarly p¯r can be given as
+         YL      p(R |U)          =                                   p(¯rl |µl ; tl, ˜θl, bl0, ˜bl),                                                                           π                                                                                                             ρ2µ                       l=1                                                            −                                                          Z                                          ∞ Z                                                                                                        2σ2                                                             2                                                                                                                   0 ×                                                                                                  p¯r ∝                                                                       ρµe         YL         ∝                                                                            ,     (13)                                                                                  0                                                                −π                          l=1e−σ−2∥¯rl−bl0fl(µl)−˜Fl˜bl∥
+                                                                                   ρβ                                F˜b∥2                                                                                     cos(ψµ−ψβ)−∥¯r−b0¯f(ψµ)−˜σ2where in fl(µl) all βl(p0) in fl(p0) are replaced by µl. Based            e σ20 ρµ                                                                                        dρµdψµ.    (20)
+on (9) and (13), the EM cycle in (10) is thus equivalent to
+                                                               Furthermore, let g(µl) = fl(µl), then by applying the result
+   Estep: Evaluate  L1 (p0) and L2({ϕl}Ll=1)                of Lemma 1, Eξ′{fl(µl)} can be obtained by taking the ratio
+
+=== PAGE 6 ===
+3096                                                                       IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 25, 2026
+
+
+of integral terms’ Laplace approximations in (19) and (20).   Similarly, we can transform the maximization of (15b) as
+Similarly Eξ′{µl} can be obtained with g(µl) = µl, i.e., let                            L
+ˇfl ≡Eξ′{fl(µl)} and ˇµl ≡Eξ′{µl} then we have                                                                       {ˆϕl}Ll=1 = arg max X −¯Ll2(ψ∗µl, ϕl).      (29)
+                                                                                     {ϕl}Ll=1 l=1
+                            ˇfl ≈fl(µ∗l )   and   ˇµl ≈µ∗l ,           (21)
+                                                             Equation (29) indicates that all {ϕl}Ll=1 can be estimated on
+where µ∗l = ρ∗µl[cos ψ∗µl, sin ψ∗µl]T . Thus, the solution for   their corresponding APs separately. For the sake of brevity, we
+Estep, can be obtained from  the following maximization   only focus on estimating the l-th one of {ϕl}Ll=1, which can
+problem                                                 be easily extended to other ones. Thus, the following problem
+                                                                               is formulated                   "                    #
+                             +ρµlρβlcos(ψµl −ψβl)    [ρ∗µl,ψ∗µl]T=arg max η −ρ2µl                         2                                                                                                                          [ˆtl, ˆ˜θl] = arg max ¯Llc(ψ∗µl, tl, ˜θl),          (30)                 [ρµl,ψµl]T                                                                                                          [tl,˜θl]
+              −¯Ll2(ψµl, ϕl),
+                                                      where ¯Llc(ψ∗µl, tl, ˜θl) is a concise version of ¯Ll2(ψ∗µl, ϕl) by
+    s.t.   ρµl > 0, −π ≤ψµl < π.                      (22)                                                                eliminating bl0 and ˜bl [46], which is given by
+where η = σ2/σ20 can be used to control the convergence                     ¯Llc(ψ∗µl, tl, ˜θl) = ¯rHl  ¯Fl ¯D−1l  ¯FHl  ¯rl,          (31)
+speed [47] and
+                                                      where ¯Dl = ¯FHl  ¯Fl and
+        ¯Ll2(ψµl, ϕl) = ∥¯rl −bl0¯fl(ψµl, tl0) −˜Fl˜bl∥2.      (23)                           T
+                                                                                             ¯Fl ≡¯K([tl, [ψ∗µl, ˜θ l ]T ]) ∆=[¯f(ψ∗µl, tl0), ˜Fl].     (32)
+   It can be seen that once ψµl  is selected, (22) becomes a
+                                                                       T
+convex quadratic function of ρµl. Thus, the maximization of    As el ∆= [tTl , ˜θ l ]T ∈R2Ql+1 is a multi-dimensional vector,
+(22) can be transformed to a line search only over ψµl, i.e.,   estimating  it by exhaustive search is computationally heavy
+with an arbitrary selected ψ′µl, the corresponding ρ′µl is given  and impractical. To achieve a tradeoff between computational
+by                                                           load and estimation accuracy, we consider the implementation
+                   ρ′µl = ρβl cos ψ′µl −ψβl   .             (24)   that alternatively estimates each element in el when ﬁxing the
+                                                               values of others. That is
+  Then  the optimization problem  in  (22) can be  further
+expressed as                                                                        [el]idc  = arg max ¯Llc([el]id, [ψ∗µl, (e′l)Tid]T ),      (33)                                                                                                                      [el]id
+ ψ∗µl = arg max ηF(ψµl) −¯Ll2(ψµl, ϕl),              (25a)  where (e′l)id  is the vector consisting of elements in value-
+            ψµl
+                                                 known e′l excluding [e′l]id, while e′l is updated once [el]idc    is
+  ρ∗µl = ρβl cos(ψ∗µl −ψβl), s.t.ρµl >0, −π ≤ψµl <π,  (25b)   obtained. Obviously, and importantly, only the line search is
+                                                                required for (33), no matter how many NLoS paths exist.
+where
+                                                     The derivations of the Estep and the Mstep are now com-
+           F(ψµl) = [ρβl cos(ψµl −ψβl)]2/2.         (26)                                                                     pleted. Next, we focus on the efﬁcient implementation of the
+                                   EM iterations.   It can now be seen from (25a) that η constrains the length
+of the iteration step to guarantee the fast enough convergence.
+The larger η improves the effect of F(ψµl), resulting in a  D. Acceleration of EM Iteration Cycle
+smaller Euclidean distance between updated ˆp0 and last ˆp0 in      Firstly, as estimating {bl0}Ll=1 and {˜bl}Ll=1 is not directly
+terms of the polar angle. Actually, even if there is no F(ψµl),   necessary for optimizing the original ML function (6) [46],
+(25b) can still provide a constraint on the iteration step in terms    ¯Llc(·) in (31) can be used to replace ¯Ll2(·) in (22). Thus, the
+of radial distance ρµl. Thus, giving up Fl (ψµl) to relax the   (i + 1)-th iteration cycle of the proposed DPD algorithm can
+constraint in Estep. Then η can be set as small as possible, that   further be re-expressed as
+is, η →0. Thus, the parameter design process is eventually                                                        Estep :
+essentially avoided, which contributes to the universality and
+                                                     ψ∗µl =arg max ¯Llc(ψµl, eil),                       (34a)deployment simplicity of the proposed algorithm.
+                                                                                  ψµl
+                                                              ρ∗µl =ρβl cos(ψ∗µl −ψβl),                        (34b)
+C. Mstep                                                                                   s.t. ρµl >0, −π ≤ψµl <π,
+  With {µ∗l }Ll=1, the maximization of (15a) can be rewritten      Mstep :
+as            \
+                    L                                          [ei+1l   ]id = arg max ¯Llc([el]id, [ψ∗µ, (eil)Tid]T ),      (34c)
+             arg max − X ∥µ∗l −p0 + ul∥2,          (27)                                 [el]id
+                   p0
+                         l=1                                        id = 1, . . ., 2Ql + 1,
+
+                                                             L
+which easily yields                                                                1                                                                                        cos ψ∗µl                                                                                                                                                            ,              (34d)                                                                           ˆpi+10 =                       X ul + ρ∗µl
+                                                                                                                  µl                     L                             L l=1            sin ψ∗                     1
+                       ˆp0 = X (ul + µ∗l ).               (28)
+               L                                                      where βil = ρβil [cos ψβil , sin ψβil ]T = ˆpi0 −ul.                           l=1
+
+=== PAGE 7 ===
+WANG et al.: DECENTRALIZED INDOOR DIRECT LOCALIZATION WITH MULTIPLE Wi-Fi ACCESS POINTS                                              3097
+
+
+
+
+
+                                                                                   Fig. 3. Schematic diagram representing the decentralized nature of the DIM-
+                                                  DPD in one iteration: 1) Estimating the polar angles of UE-AP variables at
+                                                                                     distributed APs; 2) Position estimation update at UE.
+
+
+                                                                           TABLE II
+Fig. 2.   Illustration of position update and ﬁnal position determination in
+DIM-DPD.                                                       COMMUNICATION OVERHEAD COMPARISON, ASSUMING
+                                                 N = 64, M = 4, S = 5, Nit = 10
+
+  Note that the cost function ¯Llc(·) exists in both Estep (34a)
+and Mstep (34c). It can be seen that, the matrix multiplication
+and matrix inversion for ¯Dl  is repeatedly implemented for
+each candidate ψµl. However, except elements related to ψµl,
+all other Q2l ones in ¯Dl are known and unchanged in this                                                                          limit, the solution of following single path ToA estimation
+search process. That  is, there are many redundant calcula-
+                                                       problem can be used [46], expressed as
+tions in current Estep. To this end, the alternating projection
+technique [48] is used to simplify ¯Llc(ψµl, eil) as a function                 M
+                                                                                                                                                                                                                  ˆ˜tl = arg max X |[Rl]Hmh(˜tl)|2,          (38)ˇLlc([El]1,2, (Eil)1,2), i.e.,                                                                                                                                                                                                          ˜tl                                                                  m=1
+                               ¯flH (ψµl,ti                             l0)P⊥(¯Fil)1¯rl¯rH                                                                   l P⊥(¯Fil)1¯fl(ψµl,til0)                                                                                     ,     where    ˇLlc([El]1,2,(Eil)1,2)=                 H
+                                    ¯fl  (ψµl, til0)P⊥(¯Fil)1¯fl(ψµl, til0)                   Rl ∆= [¯rl(0), . . . ,¯rl(N −1)]T .           (39)
+                                                         (35)
+                     T                                 Compared with (3), (38) is derived by modeling the ToAwhere El ∆=  [tl, [ψµl, ˜θ l ]T ] ∈R(Ql+1)×2, (Eil)g,h consists
+of elements  in value-known Eil  excluding [Eil]g,h, while   of only one path for  ¯rl, while the other paths or compo-
+                                                               nents are assumed to be additive noise from the initialization
+Eil  is  updated  once  [El]g,hd      is  obtained by maximizing   perspective.
+ˇLlc([El]g,h, (Eil)g,h). Let ¯Fil ≡¯K(Eil), then we have                                                            For the sake of readability and presentation  clarity, the
+   P⊥(¯Fil)g = IMN −(¯Fil)g[(¯Fil)Hg (¯Fil)g]−1(¯Fil)Hg .     (36)   overall workﬂow of the proposed decentralized iterative ML
+                                        DPD algorithm (DIM-DPD) is summarized in Algorithm 1.
+where  (¯Fil)g denotes  ¯Fil excluding the g-th column. Note
+that  the  aforementioned  transformation  from  ¯Llc(ψµl, eil)     IV. PROPERTIES OF THE PROPOSED DPD ALGORITHM
+to   ˇLlc([El]1,2, (Eil)1,2)  can  be  transferred  to  transform
+¯Llc([el]id, [ψ∗µl, (eil)Tid]T ) in (34c).                             A. Decentralization
+                                                 As can be observed from Algorithm 1, within each iteration
+E. Multiple-Point Initialization Strategy                          cycle, only the step 18 requires aggregating data from  all
+                                                APs for position update. Moreover, instead of collecting the
+  The proposed algorithm  is  iterative in nature. To avoid
+                                                          complete CSI or other raw data from all APs, as in traditional
+being trapped by local maxima as far as possible, S different
+                                        DPD methods, the data that is shared in our proposed approach
+initial points and LS initial NLoS AoA vectors are used to
+                                                               contains only {ψ∗µl}Ll=1. To this end, Fig. 3 illustrates the cal-generate S candidate position outputs {ˆpsf}Ss=1, while being                                                                  culation and aggregation process for the proposed DIM-DPD.
+then further clustered using the k-means approach. The ﬁnal
+                                                               Therefore, the heavy network trafﬁc stemming from sharing
+position estimation is discriminated by: 1) belonging to the
+                                                       and transmitting the raw data in traditional DPD algorithms
+cluster with largest number of elements; and 2) being closest
+                                                                               is here avoided. The proposed DIM-DPD approach is thus
+to the cluster centroid pc. That is,
+                                                                    clearly more favorable for the decentralized implementation.
+           ˆp0 = arg min ∥ˆpsf −pc∥, s = 1, 2, . . . , S.     (37)    To address this more explicitly, let the number of iterations
+                              ˆpsf                                                        be Nit. The corresponding communication overheads of the
+   Fig. 2 illustrates the typical position update and the ﬁnal   proposed DIM-DPD method and the centralized DPD (CDPD)
+position determination progress. As for the initialization of all   are summarized in Table II. If we use the DIM-DPD communi-
+ToAs, recalling that they are all within the Rayleigh resolution   cations load as the reference, the normalized communications
+
+=== PAGE 8 ===
+3098                                                                       IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 25, 2026
+
+
+Algorithm 1 Summary of the Proposed Decentralized Iterative                        TABLE III
+DIM-DPD Method                                         COMPLEXITY ASSESSMENT OF THE CONSIDERED DPD ALGORITHMS, FOR
+                                                    S = 5, N = 64, M = 4, L = 3, {Ql}Ll=1 = 3, Nit = 10, Ng = 103,
+                                                                          Nt = 50, Nd = 100
+
+
+
+
+
+                                                         compared, the numbers of grid points, candidate angles and
+                                                 ToAs are Ng, Nd and Nt,  respectively. Considering  that
+                                                                  there is no grid search in the proposed DIM-DPD, most of
+                                                                 the computational resource is consumed by maximizing (35)
+                                                                    in the main  iteration cycle of Algorithm 1 (steps 14-15).
+                                                               Further  recalling  that  (35)  involves matrix  inversion,  the
+                                                                          total computational complexity of the proposed algorithm
+                                                                               is O SNit(Nd + Nt) PLl=1 Q3l + Q2l MN    ). Despite not
+                                                             using ToA  estimation,  another  iterative DPD  algorithm
+                                      ADMM-DPD  [44]  searches Ng  points  to  estimate  posi-
+                                                                    tion in each iteration and the corresponding computational
+                                                           complexity  is O(NNit((LNg)2 + (LNd)2)LM).  Regard-
+                                                              ing  the  subspace  data  fusion  based SM-DPD  algorithm
+                                                               [39] in the multipath scenario,  its computational complex-
+                                                                           ity  is  of  the  form O(L(M 3 + M 2N + NgM))  since
+                                                                                               it  requires  eigenvalue  decomposition  of  the CSI  covari-
+                                                          ance  matrix. The  exhaustive ML  grid  search  algorithm
+                                                    (EX-DPD), in turn, requires a multi-dimensional exhaustive
+                                                                  search, resulting into impractical computational complexity
+                                                               of O NgN PLl=1(NdQl (Q2l M + Q3l ))  .  It can be seen that
+                                                 when Ng ≫Nt, the proposed DIM-DPD method exhibits
+                                                           remarkable computational savings compared to the advanced
+                                         ADMM-DPD. Furthermore, the condition that Ng  is much
+                                                                    larger than Nt is common in indoor scenarios, especially when
+                                                                 the localization area is large.
+                                                     The above complexity  observations  are summarized  in
+                                                            Table III, while noting also the corresponding normalized com-
+                                                                  putational complexities (NCCs) where the DIM-DPD serves
+                                                               as the reference. It can be clearly observed that the proposed
+                                                     method allows for favorable processing complexity compared
+                                                                    to many reference works. Furthermore, and importantly, only
+                                                                 the proposed DIM-DPD algorithm allows for decentralized
+load (NCL) of CDPD  is 5.12 times  higher. As the CSI   processing,  i.e., (35) in DIM-DPD can be implemented on
+dimension MN increases, the computational load of CDPD   each AP separately in parallel.
+becomes gradually heavier and heavier. In addition, both steps
+19 and 21 involve only simple operations of {ψ∗µl}Ll=1, thus   C. Position Estimation With Blocked APs
+even a light-weight UE (e.g. a mobile phone or other similar
+                                                                  In practice, it is very likely that the LoS path between thedevice) itself may complete the ﬁnal steps of the DIM-DPD for
+                                        UE and (some of) the APs may be completely blocked dueobtaining the estimated device position. The additional central
+                                                                    to the existence of obstructions in the indoor environments.processing unit (server) is thus unnecessary.
+                                                               In this condition, using CSIs from all APs – including the
+                                                           blocked ones – to implement the DPD will inevitably result in
+B. Computational Complexity                                                               severe position estimation bias. Thus, it is beneﬁcial to detect
+  Next, we assess the computation complexity of the pro-  CSIs from APs that contain only NLoS paths, and remove
+posed DPD algorithms and their state-of-the-art counterparts.   these from the algorithm, to ensure the high accuracy of the
+Complexity  is counted or measured via the order of the   estimation. To this end, [44] performs detection based on the
+number of complex-valued multiplications. For all algorithms   attenuation of the path. However, attenuation is not a stable
+
+=== PAGE 9 ===
+WANG et al.: DECENTRALIZED INDOOR DIRECT LOCALIZATION WITH MULTIPLE Wi-Fi ACCESS POINTS                                              3099
+
+
+feature to discriminate the LoS path from the NLoS paths.   speed is c = 3·108 m/s reﬂecting the speed-of-light. Then the
+Especially when the LoS path is not completely blocked, its  APs obtain CSI through a deconvolution of the known training
+attenuation can be at the same level or even less compared to   sequence and pulse shape function [46]. The transmission time
+the NLoS path. Instead of using path attenuation, the proposed   of UE to all APs is selected randomly from the interval [0, 800]
+algorithm focuses on the angular information of all the ﬁrst   ns, while the attenuation of the channel of all paths is also
+paths. That is, inspired by the principle of DPD that all LoS   randomly generated following the Rayleigh distribution, and
+paths are from the same target, among the ﬁnal {ψµ∗l }Ll=1   the channel phases follow the uniform distribution U [0, 2π].
+belonging to ˆp0, only the ones {ψµ∗l }L′l′=1(L′ ≤L) that can   Furthermore, the number of Monte Carlo trials NMc = 1000.
+converge into one concentrated region are judged to belong to   For each trial, the proposed DIM-DPD has randomly allocated
+the LoS paths. Then, by implementing steps 12, 19 and 21 in  S = 5 initialization groups.
+Algorithm 1, {ψµ∗l }L′l′=1 and ˆp0 are used to obtain a reﬁned
+                                                             B. Resultsposition estimate ˆpr.
+                                                              Since the proposed algorithm  is  iterative, we ﬁrst com-
+                                                             pare  the proposed DIM-DPD method with ADMM-DPDD. Accuracy Enhancement Through Observed ToAs
+                                                       and SM-DPD  in  terms  of  global  localization  error, by
+  Due to the time offsets and bias between the UE and APs                                                                evaluating  the  cumulative  distribution  function (CDF)  of
+in 802.11 systems, observed ToA of the LoS path cannot   ∥ˆp[nMc]0   −p0∥. The simulation parameters are set as: SNR =
+be directly used for the positioning purpose. However, the                                                     0 dB, N = N0/4 = 64, and observed LoS ToAs of the
+relative relations between the observed ToAs of all multipaths                                        UE to each AP are 394.32 ns, 655.05 ns, and 538.93 ns,
+remain a useful indicator to discriminate the LoS path. Hence,                                                                     respectively. Assume that each AP also receives signal from
+comprising observed ToA in the received signal model and                                                           a  close NLoS path besides  the LoS  path. The observed
+the  iterative estimation procedure will beneﬁt the position                                                 ToAs  and AoAs  of  paths  in  ascending  order  of  the
+estimation accuracy. This can be theoretically veriﬁed by the                                         AP indexes are [407.69 ns, 70.29◦], [664.77 ns, 120.77◦], and
+following preposition.                                                            [548.78 ns, −67.20◦],  respectively. Moreover,  the  third AP
+  Proposition 1: Deﬁning the CRLB of position block in two                                                                 receives an extra path with [544.78 ns, −71.70◦]. Note that
+different cases: 1) CRBOp0p0 for joint DPD and estimating   this is an intractable multipath scenario for the system with the
+the AoAs of NLoS paths; 2) CRBJp0p0 for joint DPD and   relative small aperture and limited bandwidth. To highlight this
+estimating AoAs and ToAs of all paths. Then we have                                                                    in more concrete terms, Fig. 4 shows the space-time spectra
+          CRBJp0p0 ≤CRBOp0p0.              (40)   of CSIs from all APs based on the traditional 2D FFT. It can
+                                                        be seen that we are not able to distinguish multiple signal
+  Proof: See Appendix B.                                     paths (LoS and NLoS paths) in the described scenario based
+                                                     on the space-time spectrum which only relies on the angular
+                V. NUMERICAL RESULTS                 and delay resolution.
+                                                     The obtained localization error CDFs are shown in Fig. 5. ItA. Basics and Assumptions
+                                                         can be clearly seen and observed that the position error CDF
+  To evaluate the performance of the proposed DIM-DPD,                                                            curve of the proposed DIM-DPD is much steeper than that of
+we compare  it with ADMM-DPD [42], which is one of the                                                                 the ADMM-DPD and SM-DPD benchmark solutions because
+iterative implementations for the sparse DPD problem, and                                                               of involving ToA in the signal model and parameter estimation.
+with SM-DPD [39] that is one of the subspace-based methods.                                                            Furthermore, the probability of sub-meter localization error
+The root mean-squared error (RMSE) is adopted as the main                                                           with the proposed DIM-DPD is close to 100%, while only 70%
+performance metric, deﬁned as                                                               of the trials achieve sub-meter error when using the ADMM-
+       r  1                          DPD and SM-DPD reference methods. The results in Fig. 5
+   RMSE =     XNMc   ∥ˆp[nMc]0   −p0∥2,      (41)   validate that the proposed iterative algorithm outperforms both            NMc   nMc=1
+                                                                 the ADMM-DPD and the SM-DPD on the  possibility of
+where NMc is the number of Monte Carlo trials, and ˆp[nMc]0      converging to the global optima.
+is the estimated target position at the nMc-th trial. All DPD     Next, to demonstrate the convergence speed of the proposed
+algorithms are also compared with closed-form CRLB, which  DIM-DPD, Fig. 6 compares the average number of iterations
+is derived in Appendix A and reﬂects the theoretically achiev-   for DIM-DPD and ADMM-DPD against different SNRs while
+able performance taken as the ultimate benchmark.            keeping other simulation parameters the same as in Fig. 5.
+  As depicted already in Fig. 1, we consider the scenario    It can be seen that the DIM-DPD requires similar or lower
+with L = 3 APs, which are located  at u1 =  [0, 0] m,  amount of iterations than the ADMM-DPD in almost all SNR
+u2 =  [15, 0] m, and u3 =  [0, 15] m, respectively. Each   regions. Considering further the fact that the iterations of DIM-
+AP is equipped with a ULA with M = 4 half-wavelength  DPD use the multiple line searches on each AP, which can be
+spaced antennas. UE is located at p0 = [6.38, 10.36] m and   operated in parallel, the actual implementation or execution
+transmits the OFDM signal like a typical Wi-Fi standard IEEE   speed of DIM-DPD will be much higher than that of the
+802.11ac. The spacing and the total number of subcarriers  ADMM-DPD.
+are, respectively, ∆f = 312.5 kHz and N0 = 256. The signal     Keeping the simulation parameters again the same as those
+carrier frequency is fc = 5.32 GHz, and the signal propagation   used in Fig. 6, Fig. 7 presents the RMSE of position estimation
+
+=== PAGE 10 ===
+3100                                                                       IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 25, 2026
+
+
+
+
+
+Fig. 4. 2D space-time spectra of CSI extracted from different APs. Case (a) contains LoS path from [394.32 ns, 58.37◦] and multipath from [407.69 ns, 70.29◦].
+Case (b) contains LoS path from [655.05 ns, 110.24◦] and multipath from [664.77 ns, 120.77◦]. Case (c) contains LoS path from [538.93 ns, −36.03◦] and
+multipaths from [544.78 ns, −71.70◦] and [548.78 ns, −67.20◦].
+
+
+
+
+
+Fig. 5.  CDFs of the position estimation errors of the considered DPD    Fig. 7. RMSEs of the DPD algorithms vs. SNR.
+algorithms when SNR = 0 dB.
+
+                                                                     treating the multipath signals as interference or noise [40].
+                                        We also observe that the SM-DPD performs poorly because of
+                                                                 the lack of the ability to separate the LoS path from the close
+                                                                 multipaths. Furthermore, although the ADMM-DPD RMSE
+                                                     shows a consistently decreasing trend similar to CRBJp0p0 for
+                                                                increasing SNR, there is a sizable gap to CRBOp0p0. The pro-
+                                                         posed DIM-DPD, in turn, effectively approaches CRBJp0p0,
+                                                                     particularly when the SNR is greater than 5 dB. Such perfor-
+                                                   mance improvement is partially facilitated by the inclusion
+                                                               of the observed ToAs in the iterative parameter estimation
+                                                              procedure. In general, the simulation results match well with
+                                                                 the theoretical analysis in Section IV-C, while validating that
+                                                                 the proposed DIM-DPD is an accurate implementation of the
+                                                               exact ML estimator at medium and high SNRs.
+                                                              Besides the SNR, the impact of NLoS paths is also inves-Fig. 6.  Comparison of average iteration numbers of iterative ADMM-DPD
+and the proposed DIM-DPD algorithms vs. SNR.                           tigated. In Fig. 8, the RMSEs of different algorithms are
+                                                   shown against |bLoS|/|bNLoS| which is the ratio of the relative
+against SNRs.  It can be seen that the proposed DIM-DPD   strengths of LoS and NLoS paths. Setting SNR = 5 dB, Fig. 8
+achieves the theoretical performance bound (CRBJp0p0) in  shows that the proposed DIM-DPD always approaches optimal
+most SNR regions, while minor deviation is observed only   performance CRBJp0p0 due to the capability to recognize the
+when SNR ≤0 dB, even if using relatively small aperture  LoS path using ToA information. In contrast, both ADMM-
+and bandwidth limited COTS Wi-Fi devices. The high path  DPD and SM-DPD obviously deviate from CRBOp0p0. The
+resolving capability of the DIM-DPD comes from the fact   gap decreases when the power of the LoS path gradually
+that  it incorporates the observed ToAs and exact model of   dominates,  i.e., for increasing |bLoS|/|bNLoS|. Importantly,
+NLoS paths  in the received  signal,  rather than using the   Fig. 8 indicates that the proposed DIM-DPD algorithm is more
+statistical information of multipath as in [38] and [50] or   robust in scenarios with strong NLoS paths.
+
+=== PAGE 11 ===
+WANG et al.: DECENTRALIZED INDOOR DIRECT LOCALIZATION WITH MULTIPLE Wi-Fi ACCESS POINTS                                              3101
+
+
+
+                                                TABLE IV
+
+             ACCURACY COMPARISON FOR THE PROPOSED DIM-DPD BETWEEN DIFFERENT AP CONFIGURATIONS IN TERMS
+                                       OF VARYING THE LOCATION OF THE AP3, ∆θ = 10◦
+
+
+
+
+
+                                                                algorithms, the results in Fig. 9 indicate that the DIM-DPD
+                                                           has better ability to identify the LoS path, especially when the
+                                                             angle separation between LoS and NLoS is relatively small.
+                                                 As a concluding study, it is worth to note and highlight that
+                                                                 the high-resolution ability of the proposed DIM-DPD method
+                                                                               is agnostic to the geometrical conﬁguration of the involved
+                                                       APs. To validate this, at least to an elementary manner, we
+                                                            observe and summarize the RMSEs of the proposed DIM-DPD
+                                                       and the corresponding CRBs for six different AP geometry
+                                                            conﬁgurations in Table IV. The AP3 (with location vector u3)
+                                                                               is placed in different locations while keeping ∆θ = 10◦the
+                                                   same in each conﬁguration. From the results in Table IV,
+                                                                                               it can be seen that the RMSE of the proposed DIM-DPD
+                                                                  stays consistently close to the optimal performance, with only
+Fig. 8. RMSEs of the compared algorithms vs. |bLoS|/|bNLoS|.           0.06 ∼0.09 m difference from CRBJp0p0. This highlights
+                                                                      that the proposed DIM-DPD is a generic method, robust to
+                                                                 the speciﬁc AP deployment and conﬁguration.
+
+
+                                                                           VI. CONCLUSION
+
+                                                                  In  this work, we addressed  the challenges of accurate
+                                                             device localization with COTS Wi-Fi devices in challenging
+                                                             indoor multipath environments. A decentralized iterative DPD
+                                                                algorithm, called DIM-DPD, was proposed building on the
+                                                          fundamental EM estimation concepts. In each iteration cycle,
+                                                                 the estimation of position and nuisance parameters is sepa-
+                                                                      rated. The ﬁrst has a closed-form solution, while the second
+                                                                               is alternatively estimated. Thus, no multi-dimensional search
+                                                                      exists in the proposed algorithm, offering good computational
+                                                                 efﬁciency. Despite inevitable clock biases, the timing com-
+Fig. 9. RMSEs of the compared algorithms vs. AoA separation ∆θ between   ponents are still introduced into nuisance parameters and are
+the LoS path and NLoS paths.                                           theoretically validated through CRLB, shown to be beneﬁcial
+                                                                    for position estimation accuracy. Moreover, only the low-
+   Finally, setting SNR = 5 dB and |bLoS|/|bNLoS| = 1, the                                                           dimensional estimated UE-AP variables are collected from
+next experiment investigates the impact of the AoA separation
+                                                APs to UE, while the communication and concentration of
+∆θ (see Fig. 1) between the LoS and NLoS paths on the
+                                                          complete CSIs is avoided. Simulation results show the clear
+DPD estimators. To explicitly show the impact, the number of
+                                                                   superiority of the proposed DIM-DPD over baseline prior-
+paths is adjusted to 2 for all APs. Keeping the parameters of
+                                                                           art solutions in terms of position estimation accuracy and
+all LoS paths unchanged, we present the RMSE for varying
+                                                       communication resource consumption.
+∆θ in Fig. 9. It can be seen that DIM-DPD always achieves
+optimal performance and that its RMSE is highly aligned with
+CRBJp0p0 for all values of ∆θ. The reason is that the pro-                    APPENDIX A                                                       DERIVATION OF THE CRLB IN CLOSED-FORM
+posed DIM-DPD algorithm implements joint ML estimation
+for the UE position and all parameters of the NLoS paths.     In this appendix, the CRLB is derived for the model (3).
+Only when ∆θ ≥40◦, the RMSE of ADMM-DPD is close to   First, we deﬁne
+that of DIM-DPD. The deviation of ADMM-DPD even arises                        T                                                                                                      ¯r ∆=  ¯rT1 , . . . ,¯rTL    , F ∆= blkdiag{f1, . . . , fL},at ∆θ = 20◦due to the neglect of information in the ToAs that
+potentially helps to separate spatially close NLoS paths from            ¯F ∆= blkdiag{ ¯K1, . . . , ¯KL},
+the LoS path. The performance of the sub-optimal SM-DPD                                                                            ¯Kl ∆= [fl, ˜Fl],      b0 ∆= [b10, . . . , bL0]T ,
+gradually approaches CRBOp0p0 when ∆θ increases; however,                                             T
+there is still a distinct and notable gap. Compared with other             ˜b ∆= [˜bT1 , . . . , ˜bTL]T , ¯w ∆=  ¯wT1 , . . . , ¯wTL    .
+
+=== PAGE 12 ===
+3102                                                                       IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 25, 2026
+
+
+                                                                       2       H
+Then, the observations from all reception intervals ¯r can be           Mzz =   Re{¯αHz [˙˜F  ˙˜F]¯αz},                                                                                                          ¯σ2expressed as
+                                                                       2
+                                                     Mp0z =   Re{¯αHp0[˙FH ˙˜F]¯αz},                      ¯r = ¯F¯b + ¯w = Fb0 + n + ¯w            (42)                               ¯σ2
+                                                                       2
+where n = [(˜F1˜b1)T , . . . , (˜FL˜bL)T ]T . Respectively concate-           Mp0¯bR =   Re{¯αHp0[˙FH ¯F]},                                                                                                          ¯σ2
+nating the real and imaginary parts of ¯b is expressed as
+                                                                   Mp0¯bI = −2 Im{¯αHp0[˙FH ¯F]},
+           ¯bR ∆= Re  ¯b    and   ¯bI ∆= Im  ¯b  .       (43)                                 ¯σ2     H                                                                       2
+               T          T                                      Mz¯bR =   Re{¯αHz [˙˜F  ¯F]},
+  Let z = [tT1 , ˜θ 1 , . . . , tTL, ˜θ L]T , and the unknown parameter                               ¯σ2                                                                H
+vector ξ can be rewritten as ξ = [pT0 , zT , ¯bTR, ¯bTI ]T . Then, the                                                                    Mz¯bI = −2 Im{¯αHz [˙˜F  ¯F]},
+CRLB bounds the mean square error of any unbiased estimator                                 ¯σ2
+                                                                                2of ξ, denoted by ˆξ, which is commonly expressed as [51]                                                                    M¯bR¯bR = M¯bI ¯bI =   Re{¯FH ¯F},                                                                                                                      ¯σ2
+              E{(ˆξ −ξ)(ˆξ −ξ)T } ≥M−1(ξ),          (44)                                                                         M¯bR¯bI = −M¯bI ¯bR = −2 Im{¯FH ¯F}.                                                                                                                            ¯σ2
+where M (ξ) is the Fisher information matrix (FIM) of the
+                                                     The position CRLB matrix CRBJp0p0  is obtained by theparameter vector ξ. FIM can be partitioned into blocks asso-
+                                                          upper left block of the FIM inverse corresponding to Mp0p0.ciated with the different combinations of the components in ξ
+                                                     Thus using the partitioned matrix inversion lemma, CRBJp0p0as
+                                                         can be given as
+          Mp0p0 Mp0z Mp0¯bR Mp0¯bI 
+         MTp0z  Mzz  Mz¯bR  Mz¯bI           (CRBJp0p0)−1 = Mp0p0 −Mp0¯bM−1¯b¯bMTp0¯b  M (ξ) ∆=                                           (45)         MT             MT                     p0¯bR                                z¯bR M¯bR¯bR M¯bR¯bI             −(Mp0z −Mp0¯bM−1¯b¯bMTz¯b)(Mzz −Mz¯bM−1¯b¯bMTz¯b)−1                                                                                                 ,         MT             MT                 MT                       p0¯bI                                      z¯bI                                                                                                                        (49)                                              ¯bR¯bI M¯bI ¯bI                              · (MTp0z −Mz¯bM−1¯b¯bMTp0¯b),
+where Mp0p0 is the FIM associated with the source’s position  where
+vector p0.
+  The CSIs from all APs ¯r is a proper, complex Gaussian,       Mp0¯b ∆= [Mp0¯bR, Mp0¯bI], Mz¯b ∆= [Mz¯bR, Mz¯bI],
+random vector whose mean and covariance are given by                     M¯bR¯bR M¯bR¯bI                                                                    M¯b¯b ∆=                               .
+                                                                     M¯bI ¯bR M¯bI ¯bI         χJ = Fb0 + n   and  σJ = ¯σ2ILNM,       (46)
+                                                         Towards further simpliﬁcation of (49), we recall the follow-
+where ¯σ2  is the known noise variance. Then entries of the
+                                                              ing rules [46]
+M (ξ) in this case are given by [51]
+                                                                       −1
+                       H                     Re{X} −Im{X}    Re{X−1} −Im{X−1}
+              2            ( ∂χJ (ξ)    ∂χJ (ξ) )                    =                                   ,     (50)
+  [M (ξ)]g,h =   Re                                              .   (47)     Im{X} Re{X}     Im{X−1} Re{X−1}                     ¯σ2         ∂[ξ]g         ∂[ξ]h
+                                                       and
+  The derivatives that are necessary for obtaining M (ξ) can
+                                               Re{X}Re{Y} −Im{X}Im{Y} = Re{XY},be calculated as
+                                               Im{X}Re{Y} + Re{X}Im{Y} = Im{XY}.     (51)       ∂χJ         ∂χJ        ∂χJ
+       = ˙F¯αp0,   = ˙˜F¯αz,   = [¯F, j¯F],     (48)
+       ∂p0         ∂z       ∂b                            Finally, by using (50) and (51), the expression of CRBp0p0
+                                                         can be simpliﬁed aswhere
+    ∂F       ∂F
+               ,˙F ≜                         , αp0 ≜I2 ⊗b0, b ≜ h bTR, bTI iT               CRBJp0p0 = ¯σ2 (Γ1 −Γ2Γ−13 ΓT2 )−1,        (52)     ∂x  ∂y                                                              2
+ ˙˜F ≜blkdiag    ˙Ft1, ˙Fθ1   , . . . ,  ˙FtL, ˙FθL                     where
+                                                            Γ1 = Re{¯αHp0(˙FHP⊥¯F ˙F)¯αp0},
+            h                         iT
+αz ≜diag    b10, ˜bTl , ˜bTl , . . . , bL0, ˜bTL, ˜bTL                            Γ2 = Re{¯αHp0(˙FHP⊥¯F ˙˜F)¯αz},
+                                                            H
+         ∂fl            hl (tl1)                                   hl (tlQl)  ≜                  ,                                                                                                                                                                 ˙˜F P⊥¯F ˙˜F)¯αz},               ⊗al   ˜θl1   , . . . ,                                ⊗al   ˜θlQl                Γ3 = Re{¯αHz (˙Ftl
+        ∂tl0   ∂tl1                     ∂tlQl                                              P⊥¯F = ILNM −¯F(¯FH ¯F)−1¯FH.          (53)
+  θ             ∂al   ˜θl1                 ∂al   ˜θlQl 
+˙Fl ≜     hl (tl1) ⊗                , . . . , hl (tlQl) ⊗         .                     APPENDIX B                          ∂˜θl1                          ∂˜θlQl
+                                                        PROOF OF CRBJp0p0 ≤CRBOp0p0
+  After some manipulations, the submatrices of the FIM (45)    To investigate the effect of estimating ToAs on the CRLB
+can be shown to read as follows                               of ˆp0, ﬁrstly, we rewrite ξ as
+                   2        h     i        Mp0p0 =   Re{¯αHp0  ˙FH ˙F  ¯αp0},                             ξ = [ϑT ,¯tT , ¯bTR, ¯bTI ]T .               (54)                           ¯σ2
+
+=== PAGE 13 ===
+WANG et al.: DECENTRALIZED INDOOR DIRECT LOCALIZATION WITH MULTIPLE Wi-Fi ACCESS POINTS                                              3103
+
+
+                T
+where ϑ = [pT0 , ¯θ  ] and corresponding CRLB is given by       Adiag(˜hn)},
+                                                                        Im{diag(¯bc) XN−1                                     = −2                                                                                                           diag((˜h′n)c)AH·  CRBJϑϑ −1 = Mϑϑ −Mϑ¯bM−1¯b¯bMTϑ¯b                  Mt¯bI                                                                               n=0                                                                                             ¯σ2
+   −(Mϑt −Mϑ¯bM−1¯b¯bMTt¯b)(Mtt −Mt¯bM−1¯b¯bMTt¯b)−1                                    Adiag(˜hn) },
+                                                                      2        · (MTϑt −Mt¯bM−1¯b¯bMTϑ¯b).                         (55)                                                    XN−1                                                                                     AHAdiag(˜hn) },                                                                       Re{ diag(˜hcn)                                                    M¯bR¯bR= M¯bI ¯bI =                                                                                     n=0                                                                                                       ¯σ2On the condition that joint DPD and estimating the AoAs of
+                                                              2NLoS       paths, the CRLB for estimating ϑ can be similarly given                                                XN−1                                                                               AHAdiag(˜hn) },                                                               Im{ diag(˜hcn)                                                              M¯bR¯bI =                                                                               n=0                                                                                            ¯σ2by
+
+              −1                                                XN−1                                   =−2                                                                               AHAdiag(˜hn) },                                                                Im{ diag(˜hcn)
+                                                                               n=0    CRBOϑϑ                                                                                              ¯σ2           = Mϑϑ −Mϑ¯btM−1¯bt¯btMTϑ¯bt,      (56)   M¯bI ¯bR
+where ¯bt ∆= [bTt0, . . . , bTtn, . . . , bTt(N−1)]T  is the transformed  where ˙A = [˙A0x, ˙A0y, ˙An], Bn = blkdiag B0n, Bnn  and
+attenuation factor vector while we also further deﬁne
+                                                                   2  Re(AHA) −Im(AHA)
+                ˜hn ∆= [˜hTn1, . . . , ˜hTnl, . . . , ˜hTnL]T ,           (57)      Mbtnbtn = ¯σ2  Im(AHA) Re(AHA)     ,
+such that                                            B0n = I2 ⊗(b0 ⊙ˇhn0),
+                                              Bnn = diag{[(˜bT1 ⊙ˇhTn1), . . . , (˜bTL ⊙ˇhTnL)]T },             ˜hnl =[e−j2πn∆ftl0, . . . , e−j2πn∆ftlQl ]T
+                                                                            ∂a1(p0)     ∂aL(p0)         btn = [¯bTR, ¯bTI ]T ⊙[˜hTn, ˜hTn]T .                (58)            ˙A0x = blkdiag                 , . . . ,                  ,
+                                                                   ∂x        ∂x
+Based on (55) and (56), CRBJϑϑ ≤CRBOϑϑ is sufﬁcient for                         ∂a1(p0)     ∂aL(p0)
+                                                                        ˙A0y = blkdiag                 , . . . ,                  ,CRBJp0p0 ≤CRBOp0p0, i.e.,                                                 ∂y         ∂y
+  Mϑ¯btM−1¯bt¯btMTϑ¯bt −Mϑ¯bM−1¯b¯bMTϑ¯b                               ˙An = blkdiag{˙An1, . . . , ˙Anl, . . . , ˙AnL},
+                                                         "                   #T   −(Mϑt −Mϑ¯bM−1¯b¯bMTt¯b)(Mtt −Mt¯bM−1¯b¯bMTt¯b)−1                          ∂al(˜θl1)      ∂al(˜θlQl)                                                                           ˙Anl ∆=                , . . . ,                     ,
+        · (MTϑt −Mt¯bM−1¯b¯bMTϑ¯b) ≥0.                    (59)                            ∂˜θl1           ∂˜θlQl
+Using the standard technique of Schur complements, (59) can              ˇhn0 =[e−j2πn∆ft10, . . . , e−j2πn∆ftL0]T ,
+be transformed as                                                                   ˇhnl =[e−j2πn∆ftl1, . . . , e−j2πn∆ftlQl ]T ,
+        Mϑ¯btM−1¯bt¯btMTϑ¯bt Mϑt Mϑ¯b                                         ˜h′n = −j2πn∆f˜hn.
+   Mc =                  MTϑt      Mtt Mt¯b ≥0.     (60)
+           MT                  MT                           ϑ¯b                                                     t¯b M¯b¯b                     Recalling rules (50) and (51), Mϑ¯btM−1¯bt¯btMTϑ¯bt has
+Note that the signal model corresponding to CRBOϑϑ has N                      2                                                 XN−1                                                         BHn ˙AHPA ˙ABn}. (62)
+                                                                                n=0snapshots, and the mean and covariance of (n + 1)-th one are   Mϑ¯btM−1¯bt¯btMTϑ¯bt = ¯σ2 Re{
+respectively given by
+                                                      where
+        χO = Abtn   and  σO = ¯σ2ILM,         (61)
+                                     PA = A(AHA)−1AH = blkdiag{PA1, . . . , PAL}.  (63)where A   ∆=  blkdiag{A1, . . . , Al, . . . , AL}  and Al   ∆=
+[al(p0), al(˜θl1), . . . , al(˜θlQl)]. The submatrices in Mc respec-  Note that the term BHn ˙AH can also be treated as the summa-
+tively are                                                                    tion of L terms corresponding to different APs. Then we can
+                                                                  rewrite (62) asMϑ¯bt = [Mϑbt0, . . . , Mϑbt(N−1)],
+M¯bt¯bt = blkdiag  Mbt0bt0, . . . , Mbt(N−1)bt(N−1)   ,                          L
+         2                                               Mϑ¯btM−1¯bt¯btMTϑ¯bt=X Mϑl¯btM−1¯bt¯btMTϑl¯bt,Mϑbtn =         Re{BHn ˙AH[A, jA]},             ¯σ2                                                                       l=1
+                                                                  N−1                                                                         L       2
+                                                                        2        Re{ XN−1Mϑt =              BHn ˙AHAdiag(˜h′n)  diag(¯b)},                           XX                n=0                                             =         ¯σ2                                                                                     ¯σ2Re{    BHnl ˙AHl PA ˙AlBnl}.  (64)
+                                                                            n=0 l=1         2          Re{XN−1              BHn ˙AHAdiag(˜hn)},Mϑ¯bR =                 n=0             ¯σ2
+                                                      where ˙Al is constructed by only preserving elements related
+           Im{ XN−1               BHn ˙AHAdiag(˜hn)},Mϑ¯bI = −2                  n=0                                                                    to l-th AP in ˙A and all other elements are zero. With the              ¯σ2
+       2                                                                          bl and hnl are generated from A, ˜b andMtt =          Re{diag(¯bc) XN−1 diag((˜h′n)c)AH·           same operation, ¯Al,          ¯σ2               n=0                                                                                T
+                                                                            [ˇhTn1, . . . , ˇhTnl, . . . , ˇhTnL]T , respectively. Let ˇbl = [bl0, bl0, b l                         Adiag(˜h′n) diag(¯b)},
+                                                                      ]T and ¯hnl = [e−j2πn∆ftl0, e−j2πn∆ftl0, hnl], then we have         2            Re{diag(¯bc) XN−1Mt¯bR =                                    diag((˜h′n)c)AH·          Bnl = diag{ˇbl ⊙¯hnl} and P Al¯ = ¯Al(¯AHl ¯Al)−1 ¯AHl  .                        n=0            ¯σ2
+
+=== PAGE 14 ===
+3104                                                                       IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 25, 2026
+
+
+  The same transformation as (64) can also be applied to other    [5]  M. Xiao et  al., “Millimeter wave communications for future mobile
+blocks in Mc. Thus, Mc can be divided as Mc = PLl=1 Mcl         networks,” IEEE J. Sel. Areas Commun., vol. 35, no. 9, pp. 1909–1935,                                                                                 Sep. 2017.
+and Mcl is given by                                                          [6]    J. Palacios, P. Casari, H. Assasa, and  J. Widmer, “LEAP: Location
+                 2                                                          estimation and  predictive handover with consumer-grade mmWave
+         Mcl =   Re {Ml1 ⊙Ml2 ⊙Ml3} ,        (65)         devices,” in Proc. IEEE Conf. Comput. Commun. (INFOCOM), Apr.
+                         ¯σ2                                                     2019, pp. 2377–2385.
+where                                                                             [7]  R. Wang, Z. Xing, E. Liu, and J. Wu, “Joint localization and communica-
+                                                                                           tion study for intelligent reﬂecting surface aided wireless communication
+     ˙AHl P Al¯ ˙Al −j ˙AHl ¯Al  ˙AHl ¯Al   j ˙AHl ¯Al                     system,” IEEE Trans. Commun., vol. 71, no. 5, pp. 3024–3042, May
+                                                                              2023.
+          j ¯AHl ˙Al   ¯AHl ¯Al   j ¯AHl ¯Al −AHl ¯Al                  [8]  A. Blanco,  P.  J. Mateo,  F. Gringoli, and  J. Widmer, “Augmenting  Ml1=
+         ¯AHl ˙Al  −j ¯AHl ¯Al  ¯AHl ¯Al   j ¯AHl ¯Al               mmWave localization accuracy through sub-6 GHz on  off-the-shelf                                                                                                                             ,                      devices,” in Proc. 20th Annu. Int. Conf. Mobile Syst., Appl. Services,      −j ¯AHl ˙Al  −¯AHl ¯Al −j ¯AHl ¯Al  ¯AHl ¯Al                                                                                      Jun. 2022, pp. 477–490.
+           Gl1 Gl2 Gl3 Gl3                                  [9]   Y. Zou, W. Liu, K. Wu, and L. M. Ni, “Wi-Fi radar: Recognizing human
+    XN−1 GHl2 G4 G5 G5                                     behaviorpp. 105–111,with Oct.commodity2017. Wi-Fi,” IEEE Commun. Mag., vol. 55, no. 10,  Ml2=
+          n=0                                         GHl3 GH5 G6 G6 ,                              [10] Y. He, Y. Chen, Y. Hu, and B. Zeng, “WiFi vision: Sensing, recognition,
+          GHl3 GH5 GH6 G6                                  and detection with commodity MIMO-OFDM WiFi,” IEEE Internet
+  Gl1 =¯hcnl¯hTnl, Gl2 =2πn∆f¯hcnl˜hTn, Gl3 =¯hcnl˜hTn,               [11] ThingsM. A. J.,Youssef,vol. 7, A.no.Agrawala,9, pp. 8296–8317,and A. U.Sep.Shankar,2020. “WLAN location
+  G4 =(2πn∆f)2˜hcn˜hTn, G5 =2πn∆f˜hcn˜hTn, G6 =˜hcn˜hTn,            determination via clustering and probability distributions,” in Proc. 1st                                                                 IEEE Int. Conf. Pervasive Comput. Commun., (PerCom), Mar. 2003,
+                                                                                     pp. 143–150.      ˇbcl ˇbTl  ˇbcl ¯bT  ˇbcl 1T  ˇbcl 1T
+            ¯bcˇbTl  ¯bc¯bT ¯bc1T ¯bc1T                                    [12]  F. Adib, Z. Kabelac, and D. Katabi, “Multi-person localization via
+  Ml3=                                                 RF body reﬂections,” in Proc. 12th USENIX Conf. Netw. Syst. Des.           1ˇbTl   1¯bT  11T  11T .                                     Implement., 2015, pp. 279–292.
+           1ˇbTl   1¯bT  11T  11T                                     [13] Z. Wang, L. Xie, and Q. Wan, “Beamspace joint azimuth, elevation, and
+                                                                                 delay estimation for large-scale MIMO-OFDM system,” IEEE Trans.
+  Note that 1 is a vector having the same dimension as ¯b with         Instrum. Meas., vol. 72, pp. 1–12, 2023.
+all of its elements being equal to one. Now proving Mcl ≥0    [14] A. Bose and C. Heng Foh, “A practical path loss model for indoor WiFi
+is sufﬁcient for the proof of CRBJp0p0 ≤CRBop0p0.                   positioningProcess., Dec.enhancement,”2007, pp. 1–5.in Proc. 6th Int. Conf. Inf., Commun. Signal
+  Ml1, Ml2 and Ml3 can be respectively rewritten as            [15] M. Youssef and A. Agrawala, “The Horus WLAN location determination
+                                                                                 system,” in Proc. ACM MobiSys, 2005, pp. 205–218.
+         ˙AHl                                                     [16] A. Gaber and A. Omar, “A study of wireless indoor positioning based
+               j ¯AHl                                                   on joint TDOA and DOA estimation using 2-D matrix pencil algorithms
+   Ml1 =            Al[¯  ˙Al, −j ¯Al, ¯Al, j ¯Al],                     and IEEE 802.11ac,” IEEE Trans. Wireless Commun., vol. 14, no. 5,            ¯AHl   P                                                      pp. 2440–2454, May 2015.
+          −j ¯AHl                                                       [17] Y. Zeng, D. Wu, J. Xiong, E. Yi, R. Gao, and D. Zhang, “FarSense:
+               ¯hcnl                                            Pushingof two antennas,”the range limitProc.ofACMWiFi-basedInteract.,respirationMobile, sensingWearablewithUbiquitousCSI ratio        N−1
+               2πn∆f˜hc                                                                                        Technol.,                                                                                                        vol.                                                                                                              3,                                                                                                     no.                                                                                                                     3,                                                                                                            pp. 1–26,                                                                                                                Sep.                                                                                                                  2019.
+   Ml2 =                                                                               [18]                                                                                    Y. Pan, S.                                                                     De                                                                                                        Bast,                                                                                             and                                                                                                                    S. Pollin,                                                                                                                   “Indoor                                                                                                                                                 direct                                                                                                                                             positioning                                                                                                                                             with                            ˜hcn          n=0   X                        n [¯hTnl, 2πn∆f˜hTn, ˜hTn, ˜hTn],                                                                                   imperfect                                                                                       massive                                                             MIMO                                                                                                                 array                                                                                                                 using                                                                                                            measured                                                                                                                                    near-ﬁeld                                                                                                                                                channels,”
+                            ˜hcn                                         IEEE Trans. Instrum. Meas., vol. 70, pp. 1–11, 2021.
+        ˇbcl                                                         [19] M. Kotaru, K. Joshi, D. Bharadia, and S. Katti, “Spotﬁ: Decimeter level
+                 ¯bc                                                                     localization using wiﬁ,” in Proc. ACM SIGCOMM, 2015, pp. 269–282.
+   Ml3 =                l , ¯bT , 1T , 1T ].                     (66)    [20] D. Vasisht, S. Kumar, and D. Katabi, “Decimeter-level localization with          1                                                             a single WiFi access point,” in Proc. 13th USENIX Symp. Netw. Syst.                          [ˇbT
+          1                                                          Design Implement. (NSDI), 2016, pp. 165–178.
+                                                                               [21] K. Jiokeng, G. Jakllari, A. Tchana, and A.-L. Beylot, “When FTM
+   It can be easily observed from (66) that Ml1, Ml2, Ml3         discovered MUSIC: Accurate WiFi-based ranging in the presence of
+are all positive semideﬁnite, i.e.,                                             multipath,” in Proc. IEEE INFOCOM - IEEE Conf. Comput. Commun.,
+                                                                                                    Jul. 2020, pp. 1857–1866.
+             Ml1 ⊙Ml2 ⊙Ml3 ≥0.              (67)    [22]  J. Xiong and K. Jamieson, “Arraytrack: A ﬁne-grained indoor location
+                                                                                 system,” in Proc. ACM NSDI, 2013, pp. 71–84.
+Equation (67) validates Mcl ≥0. Then, conditions Mc ≥    [23] X. Li, S. Li, D. Zhang, J. Xiong, Y. Wang, and H. Mei, “Dynamic-
+                                                             MUSIC: Accurate device-free indoor localization,” in Proc. ACM Int.
+0 and (59) are further met, thus the proof of CRBJp0p0 ≤          Joint Conf. Pervasive Ubiquitous Comput., Sep. 2016, pp. 196–207.
+CRBop0p0 is completed.                                                 [24] E. Soltanaghaei, A. Kalyanaraman, and K. Whitehouse, “Multipath
+                                                                                            triangulation: Decimeter-level WiFi localization and orientation with a
+                 REFERENCES                                        single unaided receiver,” in Proc. 16th Annu. Int. Conf. Mobile Syst.,
+                                                                                         Appl., Services, Jun. 2018, pp. 376–388.
+[1]  M. Kotaru, P. Zhang, and S. Katti, “Localizing low-power backscatter
+                                                                               [25] A. B. Pizarro, J. P. Beltr´an, M. Cominelli, F. Gringoli, and J. Widmer,
+      tags using commodity WiFi,” in Proc. 13th Int. Conf. Emerg. Netw.
+                                                                              “Accurate ubiquitous  localization with  off-the-shelf IEEE 802.11ac
+     EXperiments Technol., Nov. 2017, pp. 251–262.
+                                                                                       devices,” in Proc. 19th Annu. Int. Conf. Mobile Syst., Appl., Services,
+[2]  M. Kotaru and S. Katti, “Position tracking for virtual reality using
+                                                                                      Jun. 2021, pp. 241–254.
+     commodity WiFi,” in Proc. IEEE CVPR, Jun. 2017, pp. 68–78.
+                                                                               [26] H. Zhao, N. Zhang, and Y. Shen, “Beamspace direct localization for[3]   Y. Gu, X. Zhang, Z. Liu, and F. Ren, “BeSense: Leveraging WiFi
+                                                                                          large-scale antenna array systems,” IEEE Trans. Signal Process., vol. 68,     channel data and computational intelligence for behavior analysis,” IEEE
+                                                                                     pp. 3529–3544, 2020.     Comput. Intell. Mag., vol. 14, no. 4, pp. 31–41, Nov. 2019.
+[4]   L. Xie, S. Song, Y. C. Eldar, and K. B. Letaief, “Collaborative sensing    [27]  F. Ma, Z.-M.  Liu, and  F. Guo, “Direct  position determination  in
+      in perceptive mobile networks: Opportunities and challenges,” IEEE        asynchronous sensor networks,” IEEE Trans. Veh. Technol., vol. 68,
+     Wireless Commun., vol. 30, no. 1, pp. 16–23, Feb. 2023.                       no. 9, pp. 8790–8803, Sep. 2019.
+
+=== PAGE 15 ===
+WANG et al.: DECENTRALIZED INDOOR DIRECT LOCALIZATION WITH MULTIPLE Wi-Fi ACCESS POINTS                                              3105
+
+
+
+[28] A. Amar and A. J. Weiss, “Localization of narrowband radio emitters    [51] H. L. Van Trees, Detection, Estimation, and Modulation Theory, Part
+     based on Doppler frequency  shifts,” IEEE Trans. Signal  Process.,           I: Detection, Estimation, and Linear Modulation Theory. Hoboken, NJ,
+      vol. 56, no. 11, pp. 5500–5508, Nov. 2008.                           USA: Wiley, 2004.
+[29]  F.  Ma,  Z.-M.  Liu,  and   F.  Guo,  “Distributed  direct  position
+     determination,”  IEEE   Trans.   Veh.   Technol.,   vol. 69,   no. 11,                         Ziqiang Wang (Member, IEEE) received the B.Sc.
+     pp. 14007–14012, Nov. 2020.                                                            and Ph.D. degrees from the School of Informa-
+[30] Z. Wang, B. Tan, E. S. Lohan, L. Ni, M. Valkama, and Q. Wan,                              tion and Communication Engineering, University
+     “Majorization-minimization-based direct localization using one-bit chan-                            of Electronic Science and Technology of China,
+      nel measurements,” IEEE  Wireless Commun.  Lett.,  vol. 13,  no. 5,                        Chengdu,  in 2016 and 2024,  respectively. From
+     pp. 1389–1393, May 2024.                                                                 October 2022  to May 2024, he was a  Visiting
+[31] A.  J.  Weiss,  “Direct  position  determination  of narrowband  radio                           Researcher with Tampere University, Finland. His
+      transmitters,” in Proc. IEEE Int. Conf. Acoust., Speech, Signal Process.,                             current research interests include wireless localiza-
+      vol. 2, 2004, pp. 1–4.                                                                                         tion, integrated sensing and communication (ISAC),
+[32] Z. Wang, K. Hao, Y. Sun, L. Xie, and Q. Wan, “A computationally efﬁ-                         and array signal processing. He  is a reviewer of
+      cient direct position determination algorithm based on OFDM system,”                              several conferences and journals.
+    IEEE Commun. Lett., vol. 27, no. 3, pp. 841–845, Mar. 2023.
+[33] A. J. Weiss and A. Amar, “Direct position determination of multiple
+      radio  signals,” EURASIP  J. Adv. Signal Process.,  vol. 2005, no. 1,                    Bo Tan (Member, IEEE)  is an  Associate  Pro-
+     pp. 1–13, Dec. 2005.                                                                                 fessor of communications engineering and signal
+[34]  T. Tirer and A. J. Weiss, “High resolution direct position determination                            processing with the Department of Electronic and
+      of radio frequency sources,” IEEE Signal Process. Lett., vol. 23, no. 2,                               Electrical Engineering, University College London
+     pp. 192–196, Feb. 2016.                                                                (UCL). Before joining UCL, he was an Assistant
+                                                                                                       Professor and then an Associate Professor with Tam-[35] L. Tzafri and A.  J. Weiss, “High-resolution direct position determi-
+                                                                                                     pere University, Finland, where he holds a Docent.     nation using MVDR,” IEEE Trans. Wireless Commun., vol. 15, no. 9,
+                                                                                              His  research focuses on  radio  signal processing     pp. 6449–6461, Sep. 2016.
+                                                                                          and applications in wireless communications and
+[36] K. Hao and Q. Wan, “Importance sampling based direct maximum
+                                                                                                           sensing. He also works on the wireless networks
+      likelihood  position  determination  of  multiple  emitters  using  ﬁnite
+                                                                                          and machine learning. Prior to faculty, he conducted
+     measurements,” Signal Process., vol. 186, Sep. 2021, Art. no. 108111.
+                                                                               multiple post-doctoral research fellow positions in radar and applications in
+[37] Z. Wang, Y. Sun, Q. Wan, L. Xie, and N. Liu, “A modest power con-                                                                                   healthcare. He is the Vice Chair of the IEEE Finland AP/ED/MTT Chapter,
+     sumption maximum likelihood direct position determination approach                                                                      an Associate Editor of IEEE WIRELESS COMMUNICATIONS LETTERS, and
+      for multiple  targets with moving sensor  arrays,” IEEE Sensors  J.,                                                                          a reviewer of multiple IEEE/ACM/IET journals.
+      vol. 22, no. 22, pp. 21885–21898, Nov. 2022.
+[38] O. Bialer, D. Raphaeli, and A. J. Weiss, “Maximum-likelihood direct
+      position estimation in dense multipath,” IEEE Trans. Veh. Technol.,                     Mikko Valkama (Fellow, IEEE) received the M.Sc.
+      vol. 62, no. 5, pp. 2069–2079, Jun. 2013.                                                           (Tech.) and D.Sc.  (Tech.) degrees (Hons.) from
+[39]  J. Bai, G. Wei,  S. Wang, X. Wang, and Z.  Fei, “Efﬁcient  direct                        Tampere University of Technology, Finland, in 2000
+      localization of OFDM emitters in multipath environment with mobile                         and 2001, respectively. In 2003, he was with the
+      receivers,” IEEE Trans. Veh. Technol., vol. 71, no. 1, pp. 545–556, Jan.                        Communications Systems and  Signal  Processing
+     2022.                                                                                                              Institute, SDSU, San Diego, CA, USA, as a Visiting
+[40] N. Garcia, A. M. Haimovich, J. A. Dabin, M. Coulon, and M. Lops,                          Research Fellow. Currently, he is a Full Professor
+     “Direct localization of emitters using widely spaced sensors in multipath                         and the Head of the Unit of Electrical Engineering,
+     environments,” in Proc. 48th Asilomar Conf. Signals, Syst. Comput.,                        Tampere University, Finland. His general research
+     Nov. 2014, pp. 695–700.                                                                                   interests include radio communications, radio local-
+[41] N. Garcia, H. Wymeersch, E. G. Larsson, A. M. Haimovich, and                                ization, and  radio-based  sensing, with  particular
+    M. Coulon, “Direct localization for massive MIMO,” IEEE Trans. Signal   emphasis on 5G and 6G mobile radio networks.
+      Process., vol. 65, no. 10, pp. 2475–2487, May 2017.
+[42] W. Fan, X. Li, G. Yang, C. Li, and Y. Huang, “Low-complexity mobile
+      user tracking in quantized mmWave MIMO systems,” IEEE Trans.                         Lei  Xie  (Member,  IEEE)  received  the  B.E.
+     Mobile Comput., vol. 23, no. 9, pp. 8569–8581, Sep. 2024.                                  and Ph.D. degrees from the University of Elec-
+[43] K. Hao and Q. Wan, “Sparse Bayesian inference-based  direct  off-                              tronic Science and Technology of China, Chengdu,
+      grid position determination in multipath environments,” IEEE Wireless                           China, in 2016 and 2021, respectively. He was a
+    Commun. Lett., vol. 10, no. 6, pp. 1148–1152, Jun. 2021.                                        Post-Doctoral Fellow with the Department of Elec-
+[44] W. Fan, S. Liu, C. Li, and Y. Huang, “Fast direct localization for                              tronic and Computer Engineering, The Hong Kong
+     millimeter wave MIMO systems via deep ADMM unfolding,” IEEE                            University of Science and Technology, Hong Kong.
+     Wireless Commun. Lett., vol. 12, no. 4, pp. 748–752, Apr. 2023.                         He  is currently an Associate Professor with the
+[45] Z. Wang, Y. Sun, L. Xie, N. Liu, and Q. Wan, “An iterative direct                         School of Cyber Science and Engineering, Southeast
+      position determination approach based on Doppler frequency shifts,”                              University, Nanjing, China. His research interests
+    IEEE Trans. Veh. Technol., vol. 73, no. 2, pp. 2431–2443, Feb. 2024.                              include integrated sensing and communications, per-
+                                                                                 ceptive mobile networks, statistical signal processing, optimization theory, and[46]  F. Wen, P. Liu, H. Wei, Y. Zhang, and R. C. Qiu, “Joint azimuth,
+                                                                                         artiﬁcial intelligence. He served as the Tutorial Program Co-Chair for 2025      elevation, and delay estimation for 3-D indoor localization,” IEEE Trans.
+                                                             IEEE 102nd Vehicular Technology Conference Workshop.     Veh. Technol., vol. 67, no. 5, pp. 4248–4261, May 2018.
+[47] E. Tzoreff and A. J. Weiss, “Expectation-maximization algorithm for
+      direct position determination,” Signal Process., vol. 133, pp. 32–39,
+                                                                     Qun Wan  (Senior Member, IEEE) received the
+     Apr. 2017.
+                                                                                                    B.Sc. degree in electronic engineering from Nanjing
+[48] M. Oispuu and U. Nickel, “Direct detection and position determination                                                                                                             University, Nanjing, China, in 1993, and the M.Sc.
+      of multiple sources with intermittent emission,” Signal Process., vol. 90,                                                                                          and Ph.D. degrees in electronic engineering from
+     no. 12, pp. 3056–3064, Dec. 2010.                                                                                                          the University of Electronic Science and Technology
+[49] A. Azevedo-Filho and R. D. Shachter, “Laplace’s method approxima-                            of China (UESTC), Chengdu, China, in 1996 and
+      tions for probabilistic inference in belief networks with continuous                          2001, respectively. From 2001 to 2003, he held a
+      variables,”  in  Proc.  10th  Conf.  Uncertainty  Artif.  Intell.,  1994,                             post-doctoral position with the Department of Elec-
+     pp. 28–36.                                                                                              tronic Engineering, Tsinghua  University,  Beijing,
+[50] O. Bialer, D. Raphaeli, and A. J. Weiss, “Efﬁcient time of arrival esti-                           China. Since 2004, he has been a Professor with
+     mation algorithm achieving maximum likelihood performance in dense                             the Department of Electronic Engineering, UESTC.
+      multipath,” IEEE Trans. Signal Process., vol. 60, no. 3, pp. 1241–1252,   His research interests include direction ﬁnding, radio localization, and radar
+     Mar. 2012.                                                                  signal processing.

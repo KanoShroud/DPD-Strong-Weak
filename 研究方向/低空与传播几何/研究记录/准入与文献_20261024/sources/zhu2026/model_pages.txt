@@ -1,0 +1,135 @@
+
+--- PDF PAGE 2 ---
+   TDOA-based methods have strict requirements for the
+clock synchronization among sensors, and synchronization
+errors among sensors lead to a decline in positioning per-
+formance or even positioning failure [22], [23]. Recent
+research on the calibration of synchronization errors mainly
+focuses on two-step methods rather than DPD methods
+in TDOA scenarios. In [24], the inﬂuence of clock bi-
+ases on positioning performance is analyzed, and a DPD
+method is proposed based on the integration of expectation–
+maximization and Gauss–Newton algorithms. In [25], a
+two-step method is proposed to locate a static source with
+joint TDOA/frequency difference of arrival (FDOA) mea-
+surements using an imperfectly time-synchronized dual-
+satellite geolocation system. In [26], TDOA estimation is
+improved by a semideﬁnite programming method with mul-
+tiple calibration emitters to simultaneously alleviate sensor
+                                                                                 Fig. 1.  Schematic diagram of the dual-UAV positioning scenario.
+position errors and clock synchronization errors. In [27],
+the impact of synchronous clock bias is suppressed using
+the dimension-reduction Taylor series algorithm, and an         environments  is constructed, taking into account
+ML-based closed-form solution for the clock bias vector       unknown attenuation coefﬁcients. Two DPD cost
+is also provided. Synchronization errors are reﬂected in the          functions based on fusion approaches are proposed
+phase when the received signal is processed in the frequency          for this signal model. Kalman ﬁltering (KF) is em-
+domain, which is similar to the concept of phase errors in         ployed for performance optimization in the presence
+array signal processing. In [28], a channel data precompen-         of position errors.
+sation method is proposed using a single auxiliary source,      2) In the ﬁrst method, spatial smoothing is applied
+where the error correction matrix is calculated based on the          to further address the problem caused by coherent
+estimated steering vector of the auxiliary source. Most of          signals. The unknown attenuation coefﬁcients are
+the aforementioned TDOA-based methods targeting syn-         bypassed by computing the covariance matrix of
+chronization error scenarios either are two-step methods or          the spatially smoothed cross-power spectrum. The
+require auxiliary sources, which could bring difﬁculties in         shared vector of the synchronization error is decou-
+practical applications.                                           pled through the fusion of subspace orthogonality
+   As an emerging type of aircraft, an uncrewed aerial         containing in the cross-power spectra of different
+vehicle (UAV) has the advantages of low cost, mobility,      UAV movements.
+and the capability to be equipped with a single antenna      3) In the second method, the factor of the synchroniza-
+to receive the radiation signal, which makes  it suitable          tion error is directly eliminated within the subspace
+for TDOA-based scenarios [29], [30], [31]. Multi-UAV          orthogonality at each frequency point. The shared
+positioning systems primarily utilize two-step methods for          vector of unknown attenuation coefﬁcients is de-
+positioning, which offer low complexity and good real-time         coupled by leveraging subspace orthogonality fusion
+performance. In [32], the maximum value of the Fisher         across different frequencies.
+information matrix (FIM) determinant is determined to      4) The closed-form expressions of CRB for the cross-
+achieve track optimization for UAV swarms. Jie et al. [33]        power spectrum model in complex scenarios are
+propose a TDOA method to locate the radiation source          derived. The computational complexities of the pro-
+when the position information of UAVs is inaccurate in        posed methods are compared with those of other
+a multi-UAV system. In [34], the TDOA-based position      DPD methods to verify their real-time performance.
+estimation accuracy of the signal source is improved by        The superiority of the positioning accuracy over
+selecting nodes with minimum dilution of precision in a          other DPD methods demonstrated through simula-
+UAV swarm scenario. Li et al. [35] present weighted DPD          tion results.
+methods to locate illegal radiations simultaneously based on
+                                                                                            II.  SIGNAL MODELUAV monitoring big data. In [36], a two-step method based
+on DOA and a DPD method are proposed to locate the radio     The positioning scenario diagram is shown in Fig. 1,
+frequency emitter using a vertical takeoff and landing UAV.  where the multipath effects on the transmission paths are
+    In this article, two novel DPD methods are proposed to   caused by reﬂectors. The radiated signal is received by
+locate the radiation source using a dual-UAV system with  two UAVs, each equipped with a single sensor. In addition,
+the synchronization error. The main contributions of this   the ﬁxed clock synchronization error between the UAVs is
+article are as follows.                                     considered in the signal model. The position of the radiation
+                                                         source is denoted as q = [x, y]T, where (·)T denotes the
+    1) The cross-power spectral signal model for dual   transpose. As shown in Fig. 1, UAV 1 remains stationary,
+     UAVs with the synchronization error in multipath   while UAV 2 travels for L times, and the hovering positions
+
+
+ZHU ET AL.: DIRECT POSITION DETERMINATION USING DUAL UAVS WITH SYNCHRONIZATION ERROR                    2871
+
+     Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 27,2026 at 02:22:23 UTC from IEEE Xplore. Restrictions apply.
+--- PDF PAGE 3 ---
+of the UAVs are denoted as p0 = [x0, y0]T for UAV 1 and   spectrum between x0(t) and xl(t) can be obtained by per-
+pl = [xl, yl]T(1 ≤l ≤L) for UAV 2. Signal reception oc-   forming discrete Fourier transform on Rx0xl (τ )
+curs when the moving UAV hovers, and both UAVs receive                       M
+the radiation signals simultaneously. UAV 1 is placed in a                                                         τlm(q)+η)                                                                              Gx0xl (ω) = α0Gs (ω)   αHlme−jω(              (5)
+relatively open area, where the multipath components of
+                                                                              m=1
+the received signal are negligible. This condition serves as
+a prior information. The received signals after the lth travel  where Gs(ω) is the autopower spectrum of s(t), and ω is the
+                                                         angular frequency. Since x0(t) = α0s(t) + n0(t), we havecan be expressed as
+                                                                       Gx0 (ω) = α0Gs (ω) + Gn0 (ω)            (6)
+      x0(t) = α0s  t −τ0 q + n0(t)
+           M                                       (1)
+      xl(t) =   m=1 αlms  t −τlm q −η + nl(t)         where Gx0(ω) and Gn0(ω) are autopower spectra of x0(t)
+                                                   and n0(t), respectively. Then, Gx0xl (ω) can be rewritten as
+where 1 ≤l ≤L, 0 < t ≤T , x0(t) is the received signal of                     M
+UAV 1, α0 is the unknown attenuation coefﬁcient, s(t) is the           Gx0xl (ω) = Gx0 (ω)   αHlme−jω(  τlm(q)+η)
+transmitted signal of radiation source, τ0(q) is the time delay                         m=1
+betweentheradiationsourceandUAV1,n0(t)istheadditive                       M
+Gaussian noise generated on the signal transmission path,              −Gn0 (ω)   αHlme−jω(  τlm(q)+η).    (7)
+xl(t) is the received signal of UAV 2 after the lth traveling,                            m=1
+M is the number of paths, αlm is the unknown attenuation
+                                                          Divide (7) by Gx0(ω), and the normalized cross-powercoefﬁcient on the mth path in the lth signal reception, τlm(q)
+                                                      spectrum is obtained by
+is the time delay between the radiation source and UAV 2
+on the mth path in the lth signal reception, η is the ﬁxed                 M
+                                                                              Gx0xl (ω)                      τlm(q)+η)synchronization error, and nl(t) is the additive Gaussian           =   αHlme−jω(     + εl (ω)     (8)
+                                                                  Gx0 (ω)    m=1noise generated on the lth transmission path.
+   Without loss of generality, assume that there are M −1                                                                                               Gn0 (ω)  M               τlm(q)+η)                                                  where εl(ω) = −                                                                  αHlme−jω(           is regarded                                                                                                  Gx0 ( f )   m=1ﬁxedreﬂectorsdenotedbyq2, q3, . . . , qM,andthemultipath
+components are all caused by these reﬂectors. The extent   as Gaussian noise.
+of reﬂection is quantiﬁed by the attenuation coefﬁcient αlm.     The position estimation of the radiation source requires
+The TDOA of each multipath (2 ≤m ≤M) can be further   the effective part of the cross-power spectrum, whose am-
+modeled as                                                   plitude values are nonzero. In the cross-power domain, the
+                                                         source signal generally occupies only a portion of the sam-
+               ||q −qm||2     ||pl −qm||2       −q||2        pling bandwidth. The concept of cross-power domain is an    τlm(q) =       +          −||p0         (2)
+                c            c            c           analogy of the frequency domain. The task of extracting the
+                                                                effective part of the cross spectrum is to separate the source
+where c denotes the propagation speed of electromagnetic   signal from the collected signal. Deﬁne the effective spec-
+waves, and ∥· ∥2 denotes 2-norm. When M = 1, there is no  trum of length N of the lth normalized cross-power spec-
+multipath component, and we have τl1(q) = ||pl −q||2/c.   trum of length N0 in (8) as yl. The corresponding angular
+   Since the UAVs receive signals at the same time stamp,   frequencies of the effective spectrum are   1,   2, . . . ,  N,
+only the TDOA values and the synchronization error need  and the nth element in yl can be expressed as
+to be considered in the data model, and the received data
+                                                       M
+can be rewritten as
+                                                                             yl(  n) =   αHlme−j  n(  τlm(q)+η) + εl (  n)     (9)
+     x0(t) = α0s(t) + n0(t)                                              m=1
+          M                                                   .   (3)
+     xl(t) =   m=1 αlms  t −   τlm q −η + nl(t)         where 1 ≤n ≤N. Then, the effective normalized cross-
+                                                  power spectrum is obtained by yl.
+                                                               In the complex positioning scenario, such as multipathIII. PROPOSED SCHEME
+                                                        environment, the received signals are often coherent. To
+A.  Acquisition of the Effective Normalized Cross-Power                                                         address this issue, data segmentation and spatial smoothing
+    Spectrum                                                            are employed. The lth (1 ≤l ≤L) time-domain received
+   From (3), the cross correlation between x0(t) and xl(t)   data are segmented into K parts uniformly, with each part
+can be expressed as                                     having a length of P0. The time-domain segments of x0(t)
+                                                   and xl(t) are denoted as x0(tk) and xl(tk), respectively,
+                                                                              (k−1)T
+               M                                where   K  < tk ≤kTK . The effective normalized cross-
+        Rx0xl (τ ) = α0   αHlmRs τ −    τlm q + η      (4)  power spectrum between x0(tk) and xl(tk) is denoted as
+                  m=1                                             ylk. The basic idea of spatial smoothing is to divide the
+                                                                effective normalized cross-power spectrum into D sets of
+where (·)H denotes the conjugate transpose, and Rs(τ ) de-   overlapping sub-cross-power spectra, each with a length of
+notes the autocorrelation of s(t). Therefore, the cross-power   P. Assume that the uniform extraction interval of ylk is also
+
+
+2872                                   IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS  VOL. 62  2026
+
+        Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 27,2026 at 02:22:23 UTC from IEEE Xplore. Restrictions apply.

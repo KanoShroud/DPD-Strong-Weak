@@ -1,0 +1,49 @@
+Y. Zeng et al.: QNOMP: A Quasi-Newton-Based Joint Multipath Optimization Method
+
+
+
+
+
+  FIGURE 6. Error bars showing the median with 25th–75th percentile ranges across algorithms: (a) multipath Scenario 2 (Fig. 2); (b) clustered
+  Scenario 3 (Fig. 3); (c) CDL-A channel (Fig. 5).
+
+
+
+TABLE 3. Computational cost evaluation over 100 trials for the CDL-C channel: CPU time (seconds) and time per unit precision (TPUP, in parentheses).
+Bold entries indicate the lowest CPU time and TPUP in each column.
+
+
+
+
+
+TABLE 4. Hyperparameters configuration.                            time per unit precision (TPUP:= Time × NMSE), in Table 3.
+                                            Among the evaluated super-resolution algorithms, QNOMP
+                                                              achieves the  shortest runtime  in most  cases. Moreover,
+                                    QNOMP with block reweighting (QNOMP+BR)  attains
+                                                                the lowest TPUP,  indicating  that a modest  increase  in
+                                                           computational cost yields a substantial gain in extrapolation
+                                                                   precision.
+                                                    The computational cost of OG-ISTA increases with the
+                                                   number of  iterations, making  it suitable when a coarse
+                                                                 solution  is needed within a tight time budget, as  it can
+                                                              capture most paths in few iterations without matrix inversion.
+                                                EM-IF-SBL generally requires more time than OG-ISTA due
+                                                                   to its slower non-zero element reduction, often necessitating
+                                                           a larger compressing grid. As for TST-MUSIC, being an
+                                                              on-grid algorithm that relies on high-resolution grids,  its
+                                                           computational cost can become prohibitive.
+
+
+
+                                                                                     F. HYPERPARAMETER CONFIGURATION AND SENSITIVITY
+                                                    ANALYSIS
+Fig. 5. QNOMP further improves upon NOMP, delivering    This section provides a comprehensive analysis of hyperpa-
+higher accuracy with even shorter runtimes. The additional     rameter selection, its impact on algorithmic performance, and
+cost introduced by block reweighting is marginal, increasing     practical implementation guidelines. Table 4 summarizes the
+computation time by only about 20% over standard QNOMP    key hyperparameters and their typical configurations.
+while improving extrapolation performance by 1-3 dB.        We recommend setting k1, k2 ≥  4, as on-grid chan-
+  To enable a more informative comparison, we introduce     nel estimation performance approaches  its practical limit
+the product of CPU time and extrapolation NMSE, termed    under this condition. Larger refinement rates have minimal
+
+
+VOLUME 13, 2025                                                                                                         212667

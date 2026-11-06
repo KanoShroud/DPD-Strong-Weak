@@ -1,0 +1,64 @@
+AKBARI AND VALAEE: DECIMETER LEVEL COOPERATIVE DIRECT LOCALIZATION WITH ISING MODEL APPROACH                                 14399
+
+
+algorithm. In this approach, the energy change from flipping   Furthermore, the connection weight is:
+a randomly selected spin is considered, and the probability                    𝑃 𝑀
+of accepting this change is calculated. If the energy change                𝑊𝑖, 𝑗= ∑︁ ∑︁ 𝛾Ψ𝐻𝑝𝑚,𝑖Ψ𝑝𝑚, 𝑗,
+between the initial state and the new state is negative, we adopt                        𝑝=1 𝑚=1
+this change by the probability of 1; otherwise, if it is positive,                  𝑖= 𝑗= 1, 2, . . . , 𝐺, 𝑖≠𝑗.          (23)
+this energy is accepted with probability 𝑒𝑥𝑝(−𝛽Δ𝐸). We iter-
+ate over this algorithm until its convergence to the equilibrium  To  solve  the  above  Ising  model  problem, we  use  an
+state distribution [48].                              MCMC-based  solver  called  the  Fujitsu Computing  as a
+                                                               Service Digital Annealer (DA) [53]. DA is a computer archi-
+                                                                    tecture that solves binary combinatorial problems with an Ising
+D. Ising Model Formulation                                                           energy formulation as its objective function. According to [54],
+  Problem (13) is a constrained binary optimization problem   the time-to-solution of DA for the fully connected spin-glass
+with a quadratic objective function. By doing some algebraic   problems has been about two times faster than the existing
+manipulations, this problem can be easily restructured into an   annealing and parallel tempering methods.
+Ising model problem.                                  As we discussed in Section III-C, the Ising model represents
+  We first modify (13) to a regularized minimization problem:   the magnetic interaction between spins of a  lattice and  is
+                           𝑃                             described by the Hamiltonian energy as shown in (15). The
+           min      ||x||0 + 𝛾 ∑︁ ||y𝑝−𝚿𝑝x||22        (18)  model is based on the statistical mechanics. In the Ising model,             x∈{0,1}𝐺                               we have a configuration of spins, 𝑐, and the energy of this                                𝑝=1
+                                                                  configuration, 𝐸(𝑐), is described by (15). The probability of
+Next, we reframe (18) into an Ising energy model problem.   the system being in configuration 𝑐is related to this energy;
+In this case, we have 𝐺binary variables. We also need to   in other words, 𝑃(𝑐) ∼exp(−𝛽𝐸(𝑐)) where 𝛽is a constant.
+calculate the bias and the connection weights of the variables.   Then, considering the MCMC algorithms such as Metropolis-
+Since 𝑥𝑖∈{0, 1}, we have                                     Hastings, we need to find the acceptance rate of the configura-
+                      𝐺                                  tions, which depends on the difference between the energy of
+                              ||x||0 = ∑︁ 𝑥𝑖.                   (19)   the configuration with a spin flip and its current state. So, the
+                                     𝑖=1                            computational complexity of the whole system depends on the
+                                                                    size of the connection weight matrix W and the bias vector
+Moreover, we can rewrite the second term in (18) as follows:                                                                  b. Thus, having 𝐺binary variables in our model, the compu-
+    𝑃                                                               tational complexity of our algorithm is of the order 𝑂(𝐺2).
+   ∑︁ ||y𝑝−𝚿𝑝x||22
+     𝑝=1                                                                IV. CRÁMER-RAO BOUND DERIVATION
+         𝑃                                                      In this section, we study the theoretical performance of our
+      ∑︁     =   (y𝑝−𝚿𝑝x)𝐻(y𝑝−𝚿𝑝x)                      method by deriving CRB. CRB provides a common baseline
+          𝑝=1                                                      for comparing the performance of unbiased estimators. Esti-
+         𝑃                                               mators whose performance is closer to the CRB have less bias
+      ∑︁     =   y𝐻𝑝y𝑝−y𝐻𝑝𝚿𝑝x −x𝐻𝚿𝐻𝑝y𝑝+ x𝐻𝚿𝐻𝑝𝚿𝑝x         and, therefore, preferable to use.
+          𝑝=1
+         𝑃                                                  A. Derivation of CRB
+     =                          + x𝐻𝚿𝐻𝑝𝚿𝑝x        (20)      ∑︁ ||y𝑝||22 −2ℜ(y𝐻𝑝𝚿𝑝x)                                                                  In this section, we derive the CRB of the localization error
+          𝑝=1
+                                                                    for the signal model given by (10). First, let us define the
+where ℜ(.) represents the real part of the expression.          vector of parameters:
+  Now, let us rewrite (18) as an Ising energy model using (19)                                                                            ¯𝜼= [ ˜𝑥𝑢, ˜𝑦𝑢]𝑇                    (24)
+and (20). We should also consider that when 𝑥𝑖∈{0, 1},
+𝑥2𝑖= 𝑥𝑖:                                                where ˜𝑥𝑢and ˜𝑦𝑢represent the coordinates of the location
+                                                               of the user. The likelihood function of the received signal
+        𝐺       𝑃 𝑀
+    min       ∑︁ (1 −𝛾 ∑︁ ∑︁ 2ℜ(𝑦𝐻𝑝,𝑚Ψ𝑝𝑚,𝑖+ Ψ2𝑝𝑚,𝑖))𝑥𝑖        measurements at access point 𝑝in (10) is given by
+    x∈{0,1}𝐺              𝑖=1       𝑝=1 𝑚=1                                           1                                                             𝑓(y𝑝| ¯𝜼) =        𝑀 exp −(y𝑝−𝜇𝑝( ¯𝜼))𝐻𝚺−1𝑝(y𝑝−𝜇𝑝( ¯𝜼))
+        𝐺  𝐺   𝑃 𝑀                                         det(2𝜋𝚺𝑝) 2
+      + ∑︁ ∑︁ ∑︁ ∑︁ 𝛾Ψ𝐻𝑝𝑚,𝑖Ψ𝑝𝑚, 𝑗𝑥𝑖𝑥𝑗.           (21)                                                                                                                        (25)
+             𝑖=1 𝑗=1, 𝑗≠𝑖 𝑝=1 𝑚=1
+                                                                    in which 𝚺𝑝is the covariance matrix and 𝜇𝑝( ¯𝜼) is the mean
+So, based on (21), the bias term of the Ising formulation is:
+                                                                vector and is defined as follows:
+                  𝑃 𝑀                                             𝐺
+      𝑏𝑖= −1 + 𝛾 ∑︁ ∑︁ 2ℜ(𝑦𝐻𝑝,𝑚Ψ𝑝𝑚,𝑖+ Ψ2𝑝𝑚,𝑖),                 𝜇𝑝( ¯𝜼) = 𝚿𝑝( ¯𝜼)¯x = ∑︁ a(𝜃(𝑖)𝑝( ¯𝜼), 𝑟(𝑖)𝑝( ¯𝜼))𝑥𝑖     (26)
+                     𝑝=1 𝑚=1                                                                            𝑖=1
+         𝑖= 1, 2, . . . , 𝐺.                             (22)                                                      where a(.) is the steering vector defined in (2).
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:02:33 UTC from IEEE Xplore. Restrictions apply.

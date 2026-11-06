@@ -1,0 +1,218 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\title{Performance Loss in TDOA Estimation with 1-Bit Quantization}
+\author{}
+\date{}
+
+\begin{document}
+	
+	\maketitle
+	
+	\section*{Performance Loss in TDOA Cross-Correlation Estimation with 1-Bit Quantization}
+	
+	\section*{Method 1: Based on Taylor Series Expansion}
+	
+	\subsubsection*{Objective}
+	Due to the non-linear mapping relationship described by the Arcsine Law, TDOA estimates $\tau_q$ based on the quantized measurement cross-correlation $R_q(\tau)$ exhibit bias. Let $\hat{\tau}$ be the TDOA estimate obtained from the original cross-correlation $\rho(\tau)$, and $\tau_0$ be the true TDOA value. Then $\hat{\tau}$ is an unbiased estimate of $\tau_0$. Define $\Delta \tau_q = \tau_q - \tau_0$ and $\Delta \tau = \hat{\tau} - \tau_0$ as the corresponding estimation errors.
+	
+	Assumption: $\tau_q$ is a biased estimate of $\tau_0$, i.e.,
+	\begin{gather}
+		\tau_q = \hat{\tau} + \delta_\tau  \\
+		\mathbb{E}[\tau_q] = \mathbb{E}[\hat{\tau}] + \mathbb{E}[\delta_\tau] = \tau_0 + \mathbb{E}[\delta_\tau] 
+	\end{gather}
+	where $\delta_\tau$ is the bias term and $\mathbb{E}[\delta_\tau] \propto \text{Var}(\hat{\tau})$. The research objective is to derive an expression for $\delta_\tau$.
+	
+	\subsubsection*{A. Model Assumptions}
+	The signal is a known waveform $s(t)$. The received signals are
+	\begin{equation}
+		\begin{aligned}
+			x(t) &= s(t) + n_1(t) \\
+			y(t) &= s(t - \tau) + n_2(t)
+		\end{aligned}
+	\end{equation}
+	
+	where $n_1(t)$ and $n_2(t)$ are zero-mean Gaussian white noise processes. The goal is to estimate the delay $\tau$ over the observation interval $t \in [0, T]$.
+	
+	\subsubsection*{B. Cross-Correlation under 1-Bit Quantization: Arcsine Law}
+	Apply 1-bit quantization to $x(t)$ and $y(t)$
+	\begin{align}
+		x_q(t) &= \text{sign}(x(t)), \quad y_q(t) = \text{sign}(y(t)) 
+	\end{align}
+	The cross-correlation of the quantized signals is
+	\begin{align}
+		R_q(\tau) &= \mathbb{E}[x_q(t)y_q(t - \tau)] 
+	\end{align}
+	If $x(t)$ and $y(t)$ are continuous-time, scalar, stationary real Gaussian processes, then according to the Arcsine Law (Van Vleck Formula)
+	\begin{align}
+		R_q(\tau) &= \frac{2}{\pi} \arcsin(\rho(\tau)) 
+	\end{align}
+	where $\rho(\tau)$ is the normalized correlation coefficient of the original signals
+	\begin{align}
+		\rho(\tau) &= \frac{R_{xy}(\tau)}{\sigma_x\sigma_y} = \frac{R_{xy}(\tau)}{\sqrt{R_{xx}(0)R_{yy}(0)}} 
+	\end{align}
+	Then the first and second order derivatives of $R_q(\tau)$ are
+	
+	\begin{align}
+		R_{q}^{\prime}(\tau)&=\frac{2}{\pi} \cdot \frac{\rho^{\prime}(\tau)}{\sqrt{1-\rho^{2}(\tau)}} \\
+		R_{q}^{\prime \prime}(\tau)&=\frac{2}{\pi} \cdot\left(\frac{\rho^{\prime \prime}(\tau)}{\sqrt{1-\rho^{2}(\tau)}}+\frac{\rho(\tau)\left[\rho^{\prime}(\tau)\right]^{2}}{\left(1-\rho^{2}(\tau)\right)^{3 / 2}}\right)
+	\end{align}
+	
+	\subsubsection*{C. Taylor Expansion}
+	Let $\tau_q$ be the TDOA estimate obtained from $R_q(\tau)$, $\hat{\tau}$ be the estimate obtained from $\rho(\tau)$, and $\tau_0$ be the true TDOA. Define $\Delta\tau_q = \tau_q - \tau_0$ and $\Delta\tau = \hat{\tau} - \tau_0$ as the estimation errors.
+	
+	\begin{itemize}
+		\item Expand $R_q(\tau)$ in a Taylor series around $\hat{\tau}$
+		\begin{equation}
+			\begin{aligned}
+				R_q(\tau) &= R_q(\hat{\tau}) + R_q'(\hat{\tau})(\tau - \hat{\tau}) + \frac{1}{2} R_q''(\hat{\tau})(\tau - \hat{\tau})^2  \\
+				&= \frac{2}{\pi} \arcsin(\rho(\hat{\tau})) + \frac{2}{\pi} \cdot \frac{\rho'(\hat{\tau})}{\sqrt{1 - \rho^2(\hat{\tau})}} \cdot (\tau - \hat{\tau})  \\
+				&\quad + \frac{1}{2} \cdot \frac{2}{\pi} \left( \frac{\rho''(\hat{\tau})}{\sqrt{1 - \rho^2(\hat{\tau})}} + \frac{\rho(\hat{\tau})[\rho'(\hat{\tau})]^2}{(1 - \rho^2(\hat{\tau}))^{3/2}} \right) \cdot (\tau - \hat{\tau})^2  \\
+				&= \frac{2}{\pi} \arcsin(\rho(\hat{\tau})) + \frac{1}{2} \cdot \frac{2}{\pi} \cdot \frac{\rho''(\hat{\tau})}{\sqrt{1 - \rho^2(\hat{\tau})}} \cdot (\tau - \hat{\tau})^2 
+			\end{aligned}
+		\end{equation}
+		
+		Substituting $\tau_q$ gives
+		\begin{equation}
+			\begin{aligned}
+				R_q(\tau_q) &= R_q(\hat{\tau}) + R_q'(\hat{\tau})(\tau_q - \hat{\tau}) + \frac{1}{2} R_q''(\hat{\tau})(\tau_q - \hat{\tau})^2  \\
+				&= \frac{2}{\pi} \arcsin(\rho(\hat{\tau})) + \frac{1}{2} \cdot \frac{2}{\pi} \cdot \frac{\rho''(\hat{\tau})}{\sqrt{1 - \rho^2(\hat{\tau})}} \cdot (\tau_q - \hat{\tau})^2 
+			\end{aligned}
+		\end{equation}
+		
+		Solving for $(\tau_q - \hat{\tau})^2$
+		\begin{equation}
+			\begin{aligned}
+				(\tau_q - \hat{\tau})^2 &= \frac{R_q(\tau_q) - \frac{2}{\pi} \arcsin(\rho(\hat{\tau}))}{\frac{1}{\pi} \cdot \frac{\rho''(\hat{\tau})}{\sqrt{1 - \rho^2(\hat{\tau})}}} = \frac{\pi \cdot \sqrt{1 - \rho^2(\hat{\tau})} \cdot \left[ R_q(\tau_q) - \frac{2}{\pi} \arcsin(\rho(\hat{\tau})) \right]}{\rho''(\hat{\tau})} 
+			\end{aligned}
+		\end{equation}
+		
+		\item Expand $R_q(\tau)$ in a Taylor series around $\tau_0$
+		
+		\begin{equation}
+			\begin{aligned}
+				R_q(\tau) &= R_q(\tau_0) + R_q'(\tau_0)(\tau - \tau_0) + \frac{1}{2} R_q''(\tau_0)(\tau - \tau_0)^2  \\
+				&= \frac{2}{\pi} \arcsin(\rho(\tau_0)) + \frac{2}{\pi} \cdot \frac{\rho'(\tau_0)}{\sqrt{1 - \rho^2(\tau_0)}} \cdot (\tau - \tau_0)  \\
+				&\quad + \frac{1}{2} \cdot \frac{2}{\pi} \left( \frac{\rho''(\tau_0)}{\sqrt{1 - \rho^2(\tau_0)}} + \frac{\rho(\tau_0)[\rho'(\tau_0)]^2}{(1 - \rho^2(\tau_0))^{3/2}} \right) \cdot (\tau - \tau_0)^2 
+			\end{aligned}
+		\end{equation}
+		
+		Substituting $\tau_q$ and $\hat{\tau}$ respectively gives
+		\begin{equation}
+			\begin{aligned}
+				R_q(\tau_q) &= R_q(\tau_0) + R_q'(\tau_0)(\tau_q - \tau_0) + \frac{1}{2}R_q''(\tau_0)(\tau_q - \tau_0)^2  \\
+				&= \frac{2}{\pi}\arcsin(\rho(\tau_0)) + \frac{2}{\pi}\frac{\rho'(\tau_0)}{\sqrt{1-\rho^2(\tau_0)}} \cdot \Delta\tau_q  \\
+				&\quad + \frac{1}{2}\frac{2}{\pi}\left( \frac{\rho''(\tau_0)}{\sqrt{1-\rho^2(\tau_0)}} + \frac{\rho(\tau_0)[\rho'(\tau_0)]^2}{(1-\rho^2(\tau_0))^{3/2}} \right) \cdot \Delta\tau_q^2  \\
+			\end{aligned}
+		\end{equation}
+		
+		
+		\begin{equation}
+			\begin{aligned}
+				R_q(\hat{\tau}) &= R_q(\tau_0) + R_q'(\tau_0)(\hat{\tau} - \tau_0) + \frac{1}{2}R_q''(\tau_0)(\hat{\tau} - \tau_0)^2  \\
+				&= \frac{2}{\pi}\arcsin(\rho(\tau_0)) + \frac{2}{\pi}\frac{\rho'(\tau_0)}{\sqrt{1-\rho^2(\tau_0)}} \cdot \Delta\tau  \\
+				&\quad + \frac{1}{2}\frac{2}{\pi}\left( \frac{\rho''(\tau_0)}{\sqrt{1-\rho^2(\tau_0)}} + \frac{\rho(\tau_0)[\rho'(\tau_0)]^2}{(1-\rho^2(\tau_0))^{3/2}} \right) \cdot \Delta\tau^2 
+			\end{aligned}
+		\end{equation}
+	\end{itemize}
+	
+	\subsubsection*{D. Questions}
+	\begin{enumerate}
+		\item According to the Arcsine Law, $R_q(\tau)$ and $\rho(\tau)$ are related by the arcsine function. Since $\arcsin(x)$ is monotonically increasing, when $\rho(\tau)$ reaches its peak, $R_q(\tau)$ should also reach its peak. Does this imply that there is \textit{no bias} between $\tau_q$ and $\hat{\tau}$?
+		
+		\item The Arcsine Law requires $x(t)$ and $y(t)$ to be continuous-time, scalar, stationary real Gaussian processes. In theory, under this model, $\rho(\tau)$ should be an impulse function (Dirac delta) non-zero only at $\tau = \hat{\tau}$. This would make $\rho(\tau)$ discontinuous and non-differentiable around $\hat{\tau}$, and $\rho''(\hat{\tau})$ would not exist. Does this invalidate the above derivation?
+		
+		\item Assuming the above issues are resolved, how can we use equations (12), (14), and (15) to further derive an expression for the bias $\delta_\tau$?
+	\end{enumerate}
+	
+	\section*{Method 2: Based on the Definition of Fisher Information}
+	
+	\subsubsection*{A. Model Assumptions}
+	The signal is a known waveform $s(t)$. The received signals are
+	\begin{equation}
+		\begin{aligned}
+			x(t) &= s(t) + n_1(t) \\
+			y(t) &= s(t - \tau) + n_2(t) 
+		\end{aligned}
+	\end{equation}
+	
+	where $n_1(t), \, n_2(t)$ are zero-mean Gaussian white noise processes. The goal is to estimate the delay $\tau$ over the observation interval $t \in [0, T]$.
+	
+	\subsubsection*{B. Fisher Information for Unquantized Signal}
+	Fisher Information quantifies the identifiability of a parameter estimate and is defined as
+	\begin{align}
+		\mathcal{I}(\tau) &= \mathbb{E}\left[ \left( \frac{\partial}{\partial \tau} \log p(\mathbf{x}, \mathbf{y}; \tau) \right)^2 \right] 
+	\end{align}
+	Since the signal $x(t)$ does not contain the parameter $\tau$, we focus on $y(t) = s(t - \tau) + n_2(t)$. Its likelihood function is
+	\begin{align}
+		p(y(t); \tau) &\propto \exp \left( -\frac{1}{2\sigma^2} \int_{0}^{T} \left[ y(t) - s(t - \tau) \right]^2 dt \right)  \\
+		\log p(\mathbf{y}; \tau) &= -\frac{1}{2\sigma^2} \int_{0}^{T} \left[ y(t) - s(t - \tau) \right]^2 dt + C 
+	\end{align}
+	Differentiating with respect to $\tau$
+	\begin{equation}
+		\begin{aligned}
+			\frac{d}{d\tau} \log p(\mathbf{y}; \tau) &= -\frac{1}{\sigma^2} \frac{d}{d\tau}\left[ \int_{0}^{T} \frac{1}{2} \left[ y(t) - s(t - \tau) \right]^2 dt \right]  \\
+			&= \frac{1}{\sigma^2} \int_{0}^{T} \left[ y(t) - s(t - \tau) \right] \cdot s'(t - \tau)  dt 
+		\end{aligned}
+	\end{equation}
+	
+	The Fisher Information for the delay $\tau$ is
+	\begin{gather}
+		\mathcal{I}(\tau) = \mathbb{E}\left[ \left( \frac{d}{d\tau} \log p(\mathbf{y}; \tau) \right)^2 \right] = \frac{1}{\sigma^4} \cdot \mathbb{E}\left[ \left( \int_{0}^{T} \left[ y(t) - s(t - \tau) \right] s'(t - \tau) dt \right)^2 \right]  \\
+		y(t) - s(t - \tau) = n_2(t) \Rightarrow \mathbb{E}\left[ \left( \int_{0}^{T} n_2(t) s'(t - \tau) dt \right)^2 \right] = \sigma^2 \int_{0}^{T} [s'(t - \tau)]^2 dt  \\
+		\mathcal{I}_{\text{analog}}(\tau) = \frac{1}{\sigma^2} \int_{0}^{T} [s'(t - \tau)]^2 dt 
+	\end{gather}
+	
+	Applying the variable substitution $u = t - \tau$ yields
+	\begin{align}
+		\mathcal{I}_{\text{analog}} &= \frac{1}{\sigma^2} \int_{-\tau}^{T-\tau} [s'(u)]^2 du \approx \frac{1}{\sigma^2} \int_{-\infty}^{\infty} [s'(u)]^2 du \quad \text{(for $T \gg |\tau|$)} 
+	\end{align}
+	Here, $s'(u)$ is the first derivative of the signal, representing its slope. This integral can be interpreted as the signal's ``slope energy". A steeper signal slope leads to a lower estimation variance.
+	
+	\subsubsection*{C. Cross-Correlation under 1-Bit Quantization: Arcsine Law}
+	Apply 1-bit quantization to $x(t)$ and $y(t)$
+	\begin{align}
+		x_q(t) &= \text{sign}(x(t)), \quad y_q(t) = \text{sign}(y(t)) 
+	\end{align}
+	The cross-correlation of the quantized signals is
+	\begin{align}
+		R_q(\tau) &= \mathbb{E}[x_q(t)y_q(t-\tau)] 
+	\end{align}
+	If $x(t)$ and $y(t)$ are zero-mean, jointly Gaussian processes, then according to the Arcsine Law (Van Vleck Formula)
+	\begin{align}
+		R_q(\tau) &= \frac{2}{\pi} \arcsin(\rho(\tau)) 
+	\end{align}
+	where $\rho(\tau)$ is the normalized correlation coefficient of the original signals
+	\begin{align}
+		\rho(\tau) &= \frac{R_{xy}(\tau)}{\sigma_x\sigma_y} = \frac{R_{xy}(\tau)}{\sqrt{R_{xx}(0)R_{yy}(0)}} 
+	\end{align}
+	
+	\subsubsection*{D. Derivative of the Quantized Cross-Correlation}
+	To estimate the delay, we are interested in the slope of $R_q(\tau)$
+	\begin{align}
+		\frac{dR_q(\tau)}{d\tau} &= \frac{2}{\pi} \cdot \frac{1}{\sqrt{1 - \rho^2(\tau)}} \cdot \frac{d\rho(\tau)}{d\tau} 
+	\end{align}
+	Near $\tau \approx \tau_0$ (assuming $\tau_0=0$ for simplicity), $\rho(\tau) \approx 1$. Defining $\rho(\tau) = 1 - \epsilon(\tau)$, we have $\epsilon(\tau) \approx 0$, and $1 - \rho^2(\tau) \approx 2\epsilon(\tau)$. Thus
+	\begin{align}
+		\frac{dR_q(\tau)}{d\tau} &\approx \frac{2}{\pi} \cdot \frac{1}{\sqrt{2\epsilon(\tau)}} \cdot \frac{d\rho(\tau)}{d\tau} 
+	\end{align}
+	
+	\subsubsection*{E. Fisher Information Ratio}
+	Since the likelihood $\log p(\mathbf{y}_q; \tau)$ for the 1-bit quantized signal cannot be written explicitly, a closed-form expression for the Fisher Information is unavailable. We use an alternative statistic, the cross-correlation function $R_q(\tau)$, and approximate the Fisher Information as the square of the sensitivity of this observable statistic to the parameter, i.e.,
+	\begin{align}
+		\mathcal{I}_{\text{1-bit}} &\propto \left( \frac{dR_q(\tau)}{d\tau} \right)^2 \approx \left( \frac{2}{\pi} \right)^2 \cdot \frac{1}{2\epsilon(\tau)} \cdot \left( \frac{d\rho(\tau)}{d\tau} \right)^2 
+	\end{align}
+	Conjecture
+	\begin{align}
+		\mathcal{I}_{\text{analog}} &\propto \left( \frac{d\rho(\tau)}{d\tau} \right)^2 \\
+		\frac{\mathcal{I}_{1-\mathrm{bit}}}{\mathcal{I}_{\text {analog }}}&=\left(\frac{2}{\pi}\right)^{2} \cdot \frac{1}{2 \epsilon(\tau)} 
+	\end{align}
+	
+	\subsubsection*{F. Question}
+	The derivation above is not rigorous. However, directly relating $R_q'(\tau)$ to $\rho'(\tau)$ seems insightful for analyzing the performance loss due to 1-bit quantization. Since the Arcsine Law implies $R_q(\tau)$ is simply the arcsine of $\rho(\tau)$, this suggests the \textit{shape} of the cross-correlation function changes (especially when $\rho(\tau) \to 1$), but the \textit{peak location} remains unaffected. Does this imply that 1-bit quantization only increases the Mean Squared Error (MSE) of the estimate without introducing bias?
+	
+	
+\end{document}

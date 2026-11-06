@@ -1,0 +1,85 @@
+14398                                                      IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 23, NO. 10, OCTOBER 2024
+
+
+It is essential to note that this binary approximation restricts   state by minimizing the energy of the system given by
+the feasible set of our solution since x is a binary vector. Thus,                      𝐾       𝐾  𝐾
+the solution to this optimization problem is an upper bound           𝐸(x; b, W) = − ∑︁ 𝑏𝑖𝑥𝑖− ∑︁ ∑︁ 𝑊𝑖, 𝑗𝑥𝑖𝑥𝑗      (15)
+to the exact solution.                                                                                𝑖=1         𝑖=1 𝑗=1
+  In the process of transforming the original problem into
+                                                      where 𝐾is  the number  of  binary  states  represented by
+a binary programming problem, as described in (13),  it  is
+                                              𝑥𝑖∈{−1, +1}, 𝑏𝑖shows the bias term and 𝑊𝑖, 𝑗denotes the
+important to note that there is no guarantee that the solutions
+                                                            connection weight.
+for the original problem and the binary programming problem
+                                                          Although the Ising model is primarily a physical model, the
+will share the same fundamental structure. A recent study,
+                                                                 description and formulation of its energy function introduced
+referenced in [46], demonstrated that subject to certain con-
+                                                                    in (15) can be generalized to be used in different branches
+ditions on how the dictionary is constructed, approximating
+                                                               of mathematics such as graph theory, combinatorics, neural
+the solution of a binary programming problem like (13) with
+                                                          networks and so on [48].
+binary elements can indeed yield optimal support for the
+                                                            For instance, in (15), the variable 𝑥𝑖represents the spin of
+signal. These conditions require that the dictionary should
+                                                       atoms and has a binary value, which is originally considered to
+be a tight frame and also satisfy the structural model of the
+                                                        be {−1, +1} to show the state of the spin. However, the Ising
+system.
+                                                           energy model can easily be converted to use {0, 1} values. This
+  In practice, it is not guaranteed that the dictionary created
+                                                             conversion changes (15) to a quadratic unconstrained binary
+based on arbitrary grid points will satisfy these conditions.
+                                                               optimization (QUBO) problem, which is commonly used in
+For our case, we need a grid over the whole environment that
+                                                  Quantum computing [49].is shared among all the access points. Thus, we create the
+                                                                  2) Ising Model and QUBO: The QUBO  structure  is aover-complete manifold of all access points as follows:
+                                                                robust framework that can be used to model several groups
+                𝚿1   0       · · ·    0                     of optimization problems such as scheduling, graphs,  etc.,
+                   0   𝚿2      · · ·    0                       [50]. In addition, many NP-hard problems such as ℓ0-norm
+        𝚿=              ...                           ...     ...                       ...               (14)   optimization can be transformed into an Ising model [51].
+                                                        Although QUBO problems and Ising model problems, such
+                   0    0       · · ·  𝚿P                                                               as (21), are NP-hard, their structure allows us to use  effi-                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+                                                                    cient  solvers, such as the quantum-based  solvers,  to  findin which 𝚿𝑝is the array manifold of the 𝑝-th access point.
+                                                                        their solution  [52]. Branch-and-bound based methods and  The construction of a tight frame requires two key condi-
+                                                             annealing-based methods are among the common approachestions to be met:
+                                                                    to solving the QUBO problem.
+   • All eigenvalues should be equal, specifically 𝐺/𝑀.
+                                                             Annealing-based solvers for Ising model problems usually
+   • The atom  structure  aligns with  the proposed system
+                                                                take advantage of the Markov Chain Monte Carlo (MCMC)
+    model.
+                                                          sampling methods. In the MCMC methods, a quantity or a
+To  achieve  these  conditions,  an  alternating  projection   distribution is approximated using randomly generated sam-
+algorithm, detailed in Algorithm 2 of [46], can be employed   ples. Each sample depends only on  its previous sample.
+to design the grid. The Alternating Projections Grid Design is  The probability of transition between samples is designed so
+an iterative technique for direct location estimation. It starts   that in the steady state, the system approaches equilibrium.
+by setting up initial grid points and then refines these points   In the Ising model, the probability that the system is in the
+through iterations that balance between meeting spectral and   equilibrium state is given by
+structural requirements until the process converges or reaches
+                                                                          1
+a predefined number of cycles. Each iteration involves math-        𝑃(x|b, W, 𝛽) =          𝑒𝑥𝑝(−𝛽𝐸(x; b, W))     (16)
+                                                                           𝑍(b, W, 𝛽)ematical projections to satisfy specific matrix characteristics,
+such as maintaining a tight frame, and the grid points are  The probability given in (16)  is the Gibbs or Boltzmann
+adjusted accordingly to minimize the distance to these pro-   distribution. In (16), 𝛽= 1/𝑘𝐵𝑇, 𝑘𝐵is the Boltzman constant
+jections. The complexity of the algorithm is influenced by the  and 𝑇is the temperature. Also, 𝑍(b, W, 𝛽) is
+computational tasks such as matrix operations and the number
+                                                                   𝑍(b, W, 𝛽) = ∑︁ 𝑒𝑥𝑝(−𝛽𝐸(x; b, W))        (17)
+of grid points, which are vital for the precision and efficiency
+                                                                                                       x
+of the location estimates. Utilizing this grid design ensures that
+                                                 One of these sampling methods used in Ising models is thewhen addressing the binary program (13), the optimal support
+                                                       Gibbs sampling. In the Gibbs sampling, at each time, one offor the signal can be accurately attained.
+                                                                 the spins is selected at random. Next, the probability of that
+                                                               spin being 1 or 0 is calculated given the current state of other
+C. Ising Energy Modeling
+                                                                spins and the temperature. The updated state of that spin is
+  1) Definition of the Ising Model: The Ising energy model   assigned to be 1 or 0 with their associated probabilities. This
+is a mathematical model proposed to describe the system of   algorithm is repeated until it converges to the probability of
+interaction between spins of atoms in statistical physics [48].   equilibrium described in (16).
+When the system  is in  its equilibrium  state,  its energy  is     Another approach for the MCMC sampling, which is more
+minimum. The goal of this model is to reach the equilibrium   efficient than the Gibbs sampling, is the Metropolis-Hasting
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:02:33 UTC from IEEE Xplore. Restrictions apply.

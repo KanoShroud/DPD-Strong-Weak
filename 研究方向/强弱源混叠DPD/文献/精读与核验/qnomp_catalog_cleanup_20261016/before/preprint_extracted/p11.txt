@@ -1,0 +1,95 @@
+                                                                                                                                                 11
+
+
+
+
+
+       10                                                                           10                                                                           10
+
+
+
+        0                                                                            0                                                                            0
+
+
+
+       -10                                                                                      -10                                                                                      -10
+
+             NMSE/dB -20-30                                                                                                                                                                                                                                                             NMSE/dB -20-30                                                                                                                                                                                                                                                             NMSE/dB -20-30
+
+
+                 OMP                                                            OMP                                                            OMP
+       -40          NOMP                                                                   -40          NOMP                                                                   -40          NOMP
+                 QNOMP                                                          QNOMP                                                          QNOMP
+                  CRB                                                                 CRB                                                                 CRB
+       -50            OG-ISTA                                                                 -50            OG-ISTA                                                                 -50            OG-ISTA
+
+
+       -60                                                                                      -60                                                                                      -60
+          -10          -5        0         5        10        15        20                   -10          -5        0         5        10        15        20                   -10          -5        0         5        10        15        20
+                              SNR/dB                                                           SNR/dB                                                           SNR/dB
+
+                             (a) Scenario 1. Delay NMSE                                                          (b) Scenario 2. Delay NMSE                                                            (c) Scenario 3. Delay NMSE
+
+Fig. 3.  Estimation error of virtual delay variable in clustered simulated channel. CRB is also plotted as a reference. The scenario setting is the same as in
+Fig. 2. (a)(b)(c): Estimation error of delay and CRB w.r.t. SNR for Scenarios 1, 2, 3.
+
+
+
+
+
+                 0                                                                            0
+
+
+
+                     -5
+                                                                                                                     -2
+
+
+                  -10
+                                                                                                                     -4
+
+                  -15
+
+                                                                                                                     -6                                              NMSE/dB -20                                                                                                                                                                                                                                                            NMSE/dB
+
+                        OMP                                                                            -8         OMP
+                  -25         NOMP                                                           NOMP
+                        QNOMP                                                          QNOMP
+                         QNOMP+BR                                                          QNOMP+BR
+                  -30            OG-ISTA                                                                 -10            OG-ISTA
+
+
+
+                  -35                                                                                      -12
+                    -15        -10          -5        0         5        10        15                  -15        -10          -5        0         5        10        15
+                                      SNR/dB                                                          SNR/dB
+
+                                (a) Estimation error for CDL-C channel with 100ns RMS delay spread.                   (b) Extrapolation error for CDL-C channel with 100ns RMS delay spread. The extrapolated bandwidth is
+                                             K = 2.
+
+Fig. 4.  Estimation and extrapolation error of different algorithms for CDL-C channel with RMS delay spread 100ns.
+
+
+is a typical model with angular blocks, so the block reweight-  and extrapolation gain, as shown in Fig. 4. QNOMP takes
+ing technique can greatly improve the performance of QNOMP   even less time than NOMP and is more accurate. Moreover,
+for both low and high SNR by taking advantage of the prior    it can also be observed that the cost of block reweighting is
+clustered structure of the channel model.                        small. It only costs about 10% more computing time than the
+                                     QNOMP without block reweighting, but achieves a 2-5 dB
+                                                               gains in extrapolation.
+D. Computational Cost                                          We remark that since we keep the iteration number nit =
+  We summarize the CPU time of different algorithms for  200 in OG-ISTA, the cost of it stays constant as the SNR in-
+CDL-C channel in Table  I.  It can be found that the local   creases. So OG-ISTA works better when finding an imprecise
+refinement is more efficient than using a fine uniform grid.   solution in very short time. It can catch a large part of the
+Comparing the OMP with grid size 0.25∆τ,θdft and OMP with   paths in a few iterations without matrix inversion.
+local refinement (k1 = k2 = 10), we find that the OMP with
+local refinement is 6-8 times faster and has a higher resolution.             VI. CONCLUSION AND DISCUSSION
+It is consistent with our theoretical analysis in Section  III.   We propose an efficient super-resolution algorithm named
+For 2D or higher dimensional channels, the cost of computing  QNOMP for the CSI estimation and extrapolation in TDD
+residual dominates the overall cost of OMP, and the cost of  MIMO system. The algorithm consists an on-grid sparse selec-
+computing residual is proportional to the number of paths Np,   tion stage and an off-grid joint parameter optimization stage.
+vector sizes M, N and refinement rates k1, k2. Thus using   In the on-grid stage, a local refinement module is introduced
+local refinement is highly beneficial.                          so the on-grid stage can achieve a high resolution with low
+ QNOMP is quite efficient in our test for CDL-C channel.   cost. In the off-grid stage, we use the BFGS quasi-Newton
+To make a fair comparison, we also add the local refinement   optimization. The high efficiency of BFGS algorithm allows
+module in OMP and NOMP. It takes about 3-4 times CPU time   us to perform a joint optimization for all channel parameters.
+of OMP in our setting, but achieves a significant estimation   This joint optimization is shown to be crucial for improving

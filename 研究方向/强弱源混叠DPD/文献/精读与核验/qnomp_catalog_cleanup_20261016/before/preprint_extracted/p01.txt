@@ -1,0 +1,79 @@
+                                                                                                                                                             1
+
+     Quasi-Newton OMP Approach for Super-Resolution Channel
+                    Estimation and Extrapolation
+
+                               Yi Zeng, Mingguang Han, Xiaoguang Li, and Tiejun Li
+
+
+
+
+           Abstract—Channel estimation and extrapolation are funda-   easily extrapolates CSI to bands outside of pilots by utilizing
+         mental issues in MIMO communication systems. In this paper,   the multipath channel model.
+       we proposed the quasi-Newton orthogonal matching pursuit                                                               Compressed sensing (CS) is an effective technique to re-
+       (QNOMP) approach to overcome these issues with high  effi-
+                                                                          construct the sparse solution from a small number of linear          ciency while maintaining accuracy. The algorithm consists of
+        two stages on the super-resolution recovery: we first performed   measurements. One popular approach for CS is the greedy
+        a cheap on-grid OMP estimation  of channel parameters  in   type methods, like the orthogonal matching pursuit (OMP) and
+          the  sparsity domain  (e.g., delay or  angle), then an  off-grid    its different variants [7], [8], [9], [10], [11], [12], [13], for its2024         optimization  to achieve the  super-resolution. In the  off-grid                                                             low computational complexity. Another type of CS methods
+           stage, we employed the BFGS quasi-Newton method to jointly
+                                                                          are based on the convex ℓ1 relaxation of ℓ0 minimization [14].          estimate the parameters through a multipath model, which
+        improved the speed and accuracy significantly. Furthermore, we   Typical convex relaxation algorithms include the fast iterativeNov         derived the optimal extrapolated solution in the linear minimum   shrinkage-thresholding algorithm (FISTA)  [15],  alternating
+9  mean squared estimator criterion, revealed its connection with   direction method of multipliers (ADMM) [16], iterative re-
+         Slepian basis, and presented a practical algorithm to realize the                                                                  weighted least squares (IRLS) [17], etc. Bayesian framework
+          extrapolation based on the QNOMP results. Special treatment
+                                                                                           is also popular for sparse reconstruction by incorporating rich           utilizing the block sparsity nature of the considered channels was
+          also proposed. Numerical experiments on the simulated models   sparsity priors. The ℓ1 relaxation methods can be formulated in
+        and CDL-C channels demonstrated the high performance and   Bayesian framework through the Laplace prior [18]. Other CS
+         low computational complexity of QNOMP.                    methods in Bayesian framework include the sparse Bayesian
+           Index Terms—Quasi-Newton OMP,  optimal  extrapolation,                                                                          learning (SBL) [19], approximate message passing (AMP) [20]
+         Slepian basis, block sparsity, TDD.[eess.SP]                                                         and its different extensions [21], [22], [23].
+                                                                While the algorithms above are carried out on a pre-defined
+                                        I. INTRODUCTION                         grid in virtual domain, they suffer from the off-grid or energy
+                                                                     leakage issue. It has been shown that no matter how fine the
+            ASSIVE multiple-input multiple-output (MIMO) sys-
+                                                                           grid in the virtual space is, the off-grid mismatch still exists
+              tem is considered to be the most promising technology M                                                              [24]. The off-grid effect degrades the algorithm performance,
+          for wireless communications [1], [2], [3], [4], [5]. To embrace
+                                                                            especially for CSI extrapolation, which results in the super-
+         the  potential gains of MIMO,  the accurate estimation of
+                                                                            resolution study of virtual parameters estimation [25].
+         channel state information (CSI) between the transmitter/user
+                                                    Among the super-resolution algorithms, the multiple signal
+        and receiver/base station (BS) is a fundamental issue. In a
+                                                                                 classification (MUSIC) [26] and estimating signal parameters
+         time division duplex (TDD) system, the users  transit the
+                                                                          via rotational invariance techniques (ESPRIT) method [27] are
+         uplink pilots with a prescribed pattern of partial bands in
+                                                                               effective for high signal-to-noise ratio (SNR) case. Atomic
+          different time slots instead of the whole frequency bands for
+                                                         norm soft thresholding (AST) [28] solves a convex optimiza-
+         the communication. The BS side needs to estimate the CSI on
+                                                                              tion on continuous parameter space, which is a continuous
+         the pilots band (i.e., the CSI estimation) and predict the CSI
+                                                                                limit of LASSO. The Newtonized OMP (NOMP) [29], [30]arXiv:2411.06082v1   out of pilots bands (i.e., the CSI extrapolation) to identify the                                                                                           is an OMP type algorithm using the Newton optimization
+         transmitted signal. In general, the CSI extrapolation is more
+                                                                       refinement to resolve the basis mismatch issue, which achieves
+         challenging than CSI estimation.
+                                                             low computational cost and high accuracy. The off-grid type
+                It has been revealed [6] that although being measured in
+                                                 SBL is also proposed by using a linear approximation of off-
+         frequency and space (i.e., the antenna) domain, the CSI has
+                                                                           grid term or dynamic off-grid model in the SBL framework
+         a sparse representation in the virtual  (i.e., delay and angle)
+                                                                               [31], [32].
+        domain, which provides a tractable linear multipath character-
+                                                                    Moreover, the MIMO channel has specific intrinsic struc-
+          ization. Utilizing such sparsity provides a more efficient CSI
+                                                                              tures  [33], which can be  utilized  to  further improve  the
+          estimation. Based on the estimated virtual parameters, one can
+                                                                  performance of CSI estimation and extrapolation. In particular,
+              Y. Zeng, M. Han, and T. Li are with Laboratory of Mathematics and Applied   the burst sparsity in angular domain  is adopted to design
+           Mathematics, School of Mathematical Sciences, Center for Machine Learning   the burst LASSO algorithm [34]. Similar idea is also used
+           Research, Peking University, Beijing 100871, P.R. China
+             Email: zengyi0427@pku.edu.cn (Y. Zeng), mingguanghan@stu.pku.edu.cn   in structured Turbo-CS algorithm [35]. A non-uniform burst-
+          (M. Han), tieli@pku.edu.cn (T. Li)                                      sparsity prior is also introduced in [36] to handle the off-grid
+            X. Li is with MOE-LCSM, School of Mathematics and Statistics, Hunan  mismatch issue.
+         Normal University, Changsha, Hunan 410081, P. R. China
+             Email: lixiaoguang@hunnu.edu.cn (X. Li)                               In  this  paper, we propose a two-stage  super-resolution
+             Corresponding author: Xiaoguang Li, Tiejun Li                       algorithm named QNOMP. It can be regarded as an extension

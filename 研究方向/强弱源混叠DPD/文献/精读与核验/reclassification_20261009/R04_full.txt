@@ -1,0 +1,603 @@
+--- PDF PAGE 1 ---
+IEEE COMMUNICATIONS LETTERS, VOL. 28, NO. 2, FEBRUARY 2024
+303
+TDOA Based Direct Positioning of Co-Channel Signals Using Cyclic
+Cross-Spectral Functions
+Nan Xia , Runlin Xiang , Baohui Xing , and Danyang Gao
+Abstract— Passive positioning of co-channel transmitters is a
+major challenge in radio monitoring. Co-channel signals overlap
+in both the time and frequency domains but have different cyclic
+frequencies. A direct localization method of multiple co-channel
+signals is proposed in this letter based on the relative time
+delay information of collected signals and cyclic cross-spectral
+functions. It can estimate the number and cyclic frequencies
+of co-channel signals and separate co-channel signals through
+spectral slicing for direct positioning. A joint spectral function is
+constructed with a set of randomly generated position points,
+and the position estimate for each co-channel signal can be
+determined by searching for the maximum value of the func-
+tion. Additionally, an iterative sampling method is proposed to
+improve the positioning accuracy with only a few additional
+iterations. The simulation results demonstrate the superiority of
+the proposed algorithm over other joint positioning algorithms
+in the presence of co-channel interference.
+Index Terms— Direct localization, co-channel signals, cyclic
+frequency, cyclic cross-spectral function, iterative sampling.
+I. INTRODUCTION
+T
+IME-DIFFERENCE-OF-ARRIVAL (TDOA) localization
+is an important technology in passive positioning. Due
+to its low cost and high reliability, it has been widely used
+in radio monitoring, wireless communications, radar, naviga-
+tion and has become a research hotspot in recent years [1].
+The traditional TDOA localization is based on the two-step
+method. Utilizing correlation theory, parameters related to
+the source location information are first estimated [2], [3].
+Then, the localization method is formulated as an optimization
+problem constrained by geometric relationships, and some
+positioning algorithms have been proposed, such as weighted
+least squares [4] and the convex relaxation method [5], which
+enrich the relevant TDOA positioning theories.
+The two-step positioning algorithm has good positioning
+performance, but it is aimed at single-source signals. In wire-
+less communications, signals sharing the same frequency is
+very common. When there are multiple co-channel sources,
+the target signal from the same channel is likely to be
+affected by the normal communication signal or interference
+signal, seriously restricting location system performance. This
+Manuscript received 9 November 2023; accepted 16 December 2023. Date
+of publication 26 December 2023; date of current version 13 February
+2024. This work was supported by University-Industry Collaborative Edu-
+cation Program of Ministry of Education (P. R. China) under Grant No.
+220603231024713. The associate editor coordinating the review of this letter
+and approving it for publication was H. Zhang. (Corresponding author:
+Nan Xia.)
+The authors are with the School of Information Science and Engi-
+neering, Dalian Polytechnic University, Dalian 116034, China (e-mail:
+xianan0520@aliyun.com; xiangrunlin0@163.com; xingbaohuichn@163.com;
+gdy9785@163.com).
+Digital Object Identifier 10.1109/LCOMM.2023.3347620
+results in the failure of existing TDOA methods and enormous
+challenges to radio monitoring.
+Several TDOA estimation algorithms based on the two-step
+method have been proposed to address the co-channel inter-
+ference problem. Wan et al. [6] employed blind source
+separation and secondary interference signal extraction to
+reduce the impact of mixed communication signals. Ting et
+al. [7] proposed an interference-suppressing method based on
+particle filtering to improve TDOA estimation performance.
+Liu et al. [8] applied a signal selection algorithm based on
+cyclic correlation for estimating cyclostationary signal TDOAs
+in the presence of interference and impulsive noise. With
+the result of time delay estimation, the positioning algorithm
+can be used to obtain the target location. Zhang et al. [9]
+proposed a positioning method based on iterative constrained
+weighted least squares, which can reduce the location devia-
+tion. Ma et al. [10] used the convex difference planning tool
+to perform the maximum likelihood objective function of opti-
+mizing time difference positioning to ensure convergence to a
+stationary point of the objective function. The above methods
+are all two-step positioning methods. When interference exists,
+mixing co-channel signals will lead to ambiguity in correlation
+peak estimation and reduce positioning accuracy.
+Some direct positioning methods have been proposed to
+overcome this problem. Ouyang et al. proposed a direct
+geolocation method for multiple targets [11]. This method
+establishes a relationship directly between the received I/Q
+data and the transmitter positions and can achieve higher
+positioning accuracy under low signal-to-noise ratios (SNRs).
+However, this method requires limiting the search area and
+would be impractical for unknown sources localization, and
+the performance of the method cannot be guaranteed when
+there are insufficient location points in the search area.
+Xia et al. [12] introduced a direct positioning method for
+co-channel signals based on a random spatial spectrum in the
+presence of multipath propagation. However, in this method,
+strong signals will affect weak signals, resulting in large
+positioning errors for weak signals. Li et al. [13] constructed a
+parallel factor model by extracting and iteratively decompos-
+ing the delay matrix, performing spectral peak search, and then
+performing direct positioning based on grid search. However,
+there will be overlapping spectral peaks, causing false peaks
+to affect positioning. This method performs poorly in locating
+weak signals and requires extensive calculations.
+In this letter, to address the problem of co-channel sig-
+nal interference, we propose a multitarget direct positioning
+algorithm based on the relative time delay information con-
+tained in the collected signals, and design a resampling method
+to achieve higher estimation accuracy. The main contributions
+are as follows:
+1558-2558 © 2023 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.
+See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 06:05:05 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 2 ---
+304
+IEEE COMMUNICATIONS LETTERS, VOL. 28, NO. 2, FEBRUARY 2024
+Fig. 1.
+(a) Time domain characteristics. (b) Frequency domain and cyclic
+domain characteristics. (c) Frequency domain characteristics. (d) Cyclic
+domain characteristics.
+1) Using the cyclic domain characteristics, the number of
+co-channel signals and cyclic frequencies is estimated, and the
+slicing of cyclic cross-spectral function is obtained to separate
+the co-channel signals.
+2) The direct localization model of each separated signal
+is established according to joint spectral functions, and an
+iterative sampling method is designed to achieve higher local-
+ization accuracy.
+II. SYSTEM MODEL
+In this letter, we consider multiple co-channel signals that
+are acquired synchronously by several distributed receivers.
+These signals completely overlap in both time and frequency
+domains. Let xj = [xj; yj], j = 1, 2, . . . , J be the position
+vector of the targets with J being the total number of co-
+channel signals. ym = [xm; ym] and m = 1, 2, . . . , M is the
+position vector of the receiver with M being the total number
+of receivers. The recorded baseband signal at the m-th receiver
+is modeled as
+rm(t) =
+J
+X
+j=1
+aj,msj(t −τj,m) + vm(t),
+(1)
+where t is the time domain index, sj(t) is the j-th source
+signal, aj,m is the channel coefficient between the m-th
+receiver and the j-th transmitted signal, and τj,m is the relative
+time delay defined as
+τj,m = fs
+c (||xj −ym|| −||xj −y1||),
+(2)
+where fs and c are the sampling frequency and the speed of
+light, respectively, and vm(t) is the additive Gaussian white
+noise with zero mean and variance σ2. Let y1 be the position
+vector of the reference and have τ1,1 = 0.
+In this letter, we focus on co-channel signals with the same
+center frequency but different positions and symbol rates.
+We assume that the signals are independent and that the
+signal and noise are independent. We use the relative time
+delay information and cyclic cross-spectral function to perform
+direct positioning.
+We can distinguish signals in the cyclic domain. Then, the
+source positions can be estimated individually. Let α represent
+the cyclic frequency. The cyclic spectral function of the m-th
+received baseband signal can be modeled as
+Rα
+m(k)
+=
+J
+X
+j=1
+aj,mSα
+j (k) exp
+
+−i2π
+ k
+K + α
+2
+
+τj,m
+
++ V α
+m(k),
+(3)
+where k is the frequency domain index, Sα
+j (k) and V α
+m(k)
+represent cyclic spectral functions of the j-th source signal
+and noise component vm (t), respectively, and K is the
+total number of samples. Fig. 1 shows the characteristics of
+two signals with the same frequency in different domains.
+As Fig. 1(a) and 1(c) shown, the signals are completely aliased
+in the time and frequency domains. However, it can be found
+from Fig. 1(b) and 1(d) that they can be completely separated
+in the cyclic domain. For a given cyclic frequency αj, the
+influence of Gaussian noise can be effectively suppressed since
+V αj
+m (k) is approximately equal to 0. Therefore, the spectral
+slice function can be expressed as
+Rαj
+m (k) = aj,mSαj
+j (k) exp
+
+−i2π
+ k
+K + αj
+2
+
+τj,m
+
+. (4)
+III. DIRECT POSITIONING WITH CYCLIC SPECTRAL
+FUNCTIONS
+A. Coarse Estimation
+The number of co-channel signals and the corresponding
+cyclic frequencies for passive positioning scenarios are gener-
+ally unknown. The parameters should be accurately estimated
+so that the spectral slice function can be extracted. We take
+an average of the spectral slice function over the interval [0,
+K-1] to obtain the amplitude spectrum in the cyclic domain,
+expressed as
+F(α) = 1
+K
+K−1
+X
+k=0
+|Rα
+1 (k)|.
+(5)
+Fig. 1(d) shows that the signal has a very sharp peak at the
+cyclic frequencies, which can be determined by thresholding
+the peak signal. For threshold selection, we first normalize
+the amplitude spectrum, divide the amplitude at intervals of
+∆h, and calculate the empirical probability of F(α) in each
+interval [hi, hi + ∆h] as
+P(F(α)|F(α) ∈[hi, hi + ∆h]) = Ni
+N ,
+(6)
+where i is the interval index, Ni is the number of points in the
+interval, and N is the total number of points. Then, we find
+the index i′ of the maximum probability and determine the
+interval [hi′, hi′+∆h] as the area with the most noise, suppress
+the noise interval, and determine the threshold as Th = hi′ +
+2∆h. After determining the threshold, the number of unknown
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 06:05:05 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 3 ---
+XIA et al.: TDOA BASED DIRECT POSITIONING OF CO-CHANNEL SIGNALS
+305
+TABLE I
+RMSES WITH DIFFERENT PARAMETER SETTINGS
+co-channel signals can be obtained, and the mixed signals can
+be extracted separately and written as
+ˆαj =
+(
+αj, F(αj) > Th
+0 , F(αj) < Th,
+j = 1, 2, . . . , J.
+(7)
+By extracting these values ˆαj > 0, we can effectively estimate
+the number of co-channel signals and their corresponding
+cyclic frequencies. Additionally, the spectral slicing function
+is obtained. As Equation (4) shows, this function not only
+suppresses the effects of co-channel interference and noise but
+also contains target location information. Combining the sliced
+cyclic cross-spectral function, we can obtain a weighted spec-
+tral function, which is expressed as a cross-spectral function.
+We can obtain a weighted spectral function, which is expressed
+as
+Hj,m(k) = Rˆαj
+1 (k)[Rˆαj
+m (k)]
+∗
+|Rˆαj
+1 (k)|2
+= aj,1a∗
+j,m
+|aj,1|2 exp
+
+i2π
+ k
+K + ˆαj
+2
+
+τj,m
+
+,
+(8)
+where the symbol ∗represents the conjugate transpose opera-
+tor. To find the source location, we initialize a set of random
+location points xn, n = 1, 2, . . . , N from a given region of
+interest, where N is the total number of points. Then, the
+corresponding time delay samples τ n, n = 1, 2, . . . , N can
+be obtained according to Equation (2). A matching function
+exp {−i2π (k/K + ˆαj/2) τ n} is defined and combined with
+Hj,m(k) to obtain
+Hn
+m = 1
+K
+K
+X
+k=1
+Hj,m(k) exp
+
+−i2π
+ k
+K + ˆαj
+2
+
+τ n
+
+= aj,1a∗
+j,m
+|aj,1|2 δ (τ n −τj,m) .
+(9)
+According to (8), we can obtain larger values Hn
+m when
+τ n = τj,m. In contrast, when τ n̸ = τj,m, Hn
+m tends to zero
+by taking the average value of complex sinusoidal waveforms
+over several complete cycles. Since the receivers are spatially
+independent, we can give a joint spectral function using
+successive multiplication of Hn
+m with respect to m, as
+Hn =
+M
+Y
+m=1
+|Hn
+m|.
+(10)
+The maximum value of Hn occurs only if the location point
+xn is consistent with the real position xj. Therefore, the
+position estimate of the transmitter can be determined by
+maximizing Hn and expressed as
+ˆxj = argmax
+xn
+(Hn)
+(11)
+B. Estimation Update
+In the previous section, the position estimate of the target
+was initially determined. To improve the positioning accuracy,
+this section proposes an iterative sampling method. Similar to
+particle update [14], the position points are updated in each
+iteration based on the points determined by all particles. The
+search scope is updated and iterating continues around new
+location points.
+Let xn
+j,l be the random position points with l = 1, 2, . . . , L
+being the iterative index, which is updated from the previous
+estimation result ˆxj,l−1 and shown as
+xn
+j,l = ˆxj,l−1 + ωj,l−1un,
+(12)
+where un is the noise with zero-mean normal distribution,
+and ωj,l−1 is the weighting coefficient that affects the search
+range and is updated after each iteration. The search range is
+adjusted by the ratio of the distance difference between two
+adjacent positioning points to the initial position difference.
+The expression is
+ωj,l = ∥ˆxj,l −ˆxj,l−1∥
+∥ˆxj,1 −ˆxj,0∥ωj,0.
+(13)
+Obviously, as the value of l increases, the ωj,l search area
+will decrease accordingly, improving the estimation accuracy.
+ωj,0 is the initial value. Using the position point xn
+j,l generated
+in (11), (8)-(10) are repeated to obtain position update xn
+j,l.
+The estimation error between adjacent location estimates is
+calculated. Given an error threshold ε, the iterations stop if
+∥ˆxj,l −ˆxj,l−1∥< ε; otherwise, l = l + 1 and return to (8).
+IV. SIMULATION RESULTS
+In each independent computer simulation, we consider a
+monitoring region of area 36km2, where both transmitters
+and receivers are randomly deployed. The reference receiver
+is selected with the strongest received signal strength. All
+receivers can collect the time series data simultaneously and
+transmit the data to a processing center for target localization.
+In this letter, we consider two co-channel binary phase-shift
+keying (BPSK) baseband signals. The signals have differ-
+ent cyclic frequencies: α1 = 1 MHz and α2 = 0.8 MHz.
+The sampling rate is fs = 3 MHz. Define the signal-to-
+interference ratio (SIR) as 10log10(P1/P2) and the SNR as
+10log10(P1
+
+σ2), where P1 and P2 denote the received power
+of the target and the interference, respectively.
+Through experiments, we select the optimal parameters
+while satisfying the balance between accuracy and complexity.
+In the coarse estimation step, we first set a larger location
+points value of 500 to conduct experiments on sampling
+points and determine K = 4000. Then, we experimented with
+location points when K = 4000 and determined N = 200.
+In the updating step, based on the above parameters, we set
+ωj,0 to a larger value of 300 and conducted experiments of ε
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 06:05:05 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 4 ---
+306
+IEEE COMMUNICATIONS LETTERS, VOL. 28, NO. 2, FEBRUARY 2024
+Fig. 2.
+The positioning results of co-channel transmitters.
+Fig. 3.
+(a) RMSEs of joint positioning versus different numbers of
+receivers, J = 2. (b) RMSEs of joint positioning versus different numbers of
+transmitters, M = 5.
+to determined ε = 5. Then, we experimented with ωj,0 when
+ε = 5 and determined ωj,0 = 100. The experimental results
+are shown in Table I. Since the signals have obvious peaks
+in the cyclic frequency domain. It is reasonable to separate
+signals well, we set ∆h = 0.05 and determine Th = 0.25.
+A. Simulation Experiment
+Fig. 2 shows the positioning results for two co-channel
+signals, where SIR and SNR are set to 0 dB and 5 dB,
+respectively. x1 = [−2149, −469.4]T and x2 = [2494, 1762]T
+are the real transmitter positions, which are randomly gen-
+erated in a single trial. Since the number of location points
+N = 200 is extremely small for the entire region, we treat
+the first estimated position as the initial value and regenerate
+points with a new weighting coefficient. Then, the target
+position estimate can be updated. We calculate the estimation
+error between adjacent position estimates, compare the error
+with the threshold ε, and estimate the target position again
+until the error is less than this threshold. In this case, the
+estimated positions of two adjacent iterations are similar, and
+they are close to the real position of the target. The position
+estimates with only four iterations are ˆx1 = [−2147; −467.7]
+and ˆx2 = [2504; 1762], and the joint estimation accuracy can
+achieve 15.8 m.
+The performance of the proposed algorithm is assessed
+in terms of different numbers of receivers and transmitters.
+Fig. 3(a) shows the RMSEs of joint positioning when the
+number of sources is J = 2 and the number of receivers
+increases from 4 to 6. RMSEs decrease as the number of
+Fig. 4.
+(a) Joint positioning error under different SNRs, when J = 2,
+M = 5, SIR = 0 dB. (b) Joint positioning error under different SIRs, when
+J = 2, M = 5, SNR = 5 dB.
+receivers increases. When M ≥5, the positioning result can
+reach a stable state with only 3 iterations. The RMSE of joint
+positioning with 500 Monte Carlo simulations is calculated as
+E =
+r
+1
+500
+X500
+l=1
+XJ
+j=1 ∥ˆxj,l −xj∥.
+(14)
+Fig. 3(b) shows the RMSEs of joint positioning when the
+number of receivers is 5 and the number of sources increases
+from 2 to 4. We increase the number of mixed signals to
+4 to verify the positioning performance under time-frequency
+aliasing of multiple signals. The proposed method separates
+mixed signals based on different cyclic frequencies. The cyclic
+frequency difference is set to be randomly generated within the
+range of (0.2α1,0.5α1) [8]. The signals can be easily separated
+when their cyclic frequency differences are large. When the
+cyclic frequencies of signals are close to each other, as the
+number of transmitters increases, the mutual influence in the
+cyclic frequency domain becomes larger, resulting in reduced
+positioning accuracy.
+Fig. 4 shows the RMSE comparison between the proposed
+method and other algorithms. In Fig. 4(a), as the SNR
+increases, the positioning accuracy improves. In order to cope
+with the complex and changeable environment in actual situa-
+tions, this letter sets a relatively wide range of SNR changes to
+verify the performance under different SNRs. We set the SNR
+range to (-5dB,20dB) [11]. The two-step method uses signal
+cyclostationarity to estimate signal TDOA [8] and combines
+it with the iterative constrained weighted least squares posi-
+tioning method [9], using cyclic autocorrelation to eliminate
+the impact of co-channel interference and then positioning
+separately. However, at a low SNRs, the TDOA estimation
+error will directly affect the positioning accuracy. For other
+direct positioning methods [11], [12], [13], in the presence
+of co-channel interference, positioning accuracy is affected by
+insufficient location points and false peaks appearing during
+spectral peak searches. Other methods have larger RMSEs at
+low SNRs. The proposed algorithm combines resampling and
+direct localization to achieve lower positioning errors.
+In Fig. 4(b), when SIR = 0, the signal power is equal,
+and the positioning error of each method is minimal. The
+proposed method accounts for the cyclic characteristics of
+signals and can effectively weaken the interaction between
+different signals. Therefore, the proposed method has a smaller
+joint positioning error under different signal powers.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 06:05:05 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 5 ---
+XIA et al.: TDOA BASED DIRECT POSITIONING OF CO-CHANNEL SIGNALS
+307
+Fig. 5.
+RMSEs of joint positioning versus different numbers of co-channel
+signals.
+Fig. 6.
+Schematic diagram of actual testing on campus.
+TABLE II
+GEOLOCATION ERROR FOR DIFFERENT METHODS
+To test the impact of the number of mixed signals on
+performance, an experimental analysis was performed. The
+experiment set the SNR to 5 dB, the number of receiving
+stations to 5, and the number of iterations to 4. The co-channel
+signal power was normalized and randomly set within [0.6,1].
+Fig. 5 shows the test of different algorithms for numerous
+mixed signals. As the figure shows, the direct positioning
+method in this letter is better than other methods because this
+letter considers the cyclic characteristics of co-channel signals
+and reduces the impact of strong signals on weak signals.
+Although the cyclic characteristics are considered for the two-
+step method, the time delay estimation is inaccurate under low
+SNRs and reduces the positioning accuracy. In summary, the
+proposed method has higher positioning accuracy.
+B. Outdoor Experiment
+We conducted outdoor experiments to verify the practicality
+of the proposed method. Five receiving stations and two
+transmitting sources are set up. The distance and location
+between the transmitting sources and the receiving stations are
+shown in Fig. 6. We use two BPSK signals with cyclic fre-
+quencies of 1 MHz and 0.8 MHz and transmit powers of 30 W
+and 20 W, respectively. The center frequency is 900 MHz, the
+sampling rate is 3 MHz, and the receiving device uses GPS
+for time synchronization.
+We conducted 50 independent experiments in real-world
+scenarios and compared the RMSEs of different algorithms.
+The experimental results of the different methods are shown
+in Table II. The table shows that the positioning error of
+the proposed method is the smallest, with the maximum and
+minimum error being 11.2 m and 19.6 m, respectively. This
+shows that this method is feasible in practical situations and
+is better than other positioning methods.
+V. CONCLUSION
+A direct positioning method for co-channel transmitters
+is proposed in this letter. Since the signals have different
+cyclic frequencies, we first extract the spectral slices with the
+estimated cyclic frequencies. Then, we use a set of weighting
+cyclic spectral functions to estimate the positions of the
+transmitters directly. Finally, we propose an iterative method to
+refine the positioning accuracy. Simulation results show that
+the proposed algorithm outperforms other joint localization
+methods of co-channel signals.
+REFERENCES
+[1] J. Díez-González, R. Álvarez, P. Verde, R. Ferrero-Guillén, and H. Perez,
+“Analysis of reliable deployment of TDOA local positioning architec-
+tures,” Neurocomputing, vol. 484, pp. 149–160, May 2022.
+[2] L. Pallotta and G. Giunta, “Accurate delay estimation for multisensor
+passive locating systems exploiting the cross-correlation between signals
+cross-correlations,” IEEE Trans. Aerosp. Electron. Syst., vol. 58, no. 3,
+pp. 2568–2576, Jun. 2022.
+[3] C. Knapp and G. Carter, “The generalized correlation method for
+estimation of time delay,” IEEE Trans. Acoust., Speech, Signal Process.,
+vol. ASSP-24, no. 4, pp. 320–327, Aug. 1976.
+[4] M. R. Gholami, S. Gezici, and E. G. Strom, “A concave-convex
+procedure for TDOA based positioning,” IEEE Commun. Lett., vol. 17,
+no. 4, pp. 765–768, Apr. 2013.
+[5] H. Chen, T. Ballal, N. Saeed, M.-S. Alouini, and T. Y. Al-Naffouri,
+“A joint TDOA-PDOA localization approach using particle swarm opti-
+mization,” IEEE Wireless Commun. Lett., vol. 9, no. 8, pp. 1240–1244,
+Aug. 2020.
+[6] P. Wan, B. Hao, Z. Li, L. Zhou, and M. Zhang, “Time differences
+of arrival estimation of mixed interference signals using blind source
+separation based on wireless sensor networks,” IET Signal Process.,
+vol. 10, no. 8, pp. 924–929, Oct. 2016.
+[7] S. Ting and G. Yong, “TDOA estimation of dual-satellites interference
+localization based on blind separation,” J. Syst. Eng. Electron., vol. 30,
+no. 4, pp. 696–702, Aug. 2019.
+[8] T. Liu, J. Zhang, S. Luan, and T. Qiu, “Robust time delay estimation
+with unknown cyclic frequency in co-channel interference and impulsive
+noise,” Digit. Signal Process., vol. 117, Oct. 2021, Art. no. 103166.
+[9] L. Zhang, T. Zhang, and H.-S. Shin, “An efficient constrained weighted
+least squares method with bias reduction for TDOA-based localization,”
+IEEE Sensors J., vol. 21, no. 8, pp. 10122–10131, Apr. 2021.
+[10] X. Ma, T. Ballal, H. Chen, O. Aldayel, and T. Y. Al-Naffouri,
+“A maximum-likelihood TDOA localization algorithm using difference-
+of-convex
+programming,”
+IEEE
+Signal
+Process.
+Lett.,
+vol.
+28,
+pp. 309–313, 2021.
+[11] X. Ouyang, Q. Wan, J. Cao, J. Xiong, and Q. He, “Direct TDOA geolo-
+cation of multiple frequency-hopping emitters in flat fading channels,”
+IET Signal Process., vol. 11, no. 1, pp. 80–85, Feb. 2017.
+[12] N. Xia, B. Li, and J. Wang, “A direct localization method in the presence
+of cochannel interference and multipath fading,” IEEE Syst. J., vol. 15,
+no. 2, pp. 2855–2858, Jun. 2021.
+[13] J. Li, Y. Li, H. Jiang, X. Zhang, and Q. Wu, “Multi-TDOA estimation
+and source direct position determination based on parallel factor analy-
+sis,” IEEE Internet Things J., vol. 10, no. 8, pp. 7405–7415, Apr. 2023.
+[14] J. H. Lee, J.-Y. Song, D.-W. Kim, J.-W. Kim, Y.-J. Kim, and S.-Y. Jung,
+“Particle swarm optimization algorithm with intelligent particle number
+control for optimal design of electric machines,” IEEE Trans. Ind.
+Electron., vol. 65, no. 2, pp. 1791–1798, Feb. 2018.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 06:05:05 UTC from IEEE Xplore.  Restrictions apply. 

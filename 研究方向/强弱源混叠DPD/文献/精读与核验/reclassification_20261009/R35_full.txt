@@ -1,0 +1,1390 @@
+--- PDF PAGE 1 ---
+Signal Processing 186 (2021) 108111 
+Contents lists available at ScienceDirect 
+Signal Processing 
+journal homepage: www.elsevier.com/locate/sigpro 
+Importance sampling based direct maximum likelihood position 
+determination of multiple emitters using ﬁnite measurements 
+Kegang Hao, Qun Wan ∗
+School of Information and Communication Engineering, University of Electronic Science and Technology of China, China 
+a r t i c l e 
+i n f o 
+Article history: 
+Received 31 August 2020 
+Revised 28 March 2021 
+Accepted 31 March 2021 
+Available online 18 April 2021 
+Keywords: 
+Direct position determination 
+Mean maximum likelihood 
+Importance sampling 
+Multiple emitters 
+Finite measurements 
+a b s t r a c t 
+The exact Direct Maximum Likelihood Position Determination (ML-DPD) of multiple emitters requires 
+a multidimensional searching with exponential complexity. The subspace-based DPD technique and the 
+ﬁltering-based DPD technique are recently proposed to reduce the complexity by transforming the origi- 
+nal high-dimensional optimization problem into several low-dimensional ones. However, these techniques 
+approximate the exact ML solution only if the measurements are assumed inﬁnite. In this paper, we 
+model the received signals in the nonlinear regression form and resort to the multidimensional opti- 
+mization framework, consisting of the Pincus’ theorem and the Importance Sampling (IS) technique, to 
+approximate the exact ML solution using ﬁnite measurements. The proposed IS based ML DPD approach 
+also reduces the complexity by decoupling the multidimensional optimization problem into several three- 
+dimensional ones. Moreover, the new non-iterative ML DPD approach guarantees global optimality and 
+does not suffer from the off-grid problems inherent to most DPD techniques. The numerical simulations 
+show that the proposed ML DPD estimator acquires the exact multidimensional ML solution even using 
+a narrow bandwidth or being at low Signal to Noise Ratio (SNR). 
+© 2021 Published by Elsevier B.V. 
+1. Introduction 
+The source localization technique has been studied for sev- 
+eral decades and applied in many practical scenarios, such as the 
+Location-Based Services (LBS) in communication systems, objects 
+tracking in Internet of Things (IoT) and targets detection in radar 
+system. The classical localization methods are two-step process- 
+ing. Firstly, intermediate parameters that rely on the locations of 
+the sources, like the Angle of Arrival (AOA) and the Time of Ar- 
+rival (TOA), are estimated from the measurements of different re- 
+ceivers respectively. Then, the locations of sources are estimated 
+based on these intermediate parameters. The position methods 
+based on different intermediate parameters have been proposed. 
+The array processing methods for position by AOA are reviewed 
+by Krim and Viberg comprehensively [1] . The classical closed-form 
+Least Squares (LS) solution using TDOA was derived by Smith and 
+Abel [2] . Other TOA based methods are Semi-Deﬁnite Relaxations 
+(SDR) [3–5] and Multidimensional Scaling (MDS) approach [6] . The 
+two-step methods are sub-optimal as they measure the intermedi- 
+ate parameters at each receiver separately and independently. This 
+∗Corresponding author. 
+E-mail addresses: haokegang@std.uestc.edu.cn (K. Hao), wanqun@uestc.edu.cn 
+(Q. Wan). 
+ignores the constraint that the measurements from different re- 
+ceivers correspond to the same source position. 
+Recently, the DPD approaches have been proposed as a single- 
+step localization technique where the locations of sources are es- 
+timated by minimizing a single cost function, into which all re- 
+ceived data enter jointly. It has been veriﬁed that the DPD meth- 
+ods outperform the two-step methods at low SNR. Besides, an 
+additional data association step required by two-step methods is 
+inherently avoided by DPD methods. Nevertheless, the DPD ap- 
+proaches, which usually require exhaustive searching, obtain the 
+above advantages at the expense of increasing computational com- 
+plexity signiﬁcantly. To decrease the computational complexity, the 
+eﬃcient DPD techniques based on the Expectation-Maximization 
+(EM) algorithm replaced the multidimensional searching with sev- 
+eral one-dimensional ones [7,8] . A sequential Monte Carlo-based 
+method was used to solve the multivariate optimization problem 
+that results from the ML solution in an iterative way [9] . The local- 
+ization problem of coherent sources has been addressed by com- 
+bining the DPD with the iterative adaptive approach (IAA) [10] . 
+In the scenario of multiple sources, the exact multidimen- 
+sional ML estimator can be derived but requires a multidimen- 
+sional searching, which is usually impractical for real-time im- 
+plementations. To sidestep the multidimensional searching in the 
+exact ML estimation, several existing DPD methods resort to the 
+subspace-based technique or the ﬁltering technique such as the 
+https://doi.org/10.1016/j.sigpro.2021.108111 
+0165-1684/© 2021 Published by Elsevier B.V. 
+
+
+--- PDF PAGE 2 ---
+K. Hao and Q. Wan 
+Signal Processing 186 (2021) 108111 
+Multiple Signal Classiﬁcation (MUSIC) [11,12] , the Match Filter (MF) 
+[13] and the Minimum Variance Distortionless Response (MVDR) 
+ﬁlter [14,15] . These techniques transform the exact multidimen- 
+sional ML problem into several single ones that require merely 
+two or three-dimensional space searching. However, these meth- 
+ods require suﬃcient observation samples to achieve the ML per- 
+formance asymptotically. To be speciﬁc, the MUSIC-DPD [12] and 
+MVDR-DPD [14,15] both need lots of observation samples to ap- 
+proximate the covariance matrix by the sample covariance matrix. 
+The MF-DPD [13] also need suﬃcient observation samples to de- 
+couple the problem based on the independence among transmitted 
+signals. Unfortunately, the length of observation window is usu- 
+ally limited for the real-time position request or the stationary as- 
+sumption. Thus, the number of observation samples is ﬁnite and 
+the above estimators can not achieve the ML performance in prac- 
+tice. Besides, the iterative ML method [16] is proposed to achieve 
+the exact ML solution eﬃciently but its convergence to the global 
+optimum relies on the initial estimate. 
+In order to achieve the exact ML solution with ﬁnite observa- 
+tion resources, in this paper we resort to the optimization frame- 
+work consisting of the Pincus’ theorem [17] and the IS technique 
+[18] . We design a factorable probability density function (pdf) on 
+model parameters. This pdf allows a very easy sampling in the 
+vicinity of the exact ML solution. Numerical simulations show that 
+the proposed IS-based multidimensional ML estimator outperforms 
+the subspace-based and the ﬁltering-based DPD ones in the sce- 
+nario of multiple sources. 
+The contributions of our paper are summarized as follow: (1) In 
+order to solve the DPD of multiple emitters, we resort to Pincus’ 
+theorem and IS technique to approximate the exact ML solution 
+with ﬁnite measurements. (2) We design a factorable importance 
+function to generate the required parameter realizations eﬃciently. 
+Compared with the exponential complexity of the exhaustive mul- 
+tidimensional ML searching, the complexity of the new approach 
+is moderate. 
+The paper is organized as follows: Section 2 states the DPD 
+problem formulated for multiple emitters. The concentrated like- 
+lihood function is derived in Section 3 and maximized by Pin- 
+cus’ theorem and IS technique in Section 4 . The factorable impor- 
+tance function is designed in Section 5 . The implementation de- 
+tails and the complexity of the proposed algorithm are stated in 
+Sections 6 and 7 respectively, followed by numerical simulations 
+in Section 8 . Finally, a conclusion is drawn in Section 9 . 
+2. Problem formulation 
+Given Q
+adjacent narrow-band emitters at p q ∈ R D ×1 , q = 
+1 , . . . , Q (In general, D = 2 for plane geometry or D = 3 for solid 
+geometry) and N r space separated receivers which intercept the 
+transmitted signals. Every receiver is equipped with an antenna ar- 
+ray consisting of M elements. To avoid the angle ambiguity, the 
+carrier frequency is small than the inverse of the propagation time 
+over the array aperture. The complex envelopes of the signals ob- 
+served by the jth receiver are given by 
+y j (t) ≜ 
+Q 
+ 
+q =1 
+αq,j a j ( p q ) s q (t −τ j ( p q ) −˚t q ) + w j (t) , 0 ≤t ≤T (1) 
+where y j (t) ∈ C M×1 is the jth received signal, αq, j is an unknown 
+complex scalar representing the channel attenuation between the 
+q th emitter and the jth receiver, a j ( p q ) ∈ C M×1 is the jth array 
+response to the signal transmitted from position p q and s q (t −
+τ j ( p q ) −˚t q ) is the copy of the q th transmitted signal waveform, 
+which is transmitted at time ˚t q and is received by the jth receiver 
+after being delayed by τ j ( p q ) . The vector w j (t) ∈ C M×1 represents 
+noise and interference observed by the jth array. The received sig- 
+nal can be partitioned into L sections and the length of each sec- 
+tion satisﬁes T /L ≫max j,q τ j ( p q ) to avoid the delay ambiguity. The 
+emitters are assumed stationary during the total observation time 
+T . Each section can be Discrete Fourier Transformed (DFT) into 
+y j (n, l) = 
+Q 
+ 
+q =1 
+αq,j a j ( p q ) e −j2 π f n (τj ( p 
+q )+ ˚t q ) s q (n, l) + w j (n, l) 
+(2) 
+j = 1 , . . . , N r ; n = 1 , . . . , N; l = 1 , . . . , L 
+where f n denotes the n th frequency point, y j (n, l) ∈ C M×1 is the 
+n th Fourier coeﬃcient vector of the lth section of the jth received 
+signal, s q (n, l) is the n th Fourier coeﬃcient of the lth section of 
+the q th transmitted signal waveform and w j (n, l) ∈ C M×1 repre- 
+sents the n th Fourier coeﬃcient vector of the lth section of the 
+jth noise waveform. 
+For compact representation, we deﬁne the following vectors: 
+γ j,q,n,l ( p q , ˚t q | s q (n, l)) ≜ a j ( p q ) e −j2 π f n (τj ( p 
+q )+ ˚t q ) s q (n, l) 
+(3) 
+As the assumption in the subsection III-B of [19] , the transmitted 
+signal waveform s q (n, l) (e.g., the preamble sequence in cellular 
+system) is assumed known to location system, but the transmit- 
+ted time ˚t q (which is assumed known in subsection 3.2 of [13] ) 
+is assumed unknown herein, since the clock-synchronization be- 
+tween emitter and receiver is imperfect. We observe that all infor- 
+mation about the emitters’ positions is embedded in the manifold 
+vector γ j,q,n,l (for the sake of brevity, the dependence on p q , ˚t q 
+and s q (n, l) is omitted). The harmonic-superposition form of (2) is 
+given by: 
+y j (n, l) = 
+Q 
+ 
+q =1 
+αq,j γ j,q,n,l + w j (n, l) 
+(4) 
+which can be written in compact matrix form as follows, 
+y j (n, l) =  j,n,l ( P , ˚t ) αj + w j (n, l) 
+(5) 
+where 
+ j,n,l ( P , ˚t ) ≜ [ γ j, 1 ,n,l , . . . , γ j,Q,n,l ] ∈ C M×Q 
+(6) 
+α j ≜ [ α1 ,j , . . . , αQ,j ] T ∈ C Q×1 
+P , ˚t are the sets of emitters’ positions and transmitted times re- 
+spectively. 
+Collecting and stacking all the N coeﬃcient vectors of the lth 
+section of the jth received signal, 
+y j (l) =  j,l ( P , ˚t ) αj + w j (l) 
+(7) 
+where 
+y j (l) ≜ [ y T 
+j (1 , l) , . . . , y T 
+j (N, l)] T ∈ C NM×1 
+(8) 
+ j,l ( P , ˚t ) ≜ [ T 
+j, 1 ,l ( P , ˚t ) , . . . , T 
+j,N,l ( P , ˚t )] T ∈ C NM×Q 
+w j (l) ≜ [ w T 
+j (1 , l) , . . . , w T 
+j (N, l)] T ∈ C NM×1 
+The received data model (7) is exactly the nonlinear regression 
+model given by [18] , which is suitable to the IS based global op- 
+timization framework. 
+The problem that we address now is stated as follows: Given 
+the measurements { y j (l) } N r ,L 
+j,l=1 , how to eﬃciently and accurately es- 
+timate the locations of the emitters P . 
+3. The concentrated likelihood function 
+In this section, we will derive the Concentrated Likelihood Func- 
+tion (CLF) that depends on the parameters of interest P and the 
+nuisance parameters ˚t . In fact, since w j (l) in (7) are independent 
+among different sections of different received signals and follow 
+the identity distribution w j (l) ∼N( 0 , σ 2 I NM ) , it can be shown that 
+2 
+
+
+--- PDF PAGE 3 ---
+K. Hao and Q. Wan 
+Signal Processing 186 (2021) 108111 
+the Log Likelihood Function (LLF), of which the constant terms are 
+dropped, is given by, 
+L ( P , ˚t , α) ≜ −
+N r 
+ 
+j=1 
+L 
+ 
+l=1 
+∥ y j (l) − j,l ( P , ˚t ) αj ∥ 2 
+(9) 
+Where ∥ · ∥ denotes the vector 2-norm. To get a compact CLF, we 
+deﬁne the manifold matrix for the jth received signal by collecting 
+and stacking all L signal sections, 
+ j ( P , ˚t ) ≜ [ T 
+j, 1 , . . . , T 
+j,L ] T ∈ C LNM×Q 
+(10) 
+The CLF (9) can be rewritten as follows, 
+L ( P , ˚t , α) = −
+N r 
+ 
+j=1 
+∥ y j − j ( P , ˚t ) αj ∥ 2 
+(11) 
+where y j ≜ [ y T 
+j (1) , . . . , y T 
+j (L )] T . It is extremely challenging to max- 
+imize (11) with respect to all parameters jointly. Fortunately, for 
+any given P , ˚t , the problem of ﬁnding the optimal { α j } N r 
+j=1 becomes 
+a linear LS problem [20] whose solution is given by 
+ˆ α j = † 
+j ( P , ˚t ) y j 
+(12) 
+where † 
+j is the Moore-Penrose pseudo-inverse of  j given by 
+( H 
+j  j ) −1 H 
+j . Note that  j ∈ C LNM×Q is full column rank since the 
+Q emitters are assumed incoherent and independent with one an- 
+other. Hence, ( H 
+j  j ) −1 always exists. 
+Substituting the estimations { ˆ α j } N r 
+j=1 back into (11) , we ob- 
+tain the so-called concentrated likelihood function after performing 
+some straightforward algebraic operations, 
+L c ( P , ˚t ) = 
+N r 
+ 
+j=1 
+y H 
+j  j ( H 
+j  j ) −1 H 
+j y j 
+(13) 
+The joint ML estimates of P and ˚t are then obtained as, 
+[ ˆ 
+P , ˆ ˚t ] = arg max 
+P , ˚t 
+L c ( P , ˚t ) 
+(14) 
+The reduced-dimension optimization problem (14) still has 
+Q(D + 1) unknown parameters (including Q D -dimensional loca- 
+tion vectors { p q } Q 
+q =1 and Q transmitted times scalar { ˚t q } Q 
+q =1 ). Thus, 
+the exact multidimensional ML estimation will require an imprac- 
+tical multidimensional searching over the parameter space, which 
+takes exponential complexity. 
+To solve the multidimensional ML problem (14) eﬃciently, the 
+approach proposed in Weiss and Amar [13] transforms the prob- 
+lem into several D -dimensional optimization problems, with the 
+assumption of L → ∞ . Considering the lower bound to the length 
+of section T /L ≫max τ j ( p q ) , L → ∞ requires the observation time 
+T → ∞ . However, T is usually limited for the real-time position re- 
+quest or the assumption that emitters are stationary during the 
+observation. The MF based DPD approach proposed in Weiss and 
+Amar [13] may, therefore, be failure, especially when the emitters 
+are adjacent to one another. 
+4. Global maximization of the CLF 
+Like the previous works within other estimation problems 
+[18,21–24] , we resort to the optimization framework [18] , consist- 
+ing of the Pincus’ theorem [17] and the IS technique, to eﬃciently 
+approximate the global solution of the multidimensional ML prob- 
+lem, using ﬁnite observation resources such as the observation 
+time, the signal bandwidth and the array aperture. First of all, we 
+introduce the theorem of Pincus [17] as follows. 
+Theorem 1. Let F (x 1 , . . . , x n ) = F ( x ) be a continuous function on 
+the closure of a bounded domain S in n -dimensional Euclidean 
+space of R n . Assume that F attains a global maximum at point ˆ 
+x = 
+[ ˆ 
+x 1 , . . . , ˆ 
+x n ] T of S. Then for i = 1 , . . . , n, 
+ˆ 
+x i = lim 
+ρ→∞ 
+ 
+. . . 
+ 
+x i e ρF ( x ) d x 1 . . . d x n 
+ 
+. . . 
+ 
+e ρF ( x ) d x 1 . . . d x n 
+(15) 
+Applying this general result to our multidimensional optimiza- 
+tion problem (14) with x ≜ [ P , ˚t ] and F ( x ) ≜ L c ( P , ˚t ) leads to the 
+following ML estimation for the emitter locations and the trans- 
+mitted times respectively, 
+ˆ 
+p q (d) = 
+ 
+. . . 
+ 
+p q (d ) F( P , ˚t ) d p 1 (1) . . . d ˚t Q 
+(16) 
+ˆ ˚t q = 
+ 
+. . . 
+ 
+˚t q F( P , ˚t ) d p 1 (1) . . . d ˚t Q 
+(17) 
+q = 1 , . . . , Q; d = 1 , . . . , D 
+where 
+F( P , ˚t ) ≜ lim 
+ρ→∞ 
+e ρL c ( P , ˚t ) 
+ 
+. . . 
+ 
+e ρL c ( P , ˚t ) d p 1 (1) . . . d ˚t Q 
+(18) 
+The Pincus’ theorem can be interpreted intuitively as follows: as ρ
+tends to inﬁnity, F( P , ˚t ) becomes a Dirac-delta function centered 
+at the global maximum of L c ( P , ˚t ) . This eliminates multiple nested 
+integrals in (16) and (17) and chooses its center (i.e., the global 
+ML solution) as the result directly. Besides, the original multimodal 
+distribution is also transformed into a unimodal one. 
+Nevertheless, in practice, the multiple nested integrals (16) and 
+(17) have the same computational load as the multidimensional 
+grid searching we attempt to sidestep, because ρ is ﬁnite. By 
+closely analyzing the properties of function (18) , it turns out that 
+F( P , ˚t ) can be seen as a pdf since it is nonnegative and integrates 
+to one. As a pdf, F( P , ˚t ) indicates the probability of the candi- 
+date parameter values being true. Furthermore, the estimators in 
+(16) and (17) can be regarded as statistical expectations, i.e., we 
+have, 
+ˆ 
+p q (d) ≜ E F( P , ˚t ) { p q (d) } ˆ ˚t q ≜ E F( P , ˚t ) { ˚t q } 
+(19) 
+Consequently, the multiple nested integrals in (16) and (17) can be 
+sidestepped by using the corresponding sample mean estimates to 
+approximate the expectations (19) as follows 
+ˆ 
+p q (d) = 1 
+R 
+R 
+ 
+r=1 
+p (r) 
+q (d) ˆ ˚t q = 1 
+R 
+R 
+ 
+r=1 
+˚t (r) 
+q 
+(20) 
+Clearly, as the number of realizations R increases, the two sample 
+mean in (20) approach the statistical expectations in (19) . Unfor- 
+tunately, the extreme nonlinearity of the pdf F( P , ˚t ) makes it im- 
+practical to generate realizations { P (r) } R 
+r=1 and { ˚t (r) } R 
+r=1 . To sidestep 
+this problem, we can resort to the IS method [18,21] and rewrite 
+(16) and (17) in the following equivalent forms, 
+ˆ 
+p q (d) = 
+ 
+. . . 
+ 
+p q (d ) F( P , ˚t ) 
+G( P , ˚t ) 
+G( P , ˚t ) d p 1 (1) . . . d ˚t Q 
+(21) 
+ˆ ˚t q = 
+ 
+. . . 
+ 
+˚t q 
+F( P , ˚t ) 
+G( P , ˚t ) 
+G( P , ˚t ) d p 1 (1) . . . d ˚t Q 
+(22) 
+where G( P , ˚t ) is another pdf called importance function (IF). By 
+introducing the IF, the multidimensional integrals in (21) and 
+(22) are interpreted as statistical expectations of two transformed 
+random variates (RVs), i.e., 
+ˆ 
+p q (d) ≜ E G( P , ˚t ) { η( P , ˚t ) p q (d) } ˆ ˚t q ≜ E G( P , ˚t ) { η( P , ˚t ) ˚t q } 
+(23) 
+where η( P , ˚t ) is called importance weight (IW) and deﬁned as, 
+η( P , ˚t ) ≜ F( P , ˚t ) 
+G( P , ˚t ) 
+(24) 
+3 
+
+
+--- PDF PAGE 4 ---
+K. Hao and Q. Wan 
+Signal Processing 186 (2021) 108111 
+The expectations in (23) can be approximated at any desired de- 
+gree of accuracy (by increasing R ) using the corresponding sample 
+mean estimates. Moreover, if the IF G( P , ˚t ) is designed carefully, 
+the realizations { P (r) } R 
+r=1 and { ˚t (r) } R 
+r=1 can be generated from the 
+IF more easily and the corresponding sample mean estimates will 
+approximate the expectations more eﬃciently. In fact, the choice 
+of G( P , ˚t ) is a tradeoff between the ease and eﬃciency of the sam- 
+pling. The appropriate choice of the IF will be discussed in the fol- 
+lowing section. 
+5. Appropriate choice of importance function 
+To generate the required realizations eﬃciently, the appropri- 
+ate G( P , ˚t ) must be designed as close as possible to F( P , ˚t ) . On 
+the other hand, the ease of generating the realizations should be 
+also taken into account. Hence, we start with constraining IF’s 
+form to be factorable in terms of Q position-transmitted time pairs 
+{ ( p q , ˚t q ) } Q 
+q =1 , because it is relative easy to generate realizations 
+from pdf with the factorized form as follows 
+G( P , ˚t ) ≜ 
+Q 
+ 
+q =1 
+g q ( p q , ˚t q ) 
+(25) 
+According to the general results from probability theory, the in- 
+dependence among Q groups of RV pairs { ( p q , ˚t q ) } Q 
+q =1 is intro- 
+duced by the assumption in (25) . Hence, we can use g q ( p q , ˚t q ) , q = 
+1 , . . . , Q to generate R realizations for each (D + 1) -dimensional 
+RV pair { ( p (r) 
+q , ˚t (r) 
+q ) } R 
+r=1 , q = 1 , . . . , Q independently, instead of us- 
+ing G( P , ˚t ) to generate R realizations for Q(D + 1) -dimensional RV 
+{ P (r) , ˚t (r) } R 
+r=1 with diﬃculty. 
+On the other hand, according to the constraint on the similar- 
+ity between G( P , ˚t ) and F( P , ˚t ) (mentioned at the beginning of 
+this section), we derive G( P , ˚t ) by putting the assumption (25) on 
+the CLF deﬁnition (18) directly. This requires that the CLF L c ( P , ˚t ) 
+appears in a summation form. Note that the product y H 
+j  j in CLF 
+(13) is a Q-dimensional vector. Diagonalizing the inverse matrix 
+( H 
+j  j ) −1 is, therefore, the key step to the summation form. 
+According to the deﬁnition of  j in (10) ,  j,l in (8) ,  j,n,l in 
+(6) and γ j,q,n,l in (3) , the (u, v ) th element of the normalized matrix 
+product H 
+j  j is given by, 
+[ 1 
+MNL H 
+j  j ] u, v 
+(26) 
+= 1 
+MNL 
+L 
+ 
+l=1 
+N 
+ 
+n =1 
+γH 
+j,u,n,l γ j, v ,n,l 
+(27) 
+= 1 
+M a H 
+j ( p u ) a j ( p v ) 
+ 
+ 
+	 
+r (u, v ) 
+doa,j 
+· 1 
+N 
+N 
+ 
+n =1 
+e j2 π f n (τ j ( p u )+ ˚t u −τ j ( p v ) −˚t v ) 
+ 
+ 
+	 
+r (u, v ) 
+toa,j 
+· 1 
+L 
+L 
+ 
+l=1 
+s ∗
+u (n, l) s v (n, l) 
+ 
+ 
+	 
+r (u, v ) 
+sig,n 
+(28) 
+where r (u, v ) 
+doa, j , r (u, v ) 
+toa, j , r (u, v ) 
+sig,n denote the (u, v ) th normalized correlation 
+coeﬃcients in aspects of the jth AOA parameter, the jth TOA pa- 
+rameter and the n th Fourier coeﬃcient of the transmitted signal, 
+respectively. The Q × Q matrix
+1 
+MNL H 
+j  j is a normalized correla- 
+tion matrix among all emitters. As a consequence, it is at the cost 
+of losing the correlation information to diagonalize the normalized 
+correlation matrix 
+1 
+MNL H 
+j  j by setting its off-diagonal elements as 
+zeros (the similar approach to the appropriate IF was applied in 
+Wang et al. [21] ) 
+H 
+j  j = MNL · I , 
+j = 1 , . . . , N r 
+(29) 
+where I is the identity matrix, the coeﬃcient MNL is the diagonal 
+elements of H 
+j  j . 
+It is worthy to note that the lost correlation information can not 
+be ignored when the observation resources are ﬁnite (i.e., M, N and 
+L are ﬁnite). Fortunately, the same correlation information is em- 
+bedded in the IWs (24) so the IF G( P , ˚t ) can be designed without 
+the correlation information. 
+Substituting (29) into (13) and ignoring the constant coeﬃcient, 
+we get the summation form of CLF as follows, 
+˜ 
+L c ( P , ˚t ) = 
+N r 
+ 
+j=1 
+∥ H 
+j y j ∥ 2 
+(30) 
+= 
+Q 
+ 
+q =1 
+˜ 
+ℓ c ( p q , ˚t q ) 
+(31) 
+where 
+˜ 
+ℓ c ( p q , ˚t q ) ≜ 
+N r ,N,L 
+ 
+j,n,l=1 
+| γH 
+j,q,n,l y j (n, l) | 2 
+(32) 
+Replacing L c ( P , ˚t ) and ρ in (18) with ˜ 
+L c ( P , ˚t ) and an appropri- 
+ate ρ2 respectively, we get the factorized form of G( P , ˚t ) , of which 
+the q th factor is given by, 
+g q ( p q , ˚t q ) ≜ 
+e ρ2 ˜ 
+ℓ c ( p 
+q , ˚t q ) 
+  
+e ρ2 ˜ 
+ℓ c ( p 
+q , ˚t q ) d p q d ˚t q 
+(33) 
+The generation of q th group of realizations { ( p (r) 
+q , ˚t (r) 
+q ) } R 
+r=1 fol- 
+lows, furthermore, the well-known general result from probability 
+theory that the joint pdf g q ( p q , ˚t q ) can be factorized as the product 
+of marginal and conditional pdfs, 
+g q ( p q , ˚t q ) = g mar 
+p ( p q ) g con 
+˚t ( ˚t q | p q ) 
+(34) 
+The usual method to obtain the marginal pdf g mar 
+p ( p q ) is inte- 
+grating the joint pdf g q ( p q , ˚t q ) with respect to the transmitted time 
+˚t q . The analytical integral is, however, diﬃcult since g q ( p q , ˚t q ) is 
+extremely nonlinear about ˚t q . The discrete approximation also in- 
+volves (D + 1) -dimensional grid search with high complexity. For- 
+tunately, we ﬁnd another alternative method to construct g mar 
+p ( p q ) 
+directly and eﬃciently, 
+g mar 
+p ( p q ) ≜ 
+e ρ1 ℓ q ( p 
+q ) 
+ 
+e ρ1 ℓ q ( p 
+q ) d p q 
+(35) 
+where ℓ q ( p q ) is the single Likelihood Function (SLF) of the position 
+p q , which is derived from (32) by eliminating the transmitted time 
+˚t q . The detailed derivation of SLF ℓ q ( p q ) is put in Appendix A . 
+Given position realization p (r) 
+q 
+generated from g mar 
+p ( p q ) , the 
+conditional transmitted time pdf is deﬁned as, 
+g con 
+˚t ( ˚t q | p (r) 
+q ) = 
+g q ( p (r) 
+q , ˚t q ) 
+ 
+g q ( p (r) 
+q , ˚t q ) d ˚t q 
+(36) 
+Substituting (33) into (36) , we have, 
+g con 
+˚t ( ˚t q | p (r) 
+q ) = 
+e ρ2 ˜ 
+ℓ c ( p (r) 
+q , ˚t q ) 
+ 
+e ρ2 ˜ 
+ℓ c ( p (r) 
+q , ˚t q ) d ˚t q 
+(37) 
+Note that we use the integral 
+ 
+e ρ2 ˜ 
+ℓ c ( p (r) 
+q , ˚t q ) d ˚t q , instead of 
+g mar 
+p ( p (r) 
+q ) , to normalize the conditional pdf (36) correctly. 
+The process of generating Q groups of the required realizations 
+{ ( p (r) 
+q , ˚t (r) 
+q ) } R 
+r=1 are partitioned into two phases: for q th group of 
+realizations, ﬁrstly, generate { p (r) 
+q } R 
+r=1 using the marginal position 
+pdf g mar 
+p ( p q ) (A.8) and then use the conditional pdf g con 
+˚t ( ˚t q | p (r) 
+q ) 
+(37) to generate { ˚t q } R 
+r=1 . 
+4 
+
+
+--- PDF PAGE 5 ---
+K. Hao and Q. Wan 
+Signal Processing 186 (2021) 108111 
+6. Implementation details 
+In this section, we give all the necessary details for an eﬃcient 
+implementation of our proposed IS-based ML DPD algorithm. The 
+plane area of interest, where emitters may be put in, is conﬁned 
+within x ∈ [ x min , x max ] and y ∈ [ y min , y max ] and the range of trans- 
+mitted time is ˚t ∈ [0 , ˚t max ] , where ˚t max can be freely chosen as 
+high as desired. The process of generating the required Q groups 
+of realizations amounts to performing the following steps for ev- 
+ery q = 1 , . . . , Q: 
+STEP 1: Evaluate the q th SLF (A.7) at I × J two-dimensional 
+grid points { (x (i ) 
+q , y ( j) 
+q ) } I,J 
+i, j=1 in the area of interest [ x min , x max ] ×
+[ y min , y max ] , with relatively large step 	x and 	y (a rough search). 
+Then, substitute SLF values into the q th marginal position pdf 
+g mar 
+p (x q , y q ) in (35) and approximate integrals with discrete sum- 
+mations evaluate as follows, 
+g mar 
+p (x (i ) 
+q , y ( j) 
+q ) ≃ 
+e ρ1 ℓ q (x (i ) 
+q ,y ( j) 
+q ) 
+
+ I 
+i =1 
+
+ J 
+j=1 e ρ1 ℓ q (x (i ) 
+q ,y ( j) 
+q ) 	x 	y 
+(38) 
+STEP 2: Initialize the estimation of the q th emitter posi- 
+tion as the grid point corresponding to the maximum peak of 
+g mar 
+p (x (i ) 
+q , y ( j) 
+q ) , 
+[ ˚x q , ˚y q ] = arg max 
+x (i ) ,y ( j) g mar 
+p (x (i ) , y ( j) ) 
+(39) 
+STEP 3: Substitute the initial position estimation ˚p q = ( ˚x q , ˚y q ) 
+into the conditional transmitted time pdf g con 
+˚t ( ˚t q | ˚p q ) in (36) , and 
+then evaluate it at S grid points { ˚t (s ) 
+q } S 
+s =1 in the interval [0 , ˚t max ] , 
+with relatively large step 	 ˚t (a rough search) as follows, 
+g con 
+˚t ( ˚t (s ) 
+q | ˚p q ) = 
+g q ( ˚p q , ˚t (s ) 
+q ) 
+
+ S 
+s =1 g q ( ˚p q , ˚t (s ) 
+q )	 ˚t 
+(40) 
+STEP 4: Initialize the estimation of the q th transmitted time ˚t q 
+as the grid point corresponding to the maximum peak of the con- 
+ditional transmitted time pdf g con 
+˚t ( ˚t (s ) 
+q | ˚p q ) . 
+To force the q th group of realizations { ( p (r) 
+q , ˚t (r) 
+q ) } R 
+r=1 to be gen- 
+erated in the vicinity of the ML solutions ( ˆ 
+p q , ˆ ˚t q ) , we ﬁx the local 
+parameter space to include the ML solutions as follows, 
+ˆ 
+x q ∈ D ˚x q ≜ [ ˚x q −	x , ˚x q + 	x ] 
+(41) 
+ˆ 
+y q ∈ D ˚y q ≜ [ ˚y q −	y , ˚y q + 	y ] 
+(42) 
+ˆ ˚t q ∈ D ˚t q ≜ [ ˚t q −	 ˚t , ˚t q + 	 ˚t ] 
+(43) 
+STEP 5: Evaluate the q th marginal position pdf g mar 
+p (x q , y q ) at 
+I ′ × J ′ new grid points in local area D ˚x q × D ˚y q , with relatively small 
+step δx < 	x and δy < 	y, as follows, 
+g mar 
+p (x (i ′ ) 
+q , y ( j ′ ) 
+q ) ≃ 
+e ρ1 ℓ q (x (i ′ ) 
+q ,y ( j ′ ) 
+q ) 
+
+ I ′ 
+i ′ =1 
+
+ J ′ 
+j ′ =1 e ρ1 ℓ q (x (i ′ ) 
+q ,y ( j ′ ) 
+q ) δxδy 
+(44) 
+STEP 6: Compute the marginal coordinate x q pdf by approxi- 
+mating integrals with discrete summations, 
+g mar 
+x (x (i ′ ) 
+q ) ≃ 
+J ′ 
+ 
+j ′ =1 
+g mar 
+p (x (i ′ ) 
+q , y ( j ′ ) 
+q ) δy, ∀ x (i ′ ) 
+q ∈ D ˚x q 
+(45) 
+STEP 7: Compute the coordinate x q ’s CDF as follows: 
+G x q (x (r) 
+q ) = 
+ 
+i ′ ≤r 
+g mar 
+x (x (i ′ ) 
+q ) δx, ∀ x (r) 
+q ∈ D ˚x q 
+(46) 
+The following steps are designed to generate the rth realiza- 
+tion corresponding to the q th emitter (x (r) 
+q , y (r) 
+q , ˚t (r) 
+q ) , i.e., for r = 
+1 , . . . , R : 
+STEP 8: Generate the rth RV u (r) 
+x q ∼U[0 , 1] and invert G x q (·) via 
+linear interpolation in order to obtain the rth coordinate x q real- 
+ization x (r) 
+q = G −1 
+x q (u (r) 
+x q ) . 
+STEP 9: Given the rth realization x (r) 
+q , obtain the conditional co- 
+ordinate y q pdf from the marginal position pdf (already evaluated 
+in “STEP 5”) as follows: 
+g con 
+y | x (y ( j ′ ) 
+q | x (r) 
+q ) ≃ 
+g mar 
+p (x (r) 
+q , y ( j ′ ) 
+q ) 
+g mar 
+x (x (r) 
+q ) 
+(47) 
+STEP 10: Evaluate the coordinate y q ’s CDF G y q (y (r) 
+q ) , similarly 
+to G x q (x (r) 
+q ) in (46) , and generate the rth coordinate y q realization 
+y (r) 
+q = G −1 
+y q (u (r) 
+y q ) using linear interpolation as well. 
+STEP 11: Given the rth position realization p (r) 
+q = (x (r) 
+q , y (r) 
+q ) , 
+evaluate the q th conditional transmitted time pdf (36) at S ′ new 
+grid points in the local interval D ˚t q , with relatively small step 
+δ ˚t < 	 ˚t , as follows, 
+g con 
+˚t ( ˚t (s ′ ) 
+q | p (r) 
+q ) = 
+g q ( p (r) 
+q , ˚t (s ′ ) 
+q ) 
+
+ S ′ 
+s ′ =1 g q ( p (r) 
+q , ˚t (s ′ ) 
+q ) δ ˚t 
+(48) 
+STEP 12: Evaluate the transmitted time ˚t q ’s CDF G ˚t q | p q (·) , sim- 
+ilarly to G x q (x (r) 
+q ) in (46) , and generate the rth transmitted time 
+realization ˚t (r) 
+q = G −1 
+˚t q | p q (u (r) 
+˚t q ) using linear interpolation as well. 
+All the Q groups of required realizations { ( p (r) 
+q , ˚t (r) 
+q ) } R 
+r=1 , q = 
+1 , . . . , Q can be generated according to the above steps. The q th 
+expectations in (23) , which is equal to the ML solutions, can be 
+approximated based on these realizations as follows, 
+ˆ 
+p q = 1 
+R 
+R 
+ 
+r=1 
+η( P (r) , ˚t 
+(r) ) p (r) 
+q , 
+ˆ ˚t q = 1 
+R 
+R 
+ 
+r=1 
+η( P (r) , ˚t 
+(r) ) ˚t (r) 
+q 
+(49) 
+According to the deﬁnitions (18), (24), (25), (33), (34), (35) and 
+(37) , the rth IW can be written as, 
+η( P (r) , ˚t 
+(r) ) ≜ Ae φ( P (r) , ˚t 
+(r) ) 
+(50) 
+φ( P (r) , ˚t 
+(r) ) ≜ ρ0 L c ( P (r) , ˚t 
+(r) ) −
+Q 
+ 
+q =1 
+[ ρ1 ℓ q ( p (r) 
+q ) + ρ2 ˜ 
+ℓ c ( p (r) 
+q , ˚t (r) 
+q )] 
+(51) 
+where ρ0 , introduced by the Pincus’ theorem (15) , is selected 
+as a suﬃciently high value in practice, which is able to make 
+φ( P (r) , ˚t (r) ) too large to be stored in memory. On the other hand, 
+the scale factor A, which has absorbed the coeﬃcient R −1 in (49) , 
+involves the multidimensional integrals. To greatly reduce the com- 
+putational load and the required memory size without changing 
+the ﬁnal results, we can use the following normalized IW, 
+¯η( P (r) , ˚t 
+(r) ) = 
+e φ( P (r) , ˚t 
+(r) ) −max r φ( P (r) , ˚t 
+(r) ) 
+
+ R 
+r=1 e φ( P (r) , ˚t 
+(r) ) −max r φ( P (r) , ˚t 
+(r) ) 
+(52) 
+The ﬁnal IS based ML estimator is, therefore, given by 
+ˆ 
+p q = 
+R 
+ 
+r=1 
+¯η( P (r) , ˚t 
+(r) ) p (r) 
+q , 
+ˆ ˚t q = 
+R 
+ 
+r=1 
+¯η( P (r) , ˚t 
+(r) ) ˚t (r) 
+q 
+(53) 
+There is another detail about the super-parameters ρ1 and ρ2 
+to be stated. The distribution of probability mass in the local area 
+D ˚x q × D ˚y q (or D ˚t q ) is governed by the super-parameter ρ1 in the 
+5 
+
+
+--- PDF PAGE 6 ---
+K. Hao and Q. Wan 
+Signal Processing 186 (2021) 108111 
+Fig. 1. The marginal position pdfs ( ρ1 = 500 ) of two adjacent emitters (the red solid pentacle) at p 1 = (0 , 500) m and p 2 = (0 , −500) m respectively, the main simulation 
+conditions are SNR = 15 dB, the number of sections L = 10 , the number of elements M = 3 , the bandwidth B w = 20 kHz and the range 	x = 	y = 400 m (the yellow dotted 
+rectangle). (For interpretation of the references to color in this ﬁgure legend, the reader is referred to the web version of this article.) 
+Fig. 2. The marginal position pdfs with appropriate ρ1 = 20 . Other conditions are the same. 
+marginal position pdf g mar 
+p (x q , y q ) (or ρ2 in the conditional trans- 
+mitted time pdf g con 
+˚t ( ˚t q | p (r) 
+q ) ). Similarly to (18) , the probability 
+mass of g mar 
+p (x q , y q ) (or g con 
+˚t ( ˚t q | p (r) 
+q ) ) would concentrate at the lo- 
+cation of the maximum peak ( ˚x q , ˚y q ) (or ˚t q ) as ρ1 (or ρ2 ) increases. 
+The too large ρ1 (or ρ2 ) would result in that the points, included 
+in local area but far away from the maximum peak point, are 
+hardly to be sampled (as seen in Fig. 1 ). The range parameter 	x , 
+	y (or 	 ˚t ) and ρ1 (or ρ2 ) should, therefore, be well matched, in 
+order to generate the required realizations eﬃciently (as seen in 
+Fig. 2 ). 
+7. Complexity analysis 
+The main computation of IS-based ML DPD algorithm concen- 
+trates on the generation of the required realizations and the com- 
+putation of the IWs. The generation process involves evaluating the 
+marginal position pdf g mar 
+p (x q , y q ) and the conditional transmitted 
+time pdf g con 
+˚t ( ˚t q | p q ) at grids with different ranges and steps. The 
+computational complexity, therefore, relies on the complexity of 
+the two pdfs and the number of grid points. According to the def- 
+inition of g mar 
+p (x q , y q ) (A.8) , its complexity is O(N 3 ) for the opera- 
+6 
+
+
+--- PDF PAGE 7 ---
+K. Hao and Q. Wan 
+Signal Processing 186 (2021) 108111 
+tion λmax involves the eigen-decomposition. The marginal position 
+pdf g mar 
+p (x q , y q ) is evaluated in (38), (44) and (47) , at I J, I ′ J ′ and RJ ′ 
+grid points respectively. The complexity of generating Q groups of 
+{ ( p (r) 
+q ) } R 
+r=1 , q = 1 , . . . , Q is, therefore, about O(Q(I J + I ′ J ′ + RJ ′ ) N 3 ) . 
+Considering the (q, r) th matrix q ( p (r) 
+q ) in the marginal posi- 
+tion pdf g mar 
+p (x (r) 
+q , y (r) 
+q ) is used in the conditional transmitted time 
+pdf g con 
+˚t ( ˚t q | p (r) 
+q ) again. The residual complexity of g con 
+˚t ( ˚t q | ˚p (r) 
+q ) is 
+O(N 2 ) . g con 
+˚t ( ˚t q | ˚p (r) 
+q ) is evaluated in (40) and (48) , at S and RS ′ 
+grid points respectively. Therefore, the complexity of generating 
+Q groups of { ( ˚t (r) 
+q ) } R 
+r=1 , q = 1 , . . . , Q is about O(Q(S + RS ′ ) N 2 ) . Ac- 
+cording to the deﬁnition (25) and (34) , the values of G( P , ˚t ) at all 
+R groups of realizations { P (r) , ˚t (r) } R 
+r=1 have already been computed 
+during the generation of realizations. Thus, the computation of 
+IWs only involves F( P (r) , ˚t (r) ) , r = 1 , . . . , R, of which the complex- 
+ity is about O(RQ(LNMN r + Q 2 )) . In conclusion, the total complex- 
+ity of IS-based ML DPD is about O(Q(G p N 3 + (G ˚t + RN r ) N 2 + RQ 2 )) 
+where G p = I J + I ′ J ′ + RJ ′ and G ˚t = S + RS ′ . 
+8. Numerical simulation and discussion 
+In this section, we design several numerical simulations to eval- 
+uate the performance of the proposed IS based ML DPD estima- 
+tor, denoted by IS-ML-DPD, and compare it with the decoupled ML 
+DPD estimator proposed in Weiss and Amar [13] and the MVDR 
+based DPD estimator proposed in Tirer and Weiss [14] , denoted 
+by single-ML-DPD and MVDR-DPD respectively. To give an explicit 
+comparison with the exact ML estimator (14) , we also give its per- 
+formance curve that are obtained by an iterative local optimization 
+method using the true emitters’ positions as the initial point, de- 
+noted by optimal-ML-DPD. 
+The single-ML-DPD in Weiss and Amar [13] decouples the 
+Q(D + 1) -dimensional optimization problem into Q independent 
+(D + 1) -dimensional optimization problems by approximating the 
+emitters’ correlation matrix using a diagonal matrix (similar to the 
+Eq. (29) ) under the assumption L → ∞ . The off-diagonal elements 
+of the normalized correlation matrix (26) tend to zero as the num- 
+ber of sections L → ∞ since the transmitted signals among emit- 
+ters are uncorrelated. The approximation in Weiss and Amar [13] , 
+consequently, may become inaccurate when the number of sec- 
+tions is limited in practice, which badly worsen the performance 
+of single-ML-DPD estimator. 
+According to the multiplier effect, The off-diagonal elements 
+(26) can also tend to zero as the DOA or TOA correlation coeﬃcient 
+r (u, v ) 
+doa, j , r (u, v ) 
+toa, j → 0 , even though the number of sections is limited in 
+practice. It means that some estimators with high resolution, like 
+the MVDR ﬁlter, may acquire better performance. The MVDR-DPD 
+in Tirer and Weiss [14] , Tzafri and Weiss [15] constructs the MVDR 
+ﬁlter on the location domain directly. It is well known that the 
+MVDR principle requires the Distortionless Response (DR) vector 
+(3) keeps the same among data samples (i.e., the signal sections), 
+which means that the prior waveform information s q (n, l) has to 
+be eliminated from the DR vector (3) . The MVDR-DPD estimator 
+can, therefore, only use the DOA and TOA information to distin- 
+guish emitters. 
+We use the Root Mean Square Error (RMSE) of the emitter’s lo- 
+cation estimation to evaluate the performance of each algorithm, 
+RMSE = 
+ 
+ W 
+w =1 ∥ p (w ) 
+1 −p 1 ∥ 2 
+W 
+(54) 
+where the W is the number of Monte Carlo simulations and we 
+use W = 300 to obtain the statistic results. 
+As illustrated in Fig. 3 , we consider the scenario where there 
+are N r = 3 Base Stations (BS) at (2,2)km, (2,0)km and (2 , −2) km 
+respectively and Q = 2 adjacent emitters at p 1 = (0 , 500) m and 
+p 2 = (0 , −500) m. Each BS is equipped with an Uniform Linear 
+Array (ULA) of M = 3 elements. The signals transmitted by the 
+two emitters are two independent Gaussian random process. The 
+Fourier coeﬃcients of the transmitted signals are, consequently, 
+complex Gaussian RVs, s q (n, l) ∼N (0 , σ 2 
+s ) . The SNR is deﬁned as 
+SNR ≜ 10 log 10 
+σ 2 
+s 
+σ 2 and the signal bandwidth is 20 kHz. The number 
+of sections L = 10 and the number of samples in each section is 
+N = 5 . The transmitted time ˚t q is selected from a Uniform Distri- 
+bution U [0, 100 μs]. 
+The super-parameter ρ0 = 6 6 6 in IW expressions (50) is set 
+as large as possible while ρ1 = 20 and ρ2 = 8 are designed ap- 
+propriately to make the ML solutions ˆ 
+p q and ˆ ˚t q included in the 
+main lobe of g mar 
+p (x q , y q ) and g con 
+˚t ( ˚t q | ˚p q ) respectively. Correspond- 
+ing to the size of the main lobe, the range parameters are set 
+as 	x = 	y = 400 m and 	 ˚t = 10 μs . These super-parameter values 
+can be,statistically, acquired by plenty of simulations. 
+Note that the correlation coeﬃcient r sig in (26) would decrease 
+until zero (the correlation information can be ignored) as the num- 
+ber of sections L increases suﬃciently, for the independence among 
+Q transmitted signals. Under the condition that L is suﬃciently 
+large, the single-ML-DPD estimator would, therefore, achieve the 
+performance of the optimal-ML-DPD estimator approximately. To 
+indicate the IS-ML-DPD estimator’s advantage when there are only 
+a few signal sections, we start with varying the number of sec- 
+tions L between 10 and 100 in the ﬁrst simulation. Fig. 4 shows 
+that all three IS-ML-DPD performance curves (corresponding to the 
+number of realizations R = 10 0 , 50 0 and 20 0 0 respectively) locate 
+in the gap between the performance curves of single-ML-DPD and 
+optimal-ML-DPD. The localization accuracy of IS-ML-DPD improves 
+as the number of realizations R increases and approximates the ac- 
+curacy of optimal-ML-DPD at R = 20 0 0 . The reason is that suﬃ- 
+cient realizations can guarantee that the realizations in vicinity of 
+the ML solutions, with large IWs, can be sampled. It is worthy to 
+note that R = 20 0 0 realizations is just a few in the Q(D + 1) = 6 - 
+dimensional parameter space. In another words, the complexity of 
+brute searching for exact ML solution in Q(D + 1) = 6 -dimensional 
+parameter space is about O(N Q(D +1) 
+g 
+) ( Ng is the number of grid 
+points for each dimension), which is signiﬁcantly larger than that 
+of IS-ML-DPD. The MVDR-DPD estimator’s RMSE is around half of 
+the distance between the two emitters at all L candidate values, 
+which indicates that it fails to distinguish the two adjacent emit- 
+ters at SNR = 5 dB, Bw = 20 kHz since the beforehand waveform 
+information is not used at all. 
+Fig. 5 shows that the RMSE of each algorithm and Cramer- 
+Rao Lower Bound (CRLB, derived in Weiss and Amar [13] ) vary 
+with SNR in the second simulation. The SNR varies between 5 dB 
+and 25 dB. The IS-ML-DPD (the number of realizations R = 20 0 0 ) 
+also approximates the performance of the optimal-ML-DPD at all 
+SNR. IS-ML-DPD and optimal-ML-DPD both converge to the CRLB 
+at the asymptotic region. As the SNR increases, the performance of 
+MVDR-DPD is improved. The reason why there is a performance 
+gap between single-ML-DPD and the IS-ML-DPD (or the optimal- 
+ML-DPD) is that there exists the correlation among emitters for the 
+limited observation resources ( B w = 100 kHz, L = 10 ), which results 
+in the interferences with one another. In such case, assuming the 
+independence among emitters to decouple the multidimensional 
+optimization problem is sub-optimal. 
+The ﬁrst two simulations indicate that the single-ML-DPD and 
+MVDR-DPD are sub-optimal while the IS-ML-DPD can approximate 
+the performance of the optimal-ML-DPD in the case of limited 
+observation resources. To further validate this result, we gradu- 
+ally increase the signal bandwidth B w from 20 kHz to 800 kHz 
+in the third simulation. As expected, Fig. 6 shows that the IS-ML- 
+DPD outperforms the single-ML-DPD and MVDR-DPD, approximat- 
+ing the performance of the optimal-ML-DPD, when B w ≤400 kHz 
+7 
+
+
+--- PDF PAGE 8 ---
+K. Hao and Q. Wan 
+Signal Processing 186 (2021) 108111 
+Fig. 3. The simulation scenario. 
+Fig. 4. The RMSE of each estimator varies with the number of sections L . The signal bandwidth is 20 kHz and SNR = 5 dB. 
+8 
+
+
+--- PDF PAGE 9 ---
+K. Hao and Q. Wan 
+Signal Processing 186 (2021) 108111 
+Fig. 5. The RMSE of each estimator varies with the SNR. The signal bandwidth is 100 kHz and the number of signal sections is L = 10 . 
+Fig. 6. The RMSE of each estimator varies with the bandwidth. The number of signal sections is L = 10 and SNR = 5 dB. 
+9 
+
+
+--- PDF PAGE 10 ---
+K. Hao and Q. Wan 
+Signal Processing 186 (2021) 108111 
+and all estimators’ performances converge together as the B w in- 
+creases. 
+9. Conclusion 
+In this paper, we have researched the direct ML position de- 
+termination of dense emitters using ﬁnite observation resources. 
+We resort to a multidimensional optimization framework, consist- 
+ing of the Pincus’ theorem and the IS technique, to transform the 
+multidimensional ML problem into several single ones. We factor- 
+ized the target pdf to design the appropriate IFs that are used to 
+generate the required realizations. The numerical simulations show 
+that the proposed IS based ML DPD approach acquires the exact 
+multidimensional ML solution using ﬁnite observation resources 
+(such as low SNR, a few signal sections or narrow signal band- 
+width). Compared with the exponential complexity of the exhaus- 
+tive multidimensional ML searching, the complexity of the new 
+approach is moderate. Besides, the idea to replace the exhaustive 
+multidimensional searching with random IS can be generalized to 
+other complex DPD application such as the self-DPD problem of 
+the Global Navigation Satellite System (GNSS) receiver [25] . The 
+necessary modiﬁcations may be focused on the IS and the state- 
+of-the-art Adaptive Importance Sampling (AIS) [26] may be a good 
+choice since the target distribution in the self-DPD problem of the 
+GNSS receiver could be very intractable. 
+Declaration of Competing Interest 
+The authors declare that they have no known competing ﬁnan- 
+cial interests or personal relationships that could have appeared to 
+inﬂuence the work reported in this paper. 
+CRediT authorship contribution statement 
+Kegang Hao: Conceptualization, Methodology, Software, Writ- 
+ing - original draft, Writing - review & editing. Qun Wan: Valida- 
+tion, Resources, Supervision. 
+Acknowledgments 
+This work was supported in part by the National Natural 
+Science Foundation of China (NSFC) under Grant 61771108 and 
+U1533125 and the Fundamental Research Funds for the Central 
+Universities under Grant ZYGX2015Z011 . 
+Appendix A. The derivation of SLF 
+Our derivation starts with a vector deﬁnition as follows, 
+γq,j,l ≜ q,j,l ( p q ) b ( ˚t q ) 
+(A.1) 
+where 
+q,j,l ( p q ) ≜  j ( p q , s q (l))  a j ( p q ) 
+(A.2) 
+b ( ˚t q ) ≜ [ e −j2 π f 1 ˚t q , . . . , e −j2 π f N ˚t q ] T 
+(A.3) 
+ j ( p q , s q (l)) ≜ 
+⎡ 
+⎣ 
+s q (1 , l) e −j2 π f 1 τj ( p 
+q ) 
+. . . 
+0 
+. . . 
+. . . 
+. . . 
+0 
+. . . 
+s q (N, l) e −j2 π f N τj ( p 
+q ) 
+⎤ 
+⎦ 
+(A.4) 
+substituting (A.1) and (A.2) into (32) , we get 
+˜ 
+ℓ c ( p q , ˚t q ) = 
+N r 
+ 
+j=1 
+L 
+ 
+l=1 
+γH 
+q,j,l y j (l) y H 
+j (l) γq,j,l 
+(A.5) 
+= b H ( ˚t q ) 
+ 
+N r 
+ 
+j=1 
+L 
+ 
+l=1 
+H 
+q,j,l ( p q ) y j (l) y H 
+j (l) q,j,l ( p q ) 
+ 
+ 
+ 
+	 
+≜ q ( p 
+q ) 
+b ( ˚t q ) 
+(A.6) 
+The right hand of the second equation is a non-normalized 
+Rayleigh Quotient with respect to ˚t q . Consequently, maximizing 
+˜ 
+ℓ c ( p q , ˚t q ) with respect to ˚t q , we get, 
+ℓ q ( p q ) ≜ λmax ( q ( p q )) 
+(A.7) 
+where the notation λmax ( X ) denotes the maximum eigenvalue of 
+the matrix X . Substituting (A.7) into (35) , we get the marginal pdf 
+of the q th emitter’s position, 
+g mar 
+p ( p q ) = 
+e ρ1 λmax ( q ( p 
+q )) 
+ 
+e ρ1 λmax ( q ( p 
+q )) d p q 
+(A.8) 
+References 
+[1] H. Krim, M. Viberg, Two decades of array signal processing research: the para- 
+metric approach, IEEE Signal Process. Mag. 13 (4) (1996) 67–94, doi: 10.1109/ 
+79.526899 . 
+[2] J. Smith, J. Abel, Closed-form least-squares source location estimation from 
+range-difference measurements, IEEE Trans. Acoust. Speech Signal Process. 35 
+(12) (1987) 1661–1669, doi: 10.1109/TASSP.1987.1165089 . 
+[3] K.W. Cheung, W.K. Ma, H.C. So, Accurate approximation algorithm for TOA- 
+based maximum likelihood mobile location using semideﬁnite programming, 
+in: 2004 IEEE International Conference on Acoustics, Speech, and Signal Pro- 
+cessing, 2, 2004, pp. ii–145, doi: 10.1109/ICASSP.2004.1326215 . 
+[4] A. Beck, P. Stoica, J. Li, Exact and approximate solutions of source localization 
+problems, IEEE Trans. Signal Process. 56 (5) (2008) 1770–1778, doi: 10.1109/TSP. 
+2007.909342 . 
+[5] R.M. Vagheﬁ, R.M. Buehrer, Cooperative joint synchronization and localization 
+in wireless sensor networks, IEEE Trans. Signal Process. 63 (14) (2015) 3615–
+3627, doi: 10.1109/TSP.2015.2430842 . 
+[6] K.W. Cheung, H.C. So, A multidimensional scaling framework for mobile lo- 
+cation using time-of-arrival measurements, IEEE Trans. Signal Process. 53 (2) 
+(2005) 460–470, doi: 10.1109/TSP.2004.840721 . 
+[7] P. Closas, C. Fernandez-Prades, J.A. Fernandez-Rubio, ML estimation of posi- 
+tion in a GNSS receiver using the sage algorithm, in: 2007 IEEE International 
+Conference on Acoustics, Speech and Signal Processing - ICASSP ’07, 3, 2007, 
+pp. III-1045–III-1048, doi: 10.1109/ICASSP.2007.366862 . 
+[8] E. Tzoreff, A.J. Weiss , Expectation-maximization algorithm for direct position 
+determination, Signal Process. 133 (2017) 32–39 . 
+[9] P. Closas, C. Fernandez-Prades, J.A. Fernandez-Rubio, Maximum likelihood esti- 
+mation of position in GNSS, IEEE Signal Process. Lett. 14 (5) (2007) 359–362, 
+doi: 10.1109/LSP.2006.888360 . 
+[10] W.Y. Zhou Tao, L. Kong, Direct position determination of multiple coherent 
+sources using an iterative adaptive approach, Signal Process. 161 (2019) 203–
+213, doi: 10.1016/j.sigpro.2019.03.023 . 
+[11] R. Schmidt, Multiple emitter location and signal parameter estimation, IEEE 
+Trans. Antennas Propag. 34 (3) (1986) 276–280, doi: 10.1109/TAP.1986.1143830 . 
+[12] A.J. Weiss, Direct position determination of narrowband radio transmitters, 
+IEEE Signal Process. Lett. (2004) 513–516, doi: 10.1109/LSP.2004.826501 . 
+[13] A.J. Weiss, Amar, Direct position determination of multiple radio signals, 
+EURASIP J. Adv. Signal Process. 1 (2005) 37–49, doi: 10.1155/ASP.2005.37 . 
+[14] T. Tirer, A.J. Weiss, High resolution direct position determination of radio fre- 
+quency sources, IEEE Signal Process. Lett. 23 (2) (2015) 192–196, doi: 10.1109/ 
+LSP.2015.2503921 . 
+[15] L. Tzafri , A. Weiss , High resolution direct position determination using MVDR, 
+IEEE Trans. Wirel. Commun. 15 (9) (2016) 6449–6461 . 
+[16] A . Amar, A .J. Weiss, Eﬃcient position determination of multiple emitters, in: 
+2008 IEEE 25th Convention of Electrical and Electronics Engineers in Israel, 
+2006, pp. 3449–3461, doi: 10.1109/EEEI.2006.321149 . 
+[17] M. Pincus, A closed form solution of certain programming problems, Oper. Res. 
+16 (3) (1968) 690–694, doi: 10.1287/opre.16.3.690 . 
+[18] S. Kay, S. Saha, Mean likelihood frequency estimation, Signal Process. IEEE 
+Trans. 48 (7) (20 0 0) 1937–1946, doi: 10.1109/78.847780 . 
+[19] N. Vankayalapati, S. Kay, Q. Ding, TDOA based direct positioning maximum 
+likelihood estimator and the Cramer–Rao bound, IEEE Trans. Aerosp. Electron. 
+Syst. 50 (3) (2014) 1616–1635, doi: 10.1109/TAES.2013.110499 . 
+[20] G.H. Golub, V. Pereyra, The differentiation of pseudo-inverses and nonlinear 
+least squares problems whose variables separate, Siam J. Numer. Anal. 10 (2) 
+(1973) 413–432, doi: 10.1137/0710036 . 
+10 
+
+
+--- PDF PAGE 11 ---
+K. Hao and Q. Wan 
+Signal Processing 186 (2021) 108111 
+[21] H. Wang, S. Kay, S. Saha, An importance sampling maximum likelihood direc- 
+tion of arrival estimator, IEEE Trans. Signal Process. 56 (10) (2008) 5082–5092, 
+doi: 10.1109/TSP.2008.928504 . 
+[22] S. Saha, S.M. Kay, Maximum likelihood parameter estimation of superimposed 
+chirps using monte carlo importance sampling, IEEE Trans. Signal Process. 50 
+(2) (2002) 224–230, doi: 10.1109/78.978378 . 
+[23] H. Wang, S. Kay, Maximum likelihood angle-doppler estimator using impor- 
+tance sampling, IEEE Trans. Aerosp. Electron. Syst. 46 (2) (2010) p.610–622, 
+doi: 10.1109/TAES.2010.5461644 . 
+[24] J. Chen, Y.C. Wu, S.C. Chan, T.S. Ng, Joint maximum-likelihood CFO and chan- 
+nel estimation for OFDMA uplink using importance sampling, IEEE Trans. Veh. 
+Technol. 57 (6) (2008) 3462–3470, doi: 10.1109/TVT.2008.920473 . 
+[25] P. Closas, A. Gusi-Amigo, Direct position estimation of GNSS receivers: ana- 
+lyzing main results, architectures, enhancements, and challenges, IEEE Signal 
+Process. Mag. 34 (5) (2017) 72–84, doi: 10.1109/MSP.2017.2718040 . 
+[26] M.F. Bugallo, V. Elvira, L. Martino, D. Luengo, J. Miguez, P.M. Djuric, Adaptive 
+importance sampling: the past, the present, and the future, IEEE Signal Pro- 
+cess. Mag. 34 (4) (2017) 60–79, doi: 10.1109/MSP.2017.2699226 . 
+11 

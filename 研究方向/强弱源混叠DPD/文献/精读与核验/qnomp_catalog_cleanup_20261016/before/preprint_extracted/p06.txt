@@ -1,0 +1,63 @@
+                                                                                                                                                  6
+
+
+      largest correlation for local refinement is already enough   A. Linear Optimal Extrapolation
+      to obtain a high-resolution result.                                                     The exact calculation of MMSE can be very difficult, even if
+                                                                 the posterior is given. Instead, we can use the linear minimum
+       IV. LINEAR OPTIMAL EXTRAPOLATION AND        mean squared error estimator (LMMSE) for the extrapolated
+            IMPROVEMENT OF QNOMP               CSI  ˜h. Namely, we are going to find the solution of the
+  With the optimized parameters (τ, θ, β), one can get the   following problem
+extrapolation on  different frequency bands by  substituting                                   2
+                                                      min                                                E  ˜h −Ae(τ)β  2,   s.t. ˜h = Ah′ + b.     (22)them into channel model (2). To measure the accuracy of                                                                            A,b
+extrapolation, one should consider the approximation error on
+                                        We can show that the solution to this problem is
+the whole frequency domain rather than given pilots. Since
+we will only consider the extrapolation of the channel in       ˜h = Cov(Aeβ, h′)Cov(h′, h′)−1h′
+                                                                                                                        (23)
+frequency domain, we will ignore the spatial domain and focus    = Cov(Aeβ, A0β)(Cov(A0β, A0β) + σ2I)−1h′,
+on the one-dimensional frequency domain channel with the
+virtual delay domain in Sections IV-A and IV-B, then switch  where Cov(a, b) = Eτ|h′Eβ∼CN(0,E)abH is the covariance
+back to the case with spatial domain in Section IV-C.          matrix of random vectors a and b.
+  Let  the  extrapolated  frequency  bands  be  f1, . . . , fK    The LMMSE is a good approximation to the optimal MMSE
+and   the   corresponding   response   vector   ae(τ)  =   estimator. In fact, we have
+[1, e−j2πτfi, . . . , e−j2πτ(K−1)fi]  for  i =  1    :  K.  For                ˜h = Eτ|h′Ae(AH0 A0 + σ2E−1)−1AH0 h′
+simplicity, we assume fi = (M + i −1)∆f. The following                                                           (24)
+                                        = Eτ|h′AeEAH0 (A0EAH0 + σ2I)−1h′.results can be extended to general cases without difficulty.
+  To distinguish the frequency bands for estimation or extrap-    If we make the approximation
+olation, we denote A0 = A(τ) = [aτ(τ1), . . . , aτ(τNp)] ∈                                                  Eτ|h′AeEAH0 (A0EAH0 + σ2I)−1CM×Np and Ae = Ae(τ) = [ae(τ1), . . . , ae(τNp)] ∈CK×Np
+the sensing matrices for estimation and extrapolation, respec-          ≈Eτ|h′AeEAH0 (Eτ|h′A0EAH0 + σ2I)−1,
+tively.                                                           the MMSE can be approximated by
+  The  channel  parameter  estimation can be modeled  in
+                                                                                         ˜h ≈Eτ|h′AeEAH0 (Eτ|h′A0EAH0 + σ2I)−1h′Bayesian framework. Given the probability model  (6), the                                                                                                                        (25)
+posterior distribution of (τ, β|h′) in channel model (2) can     = Cov(Aeβ, A0β)(Cov(A0β) + σ2I)−1h′,
+be expressed as
+                                                      which is exactly the LMMSE (23). So LMMSE is an explicit
+   logP(τ, β|h′) = log P(h′|τ, β) + log P(τ, β)             approximation of MMSE. Let us call  it the linear optimal
+          Z                                                  extrapolation (LOX).
+     −log   P(τ, β, h′)dτβh′                                                         (19)    To compute the LOX (23), one has to compute the ex-
+                                                                 pectation with respect  to τ|h′. Further assuming the en-
+    = −1 ∥h′ −A0β∥22 + log P(τ, β) + Const.,             tries of β are uncorrelated, E has a diagonal form E =          σ2
+                                                           diag(E1, E2, . . . , ENp), we havewhere P(τ, β)  is the prior distribution of (τ, β) and the
+additional constant is irrelevant to the estimation. Assuming       Cov(A0β, A0β) = Eτ|h′A0EAH0
+τ and β are independent, τ has a non-informative prior and                        Np
+                                                                                                                        (26)
+the prior of β is CN(0, E), the posterior reads                     = X Eτi|h′Eia0(τi)aH0 (τi)
+     log P(τ|h′) ∼−1 ∥h′ −A0β∥22 −βHE−1β.     (20)                            i=1                  σ2                                  and
+We can find that the problem (17) is to minimize the posterior      Cov(Aeβ, A0β) = Eτ|h′AeEAH0
+with respect to (τ, θ, β). So our QNOMP method is going                        Np
+                                                                                                                        (27)to find the maximum a posterior (MAP) estimation of (τ, β).                                              = X Eτi|h′Eiae(τi)aH0 (τi).
+The regularizer E plays the role of prior covariance of β. The
+                                                                                      i=1
+extrapolations on {f1, . . . , fK} are ˜h = Ae(τ MAP)ˆβ.
+                                                  So the expectation in high dimensions can be reduced to Np MAP is a widely used estimator but may not be optimal.
+                                                       one dimensional expectations. To further compute Eτ|h′(·),Measuring the error by mean squared error, it is well-known
+                                             we  utilize the approximation that the distribution of τ|h′[38] that the minimum mean squared error estimator (MMSE)
+                         MMSE                                  is roughly a Gaussian distribution N(τ|τ MAP, H−1), whereis the posterior mean,  i.e., τ    =  Eτ|h′τ, βMMSE =
+Eβ|h′β. The corresponding extrapolated CSI is        H  is the Hessian of function (13) (see Appendix A  for
+                                                                     heuristic arguments). Therefore, τi|h′ is normally distributed
+                     ˜h = Eτ|h′Ae(τ)E(β|τ, h′),            (21)   with variance (H)−1ii  . Thanks to QNOMP, in the BFGS step,
+                                                                 the matrix Hn is the approximation of H−1. So we can get a
+where the conditional posterior mean E(β|τ, h′) = (AH0 A0 +                                                          Gaussian approximation of the posterior automatically without
+σ2E−1)−1AH0 h′, which is exactly (18). If the posterior distri-                                                                  additional computation:
+bution of τ|h′ is δ(τ −τ MAP), the MMSE coincides with the
+MAP, which can be calculated by QNOMP.                                   τ|h′ ≈N(τ|τ MAP, Hn).

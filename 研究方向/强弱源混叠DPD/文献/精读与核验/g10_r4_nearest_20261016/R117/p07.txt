@@ -1,0 +1,61 @@
+Y. Yang et al.                                                                                                   Journal of Sound and Vibration 517 (2022) 116549
+
+          ( (   (̂     )))−1 (   (̂    ))
+         rSs ←̂ rSs −  H L    rSs,̂ qSs,⋅       J L    rSs,̂ qSs,⋅      ,                                                               (17)
+
+where J(L (rSs, qSs,⋅)) is the Jacobian matrix, H(L (rSs, qSs,⋅)) is the Hessian matrix, and their detailed derivations are shown in
+Appendix II. Having obtained the optimized source coordinate estimate ̂rSs, we can update the source strength ̂qSs,⋅ and residual pr
+sequentially according to Eq. (15) and Eq. (12), respectively.
+    (c) Global cyclic feedback optimization
+   Global cyclic feedback optimization provides feedback on all identified sources according to the current residual, allowing them to
+                                                          ) based on all the identified sources (where k = 1, 2, …, s is the index of identifiedbe re-optimized. We initialize ̂r(0)Sk , ̂q(0)Sk,⋅ and A(̂r(0)Sk
+                                                                                                                                              ] ∈R2×s, the source strength estimation vectorsources), and construct the source coordinates estimation matrix ̂Ω (0)S = [̂r(0)S1 ,̂r(0)S2 ,…̂r(0)Ss
+                                                                                                                                          )] ∈CML×sL. Then we cyclicallyq(0)S = [(̂q(0)S1,⋅)T, (̂q(0)S2,⋅)T, …, (̂q(0)Ss,⋅)T] T ∈CsL×1 and the transfer matrix A(̂Ω (0)S                                                                                    ) = [A(̂r(0)S1 ),A(̂r(0)S2 ),…,A(̂r(0)Ss
+perform Newtonian optimization on them in turn and update Ω (t)S  , q(t)S  , and A(̂Ω (t)S ), where t denotes the number of cycles. The
+following describes the optimization process for the kth source in the tth cycle.
+   To optimize the kth source, we first define a transition residual vector that retains the kth source components of the (t −1)th cycle.
+This transition residual vector can be obtained by adding the projection of p(t−2)r   on the kth source basis back into the residual
+                         (̂      )̂
+        pr ←p(t−1)r  + A  r (t−1)Sk   q (t−1)Sk,⋅                                                                                          (18)
+
+   Substituting the transition residual vector ̃pr into Eq. (15) can yield the transition source strength vector ̃qSk,⋅.
+   Further, with Newtonian optimization Eq. (17), we can optimize the source coordinates estimate. The source strength estimate can
+be updated with Eq. (15), and the residual p(t)r  , ̂Ω (t)S  , ̂q(t)S  , and A(̂Ω (t)S ) can all be updated. We optimize all the identified sources in turn
+                                                                                                                                        2
+                                                                                                                                                                                                      −  ‖ p(t)r  ‖2| ≤10−4.cyclically until the change in residual energy over two consecutive cycles is less than a minor value | ‖ p(t−1)r   ‖22
+   (d) Source strength orthogonal solution
+   As the basis composed of the atoms corresponding to the sources is not orthogonal basis, the residual always contains components
+that are not orthogonal to the atoms corresponding to the identified and optimized sources. To remove the non-orthogonal compo­
+nents, we perform an orthogonal solution to update all the identified sources’ strengths at all frequencies. Utilizing the set A(̂Ω (T)S  )
+formed after T global cyclic feedback optimizations in the process (c), all the identified sources’ strengths at all frequencies can be
+updated with Eq. (10), and then the residual pr can be updated with Eq. (12).
+   After S four-step cycles we can obtain all S source coordinate estimations ̂ΩS and source strength estimations ̂qS. The BNOMP
+algorithm can successfully solve the proposed multi-frequency synchronous source identification maximum likelihood estimation
+model, which effectively overcomes the basis mismatch and makes the proposed BNOMP-CB applicable to off-grid scenarios.
+
+5. Numerical simulations
+
+   In this section, through the case simulations of multiple-sinusoids acoustic sources and Gaussian pulse acoustic sources and Monte
+Carlo simulations, we analyze the acoustic source identification performance of the BOMP-based multi-frequency synchronous on-grid
+compressive beamforming (denoted as BOMP-CB) and the BNOMP-based multi-frequency synchronous off-grid compressive beam­
+forming (denoted as BNOMP-CB), and compares them with the orthogonal matching pursuit (OMP)-based and NOMP-based single-
+frequency on- and off-grid compressive beamforming (denoted as OMP-CB and NOMP-CB). Among them, for the case simulation of
+multiple-sinusoids sound sources, we also present the source identification results of the state-of-the-art methods based on multiple-
+snapshot measurement (such as function beamforming (FB) [50], DAMAS [8] and CLEAN-SC [13]) as a comparison. For the transient
+Gaussian pulse acoustic sources based on single-snapshot measurement (which is equivalent to the case of coherent sources), FB,
+DAMAS and CLEAN-SC show poor performance [2, 7, 50] and are not involved in the comparison.
+
+5.1. Cases of multiple-sinusoids acoustic sources identification
+
+   The following figures show the results processed by the above methods for the multiple-sinusoids acoustic sources in different
+cases, demonstrating their ability to overcome basis mismatch, spatial resolution, and anti-interference performance. The simulation
+layout is the same as Fig. 1, where the planar microphone array corresponds to the distribution of the Brüel & Kjær (Nærum, Denmark)
+36-channel sector wheel array with a diameter of 0.65 m and an average microphone spacing of 0.1 m. The array plane is 1 m away
+from the source plane. The imaging plane is 1 m × 1 m and is discretized to uniform grids with a spacing of 0.05 m when discretizing is
+needed. The vector composed by the frequencies to be analyzed is [1000, 2000, 3000, 4000, 5000] Hz (the number of frequencies to be
+analyzed L = 5).
+    Fig. 2 shows the identification results of 4 compressive beamforming methods for 3 acoustic sources S1, S2, and S3 located at ( −
+0.04,0), (0.05, 0), and (0.30, 0.36) m, respectively, in which S2 is on the grid point (basis match), and S1 and S3 are off the grid points
+(basis mismatch). Both sources S1 and S2 contain 4 frequency components of 1000, 2000, 3000 and 4000 Hz, and the source strength
+
+                                                                                                                                 7̂

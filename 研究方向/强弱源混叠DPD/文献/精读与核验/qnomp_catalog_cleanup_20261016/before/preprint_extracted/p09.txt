@@ -1,0 +1,99 @@
+                                                                                                                                                  9
+
+
+
+
+
+                               M=24, N=64, SNR= 8.451 dB,
+                 5                                                                                      -15
+
+
+                                                                                                           -20
+                 0
+
+                                                                                                           -25
+
+                     -5
+                                                                                                           -30
+
+
+
+
+
+                                                                                                           -40                                                     NMSE[dB] -10-15                                                                                                                                                                                                                                                            NMSE/dB -35
+
+                                                                                                           -45
+                  -20
+                                                    OMP                              OMP
+                                                     NOMP                           -50        NOMP
+                                                    QNOMP                            QNOMP
+                  -25
+                                                        QNOMP+LOX                     -55         CRB
+                                                                   OG-ISTA                                    OG-ISTA
+
+                  -30                                                                                      -60
+                     24                48                72                96                        -5        0         5        10        15        20        25
+                                            Bandwith                                                          SNR/dB
+
+                                         (a) Estimation and extrapolation errors for Scenario 1.                                                            (b) Estimation errors of delay for Scenario 1.
+
+
+
+                               M=24, N=64, SNR= 8.451 dB,
+                 5                                                                            0
+
+
+                 0                                                                                      -10
+
+
+                     -5
+                                                                                                           -20
+
+
+                  -10
+
+                                                                                                           -30                                                     NMSE[dB] -15                                                                                                                                                                                                                                                            NMSE/dB
+
+                                                                                                           -40
+                  -20
+                                                    OMP                              OMP
+                                                     NOMP                              NOMP
+                                                    QNOMP                          -50        QNOMP
+                  -25
+                                                        QNOMP+LOX                           CRB
+                                                                   OG-ISTA                                    OG-ISTA
+
+                  -30                                                                                      -60
+                     24                48                72                96                        -5        0         5        10        15        20        25
+                                            Bandwith                                                          SNR/dB
+
+                                           (c) Estimation and extrapolation errors for Scenario 2.                                                            (d) Estimation errors of delay for Scenario 2.
+
+Fig. 1. Estimation and extrapolation error of different algorithms for two typical scenarios and the super-resolution error for virtual delay variable in simulated
+channel. Scenario 1 has a sparse delay distribution with C1 = 2, C2 = 0.5. Scenario 2 has a dense delay distribution with C1 = 1, C2 = 0.5. (a),(c):
+Estimation and extrapolation error for Scenarios 1, 2. The bandwidth with label 24 corresponds to the estimation error. The channel is extrapolated to the
+bandwidth with label 48, 72 and 96 (K = 2, 3, 4). (b)(d): Estimation error of delay for Scenarios 1 and 2.
+
+
+of all algorithms increases. The two Newton type methods   angular blocks B1, B2, B3, where Bi = {θi + jC2∆θdft|j =
+NOMP and QNOMP outperform the others in general. It is  −2 : 2}. The gains of sub-paths are β = ej2πϕ with ϕi  i.i.d.∼
+worth noting that although NOMP has a similar estimation   Uniform[0, 1]. We will test the CSI estimation performance
+error as QNOMP, the QNOMP has better extrapolation per-  (K = 1) and the extrapolation performance for K = 2.
+formance. Furthermore, the extrapolation error of QNOMP    The settings of QNOMP and baseline OMP algorithm are
+and LOX are not only lower, but also increase more slowly.   the same as in Section V-A. The unit block width of block
+This is due to the better estimation of super-resolution delay   reweighting is ∆θ = 0.5∆θdft. The angle spread is set as γ = 4.
+parameters, as shown in Fig. 1(b)(d). So, no matter the paths  We skip the procedure of selecting high energy paths,  i.e.,
+are concentratively or scatteredly distributed, QNOMP shows   ϵ = 0. We also test algorithms by designing different scenarios.
+significant gains on both CSI estimation and extrapolation   In Scenario 1, we set C1 = C2 = 2 indicating the case that
+compared to conventional OMP and NOMP. When the paths   paths distributes sparsely in both delay and angular domain. In
+are not dense, the error of QNOMP can achieve CRB for wide   Scenario 2, C1 = 1, C2 = 2, which has dense paths in delay
+range of SNR. The LOX also provides an improvement over   domain. In Scenario 3, C1 = 1, C2 = 0.5, in which paths are
+the two-stage QNOMP as well.                              dense in both delay and angular domain.
+                                                                     Fig. 2 shows the channel estimation and extrapolation error
+                                                               of algorithms under different scenarios. It can be observed that
+B. Simulated Channel with angular block Structure
+                                     QNOMP performs better in both estimation and extrapolation.
+  To show the improvement of block reweighting technique,   Besides,  in Scenario 3 which has both dense delay and
+we construct a clustered channel model. There are three clus-   angle, the block reweighting technique obtains a significant
+ters with corresponding delays τ1, τ2, τ3 and angular centers  improvement over QNOMP and other algorithms by taking
+θ1, θ2, θ3. In each cluster, there are corresponding common   benefit of the angular block structure.

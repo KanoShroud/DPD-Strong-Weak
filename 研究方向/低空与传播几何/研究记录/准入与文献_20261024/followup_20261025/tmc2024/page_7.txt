@@ -1,0 +1,76 @@
+AKBARI AND VALAEE: BINARY STRUCTURED SPARSITY APPROACH FOR MULTI-ANCHOR DIRECT LOCALIZATION                                    14061
+
+
+  In the optimization problem described by (10), our aim is to   the complex space CNNa and z to the binary space 0, 1NNa, the
+minimize the error between the signal model and the measure-   feasible set for s is larger. Furthermore, the relationship between
+ments. The ﬁrst constraint of this problem reﬂects the sparsity of   the objective functions is expressed as:
+the signal vector s, where L denotes the maximum sparsity level
+                                                                                       ||y −Φs||22 ≤||y −Φz||22of the signal vector for each anchor and NaL is the maximum
+sparsity level for the concatenated signal s. Subsequently, the
+                                                           Thus, the solution to problem (11) is as an upper bound to the
+second constraint, termed the structured sparsity constraint,
+                                                                  solution of problem (10).
+forces the LoS component of the signal to be traceable to a
+                                                                  2) Conditions for Robust Binary Approximation: In trans-
+unique gridpoint across all anchors.
+                                                         forming the optimization problem outlined in (10) into its bi-
+  The optimization problem in (10) is categorized under mixed-
+                                                           nary programming equivalent as shown in (11), it is essential
+integer nonlinear programming, primarily due to its incorpora-
+                                                                    to note that using a binary representation limits the solution
+tion of ℓ0-pseudo-norm constraints. Due to the intrinsic com-                                                           space to a large, ﬁnite set of possibilities. However, an exact
+binatorial nature of the problem, this classiﬁcation places  it
+                                                             equivalence in support between the problems (10) and (11)
+within the NP-hard spectrum. To facilitate a practical solution,
+                                                           cannot be guaranteed. Recent studies, notably in [41], have
+approximation methodologies are typically employed. A com-
+                                                           demonstrated that under speciﬁc dictionary design conditions,
+mon strategy in tackling such problems involves the replacement
+                                                           a binary approximation for a sparse modeling problem, such as
+of the ℓ0 pseudo-norm with an ℓp-norm, where 0 < p ≤1 [20].                                                                 the one described in (10), can effectively recover optimal signal
+Speciﬁcally, when p is set to 1, the constraint function transitions
+                                                                 support. These requirements specify that the dictionary needs to
+into a convex function [28], [34].
+                                                      form a tight frame.
+                                                                  In order to design a tight dictionary, two conditions should be
+E. Binary Approximation                                         satisﬁed:
+                                                                             r                                                                   All eigenvalues of ΦHΦ should be equal.  Inordertosolvetheoptimizationproblemaspresentedin(10),                                                                             r                                                       The structure of the atoms of the dictionary should bea binary approximation technique is discussed in this section. We
+                                                                    aligned with the system model.start by presenting a binary reformulation of the problem. Then,
+                                                 As mentioned in (8), an over-complete dictionary must bewe describe the conditions under which this approximation can
+                                                                 established across a grid for each anchor. According to thecorrectly recover the signal support for the inverse problem.
+  1) Binary Reformulation: The main objective in the context   systemmodel,atightframeneedsuniformeigenvaluesandapar-
+                                                                        ticular atomic structure, as described in (2). The ideal conditionof our localization problem is to identify the location of the
+                                                    number for such a frame would be 1, which would indicate equalsource on the grid point and the precise value of the signal vector
+s is not important. Furthermore, we have to determine which   eigenvalues throughout the matrix. When taking into account
+                                                                 the total number of atoms, NNa and eigenvalues, NeNa, thelinear combination of atoms from the over-complete dictionary
+best represents the vector y. By utilizing the tight dictionary   eigenvalues of ΦHΦ should consistently be N/Ne. The grid can
+                                                        be designed to satisfy these requirements by applying techniquesframework created in [41], it is possible to consider a binary ap-
+                                                          such as the alternating projection algorithm, as proposed in [41].proximation for the signal s. The dictionary structure described
+                                                           This will guarantee that the binary programming problem (11)in [41] guarantees that the binary programming method based
+                                                                    will produce the best possible signal support.on this approximation will effectively recover the support of the
+                                                          Problem(11) is abinaryprogrammingproblemwithquadraticinverse problem. As a result, the following is a binary equivalent
+                                                               or linear constraint and objective functions. With some mathe-optimization problem for the sparse recovery problem (10):
+                                                               matical manipulations discussed in the next Section, this prob-
+       min  ||y −Φz||22                              lem can be transformed into a quadratic unconstrained binary
+            z
+                                                               optimization (QUBO) problem. Advanced QUBO solvers can
+                s.t.  ||z||0 ≤LNa                              be used by adopting a binary approximation for the NP-hard
+              Na−1  Na                                 problem (10). These encompass both annealing-based solutions
+                          ||(PiN −PjN)z||22 ≤ϵ           and branch-and-bound methods. In this paper, we use the Fujitsu
+                 i=0 j=i+1                              Computing as a Service Digital Annealer (DA) [42] to solve the
+                                     QUBO problem (11). DA is a computer architecture speciﬁcally
+             z ∈{0, 1}NNa                          (11)   engineered for efﬁciently solving Ising model problems, which
+                                                                               is an efﬁcient choice for tackling the QUBO problem.
+where z is the binary representation of signal vector s. This re-
+formulation aims to minimize the approximation error between
+                                                                         F. Transformation Into Ising Energy Formulation
+the received signal and its representation using the binary vector
+z, subject to sparsity and binary structured sparsity constraints,    The Ising model is a mathematical framework originally
+ensuring a robust solution to the localization problem.           developed in the ﬁeld of statistical physics. It is used to explain
+  In (11), the constraints generate a feasible set comparable   the interactions between the spins of atoms, also known as
+to that of (10). To be more speciﬁc, the cardinality of s and   magnetic moments, in a physical system [38]. In this model, the
+z are identical because z = I(s) and both problems share the   system displays the lowest possible energy conﬁguration when
+same binary structured constraint. However, since s belongs to    it reaches its equilibrium state. The main goal of the Ising model
+
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:02:23 UTC from IEEE Xplore. Restrictions apply.

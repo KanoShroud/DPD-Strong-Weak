@@ -1,0 +1,65 @@
+                                                                                                                                                  3
+
+
+The super-resolution recovery of channel state is to estimate   location of τi, θi of a certain path may not lie on the pre-
+the parameters (β, τ, θ). With this estimation, one can extrap-   defined grid τ 0, θ0. This grid mismatch significantly degrades
+olate the channel states to the unobserved frequency bands by   the performance of super-resolution and  extrapolation. To
+model (2).                                             overcome this issue, we introduce a two-stage QNOMP strat-
+                                                       egy consist of an on-grid multi-resolution optimization stage
+      III. SUPER-RESOLUTION ALGORITHM: QNOMP        with local refinement, and an off-grid BFGS joint optimization
+                                                                     stage, both of which are proceeded in an interweaving manner.
+  Taking advantage of the sparsity nature of the channel in
+multipath model, the channel parameters can be estimated by
+solving the following sparse optimization problem with loss    A. On-Grid Multi-resolution OMP for Sparsity Selection
+             1                                        To obtain a better estimation of delay and angle, we first
+   min L =                ∥h′ −A(τ, θ)β∥22,    s.t. β is sparse    (7)   apply a locally refined multi-resolution technique in each OMP    τ,θ,β            σ2
+                                                                          iteration. The OMP estimation ˆτ0 = τ i0 , ˆθ0 = θ0j serves as the
+based on the h′  defined  in  (6). We propose a two-stage                                                                               initial guess of this procedure. Given the estimation  ˆτn, ˆθn
+algorithm for this problem. In the  first stage (nonstandard
+                                                                        after the n-th refinement  iteration, we construct a locally
+on-grid stage), we determine the sparsity and give a rough
+                                                                   refined grid
+estimate of parameters by an improved OMP-type method
+                                                        ∆τdftwith a multi-resolution on-grid sparsity selection and a slight       n    n                                                                                             ˜τ = ˆτ +      [−k1, . . . , 0, . . . , k1] ∈R2k1+1,
+off-grid nonlinear refinement. After the first stage, an off-grid                kn+11
+                                                                                                                        (12)
+stage is followed to obtain more accurate parameters by the             ∆θdft                                                                              ˜θn = ˆθn +      [−k2, . . . , 0, . . . , k2] ∈R2k2+1,BFGS quasi-Newton method. We call this approach quasi-                                                                kn+12
+Newton OMP (QNOMP) algorithm.
+                                                      where the two integers k1, k2 ≥1 indicate the refinement rate. OMP is an efficient on-grid method for sparsity selection
+                                                   The refined estimation is ˆτn+1 = ˜τin , ˆθn+1 = ˜θnj , where theand channel estimation. Given M  pilots and corresponding
+observation y, we introduce a standard grid on delay and   index (i, j) = argmaxi,j |rHaτ(˜τin )⊗aθ(˜θnj )|. The procedure
+angular domain                                           can be applied iteratively to achieve a high precision, although
+                                                                     practically one or two times of refinement can lead to a
+           τ 0 = ∆τdft · [0, 1, . . . , M −1],                      satisfying result.                                                              (8)
+           θ0 = ∆θdft · [−N/2, . . . , N/2 −1],                  Since the local refinement grid of each  iteration has a
+                                                               constant size J = (2k1 + 1)(2k2 + 1),  this local refine-
+respectively, where the grid size ∆τdft = 1/(M∆f), ∆θdft =                                                          0      ment procedure makes the  resolution of delay and angle1/N. Define  the sensing matrix A(τ 0, θ0) =  [a(τ i ) ⊗                                                                estimations  to be ∆τdft/kn1  and ∆θdft/kn2  by an  additionala(θ0j)] ∈CNM×NM for i = 0 : M, j = −N/2 : (N/2 −1).                                               O(nJ) + O(nJ min{M, N}) computation, while the resolu-
+The OMP algorithm is to consider the on-grid version of (7):
+                                                                    tion of conventional OMP is ∆τdft and ∆θdft. We summarize the
+            1                                                   local refinement procedure in Algorithm 1.  min Lon =   ∥h′ −A(τ 0, θ0)β∥22    s.t. β is sparse.   (9)   β       σ2
+                                                     Algorithm 1 On-Grid Multi-resolution OMP Procedure
+One  first initializes the residual vector r = h′ and empty
+parameter  sets  ˆτ =  ˆθ =  ∅, then  in each OMP  itera-      1: Input: Residual  vector  r, OMP  grid  size ∆τdft, ∆θdft
+                                                          and estimation  ˆτ0, ˆθ0, refinement rate k1, k2, maximumtion, one estimates the delay and angle of a certain path,
+                                                                            iteration number nmaxwhich  will be added  to the corresponding parameter  set.
+To be  specific, one  finds  the column  of A(τ 0, θ0)  that      2: Output: Refined estimation ˆτ and ˆθ
+most closely correlated to r, i.e., finding the index (i, j) =      3: Initialize: ˆτ = ˆτ0, ˆθ = ˆθ0, n = 1
+argmaxi,j rHaτ(τ i0 ) ⊗aθ(θ0j) . The sets ˆτ, ˆθ are then up-      4: while n < nmax do
+                     0                                                           5:     Construct grid ˜τ and ˜θ by (12)dated as ˆτ ←ˆτ ∪{τ i }, ˆθ ←ˆθ∪{θ0j}. Based on the estimated                                                                                       6:    Compute Rij = rHaτ(˜τi) ⊗aθ(˜θj)ˆτ and ˆθ, the gain β is determined by a least squares estimation
+                                                                                       7:    Find (i, j) = argmaxi,j |Rij| on the refined grids
+                           ˆβ = A(ˆτ, ˆθ)†r.                  (10)      8:    Update ˆτ ←˜τi, ˆθ ←˜θj
+                                                                                       9:   n ←n + 1
+The residual vector is updated as
+                                                                              10: end while
+                r ←h′ −A(ˆτ, ˆθ)ˆβ.                (11)    11: return ˆτ, ˆθ
+
+OMP runs the above procedure iteratively until some stopping
+                                                            Like conventional OMP algorithm,  this on-grid module
+criterion  is  satisfied. The number of  iterations Np  is the                                                                     refines the estimation of delay and angle of a single path,
+estimated number of propagation paths.
+                                                      which leaves other estimated path parameters unchanged.
+ OMP is a greedy method. In each iteration,  it finds the
+optimal delay and angle for a single path. However, these
+                                                             B. Off-Grid BFGS Parameter Optimizationsequential optimization does not  necessarily achieve  joint
+optimum for multipaths. Meanwhile, the resolution of OMP    The on-grid stage gives us an estimation of τi and θj on the
+algorithm is restricted by the grid size ∆τdft, ∆θdft, and the true   grid ˜τ n, ˜θn. However, the true location τi, θi may not lie on

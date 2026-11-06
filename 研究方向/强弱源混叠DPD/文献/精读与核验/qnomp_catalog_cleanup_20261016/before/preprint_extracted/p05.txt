@@ -1,0 +1,62 @@
+                                                                                                                                                  5
+
+
+by BFGS method, where the optimal β is given by             additional cost is almost a minor constant. Thus, employing
+                                          BFGS is highly efficient in this scenario. It introduces little
+                  ˆβ = (AHA + σ2E−1)−1AHh′.           (18)
+                                                                  additional cost and achieves faster convergence. In practice,
+  In practice, we choose the regularizer E ∈RNp×Np as   the solutions obtained by BFGS often have higher precision.
+λI (λ > 0) for convenience. The regularizer can be also   We have analyzed the cost of Steps 5 and 6 in QNOMP. The
+interpreted in a Bayesian framework and improved with this   cost of Step 12 is similar as Step 6. Step 7 is the computation
+perspective. The choice of E will be further discussed in detail   of pseudo-inverse with cost O(k3 + k2(M + N) + kNM) for
+in next section.                                                 the k-th OMP iteration. So the total cost is PNpk=1 O(k3 +
+  The BFGS scheme to solve (17) is the same as (14), in  k2(M + N) + kNM) = O(Np4 + Np(M3  + N) + NpNM).2
+which ˆβ is set as (18) and k = Np. Let us summarize the   Meanwhile, Step 15 introduces an additional cost O(Np3 +
+two-stage QNOMP algorithm in Algorithm 3 for clarity.    Np(M2  + N) + NpNM). Since Np is small, the total cost of
+                                                                these steps is roughly O(NpNM).2
+Algorithm 3 QNOMP Algorithm                                  Overall, we conclude that QNOMP is efficient. Compared
+  1: Input: CSI h′, noise level σ, maximum iteration of local   with conventional OMP method, it only requires almost con-
+    refinement nLR, maximum iteration of BFGS nin and nout,   stant additional cost but can achieve a much more accurate
+    the refinement rate k1, k2, false alarm probability Pfa       estimation of channel parameters and a powerful extrapolation
+  2: Output: Channel parameter estimations τ, θ and β          ability, which will be shown in later numerical results.
+  3: Initialize: r = h′, τ = θ = ∅, k = 1, n = 1           We have some final remarks on QNOMP:
+  4: do                                                           1) QNOMP is an improvement and extension of the NOMP
+  5:    Applying Algorithm 1 nLR steps to get (ˆτ, ˆθ)             method  [29],  [30]. In each OMP  iteration, we add
+  6:    Applying Algorithm 2 nin steps to get (τ, θ)                a multi-resolution refinement module to enhance the
+  7:    Update β = A†(τ, θ)r and r = h′ −A(τ, θ)β             performance. The key improvement of QNOMP is that
+  8:    k ←k + 1                                    we use BFGS instead of Newton method to compute
+  9: while ∥F−1(r)∥2∞> MNTv as in (16)                          the off-grid estimation. BFGS allows us to optimize all
+ 10: Set Np = k and the regularizer E                                the estimated path parameters jointly, while in NOMP,
+ 11: while n < nout do                                                                       it  is  difficult to do this since  it has to compute the
+ 12:    Using (14), (15) with ˆβ in (18) to get τ and θ               inverse of Hessian matrix in each Newton step. The
+ 13:   n ←n + 1                                                          joint optimization also alleviates the sequentially local
+ 14: end while                                         minimum  issue. Moreover, employing a  full-variable
+ 15: Let β = (AH(τ, θ)A(τ, θ) + σ2E−1)−1AH(τ, θ)h′.        BFGS optimization after OMP stage can yield more
+ 16: return (τ, θ, β)                                                 accurate estimates in practice.
+                                                                  2) In conventional OMP method, the residual vector r is
+                                                                   orthogonal to the selected column of sensing matrix.
+                                                          Each column of sensing matrix can be selected by OMP
+E. Computational Cost and Remarks                                                                                at most once. However, due to the off-grid optimization,
+  In  this  section we  analyze  the  computational  cost  of         the orthogonality is lost in QNOMP. So some (τ i0 , θ0j)
+QNOMP. In Algorithm 1, the cost of Step 6 is O(NM) for      may be selected by on-grid OMP step for multiple times.
+each (i, j) pair. Since aτ ⊗aθ has a tensor structure, the total        This feature brings benefit for estimation. Fixing grid
+cost of all Rij can be reduced to O(NM min{M, N}) for         size ∆τdft, ∆θdft,  it  is difficult to distinguish two paths
+k1 = k2 = 1. In Step 7, the cost of finding the maximum of       which are very close. The multiresolution refinement
+|Rij| is J = (2k1+1)(2k2+1). So the cost of each refinement       module and off-grid BFGS optimization make it possible
+step is O(NM min{M, N}+J). The total cost of Algorithm 1         to select paths whose distance smaller than ∆τdft, ∆θdft in
+is O((NM + nLRJ) min{M, N}), where nLR is the number         successive steps.
+of refinement steps. The local refinement procedure is very ef-     3) We do not apply the regularization E  in the OMP
+ficient. To achieve the same resolution, the conventional OMP         stage  to ensure the convergence of OMP  iterations.
+method requires O(kn1 kn2 NM min{M, N}) computation.          As in conventional OMP, the norm of residual vector
+  Since almost all optimization algorithms need the gradient        r  is monotonically decreasing as long as we use a
+information, we only provide the additional computational cost        monotonic line search without regularization. In BFGS
+brought by BFGS algorithm. Compared with gradient based         stage after OMP, the parameters and the number Np is
+methods such as gradient descent, BFGS scheme only needs          fixed, so we can add the regularization to perform further
+to compute the update of matrix H. The update rule of H         optimization.
+is composed by a series of matrix-vector product. In the k-th     4) The number of BFGS steps in OMP iteration need not to
+OMP iteration, H ∈Rk×k. the cost of updating H is O(k2)        be large. Practically, two or three steps is enough to give
+in each step. Thus the total additional cost brought by BFGS        a satisfying result. In BFGS stage after OMP iteration,
+is nin · PNpk=1 O(k2) = nin · O(Np),3  where nin is number of        a few more BFGS steps are required to find a more
+BFGS steps. Since BFGS is a super-linear algorithm which         accurate channel estimation. Moreover, one can select
+converges very fast, the BFGS steps nin can be very small.         several indices with the largest correlations in OMP
+Moreover, because the channel is sparse, Np is also small. The          iteration. Practice shows that selecting the index with the

@@ -1,0 +1,64 @@
+AKBARI AND VALAEE: BINARY STRUCTURED SPARSITY APPROACH FOR MULTI-ANCHOR DIRECT LOCALIZATION                                    14063
+
+
+ Algorithm 1: Transformation of Sparse Recovery Problem        3) This process is repeated iteratively to facilitate conver-
+ (11) Into Ising Model Formulation (16)                           gence to the equilibrium state distribution.
+                                                     The energy difference between the proposed and current spin Input: Binary optimization problem: minz∈{0,1}NaNa f(z)
+                                                          statesdeterminestheacceptancerateofnewconﬁgurationswhen   (refer to (11) for details)
+ Input: Observation vector: y (size Na(Ne + N) × 1)          using the Metropolis-Hastings and other MCMC algorithms.
+ Input: Dictionary matrix: Φ (size Na(Ne + N) × NaN)      The dimensions of the bias vector b and the connection weight
+                                                             matrix W determine how computationally intensive this process
+ Input: Regularization parameters: γ1, γ2
+                                                                                      is. It has been shown that the computational complexity of a
+ Output: Weight matrix: W                                                                                            2                                                         system with NNa binary variables is roughly O(N 2N a) [43].  Output: Bias vector: b
+   1: Reformulate as Regularized Optimization:
+                                                                          V. CRÁMER-RAO BOUND DERIVATION     – Introduce regularization parameters γ1 and γ2 to
+        obtain the regularized problem (13).                      This section focuses on analyzing the theoretical evaluation of
+     – Simplify the third term using matrix manipulations      our approach by calculating the CramÃ©r-Rao Bound (CRB).
+         (14).                                         The CRB is a widely-used reference point for evaluating the
+   2: Merge ℓ2-norms and Deﬁne QUBO problem:              performance of unbiased estimators. Those estimators whose
+     – Combine the two ℓ2 norm terms into a single term        results are closer to the CRB demonstrate smaller error and are
+       with modiﬁed parameters (15).                          thus more favorable for implementation [44].
+     – Deﬁne the QUBO problem with modiﬁed              The received signal model given the binary approximation is
+        observation vector y∗(17) and modiﬁed dictionary       as follows:
+        matrix Φ∗(18).
+                                                          y ≈Φz + n, z ∈Z                (22)   3: Construct Ising Model Parameters:
+        r        Calculate the weight matrix W using the modiﬁed      where Φ is the overcomplete array manifold, n ∼CN(0, Σ)
+        dictionary (19).                                                  is the Gaussain noise vector with NaNe × NaNecovariance
+        r        Calculate the bias vector b with the modiﬁed           matrix Σ, and Z is the feasible set of the reconstructed signal z
+        observation vector, modiﬁed dictionary, and           and is deﬁned as follows:
+         regularization parameters (20).                                                                            1
+                                Z = {z|z ∈{0, 1}NNa, ||z||0 ≤NaL, ||K                                                                                                                      2 z||22 < ϵ}  (23)   4: Ising Model Formulation:
+     – Using the obtained W and b, construct the Ising                                                                    in which K =   Na−1i=0    Naj=i+1(P iN −P jN)T (P iN −P jN).
+       model Hamiltonian as speciﬁed in [15] (12).                                                           Considering this signal model for our measurements, we are
+     – Apply a suitable algorithm (digital annealing here) to                                                          going to derive the CRB for the localization error.
+        solve the Ising model for the optimal conﬁguration of                                                            For our calculations, we deﬁne the parameter vector as fol-
+         z.                                                              lows:
+                                                                                                                        ¯η = [˜xu, ˜yu]T ,                   (24)
+is deﬁned as:
+                                                      where ˜xu and ˜yu denote the location coordinates of the user.                     1
+  P(x|b, W, β) =          exp(−βE(x; b, W)).   (21)  The likelihood function for the received signal measurement
+                Z(b, W, β)                                                              described in (22), is given by,
+where  β = 1/kBT   (with  kB   representing  the  Boltz-                 1
+                                                        f(y|¯η)=                                                                         exp −(y −μ(¯η))HΣ−1(y −μ(¯η))mann   constant  and  T   the   temperature),  and  Z =                                                            det(2πΣ) NaNe2
+  x exp(−βE(x; b, W)) serves as the normalizing factor.                                                               (25)
+  When analyzing Ising models, one popular MCMC technique
+is Gibbs sampling. In order to update the spin ﬂips, the proba-   in which Σ is the covariance matrix and μ(¯η) is the mean vector
+bilities of each spin assuming a 1 or 0 state must be determined.  and is deﬁned as follows:
+These probabilities depend on the temperature of the system
+                                                                               μ(¯η) = Φ(¯η)z =     φ¯ηi              (26)and the current states of the nearby spins. Up until convergence
+                                                                                              i∈NZ
+towards the previously mentioned equilibrium probability, the
+spin states are updated iteratively based on these probabilities.  whereNZ isthesetofthenon-zeroelementsofthevectorz ∈Z,
+Another effective MCMC method for the Ising models is the   andφ¯ηi isthei-thcolumnofthedictionaryΦ,whichisdependent
+Metropolis-Hastings algorithm, which consists of the following  on the parameter vector ¯η.
+steps [38]:                                             The log-likelihood function, Ly(¯η), can be found by taking
+  1) The energy change associated with ﬂipping a randomly   the natural logarithm of (25) as
+      selected spin is evaluated.                                                                             Ly(¯η) = ln f(y|¯η).                (27)
+  2) The probability of accepting this spin ﬂip is calculated;
+     a negative energy change leads to a certain acceptance,   According to [44], the CRB states that the variance of any unbi-
+     whereas a positive change is accepted with a probability   ased estimator of a parameter cannot be less than the reciprocal
+      proportional to exp(−βΔE).                             of the Fisher Information of that parameter. Fisher Information
+
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:02:23 UTC from IEEE Xplore. Restrictions apply.

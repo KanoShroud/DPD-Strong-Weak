@@ -1,0 +1,2332 @@
+--- PDF PAGE 1 ---
+CFAR Based NOMP for Line
+Spectral Estimation and
+Detection
+MENGHUAI XU
+JIANG ZHU
+, Member, IEEE
+Zhejiang University, Zhoushan, China
+JUN FANG
+University of Electronic Science and Technology of China, Chengdu,
+China
+NING ZHANG
+Nanjing University of Science and Technology, Nanjing, China
+ZHIWEI XU
+, Senior Member, IEEE
+Zhejiang University, Zhoushan, China
+The line spectrum estimation and detection problem are consid-
+ered in this article. We propose a constant false alarm rate (CFAR)-
+based Newtonized OMP (NOMP-CFAR) method, which can maintain
+a desired false alarm rate without the knowledge of the noise variance.
+The NOMP-CFAR consists of two steps, namely, an initialization step
+and a detection step. In the initialization step, NOMP is employed to
+obtain candidate sinusoidal components. In the detection step, CFAR
+detector is applied to detect each candidate frequency, and provides
+the “soft” thresholds. After removing the most unlikely target, the
+Newton reﬁnements are used to reﬁne the remaining parameters. The
+relationship between the false alarm rate and the required threshold
+Manuscript received 17 September 2022; revised 10 January 2023 and 16
+April 2023; accepted 26 May 2023. Date of publication 5 June 2023; date
+of current version 11 October 2023.
+DOI. No. 10.1109/TAES.2023.3282610
+Refereeing of this contribution was handled by F. Gini.
+ThisworkwassupportedinpartbytheZhejiangProvincialNaturalScience
+Foundation of China under Grant LY22F010009, in part by the National
+Natural Science Foundation of China under Grant 61901415, in part by
+the Fundamental Research Funds for the Central Universities under Grant
+226-2022-00096, and in part by the Bureau of Science and Technology of
+Zhoushan under Grant 2021C81008.
+Authors’ addresses: Menghuai Xu, Jiang Zhu, and Zhiwei Xu are with the
+Ocean College, Zhejiang University, Zhoushan 316021, China, and also
+with the Engineering Research Center of Oceanic Sensing Technology
+and Equipment, Ministry of Education, Zhoushan 316021, China; E-mail:
+(menghuaixu@zju.edu.cn; jiangzhu16@zju.edu.cn; xuzwg@zju.edu.cn).
+Jun Fang is with the National Key Laboratory of Science and Technology
+on Communications, University of Electronic Science and Technology
+of China, Chengdu 611731, China E-mail: (junfang@uestc.edu.cn). Ning
+Zhang is with the Nanjing Marine Radar Institute, Nanjing 210093, China
+E-mail: (zhangn_ee@163.com). (Corresponding author: Jiang Zhu.)
+0018-9251 © 2023 IEEE
+is established. Compared with NOMP, NOMP-CFAR has only 1dB
+performance loss in additive white Gaussian noise scenario with false
+alarm probability 10−2 and detection probability 0.8 without knowl-
+edge of noise variance. For varied noise variance scenario, NOMP-
+CFAR still preserves its CFAR property, while NOMP violates the
+CFAR. Besides, real experiments are also conducted to demonstrate
+the detection performance of NOMP-CFAR, compared to CFAR and
+NOMP.
+I.
+INTRODUCTION
+Line spectrum estimation and detection are fundamental
+problems in signal processing ﬁelds, as they arise in various
+applications such as radar and sonar target estimation and
+detection [1], [2], [3], direction of arrival estimation [4],
+[5], situational awareness in automotive millimeter wave
+radar [6], vital signs identiﬁcation [7] and so on.
+The classical discrete Fourier transform (DFT) based
+approach is often adopted to obtain the spectrum [8], which
+can be implemented efﬁciently via fast Fourier transform
+(FFT). Then, CFAR detection is implemented to perform
+target detection. However, DFT is susceptible to “off-grid”
+effects[9]:thesignalfromthetargetleaksintoseveralpoints
+in the DFT grid, unless it lies exactly on the DFT grid.
+Besides, this technique also suffers intertarget interference,
+i.e., the weak target is hard to detect given that the frequency
+of the weak target is close to that of a strong target, which
+limits the resolution capability. Later, subspace methods
+such as multiple signal classiﬁcation (MUSIC) [10] and
+estimation of signal parameters using rotational invariance
+techniques (ESPRIT) [11] are proposed, which exploit the
+low-rank structure of the autocorrelation matrix. The ca-
+pability of resolving multiple closely spaced frequencies
+is enhanced especially at high signal-to-noise ratio (SNR).
+However, their performances degrade at medium and low
+SNRs.
+More recent techniques using compressed sensing (CS)
+based methods exploit the sparse structure of the line
+spectrum in the frequency domain. By discretizing the
+frequency onto a ﬁnite set of grids, on-grid methods such
+as orthogonal matching pursuit (OMP) [12], least abso-
+lute shrinkage and selection operator (Lasso) [13], [14]
+are used to solve the line spectrum estimation problems.
+However, the frequencies are continuous parameters and
+they cannot lie on the grids exactly. As a consequence,
+on-grid methods suffer from mismatch issues [9]. To over-
+come the model mismatch, off-grid and gridless methods
+are proposed such as relaxation (RELAX) algorithm [15],
+[16], iterative reweighted approach (IRA) [17], variational
+line spectra estimation (VALSE) [18], atomic norm soft
+thresholding (AST) [19], NOMP [20], etc. The frequency
+estimation accuracy of these off-grid and gridless methods
+is better than the classical methods such as MUSIC and
+on-grid methods. However, the computation complexity of
+IRA and AST are high. For VALSE, it automatically esti-
+mates the noise variance, model order, and other nuisance
+parameters. However, it is numerically found that when the
+number of targets is large, VALSE tends to output spurious
+components leading to large false alarms. For NOMP, it
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS
+VOL. 59, NO. 5
+OCTOBER 2023
+6971
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 08:57:20 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 2 ---
+providestheCFARperformancebasedterminationcriterion
+by calculating the threshold with the knowledge of noise
+variance and a speciﬁed probability of false alarm, which
+is similar to the standard threshold detection. In practice,
+the interference levels often vary over time. Besides, the
+standard threshold is sensitive to the changes of the noise
+variance, and small errors in setting the threshold will have
+major impacts on radar performance [21].
+A classical model arising in adaptive CFAR target de-
+tection is to detect the possible presence of a (point-like)
+coherent target from a given cell under test (CUT) by using
+the primary and the secondary data, where the noise is
+colored [22]. Recently, invariance principle and maximal
+invariant statistics are used to design adaptive radar detec-
+tors [23], [24]. In [25], adaptive CFAR radar detection under
+both steering vector matched and mismatched conditions
+is designed, which guarantees the CFAR property. Here
+we study a different setup where the noise is i.i.d., but
+the secondary data are unavailable and the received data
+consist of several sinusoidal signals whose frequencies are
+continuous-valued and whose number is unknown. There-
+fore, it is of vital importance to incorporate the CFAR
+detector into the CS based algorithm such that both the
+advantages of the CS and CFAR are preserved.
+A.
+Related Work
+In this article, the CFAR detector is incorporated into
+the NOMP algorithm named as NOMP-CFAR, so that the
+integrated detector threshold can be adjusted to maintain the
+desired false alarm rate. Compared to CFAR method in [20],
+which is similar to the standard threshold detection with
+the knowledge of noise variance, NOMP-CFAR estimates
+the noise variance from data in real time to maintain a
+CFAR property in the environment with time-varying noise
+variance. To preserve the superresolution performance of
+NOMP-CFAR and avoid the target masking effects [21],
+NOMP-CFAR is divided into two steps: initialization and
+model order estimation (MOE) or detection step. For the
+initialization, NOMP is used to obtain a maximum possible
+number of spectral as a candidate set, which is beneﬁcial
+for closely spaced weak target detection. For the MOE, the
+CFAR detector is incorporated and outputs a soft quantity
+ (36), representing the level in which the amplitude of
+detected frequency exceeds its corresponding threshold.
+This is different from the conventional CFAR detector as
+it outputs a binary decision. The candidate frequency is
+preserved or removed in the candidate set based on the
+sign of . In each iteration, the most unlikely frequency
+corresponding to the maximum negative  is removed.
+Then, the Newton reﬁnements are conducted to improve the
+estimation accuracy of the parameters of the candidates.
+B.
+Main Contributions
+Motivated by the high estimation accuracy and low
+computation complexity of NOMP and its excellent perfor-
+mance in the application ﬁelds [26], [27], [28], [29], [30],
+the adaptive CFAR detector is incorporated into the NOMP
+and NOMP-CFAR is proposed. The main contributions of
+this work can be summarized in the following three aspects:
+1) The NOMP-CFAR algorithm is designed, which in-
+herits both the CFAR and super-resolution advan-
+tages of the CFAR and NOMP. Incorporating the
+CFAR approach into the NOMP is nontrivial as the
+proposed CFAR detector outputs a soft quantity in-
+stead of a simple binary decision. Besides, the output
+of NOMP is matched to the desired input distribution
+of the CFAR detector, and an initialization step via
+the NOMP approach is also provided to improve
+the detection probability, as shown in Sections III-B
+and IV-E. Several implement details are also taken
+into consideration to enhance the performance of
+NOMP-CFAR. For further details, please refer to
+Section III.
+2) The performances of NOMP-CFAR in terms of false
+alarm probability and detection probability are ana-
+lyzedforthecellaveraging(CA)CFAR.Speciﬁcally,
+the relationship between the false alarm rate and
+the required threshold multiplier is established, and
+insights into the relationship between CFAR and
+NOMP are also revealed. The detection probability
+by ignoring inter-sinusoid interference is derived.
+3) The NOMP-CFAR is also extended to deal with the
+compressive measurement scenario and the multiple
+measurement vector setting (MMV).
+4) The performance of NOMP-CFAR algorithm are
+compared with the NOMP, VALSE, and CFAR de-
+tector in numerical simulations and real data exper-
+iments. Numerically, it is shown that both NOMP-
+CFAR and NOMP (noise variance known) provide
+a CFAR for additive white Gaussian noise (AWGN)
+scenario. For the detection probability 0.76 and the
+false alarm probability 0.01, NOMP-CFAR yields
+1dB performance loss, compared to NOMP. For the
+noise variance which is time-varying, the NOMP
+algorithm can maintain CFAR performance if the
+noise variance can be estimated in real time and in
+high accuracy. However, in practice, the estimated
+noise variance may differ from the noise variance
+at the current time, the NOMP algorithm will not
+preserve its CFAR property by using the estimated
+noise variance, as the false alarm rate is sensitive to
+the noise variance [21]. Besides, real experiments are
+conducted to demonstrate that the detection proba-
+bility of NOMP-CFAR is higher than that of CFAR
+and the false alarm is smaller than CFAR.
+The rest of this article is organized as follows. Section II
+introduces the LSE model. In Section III, NOMP-CFAR
+algorithm is developed. In addition, NOMP-CFAR is also
+extended to deal with the compressive measurement model
+and MMV model. In Section IV, numerical experiments
+are conducted to evaluate the performance of NOMP-CFAR
+algorithm in terms of estimation accuracy, false alarm prob-
+ability, and detection probability. The real data experiments
+6972
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS
+VOL. 59, NO. 5
+OCTOBER 2023
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 08:57:20 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 3 ---
+are shown in Section V. Finally, Section VI concludes this
+article.
+Notation: Let a, A, A denote the vector, matrix, and
+tensor, respectively. For a D-dimension tensor Y, let Yk
+denote the kth element of Y, where k ∈ND and N is the
+set of all natural numbers, and ˜Y denotes its spectrum.
+For a set N, let |N| denote its cardinality. For any two
+frequencies ωl and ωk, the wrap-around distance is deﬁned
+as dist(ωl, ωk) ≜mina∈Z|ωk −ωl + 2πa| and Z is the set
+of all integers.
+II.
+PROBLEM SETUP
+Consider
+a
+multidimensional
+line
+spectral
+Z ∈
+CN1×N2···×Nd···×ND described as
+Z =
+K
+
+k=1
+xkaN1(ω1,k) ◦aN2(ω2,k) · · ·
+aNd (ωd,k) · · · ◦aND(ωD,k)
+(1)
+where D denotes the dimension (usually D = 1, 2, 3), K
+denotes the number of spectral, Nd ∈N (d = 1, . . . , D)
+denotes the number of observations in the dth dimension,
+and N = D
+d=1 Nd is the total number of observations, ◦
+denotes the outer product of two vectors, ωd,k denotes the
+frequency of the kth target in the dth dimension, xk denotes
+the kth target amplitude (k = 1, . . . , K), aP(ω) is an array
+steering vector deﬁned as
+aP(ω) =
+
+1,
+ejω,
+· · · ,
+ej(P−1)ωT
+(P ∈N, ω ∈[0, 2π]).
+(2)
+The line spectral Z corrupted by additive noise ε is de-
+scribed as
+Y = Z + ε
+(3)
+where Y
+is the noisy measurement, ε denotes the
+AWGN, and its n ≜[n1, . . . , nD]th element follows εn ∼
+CN (0, σ 2).
+By deﬁning ωk = [ω1,k, ω2,k, . . . , ωD,k] and A(ωk) =
+aN1(ω1,k) ◦· · · ◦aND(ωD,k), model (1) can be simpliﬁed as
+Y =
+K
+
+k=1
+xkA(ωk) + ε.
+(4)
+Vectorizing the tensors, model (3) can be reformulated as a
+matrix form
+y = Ax + ε
+(5)
+where y = vec(Y), x = [x1, x2, . . . , xK] and
+aN(ωk) ≜aND(ωD,k) ⊗· · · ⊗aN1(ω1,k)
+(6)
+⊗denotes the Kronecker product, ε = vec(ε) and ε ∼
+CN (0, σ 2IN ) and A is the matrix, which can be shown as
+A =
+
+aN(ω1),
+· · · ,
+aN(ωk),
+· · · ,
+aN(ωK )
+
+. (7)
+Note that we have provided both the tensor model (4) and
+the common data model (5). The tensor model is more
+suitable for practical problems. For example, in radar sig-
+nal processing, the received data is often represented as a
+3-D data cube, where the 3-D correspond to the fast time
+domain, slow time domain, and spatial domain. Besides,
+often D dimensional FFT is adopted to process the data
+cube and perform CFAR detection. As you see, using the
+tensor notation is beneﬁcial to design the guard cells and
+training cells. As for the common data model (5), it is in
+fact useful for extracting the amplitudes of the frequencies
+once the frequencies are estimated. Note that the amplitudes
+can be updated by the least square step ˆx = A†y in NOMP
+method, where A† denotes the pseudoinverse matrix of A. In
+the following, we will use the two models interchangeably
+when either one is more suitable.
+Consequently, the line spectral estimation and de-
+tection problem are to obtain
+ˆK and the frequencies
+{( ˆω1,k, ˆω2,k, . . . , ˆωD,k)} ˆK
+k=1 without the knowledge of noise
+variance σ 2.
+The SNR in dB of the kth target is deﬁned as [20]
+SNRk = 10 log N|xk|2
+σ 2
+(8)
+which is the nominal SNR value in our simulations and is
+called “integrated SNR.” An alternative deﬁnition of SNR is
+the “per-sample” SNR given by SNRsample,k = 10 log |xk|2
+σ 2 =
+10 log SNRk −10 log(N). It can be seen that the “integrated
+SNR” is the “per-sample” SNR plus the coherent integrated
+gain 10 log(N).
+III.
+NOMP-CFAR ALGORITHM
+This section develops the NOMP-CFAR algorithm for
+target detection and estimation. The false alarm probability
+is often deﬁned clearly for a binary hypothesis testing
+problem. For the LSE, an intuitively explanation of the
+false alarm probability is that for the false alarm probability
+¯PFA, the NOMP-CFAR algorithm generates about NMC ¯PFA
+false targets whose frequencies are not near the frequencies
+of the true targets in NMC Monte Carlo trials. First, the
+CFAR criterion is proposed and the threshold with the
+false alarm probability ¯PFA is provided. Second, the details
+of NOMP-CFAR which novelly combines the CFAR and
+NOMP are presented. Note that we have carefully designed
+NOMP-CFAR to ensure that the measured false alarm
+probability is close to the nominal false alarm probability.
+Finally, NOMP-CFAR is extended to deal with both the
+compressive measurement model and an MMV model.
+A.
+CFAR Detector Design
+The stopping criterion proposed in [20] assumes that the
+noise variance is known and constant. This stopping crite-
+rion sets the threshold accurately to guarantee a speciﬁed
+probability of false alarm. In practice, the noise variance is
+unknown and can often be variable. To provide predictable
+detection and false alarm behaviour in realistic scenarios,
+CFAR detection or “adaptive threshold detection ” is devel-
+oped.
+XU ET AL.: CFAR BASED NOMP FOR LINE SPECTRAL ESTIMATION AND DETECTION
+6973
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 08:57:20 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 4 ---
+The idea of CFAR detector is to estimate the noise
+variance from the data in real time, so that the detection
+threshold can be adjusted to maintain the desired ¯PFA. Below
+we present the details of the CFAR design.
+We consider a general binary detection problem as
+
+H0 : Y = ε
+H1 : Y = xA(ω) + ε
+(9)
+and we choose between the null hypothesis H0 and the
+alternative hypothesis H1, where vec(ε) ∼CN (0, σ 2IN )
+is the additive white Gaussian noise (AWGN). For the
+dimension D = 1, the binary detection problem is similar
+to the sinusoidal signal detection model [2]. The typical
+detector deciding H1 can be written as
+T (Y, σ 2) = | ˜Y˜npeak|2
+σ 2
+> α′
+(10)
+where | · | is applied elemenwisely, ˜Y denotes the nor-
+malized D-dimensional DFT of Y, whose ˜n ≜[˜n1, ˜n2,
+. . . , ˜nD]th element is deﬁned as
+˜Y˜n = 1
+N
+N1
+
+n1=1
+e−j 2π
+N1 (˜n1−1)(n1−1)
+N2
+
+n2=1
+e−j 2π
+N2 (˜n2−1)(n2−1)
+· · ·
+ND
+
+nD=1
+e−j 2π
+ND (˜nD−1)(nD−1)Yn
+(11)
+and ˜npeak is the peak localization of | ˜Y|2 given by
+˜npeak = argmax
+˜n∈˜N
+| ˜Y˜n|2
+(12)
+where ˜N = {[˜n1, ˜n2, . . . , ˜nD]|˜n1 = 1, 2, . . . , N1, . . . , ˜nD =
+1, 2, . . . , ND}. In particular, for 1-D LSE, i.e., D = 1, Y
+reduces to y, which are the measurements in time domain
+and n denotes the index in time domain, ˜y is the spectrum,
+and ˜n denotes the index in frequency domain, and ˜npeaks is
+the peak localization of the spectrum ˜y.
+In other words, the detector (10) decides that the signal
+is present if the peak value of the spectrum exceeds a
+threshold. It is also worth noting that (10) can be evaluated
+efﬁciently through D dimensional DFT. Given the false
+alarm probability ¯PFA, the threshold multiplier α′ can be
+obtained by [20]
+α′
+NOMP = −ln
+
+1 −(1 −¯PFA)
+1
+N
+
+.
+(13)
+Motivated by the conventional CFAR approach, the
+noise variance σ 2 is estimated with the data samples as
+ˆσ 2 = 1
+Nr
+
+˜n∈T˜npeak
+		 ˜Y˜n
+		2
+(14)
+where ˜npeak (12) is the index of the CUT ˜Y˜npeak, T˜npeak is
+the index set of the reference cells, Nr denotes the number
+of reference cells, and Nr = |T˜npeak|. The reference cells are
+averaged to estimate the noise variance. In practice, we set
+guard cells between the reference cells and the CUT. The
+reason is that a frequency not lying on the DFT grid exactly
+might straddle frequency cells. In this case, the energy in
+the cell adjacent to ˜Y˜npeak would contain both noise and
+signal energy. The extra energy from the signal would tend
+to raise the estimate of the noise variance, resulting in a
+higher threshold and a lower ¯PFA and ¯PD than intended. The
+details of selecting reference cells and guard cells can be
+referredto[21]. However, inthemultiple targetscenario, the
+construction of reference cells cannot be directly borrowed.
+Fig. 1 gives the CFAR windows with the same reference
+cells Nr = 6 (one dimension) and Nr = 26 (two dimension)
+for the traditional CFAR and the proposed CFAR. Com-
+pared to the traditional CFAR window, the detected cells
+which are closest to the detected frequencies are excluded
+from the average to estimate the noise variance. The reason
+is that the detected cells have been ﬁtted with the sinusoidal
+components. In this case, the energy in the detected cells
+for the CFAR detection will not be representative of the
+noise alone and is lower than the energy in the reference
+cells. If you use the traditional CFAR window, the lower
+energy due to the detected cells would tend to lower the
+estimate of the noise variance parameter, which results in a
+higher ¯PFA and ¯PD than intended. We have also conducted
+a simulation to show that if we estimate the noise using the
+traditional approach, the false alarm probability is always
+higher than the nominal false alarm probability, and the
+false alarm probability and detection probability are higher
+than those of the NOMP-CFAR, see Fig. 6 shown later in
+Section IV-C.
+With ˆσ 2 given in (14), the proposed CFAR detector in
+the case of unknown noise variance is 1
+T (Y) = | ˜Y˜npeak|2
+ˆσ 2
+> α.
+(15)
+Equation (15) indicates that the candidate target is valid
+when the level target amplitude | ˜Y˜npeak|2 exceeds the noise
+variance estimation ˆσ 2 multiplied by α. For the detector
+T (Y) in (15), its false alarm probability ¯PFA and detection
+probability ¯PD are analyzed. First, we need to calculate the
+probability density function (PDF) of ˆσ 2 (14). Note that the
+normalized DFT is a unitary matrix, and the DFT of Y under
+the null hypothesis H0 is still the AWGN, i.e.,
+p( ˜Y|H0) =
+
+˜n
+CN ( ˜Y˜n; 0, σ 2).
+(16)
+In general, the exact PDF of ˆσ 2 (14) is hard to obtain as
+the reference cells depend on the peak localization ˜npeak of
+the spectrum. Provided that the reference cells are not too
+near the peak, the PDF of ˜Y˜n, ˜n ∈T˜npeak is approximated as
+a Gaussian distribution, i.e.,
+p( ˜YT˜npeak |H0) ≈
+
+˜n∈T˜npeak
+CN ( ˜Y˜n; 0, σ 2).
+(17)
+1In Appendix A, the generalized likelihood ratio test (GLRT) explanation
+is provided.
+6974
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS
+VOL. 59, NO. 5
+OCTOBER 2023
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 08:57:20 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 5 ---
+Fig. 1.
+CFAR windows. (a) and (b) are 1-D and 2-D windows for the traditional CFAR processing, (c) and (d) are 1-D and 2-D windows for the
+proposed CFAR processing, respectively.
+Based on (17), we proceed to calculate the average false
+alarm ¯PFA and the result is summarized as Proposition 1.
+PROPOSITION 1 The average false alarm probability ¯PFA and
+the required threshold multiplier α for the detector (15) is
+¯PFA = 1 −
+1
+(Nr −1)!
+ +∞
+0
+
+1 −e−α
+Nr xN
+xNr−1e−xdx
+= 1 −
+ +∞
+0
+exp
+⎧
+⎨
+⎩N ln
+
+1 −e−α
+Nr x
++ (Nr −1) ln x
+−x −
+Nr−1
+
+n=1
+ln n
+⎫
+⎬
+⎭dx
+≜1 −
+ +∞
+0
+exp { f (x)} dx
+(18)
+or
+¯PFA = 1 −
+N
+
+n=0
+(−1)n
+N
+n
+
+1
+( nα
+Nr + 1)Nr .
+(19)
+PROOF Thebasicideaistoobtainthefalsealarmprobability
+¯PFA with ˆσ 2 ﬁxed, and then averaging that with respect to
+the PDF of ˆσ 2 yields the desired false alarm probability ¯PFA.
+Deﬁne the threshold ˆT as
+ˆT = α
+⎛
+⎝1
+Nr
+
+˜n∈T˜npeak
+		 ˜Y˜n
+		2
+⎞
+⎠.
+(20)
+Under the assumption (17), the distribution of ˆT is chi-
+square distribution with 2Nr degrees of freedom and vari-
+ance ασ 2/2, i.e.,
+p ˆT ( ˆT ) =
+1
+(Nr −1)!
+ Nr
+ασ 2
+Nr
+ˆT Nr−1e−Nr ˆT
+ασ2 .
+(21)
+The false alarm event is declared if the peak of the spectrum
+| ˜Y˜npeak|2 exceeds the threshold ˆT , i.e.,
+¯PFA = E ˆT
+
+P
+
+| ˜Y˜npeak|2 ≥ˆT
+
+(22)
+where E ˆT [·] is taken with respect to the PDF p ˆT (T ) (21).
+With ˆT being ﬁxed, P(| ˜Y˜npeak|2 ≥ˆT ) is
+P
+
+| ˜Y˜npeak|2 ≥ˆT
+
+= P
+
+max
+˜n∈˜N | ˜Y˜n|2 ≥ˆT
+
+= 1 −P
+
+max
+˜n∈˜N | ˜Y˜n|2 ≤ˆT
+
+= 1 −P
+
+| ˜Y˜n|2 ≤ˆT , ˜n ∈˜N
+
+a= 1 −
+
+˜n∈˜N
+P
+
+| ˜Y˜n|2 ≤ˆT
+
+,
+(23)
+where
+a= is due to the independence of ˜Y˜n, ˜n ∈˜N. The PDF
+of | ˜Y˜n|2 is chi-square distribution with 2 degrees of freedom
+and variance σ 2/2 with CDF
+P
+
+| ˜Y˜n|2 ≤ˆT
+
+= 1 −e−ˆT /σ 2.
+(24)
+Substituting (23) in (22), the average false alarm probability
+¯PFA is
+¯PFA = 1 −
+ +∞
+0
+
+˜n∈˜N
+P
+		 ˜Y˜n
+		2 < ˆT
+
+p ˆT ( ˆT )d ˆT .
+(25)
+Substituting (24) and (21) into (25) yields
+¯PFA = 1 −
+ +∞
+0
+
+1 −e−ˆT /σ 2N
+1
+(Nr −1)!
+ Nr
+ασ 2
+Nr
+ˆT Nr−1e−Nr ˆT
+ασ2 d ˆT
+(26)
+whichcanbesimpliﬁedas(18)bydoingachangeofvariable
+x = Nr ˆT
+ασ 2 . Furthermore, by using the binomial expansion
+
+1 −e−α
+Nr xN
+=
+N
+
+n=0
+N
+n
+
+(−1)ne−nα
+Nr x
+(27)
+(18) can be simpliﬁed as
+¯PFA = 1 −
+N
+
+n=0
+N
+n
+
+(−1)n
+(Nr −1)!
+ +∞
+0
+e−( nα
+Nr +1)xxNr−1dx.
+(28)
+Utilizing
+ +∞
+0
+e−(β+1)xxNr−1dx = (Nr−1)!
+(β+1)Nr ,
+(19)
+is
+obtained.
+■
+We have provided two formulas (18) and (19) for
+¯PFA with the required threshold multiplier α. Note that
+limx→0 exp{ f (x)} = limx→∞exp{ f (x)} = 0, where f (x) is
+deﬁned in (18), and the MATLAB built-in integrate func-
+tion can be used to numerically evaluate the integral
+ +∞
+0
+exp{ f (x)}dx. In contrast, (19) is hard to calculate as
+the dynamic range of the terms in the summation can be
+very large. Thus, (18) is more robust than (19) in terms of
+calculating ¯PFA via numerical method.
+XU ET AL.: CFAR BASED NOMP FOR LINE SPECTRAL ESTIMATION AND DETECTION
+6975
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 08:57:20 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 6 ---
+However, (19) indeed provides some insights into the
+relationship between the establishing result and the previous
+results, as shown in the following remarks.
+REMARK 1 As Nr →∞, one has
+lim
+Nr→+∞
+
+1 + nα
+Nr
+−Nr
+= e−nα.
+(29)
+Substituting (29) in (19), ¯PFA can be simpliﬁed as
+¯PFA = 1 −
+N
+
+n=0
+(−1)n
+N
+n
+
+e−nα = 1 −(1 −e−α)N
+(30)
+and α can be calculated as
+α = −ln
+
+1 −(1 −¯PFA)
+1
+N
+
+.
+(31)
+Similar results, consistent with (31), are obtained in [20],
+which focuses on the noise variance aware case. This makes
+sense as Nr →∞, the noise variance estimate is exact and
+α = α′ with α′ given in (13) and ¯PFA = PFA.
+REMARK 2 When the required threshold multiplier α is
+large such that the false alarm probability ¯PFA is small, the
+ﬁrst and second terms corresponding to n = 0 and n = 1 in
+the summation are much larger than the remaining terms,
+i.e.,
+(N −n)!n!
+(N −1)!
+nα + Nr
+α + Nr
+Nr
+≫1, n = 2, . . . , N.
+(32)
+Consequently, (19) can be approximated as
+¯PFA ≈1 −
+1
+
+n=0
+(−1)n
+N
+n
+
+1
+( nα
+Nr + 1)Nr
+= N( α
+Nr
++ 1)−Nr = N ¯PFA(bin)
+(33)
+where ¯PFA(bin) = (α/Nr + 1)−Nr is the average false alarm
+probability of traditional CA-CFAR method for each cell if
+we examine one bin. Hence, ¯PFA increases approximately
+linearly with the number of bins examined. Equation (33)
+demonstrates that when ¯PFA is very small, it is equal to the
+N times of the average false alarm probability of traditional
+CA-CFAR method. The average number of false alarms
+among all the N test cells is N ¯PFA(bin) ≪1. Intuitively,
+when N ¯PFA(bin) ≪1, the false alarm is dominated by the
+CUT corresponding to the peak of the spectrum with false
+alarm probability ¯PFA. This implies the approximation (33).
+For typical parameters such as N = 256, Nr = 60, and ¯PFA
+ranging from 0.001 to 0.02, the required threshold multipli-
+ers α calculated through (33) are close to those calculated
+through (18).
+REMARK 3 The two formulas (18) and (19) are obtained
+with the CA-CFAR approach. Following the similar steps,
+one could establish the speciﬁed ¯PFA with the required
+threshold multiplier α for other CFAR approaches, such
+as the smallest-of cell-averaging CFAR (SOCA CFAR),
+greater-of cell-averaging CFAR (GOCA CFAR), order
+statistic CFAR (OS CFAR) [31], etc. The OS-CFAR rank
+Algorithm 1: CFAR Detector.
+1: For a given false alarm probability ¯PFA, calculate
+the required threshold multiplier α for CA-CFAR
+via (18).
+2: Procedure: CFAR (Y, α) :
+3: Compute ˜Y via (11),
+4: Find the peak location ˜npeak via (12),
+5: Estimate the noise variance as ˆσ 2 (14),
+6: Compute  (36),
+7: Return .
+orders the reference window data samples
+˜Y˜n to form
+a new sequence in ascending numerical order, ˜n ∈T˜npeak.
+The rth element of the ordered list is called the rth or-
+der statistic, denoted by ˜Y(r). Thus, the new sequence of
+the reference window data samples ˜Y˜n can be denoted
+as { ˜Y(1), . . . , ˜Y(Nr )}. In OS-CFAR, the rth order statistic
+is selected as representative of the noise variance and a
+threshold is set as a multiple of this value
+ˆT = αOS ˜Y(r).
+(34)
+As shown in [31], the PDF of ˆT is
+p ˆT ( ˆT ) =
+r
+αOS
+N
+r
+ 
+e−ˆT /αOSN−r+1 
+1 −e−ˆT /αOSr−1
+.
+(35)
+Substituting (35) in (25), the average false alarm rate ¯PFA
+of OS-CFAR can be obtained.
+Deﬁne
+ = 10 log
+
+| ˜Y˜npeak|2
+ˆT
+
+.
+(36)
+where ˆT is (20). Note that  = 0 implies that the integrated
+amplitude of the detected signal just crosses the correspond-
+ing threshold. For  > 0,  is the excess in which the
+amplitude of the detected signal is above the corresponding
+threshold. While for  < 0, − is the excess in which the
+amplitude of the detected signal is below the corresponding
+threshold. For the traditional CFAR detector, it makes a
+binary decision based on the sign of . In contrast, we
+provide a “soft” CFAR detector, which outputs . The
+“soft” CFAR detector is summarized in Algorithm 1.
+It is also meaningful to obtain the detection probabil-
+ity ¯PD for the required threshold multiplier α. Under the
+alternative hypothesis H1, we declare that a frequency ω
+exists if the spectrum ˜Y at the DFT frequency ωˆn exceeds
+its corresponding threshold, where the dth element of ˆn is
+ˆnd = argmin
+nd
+|ωd −¯ωnd|
+(37)
+where ¯ωnd ≜(nd −1)2π/Nd denotes the dth dimensional
+ndth DFT frequency grid. Straightforward calculation
+6976
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS
+VOL. 59, NO. 5
+OCTOBER 2023
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 08:57:20 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 7 ---
+shows that under the alternative hypothesis H1,
+˜Yˆn =
+√
+Nx
+D
+
+d=1
+⎛
+⎝ej
+(Nd −1)(ωd −¯ωˆnd )
+2
+sin
+ Nd (ωd−¯ωˆnd )
+2
+
+Nd sin
+ (ωd−¯ωˆnd )
+2
+
+⎞
+⎠+ ˜ε
+=
+√
+Nx
+D
+
+d=1
+⎛
+⎝ej
+(Nd −1)πδd
+Nd
+sin (πδd)
+Nd sin
+
+πδd
+Nd
+
+⎞
+⎠+ ˜ε
+≜
+√
+Nxβˆn + ˜ε
+(38)
+where
+δd = (ωd −¯ωˆnd )/(2π/Nd)
+(39)
+and −0.5 ≤δd ≤0.5 due to |ωd −¯ωˆnd| ≤π/Nd, |βˆn| ≤1.
+It can be known that ˜Yˆn ∼CN (
+√
+Nxβˆn, σ 2). Conditioned
+on ˆT , the detection probability PD( ˆT ) is
+PD( ˆT ) = P
+		 ˜Yˆn
+		2 > ˆT
+
+= P
+		 ˜Yˆn
+		2 /(σ 2/2)
+ˆσ 2/(σ 2/2)
+> α
+
+.
+(40)
+As we know, the random variable | ˜Yˆn|2/(σ 2/2) follows
+noncentral chi-square distribution with two degrees of free-
+dom, and the random variable ˆσ 2/(σ 2/2) also follows chi-
+square distribution with 2Nr degrees of freedom. Assume
+that they are independent,
+| ˜Yˆn|2/(σ 2/2)
+ˆσ 2/(σ 2/2)
+follows noncentral
+F-distribution, with numerator degrees of 2, denominator
+degrees of 2Nr and positive noncentral parameter N|x|2β2
+ˆn.
+Deﬁne PF (x|ν1, ν2, μ) as the noncentral F-distribution CDF
+at each value in x, where ν1 denotes the degrees of freedom
+of the numerator, ν2 denotes the degrees of freedom of the
+denominator, μ denotes the positive noncentrality parame-
+ters. Equation (40) can be simpliﬁed as
+¯PD = 1 −PF
+
+α|2, 2Nr, N|x|2β2
+ˆn
+
+(41)
+which is the average detection probability of the CFAR
+detector (15) for the given target by taking only the noise
+into account and ignoring the intersinusoidal interference.
+B.
+NOMP-CFAR
+Section III-A has proposed the CFAR detector for a
+single target scenario and provided (18) for calculating
+the threshold multiplier α for a speciﬁed ¯PFA. Now we
+focus on the multiple target detection problem and design
+NOMP-CFAR algorithm.
+For the target detection and estimation problem, one
+should try to ﬁnd a minimal representation of the line
+spectral such that the residue can be well approximated
+as the AWGN. Note that the conventional CFAR based
+approach consists of two steps: First, performing the fast
+Fourier transform (FFT) on Y to obtain the spectrum ˜Y.2
+Second, implementing the CFAR detection such as CA
+or OS methods for all the cells by specifying the guard
+2Forrangeestimation,rangeDopplerestimation,thespectrumcorresponds
+to range spectrum and range-Doppler spectrum, respectively.
+length, training length, and the average false alarm rate
+¯PFA, the target detection results are obtained. Obviously,
+the FFT-based approach is suboptimal as it suffers from
+grid mismatch and intertarget interference. Besides, the
+resolution of the FFT-based approach is limited by the
+Rayleigh criterion. Therefore, we propose NOMP-CFAR
+to overcome the drawbacks of the traditional CFAR based
+approach and to inherit the advantages of the CFAR be-
+haviour.
+The main steps of the NOMP-CFAR can be divided
+into two steps: Initialization and MOE or detection step.
+The initialization step provides a good initial point of the
+NOMP-CFAR. While for the MOE step, it is iterative and
+it includes an activation step and deactivation step, i.e.,
+by activating the target or deactivating the target. For the
+initialization step, it is assumed that the number of targets K
+is upper bounded by a known constant Kmax, i.e., K ≤Kmax.
+This is reasonable as one could choose Kmax = N as the
+number of targets must be less than the number of measure-
+ments N. Then we run NOMP consisting of coarse detec-
+tion, single reﬁnement, cyclic reﬁnement, least squares (LS)
+step to obtain the candidate amplitudes and frequencies set
+KKmax = {(ˆxk, ˆωk), k = 1, 2, . . . , Kmax}. Note that this step
+is necessary as it alleviates the intertarget interference and
+provides ﬁne results for the MOE step. For further details,
+please see [20]. For the MOE step, the CFAR approach is
+implemented to perform target detection, i.e., activate and
+deactivate the components of the frequencies. In addition,
+all the steps such as coarse detection, single reﬁnement,
+cyclic reﬁnement, LS in NOMP are also incorporated to
+enhance the target estimation and detection accuracy. Below
+we present the details of the MOE step.
+GiventhecandidatesetK = {(ˆxk, ˆωk), k = 1, 2, . . . , ˆK}
+and ˆK = |K| ≤Kmax, one could use the CFAR criterion to
+detect the kth frequency. To implement the CFAR detector,
+we proceed as follows: The residue of the observation Yr(K)
+after eliminating all the targets K is
+Yr(K) = Y −
+ˆK
+
+k=1
+ˆxkA( ˆωk).
+(42)
+Provided that all the amplitudes and the frequencies are
+detected and estimated in high accuracy, Yr(K) is approxi-
+mately AWGN, i.e.,
+Yr(K) ≈εr
+(43)
+and vec(εr) ∼CN (0, σ 2
+r IN ). To detect the k target, we
+obtain the pseudomeasurement Yr(K\(ˆxk, ˆωk)) by adding
+the contribution of the kth frequency to the residue Yr(K),
+i.e.,
+Yr(K\(ˆxk, ˆωk)) = Yr(K) + ˆxkA( ˆωk)
+a≈ˆxkA( ˆωk) + εr
+(44)
+where
+a≈isdueto(43).WenowinputYr(K\(ˆxk, ˆωk))andthe
+required threshold multiplier α to the CFAR detector to pro-
+vide a soft detection of the kth frequency, k = 1, 2, . . . , ˆK,
+i.e., calculate k (36). Note that k ≥0 means that the
+XU ET AL.: CFAR BASED NOMP FOR LINE SPECTRAL ESTIMATION AND DETECTION
+6977
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 08:57:20 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 8 ---
+Fig. 2.
+Module of the NOMP-CFAR algorithm.
+power of the CUT exceeds the estimated threshold, and
+this target should be detected if the CFAR is adopted. If
+we radically implement the CFAR detector to detect all the
+targets and then stop, miss event may happen in certain
+scenarios. For example, in the initialization step, a strong
+target may be detected as two closely spaced frequencies
+withdistinguishableamplitudes.Thissplittingphenomenon
+degrades the SNR of the frequency and the CFAR detector
+may miss the two targets at the same time, which misses
+the true frequency. To overcome this problem, we only
+activate or deactivate one frequency in each iteration. In
+this way, even after splitting, the frequency corresponding to
+the weaker amplitude may be eliminated and the frequency
+one with stronger amplitude can be reﬁned, and the true
+frequency may be detected. To activate or deactivate one
+frequency in each iteration, the greedy approach is adopted
+by calculating
+ˆk = argmin
+k=1,2,..., ˆK
+k
+(45)
+and ˆk. Depending on the sign of ˆk, we choose two
+different actions:
+A1 ˆk < 0: In this setting, deactivate the ˆkth frequency
+by removing the ˆkth frequency, i.e., updating ˆK′ =
+K\(ˆxˆk, ˆωˆk). Perform the single reﬁnement, cyclic
+reﬁnement, and LS for the remaining targets and
+obtain ˆK′′. This reﬁnement step is necessary to
+ensure the high estimation accuracy. Then for the
+updated parameter set ˆK′′, perform CFAR detection
+as done before.
+A2 ˆk ≥0: In this setting, the frequency set is kept.
+Then, perform CFAR detection on the residual
+Yr(K) to determine whether a new amplitude fre-
+quency pair should be added on the list K or not. If
+the CFAR does not detect any target or the number
+of targets is greater than Kmax, then the algorithm
+stops. Otherwise, add the new amplitude frequency
+pair into the list and iterate.
+Note that compared to the traditional CFAR, our pro-
+cedure can be viewed as a soft CFAR as we proceed very
+gently. The NOMP-CFAR is summarized as Algorithm 2.
+In addition, the module of NOMP-CFAR is provided in
+Fig. 2 to further explain the idea of NOMP-CFAR. The
+CFAR detector module performs CFAR detection on each
+candidate frequencies and outputs {k} ˆK
+k=1. Provided that
+min
+k=1,2,..., ˆKk < 0, the NOMP module removes the most un-
+likely frequency component. Otherwise, all the frequen-
+cies are kept and a CFAR detection is implemented on
+the residual Yr(K) to determine whether a new amplitude
+Algorithm 2: NOMP-CFAR.
+1: Procedure: NOMP-CFAR (Y, Kmax, α) :
+Initialization step:
+2: Run NOMP to obtain the candidate amplitude
+frequency pair set
+KKmax = {(ˆxk, ˆωk), k = 1, 2, . . . , Kmax}. MOE step:
+3: ˆK ←KKmax
+4: while ˆK ≥0 and ˆK ≤Kmax,
+5:
+Compute k ←CFAR(Yr(K\(ˆxk, ˆωk)), α) for
+k = 1, . . . , ˆK.
+6:
+Compute ˆk and ˆk (45).
+7:
+if ˆk < 0
+8:
+K ←K\(ˆxˆk, ˆωˆk)
+9:
+Perform cyclic reﬁnement and LS on the
+remaining parameter set K and go to Step 5.
+10:
+else
+11:
+Compute new ←CFAR(Yr(K), α)
+12:
+if new ≥0
+13:
+Run single reﬁnement to obtain the new
+amplitude frequency pair (ˆxnew, ˆωnew),
+K ←K ∪(ˆxnew, ˆωnew) and go to Step 5.
+14:
+else
+15:
+break
+16:
+end if
+17:
+end if
+18: end while
+19: return K
+frequency pair should be added on the list K or not. The
+CFAR detector determines the validity of the target and
+provides a “soft” threshold to the NOMP module. NOMP
+then performs reﬁnement on the remaining components.
+Besides, we also show that after initialization provided by
+NOMP, the distribution of the input to the CFAR module
+is well matched to the desired distribution of the CFAR
+module. Let K = 16 and Kmax = 32. The qqplot (quantile-
+quantile plot) of the residue after eliminating ranging from
+ˆK = 16 to ˆK = 31 targets in a single realization is shown
+in Fig. 3. The quantile values of the input sample appear
+along the y-axis, and the theoretical values of the speciﬁed
+distribution at the same quantiles appear along the x-axis. It
+can be seen that the resulting plot is approximately linear,
+demonstrating that the residue after eliminating the effects
+ofallthetargetscanbewellapproximatedbyAWGN,which
+is the desired distribution of the CFAR detector under the
+null hypothesis H0.
+C.
+Extension of NOMP-CFAR
+The above NOMP-CFAR can be easily extended to deal
+with the MMV setting and the compressive setting.
+1) MMV Setting: The MMV model can be described
+as
+Y(s) =
+K
+
+k=1
+xk(s)A(ωk) + ε(s),
+s = 1, 2, . . . , S
+(46)
+6978
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS
+VOL. 59, NO. 5
+OCTOBER 2023
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 08:57:20 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 9 ---
+Fig. 3.
+Quantile-quantile plot (qqplot) of the residue from ˆK = 16 to ˆK = 31, where Kmax = 32.
+where S denotes the number of snapshots. Details about
+single reﬁnement, cyclic reﬁnement, and LS step can be
+referred to [26]. Here we just focus on the difference and
+provide the details of the CFAR detection.
+Deﬁne ˜Y(s) as the normalized DFT of Y(s). The CFAR
+detector deciding the alternative hypothesis H1 is
+T (Y) =
+1
+S
+S
+s=1 | ˜Y˜npeak(s)|2
+ˆσ 2
+mmv
+≥αmmv
+(47)
+where ˜npeak denotes the peak localization of 1
+S
+S
+s=1 | ˜Y(s)|2,
+which is the average of the spectrum over the snapshots,
+ˆσ 2
+mmv is
+ˆσ 2
+mmv =
+1
+SNr
+S
+
+s=1
+
+˜n∈T˜npeak
+		 ˜Y˜n(s)
+		2
+(48)
+αmmv is the required threshold multiplier. Then, given αmmv,
+the false alarm probability ¯PFA
+¯PFA = 1 −
+Nr
+α(SNr −1)!
+ +∞
+0
+
+1 −e−T
+S−1
+
+s=0
+T s
+s!
+N
+e−Nr T
+α
+NrT
+α
+SNr−1
+dT.
+(49)
+is established, see Appendix B for the details. Note that for
+SMV scenario, i.e., S = 1, (49) reduces to (18).
+2) Compressive Setting: For simplicity, we focus on
+the 1-D compressive line spectrum estimation problem for-
+mulated as
+y = 
+ K
+
+k=1
+a(ωk)xk
+
++ ε
+(50)
+where  ∈CM×N is the compression matrix and M/N is the
+compression rate. Deﬁne a “generalized” atom as
+˘a(ω) =
+a(ω)
+∥a(ω)∥2
+.
+(51)
+The CS model becomes
+y =
+K
+
+k=1
+˘xk ˘a(ω) + ε.
+(52)
+The steps of the coarse detection, single reﬁnement, cyclic
+reﬁnement, and LS are the same as that of NOMP. Here we
+present the CFAR details. Given y(K) = y −|K|
+k=1 ˆ˘xk ˘a( ˆω),
+where K = {(ˆ˘xk, ˆωk), k = 1, 2, . . . , |K|} and (ˆ˘xk, ˆωk) de-
+notes the estimate of the amplitude frequency pair, calculate
+the “generalized” spectrum as
+˜y(K) = ¯aH(ω)y(K)
+(53)
+by restricting ω to the DFT grid. Then the detector (15) is
+used to perform detection, and the noise variance estimate
+is given by (14). Besides, the required threshold multiplier
+for a given ¯PFA is (18).
+IV.
+NUMERICAL SIMULATION
+In this section, the derived theoretical result is veriﬁed
+and the performance of the proposed NOMP-CFAR is
+investigated. First, the false alarm probability versus the
+required threshold multiplier is evaluated, which provides
+a way to calculate the required threshold multiplier for a
+speciﬁed false alarm probability. Second, the effectiveness
+of the proposed CFAR window is demonstrated by compar-
+ing with the traditional CFAR Windows. Third, the CFAR
+property is validated. Fourth, the beneﬁts of initialization
+XU ET AL.: CFAR BASED NOMP FOR LINE SPECTRAL ESTIMATION AND DETECTION
+6979
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 08:57:20 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 10 ---
+is demonstrated. Fifth, the performance of the proposed
+NOMP-CFAR is evaluated, including the SMV, MMV, and
+compressive settings. Finally, we consider a time-varying
+noise variance scenario and show the CFAR property of the
+proposed algorithm. Since the performance of FFT based
+CFAR detection is poor in multiple target scenarios (here we
+set the number of frequencies as 16), we do not compare
+with it. The NOMP achieves the state-of-art performance
+and we mainly focus on comparing NOMP-CFAR with it.
+Besides, we also compare with the VALSE [18], which is a
+Bayesian approach and which automatically estimates the
+noise variance and model order.
+The parameters are set as follows: N = 256, the number
+of frequencies is K = 16, the frequencies are randomly
+drawn and the wrap around distances of any two frequen-
+cies are greater than 2.5DFT, where DFT = 2π/N. The
+noise variance is σ 2 = 1. The default algorithm parameters
+are set as follows: The average false alarm probability is
+¯PFA = 10−2, which corresponds to ¯PFA(bin) = 10−2/N ≈
+3.9 × 10−5, the number of training cells Nr = 50 unless
+stated otherwise. Therefore, the required multiple factor
+α can be calculated by (28), which is α = 11.22. And
+the threshold of NOMP is τNOMP = α′
+NOMPσ 2 = 10.15. The
+over sampling rate is γ = 4 and the upper bound of the
+number of targets is Kmax = 2 K. All the results are averaged
+over 3000 Monte Carlo (MC) trials.
+A frequency ω is detected provided that mink=1,..., ˆK
+dist( ˆωk, ω) ≤0.5DFT. We compute the detection prob-
+ability PD deﬁned as the detection probability of all the
+true frequencies. An estimated frequency ˆω is a false alarm
+provided that mink=1,..., ˆK dist( ˆω, ωk) ≥0.5DFT, where ˆK
+denotes the number of estimated frequencies. We calculate
+the false alarm probability ¯PFA deﬁned as the false alarm
+rate of all the estimated frequencies.
+A.
+Validation of the Independence of Training Cell set
+The approximation that samples in training cell set are
+approximated as independent distributed shown in (17) is
+veriﬁed. For a particular observation tensor Y or a residual
+observation tensor Yr, we calculate the autocorrelation of
+the training cells set ˜YT˜npeak via the MATLAB function
+“xcorr.” We consider two scenarios: pure noise only and
+residue after removing the only target via the NOMP ap-
+proach. The noise variance is 1. The autocorrelations of
+the two scenarios averaged over 300 Monte Carlo trials are
+shown in Fig. 4. Clearly, ˜YT˜npeak is almost independent, and
+the noise variance estimate (−0.09 dB for noise only and
+−0.1 dB for one target) is close to the true noise variance
+0dB.
+B.
+¯PFA Versus α
+In this section, the false alarm probabilities ¯PFA for re-
+quired threshold multipliers α of NOMP-CFAR and NOMP
+are calculated and results are shown in Fig. 5. In addition,
+the required threshold multiplier α of NOMP-CFAR is
+also approximately calculated through the CFAR approach
+(33) termed as CFAR approx. for the SMV scenario. For
+Fig. 4.
+Auto-correlation of CFAR training cells versus lag index.
+Fig. 5.
+¯PFA versus α for the snapshots S = 1, S = 10, and S = 50.
+the SMV scenario S = 1 and ¯PFA ≤0.5, which is often of
+interest as ¯PFA is often set as a very small value such as 10−2
+or 10−1 and ¯PFA is ﬁxed, the required threshold multiplier
+α of NOMP-CFAR is higher than α′
+NOMP of NOMP, i.e.,
+α′
+NOMP < α. For small ¯PFA, i.e., ¯PFA ≤0.01, the required
+multiplier calculated by CFAR approach approximates that
+of NOMP-CFAR well. In detail, for ¯PFA = 10−2, the re-
+quired threshold multipliers of NOMP-CFAR, CFAR ap-
+prox. and NOMP are 11.22, 11.25, and 10.15, respectively,
+corresponding to 10.50, 10.51, and 10.06dB. For the MMV
+scenario, the required threshold multiplier of NOMP-CFAR
+is close to that of NOMP. In addition, for a speciﬁed ¯PFA,
+the required threshold multiplier decreases as the number
+of snapshots S increases. For example, for ¯PFA = 10−2, the
+required threshold multipliers of NOMP-CFAR for S = 1,
+S = 10, and S = 50 are 11.22, 2.81, and 1.67, respectively,
+corresponding to 10.50, 4.49, and 2.23dB.
+C.
+Comparisons With the Traditional CFAR Windows
+The performance of NOMP-CFAR is compared with
+that of NOMP-CFAR using traditional CFAR windows, and
+results are shown in Fig. 6. It can be seen that the false
+alarm rate ¯PFA of NOMP-CFAR using traditional CFAR
+windows is always higher than that of NOMP-CFAR and
+the nominal ¯PFA = 0.01, and the detection probability ¯PD of
+NOMP-CFAR using traditional CFAR windows is always
+higher than that of NOMP-CFAR, and are close to each
+other for SNR ≥17 dB. The above result consistent with
+the analysis in Section III-A demonstrates that the false
+6980
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS
+VOL. 59, NO. 5
+OCTOBER 2023
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 08:57:20 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 11 ---
+Fig. 6.
+¯PFA (a) and ¯PD (b) versus SNR of NOMP, NOMP-CFAR
+algorithm with traditional CFAR windows, and NOMP-CFAR algorithm.
+The dashed line denotes the nominal ¯PFA.
+Fig. 7.
+Performances of measured ¯PFA versus nominal ¯PFA for three
+different SNRs SNR = 14 dB, SNR = 15 dB, and SNR = 18 dB.
+alarm can be better controlled by using the proposed CFAR
+windows which remove the detected cells.
+D.
+Validation of CFAR Property and Detection Probabil-
+ity
+The CFAR Property is veriﬁed by conducting a simu-
+lation in a SMV scenario. The nominal ¯PFA is varied from
+0.01 to 0.12. The results are shown in Fig. 7. It can be seen
+that the measured ¯PFA is close to that of the nominal ¯PFA
+at three different SNRs SNR = 14 dB, SNR = 15 dB, and
+SNR = 18 dB, demonstrating the CFAR behavior of both
+the NOMP and NOMP-CFAR algorithm in constant noise
+variance scenario.
+Fig. 8.
+Detection probabilities of FFT, NOMP-CFAR, and ¯PD versus
+SNR under different δ.
+In the following part, we will show that (41) holds
+approximately provided that the true frequency is close to
+the DFT grid through two numerical simulations.
+For the ﬁrst simulation, we consider three scenarios,
+corresponding to the frequencies, which are closest to the
+123th DFT grid with δ = 0, δ = 0.25, δ = 0.49, respec-
+tively, where δ is deﬁned in (39). The detection probabilities
+of the FFT, which chooses the 123th DFT grid to decide
+whether the target exists or not and the NOMP-CFAR
+which chooses the maximum of the DFT grid and may
+reﬁne the frequency to decide whether the target exists
+or not by its outputs are shown in Fig. 8. It can be seen
+that the detection probabilities of the FFT based approach
+are always close to the corresponding ¯PD. For δ = 0 and
+δ = 0.25 where the frequency is close to the DFT grid,
+the detection probabilities of the NOMP-CFAR are always
+close to the corresponding ¯PD, whereas for δ = 0.49, the
+detection probability of the NOMP-CFAR is higher than the
+corresponding ¯PD. The reason is that NOMP-CFAR detects
+the signal by comparing the peak of the spectrum with the
+threshold. Besides, a frequency ω is detected provided that
+min
+k=1,..., ˆKdist( ˆωk, ω) ≤0.5DFT. These leads NOMP-CFAR
+to have a higher detection probability than the correspond-
+ing ¯PD for the SNRs ranging from 8dB to 18dB.
+For the second simulation, a multiple targets scenario
+is considered. We set the number of targets as K = 16,
+where the SNR of the single signal is varied, and its fre-
+quency is ﬁxed. Meanwhile, the remaining 15 targets whose
+frequencies are randomly generated have the same SNRs
+being 20dB. We investigate the detection probability of the
+single target for ¯PFA = 0.01 and ¯PFA = 0.05, respectively.
+An oracle method named FFT (oracle) is also provided,
+which assumes that the remaining signals are perfectly
+cancelled and the FFT (oracle) is used to detect the single
+scenario. Fig. 9 shows that for δ = 0.2, the detection proba-
+bilities of both FFT (oracle) and NOMP-CFAR are close to
+the theoretical detection probability ¯PD, demonstrating the
+excellent detection performance of NOMP-CFAR.
+E.
+Beneﬁts of Initialization
+This section conducts a simulation to illustrate the bene-
+ﬁts of initialization. We design the NOMP-CFAR (forward)
+XU ET AL.: CFAR BASED NOMP FOR LINE SPECTRAL ESTIMATION AND DETECTION
+6981
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 08:57:20 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 12 ---
+Fig. 9.
+Detection probabilities of FFT (oracle), NOMP-CFAR, and ¯PD
+versus SNR of the given target in multiple targets scenario under
+different ¯PFA.
+Fig. 10.
+¯PFA (a) and ¯PD (b) versus SNR of NOMP, Adap-NOMP-CFAR
+algorithm with and without initialization. The dashed line denotes the
+nominal ¯PFA.
+algorithm,whichjustincrementallydetectsanewfrequency
+by the CFAR detection algorithm and stops until no fre-
+quency is detected. The measured false alarm probability
+¯PFA and the detection probability ¯PD versus the SNR are
+shown in Fig. 10. From Fig. 10(a), the measured false
+alarm rates ¯PFA of NOMP, NOMP-CFAR, NOMP-CFAR
+(forward) are close to the nominal ¯PFA for SNR ≥17 dB.
+From Fig. 10(b), the detection probability ¯PD of NOMP
+is highest, followed by NOMP-CFAR, NOMP-CFAR (for-
+ward). For SNR ≥17 dB, the detection probabilities ¯PD of
+NOMP and NOMP-CFAR are close to 1, while the detec-
+tion probability ¯PD of NOMP-CFAR (forward) is near 0.8.
+Besides, for ¯PD = 0.6, the SNRs of NOMP, NOMP-CFAR,
+NOMP-CFAR (forward) are SNR = 14 dB, SNR = 15 dB
+and SNR = 17 dB, respectively, demonstrating that initial-
+ization yields 1dB performance gain.
+F.
+Performance Versus the SNR in the SMV Setting
+The performances of the proposed algorithm is investi-
+gated in the SMV scenario. The SNRs of all the targets are
+identical and are varied from 12 to 22dB. The false alarm
+rate ¯PFA, the detection probability ¯PD of all the targets, the
+correct model order estimation rate P( ˆK = K), the MSE of
+the frequency estimation error ∥ˆω −ω∥2
+2 averaged over the
+trials in which ˆK = K, the normalized reconstruction error
+NMSE(ˆz) = ∥ˆz −z∥2/∥z∥2
+2 are used as the performance
+metrics. The results are shown in Fig. 11.
+Fig. 11(a) shows the false alarm rate ¯PFA versus SNR.
+At low SNR and SNR ≤16 dB, the ¯PFA of the NOMP tends
+to decrease with SNR and the ¯PFA of the NOMP-CFAR
+increases. For SNR ≥16 dB, the ¯PFA of the two algorithms
+are close to the nominal ¯PFA, demonstrating the CFAR
+property of the two algorithms. However, the ¯PFA of VALSE
+ranges from 0.1 to 0.31, which demonstrates that VALSE
+violates the CFAR. For ¯PD = 0.75, the corresponding SNRs
+of NOMP and NOMP-CFAR are 14dB and 15dB, respec-
+tively, which demonstrates that NOMP-CFAR has 1dB per-
+formance loss due to the lacking of knowledge of noise vari-
+ance.ForSNR ≤14dB,thedetectionprobabilityofVALSE
+is the highest, followed by NOMP and NOMP-CFAR. As
+SNR continues to increase, the detection probability of
+NOMP surpasses that of VALSE. For SNR = 17 dB, the
+detection probabilities of NOMP and NOMP-CFAR are
+close to 1 and are higher than that of VALSE.
+Fig. 11(c) shows the model order estimation probabil-
+ities P( ˆK = K) of the three algorithms increase as SNR
+increases. For SNR = 12 dB, the model order estimation
+probability P( ˆK = K) of VALSE is the highest, followed by
+NOMP and NOMP-CFAR. For SNR = 13 dB or SNR = 14
+dB, the model order estimation probability P( ˆK = K) of
+NOMP surpasses that of VALSE. As SNR continues to
+increase, the model order estimation probability P( ˆK = K)
+of NOMP-CFAR surpasses that of VALSE and approaches
+to that of NOMP.
+Fig. 11(d) and (e) shows the estimation errors. For the
+frequency estimation error, the Cramér Rao bound (CRB) is
+also evaluated for the one target scene. Fig. 11(d) shows that
+the MSEs of NOMP, NOMP-CFAR, and VALSE closely
+approach to the CRB computed for the true model order
+at SNR ≥16 dB, SNR ≥17 dB, and SNR ≥19 dB, re-
+spectively. The reason that NOMP-CFAR deviates away
+from CRB at SNR = 16 dB is that for a frequency lying
+off the DFT frequency grid, the frequency is not detected.
+Meanwhile, a wrong frequency is detected which yields
+a false alarm, causing a large frequency estimation error.
+For the reconstruction error of the line spectral, NOMP
+and VALSE perform better than NOMP-CFAR for about
+SNR ≤16 dB. NOMP and NOMP-CFAR perform similarly
+and better than VALSE as SNR increases.
+6982
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS
+VOL. 59, NO. 5
+OCTOBER 2023
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 08:57:20 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 13 ---
+Fig. 11.
+Performances of NOMP, VALSE, and NOMP-CFAR versus SNR. (a) False alarm rate ¯PFA. (b) Detection probability ¯PD of all the targets.
+(c) Correct model order estimation rate P( ˆK = K). (d) MSE of the frequency estimation error ∥ˆω −ω∥2
+2/K. (e) Normalized reconstruction error
+NMSE(ˆz) = ∥ˆz −z∥2/∥z∥2
+2.
+G.
+Performance Versus the Number of Snapshots in the
+MMV Setting
+The false alarm rate and the detection probability of
+the NOMP-CFAR in the MMV setting is investigated. The
+SNRs of all the targets are set as 10dB. The false alarm rate
+and the detection probability are shown in Fig. 12. From
+Fig. 12(a), the false alarm probability of NOMP [26] is a
+little lower than that of NOMP-CFAR, and the false alarm
+probabilities of both algorithms are close to the nominal
+false alarm probability for S ≥3. Fig. 12(b) shows that the
+detection probabilities of both algorithms are close to each
+other and increase as the number of snapshots increases.
+H.
+Performance Versus the Compression Rate in the
+Compressive Setting
+The performance of NOMP-CFAR versus the compres-
+sion rate M/N is investigated. The elements of the com-
+pression matrix are drawn i.i.d. from the complex Bernoulli
+distribution. The number of frequencies is K = 8, the SNRs
+of all the targets are 22dB. Results are shown in Fig. 13.
+From Fig. 13(a), the false alarm probability of NOMP is a
+little lower than that of NOMP-CFAR, and the false alarm
+probabilities of both algorithms are close to the nominal
+false alarm probability for M/N ≥0.36. For the detection
+probability ¯PD, Fig. 13 shows that NOMP performs better
+than NOMP-CFAR for M/N ≤0.375, and the ¯PD of both
+algorithms approach to 1 as M/N ≥0.5. For ¯PD = 0.74, the
+compression rates required for NOMP and NOMP-CFAR
+are 0.24 and 0.32, respectively, meaning that to achieve
+¯PD = 0.74, NOMP-CFAR needs 4/3 times the number of
+measurements of NOMP.
+Fig. 12.
+Measured ¯PFA (a) and ¯PD (b) of the two algorithm in different
+numbers of snapshots.
+I.
+False Alarm Probability Versus Strength of Noise
+Fluctuation
+The nominal SNR of the kth target is deﬁned as SNRk ≜
+10 log(N|xk|2/σ 2
+0 ), where σ 2
+0 is the nominal noise variance
+XU ET AL.: CFAR BASED NOMP FOR LINE SPECTRAL ESTIMATION AND DETECTION
+6983
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 08:57:20 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 14 ---
+Fig. 13.
+Measured ¯PFA (a) and ¯PD (b) of the two algorithm in different
+compressive rate.
+Fig. 14.
+Measured ¯PFA versus the strength of the noise ﬂuctuation.
+and is set as σ 2
+0 = 1, i.e., 0dB. The SNR of each frequency
+is 22dB. For each MC trial, the noise variance is drawn
+uniformly from [−u, u] in dB, where u characterizes the
+strength of noise ﬂuctuation. The threshold of NOMP is
+calculated by using σ 2
+0 . The results are shown in Fig. 14.
+Note that the detection probability of all the targets are very
+close to 1 (≥0.991) and are omitted here. It can be seen
+that NOMP violates the CFAR property in varied noise
+variance scenario, while NOMP-CFAR still preserves the
+CFAR property.
+V.
+REAL EXPERIMENT
+In this section, the performance of proposed NOMP-
+CFAR is demonstrated using an AWR1642 radar [32]. The
+Fig. 15.
+Field experiment 1 setup.
+TABLE I
+Parameters Setting of the Experiment
+AWR1642 radar is an FMCW MIMO radar consisting of
+two transmitters and four receivers. The radar parameters
+and wave form speciﬁcations are listed in Table I. For the
+single input multiple output (SIMO) mode, the base band
+signal model can be formulated as
+y(n, m, l)=
+K
+
+k=1
+xkej[(n−1)ωx,k+(m−1)ωy,k+(l−1)ωz,k] + ϵn,m,l
+(54)
+n = 0, 1, . . . , N −1, m = 0, 1, . . . , M −1, l = 0, 1, . . . ,
+L −1,wheren,m,l denotetheindexofthefasttimedomain,
+slow time domain, and spatial domain, respectively, ϵn,m,l
+denotes the noise, ωx,k, ωy,k, ωz,k are
+ωx,k = 4π
+c ( fcvk + μrk)Ts ≈4π
+c μrkTs
+(55a)
+ωy,k = 4π
+c fcvkTr
+(55b)
+ωz,k = 2π
+c fcd sin θk
+(55c)
+where c denotes the speed of electromagnetic wave. Note
+that (54) reduces to the range estimation, range azimuth,
+and range-Doppler imaging problem, with M = L = 1,
+M = 1, and L = 1, respectively. Thus, one could apply the
+NOMP-CFAR algorithm to solve the multidimensional line
+spectrum estimation problem (54), and obtain the estimates
+of ranges, velocities, and azimuths via (55).
+6984
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS
+VOL. 59, NO. 5
+OCTOBER 2023
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 08:57:20 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 15 ---
+Fig. 16.
+Range estimation results in experiment 1. (a) CFAR, (b) NOMP, and (c) NOMP-CFAR.
+Fig. 17.
+Range and azimuth estimation in experiment 1. (a) NOMP. (b) NOMP-CFAR.
+Fig. 18.
+Field experiment 2 setup.
+The proposed NOMP-CFAR is compared with the tra-
+ditional CFAR and NOMP. The false alarm rates of NOMP-
+CFAR and NOMP are set as ¯PFA = 10−2, and the false alarm
+rateofCFARis ¯PFA,tr = 10−2/Ntot toensurethatfalsealarms
+produced by the three algorithms are comparable when ¯PFA
+is small, where Ntot denotes the total number of cells under
+test which equals to the number of measurements. The
+upper bound of target number for NOMP-CFAR algorithm
+is Kmax = 32 unless stated otherwise.
+In the following, three experiments are conducted to
+evaluate the performance of NOMP-CFAR.
+A.
+Experiment 1
+Fig. 15 shows the setup of ﬁeld experiment 1. The radial
+distances and the azimuths of the two static people named
+people 1 and people 2 are about (4.92 m, 0◦) and (3.09 m,
+−19.8◦). First, we conduct range estimation only via the
+CFAR, NOMP, and NOMP-CFAR approaches. Then, we
+implementNOMPandNOMP-CFARforrangeandazimuth
+estimation.
+The number of the fast domain samples is N = 256.
+The number of guard cells and the number of training cells
+are 8 and 60, respectively. The CA-CFAR is adopted. The
+required threshold multipliers of the CFAR and NOMP-
+CFAR are αtr = 11.06 and α = 11.03, corresponding to
+10.44dB and 10.43dB, respectively. Fig. 16(a) shows that
+the noise variance is about 24dB, and we set the noise
+variance σ 2 = 251 for NOMP algorithm, and the corre-
+sponding threshold can be calculated as 2.55 × 103, i.e.,
+34.06dB. The range estimation results are shown in Fig. 16.
+Fig. 16(a) shows that CFAR detects people 1 and people 2,
+which estimates their radial distance as 4.90 m and 3.14 m.
+From Fig. 16(b), NOMP detects both people 1 and people
+2. It is concluded that people 1 and people 2 are extended
+targets, and each two detected results correspond to people
+1 and people 2. The highest amplitudes corresponding to
+people 1 and people 2 are 48.86dB and 51.17dB, re-
+spectively. Equivalently, the amplitudes of people 1 and
+people 2 are 14.80dB and 17.11dB above the NOMP
+thresholds. Fig. 16(c) shows that the detection results of
+NOMP-CFAR are similar to that of NOMP. In details, the
+highest amplitudes corresponding to people 1 and people
+2 are 48.83dB and 51.16dB, respectively. In addition,
+the thresholds are 37.30dB and 37.39dB, respectively.
+Equivalently, the amplitudes of people 1 and people 2 are
+11.53dB and 13.77dB above the corresponding thresholds,
+respectively.
+XU ET AL.: CFAR BASED NOMP FOR LINE SPECTRAL ESTIMATION AND DETECTION
+6985
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 08:57:20 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 16 ---
+Fig. 19.
+Range and Doppler estimation results in experiment 2. (a) CFAR. (b) NOMP. (c) NOMP-CFAR.
+Fig. 20.
+Field experiment 3 setup.
+We then implement the 2-D NOMP and NOMP-CFAR
+to perform the range and azimuth estimation, the re-
+sults are shown in Fig. 17. Fig. 17(a) shows that NOMP
+detects 19 points and the highest 2 points are esti-
+mated as (4.84 m, −0.12◦) and (3.09 m, −22.28◦), which
+are close to the truth of people 1 and people 2, re-
+spectively and their integrated amplitudes are 54.16dB,
+55.38dB, respectively. Fig. 17(b) shows that the num-
+ber of detected points of NOMP-CFAR is 2 and the
+results are (4.85 m, 0.50◦, 54.21 dB, 42.30 dB), (3.20 m,
+−21.61◦, 53.29 dB, 51.42 dB), where the ﬁrst, second,
+third, and fourth components are the radial distance, the
+azimuth, reconstructed amplitude, and threshold. The ﬁrst
+detected points correspond to people 1 and the second points
+correspond to people 2. The estimations of radial distances
+and azimuths of people 1 and people 2 are close to the truth.
+This demonstrates that NOMP-CFAR suppresses the false
+alarm signiﬁcantly, compared to NOMP.
+B.
+Experiment 2
+The setup of ﬁeld experiment 2 is shown in Fig. 18. The
+radial distances of the two static people named people 3 and
+people 2 are about (4.87 m, 0◦) and (2.63 m, 24◦). A cyclist
+moves toward the radar with the radial distance starting
+from 7 to 2 m and the velocity about 2 m/s. The numbers
+of fast time domain samples and slow time domain samples
+are N = 128 and M = 64, respectively. Two-dimensional
+CA-CFAR is adopted. The widths of guard band along the
+fast time dimension and slow time dimension are 3, the
+widths of training band along the fast time dimension and
+slow time dimension are 5. Results are shown in Fig. 19.
+Fig. 19(a) shows that people 2 and cyclist are detected,
+and people 1 is missed by CFAR. In addition, CFAR also
+produces 1 false alarm. From Fig. 19(b), the three targets
+including people 1, people 2, and cyclist are detected by
+NOMP. The total number of points detected by NOMP is
+47. Fig. 19(c) shows the detection result of NOMP-CFAR
+algorithm. The total number of points detected by NOMP-
+CFAR is 24. Note that for people 1, the reconstructed
+amplitude and the threshold output by NOMP are 61.17dB
+and 42.51dB, respectively and the reconstructed amplitude
+of people 1 are 18.66dB above the corresponding thresh-
+olds, which is of high conﬁdence of the existence of the
+people 1.
+C.
+Experiment 3
+Fig. 20 shows the setup of ﬁeld experiment 3. A people
+and a cyclist move away from the radar at the radial velocity
+of about 1.2 m/s and 2.1 m/s, and a car moves toward the
+radar at the radial velocity of about 2.3 m/s. The algorithm’s
+parameters are the same as that of the experiment 2.
+The range azimuth estimation results are shown in
+Fig. 21. The NOMP algorithm detects 28 targets. Fig. 21(a)
+shows that the people, cyclist, and car are detected by
+the NOMP algorithm, whose range and azimuth estima-
+tion results are (4.13 m, 29.93◦), (5.61 m, −29.95◦), and
+(19.90 m, −0.27◦), respectively. For the NOMP-CFAR al-
+gorithm, it detects ten targets, including the people, cy-
+clist, and car, as shown in Fig. 21(b). In detail, the
+range and azimuth estimation results are (4.12 m, 29.73◦),
+(5.62 m, −29.91◦), and (19.90 m, −0.18◦), respectively.
+Their corresponding integrated amplitudes and thresh-
+olds are (51.58 dB, 40.24 dB), (44.44 dB, 40.62 dB), and
+(45.52 dB, 39.74 dB), respectively. The range Doppler es-
+timation results are shown in Fig. 22. The upper bound
+numberoftargetsforNOMP-CFARisKmax = 48.Fig.22(a)
+shows that the CFAR method detects the people and
+car but misses the cyclist. NOMP and NOMP-CFAR de-
+tect the people, cyclist, and car, and results are shown
+in Fig. 22(b) and (c), respectively. Meanwhile, the false
+alarms generated by NOMP-CFAR are smaller than that of
+NOMP.
+6986
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS
+VOL. 59, NO. 5
+OCTOBER 2023
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 08:57:20 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 17 ---
+Fig. 21.
+Range and azimuth estimation results in experiment 3. (a) NOMP. (b) NOMP-CFAR.
+Fig. 22.
+Range and Doppler estimation results in experiment 3. (a) CFAR. (b) NOMP. (c) NOMP-CFAR.
+VI.
+CONCLUSION
+We have developed NOMP-CFAR algorithm to achieve
+the high estimation accuracy and maintain the CFAR be-
+havior for line spectrum estimation and detection. The algo-
+rithm consists of two steps: Initialization and detection step.
+For the initialization step, NOMP-CFAR uses the NOMP
+to provide candidate frequency set in high accuracy, which
+avoids target masking effects incurred by CFAR. In the
+detection step, a soft CFAR detector is introduced to output
+a quantity, which characterizes the conﬁdence of each fre-
+quency in the candidate set. A greedy approach is adopted to
+remove or add one frequency in each iteration, and Newton
+reﬁnement is then implemented to reﬁne the parameters of
+theremainingsinusoids.TheeffectivenessofNOMP-CFAR
+is veriﬁed in substantial numerical experiments and real
+data.
+APPENDIX A
+GLRT DERIVATION FOR THE PROPOSED NOMP-CFAR
+DETECTOR
+For simplicity, we consider a general binary detection
+problem in 1-D model 3
+
+H0 : y = ε
+H1 : y = xa(ω) + ε
+(56)
+3Extending the 1-D model to multidimensional model is straightforward
+and is omitted here.
+and we choose between the null hypothesis H0 and the
+alternative hypothesis H1, where ε ∼CN (0, σ 2IN ) is the
+additive white Gaussian noise (AWGN). However, the noise
+variance σ 2 is unknown, we use σ 2
+1 and σ 2
+0 to denote the
+noise variance under the hypothesis H1 and H0, respec-
+tively. Then, the GLRT detector decides H1 if
+max
+x,ω,σ 2
+1
+p(y; x, ω, σ 2
+1 |H1)
+max
+σ 2
+0
+p(y; σ 2
+0 |H0)
+> γ
+(57)
+where γ is a threshold. Under hypothesis H0, the pdf of y
+is
+p(y; σ 2
+0 |H0) =
+1
+(πσ 2
+0 )N exp
+ 
+−∥y∥2
+2
+σ 2
+0
+!
+.
+(58)
+Maximizing p(y; σ 2
+0 |H0) with respect to σ 2
+0 yields
+max
+σ 2
+0
+p(y; σ 2
+0 |H0) =
+
+N
+πe∥y∥2
+2
+N
+(59)
+where the optimal ˆσ 2
+0 = ∥y∥2
+2
+N . Similarly, under hypothesis
+H1, maximizing p(y; x, ω, σ 2
+1 |H1) yields
+max
+x,ω,σ 2
+1
+p(y; x, ω, σ 2
+1 |H1)
+= max
+x,ω
+
+N
+πe∥y −xa(ω)∥2
+2
+N
+= max
+ω
+
+N
+πe∥y −1
+N aH(ω)ya(ω)∥2
+2
+N
+(60)
+XU ET AL.: CFAR BASED NOMP FOR LINE SPECTRAL ESTIMATION AND DETECTION
+6987
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 08:57:20 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 18 ---
+where
+the
+optimal
+ˆσ 2
+1 = ∥y−xa(ω)∥2
+2
+N
+and
+ˆx
+is
+ˆx =
+aH(ω)y/aH(ω)a(ω) = aH(ω)y/N. Substituting (59) and
+(60) in (57) yields
+∥y∥2
+2
+min
+ω ∥y −1
+N a(ω)aH(ω)y∥2
+2
+=
+∥y∥2
+2
+min
+ω yH(IN −1
+N a(ω)aH(ω))y
+=
+∥y∥2
+2
+yHy −1
+N max
+ω |aH(ω)y|2 > γ ′
+(61)
+where γ ′ = γ
+1
+N . The GLRT in (61) involves solving an
+optimization problem with respect to ω ∈[0, 2π). Here
+we use a suboptimal detector in which we restrict ω into
+the DFT grid, i.e., ω ∈, where  = {2π(˜n −1)/N, ˜n =
+1, 2, . . . , N}. Suppose that ˜npeak is the peak localization of
+|˜y|2 given by
+˜npeak = argmax
+˜n∈˜N
+|˜y˜n|2
+(62)
+where
+˜y˜n =
+1
+√
+N aH(ω˜n)y, ω˜n = 2π(˜n −1)/N,
+˜n = 1, 2,
+. . . , N. Note that ˜y ∈CN is the normalized DFT of y, which
+can be computed efﬁciently via FFT. Utilizing the fact that
+∥˜y∥2
+2 = ∥y∥2
+2, (61) can be further simpliﬁed as
+∥˜y∥2
+2
+∥˜y∥2
+2 −
+		˜y˜npeak
+		2 > γ ′
+(63)
+or
+|˜y˜npeak|2
+
+∥˜y∥2
+2 −
+		˜y˜npeak
+		2
+/(N −1)
+=
+|˜y˜npeak|2
+1
+(N−1)
+
+˜n∈˜N,˜n̸=˜npeak |˜y˜n|2
+> (N −1)(γ ′ −1).
+(64)
+Note that the detector can be viewed as the ratio of the
+peak squared magnitude over the noise variance estimate,
+which is the average of the spectrum excluding the peak
+component. In practice, a target may not lie on the DFT
+grid exactly, which might straddle frequency cells. In this
+case, the energy in the cell adjacent to ˜y˜npeak would contain
+both noise and target energy and the extra energy from the
+target would tend to raise the estimate of the noise variance,
+which may result in a threshold that was too high and a
+lower detection probability ¯PD. Consequently, the proposed
+NOMP-CFAR detector (15) is proposed, which can be well
+explained by the GLRT detector.
+APPENDIX B
+COMPUTE ¯PFA FOR THE MMV SCENARIO
+The CFAR detector deciding H1: T (Y) ≥αmmv (47) can
+be equivalently written as
+S
+s=1 | ˜Y˜npeak(s)|2
+σ 2/2
+≥
+S
+s=1
+
+˜n∈T˜npeak
+		 ˜Y˜n(s)
+		2
+σ 2/2
+αmmv
+Nr
+≜¯T αmmv
+Nr
+.
+(65)
+Under the null hypothesis,
+S
+s=1 | ˜Y˜n(s)|2
+σ 2/2
+follows a chi-
+squared distribution with a degrees of freedom 2S, i.e.,
+S
+s=1 | ˜Y˜n(s)|2
+σ 2/2
+∼χ2(2S). Conditioned on
+¯T , the peak of
+S
+s=1 | ˜Y˜n(s)|2
+σ 2/2
+exceeding ¯T αmmv
+Nr
+is
+P
+S
+s=1 | ˜Y˜npeak(s)|2
+σ 2/2
+≥¯T αmmv
+Nr
+
+= 1 −F N
+2S
+
+¯T αmmv
+Nr
+
+(66)
+where N denotes the total number of cells and F2S(x)
+denotes the cumulative distribution function (CDF) of the
+chi-squared distribution
+F2S(x) =
+
+1 −e−x
+2 S−1
+s=0
+1
+s!
+ x
+2
+s , x > 0
+0,
+otherwise.
+(67)
+In addition, ¯T follows
+¯T ∼χ2(2SNr) =
+
+1
+2(SNr−1)!e−x
+2  x
+2
+SNr−1 , x > 0
+0,
+otherwise.
+(68)
+Averaging P
+ S
+s=1 | ˜Y˜npeak (s)|2
+σ 2/2
+≥αmmv
+Nr ¯T
+
+over ¯T yields the
+false alarm
+¯PFA = 1 −E ¯T ∼χ2(2SNr )
+"
+F N
+2S
+
+¯T αmmv
+Nr
+#
+.
+(69)
+Substituting (68) in (69) yields (49).
+REFERENCES
+[1] S. M. Kay, Fundamentals of Statistical Signal Processing: Estima-
+tion Theory. Englewood Cliffs, NJ, USA: Prentice Hall, 1993.
+[2] S. M. Kay, Fundamentals of Statistical Signal Processing: Detection
+Theory. Englewood Cliffs, NJ, USA: Prentice Hall, 1993.
+[3] R. Zhang, C. Li, J. Li, and G. Wang, “Range estimation and range-
+Doppler imaging using signed measurements in LFMCW radar,”
+IEEE Trans. Aerosp. Electron. Syst., col. 55, no. 6, pp. 3531–3550,
+Dec. 2019.
+[4] Z. Yang, J. Li, P. Stoica, and L. Xie, “Sparse methods for direction-of-
+arrival estimation,” in Academic Press Library in Signal Processing,
+vol. 7. New York, NY, USA:Academic, 2018, pp. 509–581.
+[5] B. Tang, J. Tang, Y. Zhang, and Z. Zheng, “Maximum likelihood
+estimation of DOD and DOA for bistatic MIMO radar,” Signal
+Process., vol. 93, no. 5, pp. 1349–1357, 2013.
+[6] G. Hakobyan and B. Yang, “High-performance automotive radar: A
+review of signal processing algorithms and modulation schemes,”
+IEEE Signal Process. Mag., vol. 36, no. 5, pp. 32–44, Sep. 2019.
+[7] D. Chian, C. Wen, C. Wang, M. Hsu, and F. Wang, “Vital signs
+identiﬁcation system with Doppler radars and thermal camera,” IEEE
+Trans. Biomed. Circuits Syst., vol. 16, no. 1, pp. 153–167, Feb. 2022.
+6988
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS
+VOL. 59, NO. 5
+OCTOBER 2023
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 08:57:20 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 19 ---
+[8] K. Duda, L. B. Magalas, M. Majewski, and T. P. Zielinski, “DFT-
+based estimation of damped oscillation parameters in low-frequency
+mechanical spectroscopy,” IEEE Trans. Instrum. Meas., vol. 60,
+no. 11, pp. 3608–3618, Nov. 2011.
+[9] Y. Chi, L. L. Scharf, A. Pezeshki, and R. Calderbank, “Sensitivity of
+basismismatchtocompressedsensing,”IEEETrans.SignalProcess.,
+vol. 59, no. 5, pp. 2182–2195, May 2011.
+[10] R. Schmidt, “Multiple emitter location and signal parameter estima-
+tion,” IEEE Trans. Antennas Propag., vol. 34, no. 3, pp. 276–280,
+Mar. 1986.
+[11] R. Roy and T. Kailath, “ESPRIT-estimation of signal parameters
+via rotational invariance techniques,” IEEE Trans. Acoust., Speech,
+Signal Process., vol. 37, no. 7, pp. 984–995, Jul. 1989.
+[12] S. K. Sahoo and A. Makur, “Signal recovery from random mea-
+surements via extended orthogonal matching pursuit,” IEEE Trans.
+Signal Process., vol. 63, no. 10, pp. 2572–2581, May 2015.
+[13] J. Friedman, T. Hastie, H. Höﬂing, and R. Tibshirani, “Pathwise co-
+ordinate optimization,” Ann. Appl. Statist., vol. 1, no. 2, pp. 302–332,
+2007.
+[14] T. T. Wu and K. Lange, “Coordinate descent algorithms for Lasso
+penalized regression,” Ann. Appl. Statist., vol. 2, no. 1, pp. 224–244,
+2008.
+[15] J. Li, P. Stoica, and D. Zheng, “Angle and waveform estimation
+via RELAX,” IEEE Trans. Aerosp. Electron. Syst., vol. 33, no. 3,
+pp. 1077–1087, Jul. 1997.
+[16] Z. Liu and J. Li, “Implementation of the RELAX algorithm,” IEEE
+Trans. Aerosp. Electron. Syst., vol. 34, no. 2, pp. 657–664, Apr. 1998.
+[17] J. Fang, F. Wang, Y. Shen, H. Li, and R. S. Blum, “Super-
+resolution compressed sensing for line spectral estimation: An it-
+erative reweighted approach,” IEEE Trans. Signal Process., vol. 64,
+no. 18, pp. 4649–4662, Sep. 2016.
+[18] M.-A. Badiu, T. L. Hansen, and B. H. Fleury, “Variational Bayesian
+inference of line spectra,” IEEE Trans. Signal Process., vol. 65, no. 9,
+pp. 2247–2261, May 2017.
+[19] B. N. Bhaskar, G. Tang, and B. Recht, “Atomic norm denoising
+with applications to line spectral estimation,” IEEE Trans. Signal
+Process., vol. 61, no. 23, pp. 5987–5999, Dec. 2013.
+[20] B. Mamandipoor, D. Ramasamy, and U. Madhow, “Newtonized
+orthogonal matching pursuit: Frequency estimation over the contin-
+uum,” IEEE Trans. Signal Process., vol. 64, no. 19, pp. 5066–5081,
+Oct. 2016.
+[21] M. A. Richards, Fundamentals of Radar Signal Processing, 2nd ed.
+New York, NY, USA: McGraw-Hill, 2014.
+[22] E. J. Kelly, “An adaptive detection algorithm,” IEEE Trans. Aerosp.
+Electron. Syst., vol. 22, no. 2, pp. 115–127, Mar. 1985.
+[23] A. Coluccia, A. Fascista, and G. Ricci, “CFAR feature plane: A
+novel framework for the analysis and design of radar detectors,”
+IEEE Trans. Signal Process., vol. 68, pp. 3903–3916, 2020.
+[24] A. De Maio, “Invariance theory for adaptive radar detection in
+heterogeneous environment,” IEEE Signal Process. Lett., vol. 26,
+no. 7, pp. 996–1000, Jul. 2019.
+[25] A. Coluccia, A. Fascista, and G. Ricci, “Design of customized
+adaptive radar detectors in the CFAR feature plane,” IEEE Trans.
+Signal Process., vol. 70, pp. 5133–5147, 2022.
+[26] J. Zhu, L. Han, R. S. Blum, and Z. Xu, “Multi-snapshot Newtonized
+orthogonal matching pursuit for line spectrum estimation with mul-
+tiple measurement vectors,” Signal Process., vol. 165, pp. 175–185,
+2019.
+[27] A. Gupta, U. Madhow, and A. Arbabian, “Super-resolution in po-
+sition and velocity estimation for short-range mm-Wave radar,” in
+Proc. IEEE 50th Asilomar Conf. Signals, Syst., Comput., 2016,
+pp. 1144–1148.
+[28] Z. Marzi, D. Ramasamy, and U. Madhow, “Compressive channel
+estimation and tracking for large arrays in mm-Wave picocells,”
+IEEE J. Sel. Topics Signal Process., vol. 10, no. 3, pp. 514–527,
+Apr. 2016.
+[29] Y. Han, T. Hsu, C. Wen, K. Wong, and S. Jin, “Efﬁcient down-
+link channel reconstruction for FDD multi-antenna systems,” IEEE
+Trans. Wireless Commun., vol. 18, no. 6, pp. 3161–3176, Jun. 2019.
+[30] B. Mamandipoor, A. Arbabian, and U. Madhow, “New models
+and super-resolution techniques for short-range radar: Theory and
+experiments,” in Proc. Inf. Theory Appl. Workshop, 2016, pp. 1–7.
+[31] H. Rohling, “Radar CFAR thresholding in clutter and multiple target
+situations,” IEEE Trans. Aerosp. Electron. Syst., vol. AES-19, no. 4,
+pp. 608–621, Jul. 1983.
+[32] S. Rao, “Introduction to mmWave Sensing: FMCW radars,”
+Texas Instruments (TI) mmWave Training Series, 2017, pp. 1–11.
+[Online]. Available: https://training.ti.com/sites/default/ﬁles/docs/
+mmwaveSensing-FMCW-ofﬂineviewing0.pdf
+Menghuai Xu was born in Zhejiang, China, in
+1998. He received the B.S. degree in marine en-
+gineering and technology from Zhejiang Univer-
+sity, Hangzhou, China, in 2021. He is currently
+working toward the M.E. degree in electronic
+and information engineering at Zhejiang Uni-
+versity.
+His research focuses on mmWave Radar re-
+lated signal processing.
+Jiang Zhu (Member, IEEE) received the B.E.
+degree in electronic engineering from Harbin
+Engineering University, Harbin, China, in 2011,
+and the Ph.D. degree in electronic engineering
+from Tsinghua University, Beijing, China, in
+2016.
+He was a Visiting Student with Lehigh Uni-
+versity in 2015. He joined Ocean College, Zhe-
+jiang University, in 2016 and is currently an
+Associate Professor. His current research in-
+terests include statistical signal processing and
+compressed sensing.
+Jun Fang received the B.S. and M.S. degrees
+from the Xidian University, Xi’an, China, in
+1998 and 2001, respectively, and the Ph.D. de-
+gree from the National University of Singapore,
+Singapore, in 2006, all in electrical engineering.
+During 2006, he was a Postdoctoral Research
+Associate with the Department of Electrical and
+Computer Engineering, Duke University. From
+2007 to 2010, he was a Research Associate with
+the Department of Electrical and Computer En-
+gineering,StevensInstituteofTechnology.Since
+2011, he has been with the University of Electronic of Science and Tech-
+nology of China, where he is currently a Professor. His research interests
+include compressed sensing and sparse theory, massive MIMO/mmWave
+communications, and statistical inference.
+Dr. Fang was the recipient of IEEE Jack Neubauer Memorial Award
+in 2013 for the best systems paper published in IEEE TRANSACTIONS ON
+VEHICULAR TECHNOLOGY. From 2012 to 2020, he served as an Associate
+Technical Editor for IEEE COMMUNICATIONS MAGAZINE. He is currently
+a Member of IEEE SPS Sensor Array and Multichannel TC, and a Senior
+Associate Editor for IEEE SIGNAL PROCESSING LETTERS.
+XU ET AL.: CFAR BASED NOMP FOR LINE SPECTRAL ESTIMATION AND DETECTION
+6989
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 08:57:20 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 20 ---
+Ning Zhang received the B.S. degree from the
+Nanjing University of Science and Technol-
+ogy, Nanjing, China, in 2008, the M.S. degree
+from China Ship Research and Development
+Academy, China, in 2011, and the Ph.D. degree
+from Tsinghua University, Beijing, China, in
+2015, all in electronic engineering.
+Since 2015, he has been with Nanjing Marine
+Radar Institute.
+Zhiwei Xu (Senior Member, IEEE) received the
+B.S. and M.S. degrees from Fudan University,
+Shanghai, China, in 1997 and 2000, respectively,
+and the Ph.D. degree from the University of
+California, Los Angeles, CA, USA, in 2003, all
+in electrical engineering.
+He has held industry positions at G-Plus
+Inc., Los Angeles, SST Communications, Lin-
+denhurst, NY, USA, Conexant Systems, Irvine,
+CA, USA, NXP Semiconductors, San Jose, CA,
+USA, and HRL Laboratories, Malibu, CA, USA,
+where he led the development for wireless LAN and system-on-a-chip
+(SoC) solution for proprietary wireless multimedia systems, CMOS cel-
+lular transceiver, multimedia over cable (MoCA) system and TV tuners,
+various aspects of millimeter- and submillimeter-wave integrated circuits
+and systems, software-deﬁned radios, high-speed ADC, and ultralow-
+power analog VLSI. He is currently a Professor with Zhejiang University,
+Hangzhou, China, where he is researching on integrated circuits and
+systems for Internet-of-Things and communication applications.
+6990
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS
+VOL. 59, NO. 5
+OCTOBER 2023
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 08:57:20 UTC from IEEE Xplore.  Restrictions apply. 

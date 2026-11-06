@@ -1,0 +1,427 @@
+--- PDF PAGE 1 ---
+192
+IEEE SIGNAL PROCESSING LETTERS, VOL. 23, NO. 2, FEBRUARY 2016
+High Resolution Direct Position Determination
+of Radio Frequency Sources
+Tom Tirer and Anthony J. Weiss
+Abstract—The most common methods for localization of radio
+frequency transmitters are based on two processing steps. In the
+ﬁrst step, parameters such as angle of arrival or time of arrival are
+estimated at each base station independently. In the second step,
+the estimated parameters are used to determine the location of
+the transmitters. The direct position determination approach ad-
+vocates using the observations from all the base stations together
+in order to estimate the locations in a single step. This single-step
+method is known to outperform two-step methods when the signal-
+to-noise ratio is low. In this paper, we propose a direct-position-de-
+termination-based method for localization of multiple emitters that
+transmit unknown signals. The method does not require knowledge
+of the number of emitters. It is based on minimum-variance-dis-
+tortionless-response considerations to achieve a high resolution es-
+timator that requires only a two-dimensional search for planar ge-
+ometry, and a three-dimensional search for the general case.
+Index Terms—Array processing, direct position determination,
+emitter localization, maximum likelihood, minimum variance
+distortionless response (MVDR), multiple signal classiﬁcation
+(MUSIC).
+I. INTRODUCTION
+T
+HE problem of emitter location attracts much interest
+in different disciplines such as signal processing, com-
+munications, vehicular technology, and underwater acoustics.
+Common localization methods use two processing steps. In the
+ﬁrst step, intermediate parameters that depend on the locations
+of the sources are estimated from the received signal. These
+parameters are usually the angle of arrival (AOA), time of
+arrival (TOA), Doppler frequency shift or signal strength.
+In the second step, the previously estimated parameters are
+used to estimate the locations of the sources, using geometric
+considerations. From estimation theory point of view, these
+methods are sub-optimal, since the parameters estimation in the
+ﬁrst phase is done independently by each sensor, without using
+the constraint that all the observations relate to the same emitter
+location. The Direct Position Determination (DPD) approach
+was proposed in [1] for a single emitter, and in [2] for multiple
+emitters whose number is known. The DPD takes advantage of
+Manuscript received September 12, 2015; revised November 04, 2015; ac-
+cepted November 20, 2015. Date of publication November 25, 2015; date of
+current version December 21, 2015. This work was supported in part by the
+Israel Science Foundation under Grants 503/15 and 965/15) and in part by the
+Institute for Future Technologies Research named for the Medvedi, Shwartzman
+and Gensler. The associate editor coordinating the review of this manuscript and
+approving it for publication was Dr. Muhammad Ikram.
+The authors are with the School of Electrical Engineering, Tel Aviv Univer-
+sity, Tel Aviv 69978, Israel (e-mail: tirer.tom@gmail.com; ajw@eng.tau.ac.il).
+Color versions of one or more of the ﬁgures in this paper are available online
+at http://ieeexplore.ieee.org.
+Digital Object Identiﬁer 10.1109/LSP.2015.2503921
+the rather simple channel that is associated with radio frequency
+signals, uses the observations from all the sensors together, and
+ends with a cost function that depends only on the location of
+sources. Therefore, it enables direct estimation of the locations
+in a single step. The DPD inherently overcomes the problem of
+associating estimated parameters with their relevant sources,
+and was shown to outperform two-step methods, especially in
+low signal to noise ratio (SNR) scenarios. Furthermore, it can
+localize more simultaneous emitters than the two-step methods,
+since it uses the observations from all the sensors together.
+The DPD technique requires the transmission of the received
+signals (possibly sampled) to a central processing location,
+unlike two-step methods, that require only the transmission
+of the intermediate parameters. Therefore, the DPD requires
+higher communication bandwidth. A DPD estimator can be
+based on the well-known Maximum Likelihood (ML) estimator
+[1]. It can also be obtained by a spectral based method [2], in
+order to make it computationally attractive for multiple emitters
+scenario.
+Spectral methods of AOA estimation can be modiﬁed to
+handle direct location determination. A common spectral
+method of AOA estimation for multiple sources is the Mul-
+tiple Signal Classiﬁcation (MUSIC) [3] that makes use of
+the eigen-structure of the measurements covariance matrix.
+However, the number of sources must be known or estimated.
+Furthermore, it usually requires large number of snapshots, and
+coherent signals require appropriate adjustments. Other spectral
+methods include the simple beamformer, which is basically the
+ML estimator for a single source, and the Minimum Variance
+Distortionless Response (MVDR) estimator [4]. The MVDR is
+known to yield better resolution than the beamformer.
+Our proposed method combines the DPD concept and the
+MVDR approach in order to create a high resolution estimator
+that can localize multiple dense emitters that transmit unknown
+signals. Since prior knowledge of the number of signals is not
+required, the use of model order determination [5] is avoided.
+Recall that order determination is prone to errors when the
+number of snapshots is small, the SNR is low or the sources
+are dense. The proposed method generates a spectrum (heat
+map) over a plane, in the 2D case, or over a three dimensional
+space in the general case, with peaks at points where emitters
+are likely to be located. Determining the number of emitters
+(and their locations) can be performed as a ﬁnal step using
+Constant-False-Alarm-Rate (CFAR) methods inspired by radar
+and sonar literature [6].
+Direct localization based on MVDR and AOA arrays was
+suggested in [7] and [8]. The work reported in [7] discusses un-
+synchronized arrays, therefore it does not exploit TOA or differ-
+ential TOA, and the arrays must consist of two sensors or more.
+The work reported in [8] describes a scenario of a moving single
+1070-9908 © 2015 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 06:14:28 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 2 ---
+TIRER AND WEISS: HIGH RESOLUTION DIRECT POSITION DETERMINATION OF RADIO FREQUENCY SOURCES
+193
+array, and therefore it has similar deﬁciencies as [7]. The work
+reported in [9], despite its title, is focused on angular bounds
+of distributed sources. The work reported here can be used not
+only with arrays but also with spatially separated single sensors.
+II. PROBLEM FORMULATION
+Consider unknown number of transmitters and
+widely sep-
+arated,
+-elements receiving arrays. The bandwidth of the sig-
+nals is small compared to the inverse of the propagation time
+over each array aperture. The signals’ waveforms are unknown.
+It is required to ﬁnd the number and the location of the trans-
+mitters based on the receiving arrays output. Consider a single
+transmitter whose position is denoted by the vector of coordi-
+nates
+, the complex envelope of the waveform observed by the
+-th array is given by the time-dependent
+vector
+(1)
+where
+is an unknown complex scalar representing the signal
+attenuation due to path loss,
+is the
+-th array response
+to a signal transmitted from
+, and
+is the signal
+waveform delayed by
+. The vector
+represents white,
+zero-mean, circular complex Gaussian noise. It is assumed that
+the transmitter and arrays are stationary during the observation
+interval, and therefore there is no frequency shift due to the
+Doppler effect. The observed signal time interval
+can be
+partitioned into
+sections, each of length
+. It is assumed
+that
+, which can be obtained by using long
+enough observation interval for the region of interest. There-
+fore, the
+-th Fourier coefﬁcient of the observed signal at the
+-th array in the -th section is well approximated by
+(2)
+where
+is the frequency associated with the
+-th coefﬁcient,
+and
+,
+,
+are the
+-th Fourier coefﬁcients
+of
+,
+,
+in the -th section, respectively. Note that
+it is advantageous to use frequency domain representation since
+it isolates the delay which is different at each array from the
+signal’s waveform that is the same at all the arrays.
+Deﬁne
+(3)
+and (2) can be written as
+(4)
+Now, collect elements from different arrays
+(5)
+We get
+(6)
+We can always ensure that
+, and without loss of
+generality, we can assume that
+. Therefore,
+from (5) and (3) we get the constraint
+(7)
+To conclude, the problem at hand now is to use the observa-
+tions given in equation (6) in order to ﬁnd the location of the
+transmitters.
+III. DPD ALGORITHM
+We start with developing the DPD Maximum Likelihood
+estimator. Since the noise samples are independent, identically
+distributed (i.i.d.), circular, complex Gaussian variables, the
+Fourier coefﬁcients,
+, are also circular, i.i.d., complex
+Gaussian, therefore, the Maximum Likelihood estimator coin-
+cides with the Least Squares (LS) estimator (assuming that the
+noise variance is known, and equal at all receivers).
+The single emitter ML estimator of
+is given by
+(8)
+where
+(9)
+The minimizer with respect to
+is given by
+(10)
+Substituting
+into (9), using
+and sim-
+plifying, gives
+(11)
+Therefore,
+(12)
+The last expression is equivalent to
+(13)
+where
+is the
+sample covariance
+(14)
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 06:14:28 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 3 ---
+194
+IEEE SIGNAL PROCESSING LETTERS, VOL. 23, NO. 2, FEBRUARY 2016
+The vector
+can be represented by
+(15)
+where
+(16)
+The notation
+stands for the
+identity matrix,
+is a
+vector of ones, and
+stands for the Kronecker product.
+Substituting (15) in (13) we get
+(17)
+Finally, maximization with respect to
+, subject to
+,
+gives
+(18)
+where
+denotes the largest eigenvalue of the operand.
+We obtained an expression for the ML estimator for a single
+emitter. Similar expression is given in [1], but it is formulated
+differently, by optimizing the ML criterion ﬁrst with respect to
+the attenuation parameters, and only then with respect to the
+Fourier coefﬁcients of the signal. However, we are interested
+in high resolution solution. Therefore, we can make use of the
+MVDR concept. The ML cost function in (13) appears as a
+simple sum of
+beamforming expressions, followed by maxi-
+mization with respect to
+. Note that each term consists of ob-
+servations from all the arrays, and uses both delays and angles
+of arrival. Processing all the frequencies together, (13) can be
+written as
+(19)
+where
+(20)
+The notation
+stands for block diagonal matrix.
+Now, we propose an estimator whose rationale follows
+closely the rationale leading to the well known MVDR.
+(21)
+where
+(22)
+The weight vector
+minimizes the total output en-
+ergy from sources at all locations except
+, and therefore it is
+expected to yield high resolution. Equation (22) describes min-
+imization of a quadratic function under a linear constraint, and
+can be solved using the complex gradient operator [10]. The so-
+lution is given by
+(23)
+Substituting (23) into (21) we get
+(24)
+Using (20) and
+(25)
+Equation (24) can be written as
+(26)
+Substituting (15) in (26) gives
+(27)
+where
+denotes the minimal eigenvalue of the operand.
+Since the matrix in the denominator is Hermitian, (27) can be
+written also as
+(28)
+Note that the eigenvalue is calculated for a
+matrix, where
+usually
+is rather small.
+IV. NUMERICAL RESULTS
+In order to examine the performance of the advocated method
+(28), denoted by DPD-HR, we performed extensive Monte
+Carlo simulations and compared the results with two other
+competing DPD algorithms. The other methods are the single
+emitter ML estimator (18), denoted by DPD-SML, and the
+MUSIC-like method proposed in [2], denoted by DPD-MUSIC.
+For the DPD-MUSIC algorithm, we used model order de-
+termination based on frequency-domain MDL criterion, as
+described in [5]. Consider four single sensors located at coor-
+dinates (100,
+150), (100,
+50), (100,50) and (100,150) Km,
+and two emitters located at ( 1.5
+50) and (1.5,
+50) Km,
+transmitting unknown ﬂat narrowband Gaussian signals. The
+geometry is shown in Fig. 1. The channel attenuation is mod-
+eled by
+, where
+is a circular, complex Gaussian,
+random variable, with zero mean and standard deviation of
+0.1, drawn independently per sensor and per emitter. The
+location estimation is based on
+sections of 64 Fourier
+coefﬁcients associated with frequencies up to 150 KHz. The
+SNR is varied between
+10 dB and 30 dB. At each SNR value
+we performed 250 Monte Carlo experiments. Fig. 2 shows the
+Root Mean Square (RMS) of miss distance for the source at
+(
+1.5,
+50) Km. Similar results were received for the second
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 06:14:28 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 4 ---
+TIRER AND WEISS: HIGH RESOLUTION DIRECT POSITION DETERMINATION OF RADIO FREQUENCY SOURCES
+195
+Fig. 1. Problem geometry.
+Fig. 2. RMS miss distance vs. SNR for single sensors.
+source. It can be clearly seen that the performance of the
+DPD-HR is superior to the DPD-SML. It is also better than
+the performance of the DPD-MUSIC at low and medium SNR,
+where the model order estimation is prone to errors. At high
+SNR, DPD-MUSIC outperforms the other methods. Next, each
+sensor was replaced by a seven-elements uniform linear array,
+with half wavelength spacing, and array baseline parallel to the
+y axis. Note that in this case
+, deﬁned in (14), is singular,
+therefore we used small diagonal loading in order to invert it,
+and slightly modiﬁed the MDL criterion to use only non-zero
+eigenvalues. Fig. 3 shows the results that were obtained by
+repeating the previous experiments using the arrays instead of
+the single sensors. It indicates that at low SNR the DPD-HR
+outperforms the other methods, and at high SNR it has the same
+performance as DPD-MUSIC. The performance improvement
+in Fig. 3 with respect to Fig. 2 is somewhat less than the
+expected coherent integration gain due to the small separation
+between the sources. Next, for SNR of 30 dB, we examined
+how the RMS error is affected by the distance between the two
+sources. The results are shown in Fig. 4. It is clear that DPD-HR
+and DPD-MUSIC have equal performance. The DPD-SML
+has a large error, even when the sources are fairly distant,
+mainly due to a bias, resulting from the presence of the other
+source. Finally, in order to demonstrate the high resolution of
+DPD-HR, we added two more emitters, located at (0,
+)
+and (0,
+) Km, and increased the number of sections to
+. Fig. 5 and Fig. 6 show the spectrums of DPD-SML
+and DPD-HR (in linear scale) for one realization at SNR of
+30 dB. The sharp peaks of the DPD-HR spectrum are visible.
+V. CONCLUSIONS
+We proposed a technique that combines the direct position
+determination and the MVDR approaches and produces a high
+resolution spectrum for multiple sources localization. The pro-
+posed estimator can be implemented without knowing or esti-
+mating the number of sources. It can work even with spatially
+Fig. 3. RMS miss distance vs. SNR for 7-sensor arrays.
+Fig. 4. RMS miss distance vs. distance between sources.
+Fig. 5. DPD-SML spectrum.
+Fig. 6. DPD-HR spectrum.
+separated single sensors (using only delays) instead of spatially
+separated arrays. For multiple sources, its performance is supe-
+rior to a DPD-beamformer, and at low and medium SNR, it also
+outperforms MUSIC-based DPD algorithm that includes model
+order determination as a ﬁrst step. We dealt with a rather general
+model, but believe that this approach can be extended to more
+complex and interesting scenarios. Performance analysis of the
+method, focusing on its resolution, will be published in the near
+future.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 06:14:28 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 5 ---
+196
+IEEE SIGNAL PROCESSING LETTERS, VOL. 23, NO. 2, FEBRUARY 2016
+REFERENCES
+[1] A. J. Weiss, “Direct position determination of narrowband radio fre-
+quency transmitters,” IEEE Signal Process. Lett., vol. 11, no. 5, pp.
+513–516, May 2004.
+[2] A. J. Weiss and A. Amar, “Direct position determination of multiple
+radio signals,” EURASIP J. Appl. Signal Process., vol. 2005, no. 1, pp.
+37–49, 2005.
+[3] R. O. Schmidt, “Multiple emitter location and signal parameter estima-
+tion,” IEEE Trans. Antennas Propag., vol. AP-34, no. 3, pp. 276–280,
+Mar. 1986.
+[4] J. Capon, “High-resolution frequency-wavenumber spectrum anal-
+ysis,” Proc. IEEE, vol. 57, no. 8, pp. 1408–1418, Aug. 1969.
+[5] M. Wax and T. Kailath, “Detection of signals by information theoretic
+criteria,” IEEE Trans. Acoust., Speech, Signal Process., vol. ASSP-33,
+no. 2, pp. 387–392, Apr. 1985.
+[6] R. Nitzberg, “Constant-false-alarm-rate signal processors for several
+types of interference,” IEEE Trans. Aerosp. Electron. Syst., vol. AES-8,
+no. 1, pp. 27–34, Jan. 1972.
+[7] D. W. Rieken and D. R. Fuhrmann, “Generalizing MUSIC and MVDR
+for multiple noncoherent arrays,” IEEE Trans. Signal Process., vol. 52,
+no. 9, pp. 2396–2406, Sep. 2004.
+[8] M. Oispuu and U. Nickel, “Direct detection and position determination
+of multiple sources with intermittent emission,” Signal Process., vol.
+90, no. 12, pp. 3056–3064, 2010.
+[9] A. Hassanien, S. Shahbazpanahi, and A. B. Gershman, “A general-
+ized capon estimator for localization of multiple spread sources,” IEEE
+Trans. Signal Process., vol. 52, no. 1, pp. 280–283, Jan. 2004.
+[10] D. Brandwood, “A complex gradient operator and its application
+in adaptive array theory,” IEE Proc. F (Commun., Radar, Signal
+Process.), vol. 130, pp. 11–16, 1983, IET.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 06:14:28 UTC from IEEE Xplore.  Restrictions apply. 

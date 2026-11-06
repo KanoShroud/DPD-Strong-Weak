@@ -1,0 +1,1081 @@
+--- PDF PAGE 1 ---
+Received: 6 April 2021
+-
+Revised: 19 June 2021
+-
+Accepted: 15 July 2021
+-
+IET Signal Processing
+DOI: 10.1049/sil2.12068
+O R I G I N A L R E S E A R C H PA P E R
+Block Newtonised orthogonal matching pursuit for off‐grid DOA
+estimation in the presence of unknown mutual coupling
+Wen‐Gen Tang
+|
+Hong Jiang
+|
+Qi Zhang
+College of Communication Engineering, Jilin
+University, Changchun, China
+Correspondence
+Hong Jiang, College of Communication
+Engineering, Jilin University, Changchun 130012,
+China.
+Email: jiangh@jlu.edu.cn
+Funding information
+National Natural Science Foundation of China,
+Grant/Award Numbers: 61371158, 61771217; Jilin
+Provincial Natural Science Foundation of China,
+Grant/Award Number: 20180101329JC
+Abstract
+Mutual coupling (MC) between array elements can lead to severe accuracy degradation in
+direction‐of‐arrival (DOA) estimation. In this study, an off‐grid compressed sensing (CS)
+approach for DOA estimation in the presence of unknown MC is proposed using block
+Newtonised orthogonal matching pursuit (NOMP). First, the model of DOA estimation
+with MC is block sparsely represented to fully utilise the whole array aperture. Then, a
+block NOMP algorithm with multiple measurement vectors (MMV) is developed to
+achieve the estimates of DOA, in which the Newton refinement procedure is presented
+by deriving the first‐ and second‐order derivatives of the block steering matrix with
+respect to the angle grid. Compared with the subspace‐based and sparse recovery‐based
+methods with MC, the proposed block NOMP approach has robustness in a small
+number of snapshots and owns no grid‐mismatch effect. Meanwhile, in comparison to
+several existing off‐grid DOA estimation methods with MC, it can achieve higher esti-
+mation accuracy and similarly low computational complexity. The superior performance
+of the proposed approach is shown via numerical simulations.
+K E Y W O R D S
+array signal processing, compressed sensing, direction‐of‐arrival estimation
+1
+|
+INTRODUCTION
+As a key technology in array signal processing, direction‐of‐
+arrival (DOA) estimation has received extensive attention in ra-
+dar, sonar, communication, and radio astronomy etc [1]. Many
+classical DOA estimation methods have been put forward over
+the past few decades such as Capon, MUSIC and ESPRIT etc
+[2]. In DOA estimation, we usually assume the ideal situation
+that the array manifold is exactly known and has a determined
+expression. However, such assumption is invalid in practice due
+to array mutual coupling (MC), which is usually caused by in-
+teractions among sensor array elements. Unknown MC may
+cause severe distortion and degradation in estimation accuracy
+[3]. To eliminate the MC effect, many array calibration tech-
+niques have been proposed. Most of them [4–15] are based on
+subspace techniques (e.g., MUSIC, ESPRIT). For example, in
+[11], by adding auxiliary array elements, DOA estimation with
+unknown MC was formulated as a normal DOA estimation
+problem, and the ESPRIT algorithm was then applied directly. In
+[12], an effective DOA estimation and tracking method with MC
+was presented by parameterising the steering vector and using
+the MUSIC‐like subspace principle. Nevertheless, the perfor-
+mance of the subspace‐based algorithms deteriorate under a
+small number of measurements (snapshots) and coherent
+sources.
+Sparse recovery technology provides an alternative strategy
+for DOA estimation with unknown MC. Recently, several
+sparse recovery‐based methods have been proposed [16–21].
+For instance, in [17], by discarding some array elements, a
+sparse representation method based on l1 norm minimisation
+has been proposed for DOA estimation with MC. In [18], by
+block sparsity representation, a block l1 norm method has been
+presented for DOA estimation with MC. However, in the
+above‐mentioned sparse methods, the spatial domain needs to
+be divided into grids, thus the grid‐mismatch problem cannot
+be overcome. To solve such a problem, several off‐grid sparse
+recovery methods [22, 23] with MC have been proposed. For
+example, in [23], a sparse Bayesian learning method with first‐
+This is an open access article under the terms of the Creative Commons Attribution‐NonCommercial‐NoDerivs License, which permits use and distribution in any medium, provided the
+original work is properly cited, the use is non‐commercial and no modifications or adaptations are made.
+© 2021 The Authors. IET Signal Processing published by John Wiley & Sons Ltd on behalf of The Institution of Engineering and Technology.
+666
+-
+IET Signal Process. 2021;15:666–673.
+wileyonlinelibrary.com/journal/sil2
+
+
+--- PDF PAGE 2 ---
+order Taylor expansion was presented for DOA estimation in
+the presence of MC.
+Orthogonal matching pursuit (OMP) [24] is an efficiently
+iterative greedy algorithm, which chooses the column of
+observation matrix that is most correlated to the current re-
+sidual at each step. Unfortunately, as an on‐grid compressed
+sensing (CS) method, the OMP suffers from the grid‐mismatch
+effect. Newtonised orthogonal matching pursuit (NOMP),
+proposed in [25] for frequency estimation, can overcome the
+disadvantage of the OMP method by the Newton refinement
+procedure and enjoys low computational complexity. Most
+importantly, NOMP does not need the adjustment of regular-
+isation parameters.
+Motivated by [25], in this study, we address the off‐grid
+CS problem for DOA estimation in the presence of un-
+known MC, and propose a block NOMP algorithm. First, we
+represent the signal model of DOA estimation as a block
+sparse form in order to fully utilise the whole array aperture
+in the presence of MC, where each potential DOA corre-
+sponds to a block matrix. Then, we extend the original
+NOMP to its block sparse version with multiple measurement
+vectors (MMV) for DOA estimation. In the proposed block
+NOMP algorithm, we estimate the initial DOA by finding the
+most similar DOA value in the predefined block grid of DOA
+based on the maximum likelihood algorithm. Then, we
+gradually refine the estimates of DOAs by a block Newton
+method.
+The main contribution of our study is as follows: (a) we
+propose a block NOMP approach for off‐grid DOA estimation
+in the presence of unknown mutual coupling. The proposed
+approach can overcome the grid‐mismatch effect of the exist-
+ing sparse recovery methods and has relatively low computa-
+tional complexity; (b) unlike the original NOMP algorithm in
+[25], the proposed block NOMP algorithm is applicable to the
+MMV case, whose single‐source observation model contains a
+block steering matrix rather than a steering vector, thus the
+matrix product rather than vector product is utilised. In addi-
+tion, the first‐ and second‐order derivatives of the block
+steering matrix with respect to angle grid are derived in the
+block Newton refinement procedure.
+The remainder of this studypaper is organised as follows. In
+section 2, the signal model of DOA estimation with MC is
+presented. In Section 3, the block sparsity representation of the
+observed signals are formulated. In section 4, a block NOMP
+algorithm for off‐grid DOA estimation in the presence of
+unknown MC is proposed for block sparse recovery. Several
+numerical simulation results are provided to verify the pro-
+posed method in section 5.
+2
+|
+SIGNAL MODEL AND BLOCK
+SPARSITY REPRESENTATION
+Assume that there are K far‐field and narrow‐band sources
+from
+directions
+θk; ðk ¼ 1; 2; …; KÞ,
+θk ∈½−90°; 90°Þ,
+impinging on an M‐element uniform linear array (ULA). First,
+let us consider an ideal situation without mutual coupling. The
+output signals of the array at time t can be modelled as
+xðtÞ
+¼ ∑
+K
+k¼1
+aðθkÞskðtÞ þ nðtÞ
+¼ AðθÞsðtÞ þ nðtÞ;
+ð1Þ
+where AðθÞ ¼ ½aðθ1Þ; aðθ2Þ; …; aðθKÞ ∈CMK is the ideal
+steering matrix, aðθkÞ ¼ ½1; γ; …; γM−1T, γk ¼ e−j
+2πdsinðθkÞ
+λ
+, where
+d is the inter‐element spacing of ULA and λ is the wavelength,
+j ¼
+ffiffiffiffiffiffi
+−1
+p
+,
+sðtÞ ¼ ½s1ðtÞ; s2ðtÞ; …; sKðtÞT ∈CK
+denote
+the
+source signals, nðtÞ ∈CM is the circular symmetric white
+Gaussian noise with mean zero and covariance matrix σ2IM,
+and is uncorrelated with sðtÞ.
+After collecting L measurements, the multi‐measurement
+receiving data can be written as follows:
+X ¼ AðθÞS þ N;
+ð2Þ
+where
+X ∈CML,
+S ¼ ½sð1Þ; sð2Þ; …; sðLÞ ∈CKL,
+and
+N ¼ ½nð1Þ; nð2Þ; …; nðLÞ ∈CML.
+In actual situations, the mutual coupling effect among the
+neighbouring array elements should be taken into consideration.
+Thus, the received data model can be modified as follows:
+Y ¼ GAðθÞS þ N;
+ð3Þ
+where G ∈CMM is a mutual coupling matrix, which could be
+modelled as the banded symmetric Toeplitz matrix [11], that is
+G ¼ TðgÞ, g ¼ 1; g1; g2; …; gP−1; 0; …; 0
+
+
+and gp denotes the
+mutual coupling coefficient between the m‐th and ðm þ pÞ‐th
+array elements, with m ¼ 1; 2; …; M, p ¼ 0; 1; …; P −1. For
+the m‐th elements, we assume it to be disturbed by the mutual
+coupling effects coming from the ðm −P þ 1Þ‐th, … , ðm −1Þ‐
+th, ðm þ 1Þ‐th, … , ðm þ P −1Þ‐th elements, while the mutual
+coupling effects of the array elements far from P are too weak;
+hence can be neglected for the simplification of analysis.
+Therefore, G can be given by
+G ¼
+1
+g1
+⋯
+gP−1
+0
+0
+0
+0
+0
+⋮
+⋱
+⋱
+⋱
+⋱
+⋱
+⋱
+⋱
+⋮
+gP−2
+⋯
+1
+g1
+⋯
+gP−1
+0
+0
+0
+gP−1
+⋯
+g1
+1
+g1
+⋯
+gP−1
+0
+0
+0
+⋱
+⋱
+⋱
+⋱
+⋱
+⋱
+⋱
+0
+0
+0
+gP−1
+⋯
+g1
+1
+g1
+⋯
+gP−1
+0
+0
+0
+gP−1
+⋯
+g1
+1
+⋯
+gP−2
+⋮
+⋱
+⋱
+⋱
+⋱
+⋱
+⋱
+⋱
+⋮
+0
+0
+0
+0
+0
+gP−1
+⋯
+g1
+1
+2
+6666666666664
+3
+7777777777775
+ð4Þ
+where g0 ¼ 1 > |g1| > ⋯> |gP−1|.
+The problem of interest is to estimate θ in Equation (3)
+with Y, under the circumstance that G is unknown. The
+number of targets K is assumed known, which is estimated in a
+separate stage.
+According to Equation (3), Y could be rewritten as follows:
+Y ¼ ∑
+K
+k¼1
+GaðθkÞsk þ N;
+ð5Þ
+TANG ET AL.
+-
+667
+ 17519683, 2021, 9, Downloaded from https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/sil2.12068 by Readcube-Labtiva, Wiley Online Library on [08/10/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+--- PDF PAGE 3 ---
+where sk denotes the k‐th row of S. We note that GaðθkÞ could
+be expressed as [18].
+GaðθkÞ ¼ HðθkÞaðθkÞ;
+ð6Þ
+where HðθkÞ ¼ diagð^h 1ðθkÞ; …; ^hP−1ðθkÞ; hPðθkÞ; …; hPðθkÞ;
+hP−1
+ðθkÞ;
+…; h1ðθkÞÞ,
+with
+^hiðθkÞ ¼ ∑P−1
+l¼1−P g|l|γl
+k −
+∑P−1
+l¼i glγ−l
+k , hPðθkÞ ¼ ∑P−1
+l¼1−P g|l|γl
+k , hiðθkÞ ¼ ∑P−1
+l¼1−P g|l|γl
+k −
+∑P−1
+l¼i glγl
+k, and HðθkÞ ∈CMM. Then, Equation (5) is trans-
+formed to
+Y ¼ ∑
+K
+k¼1
+diagðaðθkÞÞgðθkÞsk þ N;
+ð7Þ
+where
+gðθkÞ ¼ ½^h1ðθkÞ; …; ^hP−1ðθkÞ;
+hPðθkÞ; …; hPðθkÞ;
+hP−1ðθkÞ; …; h1ðθkÞT ∈CM1.
+Furthermore, considering the repeating elements in gðθkÞ
+of Equation (7), we have
+Y ¼ ∑
+K
+k¼1
+VðθkÞΞðθkÞsk þ N ¼ ∑
+K
+k¼1
+VðθkÞΓk þ N;
+ð8Þ
+where
+VðθkÞ ¼
+1
+0
+0
+0
+0
+0
+0
+0
+γk
+0
+0
+0
+0
+0
+⋮
+⋮
+⋱
+⋮
+⋮
+⋮
+⋮
+0
+0
+0
+γP−1
+k
+0
+0
+0
+⋮
+⋮
+⋮
+⋮
+⋮
+⋮
+⋮
+0
+0
+0
+γM−P
+k
+0
+0
+0
+0
+0
+0
+0
+⋱
+0
+0
+0
+0
+0
+0
+0
+γM−2
+k
+0
+0
+0
+0
+0
+0
+0
+γM−1
+k
+2
+66666666666666664
+3
+77777777777777775
+;
+withVðθkÞ ∈CMð2P−1Þ,ΞðθkÞ ¼ ½^h1ðθkÞ; …; ^hP−1ðθkÞ; hPðθkÞ;
+hP−1ðθkÞ; …; h1ðθkÞT, Γk ¼ ΞðθkÞsk, and Γk∈Cð2P−1ÞL.
+After discretising the whole spatial domain, an over‐
+complete
+dictionary
+for
+θ
+can
+be
+constructed
+as
+θ ¼ ½θ1; θ2; …; θQ, Q > > K. Then, the block sparse repre-
+sentation of Y can be written as follows:
+Y ¼ VΓ þ N;
+ð9Þ
+where V ¼ ½Vðθ1Þ; Vðθ2Þ; …; VðθQÞ ∈CMQð2P−1Þ, Γ ¼ ½ΓT
+1 ;
+ΓT
+2 ; …; ΓT
+QT∈CQð2P−1ÞL, where the ððq −1Þð2P −1Þ þ 1Þ‐th
+to qð2P −1Þ‐th rows of Γ is non‐zero if θq is the true DOA of
+the q‐th source.
+Such a problem could be seen as a block sparse recovery
+problem [18]. It is shown from Equation (9) that the information
+of the whole array aperture can be fully utilised without aperture
+loss; thus, the mutual coupling effect can be eliminated.
+3
+|
+BLOCK NOMP FOR OFF‐GRID DOA
+ESTIMATION IN THE PRESENCE OF
+MUTUAL COUPLING
+Since the original NOMP algorithm cannot be directly
+applied to the block sparsity representation model in Equa-
+tion (9), in this section, we address to extending NOMP to
+its block sparsity version, that is, block NOMP to estimate
+the DOAs in the presence of unknown MC. Until now,
+NOMP, as a fast and easy‐implemented off‐grid CS method
+to overcome the grid‐mismatch effect, has not been explored
+for solving the block sparsity recovery problem. Based on
+Equation (9) and the original NOMP in [25], we explore a
+block NOMP algorithm with MMV for block sparsity re-
+covery and estimation of θ, mainly with the following three
+steps in each iteration:
+1. Initial estimation of a single‐source DOA based on the over‐
+complete dictionary.
+2. Local block Newton refinement based on the estimated
+DOA in step 1.
+3. Global cyclic feedback refinement based on Newton
+method for all the DOAs of previously estimated sources.
+In the following subsection, we provide a single‐source
+DOA estimation procedure using the proposed block NOMP
+algorithm as an example.
+3.1
+|
+Initial estimation of a single‐source
+direction‐of‐arrival
+Let us consider the single‐source case. For the q‐th source, we
+can express the block signal model in Equation (8) as
+Y ¼ VðθqÞΓq þ N
+ð10Þ
+where N is the noise matrix. We note that in Equation (10),
+VðθqÞ is a block steering matrix other than a steering vector,
+and Y is an observation matrix with multiple measurements
+rather than a single measurement. Thus, unlike the original
+NOMP, a block NOMP algorithm with MMV is investigated in
+our study.
+First, the angle θq and corresponding gain Γq are obtained
+with the maximum likelihood (ML) algorithm by minimising
+‖Y −VðθqÞΓq‖2
+F
+and equivalently maximising Fðθq; ΓqÞ ¼
+2ReðTrðYHVðθqÞΓqÞÞ −‖VðθqÞΓq‖2
+F.
+For any given θq, the gain Γq that maximising Fðθq; ΓqÞ is
+given by
+^Γq ¼ ðVðθqÞHVðθqÞÞ−1VðθqÞHY:
+ð11Þ
+Substituting ^Γq to Fðθq; ΓqÞ yields
+^θq ¼ arg max
+θq
+ϒYðθqÞ;
+ð12Þ
+668
+-
+TANG ET AL.
+ 17519683, 2021, 9, Downloaded from https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/sil2.12068 by Readcube-Labtiva, Wiley Online Library on [08/10/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+--- PDF PAGE 4 ---
+where
+ϒYðθqÞ ¼ Re Tr½YHVðθqÞðVðθqÞHVðθqÞÞ−1VðθqÞHY
+n
+o
+.
+Then, the estimate ^θq could be found by Equation (12) in the
+predefined over‐complete dictionary θ ¼ ½θ1; θ2; …; θQ. ^θq
+and ^Γq are seen as coarse estimates.
+3.2
+|
+Local block Newton‐based refinement
+for initial estimated direction‐of‐arrival
+Since the DOA estimate ^θq could take any value in ½−90°; 90°Þ
+and may not exactly lie in the predefined over‐complete dic-
+tionary, the Newton‐based refinement procedure in [26] can be
+extended according to blocks to refine the estimate ^θq in
+Equation (12). The updated ^θq is given by
+eθq ¼ ^θq −F0ð^θq; ^ΓqÞ
+
+F″ð^θq; ^ΓqÞ
+ð13Þ
+where F0ð^θq; ^ΓqÞ and F″ð^θq; ^ΓqÞ are the first‐ and second‐order
+derivatives of Fð^θq; ^ΓqÞ with respect to the estimates ^θq and ^Γq,
+respectively. They can be expressed as follows:
+F0ð^θq; ^ΓqÞ ¼ Re TrððY −Vð^θqÞ^ΓqÞHðdVð^θqÞ
+
+d^θqÞ^ΓqÞ
+n
+o
+F″ð^θq; ^ΓqÞ ¼ Re TrððY −Vð^θqÞ^ΓqÞHðd2Vð^θqÞ=d^θ
+2
+qÞ^ΓqÞ
+n
+o
+−‖ðdVð^θqÞ
+
+d^θqÞ^Γq‖2
+F
+ð14Þ
+where dVð^θqÞ=d^θq and d2Vð^θqÞ=d^θ
+2
+q denote the first‐ and
+second‐order derivatives of the block steering matrix Vð^θqÞ
+with respect to the angle grid ^θq, respectively.
+For dVð^θqÞ=d^θq, we take γP−1
+q
+for example, where
+γP−1
+q
+¼ e−j
+2πðP−1Þdsinð^θqÞ
+λ
+. Then, we have
+dγP−1
+q
+d^θq
+¼ −j 2πðP −1Þdcosð^θqÞ
+λ
+e−j
+2πðP−1Þdsinð^θqÞ
+λ
+:
+ð15Þ
+Similarly, for d2Vð^θqÞ=d^θ
+2
+q, we have
+d2γP−1
+q
+d^θ
+2
+q
+¼ j 2πðP −1Þdsinð^θqÞ
+λ
+e−j
+2πðP−1Þdsinð^θqÞ
+λ
+−4π2ðP −1Þ2d2cos2ð^θqÞ
+λ2
+e−j
+2πðP−1Þdsinð^θqÞ
+λ
+:
+ð16Þ
+then
+eΓq ¼ ðVðeθqÞHVðeθqÞÞ−1VðeθqÞHY
+ð17Þ
+Note that Equation (13) can be applied only when the
+function Fðθq; ΓqÞ is locally concave (i.e. F″ð^θq; ^ΓqÞ < 0)
+to
+maximise
+Fðθq; ΓqÞ.
+Only
+when
+ϒYð^θqÞ < ϒYðeθqÞ
+Equation (13) can be accepted to guarantee convergence. Such
+block Newton‐based refinement procedure could be iteratively
+applied several rounds by assigning the value of eθq to ^θq, or
+stopped to satisfy |eθq −^θq| < ε.
+3.3
+|
+The whole procedure of block
+Newtonised orthogonal matching pursuit
+The whole procedure of the proposed block NOMP algorithm
+is shown in Algorithm 1. Rs and Rc denote the numbers of
+rounds for single refinement and cyclic refinement, respec-
+tively. In step 7, the global cyclic feedback refinement is
+further applied to improve the estimation accuracy, where
+YðPÞ ¼ Y −∑
+q
+VðθqÞΓq, ðθq; ΓqÞ ∈P
+and
+ePknfðeθq; eΓqÞg
+denote discarding the element ðeθq; eΓqÞ in set ePk.
+Algorithm 1 Block NOMP algorithm for DOA
+estimation with unknown mutual coupling
+Input:
+Y, K, Rs, Rc,ε
+1: Initialisation k ¼ 0, P0 ¼ fg
+2: repeat
+3:
+k ¼ k þ 1
+4:
+Identify
+^θq ¼ arg max
+θq
+ϒYðPk−1ÞðθqÞ in Equation
+(12),
+^Γq ¼ ðVð^θqÞHVð^θqÞÞ−1Vð^θqÞHYðPk−1Þ in
+Equation (11).
+5:
+single refinement
+Refine ð^θq; ^ΓqÞ using Equations (13)
+and (17) to obtain an improved estimate
+ðeθq; eΓqÞ with YðPk−1Þ. (This procedure
+could be applied Rs rounds, or stopped
+to satisfy jeθq −^θqj < ε.)
+6:
+ePk ¼ Pk−1 [ fðeθq; eΓqÞg.
+7:
+cyclic refinement
+Refine each ðeθq; eΓqÞ in ePk: For each
+ðeθq; eΓqÞ, YðePknfðeθq; eΓqÞgÞ is treated as the
+measurements, then the single
+refinement procedure in step 5 is applied
+to update ðeθq; eΓqÞ. (This procedure could
+be applied Rc rounds.)
+8:
+update all the corresponding gains in
+ePk from step 7 by least square method:
+eV ¼ ½Vðeθ1Þ; Vðeθ2Þ; …; VðeθkÞ, the updated
+corresponding gain is obtained as
+eΓ ¼ ðeV
+HeVÞ−1eV
+HY, where eΓ ¼ ½eΓ1; eΓ2; …; eΓkT.
+9:
+use Pk to denote the updated new parameters set
+ePk from step 8.
+10: until k ¼ K
+Output:
+DOA estimates eθ
+TANG ET AL.
+-
+669
+ 17519683, 2021, 9, Downloaded from https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/sil2.12068 by Readcube-Labtiva, Wiley Online Library on [08/10/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+--- PDF PAGE 5 ---
+4
+|
+SIMULATION
+In this section, several numerical experiments are conducted to
+verify the proposed block NOMP approach for off‐grid DOA
+estimation with unknown mutual coupling, and we name it
+MC‐Block‐NOMP. The root mean square error (RMSE) is
+used
+as
+an
+evaluation
+criterion,
+which
+is
+RMSEðθÞ ¼ 1
+K ∑K
+k¼1
+ffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffi
+∑N
+n¼1 ðeθk;n −θkÞ2
+q
+, where N
+is the
+number of Monte Carlo trials, and eθk;n is the estimate of θk at the
+n‐th trial. In the following simulations, N is set as 100. The inter‐
+element spacing of the ULA is half of the wavelength. It is
+assumed that the mutual coupling effect exists among the
+neighbouring 5 arrayelements, that is, P = 3 with mutual coupling
+coefficients g1 ¼ 0:2953 þ 0:3216j, g2 ¼ 0:2461 þ 0:1753j and
+g3 ¼ 0:1451 −0:1334j. Two sources are located at 2:4° and
+13:6°. The searching grids are set from −90° to 90° with interval
+1°. Rs ¼ 20, Rc ¼ 20 and ε ¼ 0:01 are used in Algorithm 1.
+Figure 1 presents the estimation results of the proposed
+MC‐Block‐NOMP approach with 100 Monte Carlo trials. The
+numbers of array elements and measurements are set as M ¼ 15
+and L ¼ 20, respectively. The signal to noise ratio (SNR) is
+fixed at 20dB. The simulation results show that despite the real
+DOA values of two targets, that is, 2:4° and 13:6°, are not
+located in the predefined searching grids, the proposed off‐grid
+approach can accurately estimate the DOAs and is not affected
+by the grid‐mismatch problem. In addition, it reveals that by
+block sparse recovery and the Newton refinement procedure,
+the proposed approach can effectively eliminate the mutual
+coupling effect and achieve high accuracy in a small number of
+measurements.
+Figure 2 depicts the RMSEs of different methods at
+different SNRs. We compare the proposed MC‐Block‐NOMP
+approach with several existing methods with mutual coupling,
+including the MC‐ESPRIT [11], MC‐MUSIC‐like [12], MC‐l1‐
+Norm [17], MC‐Block‐l1‐Norm [18] and MC‐Off‐Grid‐BCS
+[23]. Other simulation conditions are same as Figure 1. To
+fairly compare them, the singular value decomposition pro-
+cedure in [17, 18] is omitted. As shown in Figure 2, the pro-
+posed approach has the lowest RMSE among the six methods,
+indicating that it owns the highest estimation accuracy via the
+block NOMP algorithm. The subspace‐based MC‐ESPRIT
+and MC‐MUSIC‐like methods have moderate values of
+RMSE. The two sparse recovery methods, MC‐l1‐Norm and
+MC‐Block‐l1‐Norm, have the higher RMSEs and worse per-
+formance in accuracy. Their RMSEs are about 0:4° at
+SNR = 16dB, which is equal to the ideal RMSE via direct grid‐
+based sparse recovery methods, showing that they suffer from
+the existence of grid‐mismatch effect. MC‐l1‐Norm has lower
+accuracy than MC‐Block‐l1‐Norm due to the partial utilisation
+of the whole array information. The MC‐Off‐Grid‐BCS
+method, which uses Bayesian compressed sensing (BCS) and
+first‐order Taylor expansion, has lower RMSE than MC‐
+ESPRIT and MC‐MUSIC‐like methods, and has no grid‐
+mismatch effect. However, it still has lower accuracy than the
+proposed approach.
+Figure 3 shows the change of RMSEs with the number of
+measurements. The simulation conditions are same with Figure2,
+except that the SNR is fixed at 4dB. We can see that the RMSEs of
+all the methods gradually decrease with the increase of the
+number of measurements. The proposed MC‐Block‐NOMP
+approach has the lowest RMSE among them. The MC‐l1‐
+Norm and MC‐Block‐l1‐Norm methods still perform worse due
+to the grid‐mismatch effect. The MC‐ESPRIT and MC‐MUSIC‐
+like methods have degraded accuracies with the decrease of the
+number of measurement, mainly due to their requirement of
+enough snapshots to form sample covariance matrix. The MC‐
+Off‐Grid‐BCS method performs better than MC‐ESPRIT,
+MC‐MUSIC‐like,
+MC‐l1‐Norm
+and
+MC‐Block‐l1‐Norm
+methods. Nevertheless, it cannot achieve the accuracy of the
+proposed method under different measurements.
+F I G U R E 1
+Direction‐of‐arrival (DOA) estimation results of two
+sources with 2:4° and 13:6° using the proposed approach, M ¼ 15, L ¼ 20,
+SNR = 20dB
+0
+4
+8
+12
+16
+SNR (dB)
+10-1
+100
+101
+RMSE (degree)
+F I G U R E 2
+Root mean square error (RMSE) versus signal to noise ratio
+(SNR) under M ¼ 15 and L ¼ 20
+670
+-
+TANG ET AL.
+ 17519683, 2021, 9, Downloaded from https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/sil2.12068 by Readcube-Labtiva, Wiley Online Library on [08/10/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+--- PDF PAGE 6 ---
+Figure 4 shows the change of RMSE at different number of
+array elements. The simulation conditions are same as Figure 2
+with SNR fixed at 4dB. The simulation result depicts that the
+higher the number of array elements, the lower the RMSE. No
+matter how the number of array elements changes, the pro-
+posed MC‐Block‐NOMP approach outperforms other five
+methods.
+In the following experiments, we further investigate the
+computational complexities of the above‐mentioned methods,
+including MC‐ESPRIT, MC‐MUSIC‐like, MC‐l1‐Norm, MC‐
+Block‐l1‐Norm, MC‐Off‐Grid‐BCS and the proposed MC‐
+Block‐NOMP
+methods.
+Theoretically,
+the
+computational
+complexities of MC‐ESPRIT and MC‐MUSIC‐like are OfLðM
+−2ðP −1ÞÞ2 þ ðM −2ðP −1ÞÞ3 þ 2K2ððM −2
+ðP −1ÞÞ −1Þ þ 6K3g,
+and
+OfLðM −2ðP −1ÞÞ2 þ ðM −2
+ðP −1ÞÞ3 þ QððM −2ðP −1ÞÞ −KÞððM −2ðP −1ÞÞ þ 1Þg,
+respectively, where P denotes the number of MC coefficients,
+and Q denotes the number of angle grids in spectrum search in
+the MC‐MUSIC‐like method. The computational complexities
+of MC‐l1‐Norm and MC‐Block‐l1‐Norm are OfLðM −2
+ðP −1ÞÞQ2 þ LQ3g and OfLMð2P −1ÞQ2 þ Lð2P −1Þ Q3g,
+respectively [27, 28], and the MC‐Off‐Grid‐BCS method has a
+computational complexity of OðmaxðMQ2; MQLÞÞ per itera-
+tion [29], where Q denotes the number of divided grids in the
+over‐complete dictionary. For the proposed MC‐Block‐NOMP
+approach,
+the
+computational
+complexity
+is
+about
+OðKðQ þ Rs þ RcRsÞð2P −1ÞMLÞ.
+In Figure 5 and Figure 6, we compare the running time of
+these six methods with the change of the numbers of array
+elements and measurements at each trial. SNR is fixed at 4dB.
+We set L ¼ 20 in Figure 5 and M ¼ 15 in Figure 6. Other
+simulation conditions are same as Figure 2. We can see that the
+MC‐ESPRIT and MC‐MUSIC‐like methods have relatively low
+running time, while the sparse recovery‐based MC‐l1‐Norm
+and MC‐Block‐l1‐Norm methods require higher running time.
+The proposed MC‐Block‐NOMP approach have similar and
+moderate running time compared with those of the MC‐Off‐
+Grid‐BCS method. Both running times are smaller than those
+of the sparse recovery methods such as MC‐l1‐Norm and MC‐
+Block‐l1‐Norm.
+In summary, for DOA estimation with unknown mutual
+coupling, the proposed MC‐Block‐NOMP approach can ach-
+ieve better performance in estimation accuracy compared with
+that of MC‐ESPRIT, MC‐MUSIC‐like, MC‐l1‐Norm, MC‐
+Block‐l1‐Norm and MC‐Off‐Grid‐BCS methods. Also, it has
+much lower running time than that of several sparse recovery‐
+based methods such as MC‐l1‐Norm, MC‐Block‐l1‐Norm, and
+owns similarly low running time compared with that of the off‐
+grid CS method such as MC‐Off‐Grid‐BCS.
+12
+15
+18
+21
+24
+Number of array elements
+10-1
+100
+101
+RMSE (degree)
+F I G U R E 4
+Root mean square error (RMSE) versus the number of
+array elements under L ¼ 20 and signal to noise ratio (SNR) = 4dB
+12
+22
+32
+42
+52
+Number of array elements
+10-4
+10-3
+10-2
+10-1
+100
+101
+102
+Running time (s)
+F I G U R E 5
+Running time versus the number of array elements under
+L ¼ 20 and signal to noise ratio (SNR) = 4dB
+10
+15
+20
+25
+30
+Number of measurements
+100
+RMSE (degree)
+F I G U R E 3
+Root mean square error (RMSE) versus the number of
+measurements under M ¼ 15 and signal to noise ratio (SNR) = 4dB
+TANG ET AL.
+-
+671
+ 17519683, 2021, 9, Downloaded from https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/sil2.12068 by Readcube-Labtiva, Wiley Online Library on [08/10/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+--- PDF PAGE 7 ---
+5
+|
+CONCLUSION
+In this study, an off‐grid DOA estimation approach in the
+presence of unknown mutual coupling is proposed based on
+block Newtonised orthogonal matching pursuit. It can fully
+utilise the whole array aperture to eliminate the mutual
+coupling effect. Compared with the subspace‐based and
+sparse recovery‐based methods with mutual coupling, the
+proposed block NOMP approach has robustness in a small
+number of snapshots and owns no grid‐mismatch effect.
+Meanwhile, compared with several existing off‐grid methods
+with mutual coupling, it can achieve higher estimation accu-
+racy and similarly low computational complexity. Therefore, it
+has potential under large array and large number of mea-
+surements
+for
+DOA
+estimation
+with
+unknown
+mutual
+coupling.
+ACKNOWLEDGEMENTS
+The study was supported in part by the National Natural Sci-
+ence Foundation of China under Grants 61,371,158 and
+61,771,217, and in part by the Jilin Provincial Natural Science
+Foundation of China under Grant 20,180,101,329JC.
+DATA AVAILABILITY STATEMENT
+Data sharing not applicable to this study as no datasets were
+generated or analysed during the current study.
+ORCID
+Hong Jiang
+https://orcid.org/0000-0001-9562-3259
+REFERENCES
+1.
+Lu, J., et al.: Robust direction of arrival estimation approach for un-
+manned aerial vehicles at low signal‐to‐noise ratios. IET Signal Process.
+13, 456–463 (2019)
+2.
+Krim, H., Viberg, M.: Two decades of array signal processing research.
+IEEE Signal Process Mag. 13, 67–94 (1996)
+3.
+Dandekar, K.R., Ling, H., Xu, G.: Effect of mutual coupling on direction
+finding in smart antenna applications. Electron Lett. 36(22), 1889–1891
+(2000)
+4.
+Friedlander, B., Weiss, A.J.: Direction finding in the presence of mutual
+coupling. IEEE Trans. Antenn. Propag. 39(3), 273–284 (1991)
+5.
+Sellone, F., Serra, A.: A novel online mutual coupling compensation al-
+gorithm for uniform and linear arrays. IEEE Trans. Signal Process. 55(2),
+560–573 (2007)
+6.
+Lin, M., Yang, L.: Blind calibration and DOA estimation with uniform
+circular arrays in the presence of mutual coupling. IEEE Antenn. Wireless
+Propag. Lett. 5, 315–318 (2006)
+7.
+Ye, Z., et al.: DOA estimation for uniform linear array with mutual
+coupling. IEEE Trans. Aero. Electron Syst. 45(1), 280–288 (2009)
+8.
+Ye, Z., Liu, C.:On the resiliencyof MUSICdirection finding against antenna
+sensor coupling. IEEE Trans. Antenn. Propag. 56(2), 371–380 (2008)
+9.
+Dai, J., Ye, Z.: Spatial smoothing for DOA estimation of coherent signals
+in the presence of unknown mutual coupling. IET Signal Process. 5(4),
+418–425 (2011)
+10.
+Dai, J., Xu, W., Zhao, D.: Real‐valued DOA estimation for uniform linear
+array with unknown mutual coupling. Signal Process. 92, 2056–2065
+(2012)
+11.
+Hao, L., Ping, W.: DOA estimation in an antenna array with mutual
+coupling based on ESPRIT. International Workshop on Microwave and
+Millimeter Wave Circuits and System Technology, Chengdu, China, pp.
+86–89. (2013)
+12.
+Liao, B., Zhang, Z., Chan, S.: DOA estimation and tracking of ULAs with
+mutual coupling. IEEE Trans Aero. Electron Syst. 48(1), 891–905 (2012)
+13.
+Wu, H., et al.: Direction finding and mutual coupling estimation for
+uniform rectangular arrays. Signal Process. 117, 61–68 (2015)
+14.
+Hu, W., Wang, Q.: DOA estimation for UCA in the presence of mutual
+coupling via error model equivalence. IEEE Wireless Commun. Lett. 9(1),
+121–124 (2020)
+15.
+Ge, Q., Zhang, Y., Wang, Y.: A low complexity algorithm for direction of
+arrival estimation with direction‐dependent mutual coupling. IEEE
+Commun. Lett. 24(1), 90–94 (2020)
+16.
+Zhang, J., Qiu, T., Luan, S.: Robust sparse representation for DOA esti-
+mation with unknown mutual coupling under impulsive noise. IEEE
+Commun. Lett. 24(7), 1455–1458 (2020)
+17.
+Dai, J., Zhao, D., Ji, X.: A sparse representation method for DOA esti-
+mation with unknown mutual coupling. IEEE Antenn. Wireless Propag.
+Lett. 11, 1210–1213 (2012)
+18.
+Wang, Q., et al.: Effective block sparse representation algorithm for DOA
+estimation with unknown mutual coupling. IEEE Commun. Lett. 21(12),
+2622–2625 (2017)
+19.
+Wang, X., et al.: Reweighted regularized sparse recovery for DOA esti-
+mation with unknown mutual coupling. IEEE Commun. Lett. 23(2),
+290–293 (2019)
+20.
+Zhang, X., et al.: A novel block sparse reconstruction method for DOA
+estimation with unknown mutual coupling. IEEE Commun. Lett. 23(10),
+1845–1848 (2019)
+21.
+Wang, Y., et al.: DOA estimation under mutual coupling of uniform linear
+arrays using sparse reconstruction. IEEE Wireless Commun. Lett. 8(4),
+1004–1007 (2019)
+22.
+Liu, Z., Zhou, Y.: A unified framework and sparse Bayesian perspective
+for direction‐of‐arrival estimation in the presence of array imperfections.
+IEEE Trans. Signal Process. 61(15), 3786–3798 (2013)
+23.
+Wang, H., et al.: Off‐grid DOA estimation in mutual coupling via robust
+sparse Bayesian learning. IEEE International Conference on Digital
+Signal Processing, 1–5 (2018)
+24.
+Aich, A., Palanisamy, P.: On‐grid DOA estimation method using
+orthogonal matching pursuit. International Conference Signal Processing
+and Communication (ICSPC). Coimbatore, India. pp. 483–487. (2017)
+25.
+Mamandipoor, B., Ramasamy, D., Madhow, U.: Newtonized orthogonal
+matching pursuit: frequency estimation over the Continuum. IEEE Trans
+Signal Process. 64(19), 5066–5081 (2016)
+26.
+Atkinson, K.E.: An introduction to numerical analysis. John Wiley &
+Sons, Inc. ISBN 0‐471‐62489‐6 (1989)
+10
+40
+70
+100
+130
+Number of measurements
+10-4
+10-3
+10-2
+10-1
+100
+101
+102
+Running time (s)
+F I G U R E 6
+Running time versus the number of measurements under
+M ¼ 15 and signal to noise ratio (SNR) = 4dB
+672
+-
+TANG ET AL.
+ 17519683, 2021, 9, Downloaded from https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/sil2.12068 by Readcube-Labtiva, Wiley Online Library on [08/10/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+--- PDF PAGE 8 ---
+27.
+Schmidt, M.: Least squares optimization with ‐norm regularization.
+Technical report. The University of British Columbia, CS542B Project
+Report (2005)
+28.
+Mairal, J., Yu, B.: Complexity analysis of the Lasso regularization path.
+International Conference Machine Learning, Edinburgh (2012)
+29.
+Yang, Z., Xie, L., Zhang, C.: Off‐grid direction of arrival estimation using
+sparse Bayesian inference. IEEE Trans. Signal Process. 61(1), 38–43
+(2013)
+How to cite this article: Tang, W.‐G., Jiang, H., Zhang,
+Q.: Block Newtonised orthogonal matching pursuit for
+off‐grid DOA estimation in the presence of unknown
+mutual coupling. IET Signal Process. 15(9), 666–673
+(2021). https://doi.org/10.1049/sil2.12068
+TANG ET AL.
+-
+673
+ 17519683, 2021, 9, Downloaded from https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/sil2.12068 by Readcube-Labtiva, Wiley Online Library on [08/10/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License

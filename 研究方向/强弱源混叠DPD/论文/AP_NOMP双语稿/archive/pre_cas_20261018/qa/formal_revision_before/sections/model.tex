@@ -1,0 +1,77 @@
+\section{观测模型与定位目标}\label{sec:model}
+\subsection{同步单天线站的宽带观测}
+考虑静态直达传播场景。$L$个单天线接收站的位置已知，记为$\bm r_l\in\R^2$，$l=1,\ldots,L$；$K$个源的位置未知，记为$\bm p_k\in\Omega\subset\R^2$，$k=1,\ldots,K$。其中$\Omega$为二维搜索区域。各站时间、频率同步，接收链路的相对幅相响应已标定；发射天线各向一致，接收天线采用匹配极化的相同响应。本文研究已知源数的定位，实验取$L=4$、$K=2$。距离、传播时延和相对幅度系数定义为
+\begin{equation}
+ d_{lk}=\|\bm p_k-\bm r_l\|_2,\qquad
+ \tau_{lk}=d_{lk}/c_0,\qquad \beta_{lk}=d_{lk}^{-1},
+ \label{eq:distance}
+\end{equation}
+其中$c_0$为传播速度，$d_{lk}$和$\tau_{lk}$的单位分别为m和s。
+
+幅度模型来自自由空间路径损耗。对于远场、极化匹配的理想各向同性收发天线，接收功率$P_{\mathrm r}$与发射功率$P_{\mathrm t}$满足\cite{ITURP5252024}
+\begin{equation}
+ \frac{P_{\mathrm r}}{P_{\mathrm t}}
+ =\left(\frac{\lambda}{4\pi d}\right)^2,\qquad
+ a_{\mathrm{amp}}(d)=\sqrt{\frac{P_{\mathrm r}}{P_{\mathrm t}}}
+ =\frac{\lambda}{4\pi d} .\label{eq:freespace}
+\end{equation}
+这里$\lambda$为工作波长，$d$为传播距离，$a_{\mathrm{amp}}$为信号幅度比。因此，接收功率随$1/d^2$衰减，信号幅度随$1/d$衰减。在工作波长和天线响应固定时，公共因子$\lambda/(4\pi)$可并入未知源波形，得到式\eqref{eq:distance}中的$\beta_{lk}=1/d_{lk}$。这样保留了由距离决定的站间幅度差，同时不需要预先知道发射功率。本文用这一规律描述幅度，以基带时延描述时间与相位关系，不另外引入射频载波相位参数。
+
+令$s_k(t)$为已包含公共幅度因子和未知发射功率的第$k$个源基带波形。第$l$站以采样率$f_s$采集$N$点，接收信号为
+\begin{equation}
+ x_l[n]=\sum_{k=1}^{K}\beta_{lk}s_k(n/f_s-\tau_{lk})+w_l[n],
+ \quad n=0,\ldots,N-1 .\label{eq:time}
+\end{equation}
+其中$x_l[n]$为复数IQ样本，$n$为采样索引。源波形互相独立且未知，在仿真中采用独立、零均值的随机符号产生。噪声$w_l[n]\sim\mathcal{CN}(0,\sigma_t^2)$为圆对称复高斯白噪声，$\sigma_t^2=\E|w_l[n]|^2$，在站间及采样点间独立，并与源信号独立。给定候选位置后，其到各站的相对幅度与时延均由式\eqref{eq:distance}确定。
+
+为利用宽带信号的时延信息，对每站记录作离散傅里叶变换（DFT）：
+\begin{equation}
+ X_l(f_m)=\frac1N\sum_{n=0}^{N-1}x_l[n]
+ \exp(-\mathrm j2\pi mn/N),\qquad f_m=mf_s/N .\label{eq:dft}
+\end{equation}
+$m$采用移位后的有符号频率索引，$\mathrm j=\sqrt{-1}$。在DFT频率轴上保留公共处理频带内的频点，组成集合$\mathcal F$，其大小记为$F=|\mathcal F|$。以$\bm x_f=[X_1(f),\ldots,X_L(f)]^T\in\C^L$收集同一频点的各站观测，则宽带频域模型写为\cite{ChenHudsonYao2002}
+\begin{align}
+ \bm x_f&=\bm A_f(\bm P)\bm s_f+\bm n_f,\quad f\in\mathcal F,\label{eq:frequency}\\
+ [\bm a_f(\bm p)]_l&=\frac{1}{d_l(\bm p)}
+       \exp[-\mathrm j2\pi f d_l(\bm p)/c_0],\label{eq:response}\\
+ \bm A_f(\bm P)&=[\bm a_f(\bm p_1),\ldots,\bm a_f(\bm p_K)],\quad
+ \bm P=[\bm p_1,\ldots,\bm p_K].\nonumber
+\end{align}
+其中$\bm s_f=[S_1(f),\ldots,S_K(f)]^T\in\C^K$为未知源频域系数，$\bm n_f\in\C^L$为噪声，$\bm a_f(\bm p)\in\C^L$为候选位置的跨站响应，$\bm A_f(\bm P)\in\C^{L\times K}$为各源响应组成的矩阵，$\bm P\in\R^{2\times K}$收集源坐标。式\eqref{eq:response}的相位项来自时移的傅里叶变换性质，$f$表示基带频率。全频带需要逐频计算响应，不能以单一频率的导向向量代替。
+
+有限记录中，各站截取的源波形区间略有差异；上述频域表达采用共同观测窗下的时延近似，忽略窗边缘差异。在该模型下，完整DFT的白噪声满足$\E[\bm n_f\bm n_f^H]=(\sigma_t^2/N)\bm I_L$。筛除带外频点不改变保留频点的噪声方差，归一化分母仍为原始点数$N$。本文以此作为共同的定位模型，不对各站混合IQ另作RMS归一化。
+
+计算中也可使用单位范数响应$\bm q_f(\bm p)=\bm a_f(\bm p)/\|\bm a_f(\bm p)\|_2$。这一操作对同一位置的整列响应除以同一个数，站间相对幅度不变。逐频源系数自由估计时，列缩放可由相应系数补偿，因此不改变联合拟合的最小残差。离散扫描包含站点坐标时，为避免$d_l=0$的数值奇点，实现将不足1\,m的距离按1\,m计算；本文的导数推导适用于这一保护区外，仿真源位置均远离站点。
+
+下文粗体小写和大写分别表示向量与矩阵，$\C$和$\R$分别表示复数域和实数域；$(\cdot)^T$、$(\cdot)^H$及$(\cdot)^\dagger$分别表示转置、共轭转置和Moore--Penrose伪逆，$\|\cdot\|_2$表示欧氏范数，$\bm I_d$表示$d$阶单位矩阵。未标阶数的单位矩阵由相乘矩阵的维度确定。
+
+\subsection{带内信噪比与强弱源条件}
+记第$k$个源单独在第$l$站产生的时间平均接收功率为$P_{lk}$，名义信号带宽为$B$。对白噪声，带宽为$B$的频带占采样频带的比例为$B/f_s$，故其带内期望功率为$\sigma_t^2B/f_s$。以各站接收功率的平均值定义带内信噪比，以两个源接收总功率之比定义功率差：
+\begin{equation}
+ \mathrm{SNR}_{k,\mathrm{in}}
+ =10\log_{10}\frac{L^{-1}\sum_{l=1}^L P_{lk}}
+ {\sigma_t^2B/f_s},\qquad
+ \Delta=10\log_{10}\frac{\sum_l P_{l1}}{\sum_l P_{l2}} .
+ \label{eq:snr}
+\end{equation}
+式中$\mathrm{SNR}_{k,\mathrm{in}}$和$\Delta$均以dB表示。信噪比按名义信号带宽$B$定义，与含保护带的实际处理带宽区分。实验固定源2的波形、功率和噪声，仅缩放源1；这样改变功率差时，弱源自身的SNR保持不变。$\Delta>0$时称源1为强源、源2为弱源；$\Delta=0$时保留这两个身份编号。各站的局部功率差由传播距离决定，不必等于四站平均功率差。
+
+\subsection{未知波形消元与联合位置估计}
+定位时将逐频未知波形视为确定性待估系数。根据式\eqref{eq:frequency}的独立、等方差复高斯噪声模型，负对数似然中与位置和波形有关的部分为$\sigma_f^{-2}\sum_f\|\bm x_f-\bm A_f\bm s_f\|_2^2$，其中$\sigma_f^2=\sigma_t^2/N$。因此，最大似然估计等价于联合最小二乘估计\cite{ChenHudsonYao2002}。取观测总能量$E_x=\sum_{f\in\mathcal F}\|\bm x_f\|_2^2>0$作固定归一化，定义
+\begin{align}
+ \mathcal L(\bm P,\{\bm s_f\})
+   &=E_x^{-1}\sum_f\|\bm x_f-\bm A_f(\bm P)\bm s_f\|_2^2,\label{eq:fullLS}\\
+ \widehat{\bm s}_f(\bm P)&=\bm A_f(\bm P)^\dagger\bm x_f,\label{eq:waveLS}\\
+ J(\bm P)&=E_x^{-1}\sum_f\|\bm\Pi_{\bm A_f}^{\perp}\bm x_f\|_2^2,
+ \quad \bm\Pi_{\bm A_f}^{\perp}=\bm I-\bm A_f\bm A_f^\dagger .\label{eq:profile}
+\end{align}
+这里所有求和均遍历$\mathcal F$。式\eqref{eq:waveLS}给出任意候选位置组合下的最优波形系数；$\bm A_f\bm A_f^\dagger$将观测投影到响应矩阵的列空间，$\bm\Pi_{\bm A_f}^{\perp}\in\C^{L\times L}$则保留该位置组合无法解释的部分。将最优系数代回式\eqref{eq:fullLS}，便得到只依赖位置的目标$J$，这就是波形消元\cite{GolubPereyra1973}。它是无量纲的归一化残差，越小表示对同一观测的拟合越好。
+
+所求位置为$\widehat{\bm P}=\arg\min_{\bm P\in\Omega^K}J(\bm P)$。对于本文的$K=2$，待估变量只有两个二维位置，共四个实数。每次试探位置时均共同重估两源的频域系数，因此目标保留了源间的相互影响，同时避免将全部波形系数纳入非线性搜索。
+
+单源最小二乘谱则为
+\begin{equation}
+ Q_0(\bm p)=E_x^{-1}\sum_f
+ \frac{|\bm a_f(\bm p)^H\bm x_f|^2}{\|\bm a_f(\bm p)\|_2^2} .\label{eq:single}
+\end{equation}
+式中$|\cdot|$表示复数模。单源情况下有$J(\bm p)=1-Q_0(\bm p)$，故最大化$Q_0$与最小化$J$等价。双源情况下，从同一张单源谱取两个峰没有同时拟合两源，不能代替对位置组合$\bm P$的优化。后续算法以单源谱发现初值，再用多源拟合处理相互影响。

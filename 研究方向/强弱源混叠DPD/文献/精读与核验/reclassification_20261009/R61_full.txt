@@ -1,0 +1,438 @@
+--- PDF PAGE 1 ---
+Electronics Letters
+LETTER
+Efficient Direct Localization Based on Sparsity-Gradient
+Hybrid Optimization
+Ying Xiao
+Zilan Yu
+Xi Chen
+The State Key Laboratory of Space Network and Communications, Tsinghua University, Beijing, China
+Correspondence: Xi Chen (chenxiee@tsinghua.edu.cn)
+Received: 26 May 2025
+Revised: 11 August 2025
+Accepted: 5 September 2025
+Funding: This work was supported by the National Key Research and Development Program of China [Grant Number 2022YFB3105204].
+ABSTRACT
+To address the trade-off between localization accuracy and computational efficiency in direct position determination (DPD), this
+paper proposes a novel hybrid optimization method that integrates correlation-domain sparsity with gradient-guided refinement.
+The proposed method achieves sub-grid localization accuracy while significantly reducing computational complexity. Extensive
+simulations indicate that the method maintains high precision across a wide range of signal-to-noise ratios (SNRs) and sample
+sizes, achieving an order-of-magnitude reduction in runtime compared to both conventional and sparse DPD techniques.
+1
+Introduction
+Passive localization is a cornerstone task in modern signal
+processing, with critical applications spanning environmen-
+tal sensing, autonomous navigation, and defence systems [1].
+Conventional two-step methods follow a stepwise ‘parameter
+measurement—position solution’ framework [2], but suffer from
+error propagation and suboptimal performance, especially under
+low SNR conditions. This has motivated the development of
+DPD methods [3], which estimate emitter positions directly
+from raw signals by jointly exploiting the embedded spatial
+constraint, leading to significant accuracy gains with low-SNR.
+In this work, we specifically target cost-sensitive, wide-area
+surveillance scenarios, such as tracking UAVs or IoT emitters,
+where fixed ground-based sensors and low-complexity receivers
+are preferred. In such setups, time-delay-based DPD offers a
+favourable trade-off between performance, scalability and system
+complexity. However, existing DPD methods face two core chal-
+lenges: (1) the lack of closed-form solutions necessitates expensive
+grid search; and (2) the performance is constrained by grid
+resolution.
+2
+Related Work
+Existing efficient DPD methods typically trade localization
+accuracy for computational efficiency. To reduce computational
+complexity, methods in [4] and [5] approximate the maximum
+eigenvalue of the covariance matrix using Gershgorin’s theorem
+and the Frobenius norm, respectively. Notably, [5] introduces a
+differentiable surrogate enabling Gauss-Newton acceleration, but
+its accuracy deteriorates under low-SNR conditions.
+Subsequently, sparse signal reconstruction (SSR) techniques
+emerged to enhance robustness in noisy and data-limited scenar-
+ios [6]. Nevertheless, grid-dependent SSR methods face inherent
+resolution limitations due to quantization errors. Recent efforts
+have addressed this challenge through adaptive grid refinement.
+For instance, the method proposed in [7] integrates gradient
+descent within an expectation-maximization (EM) framework to
+dynamically adjust grid coordinates, while [8] employs sparse
+Bayesian inference for off-grid correction. Although these strate-
+gies effectively reduce the computational cost per iteration, they
+often suffer from slow convergence rates.
+This is an open access article under the terms of the Creative Commons Attribution License, which permits use, distribution and reproduction in any medium, provided the original work is properly
+cited.
+© 2025 The Author(s). Electronics Letters published by John Wiley & Sons Ltd on behalf of The Institution of Engineering and Technology.
+Electronics Letters, 2025; 61:e70447
+https://doi.org/10.1049/ell2.70447
+1 of 5
+
+
+--- PDF PAGE 2 ---
+Cross-domain fusion approaches represent another line of
+advancement, with methods [9] and [10] extracting positional
+constraints across the signal, correlation, and spatial domains.
+While these approaches offer improved localization accuracy
+compared to frequency-domain counterparts, their computa-
+tional burden escalates rapidly with grid resolution due to the
+complexity of cost functions.
+Building upon these insights, this letter proposes a hybrid DPD
+method designed for low-cost, wide-area surveillance systems
+using fixed receivers and time delay information. The proposed
+approach combines sparse correlation-domain delay mapping
+with a continuous-domain refinement mechanism. Specifically,
+it constructs high-resolution delay spectra via sparse recon-
+struction, interpolates them into a differentiable representation,
+and applies gradient-guided updates to iteratively refine emit-
+ter positions. This fusion of discrete and continuous inference
+obtains sub-grid localization accuracy, bypassing grid limita-
+tions and achieving both robustness and efficiency in low SNR
+environments where conventional methods fail.
+3
+System Model
+As illustrated in Figure 1, a ground-based passive localization
+system is considered, where multiple synchronized and spa-
+tially distributed sensors receive the waveform s(t) emitted by
+a non-cooperative target. The inherent time delay information
+embedded in the received signals is exploited for position
+estimation.
+Similar to [3], by applying an N-point Fourier transform to the
+sampled received signals with a sampling rate fs, the frequency-
+domain signal model can be expressed as:
+𝐗𝑙(𝜔) = 𝑏𝑙𝐒(𝜔)𝑒−𝑗𝜔𝜏𝑙+ 𝐖𝑙(𝜔),
+(1)
+where 𝑏𝑙∈ℂis the unknown complex channel attenua-
+tion. 𝜏𝑙(𝐮) = ‖𝐮−𝐩𝑙‖∕𝑐represents the transmission time delay
+FIGURE 1
+Schematic diagram of distributed multi-station passive
+localization.
+between the emitter position u and the l-th sensor position
+pl. 𝐒(𝜔) ∈ℂ𝑁and 𝐖𝑙(𝜔) ∈ℂ𝑁denote the discrete Fourier
+transform of s(t) and the independent observation noise, respec-
+tively. 𝜔= [𝜔1, 𝜔2, ..., 𝜔𝑁]T are N discrete frequency components,
+where 𝜔𝑛= 2𝜋𝑓𝑠(𝑛−1)∕𝑁.
+To fully exploit inter-station information, we obtain P unique
+combinations by pairing all sensor stations without repetition.
+For the p-th pair sensors indexed by {l, m}, the cross-power
+spectral density is computed as:
+𝐑𝑝(𝜔) = 𝐗𝑙(𝜔) ⊙𝐗∗
+𝑚(𝜔) = 𝑑𝑖𝑎𝑔(𝚪𝑝)𝐑𝑠𝑠(𝜔) + 𝐑𝑤,
+(2)
+where Rp(ω) is the measurement in the correlation domain. 𝚪𝑝=
+[𝑏𝑝𝑒−𝑗𝜔1𝜏𝑝, ..., 𝑏𝑝𝑒−𝑗𝜔𝑁𝜏𝑝]
+T is a vector that contains the relative
+channel attenuation 𝑏𝑝= 𝑏𝑙𝑏∗
+𝑚and the time delay difference τp
+= τm −τl. And Rss(ω) denotes the source signal’s autocorrelation
+matrix in the frequency-domain. Rw represents the noise covari-
+ance. The derived measurements {𝐑𝑝}𝑃
+𝑝=1 form the basis for the
+proposed algorithm.
+4
+Proposed Algorithm
+To establish the spatial-domain mapping, we first discretize the
+spatial region into Gu grid points. Each grid point gu maps to a
+corresponding delay-difference vector in the correlation domain:
+𝝉𝑔= [𝜏𝑔
+1, 𝜏𝑔
+2, ..., 𝜏𝑔
+𝑃] ∈ℝ𝑃,
+(3)
+where 𝜏𝑔
+𝑝= 𝜏𝑔
+𝑚−𝜏𝑔
+𝑙= (‖𝐠𝑢−𝐩𝑚‖ −‖𝐠𝑢−𝐩𝑙‖)∕𝑐. Under the spa-
+tial sparsity of the emitter, τg exhibits inherent sparsity. Let the
+delay-difference range be discretized into Gτ grid points Ω =
+{𝜏1, 𝜏2, ..., 𝜏𝐺𝜏}. The sparse reconstruction model for the p-th
+sensor pair in (2) is:
+𝐑𝑝= 𝚪𝑝(Ω)𝐑𝑝
+Ω + 𝐍𝑝,
+(4)
+where 𝚪𝑝(Ω) ∈ℂ𝑁×𝐺𝜏is the over complete form of Γp. And 𝐑𝑝
+Ω ∈
+ℂ𝐺𝜏×1 is a sparse vector with a non-zero value only at the true
+delay-difference index, Np is the observed error.
+A hierarchical prior structure is adopted to enforce sparsity.
+Assume 𝐑𝑝
+Ω ∼𝐶𝑁(𝟎, 𝚲) follows the Gaussian prior distribution,
+where Λ = diag(ϒ) is the covariance matrix of 𝐑𝑝
+Ω. And Υ =
+[𝛾1, 𝛾2, ..., 𝛾𝐺𝜏]
+T is non-negative hyper parameter, which controls
+sparsity via a Gamma prior:
+𝑝(Υ) ∝
+𝐺𝜏
+∏
+𝑔𝜏=1
+𝐺𝑎𝑚𝑚𝑎
+(
+𝛾𝑔𝜏; 1, 𝜌
+)
+.
+(5)
+Similarly, considering that the observed noise follows a zero-
+mean complex Gaussian distribution with variance σ2, the hyper
+parameter is defined as the noise accuracy α0 = σ−2. Assign the
+Gamma prior distribution to the hyper parameter α0 as well:
+p(α0)∝Gamma(α0; a, b), where a and b take extremely small
+positive numbers.
+This hierarchical model induces a Laplace prior on 𝐑𝑝
+Ω, pro-
+moting stronger sparsity than single-layer priors. The posterior
+2 of 5
+Electronics Letters, 2025
+ 1350911x, 2025, 1, Downloaded from https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/ell2.70447 by Readcube-Labtiva, Wiley Online Library on [08/10/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+--- PDF PAGE 3 ---
+distribution of 𝐑𝑝
+Ω given Rp is Gaussian:
+𝑝(𝐑𝑝
+Ω|𝐑𝑝; Υ, 𝛼0) ∝𝐶𝑁(𝝁𝑝,𝑠, 𝚺𝑝,𝑠),
+(6)
+where the posterior mean and the posterior covariance matrix are
+denoted as:
+𝝁𝑝,𝑠= 𝚲ΓH
+𝑝(Ω)𝚺−1
+𝑝,𝑥𝐑𝑝,
+(7)
+𝚺𝑝,𝑠= 𝚲−𝚲ΓH
+𝑝(Ω)𝚺−1
+𝑝,𝑥𝚪𝑝(Ω)𝚲,
+(8)
+where 𝚺𝑝,𝑥= 𝛼−1
+0 𝐈𝑁+ 𝚪𝑝(Ω)𝚲ΓH
+𝑝(Ω) is the covariance of Rp. So
+the sparse reconstruction of 𝐑𝑝
+Ω is reformulated as a maximum
+posteriori estimation with the cost function as:̂
+𝐑𝑝
+Ω = max
+𝐑𝑝
+Ω
+{
+𝑝
+(
+𝐑𝑝
+Ω|𝐑𝑝; Υ, 𝛼0
+)}
+.
+(9)
+The cross-correlation measurements of each sensor pair are
+iteratively reconstructed through the efficient fixed-point EM
+algorithm to obtain the final sparse delay-difference spectrum:
+{̂𝐑𝑝
+Ω}𝑃
+𝑝=1. For each sensor pair, spline interpolation is applied to
+the discrete spectrum to construct a continuously differentiable
+function as:
+𝐹𝑝(𝜏) = 𝑠𝑝𝑙𝑖𝑛𝑒
+(
+Ω,̂ 𝐑𝑝
+Ω
+)
+,
+(10)
+which extends the discrete representation into a globally smooth
+form and eliminates grid discretization effects. By mapping delay
+differences to the spatial domain, a global spatial cost function is
+formulated as
+𝐶(𝐮) =
+𝑃
+∑
+𝑝=1
+𝐹𝑝
+(
+𝜏𝑝(𝐮)
+)
+.
+(11)
+The objective of direct position determination then reduces to
+solving:̂
+𝐮= arg max
+𝐮
+{𝐶(𝐮)} .
+(12)
+To achieve rapid spatial localization, a hybrid-guided optimiza-
+tion strategy is implemented, with its explicit formulation as
+𝐮(𝑘+1) = 𝐮(𝑘) + 𝛼𝑘· 𝜕𝐶(𝐮)∕𝜕𝐮∕‖𝜕𝐶(𝐮)∕𝜕𝐮‖,
+(13)
+where 𝜕𝐶(𝐮)∕𝜕𝐮= ∑𝑃
+𝑝=1 (𝑑𝐹𝑝∕𝑑𝜏𝑝) · (𝜕𝜏𝑝∕𝜕𝐮) combines the con-
+straint of sparse spectral rate 𝑑𝐹𝑝∕𝑑𝜏𝑝and the analytical gradient
+𝜕𝜏𝑝∕𝜕𝐮. αk is the step-size, and the constraint condition for αk can
+be expressed as
+𝐶(𝐮(𝑘+1)) ≥𝐶(𝐮(𝑘)) + 0.1𝛼𝑘‖𝜕𝐶(𝐮)∕𝜕𝐮‖
+2.
+(14)
+Finally, an adaptive step-size search based on the Armijo criterion
+is employed in the spatial domain to ensure convergence of
+the cost function, enabling sub-grid accurate direct localization.
+The parameter 0.1 in the Armijo line search condition is chosen
+following common practice in the optimization literature [11],
+balancing convergence speed and computational cost. Since the
+cost function C(u) is constructed from cubic spline interpolants,
+its gradient ∇C(u) is Lipschitz continuous. Consequently, the
+Armijo line search method used in Equation (14) guarantees that
+||∇C(u(k))||2 →0 as k →∞, ensuring convergence to a stationary
+point.
+The overall flow of the proposed algorithm is illustrated in
+Figure 2, which provides a comprehensive overview of the algo-
+rithm’s structure and the interconnections between its various
+steps.
+FIGURE 2
+The overall flow chart of the proposed algorithm.
+Electronics Letters, 2025
+3 of 5
+ 1350911x, 2025, 1, Downloaded from https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/ell2.70447 by Readcube-Labtiva, Wiley Online Library on [08/10/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+--- PDF PAGE 4 ---
+FIGURE 3
+Localization RMSE vs. SNR for different methods, when
+sample size N = 1000.
+5
+Complexity Analysis
+The overall complexity of the proposed algorithm consists of
+the time complexity T and the space complexity M. The time
+complexity involves three stages: (1) signal pre-processing: Per-
+forming N-point FFT for L sensors and computing cross-spectra
+for P station pairs results in O(LNlog N), where theO(PN)term is
+negligible underN ≫P; (2) sparse spectral reconstruction: Each
+pair of stations per iteration requires a matrix multiplication of
+O(G2
+𝜏𝑁) and the inversion cost O(G3
+𝜏) which is ignored for N
+≫Gτ. The total cost across P pairs of stations and I1 iterations
+is O(𝑃𝐼1G2
+𝜏𝑁); and (3) delay-to-space mapping and refinement:
+hybrid-guided optimization over I2 iterations adds O(I2P), which
+is minor. In typical scenarios where N ≫Gτ ≫P > L, the
+dominant term leads to 𝑇≈O(𝑃𝐼1G2
+𝜏𝑁). The spline interpolation
+in Equation (10) significantly reduces Gτ, and the proposed
+fast-converging optimization algorithm keeps the number of
+iterations very small. Regarding space complexity, memory usage
+is mainly due to the storage of frequency-domain signals and
+over-complete dictionary, giving M = O(LN + GτN).
+6
+Numerical Simulations
+The simulation setup consists of four stationary sensors arranged
+in a 1 km×1 km square, monitoring an emitter randomly located
+within the surveillance area, such as 𝐮= [53.5, −86.5]T. The
+emitter’s parameters are set as fs = 100MHz and fc = 1GHz. Three
+benchmark methods are considered: TDOA-WLS in [2], DPD-
+SML in [3], and DPD-Sparse in [9]. All compared algorithms
+utilize a multiresolution grid search over a 200m × 200m area
+with an initial grid spacing of 5 m. The proposed method
+integrates sparsity priors and gradient-driven iteration, starting
+from a coarser initial resolution of 10 m.
+Monte Carlo simulations are conducted over 200 trials. Figures 3
+and 4 depict the localization RMSE and run time versus SNR
+with the sample size fixed at N = 1000. As shown in Figure 3,
+the proposed method obtains significant performance gains in
+low-SNR regimes. Specifically, it maintains an RMSE below 0.1
+m at –5 dB, outperforming DPD-SML and DPD-Sparse by 81%
+and 79%, respectively. Its performance degradation threshold lies
+between –10 dB and –5 dB, while DPD-SML and DPD-Sparse
+FIGURE 4
+Run time vs. SNR: Efficiency analysis of different
+methods, when sample size N = 1000.
+FIGURE 5
+Localization RMSE vs. Sample size for different meth-
+ods, when SNR = –5 dB.
+experience sharp deterioration below –2.5 dB. Run time results
+are shown in Figure 4, based on MATLAB implementations on
+an Intel Core i9-13900K CPU @ 2.20 GHz. The proposed method
+achieves speedups of approximately 18.9× and 26.4× over DPD-
+SML and DPD-Sparse, respectively. It also reduces runtime by
+84% compared to TDOA-WLS, while maintaining significantly
+higher accuracy in low-SNR scenarios.
+Further analysis is conducted under a fixed SNR of –5 dB to
+evaluate performance across varying sample sizes. Figure 5 shows
+that DPD-SML and DPD-Sparse exhibit degraded accuracy when
+the sample size drops below 1600 and 1400, respectively. In
+contrast, the proposed method consistently maintains RMSE
+below 0.1 m across the entire range from 600 to 2000 samples,
+and outperforms TDOA-WLS throughout. Figure 6 illustrates
+the runtime as a function of sample size. Benefiting from
+the hybrid sparse-gradient optimization strategy, the proposed
+method achieves more than an order-of-magnitude reduction
+in computation time across all sample sizes. For instance, at
+N = 1400, the proposed method runs in 0.22 s, significantly
+faster than DPD-SML (4.7 s), DPD-Sparse (11.1 s), and TDOA-
+WLS (1.9 s), corresponding to speedups of 21×, 50×, and 8.6×,
+respectively. This confirms the superior efficiency of the proposed
+algorithm.
+4 of 5
+Electronics Letters, 2025
+ 1350911x, 2025, 1, Downloaded from https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/ell2.70447 by Readcube-Labtiva, Wiley Online Library on [08/10/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+--- PDF PAGE 5 ---
+FIGURE 6
+Run time vs. Sample size: Efficiency analysis of different
+methods, when SNR = –5 dB.
+7
+Conclusion
+An efficient DPD method is proposed, leveraging sparse struc-
+tures in the cross-correlation domain and gradient-driven refine-
+ment to achieve accurate and efficient emitter localization. By
+avoiding grid resolution limitations and accelerating conver-
+gence, the proposed method enhances both localization accuracy
+and efficiency. Simulation results demonstrate that the proposed
+approach significantly outperforms conventional and sparse DPD
+methods under low-SNR conditions. And the proposed method
+maintains superior localization performance while reducing
+runtime across varied sample sizes. Overall, this letter offers
+a competitive solution for real-time passive localization in
+challenging environments.
+Author Contributions
+Ying Xiao: conceptualization, formal analysis, methodology, software,
+validation, writing – original draft. Zilan Yu: data curation, investiga-
+tion, resources, soft-ware, visualization, writing – review & editing. Xi
+Chen: con-ceptualization, funding acquisition, project administration,
+resources, supervision, validation, writing—review & editing.
+Acknowledgements
+The funding support from the National Key Research and Develop-
+ment Program of China under Grant 2022YFB3105204 is gratefully
+acknowledged.
+Conflicts of Interest
+The authors declare no conflicts of interest.
+Data Availability Statement
+The data that support the findings of this study are available from the
+corresponding author upon reasonable request.
+References
+1. G. Wu, F. Guo, and H. Zhang, “Direct Position Determination: An
+Overview,” Journal of Radars 9, no. 6 (2020): 998–1013.
+2. X. Qu, L. Xie, and W. Tan, “Iterative Constrained Weighted Least
+Squares Source Localization Using TDOA and FDOA Measurements,”
+IEEE Transactions on Signal Processing 65, no. 15 (2017): 3990–4003.
+3. A. Weiss, “Direct Position Determination of Narrowband Radio Trans-
+mitters,” IEEE Signal Processing Letters 11, no. 5 (2004): 513–516.
+4. M. Pourhomayoun and M. Fowler, “Distributed Computation for
+Direct Position Determination Emitter Location,” IEEE Transactions on
+Aerospace and Electronic Systems 50, no. 4 (2014): 2878–2889.
+5. X. Feng, Z. Huang, J. He, and D. Xue, “Efficient Direct Position Deter-
+mination Using Frobenius Norm Approximation,” Electronics Letters 58,
+no. 10 (2022): 402–404.
+6. D. Malioutov, M. Cetin, and A. Willsky, “A Sparse Signal Recon-
+struction Perspective for Source Localization With Sensor Arrays,” IEEE
+Transactions on Signal Processing 53, no. 8 (2005): 3010–3022.
+7. K. Hao and Q. Wan, “Sparse Bayesian Inference-Based Direct Off-Grid
+Position Determination in Multipath Environments[J],” IEEE Wireless
+Communication Letters 10, no. 6 (2021): 1148–1152.
+8. J. Li, X. Dong, X. Shi, and X. Zhang, “An Enhanced Direct Position
+Determination of Non-Circular Sources via Sparse Bayesian Inference
+and Grid Refinement Strategy,” Digital Signal Process 151 (2024): 104564.
+9. H. Jiang, J. Li, K. Zhu, and Y. Li, “Sparse Direct Position Determination
+Based on TDOA Information in Correlation-Domain,” Remote Sensing 15,
+no. 15 (2023): 3705.
+10. J. Li, H. Jiang, Y. Li, et al., High Accuracy Source Localization Based on
+Parallel Factor Analysis of TDOA in the Cross Correlation Domain (IEEE
+Trans. Commun, 2025).
+11. J. Nocedal and S. Wright, Numerical Optimization (New York, NY:
+Springer, 2006).
+Electronics Letters, 2025
+5 of 5
+ 1350911x, 2025, 1, Downloaded from https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/ell2.70447 by Readcube-Labtiva, Wiley Online Library on [08/10/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License

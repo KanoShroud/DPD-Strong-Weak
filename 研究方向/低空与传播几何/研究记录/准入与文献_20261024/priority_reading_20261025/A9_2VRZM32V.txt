@@ -1,0 +1,2236 @@
+
+=== PDF PAGE 1 ===
+    sensors
+
+
+
+Article
+Direct Position Determination of Unknown Signals in
+the Presence of Multipath Propagation
+
+
+Jianping Du  ID , Ding Wang  ID , Wanting Yu  ID and Hongyi Yu *
+
+  National Digital Switching System Engineering and Technological Research Center, Zhengzhou 450002, China;
+  dullenx@126.com (J.D.); wang_ding814@aliyun.com (D.W.); ywan1107@163.com (W.Y.)
+  *  Correspondence: hongyiyuise@163.com; Tel.: +86-135-0382-7610
+
+  Received: 22 February 2018; Accepted: 15 March 2018; Published: 17 March 2018
+
+ Abstract: A novel geolocation architecture, termed “Multiple Transponders and Multiple Receivers
+  for Multiple Emitters Positioning System (MTRE)” is proposed in this paper. Existing Direct Position
+ Determination (DPD) methods take advantage of a rather simple channel assumption (line of sight
+ channels with complex path attenuations) and a simpliﬁed MUltiple SIgnal Classiﬁcation (MUSIC)
+ algorithm cost function to avoid the high dimension searching. We point out that the simpliﬁed
+ assumption and cost function reduce the positioning accuracy because of the singularity of the
+  array manifold in a multi-path environment. We present a DPD model for unknown signals in
+  the presence of Multi-path Propagation (MP-DPD) in this paper. MP-DPD adds non-negative real
+ path attenuation constraints to avoid the mistake caused by the singularity of the array manifold.
+ The Multi-path Propagation MUSIC (MP-MUSIC) method and the Active Set Algorithm (ASA) are
+ designed to reduce the dimension of searching. A Multi-path Propagation Maximum Likelihood
+ (MP-ML) method is proposed in addition to overcome the limitation of MP-MUSIC in the sense of a
+  time-sensitive application. An iterative algorithm and an approach of initial value setting are given
+  to make the MP-ML time consumption acceptable. Numerical results validate the performances
+ improvement of MP-MUSIC and MP-ML. A closed form of the Cramér–Rao Lower Bound (CRLB) is
+ derived as a benchmark to evaluate the performances of MP-MUSIC and MP-ML.
+
+
+ Keywords: direct position determination; MUSIC algorithm; maximum likelihood estimation; convex
+ QP; multi-path geolocation; active set algorithm
+
+
+
+
+1. Introduction
+
+   We are interested in high precision positioning for shortwave signal sources in this paper. Two-step
+methods, such as the Angle Of Arrival (AOA) method, were usually used for shortwave signal
+positioning, and the methods provided a poor performance in a low Signal Noise Ratio (SNR) scenario.
+It has been shown that available prior knowledge on deterministic multi-path components can be
+beneﬁcial for localization [1].  Kietlinski-Zaleski Jan presented techniques to beneﬁt from signal
+reﬂections from known indoor features such as walls [2]. Inspired by those ideas, we propose a
+novel geolocation system architecture to locate the shortwave sources. This new architecture, termed
+“Multiple Transponders and Multiple Receivers for Multiple Emitters Positioning System (MTRE)”,
+uses multiple transponders and receivers with known locations to locate multiple narrow band signals.
+The raw signals are transferred “in band” (i.e., as a man-made multi-path) by the transponders, and
+there is no need for a network infrastructure or an out-of-band channel bandwidth, which are required
+in an up/down converter system. In order to avoid the interference between the receiving and the
+sending signals of a transponder, we use different polarization modes to isolate the signals. In an MTRE
+system, man-made multiple paths from an emitter to a receiver are made to improve the positioning
+precisions and extending the positioning range.
+
+
+
+Sensors 2018, 18, 892; doi:10.3390/s18030892                                        www.mdpi.com/journal/sensors
+
+=== PDF PAGE 2 ===
+Sensors 2018, 18, 892                                                                                        2 of 36
+
+
+
+     Multi-path propagation is a really important problem in outdoor and indoor positioning systems,
+and it is still the main source of estimation errors for range-based indoor localization approaches [3,4].
+The recent research in dealing with multi-path either tries to detect these situations statistically
+based on the received signals [5,6] or to directly mitigate the corresponding errors with statistical
+techniques [7,8]. Some algorithms for indoor localization make use of, e.g., the cooperation of multiple
+agents to overcome multi-path situations [9]. Arrays were used for beam-forming to separate signals
+from different directions, and the multi-path positioning problem is simpliﬁed into a single path
+positioning problem [10,11]. Furthermore, location ﬁngerprinting, e.g., Received Signal Strength
+(RSS)-based methods, has been widely used in harsh environments [12,13]. It makes use of a priori
+training signals in multiple regions of the environment to train a classiﬁcation algorithm [14]. However,
+the required training phase, as well as the missing ﬂexibility w.r.t. changes in the environment may
+limit its application.
+    Most of the above literature focused on the UWB signals and indoor positioning applications,
+and two-step approaches were adopted to locate the emitters. The very high bandwidth of the UWB
+signal translates into very good time resolution and makes the UWB signal resistant to multi-path.
+It is possible to extract parameters, e.g., RSS, Time Of Arrival (TOA), AOA, Time Difference Of Arrival
+(TDOA) and Frequency Difference Of Arrival (FDOA), from UWB signals in the presence of multi-path
+propagation and to locate the emitter based on those parameters [15,16]. However, narrow-band
+systems have a low time resolution, and it is difﬁcult to get the measurements in the ﬁrst step.
+    The Direct Position Determination (DPD) methods were proposed in [17] for single narrow band
+signal positioning and in [18] for multiple narrow band signal positioning. A DPD approach collects
+data at all sensors together and uses both the array responses and the Times Of Arrival (TOA) at each
+array, in contradiction with the two separate steps: parameter measuring and location determination.
+From the optimization theory point of view, two-step methods are sub-optimal, since the parameter
+estimation in the ﬁrst phase is done independently, without considering the constraints that the
+measurements must correspond to the same source position. DPD methods overcame the problem of
+associating estimated parameters with their relevant sources and was shown to outperform two-step
+methods, especially in low SNR scenarios [19].
+    There have been only a few attempts to improve the accuracy of emitter positioning in the
+presence of multi-path propagation under the DPD framework. Most of the existing DPD methods
+were developed for a single-path channel in which the multi-path was modeled as additive noise [20].
+In [20], the single path DPD was tested with a channel with two paths scenario and showed improved
+performance over two-step methods. The DPD with small local scattering was studied in [21,22]. In a
+scattering scenario, sensors were affected by a set of virtual emitters, which were placed randomly
+in close proximity to the real emitter. It was assumed that the positions of the virtual emitters were
+i.i.d, and each position forms a 3D Gaussian distribution. Odel Bialer and Dan Paphaeli and Anthony
+J. Weiss [23,24] proposed a positioning algorithm for a dense multipath environment. Each received
+signal was obtained by convolving the transmitted pulse with a channel impulse response, and only
+the ﬁrst arrival cluster (the direct path) was taken into consideration in their work. The signals reﬂected
+from other objects were not modeled in their work.
+    Papakonstantinou and Slock [25,26] considered a simpliﬁed single-bounce multipath model.
+The model assumed that the transmitted signal did not bounce over more than one scatter. They jointly
+estimated the position of the target and scatters. They studied the single emitter positioning problem in
+the presence of multi-path propagation and assumed that the waveform of signal and path attenuations
+were known in advance. Miljko and Vucic [27] proposed a novel direct geolocation of an Ultra
+WideBand (UWB) source in the presence of multi-path using the MUltiple SIgnal Classiﬁcation
+(MUSIC) method and focusing matrices. Only one emitter was taken into consideration, and the
+path attenuations are known in advance in their work.  Bar-Shalom et al.  [28,29] proposed a
+transponder-added Single Platform Geolocation (SPG) model. A single emitter and single receiver
+were assumed in the SPG model. They stated that the SPG model achieved a similar performance to
+
+=== PDF PAGE 3 ===
+Sensors 2018, 18, 892                                                                                        3 of 36
+
+
+
+the multiple-RX DPD algorithm. The multiple-RX DPD algorithm mentioned in their works assumed
+that the transponders were replaced by the receivers directly. In a weak signal location application,
+a single receiver cannot receive signals from all transponders stably. Some paths may be blocked
+or disrupted. Multiple emitters, multiple transponders and multiple receivers need to be taken into
+consideration in a weak signal positioning application.
+     All unknown parameters should be estimated together in a DPD model, and this leads to a
+large-scale parameter searching. MUSIC methods calculate the spatial spectrum of each candidate
+position rather than the combinations of all emitter positions. Amar et al. [30] studied that multiple
+known and unknown radio-frequency signals under the LoS (Line of Sight) channel assumption.
+A simpliﬁed MUSIC algorithm was adopted to avoid the large-scale parameter searching. The cost
+function in [30] maximized the projection of the array manifold onto the signal subspace rather than
+minimizing the projection onto the noise subspace. The simpliﬁed cost function took advantage
+of the maximization of the convex Quadratic Programming (QP) with linear constraints, and the
+eigenvalue structure was adopted to avoid the searching of path attenuation parameters in their work.
+The simpliﬁed MUSIC worked well in an LoS propagation context, but it had a poor performance in a
+multi-path propagation scenario due to the singularity of the array manifold. Minimizing the projection
+of the array manifold onto the noise subspace overcomes the shortcomings of a signal subspace
+projection method. However, the eigenvalue system fails to resolve the minimization programming.
+     Existing DPD methods mainly focus on narrow-band signal positioning [18,29,31–33] and usually
+assume that the carrier phase does not carry the propagation delay information. Complex channel
+attenuations were estimated to eliminate the inﬂuence of carrier phase misalignment in a narrow-band
+signal positioning method. We point out that the narrow-band assumption will lose the phase
+information in an LoS positioning application, and it will not be able to locate emitters at all in a
+multi-path positioning application. We add constraints that path attenuations are nonnegative real
+numbers in our model. In an existing DPD model, path attenuations are complex numbers and have
+only one equation constraint (the norm of path attenuations is one), and the Lagrange-multiplier
+method is very effective at solving the optimization with equation constraints [34]. However, it is
+difﬁcult to solve an optimization with inequality constraints (the path attenuations should be greater
+than zero). We are required to design an efﬁcient algorithm to solve the QP with inequality constraints.
+    The performance of a MUSIC method is determined by the precision of the covariance matrix
+estimation. In a time-sensitive application, the number of snapshots is not enough, and it is difﬁcult to
+estimate the covariance matrix precisely. The maximum likelihood method maximizes the likelihood
+function of the received data rather than estimating the covariance matrix, and it achieves a better
+performance than that of the MUSIC method. However, the dimension of the searching space turns
+out to be unacceptable in the maximum likelihood method.
+    Our motivation is to develop a simple and accurate positioning model and corresponding
+algorithms for the case of unknown waveform signals and multi-path environment. We establish a
+Multi-path Propagation (MP)-DPD model for the scenario of multiple emitters, multiple transponders
+and multiple receiving arrays. It can be viewed as a modiﬁed and extended version of the SPG model
+proposed in [29]. The MP-DPD reduces the risk of paths being blocked or disrupted and ﬁxes the
+constraints on path attenuations. Multiple emitters can be simultaneously positioned in the MP-DPD
+model, as well. MP-MUSIC and MP-ML methods are proposed to reduce the time consumption of the
+optimization. The numerical results and the Cramér–Rao Lower Bound (CRLB) analysis show that
+the MP-MUSIC method has a lower computing complexity than MP-ML, especially in the case of a
+complex multipath scenario. The MP-ML method is more precise than MP-MUSIC, especially in the
+case of positioning with limited snapshots. An Active Set Algorithm (ASA) for the MP-MUSIC and
+an iterative algorithm for the MP-ML are developed to reduce the computational complexity of the
+methods further. Numerical results demonstrate that the MP-MUSIC and MP-ML proposed in this
+paper outperform the conventional methods.
+
+=== PDF PAGE 4 ===
+Sensors 2018, 18, 892                                                                                        4 of 36
+
+
+
+    The paper is organized as follows: Section 2 outlines the problem formulation, and an MP-DPD
+model is established in this section. The MP-MUSIC method, the MP-ML method and corresponding
+algorithms are proposed in Sections 3 and 4, Numerical performance examples of these algorithms are
+given in Section 5. The ﬁnal conclusions are given in Section 6. Finally, the detailed descriptions of
+the ASA algorithm, the iterative algorithm for MP-ML method and the derivation of the CRLB are
+provided in the Appendix.
+
+2. Problem Formulation
+
+    Consider that there are D emitters located at pe = [pTe (1), pTe (2), ..., pTe (D)]T and L passive
+transponders placed at pt = [pTt (1), pTt (2), ..., pTt (L)]T. The signals transmitted by the emitters are
+reﬂected by the transponders and intercepted by N receiving arrays. Each array includes M antennas.
+The centers of the arrays are located at pr = [pTr (1), pTr (2), ..., pTr (N)]T. It is assumed that the locations
+of the transponders and the receiving arrays are known a priori and that the signal waveforms are
+unknown. The scenario is depicted in Figure 1.
+
+
+
+                    105
+                                                                                Emitters
+                    2                                                         Transponders
+                                                                                Receivers
+
+                                      Z(m) 1
+
+
+                    0
+                    4
+
+                        2
+
+                    106       0
+                               -2                                             3       4                                                                       2                                                                1
+                       Y(m)      -4   -2      -1      0                        106
+                                                   X(m)
+
+              Figure 1. Multiple-path positioning problem with static transponders/receivers.
+
+
+    Denote the signal propagation delay between the d-th emitter and the ℓ-th transponder
+by ¯τdℓ. Denote:
+                                                  ˜τℓn = [ ˜τℓn1, ˜τℓn1, ..., ˜τℓnM]T,                                       (1)
+
+where ˜τℓnm is the propagation delay between the ℓ-th transponder and the m-th antenna in the n-th
+receiving array. ˜τℓn is an M × 1 column vector, which represents the propagation delays from the
+ℓ-th transponder to the n-th receiving array. ˜τℓn is known in advance, and it is independent of the
+emitter positions.
+    The path attenuation from the d-th emitter to the n-th receiving array, which is reﬂected by the ℓ-th
+transponder, is denoted by αdℓn. The path attenuation coefﬁcients are assumed as non-negative real
+numbers, and the rationality of the assumption will be discussed in detail in Section 3.1.2. We assume
+that the antennas in a receiving array are uniform, and all antennas in an array share the same path
+attenuation coefﬁcient.
+    The time-domain model of the signals that are received by the n-th receiving array is:
+
+
+                                     L  D
+                                 ¯rn(t) = ∑ ∑ [αdℓn¯sd(t −˜τℓn −¯τdℓ−td)] + ¯n(t),                           (2)
+                                 ℓ=1 d=1
+
+where ¯rn(t) is an M × 1 column vector, which represents M snapshots at time t of the n-th receiving
+array. ¯sd(t) is an M × 1 column vector, which represents M snapshots of the d-th source signal at
+time vector t ≜t −˜τℓn −¯τdℓ−td. ¯n(t) is an M × 1 noise vector at time t. 0 ≤t ≤T, and td is the
+unknown transmit time of the emitter d. We assume that the path attenuation, αdℓn, remains constant
+
+=== PDF PAGE 5 ===
+Sensors 2018, 18, 892                                                                                        5 of 36
+
+
+
+during the observation time interval. This paper mainly focuses on the positioning of deterministic,
+but unknown signals. It is assumed that source signals are independent of one another, and there is no
+further requirement for the code or waveform of the signals. The frequency-domain model for the k-th
+DFT coefﬁcients is given by:
+
+
+                                       L  D
+                            rn(k) = ∑ ∑ αdℓn˜aℓn(k)e−iωk ¯τdℓsd(k) + n(k),                            (3)
+                                   ℓ=1 d=1
+
+where:
+
+                                              ˜aℓn(k) = e−iωk ˜τℓn,
+                                                  ˇsd(k) = sd(k)e−iωktd,
+                                       2πk
+                                   ωk =         ,
+                                    T
+                                            k = 1, 2, . . . , K,                                            (4)
+
+where sd(k) is the k-th Fourier coefﬁcient of the d-th source signal ¯sd(t), t ∈[0, T]. rn(k) and n(k) are
+M × 1 vectors of the k-th Fourier coefﬁcients of ¯rn(t) and ¯n(t). ˜aℓn(k) is an M × 1 vector, which denotes
+the generalized array response of the n-th receiver at frequency ωk. Make (3) into matrix form:
+
+                                        r(k) = A(k)ˇs(k) + n(k),                                         (5)
+
+where:
+
+                                r(k) ≜[rT1 (k), rT2 (k), ..., rTN(k)]T,
+                              rTn(k) = [rTn1(k), rTn2(k), ..., rTnM(k)]T,
+                         A(k) ≜˜A(k)V(k)α,
+                          ˜A1(k)    0        . . .     0   
+                                      0     ˜A2(k)    . . .     0
+                               ˜A(k) =                                                            ,
+                                                                                                                                                                                                                                     ...                                       ...       ...                              ...                                                                                                                                                                                                                                
+                                      0      0        . . .   ˜AN(k)
+                             ˜An(k) = [˜a1n(k), ˜a2n(k), ..., ˜aLn(k)],
+
+
+                         V(k) = IN ⊗¯V(k),
+                               ¯V(k) = [ ¯V1(k), ¯V2(k), ..., ¯VD(k)],
+                             ¯Vd(k) = diag([e−iωk ¯τd1, e−iωk ¯τd2, ..., e−iωk ¯τdL]),
+                                                                  α1
+                                      α2
+                          α =                        ...        ,                                                                                                                                            
+                              αN
+                                                                α1n   0      . . .    0  
+                                    0   α2n    . . .    0
+                            αn =                         ...                          ...     ...                       ...        ,                                                                                                                                                                                                      
+                                    0    0      . . .  αDn
+                             αdn = [αd1n, αd2n, ..., αdLn]T,
+                                      ˇs(k) ≜[ˇs1(k), ˇs2(k), ..., ˇsD(k)]T.
+
+=== PDF PAGE 6 ===
+Sensors 2018, 18, 892                                                                                        6 of 36
+
+
+where ⊗is the Kronecker product and IN is an identify matrix with a size of N × N.
+    Denote the second moments of variables by:
+
+
+                   E{n(k)nH(k)} = σ2IMN ≜Σ,                                                    (6)
+                    E{n(k)n(k)T} = 0,
+                            R(k) ≜E{r(k)rH(k)} = A(k)Λ(k)AH(k) + Σ,                       (7)
+                           Λ(k) ≜E{ˇs(k)ˇsH(k)},                                                 (8)
+
+where IMN is an identity matrix with a size of MN × MN. R(k) is a covariance matrix of received
+signals at frequency ωk. σ is the noise standard deviation. The observed signal of each antenna ¯r(t) is
+partitioned into J sections, and each section is Fourier transformed. The k-th Fourier coefﬁcient of the
+j-th section is denoted by rj(k). The covariance matrix at frequency ωk is estimated by:
+
+
+                                                                                      J
+                                         1
+                                          ˆR(k) = ∑ rj(k)rHj (k).                                         (9)                                                              J                                                    j=1
+
+    The relationship between the received signals and emitter positions has been established in (5),
+and it is named the MP-DPD model. The MP-DPD model optimizes the emitter positions directly to
+achieve a more accurate estimation. Two DPD methods are proposed under the MP-DPD framework:
+
+•  MP-MUSIC method;
+•  MP-ML method.
+
+    The array manifold projection onto the noise subspace is adopted as the cost function in the
+MP-MUSIC method, and the likelihood function of the received signals is adopted in the MP-ML
+method. If the number of snapshots is sufﬁcient, MP-MUSIC consumes less time than MP-ML without
+degrading the performance. Besides, if the number of snapshots is not enough, MP-ML obtains more
+precise position estimations than MP-MUSIC.
+
+3. MP-MUSIC Method
+
+   We analyze the shortcomings of the existing MUSIC method in the multi-path propagation
+positioning ﬁrstly and establish an MP-MUSIC model that is suitable for the multi-path environment
+positioning. Finally, the corresponding algorithm is given at the end of this section.
+
+3.1. The Limitation of Existing MUSIC Methods
+
+   We introduce the Signal Subspace Projection MUSIC (SSP-MUSIC) method, which was commonly
+used in the DPD model ﬁrstly, and develop a Noise Subspace Projection MUSIC (NSP-MUSIC) method
+to overcome the shortage of SSP-MUSIC. Finally, we discuss the performances of SSP-MUSIC and
+NSP-MUSIC, which were adopted in a multi-path positioning application.
+
+3.1.1. SSP-MUSIC
+
+    Alan Amar and Anthony  J. Weiss studied the positioning problem of multiple unknown
+radio-frequency signals in [30]. The MUSIC method for the LoS propagation positioning was proposed
+in their works. Alan Amar maximized the manifold projection onto the signal subspace rather than
+minimizing the projection onto the noise subspace. The programming model of Amar’s method was
+deﬁned as:
+                                               [ ˆpe, ˆα] = arg max F(pe, α) = αHD(pe)α,                            (10)
+
+                             = 1,                         ( ∥α∥2F                                                           s.t.                                                        (11)
+                                      α ∈CND,
+
+=== PDF PAGE 7 ===
+Sensors 2018, 18, 892                                                                                        7 of 36
+
+
+
+where:
+
+                               " K                  #
+                       D(pe) ≜HH ∑ ΓH(k)Us(k)UHs (k)Γ(k) H,                          (12)
+                                         k=1
+                 H ≜IN ⊗1M,                                                      (13)
+
+                          CND is the set of complex column vectors with the length ofwhere α is the path attenuation vector,
+ND, ∥· ∥F is the Frobenius norm of a matrix, pe is the vector of emitter positions, IN stands for the
+N × N identity matrix, 1M stands for an M × 1 column vector of ones, M stands for the number of
+antennas of each array, Γ(k) is the array manifold matrix at frequency ωk, N is the number of receivers,
+D is the number of emitters, K is the frequency points of received signals and Us(k) is made up of the
+eigenvectors of the covariance matrix of received signals corresponding to the D largest eigenvalues.
+The other parameter notations can be found in [30].
+     Since (10) is a quadratic convex optimization with linear constraints in the complex ﬁeld, the
+maximum of the cost function is the maximal eigenvalue of the matrix D(pe) [31]; thus, the optimal
+cost function value is F∗(pe) = λmax{D(pe)}, where λmax{·} represents the maximal eigenvalue of
+a matrix. Beneﬁting from the simpliﬁed cost function and the eigenvalue system, Amar’s method
+reduced the searching dimension from 2DK + 2(N −1)D + 3 to three.
+
+3.1.2. NSP-MUSIC
+
+   A noise subspace projection MUSIC method is proposed in this paper to remove the simpliﬁcation
+of the SSP-MUSIC. NSP-MUSIC minimizes the manifold projection onto the noise subspace:
+
+
+                                           K
+                                  n      h               i   o                    [ ˆpe, ˆα] = arg min ¯F(pe, α) = αHHH ∑  ΓH(k)  I −Us(k)UHs (k) Γ(k)  Hα.          (14)
+                                               k=1
+
+    Reorganize the items in (14):
+
+                                                        1
+                                     [ ˆpe, ˆα] = arg max ˜F(pe, α) =                                               (15)                                              αHI(pe)α −αHD(pe)α,
+
+where:
+                                    " K         #
+                                  I(pe) ≜HH ∑ ΓH(k)Γ(k) H,                                 (16)
+                                                                k
+
+and D(pe) has been deﬁned in (12). SSP-MUSIC is viewed as a simpliﬁed version of (15). In a direction
+ﬁnding application, it is assumed that the path attenuation of each antenna in an array has been
+normalized in advance, and αHI(p)α is a known constant item. The dropping of the constant item in
+an optimization is reasonable. However, in a multi-path positioning application, αHI(p)α changes
+with the change of α, and the dropping of αHI(p)α is unreasonable.
+    Following the standard noise subspace MUSIC method and the model for the multi-path
+positioning, we deﬁne the cost function of NSP-MUSIC:
+
+                                                        1
+                          [ ˆpe, ˆα] = arg max Q(pe, α) =                                                                   ,              (17)
+                                ∑Kk=1 aH(k) [IMN −Us(k)UHs (k)] a(k)
+
+where IMN is an identity matrix with a size of MN × MN.  Us(k) is a matrix consisting of the
+eigenvectors of Rk corresponding to the D largest eigenvalues. pe and α are decision making variable
+vectors representing the candidate emitter positions and the corresponding path attenuations. In order
+to facilitate a unique solution, we assume that the norm of α is one. a(k) is the array manifold vector
+for pe at frequency ωk. Unfortunately, the cost function requires an LN −1 + 3 dimensional searching,
+and it is difﬁcult to get the optimal solution over such a high dimensional space.
+    Note that the d-th column of matrix A(k) in (5) is denoted by:
+
+=== PDF PAGE 8 ===
+Sensors 2018, 18, 892                                                                                        8 of 36
+
+
+                              ad(k) = ˜A(k)[IN ⊗¯Vd(k)]αd ≜Γd(k)αd,                            (18)
+where αd ≜[αTd1, αTd2, ..., αTdN]T represent attenuations of paths from the d-th emitter. The vector a(k) of
+a candidate emitter in the MUSIC algorithm (17) is similar to ad(k), but the position of the d-th emitter
+is replaced by the candidate emitter position pe. Denote Γ(k) ≜Γd(k) to simplify the explanation, and
+substitute (18) into (17):
+
+                                                         1
+                                              [ ˆpe, ˆb] = arg max Q(pe, α) = αHE(pe)α,                            (19)
+
+                                       E(pe) = ∑Kk=1 ΓH(k) IMN −Us(k)UHs (k) Γ(k),             
+                                 s.t.   ∥α∥2F = 1,                                                             (20)
+              α ∈CND,
+
+   Tom Tirer and Anthony J. Weiss studied similar programming in [35]. They transformed the cost
+function into:
+
+                                                        1
+                                            [ ˆpe, ˆα] = arg max ˜Q(pe, α) =                                                     λmin {E(pe)},                          (21)
+
+where λmin{·} represents the minimal eigenvalue of a matrix.   It is a promotion result of the
+maximization QP, but it is only a “not bad” solution rather than the optimal one. If Γ(k) is singular,
+E(pe) turns out to be singular, and λmin {E(pe)} = 0. In this case, the cost function reaches a peak.
+NSP-MUSIC only ﬁnds the solutions that make Γ(k) singular rather than true emitter positions.
+    From another point of view, if ∃i, j, which satisfy ei(pe) ≈ej(pe), where ei(pe) and ej(pe) are the
+column i and column j in E(pe), the matrix E(pe) turns out to be singular or near singular (It should be
+noticed that, in a single path positioning application, Γ(k) is a block diagonal matrix, and each block is
+an M × 1 column vector. It is impossible that Γ(k) has the same two columns, but this is possible for
+a multi-path positioning application. In a multi-path environment, Γ(k) is a block diagonal matrix,
+and each block is an M × L matrix. It is possible that the block is singular.). In this case, the optimal
+estimations of path attenuations are ˆα = [ˆα1, ˆα2, ..., ˆαℓ·n]T, where:
+
+                                 √
+                                                            2                                                     =                                                      z                                                                                               i,                                 √2                                                                                  2                                                          ˆαz =                          −                               =                                                      z                                                                                                j,                                       (22)                                                           2
+                          0   else.
+
+ˆαz is a feasible solution that satisﬁes (20). Substitute (22) into (19); Q(pe, α) →+∞. If α are complex
+scaled path attenuations, the cost function of NSP-MUSIC will reach a peak where E(pe) is singular or
+near singular.
+    Above all, if the manifold matrix Γ(k) is singular or near singular, SSP-MUSIC will fail to get the
+emitter positions. Besides, if Γ(k) is singular or near singular and α are complex path attenuations,
+NSP-MUSIC also fails to get the emitter positions. In the next section, we will discuss the singularity
+of the manifold matrix Γ(k) and the necessity for non-negative real number constraints for path
+attenuations.
+
+3.1.3. Singularity of the Manifold Matrix in the Presence of Multi-Path Propagation
+
+   We have discussed that SSP-MUSIC and NSP-MUSIC will fail to locate the emitters if Γ(k) is
+a near singular matrix, and we get the conditions of a candidate that makes Γ(k) near singular in
+Appendix A.
+     Unfortunately, Γ(k) will always be near singular. For example, in a shortwave positioning
+application, the size of a shortwave antenna is large. If the receivers need to be installed on mobile
+platforms (e.g., aircraft), only one antenna can be installed in a receiver (M = 1). In this case, from the
+
+=== PDF PAGE 9 ===
+Sensors 2018, 18, 892                                                                                        9 of 36
+
+
+condition in Theorem A2 in Appendix A, aℓ1n(k) = aℓ2n(k), k = 1, 2, ..., K always are satisﬁed, and the
+manifold matrix Γ(k) of a CSMCis a singular matrix.
+     In another application, the transponders are installed on a mobile platform (e.g., Unmanned
+Aerial Vehicle (UAV) platform or satellite platform).   If one transponder is relatively close to
+another transponder, or two transponders and a receiving station are near collinear, this makes
+aℓ1n(k) ≈aℓ2n(k), k = 1, 2, ..., K. In this situation, the conditions in Theorem A2 in Appendix A are
+satisﬁed, and Γ(k) turns out to be near singular.
+     In addition, it is necessary to down convert the Radio Frequency (RF) signals to baseband signals
+ﬁrstly to avoid the multi-peak searching of the cost function (see Figure 2). The suboptimal peaks in
+Figure 2a are caused by the carrier wave. The higher the frequency of the carrier, the more suboptimal
+the peaks in the cost function. Besides, there is only one peak in the cost function for a baseband signal
+positioning model (see Figure 2b). Figure 2b is an up envelopeof Figure 2a. If the cost function is a
+surface with multiple peaks, it is difﬁcult to develop a searching strategy except for a high density
+grid searching. However, it is easy to get the global optimal solution for a continuous function with
+a single peak (e.g., Steepest Descent Method (SDM), Newton Method (NM)). In a baseband signal
+positioning application, λ ≫R, where λ is the wave length corresponding to the maximal frequency
+of the baseband signal, and R is the radius of the circle receiving array. If λ ≫R, it is easy to satisfy
+aℓ1n(k) ≈aℓ2n(k), k = 1, 2, ..., K, and Γ(k) is near singular.
+
+
+
+
+     0.15                                     0.15
+
+
+      0.1                                      0.1
+
+
+     0.05                                     0.05
+
+
+        0                                        0
+     5000                                     5000
+                                            5000                                     5000
+               0                                        0
+                                  0                                        0
+       Y(m)     -5000  -5000      X(m)          Y(m)     -5000  -5000     X(m)
+                                    (a)                                                             (b)
+
+
+     Figure 2. Multiple-peak cost function of a frequency band signal and single peak cost function of a
+     base band signal. (a) Cost function for a frequency band signal (b) Cost function for a base band signal.
+
+
+3.1.4. Non-Negative Real Path Attenuation Constraints
+
+    Our model requires that path attenuations must be non-negative real numbers, but complex
+values in existing studies for narrow band signal positioning [18,29,31–33]. Weiss ignored the path
+attenuations (set the attenuation α = 1) in wide-band emitter positioning in [36].
+     In a narrow band signal positioning application, it is assumed that aℓn(k) ≈aℓn(k0) ≜aℓn, where
+k = 1, 2, . . . , K, and ωk0 is the carrier frequency. Based on the above assumptions, (3) turns out to be:
+
+                                     L  D
+                          rn(k) = ∑ ∑ αdℓnaℓn(k)e−iωk ¯τℓd ˇsd(k) + n(k)
+                                  ℓ=1 d=1
+                                     L  D
+                 ≈ ∑ ∑ αdℓnejωk0τaℓne−iωk ¯τℓd ˇsd(k) + n(k),                        (23)
+                                  ℓ=1 d=1
+
+=== PDF PAGE 10 ===
+Sensors 2018, 18, 892                                                                                       10 of 36
+
+
+where ejωk0τ is a phase adjustment item to satisfy ejωk0τaℓn(k0) →aℓn(k).  Existing studies used
+the envelope information only to estimate the propagation delay and dropped the carrier phase
+information. ejωk0τ was an adjustment factor for carrier phase alignment, and it was used to reduce the
+interference with the propagation delay estimation. Denote ¯αdℓn ≜αdℓnejωk0τ; (23) turns out to be:
+
+
+                                        L  D
+                             rn(k) ≈ ∑ ∑ ¯αdℓnaℓne−iωk ¯τℓd ˇsd(k) + n(k),                           (24)
+                                     ℓ=1 d=1
+
+where ¯αdℓn is a complex scalar representing the “channel attenuation” (It is not a real channel
+attenuation coefﬁcient, but an equivalent parameter, which is determined by the real path attenuation
+and the model error caused by the narrow band signal assumption), and aℓn denotes the generalized
+array response matrix.
+    The commonly-used DPD methods [18] modeled the received signal as:
+
+
+                             D
+                              rn(k) ≈ ∑ αdnan(pd)e−iωkτnd ˇsd(k) + n(k).                           (25)
+                                    d=1
+
+(25) is an LoS positioning model for narrow band signal positioning, while (24) is an NLoS positioning
+model. Existing models with complex path attenuation assumptions are viewed as simpliﬁed models of
+(3) in a narrow band signal positioning application. We point out that the simpliﬁed model (24) can not
+be adopted either in a MUSIC method or in an ML method in a multi-path propagation and unknown
+wave form application. We have obtained that the manifold matrix Γ(k) may be singular in Section
+3.1.3 and discussed that if the path attenuations were complex numbers, a MUSIC method could not
+obtain the emitter positions correctly in Section 3.1.2. We will discuss this further in Section 4.1 to
+explain the necessity of the real and non-negative constraints in an ML method.
+     Overall, we develop (3) as the signal model for positioning and constrain the path attenuations
+in R+.
+
+3.2. Mathematical Model of MP-MUSIC
+
+     In an MP-MUSIC method, the optimal estimation of α for a ﬁxed emitter position pe is given by
+solving the following programming:
+
+
+                                                        ˆα = arg min Q(α) = αHE(pe)α,                                 (26)
+
+
+               ∥α∥1 = 1,
+                       ∈RLN, α ≥0,               α                                   s.t.
+                                   K
+                           E(pe) =                ∑ ΓH(k) h IMN −Us(k)UHs (k) i Γ(k).                                                    k=1
+
+where ∥· ∥1 is the one norm of the vector (that is, the sum of the absolute values of the elements of the
+vector) and IMN is an MN × MN identity matrix.
+    The programming is a non-linear programming with real value constraints. There is an LN
+dimensional searching for a candidate emitter position, and it is difﬁcult to solve the programming
+directly. We remove the imaginary items in the programming without changing the optimal solution
+ﬁrstly and prove the convexity of the modiﬁed programming later. An iterative algorithm named ASA
+is proposed to solve the convex programming after the proof.
+
+=== PDF PAGE 11 ===
+Sensors 2018, 18, 892                                                                                       11 of 36
+
+
+
+3.2.1. Remove the Imaginary Items in the Programming
+
+    Rewrite the objective function by:
+
+                             αHE(pe)α = αHΨα + αHΦα,                                  (27)
+
+where Ψ ≜Re[E(pe)] is the real part of E(pe) and Φ ≜Im[E(pe)] is the imaginary part of E(pe). Φ is
+a Hermitian matrix, which satisﬁes:
+
+                         (                                            0       i = j,
+                                             Φi,j =                                                        (28)
+                                             −Φj,i   else.
+
+where Φi,j is the element at the i-th row and j-th column of the matrix Φ. Since α is a non-negative real
+value vector and the diagonal elements of Φ are zeros,
+
+
+                                   NL NL
+                     αHΦα = ∑ ∑ αiΦi,jαj
+                                             i=1 j=1
+
+                                   NL i−1
+                      = ∑ ∑ (αiΦi,jαj + αjΦj,iαi)
+                                             i=2 j=1
+
+                      = 0.                                                        (29)
+
+     Substitute (29) into (27), and the cost function turns out to be:
+
+                                                            ˆα = arg min q(α) = αHΨα                                    (30)
+
+
+                        ( ∥α∥1 = 1,
+                                                        s.t.
+                                    α ∈RLN, α ≥0.
+
+    The programming (30) is a QP in the real ﬁeld. If there are no inequality constraints and the
+objective function is convex, the Lagrange multiplier method is effective for solving the programming.
+However, the non-negative constraints of path attenuations are necessary due to the singularity of the
+array manifold. To obtain the optimal solution of (30), we verify the convexity of the programming
+ﬁrstly and design an algorithm to solve the convex programming.
+
+3.2.2. Convexity of the Programming
+
+Theorem 1. (30) is a convex quadratic programming with linear equality constraints and lower bounds.
+
+
+Proof.
+
+                                             K
+                                     E(pe) = ∑ E(k),                                        (31)
+                                                 k=1
+
+where:
+
+                                         h                  i                            E(k) = ΓH(k) IMN −Us(k)UHs (k) Γ(k)
+                   = ΓH(k)Un(k)UHn (k)Γ(k),                                      (32)
+
+=== PDF PAGE 12 ===
+Sensors 2018, 18, 892                                                                                       12 of 36
+
+
+where Un is the noise subspace of the received signal. ∀x ∈RLN,
+
+
+                                       K
+                          xHE(pe)x = ∑ xHE(k)x
+                                          k=1
+                                       K
+                      = ∑ ∥xHΓH(k)Un(k)∥2 ≥0,                             (33)
+                                          k=1
+
+
+                          xHΨx = xHE(pe)x −xHΦx.                                   (34)
+
+     Since ∀x ∈RLN, xHΦx =  0, and substituting (33) into (34), we get xHΨx ≥0, and the
+objective function is Positive Semi-Deﬁnite (PSD). The optimization problem (30) is a convex quadratic
+programming with linear equality constraints and lower bounds.
+
+      It is possible to ﬁnd the global optimal solution for a convex quadratic programming [37,38].
+The interior-point algorithm or any Heuristic Searching Algorithm (HSA) can be adopted to solve
+the optimization problem with equality constraints and lower bounds. However, those algorithms
+apply numerical searching strategies with low efﬁciencies. We introduce a faster algorithm named
+the Active Set Algorithm (ASA) in this paper to obtain the global optimal solution base on some
+theoretical analysis.
+
+3.2.3. Active Set Algorithm
+
+    The ﬁrst widely-used algorithm for solving a similar problem is the active set method published
+by Lawson and Hanson [34,39]. They proposed an active set method to solve the Non-Negative Least
+Squares (NNLS).
+
+
+Deﬁnition 1. Active set [40] In mathematical optimization, a problem is deﬁned using an objective function to
+minimize or maximize and a set of constraints:
+
+                                    g1(x) ≥0, . . . , gk(x) ≥0.                                    (35)
+
+    Given a point x in the feasible region, a constraint:
+
+                                              gi(x) ≥0,                                            (36)
+
+is called active at x if gi(x) = 0 and inactive at x if gi(x) > 0. The set of active ones is called the active set and
+denoted by A(x) = {i|gi(x) = 0}.
+
+   We describe the active set method for solving the quadratic programs of the form (30) containing
+equality and inequality constraints based on the methods described in [34,39].
+    Denote the optimal solution of (30) by ˆα.  If the active set of the optimal solution A(ˆα) were
+known in advance, we could ﬁnd the optimal solution ˆα by applying techniques, such as the Lagrange
+multiplier method, for equality-constrained QP. The prior knowledge of the active set accelerates the
+algorithm effectively.
+   α∗= [α∗1, α∗2, ..., α∗LN]T represents the real, but unknown path attenuations. If the n-th receiver
+cannot receive the signal from the emitter, which is reﬂected by the ℓ-th transponder, α∗ℓn = 0, otherwise,
+α∗ℓn > 0. In most cases, we known the set {i|α∗i = 0} in advance and have deleted the unconnected
+path in the model. without loss of generality, we set α∗i > 0, i = 1, 2, ..., LN. Denote ˆα as an estimation
+of α∗, that is ˆα ≈α∗. Denote ˆα = α∗+ ε, where ε is the estimation error vector of α∗. Since α∗i > 0,
+i = 1, 2, ..., LN, we set the initial work set by W(0) = ∅.
+
+=== PDF PAGE 13 ===
+Sensors 2018, 18, 892                                                                                       13 of 36
+
+
+
+    The searching path of the active set algorithm is strictly in the feasible region. Choose a feasible
+solution as the initial point of the algorithm. Solve the QP with equality constraints in the work set,
+and get the optimal searching direction. if the searching direction is blocked by some constraints not in
+the work set, add the constraints, which block the searching path ﬁrstly, into the work set. Resolve the
+new QP with the updated work set, until the searching direction is not blocked by any constraints.
+The algorithm reaches a local optimum for the current work set. To get an even better solution, we
+drop one active constraint in the work set to relax the programming. If the objective function cannot be
+decreased for all constraints in the work set, we get the optimal solution of the original programming.
+Otherwise, drop the constraint that causes the fastest decrease.
+    The detail of the ASA is described in Section 1 of the Supplementary File. The spatial spectrum of
+an emitter is determined by substituting the ˆα into the MUSIC cost function (19).
+
+3.2.4. MP-MUSIC Algorithm
+
+    The spatial spectrum of the emitter positions requires only a three-dimensional searching, and the
+size of E(pe) is LN × LN, which is usually rather small. The detailed procedure of the MP-MUSIC
+algorithm is represented in Algorithm 1.
+
+  Algorithm 1: MP-MUSIC algorithm.
+     Input: The received signal r, a speciﬁed emitter position pe
+    Output: The spatial spectrum q(pe)
+    Function MP_MUSIC(r,pe)
+         Partition ¯r into J sections: ¯rj,j = 1, 2, ..., J;
+        for j = 1 →J do
+           Fourier transform to section j: rj(k) ←FT(¯rj, ωk),k = 1, 2, ..., K;
+      end
+        for k = 1 →K do
+           Evaluate: ˆR(k) ←1J ∑Jj=1 rjkrHjk;
+          Get signal subspace Us(k) from ˆR(k);
+           Evaluate: Γ(k) ←˜A(k)[IN ⊗¯V(k)];
+           Evaluate: E(k) ←ΓH(k) IMN −Us(k)UHs (k) Γ(k);
+      end
+        Evaluate: Ψ ←Re[∑Kk=1 E(k)];
+        Evaluate: ˆα ←ASA(Ψ) in Algorithm 1 in the Supplementary File ;
+        Evaluate: q(pe) ←αHΨα;
+        return q(pe);
+    end
+
+    The performance of the MP-MUSIC algorithm is determined by the estimation precision of ˆR(k).
+If the number of snapshots is not enough, neither the covariance matrix ˆR(k) nor the spatial spectrum
+q(pe) can be estimated precisely.
+     In a time-sensitive positioning application, it is difﬁcult to get enough snapshots to estimate ˆR(k).
+We develop a Maximum Likelihood method in the presence of Multi-path Propagation (MP-ML) to
+estimate the emitter positions directly.
+
+4. MP-ML Method
+
+    The MP-ML method maximizes the conditional likelihood function of the received signals.
+The noise is assumed as Additive White Gaussian Noise (AWGN) with a known standard deviation σ,
+
+=== PDF PAGE 14 ===
+Sensors 2018, 18, 892                                                                                       14 of 36
+
+
+
+4.1. Mathematical Model of MP-ML
+
+    The likelihood function of the received signals is:
+
+                               K   1
+                                                                                                       (37)                         P(r|θ) =             ∏ |πΣ|e−[r(k)−A(k)ˇs(k)]HΣ−1[r(k)−A(k)ˇs(k)],                                  k=1
+
+where r is the observed data, Σ is the covariance matrix of noises, which is deﬁned in (6), and the
+unknown parameter vector θ ≜[pTe , αT, sT]T consists of:
+
+                                 pe ≜[pTe (1), pTe (2), ..., pTe (D)]T,
+                               pe(d) ≜[pex(d), pey(d), pez(d)]T,
+                                                            ¯α ≜[¯αT1 , ¯αT2 , ..., ¯αTN]T,
+                                                ¯αn ≜[αT1n, αT2n, ..., αTDn]T,
+                                                                           ˇs ≜[ˇsT(1), ˇsT(2), ..., ˇsT(K)]T,                                 (38)
+
+where αdn and ˇs(k) have been deﬁned in (5). The log-likelihood function of (37) is:
+
+               L(θ) = −KMN log πσ2 −1 ∑K [r(k) −A(k)ˇs(k)]H[r(k) −A(k)ˇs(k)].             (39)
+                                       σ2 k=1
+
+    Remove the constant items, and get the modiﬁed cost function of MP-ML:
+
+
+                                     K
+                                 ˆθ = arg min ¯Q(θ) = ∑ [r(k) −A(k)ˇs(k)]H[r(k) −A(k)ˇs(k)].                  (40)
+                                        k=1
+
+    The searching space dimension of (40) is 3D + DNL + DK, and it is necessary to reduce the
+searching space dimension. For ﬁxed attenuations α and emitter position combination pe in (40), the
+optimal estimation of the source signals at frequency ωk is:
+
+                                                              ˆˇs(k) = A+(k)r(k),                                        (41)
+
+where A+(k) ≜[AH(k)A(k)]−1AH(k) is the Moore–Penrose inverse of A(k). Substitute (41) into (40),
+
+
+                                    K
+                                 ˆη = arg min ¯Q(η) = ∑ [r(k) −PA(k)r(k)]H[r(k) −PA(k)r(k)],                 (42)
+                                       k=1
+where η ≜[pTe , ¯αT]T,  ¯α = αID ≜[α1,1,1, . . . , αd,ℓ,n, . . . , αDLN]T, ID is a column vector of D ones.
+PA(k) = A(k)A+(k) is the projection matrix of A(k). Expand (42):
+
+
+                K
+         ¯Q(η) = ∑ [rH(k)r(k) −rH(k)PHA(k)r(k) −rH(k)PA(k)r(k) + rH(k)PHA(k)PA(k)r(k)],     (43)
+                 k=1
+
+and move the constant items rH(k)r(k). Applying the properties of the projection matrix PA(k) = PHA(k)
+and PHA(k)PA(k) = PA(k), we get the modiﬁed programming of MP-ML:
+
+                                       K−1
+                             Q(η) = − ∑ rH(k)PA(k)r(k),                                 (44)
+                                             k=0
+
+=== PDF PAGE 15 ===
+Sensors 2018, 18, 892                                                                                       15 of 36
+
+
+
+               PA(k) = A(k, pe)A+(k, pe),
+                     =                          A+(k)                                      [AH(k,                                             pe)A(k, pe)]−1AH(k, pe),
+                      =                             A(k,                                  pe)                                             Γ(k, pe)α,                                                   s.t.    Γ(k, pe) = ˜A(k, pe)V(k, pe),
+                   =                                  αID,
+                        ∈RDLN,                                                    ¯α                ¯α                        ≥0.                                                    ¯α
+
+    There are two differences between our model and Bar-Shalom Ofer’s model in [28]. The ﬁrst one
+is that only a single emitter and a single receiver were modeled in their work, but multiple emitters and
+multiple receivers are taken into consideration in our work. The second one is that there are complex
+path attenuations in [28], but real non-negative path attenuations in our model.
+    The cost function in [28] was modeled as:
+
+                                            K αHf(k)fH(k)α
+                        max Q(η) = − ∑                          .                               (45)
+                                                k=1  αHC(k)α
+where f(k) ≜ΓH(k, pe)r(k), C(k) ≜ΓH(k, pe)Γ(k, pe). Section 3.1.1 has discussed that Γ(k, pe) may
+be singular, and C(k) may be singular, as well. When C(k) is singular, there is an α that satisﬁes
+αHC(k)α = 0, and the cost function Q(η) reaches the peak. However, the candidate emitter position is
+not the true emitter position. If Γ(k, pe) is near singular, f(k) = ΓH(k, pe)r(k) is near singular, as well.
+The numerator and denominator of the cost function Q(η) both tend to zero, and the value of the cost
+function turns out to be unstable. The noise level will seriously affect the value of the cost function in
+this case, and the model cannot ﬁnd the emitter accurately.
+    The searching space dimension of (44) has been reduced to 3D + DNL, but it is still difﬁcult to
+solve such a high dimensional non-linear programming. We propose an iterative algorithm in this
+paper to get the estimation of path attenuations to reduce the time consumption of the MP-ML.
+
+4.2. Remove Imaginary Items in the Programming
+
+     Substitute the constraints into the objective function of (44),
+
+
+                         K
+              Q(η) = − ∑ rH(k)Γ(k, pe)α[αHΓH(k, pe)Γ(k)α]−1αHΓH(k, pe)r(k)
+                           k=1
+                         K
+             = − ∑ fH(k)α[αHC(k)α]−1αHf(k),                                         (46)
+                           k=1
+
+where f(k) ≜ΓH(k, pe)r(k), C(k) ≜ΓH(k, pe)Γ(k, pe).
+   Henk A. L. Kiers studied a similar convex optimization problem in [41]. Ofer Bar-Shalom and
+Anthony J. Weiss study the complexity form of the optimization in [28] and its application in [29].
+The programming in our work has the complex f(k) and C(k), but the decision making variables α are
+real non-negative values. We modify the iterative process in [28,41] to satisfy the real non-negative
+constraints in our work.
+    The cost function (46) can be rewritten by:
+
+                                K−1
+                      Q(η) = − ∑ fH(k)α[αHC(k)α]−1αHf(k)
+                                     k=0
+                                K−1
+                             n                  = − ∑ tr  αHf(k)fH(k)α[αHC(k)α]−1o ,                         (47)
+                                     k=0
+
+=== PDF PAGE 16 ===
+Sensors 2018, 18, 892                                                                                       16 of 36
+
+
+where tr(·) is the trace operator of a matrix. Since C(k) and f(k)fH(k) are Hermitian metrics, ∀α satisfy:
+
+                                αHC(k)α = αH ¯C(k)α,
+                               αHf(k)fH(k)α = αH¯f(k)¯fH(k)α,                                 (48)
+
+
+                                                                1
+where ¯C(k) ≜Re{C(k)},  ¯f(k) = u(k)s 2 (k), and u(k)s(k)vH(k) is the SVD decomposition of
+Re{f(k)fH(k)}. The complex matrices f(k) and C(k) are replaced by the matrices ¯f(k) and ¯C(k)
+with real number elements:
+
+                                  K
+                             n                       Q(η) = − ∑ tr  αHf(k)fH(k)α[αHC(k)α]−1o
+                                     k=1
+                                  K
+                  = − ∑ ¯fH(k)α[αH ¯C(k)α]−1αH¯f(k).                              (49)
+                                     k=1
+
+    The complex non-linear programming with real constraints (46) is simpliﬁed to be a real non-linear
+programming (49).
+
+4.3. An Iterative Algorithm for Solving MP-ML
+
+   We introduce a theorem ﬁrstly and then give an  iterative algorithm  for solving the
+programming (49).
+
+Theorem 2.  ¯αi is a feasible solution of (49), and a better solution of (49) is obtained by solving the following
+programming:
+
+                                 ¯αi+1 = arg min G(αi, ¯α, pe) = ||Y −¯αHX||2 −Z,                        (50)
+                                                                                   ¯α
+
+
+                                                                 s.t. ¯α ≥0.
+
+where:
+
+                                       K
+                               F ≜ ∑ ¯f(k)TW(k)T,
+                                          k=1
+                          Y ≜FU−1,
+                          X ≜UT,
+                          Z ≜YYT,
+
+                                                                     1
+                      U = ¯UΣ 2 ,
+                           W(k) ≜IN ⊗diag{w(k)} ⊗IL,
+                             w(k) ≜¯f(k)Tαi[αTi ¯C(k)αi]−1,
+
+IL is an identify matrix with a size of L × L and IN is an identify matrix with a size of N × N. ¯U is the Singular
+Value Decomposition (SVD) of the following item:
+
+
+                                K
+               ∑ W(k) ¯C(k)WT(k) = ¯UTΣ ¯U.
+                                  k=1
+
+    The proof of Theorem 2 is given in Appendix B. The programming (50) is a linear least squares
+with bound constraints, and the Trust-Region-Reﬂective (TRR) algorithm is adopted to solve the
+programming. The detail of TRR is described in [42–44].
+
+=== PDF PAGE 17 ===
+Sensors 2018, 18, 892                                                                                       17 of 36
+
+
+
+    Following Theorem 2 and (A11) in the Appendix B:
+
+             Q(ηi+1) = H(¯αi+1) ≤G(αi, ¯αi+1, pe) ≤G(αi, ¯αi, pe) = H(¯αi) = Q(ηi).            (51)
+
+   We get an iterative method to obtain a better solution than the previous step. Denote the initial
+estimation of the unknown channel attenuations by α0. The solution of (50) gives a better estimation of
+the unknown parameter vector due to the inequality of (51). Furthermore, we get a better estimation
+¯α2, so that H(¯α2) ≤G(α1, ¯α2, pe) ≤G(α1, ¯α1, pe) = H(¯α1). Thus, H(¯α2) ≤H(¯α1) ≤H(¯α0). The detail
+of the iterative procedure is shown in the Algorithm 2 in the supplementary ﬁle.
+
+4.4. Getting the Initial Value
+
+    The performance of the iterative algorithm is determined by the initial value ¯α0. The path
+attenuations from the MP-MUSIC algorithm are used as the initial value of the MP-ML.
+    The initial path attenuations of the emitter d are denoted by ¯α0(d), and they are estimated by the
+MP-MUSIC in Algorithm 1.
+    For a ﬁxed emitter position combination pe, evaluate the MP-MUSIC algorithm to get the initial
+path attenuations ˆαd of the position pe(d), d = 1, 2, ..., D.
+    Reshape ˆα = [ˆαT1 , ˆαT2 , , ..., ˆαTD]T to get the initial attenuations vector:
+
+                                                        ¯α0 = [¯αT1 , ¯αT2 , ..., ¯αTD]T                                       (52)
+
+where:
+
+                                                    ˆαd = [ˆαTd1, ˆαTd2, ..., ˆαTdN]T,
+                                              ˆαdn = [ˆαdn1, ˆαdn2, , ..., ˆαdnL]T,
+
+and ˆαdnℓis estimated from MP-MUSIC.
+
+4.5. MP-ML Algorithm
+
+    Algorithm 2 in the Supplementary File optimizes the parameters α for a ﬁxed emitter positions
+combination pe. The searching dimension is reduced to 3D further.  It is possible to solve a 3D
+dimensional nonlinear programming. The MP-ML algorithm is proposed in Algorithm 2
+    Deﬁne the Region of Interest (RoI) by p, and apply the MP-MUSIC algorithm described in
+Algorithm 1 to get an initial solution pe = [pTe (1), pTe (2), ..., pTe (D)]T and the corresponding path
+attenuations α0. Adopt Algorithm 2 in the Supplementary File to get the optimal estimations of
+attenuations α and the cost function of emitter positions pe. Design a suitable searching path pie,
+i = 1, 2, ..., such as the Gaussian method, and get the optimal emitter position estimations.
+
+=== PDF PAGE 18 ===
+Sensors 2018, 18, 892                                                                                       18 of 36
+
+
+
+  Algorithm 2: MP-ML algorithm.
+     Input: Received signal r
+    Output: Emitter positions ˆpe
+    Function MP_ML_Algorithm(r)
+      Deﬁne the region of interest p;
+       while pe ∈p do
+           Evaluate: F(pe) ←MP_MUSIC(r,pe);
+           pe ←pe + ∆p;
+      end
+         Set: q∗= +∞i = 0; Get the initial p0e from the spatial spectrum F(pe), pe ∈p;
+        Evaluate: q(p0e) ←MP_ML_CostFun(p0e);
+       while |q(p0e) −q∗| > ε · |q∗| do
+               if q[pie] < q∗then
+          q∗= q(pie);
+         end
+           Evaluate a searching strategy: pi+1e  ←pie + ∆p;
+           Evaluate: q(pi+1e  ) ←MP_ML_CostFun(pi+1e  );
+                   i ←i + 1;
+      end
+        return ˆpe;
+    end
+    Function MP_ML_CostFun(pe)
+        Evaluate: MP-MUSIC to get the initial ¯α0;
+        Evaluate: ¯α ←MP_ML_Attenuation(pe(0),¯α0);
+       Reshape: α ←¯α;
+        Evaluate: q(pe) ←−∑K−1k=0 ¯fH(k)α[αH ¯C(k)α]−1αH¯f(k);
+        return q(pe)
+    end
+
+
+5. Numerical Examples
+
+    Some numerical examples are given to demonstrate the performances of the above algorithms.
+
+5.1. Scenario Setting and Performance Index Deﬁnition
+
+     In numerical simulations, three emitters are located at [0, 0, 0], [50, 0, 0] and [0, 50, 0], and
+four receiving arrays are located at [2200, −2100, 0], [3300, 600, 0], [3100, −700, 0] and [2300, 2500, 0].
+There are two different layouts of transponders in the simulations.  The ﬁrst one is the basic
+scenario, and the second one is designed to test the performances when a transponder is close to the
+anther. There are four transponders located at [−1210, 100, 200],[100, 1120, 200], (−100, −1040, 200)
+and [970, 160, 200] in Scenario A (see Figure 3a) (Figure 3 is a top view of the system layout. Height
+information is not indicated in the ﬁgure.). We move the third transponder to [100, 1100, 200] in
+Scenario B (see Figure 3b). All the positions are measured in km.
+
+=== PDF PAGE 19 ===
+Sensors 2018, 18, 892                                                                                       19 of 36
+
+
+
+
+           106                                                            106
+     2.5                                                         2.5
+              Emitters                                                          Emitters
+       2     Transponders                                            2     Transponders
+              Receivers                                                         Receivers
+
+     1.5                                                         1.5
+
+       1                                                           1
+
+     0.5                                                         0.5
+
+       0                                                           0     Y(m)                                                                                                                              Y(m)
+
+    -0.5                                                        -0.5
+
+      -1                                                          -1
+
+    -1.5                                                        -1.5
+
+      -2                                                          -2
+
+    -2.5                                                        -2.5
+        -2     -1      0      1      2      3      4              -2     -1      0      1      2      3      4
+                          X(m)                  106                                X(m)                  106
+                                  (a)                                                                 (b)
+
+
+                  Figure 3. Layouts of the numerical examples. (a) Layout A (b) Layout B.
+
+
+    Each receiving array is a Uniform Circular Array (UCA) with eleven antennas and a radius of
+30 m. The bandwidth is 8 kHz. The carrier frequency is 10 MHz. The simulation results are based
+on 200 Monte Carlo runs to gather enough statistics. The source signal of each emitter and the path
+attenuation coefﬁcients are generated randomly once for all the Monte Carlo runs, while the additive
+noises are regenerated at each run. The complex-valued signal frequency coefﬁcients are subject to
+∥ˇsd∥2F = 1. The path attenuation coefﬁcients are drawn from a uniform distribution between zero and
+one. The SNR is deﬁned in terms of “post-processing SNR”, which is given by:
+
+                             n            o                               E ∑Kk=1 ∥A(k)ˇs(k)∥2F
+                       SNR ≜                                          .                                 (53)
+                                         Kσ2
+
+    Root-Mean-Squared Error (RMSE) of the estimated position is adopted as the performance index
+of the algorithms. RMSE is given by:
+
+                     s ∑Nsi=1 ∥ˆpe −pe∥2F                                                                                                                     ,                                (54)                          RMSE(pe) ≜
+                                      NsD
+
+where Ns is the number of Monte Carlo runs, D is the number of emitters, pe are the real emitter
+positions and ˆpe are the estimated emitter positions
+   A scalar quantity of the CRLB matrix corresponding to RMSE is deﬁned as:
+
+                     r λmax[CRLB(pe)]                           CRLB(pe)¯    ≜                                   ,                                (55)
+                                D
+where λmax[CRLB(pe)] is the maximal eigenvalue of CRLB(pe). The computation of the CRLB matrix
+is presented in Section 3 of the Supplementary File [45–47].
+
+5.2. Performances of the MP-MUSIC Method
+
+   We compare the performances of the following MUSIC algorithms:
+
+•   SSP-MUSIC: Signal Subspace Projection MUSIC proposed in [18],
+•   NSP-MUSIC: Noise Subspace Projection MUSIC without non-negative and real constraints,
+•   MP-MUSIC-IPA: Noise subspace projection MUSIC with real and non-negative constraints in the
+    multipath propagation scenario and solved by the Interior Point Algorithm,
+
+=== PDF PAGE 20 ===
+Sensors 2018, 18, 892                                                                                       20 of 36
+
+
+•   MP-MUSIC-ASA: Noise subspace projection MUSIC with real and non-negative constraints in the
+    multipath propagation scenario and solved by the Active Set Algorithm.
+
+5.2.1. SSP-MUSIC and NSP-MUSIC in a Single Path Propagation Positioning Scenario
+
+    The single emitter is placed at [0,0] (km), and only the direct paths are taken into consideration.
+Figure 4 gives the spatial spectrum in a single path propagation positioning scenario (Actually, the
+spatial spectrum of a 3D positioning is a 3D spectrum, but in order to show the form of spatial spectrum
+more intuitively, the spatial spectrum displayed in this paper only gives a horizontal slice of the 3D
+spatial spectrum at the real Z value (where z = 0)).
+
+
+
+                                                                       Y
+              20                                            20
+
+
+
+
+              10                                            10
+
+
+
+           Y(km)0                                           Y(km)0
+
+
+
+
+               -10                                                   -10
+
+
+
+
+               -20                                                   -20
+                  -20       -10      0        10       20           -20        -1       0        10       20
+                                X(km)                                             X(km)                                                                                                          X
+                                        (a)                                                      (b)
+
+
+     Figure 4. Spatial spectrum of Signal Subspace Projection (SSP)-MUSIC and Noise Subspace Projection
+    (NSP)-MUSIC in a single path scenario. (a) SSP-MUSIC (b) NSP-MUSIC.
+
+
+   We ﬁnd the peak in the spatial spectrum of SSP-MUSIC (Figure 4a), but the NSP-MUSIC proposed
+in this paper (Figure 4b) holds a sharper peak and more precise estimation than SSP-MUSIC in a single
+path positioning context.
+    The following simulations are designed to study the performance of those MUSIC methods in the
+presence of multi-path propagation.
+
+5.2.2. SSP-MUSIC, NSP-MUSIC and MP-MUSIC in a Multi-Path Propagation Positioning
+
+   We design four numerical simulations in this section. The simulation parameters are set as in
+Table 1, where R is the radius of the UCA, λ and f are the carrier wave length and frequency, M is the
+number of the antennas in a receiving array, B is the bandwidth of the source signals, K is the number
+of frequencies and J is the number of sections of a received signal.
+
+
+                         Table 1. Parameter setting in the numerical simulations.
+
+
+   Description                  Layout  R (m)  λ (m)/f (MHz)  M  B (kHz)  K     J   SNR (dB)
+
+   Baseband signal positioning     A       30       1157.5/0.26     11      8      64   100      10
+   Transponders are close          B       30        30/10       11      8      64   100      10
+    Single antenna of each receiver   A       30        30/10       1       8      64   100      10
+   Standard scenario           A       30        30/10       11      8      64   100      10
+
+=== PDF PAGE 21 ===
+Sensors 2018, 18, 892                                                                                       21 of 36
+
+
+    Baseband signal positioning: Figure 5 gives the spatial spectrum when R ≪λ. The emitter
+positions pe that make E(pe) singular or nearly singular constitute the yellow hyperbolic curves in the
+SSP-MUSIC spectrum and the NSP-MUSIC spectrum. Neither SSP-MUSIC nor NSP-MUSIC ﬁnd the
+emitters correctly when R ≪λ. We cannot ﬁnd any peak in SSP-MUSIC. Three peaks are found in the
+spectrum of NSP-MUSIC, but they are disrupted by the hyperbolic curves. MP-MUSIC with real and
+non-negative constraints ﬁnds three sharp peaks correctly.
+
+
+                      105  SSP-MUSIC                          105  NSP-MUSIC
+                  2                                      2
+
+                                                     7000                                        3
+                  1                               6500      1                                2
+
+                                                     6000                                        1
+                  0                                      0                                                                                                0                                Y(m)                                  5500      Y(m)
+                                                                                                -1
+                 -1                                5000     -1
+                                                                                                -2
+                                                     4500
+                                                                                                -3
+                 -2                                     -2
+                   -2          0          2               -2          0          2
+                          X(m)      105                        X(m)      105
+                                                                     (a)
+
+
+
+
+
+                                                                  (b)
+
+
+     Figure 5. Spatial spectrum in baseband signal positioning. (a) Spatial spectrum of SSP-MUSIC and
+    NSP-MUSIC (b) Spatial spectrum of Multi-path Propagation (MP)-MUSIC.
+
+
+   Two transponders are close: Figure 6 gives the spatial spectrum when a transponder is close to the
+anther. The nearest distance of transponders is 20 km in the simulation. When two transponders are
+close, the array responses of the receiving array with respect to the two transponders are almost same.
+The yellow hyperbolic curves in the SSP-MUSIC and the NSP-MUSIC spectrum are the candidate
+positions, which make Γ(k) singular. SSP-MUSIC and NSP-MUSIC failed to locate the emitters in this
+context, but MP-MUSIC gets the emitter positions correctly.
+     Single antenna of each receiving station: Figure 7 gives the spatial spectrum when M = 1.
+The array responders are deﬁned as aℓn(k) = 1, and an SMC will make Γ(k) singular.
+    General scenario: Figure 8 gives the spatial spectrum of a general parameter setting scenario.
+Although there is no deliberate construction of conditions that leads to Γ(k) singularity in the general
+scenario, SSP-MUSIC and NSP-MUSIC still cannot obtain the emitter positions. However, MP-MUSIC
+obtains the three emitter locations accurately.
+
+=== PDF PAGE 22 ===
+Sensors 2018, 18, 892                                                                                       22 of 36
+
+
+                              2  105       SSP-MUSIC                   7500          2  105       NSP-MUSIC
+                                                                                                                                         0.5
+                            1.5                                            7000        1.5
+
+                                                                                                                                         0
+                              1                                            6500          1
+
+                            0.5                                            6000        0.5                                            -0.5
+
+
+                                                                                   0                                            -1                                                    Y(m)                              0                                            5500         Y(m)
+                                                                              5000
+                           -0.5                                                  -0.5                                            -1.5
+                                                                              4500
+                            -1                                                    -1
+                                                                              4000                                                        -2
+                           -1.5                                                  -1.5
+                                                                              3500                                                        -2.5
+                            -2                                                    -2
+                              -2      -1       0       1       2                   -2      -1       0       1       2
+                                          X(m)            105                                X(m)            105
+                                                                     (a)
+
+
+
+
+
+                                                                  (b)
+
+
+     Figure 6. Spatial spectrum when a transponder is close to the anther. (a) Spatial spectrum of SSP-MUSIC
+    and NSP-MUSIC (b) Spatial spectrum of MP-MUSIC.
+
+
+
+                              2  105       SSP-MUSIC                               2  105       NSP-MUSIC
+                                                                              750
+                            1.5                                            700         1.5                                            3.5
+
+                                                                                                                                         3
+                              1                                            650           1
+                            0.5                                            600         0.5                                            2.5
+
+                                                                              550                                                         2
+                              0                                                     0                                                    Y(m)                                                 500            Y(m)                                                 1.5
+                          -0.5                                                  -0.5
+                                                                              450                                                         1
+                            -1                                            400          -1
+                                                                                                                                         0.5
+                          -1.5                                            350        -1.5
+                                                                                                                                         0
+                            -2                                            300          -2
+                              -2      -1       0       1       2                   -2      -1       0       1       2
+                                         X(m)            105                                X(m)            105
+                                                                     (a)
+
+
+
+
+
+                                                                  (b)
+
+
+     Figure 7.  Spatial spectrum for a single antenna of each receiving array.  (a) Spatial spectrum of
+    SSP-MUSIC and NSP-MUSIC (b) Spatial spectrum of MP-MUSIC.
+
+=== PDF PAGE 23 ===
+Sensors 2018, 18, 892                                                                                       23 of 36
+
+
+
+                              2  105       SSP-MUSIC                               2  105       NSP-MUSIC
+                                                                              8000                                                        1
+                            1.5                                            7500        1.5                                            0.5
+                              1                                            7000          1                                            0
+                                                                              6500
+                            0.5                                                   0.5                                            -0.5
+                                                                              6000
+
+                                                                                    0                                            -1                                                     Y(m)                              0                                            5500          Y(m)
+
+                           -0.5                                            5000       -0.5                                            -1.5
+
+                             -1                                            4500         -1                                            -2
+                                                                              4000                                                        -2.5
+                           -1.5                                                  -1.5
+                                                                              3500
+                                                                                                                                          -3
+                             -2                                                    -2
+                              -2      -1       0       1       2                   -2      -1       0       1       2
+                                          X(m)            105                                X(m)            105
+                                                                      (a)
+
+
+
+
+
+                                                                  (b)
+
+
+     Figure 8. Spatial spectrum in a general scenario. (a) Spatial spectrum of SSP-MUSIC and NSP-MUSIC
+      (b) Spatial spectrum of MP-MUSIC.
+
+
+5.2.3. Performances of MP-MUSIC-ASA and MP-MUSIC-IPA
+
+   We down convert the radio frequency signals to baseband signals ﬁrstly to avoid the multiple
+peak searching of the radio frequency signal positioning. The simulation parameters are set as in
+Table 2.
+
+                          Table 2. Parameter setting in MP-MUSIC simulations.
+
+
+     Description              Layout  R (m)  λ (m)/f (MHz) M  B (kHz)  K      J   SNR (dB)
+
+    RMSE of MUSIC methods   A       30      1157.5/0.26    11      8      128   100  −15 ∼15
+
+
+    The RMSE of MP-MUSIC-ASA, MP-MUSIC-IPA and the CRLB are given in Figure 9.
+     Since ASA could ﬁnd the global optimal solution, the performance of MP-MUSIC-ASA should
+be no worse than that of MP-MUSIC-IPA. The numerical simulation results show that both
+MP-MUSIC-ASA and MP-MUSIC-IPA ﬁnd the global optimal solution and have the same RMSE
+because of the convexity of the cost function.
+     Simulations are done on a server with Intel Xeon CPU E5-2630 v4, 16 G memory, and Matlab2016a.
+The MATLAB function “lsqlin” is adopted to verify the performance of IPA. We repeat the simulation
+1000 times to get the distribution of the time-consumption of the ASA and IPA sections. It is assumed
+that the time consumptions tASA and tIPA follow normal distributions, and tASA ∼N(5.8175 × 10−5,
+4.8311 × 10−6), tIPA ∼N(3.4756 × 10−3, 2.2225 × 10−5) (seconds).
+    Beneﬁting from the convex properties and a reasonable initial value of α in ASA, ASA consumes
+only 1.67% more time than IPA and has a more stable time consumption than IPA (It should be noticed
+that the time consumption of MP-MUSIC-ASA will be determined by the path attenuations and SNR.
+A low SNR and small αℓn make the constraint αℓn ≥0 an active constraint (αℓn = 0.). The time
+consumption of MP-MUSIC-ASA is deeply affected by the number of elements in the active set.
+
+=== PDF PAGE 24 ===
+Sensors 2018, 18, 892                                                                                       24 of 36
+
+
+
+
+
+                                               105
+
+                                                                                        MP-MUSIC-ASA
+                                                                                             MP-MUSIC-IPA
+                                                                                 CRLB
+
+
+
+                                               104
+                                                                                                                                     RMSE(m)
+
+                                               103
+
+
+
+
+
+                                               102
+                                                 -15        -10          -5         0         5        10        15
+                                                             SNR(dB)
+
+
+     Figure 9. Performance of MP-MUSIC-Active Set Algorithm (ASA) and MP-MUSIC-Interior Point
+     Algorithm (IPA).
+
+
+5.3. The Performance of MP-ML and MP-MUSIC
+
+   We compare the performances of MP-ML and MP-MUSIC in cases of different numbers
+of snapshots.
+
+5.3.1. Insufﬁcient Snapshots
+
+       If the number of snapshots is insufﬁcient, we cannot obtain a reliable covariance matrix estimation
+of observations, and MP-MUSIC will fail to get the emitter positions. The simulation parameters are
+set as in Table 3.
+
+                       Table 3. Parameter setting in insufﬁcient snapshot scenarios.
+
+
+          Description   Layout  R (m)  λ (m)/f (MHz) M  B (kHz)  K    J  SNR (dB)
+
+        MP-MUSIC    A       30      1157.5/0.26    11      8      16   1  −15 ∼15
+        MP-ML      A       30      1157.5/0.26    11      8      16   1  −15 ∼15
+        CRLB       A       30      1157.5/0.26    11      8      16   1  −15 ∼15
+
+
+    The performances of MP-MUSIC and MP-ML with 32 snapshots (16 frequencies) are compared in
+Figure 10.
+
+
+
+                                               105
+
+                                                                                            MP-MUSIC(K=16)
+                                                                                             MP-ML(K=16)
+                                                                                             CRLB(K=16)
+
+
+
+                                               104
+                                                                                                                                     RMSE(m)
+
+                                               103
+
+
+
+
+
+                                               102
+                                           0         5        10        15        20        25        30
+                                                             SNR(dB)
+
+
+                    Figure 10. Performances of MP-MUSIC and MP-ML (K = 16, J = 1).
+
+=== PDF PAGE 25 ===
+Sensors 2018, 18, 892                                                                                       25 of 36
+
+
+
+    Only 32 snapshots of each receiver are taken for positioning. Thirty two snapshots are not divided
+into sections to estimate the covariance matrix in NSP-MUSIC (that is K = 16, J = 1). The RMSE
+of NSP-MUSIC cannot be reduced further with the increasing of SNR because of the error of the
+covariance matrix estimation. The MP-ML obtains a better performance than the MP-MUSIC in the
+sense of insufﬁcient snapshots.
+
+5.3.2. Performances of Different K and J Combinations
+
+   We discuss the performances of MP-MUSIC with different K and J combinations in Figure 11.
+The total number of snapshots in the simulations is 256 (K · J = 128). The other parameters are set as
+in Table 4.
+
+                 Table 4. Parameter setting in MP-MUSIC with different J, K combinations.
+
+
+   Description                    Layout  R (m)  λ (m)/f (MHz) M  B (kHz)  K     J  SNR (dB)
+
+  MP-MUSIC J, K Combination I    A       30      1157.5/0.26    11      8      32    4     0 ∼30
+  MP-MUSIC J, K Combination II    A       30      1157.5/0.26    11      8      16    8     0 ∼30
+  MP-MUSIC J, K Combination III   A       30      1157.5/0.26    11      8       8    16    0 ∼30
+  MP-MUSIC J, K Combination IV   A       30      1157.5/0.26    11      8       4    32    0 ∼30
+  MP-ML                 A       30      1157.5/0.26    11      8      128   1     0 ∼30
+  CRLB                  A       30      1157.5/0.26    11      8      128   1     0 ∼30
+
+
+
+
+
+                                                                                       J=4,K=32 MP-MUSIC
+                                     105                                               J=8,K=16 MP-MUSIC
+                                                                                       J=16,K=8 MP-MUSIC
+                                                                                       J=32,K=4 MP-MUSIC
+                                                                        MP-ML
+                                                                      CRLB
+
+                                     104
+                                                                                                        RMSE(m) 103
+
+
+
+                                     102
+
+
+
+                                     101
+                                   0         5        10        15        20        25        30
+                                                      SNR(dB)
+
+
+            Figure 11. Performance of MP-ML and MP-MUSIC with different J, K combinations.
+
+
+    Figure 11 gives the performances of MP-MUSIC with different combinations of  J and K.
+The number of the snapshots used in the simulation is 256. MP-ML establishes a maximum likelihood
+function of the 256 snapshots to estimate the emitter positions together, and it has a better performance
+than MP-MUSIC.
+    The performances of MP-MUSIC methods are effected by the error of covariance estimations and
+the bandwidth. A smaller J leads to a larger error of the covariance estimation; in addition, a smaller K
+leads to a smaller number of observation equations.
+
+5.3.3. The Performances of Different Numbers of Snapshots
+
+   We compare the performances of the MP-MUSIC and the MP-ML with different numbers of
+snapshots in Figure 12 (The CRLB derived in the Appendix shows that the CRLB is determined by
+the signal snapshots. The CRLB in Figure 12 is the average of 100 simulations with random signal
+snapshots.). The other parameters are set as in Table 5.
+
+=== PDF PAGE 26 ===
+Sensors 2018, 18, 892                                                                                       26 of 36
+
+
+
+                Table 5. Parameter setting in simulations of different numbers of snapshots.
+
+     Description   Layout  R (m)  λ (m)/f (MHz) M  B (kHz)      K · J      SNR (dB)
+    MP-MUSIC    A       30      1157.5/0.26    11      8        2i, (i = 4, 5, . . . , 13)      10
+   MP-ML      A       30      1157.5/0.26    11      8        2i, (i = 4, 5, . . . , 13)      10
+    CRLB       A       30      1157.5/0.26    11      8        2i, (i = 4, 5, . . . , 13)      10
+
+
+
+                                     105
+
+                                                                                 MP-MUSIC
+                                                                               MP-ML
+                                                                            CRLB
+
+                                     104
+
+
+
+
+                                     103                                                                                                        RMSE(m)
+
+
+
+                                     102
+
+
+
+
+                                     101
+                                        101                    102                    103                    104
+                                               Number of snapshots
+
+
+          Figure 12. Performances of MP-MUSIC and MP-ML with different numbers of snapshots.
+
+    The performances of MP-MUSIC and MP-ML with K · J = 2i, (i = 4, 5, . . . , 13) are studied in this
+section. Since the performance of MP-MUSIC is determined by the combination of K and J, we choose
+the best combination of K, J in the MP-MUSIC simulation. As the number of snapshots increases, the
+RMSE decreases gradually in Figure 12. If the number of snapshots is abundant (K · J > 1024), both
+MP-MUSIC and MP-ML are close to the CRLB. If the number of snapshots is insufﬁcient (K · J < 256),
+the performance of MP-MUSIC will suffer a serious deterioration. However, MP-ML is much less
+affected by the insufﬁcient snapshots.
+
+5.3.4. Time Consumptions of MP-MUSIC and MP-ML
+
+   MP-MUSIC computes the cost values of the candidate one by one to obtain the spatial spectrum;
+while MP-ML computes the likelihood function of all combinations of d emitters. MP-ML consumes
+more time to obtain the emitter positions than MP-MUSIC. We compare the time consumptions and the
+corresponding performances of MP-MUSIC and MP-ML with different d. The simulation parameters
+are set as in Table 6, and the simulation results are given in Figure 13.
+
+
+                      Table 6. Parameter setting in simulations of time consumption.
+
+
+    Description            Layout    d   R (m)  λ (m)/f (MHz) M  B (kHz)  SNR  K     J
+
+  MP-ML (KJ = 16)      A     1 ∼4    30      1157.5/0.26    11      8       15    16   1
+   MP-MUSIC (KJ = 16)    A     1 ∼4    30      1157.5/0.26    11      8       15    16   1
+  MP-ML (KJ = 128)     A     1 ∼4    30      1157.5/0.26    11      8       15    128   1
+   MP-MUSIC (KJ = 128)   A     1 ∼4    30      1157.5/0.26    11      8       15    16   8
+
+=== PDF PAGE 27 ===
+Sensors 2018, 18, 892                                                                                       27 of 36
+
+
+
+
+
+           350                                                                           106
+                         MP-MUSIC(KJ=16)                                                         MP-MUSIC(KJ=16)
+                         MP-ML(KJ=16)                                                             MP-ML(KJ=16)
+           300         MP-MUSIC(KJ=128)                                                        MP-MUSIC(KJ=128)
+                         MP-ML(KJ=128)                                                            MP-ML(KJ=128)
+                                                                                            105
+           250                                        (seconds)
+           200
+                                                                                            104           150                                                                                                                                                                                                                         RMSE(m)                                                 consumption 100
+                  Time                                                                               103
+            50
+
+             0                                                                           102
+              1        1.5       2        2.5       3        3.5       4                1        1.5       2        2.5       3        3.5       4
+                          Number of emitters                                           Number of emitters
+                                    (a)                                                             (b)
+
+
+     Figure 13. Time consumptions and RMSE of different numbers of emitters. (a) Time consumptions of
+    MP-MUSIC and MP-ML (b) RMSE of MP-MUSIC and MP-ML.
+
+
+    The layout of transponders and receiving arrays are deﬁned as in Figure 3a, and the four emitters
+are placed at [0, 0, 0], [50, 0, 0], [0, 50, 0], [50, 50, 0] (km). We choose d emitters in four random placements
+to analyze the time consumptions of MP-MUSIC and MP-ML with different d. We perform 100
+simulation runs to gather enough statistics.
+     In Figure 13a, because MP-MUSIC calculates the cost function value of each candidate one by one,
+while MP-ML computes all combinations of d emitters, the time consumption of MP-MUSIC is almost
+independent of d, and MP-ML increases exponentially with d. The time consumption of MP-MUSIC is
+mainly determined by K rather than the number of snapshots (the two red lines in Figure 13a, which
+represent MP-MUSIC (K = 16, J = 8) and MP-MUSIC (K = 16, J = 1), are almost coincident), because
+the dimension of the matrix in the cost function is determined by K, and it is independent of J. Besides,
+the time consumption of MP-ML is determined by the number of snapshots (KJ = 128 costs much
+more time than KJ = 16).
+    Figure 13b presents the performances corresponding to Figure 13a. When the snapshots are
+sufﬁcient (KJ = 128), the positioning accuracy improvement of MP-ML is not signiﬁcant compared to
+MP-MUSIC, but it costs much more time to obtain the positions. In this case, applying MP-MUSIC to
+get emitter positions is a wise choice. When the snapshots are insufﬁcient (JK = 16), MP-ML obtains a
+better performance than MP-MUSIC, although MP-ML costs much more time to get the results. It is
+worth much more time to obtain a much better performance when the snapshots are insufﬁcient.
+    Beneﬁting from a good initial value of MP-MUSIC and an efﬁcient searching strategy (steepest
+descent method), the time consumption of MP-ML is acceptable when the snapshots are insufﬁcient.
+The time consumption of ASA in MP-MUSIC is determined by the a priori information of the initial
+active set W, and it can be derived with some other techniques, e.g., direction ﬁnding. MP-ML costs
+much more time than MP-MUSIC, especially in the the case of a large number of emitters. Fortunately,
+MP-MUSIC, which is adopted to obtain an initial value of MP-ML, provides “not bad” solutions
+quickly, and the iterative algorithm continues outputting better and better solutions (see Figure 14).
+    The simulation parameters are set the same as the second row in Table 6, and d = 3. MP-ML
+does not output the result until T0, because MP-MUSIC is running from zero to T0 to obtain the initial
+solution of MP-ML. The RMSE of MP-ML is monotone decreasing and continuous for the output
+results. In real applications, we can ﬁnd a trade-off between the time consumption and positioning
+accuracy to obtain an acceptable solution.
+
+=== PDF PAGE 28 ===
+Sensors 2018, 18, 892                                                                                       28 of 36
+
+
+
+
+
+                                    12000
+
+
+
+
+                                    10000
+
+
+
+
+                                     8000
+
+
+
+
+                                     6000                                                                                                                        RMSE(m)
+
+
+                                     4000
+
+
+
+
+                                     2000
+
+
+
+
+                                        0
+                                         0     10    20    30    40    50    60    70    80    90   100
+                                                     Time consumption (seconds)
+
+
+                   Figure 14. Positioning accuracies and time consumptions of MP-ML.
+
+
+5.4. Performance of SGP and MP-ML
+
+     Single Platform Geolocation (SPG) mentioned in [28] used only one platform to position the single
+emitter; while MP-ML uses multiple receiving arrays and locates multiple emitters simultaneously.
+
+5.4.1. SPG and MP-ML with a Single Emitter
+
+    Assume that there is only one emitter (D = 1, pe = [0, 0, 0]Tkm) in the RoI. Figure 15 compares
+the performance of SPG and that of MP-ML with different numbers of receivers. The other parameters
+are set as in Table 7.
+
+     Table 7. Parameter setting in simulations of different numbers of receivers. SGP, Single Platform
+     Geolocation .
+
+
+     Description  Number of Receivers  R (m)  λ (m)/f (MHz) M  B (kHz)  K  SNR (dB)
+
+    MP-ML            2∼4            30      1157.5/0.26    11      8      128      10
+    CRLB             1∼4            30      1157.5/0.26    11      8      128      10
+    SGP                   1             30      1157.5/0.26    11      8      128      10
+
+
+
+
+
+                                                                      CRLB of 4 receivers
+                                        1010                                    CRLB of 3 receivers
+                                                                      CRLB of 2 receivers
+                                                                      CRLB of 1 receiver
+                                                                         MP-ML of 4 receivers
+                                                                         MP-ML of 3 receivers
+                                        108                                      MP-ML of 2 receivers
+                                                                  SPG
+
+
+                                        106                                                                                                             RMSE(m)
+
+
+                                        104
+
+
+
+                                        102
+
+
+                                     0         5        10        15        20        25        30
+                                                        SNR(dB)
+
+
+                 Figure 15. MP-ML and CRLB of different numbers of receivers (K = 1024).
+
+=== PDF PAGE 29 ===
+Sensors 2018, 18, 892                                                                                       29 of 36
+
+
+   We compare the performances of MP-ML with N receivers, N =  1, 2, 3, 4, and give the
+corresponding CRLB, as well. When D = 1 and N = 1, MP-ML degenerates into SPG. The RMSE of N
+receivers is obtained from the average of the RMSE of all combinations of N receivers in four positions,
+and the positions of the four receiving stations are deﬁned as Layout A. The simulation demonstrates
+that the performance is signiﬁcantly improved as the number of receiving stations increases. The
+program with four receiving stations gains nearly a 105 performance improvement compared to SPG.
+
+5.4.2. Performance of Positioning Multiple Emitters
+
+   MP-ML has the ability of positioning multiple emitters synchronously.  We analyze the
+performances of different numbers of emitters in this section.
+   We place four emitters in the RoI. Emitters are placed at [0, 0, 0], [50, 0, 0], [0, 50, 0], [50, 50, 0] and
+[25, 25, 0] (km). We layout four transponders and four receiving arrays as in Figure 3a. The RMSE of D
+emitters, where D = 1, 2, 3, 4, 5, is obtained from the average of the RMSE of all combinations of D
+emitters in ﬁve positions. The RMSEs and CRLBs of different D are displayed in Figure 16. The other
+parameters are set the same as in Table 7.
+
+
+
+                                     107
+
+                                                                     CRLB of 4 emitters
+                                                                     CRLB of 3 emitters
+                                     106                                     CRLB of 2 emitters
+                                                                     CRLB of 1 emitter
+                                                                       MP-ML of 4 emitters
+                                                                       MP-ML of 3 emitters
+                                     105                                      MP-ML of 2 emitters
+                                                                       MP-ML of 1 emitter
+
+
+                                     104                                                                                                        RMSE(m)
+                                     103
+
+
+                                     102
+
+
+                                     101
+
+
+                                   0         5        10        15        20        25        30
+                                                      SNR(dB)
+
+
+              Figure 16. MP-ML and CRLB of different numbers of emitters (K = 1024, J = 1).
+
+
+    Figure 16 only gives the RMSEs and CRLBs when D = 1, 2, 3, 4, since the RMSE turns out to be
+unstable and the CRLB turns out to be +∞when D = 5. This can be explained by the algebra principle
+that the number of unknown emitters cannot be greater than the number of transponders.
+    The numerical simulations and CRLB results demonstrate that the performance of MP-ML is
+inﬂuenced by the number of emitters. If D ≪L, the number of emitters has only a slight effect on the
+performance of MP-ML, and if D = L, the performance will decline signiﬁcantly. If D > L, MP-ML
+cannot ﬁnd any emitter at all.
+
+6. Conclusions
+
+   A novel geolocation architecture, termed “Multiple Transponders and Multiple Receivers
+for Multiple Emitters Positioning System (MTRE)” is proposed in this paper. A Direct Position
+Determination for Multi-path Propagation positioning (MP-DPD) model and a MUltiple SIgnal
+Classiﬁcation algorithm for Multi-path Propagation positioning (MP-MUSIC) were proposed to
+position the emitters in an MTRE system. To optimize the cost function of the MP-MUSIC efﬁciently, we
+proved that the cost function of the MP-MUSIC was a linear and non-negative constrained quadratic
+convex programming. A algorithm named Active Set Algorithm (ASA) is designed to solve the
+quadratic convex programming further. Numerical results show that the MP-MUSIC with ASA locates
+
+=== PDF PAGE 30 ===
+Sensors 2018, 18, 892                                                                                       30 of 36
+
+
+
+multiple emitters precisely, but the Signal Subspace Projection MUSIC algorithm (SSP-MUSIC) does
+not. We compared the time consumptions of the Interior Point Algorithm (IPA) and the ASA, as well.
+ASA consumes only 1.67% more time than IPA.
+     In the case of time-sensitive positioning, the number of snapshots is not enough. The maximum
+likelihood estimation algorithm for Multi-path Propagation positioning (MP-ML) maximizes the
+likelihood function rather than calculating the covariance matrix of the observations to avoid the
+requirement of a large number of snapshots. We designed an iterative algorithm and proposed the
+strategy of choosing an initial solution to accelerate the solving of the programming. Numerical
+simulation results show that MP-ML can approach the Cramér–Rao Lower Bound (CRLB) relative
+to MP-MUSIC with the same data length, but MP-ML requires more computation time than the
+MP-MUSIC method.
+    Furthermore, we discussed the performances of MP-ML with different numbers of receiving
+arrays and emitters. SPG mentioned in [28] is viewed as a degenerate version of MP-ML (where D = 1
+and N = 1). The numerical results shows that it is worthwhile to increase the number of receiving
+stations in the sense of a weak signal, although MP-ML increases the hardware costs, communication
+overhead and computational complexity.
+   We compared the performances and time consumptions of MP-MUSIC and MP-ML by numerical
+simulations. MP-ML obtains a more precise position estimation than MP-MUSIC, and MP-MUSIC
+consumes less time than MP-ML. In a speciﬁc positioning application, we choose the appropriate
+method according to the number of snapshots, the precision requirement and the calculation ability.
+   MP-ML has the ability of positioning multiple emitters synchronously. If the number of emitters
+is far less than the number of transponders, the number of emitters has only a slight inﬂuence on
+the positioning performance.  If the number of emitters is equal to the number of transponders,
+the performance will decline signiﬁcantly.  If the number of emitters is more than the number of
+transponders, MP-ML cannot ﬁnd any emitter at all.
+   An MTRE system requires more receiving arrays, more transponders and more computing
+resources compared to a Single Geolocation Platform (SGP) or a Direction Finding System (DFS).
+However, an MTRE system can locate multiple emitters synchronously and provides a higher
+positioning accuracy than SGP and DFS. It is suitable for some cost-insensitive applications, such as
+military and national security applications.
+
+Acknowledgments: This work was supposed by the National Natural Science Foundation of China (61201381
+and 61401513), China Postdoctoral Science Foundation (2016M592989), the Outstanding Youth foundation
+of Information Engineering University (2016603201), and Self-topic Foundation of Information Engineering
+University (2016600701).
+
+Author Contributions: Jianping Du developed the program and mathematical model and wrote the paper.
+Ding Wang provided much useful advice and checked the paper. Wanting Yu worked on the data collection,
+experiments and data analyses. Hongyi Yu provided the initial idea of this research.
+
+Conﬂicts of Interest: The authors declare no conﬂict of interest.
+
+Appendix A. Conditions of a Near Singular Manifold Matrix
+
+   We discuss the conditions that make the manifold matrix singular in this section. Deﬁne the term
+of Singular Manifold Candidate (SMC) and Near Singular Manifold Candidate (NSMC) ﬁrstly.
+
+
+Deﬁnition A1. Singular Manifold Candidate (SMC): In a multi-path positioning application, a candidate
+position pe is named a singular manifold candidate if it satisﬁes e−jωk[ ˜τℓ1n+ ¯τℓ1(pe)] = e−jωk[ ˜τℓ2n+ ¯τℓ2(pe)],
+k = 1, 2, . . . , K, where ˜τℓin, i = 1, 2, is the propagation delays from the ℓi-th transponder to the n-th receiving
+array and ¯τℓi, i = 1, 2, is the propagation delay from the candidate position to the ℓi-th transponder.
+
+Deﬁnition A2. Center Singular Manifold Candidate (CSMC): In a multi-path positioning application,
+a candidate position pe  is named a singular manifold candidate,  if  it satisﬁes e−jωk[ ˜τℓ1n+ ¯τℓ1(pe)] =
+                        = 1, 2, is the propagation delay from the ℓi-th transponder toe−jωk[ ˜τℓ2n+ ¯τℓ2(pe)], k = 1, 2, . . . , K, where ˜τℓin, i
+
+=== PDF PAGE 31 ===
+Sensors 2018, 18, 892                                                                                       31 of 36
+
+
+the center of the n-th receiving array and ¯τℓi, i = 1, 2, is the propagation delay from the candidate position to the
+ℓi-th transponder.
+
+    The difference of an SMC and a CSMC is that all the antennas satisfy the equation for an SMC,
+but only the centers of the array satisfy the equation for a CSMC.
+
+Theorem A1.  If pe is a CSMC, there are at least two paths from pe to a receiving array, which satisfy:
+
+                                        ˜Dℓ1,2n(pe) = zλ, z = 0, 1, 2, . . . ,                            (A1)
+
+where n is the receiving array index, ℓ1 and ℓ2 are the indexes of two transponders in two paths, ˜Dℓ1,2n ≜
+∥pe −pt(ℓ1)∥F + ∥pr(n) −pt(ℓ1)∥F −∥pe −pt(ℓ2)∥F −∥pr(n) −pt(ℓ2)∥F is the difference between the
+two path lengths, pr(n) is the center of the n-th receiving array, z is an integer, λ is the Least Common Multiple
+(LCM) of {λ1, λ2, . . . , λK} and λk is the wave length of frequency ωk.
+
+Proof. Move the right item of the equation in the CSMC condition to the left:
+
+                     e−jωk n [ ˜τℓ1n+ ¯τℓ1(pe)]−[ ˜τℓ2n+ ¯τℓ2(pe)] o = 1,
+              ⇒e−j 2πcλk n [ ˜τℓ1n+ ¯τℓ1(pe)]−[ ˜τℓ2n+ ¯τℓ2(pe)] o = 1,
+            ⇒2πc   [                                            ˜τℓ1n + ¯τℓ1(pe)] −[ ˜τℓ2n + ¯τℓ2(pe)]   mod 2π = 0,
+                       λk
+                            ˜Dℓ1,2n(pe)         ⇒        ∈Z, k = 1, 2, . . . , K,
+                          λk
+                    ⇒˜Dℓ1,2n(pe) = zλ, z = 0, 1, 2, . . . ,                                      (A2)
+
+where λk = 2πcωk  is the wave length of frequency ωk, c = 3.0 × 108 m/s is the light speed constant,
+˜Dℓ1,2n ≜∥pe −pt(ℓ1)∥F + ∥pr(n) −pt(ℓ1)∥F −∥pe −pt(ℓ2)∥F −∥pr(n) −pt(ℓ2)∥F is the difference
+between the two path lengths, pr(n) is the center of the n th receiver and Z is the integer set. Denote λ
+as the Least Common Multiple (LCM) of {λ1, λ2, . . . , λK}.
+
+     In particular, we set z = 0 and obtain ˜Ddℓ1,2n = 0 (see Figure A1) (in fact, pe(d) on the hyperbolic
+satisﬁes ˜τℓ1n + ¯τℓ1 = ˜τℓ2n + ¯τℓ2).
+
+
+
+
+                                  1
+
+
+                                       0.8
+
+
+                                       0.6
+
+
+                                       0.4
+
+
+                                       0.2
+
+
+                                  0                                                                         Y(km)
+
+                                         -0.2
+
+
+                                         -0.4
+
+
+                                         -0.6
+
+
+                                         -0.8
+
+
+                                         -1
+                                           -2      -1.5      -1      -0.5      0       0.5      1       1.5      2
+                                                           X(km)
+
+
+                               Figure A1. Two paths with the same delay.
+
+=== PDF PAGE 32 ===
+Sensors 2018, 18, 892                                                                                       32 of 36
+
+
+Theorem A2.  If pe is a CSMC and aℓ1n(k) ≈aℓ2n(k), k = 1, 2, ..., K, the candidate emitter position pe makes
+the manifold matrix near singular.
+
+Proof. In a multi-path positioning model, Γ(k) in (16) is deﬁned as:
+
+                                       Γ(k) ≜˜A(k)V(k),                                  (A3)
+
+where Γ(k) is a block diagonal matrix:
+
+                        Γ1(k)    0        . . .    0  
+                                   0    Γ2(k)    . . .    0
+                         Γ(k) =                              ...                                     ...       ...                            ...                                (A4)                                                                                                                                                                                                                 
+                                   0      0        . . .  ΓN(k)  MN×LN
+
+    The n-th block Γn(k) in the diagonal is a matrix with a size of M × L. The ℓ-th column of Γn(k)
+is deﬁned as e−iωk( ˜τℓn+ ¯τℓ), where τℓn is an M × 1 column vector representing the propagation delays
+from the ℓ-th transponder to the M antennas in the n-th receiving station. Notice that:
+
+       e−iωk( ˜τℓn+ ¯τℓ) = e−iωk( ˜τℓn−τℓn+τℓn+ ¯τℓ) = e−iωk( ˜τℓn−τℓn)e−iωk(τℓn+ ¯τℓ) ≜aℓn(k)e−iωk(τℓn+ ¯τℓ)      (A5)
+
+where τℓn is the propagation delay from the ℓ-th transponder to the center of the n-th receiving
+array and aℓn(k) = e−iωk( ˜τℓn−τℓn) represents the array response of the n-th receiving station from the
+ℓ-th transponder.
+      If pe is a CSMC that satisﬁes ˜Dℓ1,2n = zλ and aℓ1n(k) ≈aℓ2n(k), we get that e−iωk( ˜τℓ1n+ ¯τℓ1) ≈
+e−iωk( ˜τℓ2n+ ¯τℓ2) from (A5). In this case, the ℓ1-th column of matrix Γn(k) is approximately equal to the
+ℓ2-th column. Because there are two columns in the matrix Γ(k) that are almost equal, Γ(k) is a near
+singular matrix.
+
+Appendix B. Convergence of the Iterative Algorithm
+
+    The proof of Theorem 2:
+
+Proof. Denote a speciﬁc value of α by αi. ¯f(k) and ¯C(k) are vectors with real values. The following
+inequality is always true,
+
+
+
+                                                         2                    ∥¯f(k)Tα[αT ¯C(k)α]−1                                                 1                                                                                                           2 ∥2F ≥0.              (A6)                                       −¯f(k)Tαi[αTi ¯C(k)αi]−1[αT ¯C(k)α]
+
+     After expanding the expression in (A6) and re-arranging the terms,
+
+
+          ¯f(k)Tα[αT ¯C(k)α]−1αT¯f(k) ≥2{¯f(k)Tα[αTi ¯C(k)αi]−TαTi ¯f(k)}
+                                    −¯f(k)Tαi[αTi ¯C(k)αi]−1[αT ¯C(k)α)(αTi ¯C(k)αi]−TαTi ¯f(k).     (A7)
+
+    Deﬁning w(k) ≜¯f(k)Tαi[αTi ¯C(k)αi]−1, and summing (A7) over k,
+
+
+                 Q(η) = H(α)
+
+                             K
+               = − ∑ ¯f(k)Tα[αT ¯C(k)α]−1αT¯f(k)
+                               k=1
+                              K                 K
+               ≤−2 ∑ {¯fT(k)αwT(k)} + ∑ w(k)[αT ¯C(k)α]wT(k).               (A8)
+                                k=1                 k=1
+
+=== PDF PAGE 33 ===
+Sensors 2018, 18, 892                                                                                       33 of 36
+
+
+
+    Notice that:
+                                  w(k)αT = ¯αTW(k),                                 (A9)
+
+where ¯α is deﬁned in (38), and it is viewed as a reshaped form of the α. α is deﬁned in (5), and:
+
+                           W(k) ≜IN ⊗diag{w(k)} ⊗IL,                          (A10)
+
+where IL is an identify matrix with a size of L × L and IN is an identify matrix with a size of N × N.
+Substitute (A9) into (A8):
+
+
+                              K                   K
+                     H(¯α) ≤−2[ ∑ ¯fT(k)WT(k)]¯α + ¯αT[ ∑ W(k) ¯C(k)WT(k)]¯α.              (A11)
+                                 k=1                    k=1
+
+    The eigenvalue decomposition of the second item of the right part is denoted by:
+
+
+                                K
+               ∑ W(k) ¯C(k)WT(k) = ¯UTΣ ¯U
+                                   k=1
+                               = UTU,                            (A12)
+
+
+                       1
+where U = ¯UΣ 2 . The right part of (A11) is simpliﬁed by:
+
+
+                           K                   K
+                   −2[ ∑ ¯f(k)TW(k)T]¯α + ¯αT[ ∑ W(k) ¯C(k)W(k)T]¯α
+                             k=1                    k=1
+              = ||FU−1 −¯αTUT||2 −FU−1U−TFT
+                   ≜||Y −¯αTX||2 −Z,                                             (A13)
+
+where:
+
+                                        K
+                                F ≜ ∑ ¯f(k)TW(k)T,
+                                           k=1
+                           Y ≜FU−1,
+                           X ≜UT,
+                           Z ≜YYT.
+
+    Denote:
+
+                                  G(αi, ¯α, Pe) ≜||Y −¯αHX||2 −Z.                          (A14)
+
+    For a given αi, G(αi, ¯α, pe) is the upper bound of the cost function Q(η). The cost function deﬁned
+in (A14) is viewed as a relaxed programming of the original programming:
+
+                                 ¯αi+1 = arg min G(αi, ¯α, pe) = ||Y −¯αHX||2 −Z,                   (A15)
+                                                                                   ¯α
+
+
+                                                                s.t. ¯α ≥0.
+
+     Since ¯αi+1 is the optimal solution of the relaxed programming,
+
+              Q(ηi+1) = H(¯αi+1) ≤G(αi, ¯αi+1, pe) ≤G(αi, ¯αi, pe) = H(¯αi) = Q(ηi),         (A16)
+
+=== PDF PAGE 34 ===
+Sensors 2018, 18, 892                                                                                       34 of 36
+
+
+
+References
+
+1.   Shen,  Y.; Win, M.Z.  On the Use of Multipath Geometry for Wideband Cooperative Localization.
+     In Proceedings of the Global Telecommunications Conference, Honolulu, HI, USA, 30 November–4 December
+      2009; pp. 1–6.
+2.    Kietlinski-Zaleski, J.; Yamazato, T.; Katayama, M. TDoA UWB positioning with three receivers using known
+     indoor features. In Proceedings of the IEEE International Conference on Ultra-Wideband, Nanjing, China,
+     20–23 September 2010; pp. 964–971.
+3.   Krizman, K.J.; Biedka, T.E.; Rappaport, T.S. Wireless position location: Fundamentals, implementation
+      strategies, and sources of error. In Proceedings of the Vehicular Technology Conference, Phoenix, AZ, USA,
+     4–7 May 1997; pp. 919–923.
+4.    Caffery, J.J.; Stüber, G.L. Overview of radiolocation in CDMA cellular systems. IEEE Commun. Mag. 1998, 36,
+     38–45.
+5.    Decarli, N.; Dardari, D.; Gezici, S.; D’Amico, A.A. LOS/NLOS detection for UWB signals: A comparative
+     study using experimental data. In Proceedings of the IEEE International Conference on Wireless Pervasive
+     Computing, Modena, Italy, 5–7 May 2010; pp. 169–174.
+6.   Guvenc, I.; Chong, C.C.; Watanabe, F.; Inamura, H. NLOS Identiﬁcation and Weighted Least-Squares
+     Localization for UWB Systems Using Multipath Channel Statistics. EURASIP J. Adv. Signal Process. 2007,
+     2008, 36.
+7.   Wymeersch, H.; Marano, S.; Gifford, W.M.; Win, M.Z. A Machine Learning Approach to Ranging Error
+     Mitigation for UWB Localization. IEEE Trans. Commun. 2012, 60, 1719–1728.
+8.    Gifford, W.M.; Wymeersch, H.; Win, M.Z. NLOS identiﬁcation and mitigation for localization based on UWB
+     experimental data. IEEE J. Sel. Areas Commun. 2010, 28, 1026–1035.
+9.   Wymeersch, H.; Lien, J.; Win, M.Z. Cooperative Localization in Wireless Networks.  Proc. IEEE 2009,
+      97, 427–450.
+10.   Ocal, O.; Dokmanic, I.; Vetterli, M. Source localization and tracking in non-convex rooms. In Proceedings of
+     the 2014 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), Florence, Italy,
+     4–9 May 2014; pp. 1429–1433.
+11.   Svaizer, P.; Brutti, A.; Omologo, M. Use of reﬂectedwavefronts for acoustic source localization with a line
+      array. In Proceedings of the The Workshop on Hands-Free Speech Communication and Microphone Arrays,
+     Edinburgh, UK, 30 May–1 June 2011; pp. 165–169.
+12.   Steiner, C.; Wittneben, A. Low Complexity Location Fingerprinting With Generalized UWB Energy Detection
+     Receivers. IEEE Trans. Signal Process. 2010, 58, 1756–1767.
+13.   Shi, S.; Sigg, S.; Chen, L.; Ji, Y. Accurate Location Tracking from CSI-based Passive Device-free Probabilistic
+     Fingerprinting. IEEE Trans. Veh. Technol. 2018, PP, 1.
+14.   Li, Z.; Braun, T.; Zhao, X.; Zhao, Z.; Hu, F.; Liang, H. A Narrow-Band Indoor Positioning System by Fusing
+    Time and Received Signal Strength via Ensemble Learning. IEEE Access 2018, PP, 1.
+15.  Bergstrom, A.; Hendeby, G.; Gunnarsson, F.; Gustafsson, F. TOA estimation improvements in multipath
+     environments by measurement error models. In Proceedings of the 2017 IEEE 28th Annual International
+    Symposium on Personal, Indoor, and Mobile Radio Communications (PIMRC), Montreal, QC, Canada,
+     8–13 October 2017; pp. 1–7.
+16.  Maceraudi, J.; Dehmas, F.; Denis, B.; Uguen, B. Multipath-Aided Direct Path ToA Reconstruction for
+     Integrated UWB Receivers in Generalized NLoS. In Proceedings of the 2017 IEEE 86th Vehicular Technology
+     Conference (VTC-Fall), Toronto, ON, Canada, 24–27 September 2017; pp. 1–5.
+17.  Weiss, A.J.  Direct position determination of narrowband radio frequency transmitters.  IEEE Signal
+      Process. Lett. 2004, 11, 513–516.
+18.   Weiss, A.J.; Amar, A. Direct position determination of multiple radio signals. EURASIP J. Appl. Signal Process.
+     2005, 2005, 37–49.
+19.  Amar, A.; Weiss, A.J. Advances in Direct Position Determination. In Proceedings of the 3rd IEEE Sensor
+     Array Multichannel Signal Processing Workshop, Barcelona, Spain, 18–21 July 2004.
+20.   Closas, P.; Fernandez-Prades, C.; Fernandez-Rubio, J.A. Maximum Likelihood Estimation of Position in
+    GNSS. IEEE Signal Process. Lett. 2007, 14, 359–362.
+
+=== PDF PAGE 35 ===
+Sensors 2018, 18, 892                                                                                       35 of 36
+
+
+
+21.   Astely, D.; Ottersten, B. The Effects of local scattering on direction of arrival estimation with MUSIC.
+    IEEE Trans. Signal Proc. 1999, 47, 3220–3234.
+22.  Bar-Shalom, O.; Weiss, A.J.  Direct emitter geolocation under local scattering.   Signal Process.  2015,
+     117, 102–114.
+23.   Bialer, O.; Dan, R.; Weiss, A.J.  Efﬁcient Time of Arrival Estimation Algorithm Achieving Maximum
+     Likelihood Performance in Dense Multipath. IEEE Trans. Signal Process. 2012, 60, 1241–1252.
+24.   Bialer, O.; Dan, R.; Weiss, A.J. Maximum-Likelihood Direct Position Estimation in Dense Multipath.
+    IEEE Trans. Veh. Technol. 2013, 62, 2069–2079.
+25.  Papakonstantinou,  K.;  Slock, D.    Direct Location Estimation for MIMO Systems in Multipath
+     Environments.  In Proceedings of the Global Telecommunications Conference, New Orleans, Louisiana,
+     30 November–4 December 2008; pp. 1–5.
+26.  Papakonstantinou, K.; Slock, D. NLOS Mobile Terminal position and speed estimation. In Proceedings of
+     the International Symposium on Communications, Control and Signal Processing, St Julian’s, Malta, 12–14
+    March 2008; pp. 1308–1313.
+27.   Miljko,  E.;  Vucic, D.   Direct position estimation of UWB transmitters in multipath conditions.
+     In Proceedings of the  IEEE  International  Conference  on  Ultra-Wideband,  Hannover,  Germany,
+     10–12 September 2008; pp. 241–244.
+28.  Bar-Shalom, O.; Weiss, A.J. Transponder-Aided Single Platform Geolocation. IEEE Trans. Signal Process.
+     2013, 61, 1239–1248.
+29.  Bar-Shalom, O.; Weiss, A.J. Emitter geolocation using single moving receiver. Signal Process. 2014, 105, 70–83.
+30.  Amar, A.; Weiss, A.J. Direct position determination (DPD) of multiple known and unknown radio-frequency
+      signals. In Proceedings of the Signal Processing Conference, 2004 European, Vienna, Austria, 6–10 September
+     2010; pp. 1115–1118.
+31.  Amar, A.; Weiss, A.J. Efﬁcient Position Determination of Multiple Emitters. In Proceedings of the 2006 IEEE
+     Convention of Electrical and Electronics Engineers in Israel, Eilat, Israel, 15–17 November 2006; pp. 11–15.
+32.  Amar, A.; Weiss, A.  Localization of Narrowband Radio Emitters Based on Doppler Frequency Shifts.
+    IEEE Trans. Signal Process. 2008, 56, 5500–5508.
+33.   Tirer, T.; Weiss, A.J. High resolution localization of narrowband radio emitters based on doppler frequency
+      shifts. Signal Process. 2017, 141, 288–298.
+34.  Lawson, C.L.; Hanson, R.J. Solving Least Squares Problems; SIAM: Philadelphia, PA, USA, 1995; p. 291.
+35.  Tom, T.; Weiss, A.J. High Resolution Direct Position Determination of Radio Frequency Source. IEEE Signal
+      Process. Lett. 2016, 23, 192–196.
+36.   Weiss, A.J. Direct Geolocation of Wideband Emitters Based on Delay and Doppler. IEEE Trans. Signal Process.
+     2011, 59, 2513–2521.
+37.  Dennis, J.E.; Schnabel, R.B.  Numerical Methods for Unconstrained Optimization and Nonlinear Equations;
+      Prentice-Hall: Upper Saddle River, NJ, USA, 1983; p. 64.
+38.  Cormen, T.H.; Leiserson, C.E.; Rivest, R.L.; Stein, C. Introduction to Algorithms, 3rd ed.; The MIT Press:
+     Cambridge, MA, USA, 2009.
+39.  Nocedal, J.; Wright, S. Numerical Optimization, 2nd ed.; Springer: Berlin/Heidelberg, Germany, 2006.
+40.  Murty, K.G. Linear Complementarity, Linear and Nonlinear Programming; Heldermann: Lemgo, Germany, 1988;
+     pp. 447–448.
+41.   Kiers, H.A.L. Maximization of sums of quotients of quadratic forms and some generalizations. Psychometrika
+     1995, 60, 221–245.
+42.  Sorensen, D.C. Newton’s method with a model trust region modiﬁcation. SIAM J. Numer. Anal. 1982,
+      19, 409–426.
+43.  Yuan, Y.X. A Review of Trust Region Algorithms for Optimization; ICIAM99: Edinburgh, UK, 2000; pp. 271–282.
+44.  Yuan, Y.X. Recent advances in trust region algorithms. Math. Program. 2015, 151, 249–281.
+45.   Stoica, P.; Nehorai, A. MUSIC, Maximum Likelihod, and Cramer-Rao Bound. IEEE Trans. Acoust. Speech
+      Signal Process. 1989, 37, 720–741.
+
+=== PDF PAGE 36 ===
+Sensors 2018, 18, 892                                                                                       36 of 36
+
+
+
+46.   Stoica, P.; Nehorai, A.  MUSIC, Maximum Likelihod, and Cramer-Rao Bound: Further Results and
+     Comparisons. IEEE Trans. Acoust. Speech Signal Process. 1990, 38, 2140–2150.
+47.  Van Trees, H.L.  Optimum Array Processing:  Part IV of Detection, Estimation and Modulation Theory;
+     Wiley-Interscience: Hoboken, NJ, USA, 2002; pp. 293–303.
+
+                   c⃝2018 by the authors. Licensee MDPI, Basel, Switzerland. This article is an open access
+                           article distributed under the terms and conditions of the Creative Commons Attribution
+                  (CC BY) license (http://creativecommons.org/licenses/by/4.0/).

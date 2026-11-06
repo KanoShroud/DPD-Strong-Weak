@@ -1,0 +1,547 @@
+--- PDF PAGE 1 ---
+Efficient Position Determination Using Low-Rank
+Matrix Completion
+Zehui Zhang
+Shenzhen Research Institute of Big Data
+Shenzhen, China
+zhangzehui@sribd.cn
+Wenqiang Pu
+Shenzhen Research Institute of Big Data
+Shenzhen, China
+wpu@sribd.cn
+Rui Zhou
+Shenzhen Research Institute of Big Data
+Shenzhen, China
+rui.zhou@sribd.cn
+Mingyi You
+National Key Laboratory of
+Electromagnetic Space Security
+Jiaxing, China
+youmingyi@126.com
+Wei Wang
+National Key Laboratory of
+Electromagnetic Space Security
+Jiaxing, China
+wwzwh@163.com
+Junkun Yan
+National Key Laboratory of Radar Signal Processing
+Hangzhou Institute of Technology, Xidian University
+Xi’an & Hangzhou, China
+jkyan@xidian.edu.cn
+Abstract—In increasingly complex electromagnetic environ-
+ments, distributed systems are crucial for passive target local-
+ization. These systems, consisting of spatially dispersed sensing
+nodes, collaboratively enhance the localization of target signals.
+Particularly in blind localization tasks within low signal-to-noise
+ratio (SNR) settings, distributed passive localization offers im-
+proved positioning performance. Traditional passive localization
+methods typically follow a two-step process: initially extracting
+parameters, such as the direction of arrivals (DOA), from raw
+data, followed by localizing the target. This approach often
+requires a high SNR. In contrast, Direct Position Determination
+(DPD) methods directly leverage all the received raw data, thus
+overcoming the constraints of the two-step process. However,
+DPD methods involve a time-consuming grid search within
+the area of interest. To address this challenge, we propose
+a radiation source localization method that utilizes random
+sampling. This method capitalizes on the low-rank properties
+of the grid search matrix used in DPD methods. By integrating
+random sampling with low-rank matrix completion algorithms,
+our approach efficiently localizes the radiation source. Simulation
+results demonstrate that this random sampling-based method
+significantly reduces computational demands while preserving
+high localization accuracy.
+Index Terms—Direct Position Determination (DPD), random
+sampling, low-rank matrix completion
+I. INTRODUCTION
+In recent decades, distributed passive localization has be-
+come increasingly prevalent in both military and civilian
+sectors. In civilian applications, this technology is employed
+for radio supervision, arrest support, and search and rescue
+operations. In military contexts, locating radiation sources is
+crucial for tasks such as troop deployment, signal separa-
+tion, jamming guidance, and navigational aid during attacks.
+Commonly used distributed passive localization methods are
+categorized into indirect localization algorithms and Direct
+This work was supported in part by the National Nature Science Foun-
+dation of China (NSFC) under Grant 62101350, Grant 62201362, and
+in part by the Shenzhen Science and Technology Program (Grant No.
+RCBS20221008093126071).
+Position Determination (DPD) algorithms, often described as
+two-step and one-step localization approaches, respectively.
+Two-step localization methods are generally suboptimal
+because they fail to ensure that all extracted parameters are
+consistent with the same radiation source location. Com-
+mon two-step localization techniques include received signal
+strength (RSS) [1], angle of arrival (AOA) [2], time difference
+of arrival (TDOA), frequency difference of arrival (FDOA),
+and systems that integrate multiple observational methods [3].
+In practical scenarios, the location and velocity data of sensing
+nodes are often imprecise, particularly when the nodes are
+mounted on platforms like unmanned aerial vehicles, where
+random errors are inevitable. Localization based on TDOA and
+FDOA is particularly susceptible to inaccuracies in the position
+and velocity of the sensing nodes. Consequently, localization
+algorithms must incorporate the statistical data of these errors
+to improve the accuracy of radiation source localization.
+In scenarios with low signal-to-noise ratio (SNR), the ef-
+fectiveness of traditional two-step localization methods signif-
+icantly diminishes. To overcome this limitation, DPD methods
+have been developed, which estimates the source location
+directly from the received signals, bypassing the need for
+intermediate parameter estimation [4]–[10]. DPD methods
+generally outperform the traditional two-step approaches by
+modeling the signal observations from all distributed sensors
+as functions of the same source. These methods can directly
+estimate the location of a radiation source from the received
+signals, eliminating the need for a preliminary parameter
+extraction step. A prevalent technique in DPD for stationary
+sources involves utilizing signals that encapsulate time differ-
+ence and frequency difference information. DPD techniques
+that rely on TDOA and FDOA typically assume constant
+delays and Doppler shifts over the observation period. Weiss
+et al. conducted extensive research on DPD for narrowband
+radiation sources [11]. They formulated methods to estimate
+the radiation source location using the least squares approach,
+effective under both known and unknown signal conditions.
+2024 IEEE International Conference on Signal, Information and Data Processing (ICSIDP) | 979-8-3315-1566-9/24/$31.00 ©2024 IEEE | DOI: 10.1109/ICSIDP62679.2024.10868130
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:49:02 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 2 ---
+However, the primary limitation of DPD methods is that their
+accuracy hinges on the grid width used to partition the search
+area. In cases where the search space is large and the grid
+width is small, the computational load can become significant,
+even in two-dimensional searches.
+To overcome the computational challenges of grid searches,
+this paper introduces a novel method that combines random
+sampling with low-rank matrix completion (LRMC) algo-
+rithms [12] [13] [14]. This approach significantly reduces
+computational load while maintaining localization accuracy
+in complex electromagnetic environments. It enhances the
+efficiency of Directional Pursuit Detection (DPD) methods,
+proving especially effective in both military and civilian
+applications of distributed systems. Numerical experiments
+confirm that this innovative strategy not only cuts down on
+computational demands but also maintains high localization
+accuracy.
+II. SIGNAL MODEL AND DPD
+A. Signal Model
+Consider a scenario where a stationary radiation source is
+located in a two-dimensional space, with its position denoted
+by Ps = (x0, y0). Surrounding this source are N stationary
+sensing nodes positioned at spatial coordinates Pr,i = (xi, yi)
+for i = 1, . . . , N. The time delay τi from the radiation source
+to the i-th sensing node can be mathematically described as:
+τi = ∥Ps −Pr,i∥2
+c
+,
+i = 1, . . . , N,
+where c represents the speed of light, and ∥· ∥2 signifies the
+Euclidean distance between the radiation source and the i-th
+sensing node. To facilitate the discussion, it is assumed that
+the clock frequencies of the sensing nodes are synchronized.
+Additionally, the delays experienced during the observation
+period are sufficiently short, allowing them to be considered
+constant throughout the duration of the observation.
+During the observation time slot, the received signal model
+used to capture the radiation source signal is defined as
+follows:
+yi(t) = his(t −τi) + ni(t).
+In this model, yi(t) represents the signal received by the
+i-th sensing node. The parameter hi denotes the channel
+characteristic from the radiation source to the i-th node, which
+is assumed to follow a Rayleigh distribution. The term s(t)
+corresponds to the radiation source signal, while τi indicates
+the delay from the radiation source to the i-th sensing node.
+Additionally, ni(t) is the additive white Gaussian noise at
+the i-th node, which follows a complex Gaussian distribution.
+Each node transmits observation data to the fusion center,
+where the received data is asynchronous. The asynchronous
+data received at the fusion center is denoted by Y ∈CN×T ,
+where T represents the number of observation samples per
+sensing node, N denotes the total number of sensing nodes.
+B. DPD
+The workflow of our considered Direct Position Determi-
+nation (DPD) method is outlined as follows:
+1) Grid Division: Segment the sensing area into grids.
+2) Data Compensation: At each grid point, the fusion
+center adjusts the received data for time delays to derive
+the compensated data.
+3) Statistical Computation: Employ various localization
+methods to analyze the compensated data and compute
+the relevant statistics.
+4) Iteration: Repeat steps 2 and 3 for each grid point until
+the entire area has been covered.
+5) Source Localization: Identify the radiation source’s
+location at the grid point where the computed statistics
+reach a peak value.
+Time delays can be compensated for, such that the data
+received by each sensing node is synchronized and free from
+any discrepancies in delay. The compensated data model is
+mathematically represented as follows:
+Y = Hs + N,
+where y(t) is a vector representing the signals received at time
+t from all N sensing nodes, and it ranges over t = 1, . . . , T,
+where T denotes the total number of observation time points.
+The matrix Y compiles these vectors into a N × T matrix,
+encapsulating the data received over all time points. The matrix
+H characterizes the channel responses of each of the N nodes
+and remains constant across different time points. The vector s,
+of dimension 1×T, contains the source signals sampled across
+these time points. Lastly, N is a N × T matrix representing
+the noise at each node and each time point, assumed to be
+additive white Gaussian noise.
+Our considered DPD method employs the generalized like-
+lihood ratio test (GLRT) to address uncertainties regarding the
+presence of a radiation source signal. Depending on whether
+hypothesis H1 (signal presence) or H0 (signal absence)
+is assumed, the unknown parameters differ. The maximum
+likelihood (ML) estimations of these parameters under each
+hypothesis are given by:
+ˆR0 = arg max
+R∈Θ0
+p(Y|R, H0),
+ˆR1 = arg max
+R∈Θ1
+p(Y|R, H1),
+where Θ0 and Θ1 represent the sets of unknown parameters
+under the hypotheses H0 and H1, respectively. Specifically,
+Θ0 := {Diag(σ)|σ > 0} and Θ1 := {HHH + Diag(σ)|σ >
+0} characterize the parameters under each hypothesis. Note
+that in this context, both H and σ are auxiliary variables
+and remain unknown. The generalized GLRT test statistic is
+formulated as:
+ξGLR = p(Y|R, H1)
+p(Y|R, H0).
+For the estimation of the received signal’s covariance matrix,
+we extend the algorithm described in [15]. This refinement
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:49:02 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 3 ---
+allows for more accurate assessments under varying hypoth-
+esis scenarios. The DPD process ultimately determines the
+positions of the signal source at the grid points exhibiting the
+maximum test statistic, essentially pinpointing the peak of the
+test statistic map.
+III. THE EFFICIENT DPD BASED ON RANDOM SAMPLING.
+Analyzing all grid points and computing the associated test
+statistics is typically time-consuming. Therefore, in this paper,
+we propose using the matrix completion approach to estimate
+the test statistics map by completing the partially observed
+map M.
+A. Problem Formulation
+Matrix Completion (MC) is a pivotal technique in computer
+science that utilizes the sparsity of data—significantly zero
+elements in certain domains—to effectively process informa-
+tion. Specifically, in matrix completion, sparsity is observed
+in the singular value vectors of the original matrix. The
+main goal of MC is to reconstruct a complete, low-rank
+matrix from partially observed data by filling in the missing
+elements. The objective is to find a low-rank matrix that best
+matches the available partial observations, a problem which is
+mathematically formulated as follows:
+min
+rank(X)
+s.t.
+Xij = Mij,
+∀(i, j) ∈Ω,
+(1)
+where Ωdenote the set of indices corresponding to observed
+elements. The constraint ensures that the constructed low-rank
+matrix X matches the known elements of matrix M precisely.
+Minimizing the rank of a matrix is an NP-hard problem;
+therefore, approximation algorithms are frequently employed
+[12]. In the realm of sparse optimization, the l0 norm, rep-
+resenting the count of non-zero singular values in a matrix,
+is typically substituted with the l1 norm. Expanding on this
+approach, the l1 norm is further replaced by the sum of all
+singular values—known as the nuclear norm of the matrix X,
+denoted as ||X||∗= P
+i
+σi(X). Consequently, Problem (1) can
+be reformulated as follows:
+min
+∥X∥∗
+s.t.
+Xij = Mij,
+∀(i, j) ∈Ω,
+(2)
+Where ||·||∗represents the nuclear norm of a matrix, which
+is the sum of its singular values. Ωdenotes the set of indices
+for observed samples, X represents the recovered matrix, and
+M is a matrix containing partial observations.
+Problem (2) constitutes a convex optimization challenge that
+can be reformulated as a semidefinite programming problem.
+For a specified parameter µ > 0, the problem adopts a
+quadratic penalty function form, expressed as:
+min
+X∈Rm×n
+µ∥X∥∗+ 1
+2
+X
+(i,j)∈Ω
+(Xij −Mij)2
+(3)
+This formulation effectively balances the minimization of
+the nuclear norm and the fidelity to the observed entries of
+matrix M. Moreover, alternative methods to singular value
+decomposition are available in matrix factorization. These
+approaches employ two low-rank matrices to approximate the
+target matrix, presupposing that the rank of the original matrix
+is predetermined. The objective is expressed as:
+min
+U∈Rm×r,V∈Rn×r ∥(UVT )Ω−MΩ∥2
+This formulation aims to minimize the squared Frobenius
+norm of the difference between the observed entries of the
+target matrix MΩand the product of the approximating
+matrices U and V.
+The implementation process for the radiation source lo-
+calization method utilizing random sampling is detailed as
+follows:
+1) Grid Division: Segment the sensing area into grids.
+2) Sampling: Randomly select a certain proportion of grid
+points.
+3) Data Compensation: Perform time delay compensation
+for each sampled grid point.
+4) Statistical Computation: Utilize various localization
+methods to analyze the compensated data and compute
+the relevant statistics.
+5) Iteration: Repeat steps 3 and 4 for each sampled grid
+point until all have been processed.
+6) Matrix Completion: Input the compiled statistical data
+into a matrix completion algorithm.
+7) Source Localization: Determine the radiation source’s
+location at the grid point corresponding to the peak value
+in the completed matrix.
+This structured approach ensures precise localization of
+radiation sources within a defined area using statistical analysis
+and matrix algorithms.
+B. Solution
+To implement the Alternating Direction Method of Multi-
+pliers (ADMM) algorithm, it is necessary to modify Equation
+(2) by introducing an auxiliary variable Z. The modified
+formulation is presented as follows:
+min
+Z
+∥Z∥∗
+s.t.
+PΩ(X) = PΩ(M),
+X = Z,
+(4)
+where PΩ(X)ij
+=
+(
+Xij,
+if (i, j) ∈Ω,
+0,
+otherwise.
+This adjustment
+introduces Z to facilitate the separation of the optimization
+of the nuclear norm and the constraint that X must match the
+observed entries M in the set Ω.
+For the matrix completion problem, the objective is to
+estimate the unobserved elements of the true, unknown matrix
+M using its partially observed entries PΩ(M). To address
+this, we employ a combination of the ADMM algorithm
+and the Singular Value Thresholding (SVT) algorithm [13].
+This approach solves the optimization problem defined in (5)
+through an alternating iterative method.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:49:02 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 4 ---
+The augmented Lagrangian function for Problem (4) is
+L(X, Z, T) = ∥Z∥∗+ ρ
+2∥X −Z∥2
+F + ⟨X −Z, T⟩
+(5)
+where ρ > 0 represents a penalty factor, T is the Lagrange
+multiplier, and the notation ⟨·, ·⟩denotes the inner product.
+This formulation facilitates the iterative refinement of X and
+Z, promoting convergence to the solution that best approxi-
+mates the observed data.
+Algorithm 1 SVT-ADMM
+Input: MΩ
+Initialize: Maximum number of iterations K, Z0, X0, T0, ρ,
+and ϵ.
+for k = 1 to K do
+STEP 1. Zk+1 = D1/ρ(Xk + 1
+ρTk)
+STEP 2. Xk+1 = P1/Ω(Zk+1 −1
+ρTk) + PΩ(M)
+STEP 3. Tk+1 = Tk −ρ(Zk+1 −Xk+1)
+if ∥Xk+1 −Xk∥F ≤ϵ then
+break
+end
+end
+Output: Xk+1
+IV. NUMERICAL EXPERIMENTS
+This section evaluates the matrix completion method using
+SVT-ADMM.We opted for a DPD method with GLRT detec-
+tor. Our simulations were conducted using Matlab R2022b on
+a computer equipped with an AMD Ryzen 7945HX CPU. To
+enhance computational efficiency, a grid search was performed
+using parallel processing of 7 threads.
+We segmented the sensing area into a grid and randomly
+sampled 30% of the grid points to perform low-rank matrix
+completion. Subsequently, we assessed and compared the time
+requirements and localization accuracy of various methods.
+The simulation scenario was established by generating the
+positions of radiation sources and sensing nodes within a two-
+dimensional space as follows:
+The spatial relationship between the radiation source and
+the sensing nodes is illustrated in Figure 1. The actual po-
+sition of the radiation source is Ps = [−5.6 km, 8.4 km],
+and the potential positions of the radiation sources, Pr, are
+defined within the area {(x, y) | x ∈[−25 km, 25 km], y ∈
+[−25 km, 25 km]}. The configuration utilizes five sensing
+nodes, with detailed simulation parameters provided in Table I.
+The vanilla DPD localization method, which processes all
+grid points, incurs significant computational costs and may
+lead to prolonged execution times. Alternatively, the random
+sampling-based method utilizes low-rank matrix completion
+techniques to reconstruct the entire matrix from a subset of
+observed values, thereby reducing computational demands.
+Utilizing the Singular Value Thresholding with Alternating
+Direction Method of Multipliers (SVT-ADMM) algorithm
+requires setting several parameters, such as the maximum
+number of iterations and the penalty factor. The configuration
+of these parameters affects the duration needed for matrix
+Fig. 1: Spatial distribution of emitter source and sensing nodes.
+completion and, indirectly, the execution time of the local-
+ization process.
+TABLE I: Simulation Setting
+Parameter Name
+Parameter Value
+Grid Width
+500m
+Random Sample
+30%
+Modulation Type
+BPSK
+Baud Rate
+20kHz
+Reference SNR
+[−11 : 4 : 5]dB
+Sample Rate
+600kHz
+Observe Time
+0.1s
+Monte Carlo Numbers for Matrix Completion
+20
+The perception area is divided into grids, and the fusion
+center employs a localization method using GLRT, which
+traverses all grid points. Additionally, a localization method
+based on random sampling is utilized. Table II presents a com-
+parison of the time required for different localization methods
+across various grid widths. It is evident that matrix completion
+algorithms, such as SVT-ADMM, require significantly less
+time than exhaustive traversal methods.
+It is important to note that the comparison of time savings
+is approximate. In this particular simulation scenario and
+with the specified parameter settings, the DPD method using
+exhaustive traversal takes approximately five times longer than
+the method based on random sampling. The random sampling-
+based localization method necessitates careful adjustment of
+the parameters of the matrix completion algorithm, such as
+the number of iterations, to maximize its effectiveness.
+TABLE II: Time consumption of DPD methods.
+Methods
+Grid
+101*101
+81*81
+61*61
+41*41
+Exhaustive grid search
+26.387s
+15.826s
+9.383s
+4.489s
+Random Sample (SVT)
+5.363s
+3.222s
+1.908s
+0.911s
+Figure 2 depicts the localization results using the DPD
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:49:02 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 5 ---
+method based on GLR and the DPD method employing
+random sampling (SVT-ADMM), where 30% of the points
+are randomly sampled, and the average signal-to-noise ratio
+is -5.8 dB. From Figure 3, it is evident that the localization
+errors (Root Mean Square Error, RMSE) of the three methods
+are comparable when 30
+When the radiation source is both three-dimensional
+and mobile, the localization challenge escalates to a six-
+dimensional grid search, significantly increasing computa-
+tional complexity. In such scenarios, the random sampling-
+based method demonstrates distinct advantages due to its
+reduced computational demands.
+V. CONCLUSION
+This work combines random sampling with low-rank matrix
+completion to address the computational challenges of the
+DPD method’s grid search. This technique reduces compu-
+tational demands while maintaining accuracy, as validated by
+numerical experiments. Future work could explore adaptive
+sampling schemes.
+REFERENCES
+[1] Di Jin, Feng Yin, Carsten Fritsche, Fredrik Gustafsson, and Abdelhak M
+Zoubir. Bayesian cooperative localization using received signal strength
+with unknown path loss exponent: Message passing approaches. IEEE
+Transactions on Signal Processing, 68:1120–1135, 2020.
+[2] Jun Xu, Maode Ma, and Choi Look Law.
+Aoa cooperative position
+localization. In IEEE GLOBECOM 2008-2008 IEEE Global Telecom-
+munications Conference, pages 1–5. IEEE, 2008.
+[3] Liu Yang, Le Yang, and KC Ho. Moving target localization in multistatic
+sonar by differential delays and doppler shifts. IEEE Signal Processing
+Letters, 23(9):1160–1164, 2016.
+[4] A. J. Weiss.
+Direct position determination of narrowband radio fre-
+quency transmitters. IEEE Signal Process. Lett., 11(5):513–516, April
+2004.
+[5] A. J. Weiss and A. Amar. Direct geolocation of stationary wideband
+radio signal based on time delays and doppler shifts. In IEEE Workshop
+Stat. Signal Process., pages 101–104, Cardiff, U.K., 2009.
+[6] A. Y. Sidi and A. J. Weiss. Delay and doppler induced direct tracking
+by particle filter. IEEE Trans. Aerosp. Electron. Syst., 50(1):559–572,
+January 2014.
+[7] A. J. Weiss. Direct geolocation for wideband emitters based on delay
+and doppler. IEEE Trans. Signal Process., 41(8):2513–2521, June 2011.
+[8] J. Li, L. Yang, F. Guo, and W. Jiang. Coherent summation of multiple
+short-time signals for direct positioning of a wideband source based on
+delay and doppler. Digital Signal Process., 48:58–70, June 2016.
+[9] Z. Lu, B. Ba, J. Wang, W. Li, and D. Wang.
+A direct position
+determination with combined tdoa and fdoa based on particle filter. Chin.
+J. Aeronaut., 31(1):161–168, January 2018.
+[10] F. Ma, F. Guo, and L. Yang. Direct position determination of moving
+sources based on delay and doppler. IEEE Sensors J., 20(14):7859–7869,
+July 2020.
+[11] Amir Weiss and Gregory W Wornell. One-bit direct position determi-
+nation of narrowband gaussian signals. In 2021 IEEE Statistical Signal
+Processing Workshop (SSP), pages 466–470. IEEE, 2021.
+[12] Xiao Peng Li, Lei Huang, Hing Cheung So, and Bo Zhao. A survey
+on matrix completion: Perspective of signal processing. arXiv preprint
+arXiv:1901.10885, 2019.
+[13] Jian-Feng Cai, Emmanuel J Cand`es, and Zuowei Shen.
+A singular
+value thresholding algorithm for matrix completion. SIAM Journal on
+optimization, 20(4):1956–1982, 2010.
+[14] Yao Hu, Debing Zhang, Jieping Ye, Xuelong Li, and Xiaofei He. Fast
+and accurate matrix completion via truncated nuclear norm regulariza-
+tion. IEEE transactions on pattern analysis and machine intelligence,
+35(9):2117–2130, 2012.
+[15] Koulik Khamaru and Rahul Mazumder. Computation of the maximum
+likelihood estimator in low-rank factor analysis. Mathematical Program-
+ming, 176:279–310, 2019.
+(a) GLR + SVT-ADMM
+(b) GLR grid search
+Fig. 2: Example of DPD results (average SNR: -5.8dB)
+Fig. 3: Comparison of localization errors for different methods.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:49:02 UTC from IEEE Xplore.  Restrictions apply. 

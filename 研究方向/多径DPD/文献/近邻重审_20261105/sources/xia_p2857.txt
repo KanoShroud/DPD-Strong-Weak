@@ -1,0 +1,73 @@
+IEEE SYSTEMS JOURNAL, VOL. 15, NO. 2, JUNE 2021                                                                                                2857
+
+
+
+                      TABLE I
+                 MULTIPATH CHANNEL MODEL [15]
+
+
+
+
+
+    i) Find the location estimator of the target signal ˆx1, which is the
+                                                                                   Fig. 2.   (a) Target source position estimation RMSEs versus SNRs and different
+    maximum solution to the problem                             number of paths G, SIR = 3 dB. (b) Target source position estimation RMSEs
+                                                                              versus the number of iterations, SNR = 5 dB, SIR = 3 dB.
+                                ˆx1 = arg max ( ˜F n).                (14)
+                                xn
+    ii) Deﬁne an interval width Δh, and compute the empirical proba-   signal-to-noise ratio (SNR) and SNR are deﬁned as
+       bility                                                                              P1
+                                                            SNR = 10 log10                        (18)
+                                                                                          σ2v                                            Ni2
+           P (xn|∥ˆx1 −xn∥≤hi2 + Δh) =            (15)
+                           N                                            P1
+                                                                            SIR = 10 log10                        (19)
+     where i2 is the index of distance, h1 = 0 and Ni2 is the number                                  P2
+      of position particles in the area.                             where P1 and P2 denote the transmit power of the target and the
+   iii) Determine the bandwidth ˆh = hi2 + Δh and stop the iterations,   interference, respectively.
+         (Ni2 −Ni2−1)        if         N   < ε; else i2 = i2 + 1 and return to (15).           The proposed method is compared with other localization methods in
+  iv) DeﬁnethesetE1 = {∥xn −ˆx1∥≤ˆh}Nn=1 andthesetE2,which   terms of the root mean square error (RMSE) and the CRLB as follows.
+      includes the residual particles. Then, we can determine the      1) The two-step method [6] combines the multipath delay estima-
+      position estimate of the cochannel source ˆx2 from the set E2          tion and TDOA localization. The cochannel interference is not
+     by ﬁnding the position particle with the maximum value of the         considered.
+       spatial spectrum.                                                   2) The direct tracking method [14] is slightly changed with only
+   v) To improve the estimation accuracy, recompute (9)–(13) and      TDOA information. The cochannel interference is considered,
+      repeat step i–iv, with the updated particles                          and the channel is formulated by frequency-ﬂat fading model.
+                                                                         3) The CRLB is proposed in this paper.
+                             ˆx1 + vn1 ,    n = 1, 2, . . ., N/2             To assess the localization performance, the RMSE of the target
+            xn =                                          (16)                                                                   source (j = 1) with 1000 Monte Carlo simulations is calculated as
+                             ˆx2 + vn2 ,  n = N/2 + 1, . . ., N
+                                                                             1      1000                 2
+     where vn1 , vn2 ∈R2×1 denote the additive process noise vector          E =                  θ1(l) −ˆθ1(l)             (20)
+                                                                           1000    l=1
+      with the given covariance matrix Γ1 and Γ2, respectively.
+                                                            where θ1(l) and ˆθ1(l) are the actual position and the estimated position
+                  V. SIMULATION RESULTS                       of the target source at the lth independent trial, respectively. In each
+                                                                                             max(F n)−min(F n)
+                                                                                               trial, we set the width in (11) Δa =         10             , the width in (15)   In the computer simulations, we assume that both the BS locations
+                                         Δh = 400, ε = 0 in step iii, and the covariance matrix in (16) Γj =
+and the cochannel transmitters are in the region A with the size of 6 × 6                                                                     [100, 0; 0, 100], j = 1, 2. Fig. 2(a) shows the localization performance
+km2. The reference BS is placed at the center of the region (0, 0), and the                                                                      of the target source (j = 1) in the presence of interference (j = 2)
+other four BSs are randomly deployed. The time series data collected                                                             and multipath fading. The number of iterations mentioned in step v
+simultaneously from different BSs are uploaded to a fusion center. We                                                                                        is set to be 2. It is not difﬁcult to ﬁnd that the proposed algorithm
+assume that all the BSs are active and able to sense the information                                                               can efﬁciently locate the target with different number of multipath,
+from the transmitters during the whole sampling period. For each                                                                       since the cochannel sources can be well separated and the multipath
+cochannel signal, the modulation type is BPSK with fc = 900 MHz,                                                             components are suppressed by the proposed spatial spectrum function.
+fs = 1 MHz, and fm = 200 kbps denoting the carrier frequency, the                                                                      Besides, the multipath components with large delays have limited effect
+sampling rate, and the symbol rate, respectively. The number of samples                                                           on the locating performance due to their small value of the amplitudes.
+is K = 2000 and N = 1000 is the number of position particles, which                                                                          Fig. 2(b) shows the performance under different number of particles
+are initially drawn from the uniform distribution U(A). The channel                                                             and iterations. It can be seen that all the RMSEs converge after four
+model is described in Table I, where six paths are considered with the                                                                   iterations,andlargernumberofparticlescanprovidefasterconvergency
+maximum delay of 21 μs. Regarding the path loss of the direct path                                                                      speed. For the current simulation settings, the method can work well
+(g = 0), the Cost-231 Walﬁsch–Ikegami model [13] is used with the                                                                  with 1000 particles and three iterations.
+expression                                                                             Fig. 3(a) shows the comparison of RMSEs between the proposed
+                                                           method and the direct tracking methods in [14]. The traditional two-step
+    Pj,m = 42.6 + 20 log10(fc) + 26 log10(dj,m) + γj,m     (17)   method is not included since the method is efﬁcient under low SIRs
+                                                                                   (e.g. SIR=−3 dB). The proposed method has lower RMSEs than the
+where dj,m is the distance (in km) between the jth source and the   other method in the presence of cochannel interference and multipath
+mth BS, and Pj,m is the corresponding path loss in dB. γj,m is used   wireless channel, and is much closer to the proposed CRLB with lower
+to model the shadowing effect with a zero-mean normal distribution   SNRs. Both of the methods deviate from the bound curve under high
+N(0, σ2γ), where σ2γ = 25 is the variance used in the simulations. The   SNRs, caused by the multipath effect and insufﬁcient particle numbers.
+
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 27,2026 at 04:51:29 UTC from IEEE Xplore. Restrictions apply.

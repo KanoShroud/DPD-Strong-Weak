@@ -1,0 +1,64 @@
+14068                                                              IEEE TRANSACTIONS ON MOBILE COMPUTING, VOL. 23, NO. 12, DECEMBER 2024
+
+
+
+                      TABLE I
+   COMPARISON OF THE AVERAGE PROCESSING TIME OF BSS, ℓ0NORM-CS
+  DLE [18], 3LHS-VBI [45], DISOUL [16], ROARRAY [14] AND SPOTFI [8]
+
+
+
+
+
+                                                                                   Fig.  13.  RMSE  performance  comparison  for  localization  methods
+                                                                 BSS, [18], [45] [16], [14] and [8] as a function of number of antenna
+                                                                                      arrays.
+
+
+                                                                     Fig. 12 illustrates that in a scenario that we have four anchors
+                                                             placed in a 20 m × 20 m room, as the SNR improves, which
+                                                    means the signal becomes stronger compared to the background
+                                                                   noise, the RMSE of our method approaches the CRB more
+                                                                      closely. This indicates that the accuracy of our method in
+                                                               estimating locations becomes more precise and closer to the
+                                                                     theoretical best possible accuracy (the CRB) when the signal
+                                                                   quality improves. Furthermore, compared to the other methods
+                                             we tested, the RMSE of our proposed method is consistently
+                                                                  closer to the CRB across various SNR levels, suggesting that
+                                                                                               it generally performs better in terms of localization accuracy.
+                                                                    Similarly, Fig. 13 illustrates that in the scenario with an SNR
+                                                               of 20 dB, increasing the number of anchors will increase the
+Fig.  12.  RMSE  performance  comparison  for  localization  methods   accuracy of the methods and follow the CRB closely.
+BSS, [18], [45], [16], [14] and [8] as a function of SNR.
+
+                                                                            VII. LIMITATIONS AND FUTURE WORK
+
+                                                                  In this Section, we discuss the limitations and assumptions
+comparing their localization accuracy against the theoretical
+                                                                inherent in the proposed method, along with potential directions
+limits, speciﬁcally the CRB discussed earlier.
+                                                                    for future research. Recognizing and addressing these limita-
+  We summarized the average processing times for all methods
+                                                                    tions provide a more balanced and realistic point of view of the
+in Table I. This is calculated by running each algorithm several
+                                                                     applicability of the proposed method.
+times and taking the average of these runs. The RoArray method
+took the longest time to process. This is because  it uses a
+                                                             A. Limitations and Assumptions
+two-step approach to ﬁnd the solution. DiSoul is the second
+longest algorithm due to its use of a more complex mathematical    The primary limitation of our method stems from the binary
+approach (second-order cone programming) that has to deal with   approximation used in addressing structured sparsity. While this
+a higher number of variables than our proposed method, leading   approachsigniﬁcantlyreducescomputationalcomplexity,itmay
+to longer processing times. The ℓ0-norm-CS DLE is the fastest   introduce approximation errors, especially in highly dynamic
+which uses the DA. Our proposed method is the second fastest   environments where signal characteristics rapidly change. Fur-
+one among the compared methods due to additional processing   thermore, our method assumes a relatively stable and coherent
+times for the constraints.                                         signal environment to effectively distinguish between LoS and
+   Finally, we compare the theoretical limit of localization ac-  NLoS components. This assumption might not hold in harsh
+curacy (the CRB) discussed in Section V, with the actual lo-   multipath environments or highly dynamic indoor scenarios, po-
+calization accuracy measured as the Root Mean Squared Error   tentially affecting the accuracy and reliability of the localization.
+(RMSE) for all the methods we tested, as shown in Figs. 12 and     Additionally, the current methodology primarily focuses on
+13.InFig.12,weperformthiscomparisonbyvaryingSNRwhile  2-D environments and need adjustments to be as effective in
+in Fig. 13 the comparison is done with respect to increasing the  3-D localization tasks. The adaptation to 3-D environments
+number of antenna arrays.                                   remains an area for future development, which would extend
+
+        Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:02:23 UTC from IEEE Xplore. Restrictions apply.

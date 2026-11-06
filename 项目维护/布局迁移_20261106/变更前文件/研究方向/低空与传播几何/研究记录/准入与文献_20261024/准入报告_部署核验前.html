@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>低空盲多源定位｜十九篇全文后的研究收敛</title>
+<style>
+:root{--ink:#193b43;--muted:#5c7175;--teal:#14746b;--paper:#f5f5ef;--line:#d7e2dd;--soft:#e8f1eb}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.85 "Segoe UI","Microsoft YaHei",sans-serif}a{color:var(--teal);text-underline-offset:4px;overflow-wrap:anywhere}a:hover{color:#0e4944}a:focus-visible,summary:focus-visible{outline:3px solid #b07e32;outline-offset:4px}.wrap{max-width:1120px;width:calc(100% - 64px);margin:auto}header{padding:32px 0 26px}header .eyebrow{color:var(--teal);font-size:13px;letter-spacing:.12em}h1{font-size:clamp(30px,4vw,48px);line-height:1.3;max-width:900px;margin:20px 0}header p{max-width:830px;font-size:18px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:26px 0 8px}.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:19px 23px}.stat b{font-size:28px;display:block}.stat span{font-size:13px;color:var(--muted)}nav{position:sticky;top:0;z-index:2;background:#f5f5eff5;border-block:1px solid var(--line);backdrop-filter:blur(8px)}nav .wrap{display:flex;gap:22px;overflow-x:auto;white-space:nowrap;padding-block:13px}nav a{text-decoration:none;font-size:14px;color:var(--ink)}main{padding-bottom:36px}main>h2{font-size:27px;line-height:1.45;margin:52px 0 18px;padding-top:12px;border-top:2px solid var(--teal)}p{margin:14px 0}main>p:first-child{color:var(--muted);font-size:13px}main>p:nth-child(2){font-size:20px;background:var(--soft);padding:22px 26px;border-radius:14px}blockquote{margin:20px 0;padding:18px 25px;background:var(--soft);border-left:4px solid var(--teal);border-radius:0 12px 12px 0}blockquote p{margin:0;font-size:19px}strong{font-weight:650}ol,ul{padding-left:26px}li+li{margin-top:12px}main>ol>li{padding:5px 0}table{width:100%;border-collapse:collapse;font-size:14px;background:white}th,td{text-align:left;vertical-align:top;padding:15px 18px;border-bottom:1px solid var(--line);min-width:160px}th{background:var(--soft)}tr:last-child td{border:0}.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:13px;margin:18px 0}details{background:#fff;border:1px solid var(--line);border-radius:12px;margin:12px 0}summary{padding:18px 22px;cursor:pointer;font-weight:650;line-height:1.6}summary:hover{background:#f0f6f1;border-radius:12px}.paper-body{padding:0 23px 18px;border-top:1px solid var(--line)}.paper-body p:first-child{font-size:15px}.paper-body p{margin:16px 0 0}.source-list ul{padding:0 30px 20px 45px;font-size:14px}.source-list span{color:var(--muted);white-space:nowrap}pre{overflow-x:auto;max-width:100%;padding:22px;border:1px solid var(--line);border-radius:13px;background:white;font:14px/1.9 Consolas,"Microsoft YaHei",monospace}code{overflow-wrap:anywhere;font-size:13px}footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--muted);font-size:13px}.pill{display:inline-block;border-radius:6px;background:var(--soft);color:var(--teal);font-size:12px;padding:4px 9px;margin-right:7px}.pill.amber{background:#f6ecd7;color:#855c28}#motion{scroll-margin-top:90px}
+@media(max-width:680px){.wrap{width:calc(100% - 32px)}header{padding-top:23px}.stats{gap:8px}.stat{padding:14px 11px}.stat b{font-size:23px}.stat span{font-size:12px}nav .wrap{gap:19px}main>h2{font-size:23px;margin-top:38px}main>p:nth-child(2),blockquote{padding:17px 19px;font-size:18px}summary{padding:16px}th,td{padding:13px;min-width:145px}pre{font-size:12px;padding:15px}}
+@media print{nav{position:static}details:not([open])>.paper-body{display:block}summary{list-style:none}.wrap{width:100%}.stats{break-inside:avoid}body{background:white}h2{break-after:avoid}}
+</style></head><body>
+<header class="wrap"><div class="eyebrow">RESEARCH ADMISSION · 2026.10.25</div><h1>低空盲多源定位<br>十九篇全文后的研究收敛</h1>
+<p>从“哪些站可靠”，收敛到“哪些源—路径解释可信”。逐篇依据、先验边界与下一步判定放在同一份报告里。</p>
+<span class="pill">第二、三批精读完成</span><span class="pill">主题分类已核验</span><span class="pill amber">条件机制准入</span>
+<div class="stats"><div class="stat"><b>10篇</b><span>本轮137页全文精读与关键页核查</span></div><div class="stat"><b>19篇</b><span>前三批累计284页，不含缺失独立补充</span></div><div class="stat"><b>0次</b><span>新定位实验；不提前宣布方法成立</span></div></div></header>
+<nav aria-label="报告导航"><div class="wrap"><a href="#step1-latest">第一步结果</a><a href="#path">审查路径</a><a href="#papers">逐篇结论</a><a href="#decision">研究目标</a><a href="#method">解决思路</a><a href="#next">后续计划</a><a href="#classification">Zotero分类</a><a href="#unknown">未确定事项</a><a href="#records">原始记录</a></div></nav>
+<main class="wrap"><section id="step1-latest" style="padding:22px 26px;margin:24px 0;background:#f6eddc;border-left:4px solid #b16b2c;border-radius:0 12px 12px 0"><h2 style="margin:0 0 12px;font-size:24px">最新：每源四直达的全局核验已完成</h2><p>总共5站不变。四LOS消除了连续歧义，但发现两个均处于20—120m高度范围的位置，相距约21.17m，却产生同一份混合IQ。本轮未发现未知LOS集合额外引入域内假解；暂不进入性能比较。</p><p><a href="step1_four_los_20261025/四直达核验报告.html"><strong>查看四直达结果、推导和下一步边界 →</strong></a> · <a href="step1_identifiability_20261025/第一步核验报告.html">上一轮三直达记录</a></p><p style="font-size:13px;color:#775a31">以下为文献阶段历史报告；最新执行条件与结果以上述链接为准。</p></section>
+<p>2026-10-25｜文献准入与执行建议，不是新实验报告。</p>
+<p><strong>保留一个候选：部分直达径可见时，怎样把多个未知波形与反射正确对应到真实位置。</strong> 本轮把问题、先验和验证路线收敛了；还没有证明它已经构成低创新风险的论文贡献。</p>
+<p>下一步先核验可辨识性和强常规方法，不直接开大规模比较。旧G11有限窗路线保持终审结论，不重新启动。</p>
+<h2 id="done">1．完成情况</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>本轮</th>
+<th>累计</th>
+<th>执行边界</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>B1—B7、C1—C3：10篇、137页</td>
+<td>三批19篇、284页</td>
+<td>0次新定位实验；不改论文与定位器</td>
+</tr>
+<tr>
+<td>每篇核对模型、方法、理论条件与实验</td>
+<td>含封面、参考文献、文内附录的物理页数</td>
+<td>C3作者官网全文，库内只有题录/链接</td>
+</tr>
+<tr>
+<td>19条目新增主题分类，原分类保留</td>
+<td>新目录＋6个子分类，允许交叉归类</td>
+<td>不添加阅读状态；标签、Extra和其他非分类字段未改</td>
+</tr>
+</tbody></table></div>
+<p>阅读到正文/附录不等于复现算法。C3预检因加密标记不可用，但4页可正常读取和渲染；其余本轮9份预检PASS。A9独立补充材料仍缺，未把主体阅读写成补充实现也已核验。</p>
+<h2 id="path">2．证据怎样改变了判断</h2>
+<p>以下是可复核的审查步骤、发现与决策依据。</p>
+<ol>
+<li><strong>先确认低空遮挡是否真实。</strong> B6测到了楼体遮挡引起的传播变化，支持研究动机；但它测功率，不是多站宽带混合IQ。B7虽提供公开CIR，却明确LOS始终存在，不能直接验证缺LOS的盲多源定位。</li>
+<li><strong>再查基本思路是否已有。</strong> A3/C3已有无共同参考与不完整时差图；A8/B2已有共同位置支持和局部NLOS；A2已有多源关联。把这些名称重组不等于新贡献。</li>
+<li><strong>逐项检查隐藏的先验。</strong> B2用已知波形与阵列；B4位置依赖阵列方向；B5依赖干净参考；A9/B3知道反射/转发结构；C1、C2借助运动、地图或阵列。它们不是直接可用的等信息基线。</li>
+<li><strong>检查“符合测量”是否等于真目标。</strong> C3的循环一致性只证明时差兼容；反射形成的虚拟位置也可能自洽。A8/B2的恢复结果中，唯一几何解释本身就是条件之一。</li>
+<li><strong>最后才确定方案。</strong> 先查允许的信息能否区分真源与替代解释，再查普通方法是否仍有缺口。只有确定具体失败机制，才值得推导新规则。</li>
+</ol>
+<p><strong>最大的变化：</strong> 从“选择可靠站／做共同支持”，进一步收敛为“未知混合波形下，哪些源—路径解释能够被几何与观测共同排除”。这是问题收敛，不是已经完成创新。</p>
+<h2 id="papers">3．十篇文献，逐篇留下什么结论</h2>
+<details class="paper"><summary>B1 · 二元CSI定位</summary><div class="paper-body">
+<p><a href="https://doi.org/10.1109/TSP.2022.3215651">Location Estimates From Channel State Information via Binary Programming — TSP 2022</a></p>
+<p>BOAT研究阵列CSI的角度/时延稀疏支持。二元化有非负功率、唯一性和字典条件，不能把自由复系数无条件换成0/1。实测LOS未遮挡；其部分误差统计取离真值最近的估计，不能直接搬成盲多源输出协议。它是结构近邻，不是当前输入下的现成基线。<a href="bc_reading_20261025/structure_notes.md">详细笔记</a></p>
+</div></details><details class="paper"><summary>B2 · 共同LOS与局部NLOS</summary><div class="paper-body">
+<p><a href="https://doi.org/10.1109/TSP.2017.2666779">Direct Localization for Massive MIMO — TSP 2017</a></p>
+<p>DiSouL使用已知发射波形和阵列方向，把共同位置组与各站NLOS分开，并能调整有效LOS站数。部分LOS与支持分组已有明确先例；不能删掉已知波形、阵列和唯一几何解释条件后，继续援用恢复保证。它不是A8多源TOA预印本的正式期刊版本。<a href="bc_reading_20261025/structure_notes.md">详细笔记</a></p>
+</div></details><details class="paper"><summary>B3 · 未知多源波形的多径DPD</summary><div class="paper-body">
+<p><a href="https://doi.org/10.1109/ACCESS.2018.2889958">Unified Subspace Fitting Framework and Its Performance Analysis for Direct Position Determination in the Presence of Multipath Propagation — IEEE Access 2019</a></p>
+<p>统一归一化子空间拟合、DML等目标，并给出渐近性能分析。它确实处理未知多源波形，而不是只做已知信号；关键前提是已知反射/转发结构。是必须对接的理论近邻，不能再说未知波形多径DPD没有先例。<a href="bc_reading_20261025/dpd_notes.md">详细笔记</a></p>
+</div></details><details class="paper"><summary>B4 · 分布式Wi-Fi直接定位</summary><div class="paper-body">
+<p><a href="https://doi.org/10.1109/TWC.2025.3601543">Decentralized Indoor Direct Localization With Multiple Wi-Fi Access Points — TWC 2026／2025在线</a></p>
+<p>DIM-DPD用已知导频CSI和阵列；TOA作为自由参数，位置主要通过AOA进入模型。已经有首径几何一致性筛选、多初值和聚类。直接把阵元数设为1，会移除这套参数化的位置信息，而不只是降低精度。因此不能这样“适配”后参加排名。<a href="bc_reading_20261025/structure_notes.md">详细笔记</a></p>
+</div></details><details class="paper"><summary>B5 · 互谱多径DPD</summary><div class="paper-body">
+<p><a href="https://doi.org/10.3390/s22197245">A Direct Position Determination Method Based on Subspace Orthogonality in Cross-Spectra under Multipath Environments — Sensors 2022</a></p>
+<p>处理单个未知源，利用一个干净参考站构造互谱多指数结构。参考站也有多径或其他源时，结构会改变。它不是已经解决无干净参考的并发盲多源方案；但其分频、平滑和子空间模型可作为具体对照依据。<a href="bc_reading_20261025/dpd_notes.md">详细笔记</a></p>
+</div></details><details class="paper"><summary>B6 · 低空遮挡的实测依据</summary><div class="paper-body">
+<p><a href="https://doi.org/10.1109/TVT.2020.2968136">Propagation Measurements and Modeling for Low Altitude UAVs From 1 to 24 GHz — TVT 2020</a></p>
+<p>真实楼体遮挡、无人机升降和多频段功率测量说明低空局部遮挡具有实际意义。测量并非多站宽带复IQ，没有提供当前任务的路径时延与定位结果；文中遮挡损耗也不能当成两个源的功率差。<a href="bc_reading_20261025/application_notes.md">详细笔记</a></p>
+</div></details><details class="paper"><summary>B7 · 公开空地信道数据</summary><div class="paper-body">
+<p><a href="https://doi.org/10.1016/j.dib.2025.112086">Air-to-ground channel dataset via UAV-aided measurements in multiple scenarios — Data in Brief 2025</a></p>
+<p>使用已知Zadoff–Chu序列探测单链路CIR，三类场景中LOS始终存在。公开文件为dB形式CIR及派生量，不等于可相干联合的多站未知混合IQ。可参考信道参数，不能把合成的新观测称作实测盲多源定位。<a href="bc_reading_20261025/application_notes.md">详细笔记</a></p>
+</div></details><details class="paper"><summary>C1 · 无地图环境学习也有额外条件</summary><div class="paper-body">
+<p><a href="https://doi.org/10.1121/10.0016999">An architecture for passive joint localization and structure learning in reverberant environments — JASA 2023</a></p>
+<p>PEEL面向移动水声单源、周期脉冲，先无遮挡初始化，再学习边界并跟踪。并非任意未知连续波形、单次记录、无地图多源都可解。它说明环境学习有价值，也说明不能忽略初始化与时间信息的贡献。<a href="bc_reading_20261025/crossdomain_notes.md">详细笔记</a></p>
+</div></details><details class="paper"><summary>C2 · 反射／绕射多声源定位</summary><div class="paper-body">
+<p><a href="https://doi.org/10.1109/TRO.2021.3118966">Diffraction- and Reflection-Aware Multiple Sound Source Localization — TRO 2022</a></p>
+<p>利用阵列DOA、LiDAR/SLAM地图、射线追踪和粒子滤波。路径机制可以借鉴，但地图、阵列和时间连续性都是额外信息，不能免费带入单天线单次盲定位的主比较。<a href="bc_reading_20261025/crossdomain_notes.md">详细笔记</a></p>
+</div></details><details class="paper"><summary>C3 · 时差一致性不等于真实源</summary><div class="paper-body">
+<p><a href="https://www.iss.uni-stuttgart.de/forschung/publikationen/kreissig_itg10.pdf">A graph theoretical framework for consistent time differences of arrival — ITG 2010作者全文</a></p>
+<p>任意生成树、不完整TDOA图和基础循环条件已经提供了无公共参考框架。循环一致仍不证明直达身份；每站附加路径延迟也可能保持循环关系。该文是理论框架，不含足以替代当前RF场景验证的性能实验。<a href="bc_reading_20261025/crossdomain_notes.md">详细笔记</a></p>
+</div></details><h2 id="decision">4．收敛后的研究目标</h2>
+<blockquote>
+<p>同步单天线站对多个未知宽带低空辐射源定位；不同源的直达径可见站集合不同，又没有逐源干净参考。研究怎样减少源—路径错误关联造成的位置RMSE与大错，并控制完整耗时。</p>
+</blockquote>
+<p>通俗地说：有的信号直达，有的绕路，接收站还把多个目标混在一起听。我们要避免把属于不同目标、不同路径的成分，拼成一个看似合理的假位置。</p>
+<p>建议以三维为目标，先已知双源、短记录准静态定位。初始核验可用6个含高度差的单天线站，每源保留几何有效的部分LOS；从每源4站开始不等于“四站保证唯一”。不同源的LOS集合可相交，但同站有LOS不等于能提供干净逐源参考。</p>
+<p>不加入导频、真实波形、阵列方向、已知地图、速度估计或轨迹跟踪。运动是否可忽略，要先核验记录内位移和多普勒相位变化。允许有限路径的未知复系数，不靠精确1/d先验消歧，也不允许任意频率响应吸收全部位置变化。</p>
+<p><strong>与旧工作的关系：</strong> 保留输入、RMSE评价、波形消元、优化与审计工具；不要求保住旧AP/VP创新。强弱源可作为后续条件，有限窗处理作为基础数值规范，不再分别承担选题主张。</p>
+<h2 id="method">5．解决思路，只保留一条</h2>
+<p><strong>几何约束下，联合解释未知波形、直达支持和少量反射。</strong></p>
+<ol>
+<li>全站对保留多种时延候选，允许缺边，不锁定单一参考。</li>
+<li>形成少量位置与源—站支持假设，排除明显不可能的几何组合。</li>
+<li>回到带限复IQ，检验同一个未知波形能否解释相关站的观测，把有限反射纳入同一目标。</li>
+<li>常规流程若仍有具体失败，再推导一个必要的约束或推断规则。</li>
+</ol>
+<p>多峰、图一致、组稀疏、波形消元和联合ML都已有先例。<strong>候选贡献应是明确的可辨识／错误关联机制，以及由此推出并经验证有效的规则。</strong> 这仍是方案骨架，尚不是已确认的新算法。</p>
+<p>必须先守住三件事：</p>
+<ul>
+<li>时差循环一致、几何上存在交点、真实源身份正确，是不同层次；镜像假解可能通过前两层。</li>
+<li>波形与信道存在尺度、相位、时移、置换及卷积分解歧义；残差小和局部FIM满秩不能替代全局核查。</li>
+<li>支持／路径数不同，不能只比较原始残差。必须事前统一模型容量或固定合理的复杂度选择规则，否则灵活模型天然获利。</li>
+</ul>
+<h2 id="next">6．下一步的具体计划</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>核验内容</th>
+<th>决策条件</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>① 先确认能解</strong></td>
+<td>明确模型和信息权限；无噪构型检查循环不一致、几何不一致、自洽虚拟源；分析局部灵敏度和全局替代解</td>
+<td>输出适用条件或反例。若只能靠未允许的地图／已知波形／跟踪消歧，收缩或停止</td>
+</tr>
+<tr>
+<td><strong>② 再确认普通方法不够</strong></td>
+<td>RF适配DATEMM／稳健TDOA、同模型常规联合拟合；4构型×3实现×3条件＝36条混合，逐例配72条孤立对照；等发射功率</td>
+<td>RMSE优先，兼看大错、关联错误与完整耗时；普通方法够用就结束，不为制造失败调场景</td>
+</tr>
+<tr>
+<td><strong>③ 只改一个必要环节</strong></td>
+<td>从机制推出一个规则，配对比较普通流程、新规则、已有替代办法；有效后再做独立数据复核</td>
+<td>需要独立增量；只多算、调参或代码优化不作为理论创新</td>
+</tr>
+</tbody></table></div>
+<p>36条是机制诊断，不是论文最终样本量。精确坐标、路径容量、可见站下限、带宽和噪声定义先冻结；所有方法同等取得允许的先验。孤立源只删除另一源，保留路径、功率与噪声，不重新调SNR。完全不可区分的反例单列，不归罪于算法。</p>
+<p>已知真实LOS／路径归属只作oracle诊断参照，不是严格RMSE上界，也不进普通排名。复IQ相关、有效频带、幅相处理与停止条件先核验，避免把基线适配缺口当理论问题。</p>
+<p><a href="bc_reading_20261025/%E7%A0%94%E7%A9%B6%E7%9B%AE%E6%A0%87%E4%B8%8E%E5%90%8E%E7%BB%AD%E8%AE%A1%E5%88%92.md">完整研究计划</a>。<strong>本轮没有运行以上三步，方案待审议后推进。</strong></p>
+<h2 id="classification">7．Zotero分类已经完成</h2>
+<p>在“多源定位研究｜文献导航”下新增：</p>
+<pre><code class="language-text">02 低空盲多源定位｜候选准入（19条）
+├─ 00 低空实测与需求       B6、B7
+├─ 01 多径DPD与盲联合估计 A9、B3、B5、A6
+├─ 02 关联与链路缺失       A2、A3、A4、C3
+├─ 03 结构近邻             A1、A2、A7、A8、B1、B2、B4
+├─ 04 可辨识性             A5、A6、A8、C3
+└─ 90 不同信息条件         C1、C2
+</code></pre>
+<p>“不同信息条件”不是低价值，而是其地图、阵列、时间信息不能免费用于同输入排名。原分类保留，同一条目交叉归类，不复制条目。19条新增主题归属已逐条回查；标签、Extra和其他非分类字段未改。原有“New”等阅读状态原样保留，<strong>没有添加阅读状态</strong>。</p>
+<h2 id="unknown">8．仍未确定与需要提醒的事项</h2>
+<ul>
+<li><strong>创新风险尚未闭合。</strong> 已排除多项直接重合主张；具体新规则尚未形成，不能提前保证独立贡献或期刊接收。</li>
+<li><strong>可辨识范围待证。</strong> 这是第一项核验，不等性能不好才补查。</li>
+<li><strong>B7不等于本任务的实测数据。</strong> 本轮核对论文和官方说明，未下载审计全部数值文件；主验证仍以物理可信仿真为主。</li>
+<li><strong>A9独立补充材料未取得。</strong> 36页主体已读，不宣称补充实现也已审核。</li>
+<li><strong>C3全文已读、库内缺附件。</strong> 作者官网4页PDF已保存项目。Zotero会议名误写为Conference on Natural Language Processing，与ITG Sprachkommunikation 2010页脚不符；本轮只授权分类，因此登记而未改题录。</li>
+</ul>
+<p>不再要求无限补论文。待拟议规则具体到一个数学对象时，围绕该规则定向查重。</p>
+<h2 id="records">9．完整记录</h2>
+<ul>
+<li><a href="bc_reading_20261025/%E9%80%90%E7%AF%87%E7%B2%BE%E8%AF%BB%E7%B4%A2%E5%BC%95.md">B/C逐篇索引</a> · <a href="priority_reading_20261025/%E9%80%90%E7%AF%87%E7%B2%BE%E8%AF%BB.md">A批九篇</a></li>
+<li><a href="bc_reading_20261025/%E7%A0%94%E7%A9%B6%E4%BE%9D%E6%8D%AE%E4%B8%8E%E4%B8%BB%E5%BC%A0%E8%BE%B9%E7%95%8C.md">研究依据与主张边界</a> · <a href="bc_reading_20261025/%E7%A0%94%E7%A9%B6%E7%9B%AE%E6%A0%87%E4%B8%8E%E5%90%8E%E7%BB%AD%E8%AE%A1%E5%88%92.md">完整后续计划</a></li>
+<li><a href="bc_reading_20261025/source_manifest.json">十九篇文件身份</a> · <a href="bc_reading_20261025/C3_source.json">C3作者版来源</a></li>
+<li><a href="bc_reading_20261025/zotero_receipts.json">分类写入回执</a> · <a href="bc_reading_20261025/%E6%9D%A5%E6%BA%90%E4%B8%8E%E5%88%86%E7%B1%BB%E6%A0%B8%E9%AA%8C.json">来源与分类回查</a></li>
+<li><a href="%E5%87%86%E5%85%A5%E6%8A%A5%E5%91%8A_%E7%AC%AC%E4%BA%8C%E4%B8%89%E6%89%B9%E7%B2%BE%E8%AF%BB%E5%89%8D.html">更新前HTML存档</a> · <a href="%E5%87%86%E5%85%A5%E6%8A%A5%E5%91%8A_%E7%AC%AC%E4%BA%8C%E4%B8%89%E6%89%B9%E7%B2%BE%E8%AF%BB%E5%89%8D.md">更新前Markdown存档</a></li>
+</ul>
+<p>状态：<code>A_B_C_MAIN_TEXT_READING_COMPLETED / TOPIC_CLASSIFICATION_VERIFIED / CONDITIONAL_MECHANISM_ADMISSION / NO_NEW_SIMULATION</code>。</p>
+<details class="source-list"><summary>打开19篇本地原文（含C3作者版）</summary><ul><li><b>A1</b> <a href="file:///F:/Zotero/storage/TNQ6782B/Cooperative%20direct%20localization%20in%20multipath%20environments%20using%20binary%20sparse%20modeling%20and%20cayley%E2%80%93me-Akbari%E5%92%8CValaee-2025.pdf">Cooperative Direct Localization in Multipath Environments Using Binary Sparse Modeling and Cayley–Menger Determinant</a> <span>15 页</span></li>
+<li><b>A2</b> <a href="file:///F:/Zotero/storage/DF62ZBS8/Joint%20localization%20and%20source%20association%20sparse%20bayesian%20learning%20under%20multipath%20propagation-Tang%20%E7%AD%89-2025.pdf">Joint Localization and Source Association Sparse Bayesian Learning Under Multipath Propagation</a> <span>16 页</span></li>
+<li><b>A3</b> <a href="file:///F:/Zotero/storage/E9FPT6S7/Disambiguation%20of%20TDOA%20estimation%20for%20multiple%20sources%20in%20reverberant%20environments-Scheuing%E5%92%8CYang-2008.pdf">Disambiguation of TDOA Estimation for Multiple Sources in Reverberant Environments</a> <span>11 页</span></li>
+<li><b>A4</b> <a href="file:///F:/Zotero/storage/75D7SYAT/TDOA%20matrices%20algebraic%20properties%20and%20their%20application%20to%20robust%20denoising%20with%20missing%20data-Velasco%20%E7%AD%89-2016.pdf">TDOA Matrices: Algebraic Properties and Their Application to Robust Denoising With Missing Data</a> <span>13 页</span></li>
+<li><b>A5</b> <a href="file:///F:/Zotero/storage/U68LCSG6/Identifiability%20conditions%20for%20compressive%20multichannel%20blind%20deconvolution-Mulleti%20%E7%AD%89-2020.pdf">Identifiability Conditions for Compressive Multichannel Blind Deconvolution</a> <span>16 页</span></li>
+<li><b>A6</b> <a href="file:///F:/Zotero/storage/KDQLQKWC/A%20semi-blind%20method%20for%20localization%20of%20underwater%20acoustic%20sources-Weiss%20%E7%AD%89-2022.pdf">A Semi-Blind Method for Localization of Underwater Acoustic Sources</a> <span>17 页</span></li>
+<li><b>A7</b> <a href="file:///F:/Zotero/storage/MUTMVR4F/Direct%20localization%20of%20emitters%20using%20widely%20spaced%20sensors%20in%20multipath%20environments-Garcia%20%E7%AD%89-2014.pdf">Direct localization of emitters using widely spaced sensors in multipath environments</a> <span>6 页</span></li>
+<li><b>A8</b> <a href="file:///F:/Zotero/storage/XT4H5ZI5/High%20precision%20TOA-based%20direct%20localization%20of%20multiple%20sources%20in%20multipath-Garcia%20%E7%AD%89-2015.pdf">High Precision TOA-based Direct Localization of Multiple Sources in Multipath</a> <span>17 页</span></li>
+<li><b>A9</b> <a href="file:///F:/Zotero/storage/2VRZM32V/Direct%20position%20determination%20of%20unknown%20signals%20in%20the%20presence%20of%20multipath%20propagation-Du%20%E7%AD%89-2018.pdf">Direct Position Determination of Unknown Signals in the Presence of Multipath Propagation</a> <span>36 页</span></li>
+<li><b>B1</b> <a href="file:///F:/Zotero/storage/JQREGHES/Location%20estimates%20from%20channel%20state%20information%20via%20binary%20programming-Rahman%E5%92%8CValaee-2022.pdf">Location Estimates From Channel State Information via Binary Programming</a> <span>14 页</span></li>
+<li><b>B2</b> <a href="file:///F:/Zotero/storage/F2RKIZK2/Direct%20localization%20for%20massive%20MIMO-Garcia%20%E7%AD%89-2017.pdf">Direct Localization for Massive MIMO</a> <span>13 页</span></li>
+<li><b>B3</b> <a href="file:///F:/Zotero/storage/XTYEPS7K/Unified%20subspace%20fitting%20framework%20and%20its%20performance%20analysis%20for%20direct%20position%20determination%20in-Du%20%E7%AD%89-2019.pdf">Unified Subspace Fitting Framework and Its Performance Analysis for Direct Position Determination in the Presence of Multipath Propagation</a> <span>26 页</span></li>
+<li><b>B4</b> <a href="file:///F:/Zotero/storage/FZPDZV4H/Decentralized%20indoor%20direct%20localization%20with%20multiple%20wi-fi%20access%20points-Wang%20%E7%AD%89-2026.pdf">Decentralized Indoor Direct Localization With Multiple Wi-Fi Access Points</a> <span>15 页</span></li>
+<li><b>B5</b> <a href="file:///F:/Zotero/storage/BJJDPD4Z/A%20direct%20position%20determination%20method%20based%20on%20subspace%20orthogonality%20in%20cross-spectra%20under%20multip-Zhu%20%E7%AD%89-2022.pdf">A Direct Position Determination Method Based on Subspace Orthogonality in Cross-Spectra under Multipath Environments</a> <span>15 页</span></li>
+<li><b>B6</b> <a href="file:///F:/Zotero/storage/2ZA5PL6W/Propagation%20measurements%20and%20modeling%20for%20low%20altitude%20UAVs%20from%201%20to%2024%20GHz-Briso%20%E7%AD%89-2020.pdf">Propagation Measurements and Modeling for Low Altitude UAVs From 1 to 24 GHz</a> <span>5 页</span></li>
+<li><b>B7</b> <a href="file:///F:/Zotero/storage/ELJKG7FY/Air-to-ground%20channel%20dataset%20via%20UAV-aided%20measurements%20in%20multiple%20scenarios-Li%20%E7%AD%89-2025.pdf">Air-to-ground channel dataset via UAV-aided measurements in multiple scenarios</a> <span>11 页</span></li>
+<li><b>C1</b> <a href="file:///F:/Zotero/storage/KA22KI9Q/An%20architecture%20for%20passive%20joint%20localization%20and%20structure%20learning%20in%20reverberant%20environments-Arikan%20%E7%AD%89-2023.pdf">An architecture for passive joint localization and structure learning in reverberant environments</a> <span>14 页</span></li>
+<li><b>C2</b> <a href="file:///F:/Zotero/storage/VYY5HM68/Diffraction-%20and%20reflection-aware%20multiple%20sound%20source%20localization-An%20%E7%AD%89-2022.pdf">Diffraction- and Reflection-Aware Multiple Sound Source Localization</a> <span>20 页</span></li>
+<li><b>C3</b> <a href="bc_reading_20261025/C3_kreissig_itg10.pdf">A graph theoretical framework for consistent time differences of arrival</a> <span>4 页</span></li></ul></details></main>
+<footer class="wrap">源文件、证据记录和执行建议均可从本页打开。阅读状态只记在文档中。论文、定位器、实验配置和原始结果没有改动。<br>旧链接兼容：<a id="motion" href="#decision">三维与运动</a> · <a id="structure-record" href="#papers">结构近邻</a> · <a id="integrity" href="#unknown">来源完整性</a></footer>
+</body></html>

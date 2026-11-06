@@ -1,0 +1,255 @@
+% Main sections for the unknown-complex-gain model. Edit directly.
+\section{问题描述与定位方法}\label{sec:ug-model}
+\subsection{场景、传播与未知参数}\label{sec:ug-assumptions}
+考虑位置已知的$L$个同步单天线接收站和$K$个静止辐射源，主场景取$L=4$、$K=2$。站址为$\mathbf r_\ell\in\mathbb R^2$，源位置为$\mathbf p_k\in\Omega$，$\Omega=[-1000,1000]^2\ \mathrm{m}^2$。传播距离和时延分别为$d_{\ell k}=\|\mathbf p_k-\mathbf r_\ell\|$和$\tau_{\ell k}=d_{\ell k}/c$；$c$为已知传播速度。源数、站址和同步关系已知，源波形、发射功率及站间复增益未知。两源波形独立生成，但有限记录中的交叉项不必为零。
+
+仿真采用自由空间直达传播。固定载频及天线条件下，接收场幅度与$1/d_{\ell k}$成正比，接收功率与$1/d_{\ell k}^2$成正比。公共比例常数可并入源波形，载频传播相位可并入复增益。估计器不使用由距离给定的相对幅度，而将每个源的站间复增益作为待估参数。时间域模型为
+\begin{equation}\label{eq:ug-time}
+x_\ell[n]=\sum_{k=1}^K\beta_{\ell k}v_k(nT_s-\tau_{\ell k})+w_\ell[n],
+\quad w_\ell[n]\sim\mathcal{CN}(0,\sigma_t^2).
+\end{equation}
+其中$T_s=1/F_s$，$n=0,\ldots,N-1$；各站噪声独立且同方差。复增益在一次观测及所用频带内保持不变。令$\mathbf g_k=[\beta_{1k},\ldots,\beta_{Lk}]^T$、$\mathbf b_k=\mathbf g_k/\|\mathbf g_k\|$，将其范数并入源波形，并固定一个非零参考分量的相位，有
+\begin{equation}\label{eq:ug-gauge}
+\|\mathbf b_k\|=1,\qquad
+\operatorname{Im}b_{\ell_0 k}=0,\quad \operatorname{Re}b_{\ell_0 k}>0.
+\end{equation}
+若参考分量为零，则选用非零分量作为局部参数化的参考。该约束消除增益与波形之间的尺度和公共相位歧义，不是接收观测的能量归一化。
+
+采用除以$N$的DFT，噪声方差为$\sigma_f^2=\sigma_t^2/N$。采用忽略观测窗边缘效应的频域近似模型\cite{ref04,ref05}，保留带符号基带频率$f_m$，得到
+\begin{equation}\label{eq:ug-model}
+\begin{aligned}
+\mathbf x_m&=\sum_{k=1}^K\mathbf D_m(\mathbf p_k)\mathbf b_k s_{k,m}+\mathbf n_m
+=\mathbf A_m(\theta,\mathbf B)\mathbf s_m+\mathbf n_m,\\
+\mathbf D_m(\mathbf p)&=\operatorname{diag}_{\ell=1}^L
+\{e^{-j2\pi f_m\tau_\ell(\mathbf p)}\},\qquad
+\mathbf n_m\sim\mathcal{CN}(\mathbf0,\sigma_f^2\mathbf I_L).
+\end{aligned}
+\end{equation}
+这里$\theta=[\mathbf p_1^T,\ldots,\mathbf p_K^T]^T$，$\mathbf B=[\mathbf b_1,\ldots,\mathbf b_K]$，$\mathbf A_m=[\mathbf D_m(\mathbf p_1)\mathbf b_1,\ldots,\mathbf D_m(\mathbf p_K)\mathbf b_K]$。位置和增益跨频共享，$\mathbf s_m$逐频未知。若允许各站增益在每个频点任意变化，时延相位可被增益吸收，模型将失去相应的定位约束。
+
+\begin{table}[!htbp]
+\centering\caption{未知增益模型的主要符号。}\label{tab:ug-symbols}
+\small\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\linewidth}{Y{.8}Y{1.5}Y{.7}}
+\toprule 符号 & 含义 & 维度或单位\\\midrule
+$\theta,\mathbf B$ & 位置向量、归一化未知复增益 & $2K\times1$，$L\times K$\\
+$\mathbf x_m,\mathbf s_m$ & 站观测、源频率系数 & $L\times1$，$K\times1$\\
+$\mathbf D_m,\mathbf A_m$ & 时延相位矩阵、多源响应矩阵 & $L\times L$，$L\times K$\\
+$\mathbf P_m^\perp$ & 多源响应列空间的正交补投影 & $L\times L$\\
+$\mathbf R_k(\mathbf p)$ & 对当前源残差补偿时延后的相关矩阵 & $L\times L$\\
+$\gamma,\Delta P$ & 弱强接收功率比、功率差 & 无量纲，dB\\
+\bottomrule\end{tabularx}
+\end{table}
+上标$H$和$\dagger$分别表示共轭转置和Moore--Penrose伪逆。正文中的$\mathbf D_m$专指时延相位矩阵；附录\ref{sec:2}中的同名字母按该附录的局部定义表示均值导数。
+
+\subsection{波形消元与联合最小二乘}\label{sec:ug-ls}
+在式\eqref{eq:ug-model}下，负对数似然去掉常数项后等于总残差除以$\sigma_f^2$。定义
+\begin{equation}\label{eq:ug-full-ls}
+\mathcal L(\theta,\mathbf B,\{\mathbf s_m\})
+=\sum_m\|\mathbf x_m-\mathbf A_m\mathbf s_m\|^2.
+\end{equation}
+固定位置和增益时，波形系数是线性LS子问题。代入其最小范数解，得
+\begin{equation}\label{eq:ug-profile}
+\begin{aligned}
+\widehat{\mathbf s}_m&=\mathbf A_m^\dagger\mathbf x_m,\qquad
+\mathbf P_m^\perp=\mathbf I_L-\mathbf A_m\mathbf A_m^\dagger,\\
+J(\theta,\mathbf B)&=\min_{\{\mathbf s_m\}}\mathcal L
+=\sum_m\|\mathbf P_m^\perp\mathbf x_m\|^2,\\
+(\widehat\theta,\widehat{\mathbf B})&\in
+\arg\min_{\theta\in\Omega^K,\,\mathbf B\in\mathcal G}
+J(\theta,\mathbf B).
+\end{aligned}
+\end{equation}
+集合$\mathcal G$由式\eqref{eq:ug-gauge}定义。波形消元并未消去增益。每个复增益向量在去除两项歧义后有$2L-2$个实自由度；四站双源因此包含4个位置参数和12个实增益自由度。仅关于位置的剖面目标可形式化写为
+\begin{equation}\label{eq:ug-position-profile}
+J_{\mathrm{pos}}(\theta)=\min_{\mathbf B}J(\theta,\mathbf B).
+\end{equation}
+若内层只得到局部增益解，返回值一般不等于式\eqref{eq:ug-position-profile}的精确最小值。通用优化器的比较须使用同一目标、增益约束及内层求解约定，并计入增益估计的耗时。
+
+\subsection{从单源LS到最大特征值空间谱}\label{sec:ug-single}
+令$K=1$。对候选位置$\mathbf p$补偿时延，定义$\mathbf y_m(\mathbf p)=\mathbf D_m^H(\mathbf p)\mathbf x_m$。因$\mathbf D_m$为酉矩阵，且$\|\mathbf b\|=1$，有
+\begin{equation}\label{eq:ug-single-elimination}
+\begin{aligned}
+\min_{\{s_m\}}\sum_m\|\mathbf y_m-\mathbf b s_m\|^2
+&=E_x-\mathbf b^H\mathbf R(\mathbf p)\mathbf b,\\
+\widehat s_m&=\mathbf b^H\mathbf y_m,\quad
+\mathbf R(\mathbf p)=\sum_m\mathbf y_m\mathbf y_m^H,\quad
+E_x=\sum_m\|\mathbf x_m\|^2.
+\end{aligned}
+\end{equation}
+Rayleigh商的极值给出
+\begin{equation}\label{eq:ug-single-eigen}
+\max_{\|\mathbf b\|=1}\mathbf b^H\mathbf R(\mathbf p)\mathbf b
+=\lambda_{\max}(\mathbf R(\mathbf p)),\qquad
+\widehat{\mathbf p}\in\arg\max_{\mathbf p\in\Omega}
+\lambda_{\max}(\mathbf R(\mathbf p)).
+\end{equation}
+最优增益方向为最大特征值对应的单位特征向量，再按式\eqref{eq:ug-gauge}调整公共相位。这条推导连接了LS、未知波形消元与最大特征值扫描\cite{ref05,ref06}。在混合观测上计算同一评分，再取多个峰，是逐点单源准则的多峰使用方式，一般不等于多源联合ML。
+
+\subsection{多源残差上的特征值更新}\label{sec:ug-block}
+更新第$k$个源时，固定其他源的位置、增益及波形，先减去它们的拟合信号：
+\begin{equation}\label{eq:ug-residual}
+\mathbf e_{k,m}=\mathbf x_m-
+\sum_{q\ne k}\mathbf D_m(\mathbf p_q)\mathbf b_qs_{q,m},\qquad
+\mathbf y_{k,m}(\mathbf p)=\mathbf D_m^H(\mathbf p)\mathbf e_{k,m}.
+\end{equation}
+将上一节的消元作用于该残差，得到
+\begin{equation}\label{eq:ug-block-eigen}
+\begin{aligned}
+\min_{\|\mathbf b_k\|=1,\{s_{k,m}\}}
+\sum_m\|\mathbf e_{k,m}-\mathbf D_m(\mathbf p)\mathbf b_ks_{k,m}\|^2
+&=E_k-\lambda_{\max}(\mathbf R_k(\mathbf p)),\\
+E_k=\sum_m\|\mathbf e_{k,m}\|^2,\qquad
+\mathbf R_k(\mathbf p)&=\sum_m\mathbf y_{k,m}\mathbf y_{k,m}^H.
+\end{aligned}
+\end{equation}
+扫描或连续优化$\mathbf p$后，以主特征向量更新$\mathbf b_k$，并令$s_{k,m}=\mathbf b_k^H\mathbf y_{k,m}$。各源依次更新，随后还可用式\eqref{eq:ug-profile}联合重估全部波形。每步保留原解，仅接受使式\eqref{eq:ug-full-ls}不增的更新，可得到残差单调不增的交替求解；这不保证全局最优。有限位置搜索、初始残差中的源间误差以及停止条件均会影响最终结果。
+
+\subsection{投影条件谱与MUSIC型DPD}\label{sec:ug-spectra}
+残差减除固定了其他源的波形，而正交投影允许这些波形重新拟合。固定其他源的位置和增益，记其响应矩阵为$\mathbf A_{-k,m}$，$\mathbf P_{-k,m}^\perp=\mathbf I-\mathbf A_{-k,m}\mathbf A_{-k,m}^\dagger$，则新增响应的残差下降量为
+\begin{equation}\label{eq:ug-projection}
+Q(\mathbf p,\mathbf b)=\sum_m
+\frac{|\mathbf b^H\mathbf D_m^H(\mathbf p)\mathbf P_{-k,m}^\perp\mathbf x_m|^2}
+{\mathbf b^H\mathbf D_m^H(\mathbf p)\mathbf P_{-k,m}^\perp\mathbf D_m(\mathbf p)\mathbf b}.
+\end{equation}
+投影响应为零时该频点增量取零。固定$\mathbf b$时，此式是联合LS的精确增量；进一步对跨频共享的$\mathbf b$求极值，通常涉及分母不同的多个Rayleigh商，不能直接归结为一次普通特征值分解。附录\ref{sec:2}的条件谱属于已知相对增益下的这一投影路线。
+
+MUSIC型DPD利用信号子空间与噪声子空间的正交关系\cite{ref04}。设同一观测记录提供$J_s$个可用统计片段，$\mathbf x_{m,j}$为第$j$个片段的频域观测，构造
+\begin{equation}\label{eq:ug-covariance}
+\widehat{\mathbf R}_{x,m}=\frac1{J_s}\sum_{j=1}^{J_s}\mathbf x_{m,j}\mathbf x_{m,j}^H
+=\mathbf U_{s,m}\Lambda_{s,m}\mathbf U_{s,m}^H+
+\mathbf U_{n,m}\Lambda_{n,m}\mathbf U_{n,m}^H.
+\end{equation}
+在同方差噪声、源协方差满秩及子空间正确分离的总体模型中，真实源响应满足
+\[\mathbf U_{n,m}^H\mathbf D_m(\mathbf p_k)\mathbf b_k=0.\]
+取固定权重$w_m\geq0$、$\sum_mw_m=1$，消去单位范数未知增益，可构造
+\begin{equation}\label{eq:ug-music}
+\begin{aligned}
+\mathbf C(\mathbf p)&=\sum_mw_m\mathbf D_m^H(\mathbf p)
+\mathbf U_{n,m}\mathbf U_{n,m}^H\mathbf D_m(\mathbf p),\\
+P_{\mathrm{MUSIC}}(\mathbf p)&=\left[
+\min_{\|\mathbf b\|=1}\mathbf b^H\mathbf C(\mathbf p)\mathbf b\right]^{-1}
+=\frac1{\lambda_{\min}(\mathbf C(\mathbf p))}.
+\end{aligned}
+\end{equation}
+因为信号与噪声子空间投影之和为单位阵，分母也可写为$1-\lambda_{\max}(\sum_mw_m\mathbf D_m^H\mathbf U_{s,m}\mathbf U_{s,m}^H\mathbf D_m)$。这里的矩阵由子空间投影构成，与式\eqref{eq:ug-single-eigen}的原始相关矩阵不同。单天线条件下，只使用一个频点时酉相似变换不改变特征值，不能依靠这一谱定位；跨频共享增益与多频联合约束是必要组成。
+
+DPD-HR使用协方差逆矩阵构造另一类评分。在单天线形式下，其结构为\cite{ref06}
+\begin{equation}\label{eq:ug-hr}
+P_{\mathrm{HR}}(\mathbf p)=
+\frac1{\lambda_{\min}\!\left(\sum_mw_m\mathbf D_m^H(\mathbf p)
+\widehat{\mathbf R}_{x,m}^{-1}\mathbf D_m(\mathbf p)\right)}.
+\end{equation}
+分段方式须同时满足时延模型近似和统计估计的要求；矩阵奇异时的加载或正则化必须明确记录。不能从其他蒙特卡洛试次借用快拍，也不能在比较时增加总观测时长。式\eqref{eq:ug-music}和\eqref{eq:ug-hr}说明方法关系，当前短记录下的具体适配及性能仍待核验。
+
+\subsection{方法比较与完整求解流程}\label{sec:ug-methods}
+\begin{table}[!htbp]
+\centering\caption{未知增益条件下拟比较的方法及其目标。}\label{tab:ug-methods}
+\small\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\linewidth}{Y{.8}Y{1.25}Y{.95}}
+\toprule 方法 & 估计准则 & 需固定的求解条件\\\midrule
+单源特征值扫描取多峰 & 式\eqref{eq:ug-single-eigen} & 全区域候选、选峰及精修\\
+MUSIC型DPD & 式\eqref{eq:ug-music} & 分段、信号子空间秩、频率权重\\
+DPD-HR/MVDR & 式\eqref{eq:ug-hr} & 分段、协方差估计及正则化\\
+联合LS交替求解 & 式\eqref{eq:ug-full-ls}、\eqref{eq:ug-block-eigen} & 初始化、逐源搜索及联合波形更新\\
+多初值局部优化、差分进化、GA & 同一式\eqref{eq:ug-profile} & 相同增益约束及完整处理预算\\
+DPD-PDL & 参数化字典的稀疏贝叶斯估计 & 全区域字典、复增益与离网更新\\
+未知增益版本A--D & 式\eqref{eq:ug-profile}的补充搜索比较 & 适配后重新验证；旧结果不沿用\\
+\bottomrule\end{tabularx}
+\end{table}
+表\ref{tab:ug-methods}区分估计准则与求解器。遗传算法（genetic algorithm，GA）、差分进化和多初值局部优化属于求解器，不构成新的观测模型。对同一联合目标的比较应保留相同已知信息和约束。
+
+DPD-PDL将位置离网偏移和未知复衰减纳入参数化字典，在稀疏贝叶斯框架下联合更新\cite{ref13}。它与单天线多站观测接近，应优先核验，但其初始化、全区域字典规模及复数更新式仍需检查。采用共同已知参考信号获取CSI的多源ML方法\cite{ref14}具有不同的观测信息；其中路径增益仍可未知，不能据CSI一词认定其增益已知。
+
+\begin{figure}[!htbp]\centering
+\begin{tikzpicture}[node distance=8mm and 6mm,
+box/.style={draw=black!65,fill=black!3,rounded corners=2pt,text width=3.6cm,minimum height=12mm,align=center,font=\small},
+arr/.style={-{Stealth[length=2mm]},thick}]
+\node[box] (iq) {多站混合观测\\固定观测与噪声约定};
+\node[box,right=of iq] (init) {空间谱候选或多初值\\不使用位置与增益真值};
+\node[box,right=of init] (state) {初始化位置、复增益\\及源波形};
+\node[box,below=of state] (res) {固定其他源并相减\\构造当前源残差};
+\node[box,left=of res] (update) {特征值位置搜索\\更新增益与波形};
+\node[box,left=of update] (accept) {检查联合残差\\联合重估全部波形};
+\draw[arr] (iq)--(init);\draw[arr] (init)--(state);\draw[arr] (state)--(res);
+\draw[arr] (res)--(update);\draw[arr] (update)--(accept);
+\draw[arr] (accept.south)--++(0,-.65)-|node[pos=.3,below,font=\small]{更新其他源，直至停止条件满足} (res.south);
+\end{tikzpicture}
+\caption{未知增益联合LS的一种交替求解流程。}\label{fig:ug-flow}
+\end{figure}
+图\ref{fig:ug-flow}将空间谱候选与联合拟合连接起来。空间谱也可直接产生多峰位置输出；通用优化器则可联合更新位置和增益，不必沿用图中的逐源步骤。初始化的影响需要在相同求解器和预算下单独比较，不能由完整算法间的差异推断。
+
+经典推导\cite{ref04,ref06}中的增益单位范数约束及协方差除以快拍数，与逐站按混合观测RMS缩放不同。主比较使用原始观测，不进行这种逐站能量均衡。若设$\mathbf W=\operatorname{diag}(w_1,\ldots,w_L)$为逐站缩放矩阵，则噪声协方差变为$\sigma_f^2\mathbf W\mathbf W^H$；缩放后仍用无权LS会改变准则。混合观测生成的权重还会随强源功率变化，因此RMS版本作为独立变体评价。仅将显示谱除以最大值或换算为相对dB，不影响估计器。
+
+\subsection{可辨识性、局部曲率与非凸求解}\label{sec:ug-information}
+消去波形后的联合目标通常非凸。固定响应时的线性LS子问题为凸，并不能推出含时延相位的位置优化为凸；最大特征值对矩阵变量的凸性也不能推出对位置的搜索为凸。
+
+在固定歧义约束的光滑局部参数化中，以$\eta$表示波形和增益的实干扰参数，$\boldsymbol{\mu}$为叠加后的观测均值。信息矩阵及有效位置信息为
+\begin{equation}\label{eq:ug-fim}
+\begin{aligned}
+\mathbf I_{ab}&=\frac{2}{\sigma_f^2}\operatorname{Re}
+\left\{\left(\frac{\partial\boldsymbol{\mu}}{\partial a}\right)^H
+\frac{\partial\boldsymbol{\mu}}{\partial b}\right\},\quad a,b\in\{\theta,\eta\},\\
+\mathbf I_{\theta}^{\mathrm{eff}}&=\mathbf I_{\theta\theta}
+-\mathbf I_{\theta\eta}\mathbf I_{\eta\eta}^{-1}\mathbf I_{\eta\theta}.
+\end{aligned}
+\end{equation}
+式\eqref{eq:ug-fim}的逆块表达要求相关参数局部可辨识；奇异时须先处理不可辨识方向，不能直接声称存在有限位置CRB\cite{ref10}。固定未知增益求位置导数时，仅对时延相位求导，不对仿真生成器的$1/d$幅度关系求导。旧模型只消去波形的信息矩阵不能代替该式。
+
+令局部实参数为$z$，光滑复残差为$\boldsymbol{\rho}(z)$，$\mathbf G=\partial\boldsymbol{\rho}/\partial z$，则
+\begin{equation}\label{eq:ug-hessian}
+\nabla^2\|\boldsymbol{\rho}\|^2
+=2\operatorname{Re}\!\left\{\mathbf G^H\mathbf G
++\sum_i\rho_i^*\nabla^2\rho_i\right\}.
+\end{equation}
+无噪声且模型正确时，真值残差为零；若有效参数的实Jacobian满列秩，Hessian正定，并由连续性得到一个局部强凸邻域。该结论要求响应秩和局部参数化稳定。有噪声时，真值通常不是样本目标的驻点，残差项可能改变曲率；弱源信息不足、布局退化和位置--增益耦合也可能导致平坦方向。因而不能预设真值附近固定半径内必然凸，或把期望信息矩阵正定视为每条记录的局部凸性保证。
+
+\section{仿真设计与待验证结果}\label{sec:ug-experiments}
+\subsection{功率差扫描与配对单源参照}\label{sec:ug-protocol}
+首轮检验固定弱源在加入不同功率的另一源后，代表性方法的定位性能如何变化。设$P_{\ell,k}$为无噪声接收分量的记录平均功率，定义
+\begin{equation}\label{eq:ug-gamma}
+\overline P_k=\frac1L\sum_{\ell=1}^LP_{\ell,k},\qquad
+\gamma=\frac{\overline P_{\mathrm w}}{\overline P_{\mathrm s}},\qquad
+\Delta P=-10\log_{10}\gamma.
+\end{equation}
+主场景采用四站双源、$N=16384$、频谱完全重叠，功率差为$0,3,6,9,12,15$ dB。相应$\gamma$约为$1,0.5012,0.2512,0.1259,0.0631,0.0316$。采样率沿用100 MHz，两源采用独立BPSK/RRC波形，符号率10 MHz、滚降系数0.25，单源支持宽度12.5 MHz。源身份跨功率档固定，0 dB也不交换标签。
+
+弱源功率在独立开发样本上经单源校准后冻结；应达到接近饱和的单源定位表现，并区分信号信息不足与求解器漏搜。正式扫描固定弱源和噪声，只改变强源功率。同一布局、基础波形和噪声形成三种配对观测：双源混合、孤立弱源、当前档位的孤立强源。弱源单源数据跨档复用，强源单源数据随功率变化。单源参照设$K=1$，混合设$K=2$。
+
+\begin{table}[!htbp]\centering
+\caption{首轮实验协议及待冻结配置。}\label{tab:ug-protocol}
+\small\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\linewidth}{Y{.57}Y{1.43}}
+\toprule 项目 & 约定\\\midrule
+主场景 & 四站单天线、双源；16384点；IoU=1；六档功率差\\
+估计器信息 & 站址、同步、传播速度、源数、统一噪声信息；未知波形与复增益\\
+评价 & 强弱源RMSE、20 m成功率、双源成功率、CDF、完整处理时间\\
+需经开发后冻结 & 弱源SNR、布局数、重复次数、随机种子、频率处理、算法参数与运行预算\\
+后续检查 & 4096点及部分重叠；初始化与RMS变体；适配后的A--D\\
+\bottomrule\end{tabularx}
+\end{table}
+各方法使用相同观测和搜索区域，不提供真实增益或真实位置邻域。未知增益求解计入完整耗时；同一目标的求解器另作相同时间预算比较。统计分段不得增加观测时长或借用其他试次数据。当前版本尚未执行表\ref{tab:ug-protocol}的正式实验。
+
+\subsection{评价指标与图形约定}\label{sec:ug-metrics}
+对有效的双源输出，以最小总平方位置误差确定一对一匹配，再按固定源身份统计强弱源误差。令匹配后误差为$e_{k,i}$，有
+\begin{equation}\label{eq:ug-metrics}
+\mathrm{RMSE}_k=\sqrt{\frac1{n_{\mathrm v}}\sum_{i\in\mathcal V}e_{k,i}^2},\qquad
+\widehat P_k=\frac1{n_{\mathrm{all}}}\sum_{i\in\mathcal V}\mathbb I(e_{k,i}\leq20\ \mathrm m).
+\end{equation}
+其中$\mathcal V$包含所有返回有效位置的记录，包含误差超过20 m的定位失败；$n_{\mathrm v}=|\mathcal V|$。未返回有效位置的记录单独报告，并在成功率分母$n_{\mathrm{all}}$中计为失败。误差CDF采用同一完整分母，缺失输出置于无穷误差处；若存在缺失输出，同时给出有效输出RMSE及覆盖率，不以删去记录后的RMSE冒充全部试次RMSE。双源成功要求两个位置均满足20 m。GOSPA若作为补充，其截断参数单独注明，不代替成功阈值。
+
+按六档功率差绘制强弱源RMSE、成功率、双源成功率及分面CDF。完整处理时间报告均值、中位数和高分位数，包含候选生成、增益求解、局部精修和数据传输；一次性编译或预热单列。不同优化随机种子用于检查稳定性，不视为新的独立观测样本。
+
+代表性空间谱采用预先约定的布局与样本选择规则，在等功率、中等和较大功率差下标出站点、真实位置及估计位置。最大特征值、MUSIC和HR使用各自的谱定义；稀疏方法显示空间功率或支撑。联合LS展示注明固定变量的二维条件谱，不将其视为完整四维位置目标。各图使用相同位置范围，以标记、线型和文字辅助区分；显示归一化不用于比较不同准则的绝对谱值。
+
+\subsection{结果预留}\label{sec:ug-results}
+未知复增益条件下的六档扫描、单源参照、空间谱与耗时结果待实验完成后补充。届时分别报告各方法的性能变化和计算代价，再据配对单源结果判断加入强源后的额外损失；当前不指定退化起点或方法优劣。
+
+附录\ref{sec:3}保留已知相对增益条件下的完整结果，分别包括原方法比较、新布局上的补充搜索比较及固定样本诊断。它们支持相应模型下对候选遗漏和计算开销的讨论，不能作为本章未知增益方法的成绩，也不与新实验合并计算总体指标。
+
+\section{讨论}\label{sec:ug-discussion}
+当前首先需要确定代表性方法随接收功率差变化的实际表现。孤立源参照用于区分弱源本身难以定位与强源叠加后的额外损失。若某方法在等功率或单源情况下已不可靠，应先核验实现、观测适用性及求解预算，再解释强弱差异。
+
+目标函数、谱构造和数值搜索的作用需要分别判断。特征值谱可用于初始化，也可构成逐源LS更新；MUSIC与HR则依赖不同的统计矩阵。真实位置附近的局部曲率仅描述已进入该邻域后的行为，不能说明全局候选搜索一定能到达该邻域。初始化的影响应通过固定求解器的配对比较检验。
+
+是否进一步分析退化机制或设计新方法，取决于上述比较。若成熟求解器已在合理代价下获得可靠结果，应据此收缩定制搜索的必要性；若仍存在稳定退化，再检查谱构造、干扰参数估计、候选遗漏及位置耦合。已知增益条件下的搜索诊断为这些问题提供参考，尚不能确定未知增益模型中的主导原因。

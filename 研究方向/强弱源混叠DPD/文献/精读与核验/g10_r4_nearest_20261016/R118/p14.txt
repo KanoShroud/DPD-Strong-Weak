@@ -1,0 +1,54 @@
+Y. Zeng et al.: QNOMP: A Quasi-Newton-Based Joint Multipath Optimization Method
+
+
+
+
+
+ FIGURE 4. Delay parameter estimation error in clustered channel simulations under the same scenarios as in Fig. 3. Subplots (a)(b)(c) show the delay
+ estimation error versus SNR for Scenarios 1, 2, and 3, respectively.
+
+
+
+without block reweighting. This superior performance stems     for high-performance super-resolution channel estimation
+from the high precision and rapid convergence of BFGS    and extrapolation.
+optimization. As confirmed by the delay estimation errors in
+Fig. 4, QNOMP+BR achieves lower estimation error than SS-                                                                   C. ON CDL MODELS
+Turbo-IF-VBI. Thus, while SS-Turbo-IF-VBI utilizes angu-                                                            Simulations of the 3GPP-specified Clustered Delay Line
+lar block-sparsity to improve channel estimation, its relatively                                                 (CDL) channel models [64] are performed using the MAT-
+coarse delay estimation limits super-resolution performance.                                       LAB 5G NR Toolbox. These channels exhibit dense delay
+In contrast, QNOMP+BR effectively leverages both angular                                                                     clusters with angles concentrated within specific angular
+block-sparsity and high-precision BFGS optimization  to                                                                blocks.
+achieve superior super-resolution in the delay domain.                                                           For QNOMP and NOMP, the iteration parameters are
+   It is noteworthy that sparsity in the delay domain signif-                                                            configured as follows: local refinement rates k1 = k2 = 10,
+icantly influences extrapolation performance. As shown in                                                            refinement steps nLR =  1, BFGS iterations nin = 2 and
+Fig. 3(d) and (e), when C1 decreases from 2 to 1—indicating                                                                       nout = 40; for NOMP, Rs = 1, Rc = 3, and nout = 0. For fair
+denser delays—the extrapolation accuracy degrades for both                                                           comparison, conventional OMP uses a grid size of 0.11τ,θdft ,QNOMP with and without block reweighting. In contrast,                                                        matching the finest resolution of QNOMP’s on-grid module.
+for a fixed C1, the sparsity of angular blocks has  little                                                   The block reweighting thresholds are set to ϵ = 0.001, with
+impact on extrapolation, as verified by comparing Fig. 3(e)
+                                                           a block width of 1 = 61θ, where 1θ = 1θdft.and (f). Since extrapolation is performed in the frequency                                                                     Fig. 5 shows the estimation and extrapolation performance
+domain  rather  than  the  spatial domain,  the  estimation                                                               of different algorithms for the CDL channel with 100 ns
+accuracy of time delays is more critical than that of angles.                                     RMS delay spread. Similar to the simulated channel cases,
+Consequently, the density of time delays poses a greater                                    QNOMP significantly outperforms other methods in both
+challenge for super-resolution and  is the primary factor                                                               estimation and extrapolation. Since the CDL channel exhibits
+affecting extrapolation accuracy. Furthermore, because pilots                                                           a typical angular block structure, the block reweighting tech-
+are distributed over the entire antenna domain and no spatial                                                           nique effectively leverages this prior structural information to
+extrapolation is required, angular resolution has a relatively                                                                   further improve QNOMP’s performance across both low and
+minor influence on channel extrapolation performance.                                                           high SNR regimes.
+  We further analyze the estimation error of the virtual
+delay parameters τ to validate their impact on extrapolation
+performance. As shown in Fig. 4, the delay estimation error     D. STATISTICAL RELIABILITY
+under various SNR conditions reveals distinct behaviors    To  evaluate  the   statistical   reliability  and  robustness
+across algorithms. In Fig. 4(a), the delay estimation error     of QNOMP, we perform an  error-bar  analysis  of  the
+of OMP remains nearly constant as SNR increases, which     super-resolution error across different channel scenarios. The
+explains its stagnant extrapolation error in Fig. 3. Similarly,     analysis includes Scenario 2 from Section V-A (Fig. 2),
+comparisons between Fig. 4(b)(c) and Fig. 3(e)(f) indicate     Scenario 3 from Section V-B (Fig. 3), and the CDL-A model
+that  as  delays become  denser, both OMP and NOMP    from Section V-C (Fig. 5). For each scenario, we report the
+fail  to improve delay  estimation with  increasing SNR,    median super-resolution error along with the 25th and 75th
+leading to poor extrapolation accuracy. In contrast, QNOMP     percentiles from 100 independent trials, as summarized in
+consistently reduces delay estimation error as SNR rises,     Fig. 6. For comparison, we include AST and EM-IF-SBL,
+resulting in progressively better extrapolation performance.    which demonstrate strong performance in their respective
+These findings confirm that QNOMP is an effective approach     scenarios. Each error bar spans from the 25th to the 75th
+
+
+
+VOLUME 13, 2025                                                                                                         212665

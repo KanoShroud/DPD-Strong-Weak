@@ -1,0 +1,65 @@
+Y. Yang et al.                                                                                                   Journal of Sound and Vibration 517 (2022) 116549
+
+amplitude of each frequency is set to 1 Pa (93.98 dB). Thus, the source strength amplitude vectors for S1 and S2 are both [1, 1, 1, 1, 0]
+Pa. The source S3 contains only a 3000 Hz frequency component, and the source strength amplitude is also set to 1 Pa, the corre­
+sponding source strength amplitude vector is [0, 0, 1, 0, 0] Pa. Their phases are randomly generated. The SNR for microphone sound
+pressure signal at each frequency is set to 20 dB. It is achieved by adding additive Gaussian white noise to the corresponding theoretical
+sound pressure vector. Fig. 2(a) and (b) are the colormaps of the OMP-CB and NOMP-CB at frequencies of 1000, 2000, 3000 and 4000
+Hz, respectively, and Fig. 2(c) and (d) show the corresponding colormaps having superimposed the energies of estimated sources that
+overlap between different frequencies. Fig. 2(e) and (f) are the colormaps of the BOMP-CB and BNOMP-CB, respectively. For the
+multiple-sinusoids sources S1 and S2, the OMP-CB (Fig. 2(a) and (c)) fails to locate them at any analyzed frequency. This is because the
+distance between S1 and S2 exceeds the spatial resolution of OMP-CB even at the highest frequency of 4000 Hz (As shown in Fig. 2(a),
+S1 and S2 have not been effectively separated at 4000 Hz.). Compared to OMP-CB, NOMP-CB (Fig. 2(c) and (d)) has enhanced spatial
+resolution, enabling locate S1 and S2 at 4000 Hz accurately and reducing the localization errors at the other frequencies. This is
+attributed to the global cyclic feedback optimization of NOMP-CB, which suppresses mutual interference between sources and brings a
+degree of spatial resolution improvement. BOMP-CB (Fig. 2(e)) fails to separate S1 and S2 because the spatial resolution improvement
+brought only from the joint sparsity constraint of multi-frequency synchronous processing is limit. However, BNOMP-CB (Fig. 2(f))
+achieves accurate localization of S1 and S2. BNOMP-CB enjoys the highest spatial resolution among these four methods, which is
+attributed to the global cyclic feedback optimization to suppress mutual interference of sources and the joint multi-frequency sparsity
+constraint to promote sparsity. Fig. 2(c)-(f) show that for the single-frequency source S3, the above four methods can achieve correct
+localization. Among them, the on-grid methods (OMP-CB and BOMP-CB) are affected by the basis mismatch and cannot obtain high-
+accuracy localization. In contrast, due to the Newtonian optimization, the off-grid methods (NOMP-CB and BNOMP-CB) allow the
+sources to be located to the true position, effectively overcoming the basis mismatch and obtaining high-accuracy source localization.
+Fig. 2(g)-(j) are the source strength quantification results of the above methods at each frequency. It can be seen that BNOMP-CB (Fig. 2
+(j)) can accurately quantify all sources at all frequencies and the source strength quantification performance is significantly better than
+the other three methods (Fig. 2(g)-(i)). In summary, due to the combination of multi-frequency synchronous processing and global
+cyclic feedback Newtonian optimization, BNOMP-CB can overcome the basis mismatch and has the highest spatial resolution among
+the four methods.
+   To further clarify the acoustic source identification performance of the proposed BNOMP-CB, we compare it with the above-
+mentioned state-of-the-art methods (FB, DAMAS and CLEAN-SC) based on multiple-snapshot measurement of the first simulation
+case. The three sources are set to be incoherent with each other, and noise is added with a SNR of 20 dB. In this simulation, the number
+of snapshots is 50 (When the number of snapshots is insufficient, the acoustic source identification performance of the above methods
+will be significantly degraded. When using a single snapshot data, which is equivalent to the case of coherent sources, FB and CLEAN-
+SC will even fail [7, 50].), the exponent parameter of FB is set to 30, and each frequency is processed separately. Since FB and
+CLEAN-SC need a complete microphone sound pressure cross-spectrum matrix (CSM), we have performed diagonal reconstruction
+(DR) [51] on the CSM for denoising. We also use the CSM with DR for DAMAS, although the CSM with diagonal removal [7, 52] is also
+suitable for DAMAS, and both have comparable effects. Other settings are the same as the above simulation. Fig. 3 shows the colormaps
+of the three methods, which superimposes the energies of identified results under different frequencies. The true locations are marked
+by the symbol “+”. The estimated source strengths are marked near the identified sources (corresponding to the peaks of hotspots) in
+the colormaps. For FB and CLEAN-SC, the peak value of hotspots in the colormaps is directly considered as the strength estimate, while
+for DAMAS, the integral energy of the grid points in hotspots is considered as the strength estimate. It can be seen that for the
+closely-spaced sources S1 and S2, all three methods cannot separate them correctly under the four frequencies. The mainlobe is heavily
+fused, and the source is located in the middle of the two sources. In short, FB, DAMAS and CLEAN-SC all failed to identify them. The
+three methods can accurately locate and quantify the source S3 with only 3000 Hz frequency components, but the mainlobe of FB is
+wide. Comparing Fig. 2 and Fig. 3, it can be seen that the spatial resolution of the proposed BNOMP-CB is higher than that of the above
+three methods.
+   To illustrate the anti-interference performance of the proposed method, we designed a case in which three sources are far apart and
+lie off the grid points. The coordinates of the three acoustic sources S1, S2, and S3 are ( −0.18, −0.2), (0.08, −0.2), and (0.3, 0.36) m,
+respectively, and all the three sources contain components with frequencies of 2000, 3000 and 4000 Hz. The source strength amplitude
+vectors of S1 and S2 are both [0, 1, 1, 1, 0] Pa, while that of S3 is [0, 1, 1, 0.4, 0] Pa. Fig. 4 shows the source identification results of the
+four methods with SNR of 20 dB. Fig. 5 shows the source identification results with SNR of 5 dB. As Fig. 4, all the four methods can
+correctly locate all the sources with SNR of 20 dB. The on-grid OMP-CB (Fig. 4(a) and (c)) and BOMP-CB (Fig. 4(e)), affected by basis
+mismatch, locate the sources to the grid points near the true sources. Compared to the on-grid methods, the off-grid NOMP-CB and
+BNOMP-CB have significantly improved accuracy in source localization and strength quantification. Comparing Fig. 4(a)-(d) with
+Fig. 5(a)-(d), we can see that the identification results of the single-frequency OMP-CB and NOMP-CB are more scattered when the SNR
+is 5 dB than when the SNR is 20 dB. Especially for the weak source, with a strength of 0.4 Pa at 4000 Hz, both single-frequency
+processing methods result in a large deviation in localization due to noise interference. In contrast, with SNR decreases from 20 dB
+to 5 dB, the multi-frequency synchronous BOMP-CB and BNOMP-CB only have a slight decrease in localization accuracy. According to
+the quantification for each frequency component of the sources, we can see that whether SNR is 20 dB or 5 dB, BNOMP-CB has the
+highest source strength estimation accuracy and outputs the lowest strength estimation at the frequencies that true sources do not
+involve. In summary, the proposed BNOMP-CB has the strongest capability to resist noise interference than the other three methods.
+    Similarly, based on the second simulation case corresponding to Fig. 4, FB, DAMAS and CLEAN-SC are used to identify these
+sources. The three sources are set to be incoherent with each other, and noise is added with a SNR of 20 dB. In this simulation, we also
+have performed DR on the CSM for denoising before identifying, and the number of snapshots, the exponent parameter of FB and other
+
+                                                                11

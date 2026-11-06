@@ -1,0 +1,233 @@
+
+--- PDF PAGE 3 ---
+                        This article has been accepted for publication in IEEE Transactions on Signal Processing. This is the author's version which has not been fully edited and
+                                                 content may change prior to final publication. Citation information: DOI 10.1109/TSP.2026.3743837
+
+JOURNAL OF LATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015                                                                                       3
+
+
+  • Integrated Algorithm Framework Under Two Cases:   sensor l, and wl(t) is zero-mean circularly symmetric complex
+   We develop two  distinct DPD algorithms incorporat-   Gaussian noise with E[|wl(t)|2] = σ2.
+     ing synergistic robustness strategies: For known wave-    Assuming zl(t) is narrowband, it can be rewritten as:
+     forms, a computationally efficient three-stage estimator                                                     0                                                                                              0                     l )                                                                                               ej2πfdl(t−τ + wl(t),       (3)     sequentially resolves path gain, noise variance, and po-              zl (t) = ηlr  t −τ l
+     sition through closed-form solutions and grid search.           0                                                      where τ l = τl(t0) with t0 being the initial sampling instant,
+    For unknown waveforms, an iterative subspace projection                                                       and fdl denotes the corresponding Doppler shift:
+     technique handles signal ambiguity while maintaining
+     resilience. Crucially, both algorithms integrate adaptive                      fc    (˙sl (t0))T (u −sl (t0))
+                                                                                   fdl =      ·                                   ,           (4)
+    measurement truncation with Student’s t-distribution like-                      c     ∥u −sl (t0)∥
+     lihoods, creating a dual-defense system against heteroge-                                                           with fc as the carrier frequency.
+    neous contamination that dynamically suppresses outliers                                                              Let ∆denote the sampling interval. The discrete-time signal
+     without prior knowledge of error distributions.                                                                         at sensor l is expressed as:
+  • Comprehensive Experimental Validation: Our study
+                                                                                              0                              l0 )     delivers findings through numerical investigations in three     zl [n] = ηlr n∆+ t0 −τ l  ej2πfdl(n∆+t0−τ + wl[n]
+                                                                                                                                  (5)
+     areas. First, we use histograms and Q-Q plots to quan-                                 0                         l0 )                                      = ηlδlr n∆+ t0 −τ l  ej2πfdl(n∆−τ + wl[n],      titatively  characterize contaminated  data  distributions,
+     revealing significant heavy-tailed deviations. Second, we  where δl = ej2πfdlt0 and wl [n] = wl (n∆+ t0). Assuming
+    perform rigorous benchmarking against classical and con-   each sensor collects N samples, we define:
+    temporary DPD variants across diverse SNR regimes.
+                                                                  r = [r[0], r[1], . . . , r[N −1]]T ,                (6)     Third, we systematically assess the impact of truncation
+     percentages under high bit-error-rate conditions, which                zl = [zl[0], zl[1], . . . , zl[N −1]]T ,             (7)
+     allows us to define practical operational boundaries for                                                          wl = [wl[0], wl[1], . . . , wl[N −1]]T ,          (8)
+     implementation.
+  The remainder of this paper is structured as follows. Section  where r[n] = r(n∆+ t0). Without loss of generality, we
+II details the signal model, while Section  III presents the  assume r is normalized, i.e., rHr = 1.
+statistical distribution modeling for contaminated localization     Using a  fast Fourier transform (FFT) and inverse FFT
+data. Section IV develops the robust DPD algorithms for   following [27], zl can be modeled as:
+both known and unknown signal cases. Section V conducts                                                                                                                       0 Fr + wl                                                                                      zl = βlDfdlFHDτlnumerical experiments to evaluate the performance of the                                                                 (9)
+                                           = βlQlr + wl = Glr + wl,proposed algorithms. Finally, Section VI provides conclusions.
+  In this paper, column vectors and matrices are represented  where βl = ηlδl, υl = 2πfdl, and:
+by lowercase and uppercase boldface letters, respectively. For
+                                                 Gl = βlQl,                                        (10)a matrix A, its Hermitian and transpose are denoted as AH
+                                                                                                         0 F,                               (11)and AT . The terms Cm×n and Rm×n refer to complex and      Ql = DfdlFHDτl
+real spaces of dimensions m by n. E{·} signify the expectation            1         2π
+operator. N(µ, σ) represents the Gaussian distribution whose     F = √  exp  −j  nnT    ,                      (12)                                       N     N
+mean and variance are µ and σ2, respectively.                                                       0
+                                                                       2π  τ l                                                                                        0 = diag  exp  −j      ·       ˜n      ,             (13)                                              Dτl                                                N  ∆·
+                         II. SIGNAL MODEL                                                                 0
+                                                                                                                                                                        l                                                     −τ  Consider a scenario where L widely separated,  single-       Dfdl = diag  exp  jυl∆ n                                                       ∆· 1N         ,     (14)
+antenna moving sensors are deployed to localize a stationary
+                                                           withsource. The unknown position of the source is denoted by
+u = [xu, yu, zu]T , where u ∈Ωand Ωcontains all possible         n = [0, 1, . . . , N −1]T ,                      (15)
+source locations. The position and velocity of sensor l (l =                                                                                                 ˜n = [−N/2, . . . , −1, 0, . . . , N/2 −1]T .       (16)
+1, 2, . . . , L) at time t are given by sl(t) = [xl(t), yl(t), zl(t)]T
+and ˙sl(t) = [˙xl(t), ˙yl(t), ˙zl(t)]T , respectively.                 Aggregating signals across sensors yields:
+  The propagation time delay from the source to sensor l at
+                                                                       z = Gr + w,                    (17)time t is:
+                     τl(t) = ∥u −sl(t)∥/c,                  (1)   where:
+
+                                                                                        T
+where c is the wave propagation speed. The signal received at               z = zT1 , zT2 , . . . , zTL     ,                 (18)
+sensor l is:                                                                                 T
+                                        w = wT1 , wT2 , . . . , wTL     ,              (19)
+                zl(t) = ηlr (t −τl(t)) + wl(t),             (2)        G = diag (G1, G2, . . . , GL) .           (20)
+
+where r(t) is the transmitted signal from the source, ηl is the     Equation (17) gives the standard DPD formulation,  as-
+unknown complex path attenuation between the source and  suming  perfect sensor-to-FC communication. However,  in
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 21,2026 at 11:31:09 UTC from IEEE Xplore. Restrictions apply.
+               © 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+                                          but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+--- PDF PAGE 6 ---
+                        This article has been accepted for publication in IEEE Transactions on Signal Processing. This is the author's version which has not been fully edited and
+                                                 content may change prior to final publication. Citation information: DOI 10.1109/TSP.2026.3743837
+
+JOURNAL OF LATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015                                                                                       6
+
+
+ing position estimates. To mitigate this vulnerability while                          1
+maintaining computational efficiency, we introduce an adap-                                  == 12
+tive truncation mechanism grounded in residual analysis.                                      0.8          = 5
+                                                                                                                      = 10
+  For each sensor l, we compute the per-sample fitting error:
+                                                                                                                                                 0.6                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    Probability
+     ϵl[n] = ∥˜zl[n] −yl[n]∥2,  n = 0, 1, . . . , N −1     (29)
+
+                                                                                                                                                 0.4where yl[n] denotes the (n + 1) −th element of the expected                                                                                                                Cumulative
+signal yl = Qlr. The 1 −p fraction of samples exhibiting the                              0.2
+largest fitting errors ϵl[n] are identified as potential outliers.
+These samples are then adaptively downweighted by setting                          0-5                         0                         5
+corresponding elements  to zero  in both  the measurement                                                  Observation
+vector  ˜zl and the reference signal vector yl, yielding trun-    Fig. 2.  Cumulative distribution functions for Student’s t-distribution with
+cated representations ˜zl,p and yl,p. This selective nullification   varying degrees of freedom υ. The heavier tails at lower υ values enhance
+preserves informative samples while neutralizing the most    robustness to outliers.
+disruptive outliers.
+  The robust estimation procedure modifies the original three-            180160                                                                    20
+stage framework as follows:                                                                                       140                                                                                                  FC) 15
+                                                                                                                                                                                                                                                                                                                                          (at
+  1) Path attenuation estimation: The estimate ˆβl retains its            120100                                                                    10                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             quantiles  5      original closed-form solution (26), computed using the                                           Frequency  80                                                                                                                                  data
+       full  dataset. This preserves the estimator’s  statistical             60                                                                     0                                                                                                                                                       40                                                                                                                                                                                                                                                                    Received  -5      efficiency for the dominant inlier components.                                  20
+
+
+                                                                                                                                                        0                                                                             -10  2) Noise correction estimation: Incorporating truncation,                 -10        -5       0        5       10       15       20                   -4      -3      -2      -1     0      1      2      3      4
+      the noise variance estimate becomes:                                                                             Magnitude                                                  Normal theoretical quantiles
+
+                                                                                   Fig. 3.  Statistical properties of Re( ˜wl) without truncation: (a) Histogram of
+           ˆσcl = arg min (υpgl(˜zl,p −yl,p) + hl,p) u=ˆu(r) ,  (30)   Re( ˜wl); (b) Q-Q plot of Re( ˜wl) versus a normal distribution.
+               σcl>0                                             βl=ˆβl
+     where υp = (υ + Np) and hl,p ≜Np log((σ + σcl)2)                                                          approach maintains conceptual consistency with the known-
+      adjusts the penalty to reflect the effective sample size.                                                                  signal case while addressing the additional complexity of
+  3) Position estimation: Utilizing the truncated residuals:                                                                  signal uncertainty, ensuring robustness against transmission-
+                     L                               induced distortions.
+                   ˆu = arg min X Cl,p(θ)                    .    (31)
+                u∈Ω             βl=ˆβl,σcl=ˆσcl          Phase 1: Signal Estimation and Data Truncation                           l=1
+                                          We  first derive the signal estimate  ˆr through maximum
+     where                                                                 likelihood projection:
+
+          Cl,p(θ) = (υ + Np)gl(˜zl,p −yl,p) + hl,p.     (32)                             L
+                                                                                                                               ˆr = β−2Σ GH˜z = β−2Σ X βHl QHl  ˜zl,         (33)
+     The preserved p-fraction of samples drives the position                                     l=1
+      estimation, enhancing robustness against transmission-
+                                                      where β2Σ = PLl=1∥βl∥2 provides energy normalization.     induced distortions.
+                                                                         Critical parameter relationships are then established from
+  This robustification strategy offers three key advantages:
+                                                                 the measurement model in (21):
+First,  it maintains the core algorithmic structure, requiring
+minimal         implementation                          modifications.                                     Second,                                                                          it provides                                                                      L  ˜zH                                                                                                                                                                l  ˜zl                                                                                                                                                       ,                  (34)                                                                                                         ˆβ2Σ = Xadaptive resilience                    against                           transmission errors                                             without                                                            prior                                                                      rHr
+knowledge of error distributions. Third, the truncation fraction                               l=1
+                                                                                                  ˜zHi QiQHj  ˜zjp serves as a tunable robustness parameter—higher values in-                                                                                 ˆβHi  ˆβj =                    .               (35)
+crease efficiency in clean channels, while lower values enhance                          rHr
+outlier resistance in severely contaminated environments.      These expressions define the second-order  statistics of the
+  The complete signal-known DPD algorithm, incorporating   path attenuation coefficients, capturing both variance (Eq. 34)
+this optional truncation mechanism, is formalized in Algorithm  and cross-sensor covariance (Eq. 35) properties essential for
+1, where p can be dynamically adjusted based on channel   distributed processing.
+quality indicators or residual analysis.                             Substituting  these  statistical  relationships  into  the  error
+                                                  norm minimization objective yields:
+B. Signal-Unknown DPD Formulation                               L              L             2
+                                                       min                      X   ˜zl −ˆβlQlβ−2Σ X βHq QHq ˜zq    .      (36)  When the transmitted signal waveform r is unknown—a                                                         u∈Ω
+scenario prevalent in passive surveillance systems and non-                 l=1              q=1
+cooperative target tracking—we extend the robust DPD frame-   This formulation explicitly incorporates the β  statistics to
+work through a  structured three-phase methodology. This   enhance estimation consistency across sensors.
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 21,2026 at 11:31:09 UTC from IEEE Xplore. Restrictions apply.
+               © 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+                                          but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+--- PDF PAGE 7 ---
+                        This article has been accepted for publication in IEEE Transactions on Signal Processing. This is the author's version which has not been fully edited and
+                                                 content may change prior to final publication. Citation information: DOI 10.1109/TSP.2026.3743837
+
+JOURNAL OF LATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015                                                                                       7
+
+
+
+     100                                                                    20                                              TABLE I
+
+      90                                             RMS LOCALIZATION                                                                        ERROR                                                                                      OF ALGORITHM                                                                                                          1 AND                                                                                                      THE BENCHMARKS
+      80                                                                                                  FC) 15                                                                          FOR                                                                                DIFFERENT                                                                                     TRUNCATION                                                                                                 RATES
+      70                                                                                                  (at 10
+
+      60
+      50                                                                                                                                                                                                                                                                                                     quantiles  5                                  Truncation     0.01     0.02     0.05     0.10     0.15     0.20             Frequency  40                                                                                                                                  data                                           rate
+
+      30
+      20                                                                                                                                                                                                                                                                    Received  -50                              DPDkGDPD1                            3004.54222.8
+      10                                                              DPDks                            4003.2
+       0                                                                             -10
+         -10        -5       0        5       10       15       20                   -4      -3      -2      -1     0      1      2      3      4         DPDkGt      4369.7   4107.0   3742.3   3817.1   4271.8   4250.5
+                              Magnitude                                                  Normal theoretical quantiles                Algorithm 1    3823.6   4049.8   3445.5   3548.5   3426.9   3550.4
+
+Fig. 4.   Statistical properties of Re(˜zl,p −yl,p) with 5% truncation: (a)
+Histogram of Re(˜zl,p −yl,p); (b) Q-Q plot of Re(˜zl,p −yl,p) versus a                        TABLE II
+normal distribution.                                  RMS LOCALIZATION ERROR OF ALGORITHM 2 AND THE BENCHMARKS
+                                                                          FOR DIFFERENT TRUNCATION RATES
+
+      35                                                                    20                                  Truncation     0.01     0.02     0.05     0.10     0.15     0.20
+      30                                                                    15                                         rate
+                                                                                                               FC)
+      25                                                                                                  (at                                                                            10                            DPD2                            3670.1
+                                                                                                              6090.6                                                            DPDuG                                                                                                                                                                                                                                                                                                                                            quantiles                                                                             5                                                                                                              6051.1                                                                  DPDus                  Frequency 2015                                                                                                                                                   data
+                                                                             0                                 DPDuGt      5957.5   5764.0   5525.7   5757.4   5447.0   5622.1
+      10
+                                                                         Algorithm 2    5958.2   5718.8   5342.8   5262.1   5147.5   5197.8                                                                                                                                                                                                                                                                                                       Received  -5
+       5
+
+
+       0                                                                             -10
+         -10        -5       0        5       10       15       20                   -4      -3      -2      -1     0      1      2      3      4
+                              Magnitude                                                  Normal theoretical quantiles          Phase 3: Joint Position Estimation
+Fig. 5.  Statistical properties of Re(˜zl,p −yl,p) with 10% truncation: (a)    With the noise parameters ˆσcl,p now determined, we con-
+Histogram of Re(˜zl,p −yl,p); (b) Q-Q plot of Re(˜zl,p −yl,p) versus a   struct the position cost function by  integrating  all sensor
+normal distribution.
+                                                                   contributions:
+
+                                                      C′lp(θ) =  (υ + Np)g(ζl,p) + hl,p                        .   (39)  This leads to the residual vector incorporating the β esti-                                       βl=ˆβl,σcl=ˆσcl,p
+mates:
+                          L                          This expression embodies the negative log-likelihood of the
+              ζl = ˜zl −ˆβlQlβ−2Σ X ˆβHq QHq ˜zq.         (37)   truncated measurements given the position hypothesis u. The
+                             q=1                           global position estimate is then obtained by minimizing the
+                                                             aggregate cost:
+The magnitude-squared residual ∥ζl[n]∥2 quantifies the per-
+                                                                        L
+sample deviation between actual measurements and model pre-
+                                                                                                          ˆu = arg min X C′lp(θ).              (40)
+dictions. We then implement adaptive truncation by nullifying                     u∈Ω                                                                                             l=1
+the 1 −p fraction of samples with largest residuals in both ˜zl
+and yl = Qlˆr, generating ˜zl,p and ζl,p. This selective suppres-   Crucially, the formulation simultaneously resolves position
+sion preserves signal coherence while mitigating transmission-   uncertainty and signal ambiguity while maintaining robustness
+induced distortions. It is noted that the related works in [36]   to data contamination through three complementary mecha-
+and [37] treat the recovery of unknown signal waveform as   nisms: 1) Statistical modeling via heavy-tailed distributions,
+the main task using partially collapsed Gibbs sampler (PCGS),   2) Adaptive sample truncation, and 3)  Iterative parameter
+the current work treats the unknown waveform as a nuisance   refinement. The complete signal-unkknown DPD algorithm is
+parameter estimated via a closed form projection.              formalized in Algorithm 2.
+
+Phase 2: Robust Objective Formulation
+                                                                       V. NUMERICAL INVESTIGATIONS
+  Building on the truncated residuals ζl,p, we now formulate
+the noise variance estimation as a constrained optimization   A. Experimental Settings
+problem. The key insight is that under t-distribution assump-     This section presents comprehensive numerical simulations
+tions, the noise parameters can be decoupled from position   to evaluate the performance of the proposed robust DPD
+estimation. Specifically, for fixed βl and u, we solve:          algorithms under practical transmission constraints. We con-
+                                                                    sider a surveillance scenario comprising one stationary emitter
+                                                                             ,    (38)      ˆσcl,p = arg             min (υ + Np)g(ζl,p) + hl,p                                                       and three mobile receivers coordinating through a stationary                                           βl=ˆβl             σcl>0
+                                                      FC. The emitter is positioned at u = [14.5, 102.6, 0]T km
+where hl,p ≜Np log((σ + σcl)2) adapts the penalty term   (with fixed altitude), while initial sensor positions are s1 =
+to the effective sample count  after truncation. This scalar   [40, 1, 10]T km, s2 = [10, 0, 10]T km, and s3 = [−10, 5, 10]T
+optimization ensures reliable convergence via gradient-based  km. Sensor velocities are ˙s1 = [716, 0]T m/s, ˙s2 = [350, 0]T
+solvers. The solution ˆσcl,p represents the maximum likelihood   m/s, and ˙s3 = [350, 0]T m/s.
+estimate of the composite noise variance under the truncated    The emitter transmits BPSK-modulated signals with 50 kHz
+t-distribution model, accounting for both thermal noise and   bandwidth at 303 MHz carrier frequency. Signals are sampled
+transmission artifacts.                                                 at 200 kHz, with 1024 samples collected per localization trial.
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 21,2026 at 11:31:09 UTC from IEEE Xplore. Restrictions apply.
+               © 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+                                          but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.

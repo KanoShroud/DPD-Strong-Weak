@@ -1,0 +1,44 @@
+                                                                                          Y. Zeng et al.: QNOMP: A Quasi-Newton-Based Joint Multipath Optimization Method
+
+
+
+
+
+TABLE 1. Symbol classification summary.
+
+
+
+
+
+complexity and  superior  performance  of  the  proposed    assumed to be sorted in an appropriate order, we repre-
+methods.                                                        sent them as vectors τ =   [τ1, τ2, . . . , τK]T  or θ =
+  Outline: The rest of this paper is structured as follows.     [θ1, θ2, . . . , θL]T. The dictionary matrix corresponding to the
+Section II describes the TDD-MIMO system and multipath     pair (τ, θ) is denoted by A(τ, θ) = [aτ(τi) ⊗aθ(θi)]i=1:K,
+channel model. Section  III presents the proposed super-    where the index set 1 : K denotes {1, 2, . . . , K}, and similar
+resolution algorithm, QNOMP. Section IV formulates the     notations following the same convention.
+channel extrapolation problem in a Bayesian framework and    A comprehensive nomenclature table (Table 1) is provided,
+presents: the derivation of the linear optimal extrapolation      listing all key mathematical symbols and their corresponding
+solution, its low-rank approximation, and a block reweighting     descriptions for easy reference.
+technique to exploit the angular-domain block sparsity of
+CSI. Section V presents the numerical experiments and       II. THE MIMO CHANNEL MODEL
+discussions. Finally, Section VI draws the conclusions.      We consider a frequency-selective TDD-MIMO channel.
+  Notations: In this paper, matrices and vectors are denoted    Suppose the BS is equipped with a uniform linear array
+by bold uppercase and blod lowercase letters, respectively.    (ULA) with N antennas. The user transmits pilot symbols
+Scalars are in normal font, and italicized letters i, j, k are      xi ∈C, i = 1  : M over M subcarriers with frequency
+used as subscripts. The superscripts (·)H and (·)T represent the     spacing 1f . The received signal yk ∈CN at the BS for the
+conjugate transpose and transpose, respectively. The notation     k-th subcarrier is given by
+|·| denotes the absolute value of a real number or the modulus                                                                            yk = hkxk + wk,   k = 1 : M,            (1)
+of a complex number. ℜ(z) is the real part of z. The Kronecker
+product is denoted by ⊗. diag(x) represents a diagonal matrix    where hk  represents the CSI in the spatial domain and
+with the elements of vector x on its main diagonal. CN(µ, 6)    {wk}k are independent instances of complex additive white
+denotes the complex Gaussian distribution with mean µ and    Gaussian noise (AWGN). The CSI hk can be characterized
+covariance 6. For a given delay τ or angle θ, the correspond-    by a multipath channel model
+ing frequency-domain and spatial-domain steering vectors                   L
+are defined as aτ(τ) := [1, e−j2πτ1f , · · · , e−j2π(M−1)τ1f ]T            hk = X βie−j2πτik1f aθ (θi) ,   k = 1 : M,     (2)
+and aθ(θ) :=  [1, e−j2πθ, · · · , e−j2π(N−1)θ]T, respectively,                    i=1
+where j2 = −1 is the imaginary unit. Given a set of delays    where L is the number of propagation paths, βi is the complex
+ = {τ1, τ2, . . . , τK} (or angles 2 =  {θ1, θ2, . . . , θL}),     gain, τi is the time delay, and θi ∝cos φi represents the
+
+
+
+212654                                                                                                              VOLUME 13, 2025

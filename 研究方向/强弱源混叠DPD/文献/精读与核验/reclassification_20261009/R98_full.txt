@@ -1,0 +1,728 @@
+--- PDF PAGE 1 ---
+IEEE COMMUNICATIONS LETTERS, VOL. 27, NO. 3, MARCH 2023
+841
+A Computationally Efﬁcient Direct Position Determination
+Algorithm Based on OFDM System
+Ziqiang Wang
+, Graduate Student Member, IEEE, Kegang Hao
+, Yimao Sun
+, Member, IEEE,
+Lei Xie
+, Member, IEEE, and Qun Wan
+, Senior Member, IEEE
+Abstract—Based
+on
+the
+orthogonal
+frequency
+division
+multiplexing
+(OFDM)
+system,
+a
+computationally
+attractive
+implementation for the traditional single source maximum like-
+lihood (SML) direct position determination (DPD) algorithm
+is proposed. The proposed algorithm implements fast Fourier
+transform (FFT) to the received frequency-domain signals after
+deconvolution. Then, the cost function for all points can be
+obtained from the same FFT output set. As a consequence,
+some repeated calculation in the traditional SML DPD algorithm
+is avoided. Simulation results demonstrate that the proposed
+modiﬁed SML DPD algorithm can achieve a comparable per-
+formance to traditional SML-DPD while signiﬁcantly reducing
+the computational complexity.
+Index Terms—Time delay, direct position determination, fast
+Fourier transform, maximum likelihood estimation, orthogonal
+frequency division multiplexing.
+I. INTRODUCTION
+H
+IGH-ACCURACY localization gradually become nec-
+essary for communication infrastructures to enhance
+quality of service. Hence, the integrated sensing and commu-
+nication (ISAC) framework is emerging in many commercial
+ﬁelds [1], [2], [3], such as nursing home management, virtual
+reality and autonomous driving. In general, two steps are
+required for source localization in ISAC systems. In the
+ﬁrst step intermediate parameters are estimated, which are
+then transferred to a central processing station to determine
+the source position. However, due to the constraint that all
+measurements must correspond to the same source position
+and transmitting signal is ignored, two-step approaches are
+always sub-optimal.
+Different with conventional two-step methods, the direct
+position determination (DPD) approach estimates the source
+position from received signals directly without the information
+loss caused by estimating intermediate parameters. Thus it
+performs better than its two-step counterpart, especially under
+large noise conditions. Based on the orthogonal frequency
+Manuscript received 24 November 2022; accepted 17 December 2022. Date
+of publication 21 December 2022; date of current version 10 March 2023.
+This work was supported by the National Natural Science Foundation of
+China Grant 61771108. The associate editor coordinating the review of this
+letter and approving it for publication was C.-K. Wen. (Corresponding author:
+Qun Wan.)
+Ziqiang Wang and Qun Wan are with the School of Information and Com-
+munication Engineering, University of Electronic Science and Technology of
+China, Chengdu 611731, China (e-mail: ziqiangwang518@std.uestc.edu.cn;
+wanqun@uestc.edu.cn).
+Kegang Hao is with the Southwest China Research Institute of Electronic
+Equipment, Chengdu 610036, China (e-mail: 304766416@qq.com).
+Yimao Sun is with the College of Computer Science, Sichuan University,
+Chengdu 610065, China (e-mail: yimaosun@scu.edu.cn).
+Lei Xie is with the Department of Electronic and Computer Engineering,
+The Hong Kong University of Science and Technology, Hong Kong (e-mail:
+eelxie@ust.hk).
+Digital Object Identiﬁer 10.1109/LCOMM.2022.3231548
+division multiplexing (OFDM) system, DPD methods have
+been studied extensively [4], [5], [6]. Using angle of arrival
+(AOA) and time of arrival (TOA), a work about DPD for a
+stationary source was proposed in [7], where positions of sen-
+sor arrays are also ﬁxed. Then for the scenario with multiple
+sources (target and scatterers), [8] proposed a subspace data
+fusion (SDF) DPD approach. However, this subspace-based
+algorithm suffers from severe performance degradation at low
+signal-to-noise ratio (SNR) levels, while it is well-known
+that the maximum likelihood (ML) estimator could achieve
+Cramér-Rao lower bound (CRLB) even if the SNR is low. [9]
+proposed a decoupled ML DPD algorithm, which is iterative
+in nature and possibly trapped by the local maxima. Recently,
+a globally-optimal importance sampling (IS)-based ML DPD
+method is proposed in [10]. Aforementioned feasible ML DPD
+algorithms always have the optimal estimation performance for
+solving the DPD problem. Nevertheless, their computational
+complexity is still not acceptable for real-time processing,
+especially when a large number of sources exist since single
+source ML (SML) DPD estimator [11], [12] is inevitably
+utilized for position estimation of each source repetitively,
+which is implemented by exhaustive search. Furthermore,
+on an ISAC device, the computational resource distributed for
+localization is extremely limited. Hence, in order to estimate
+position with ML concept using communication infrastruc-
+tures, a computationally efﬁcient implementation of SML DPD
+estimator must be researched.
+A widely applied technology to reduce the computational
+time in solving many parameter ML estimation problems
+is the fast Fourier transform (FFT). For the ML estimation
+of time differences of arrival (TDOA) [13], sinusoidal fre-
+quency [14] and direction of arrival (DOA) [15], FFT resulted
+in remarkable improvement from computational complexity
+viewpoints. Referring to [12], the cost function of SML DPD
+estimator is a combination of multiple ML cost functions for
+estimating intermediate parameters from different receiving
+sensors, which could be fast realized by FFT. It motivates us
+to leverage the FFT for a faster implementation of SML DPD.
+In this letter, we focus on the position estimation prob-
+lem with static sensors and source based on the
+OFDM
+system. A modiﬁed SML DPD algorithm using time delays
+is proposed by exploiting FFT, which enjoys prominently
+high computational efﬁciency. When the transmitted signal
+is unknown, the proposed method operates the FFT to a
+series of frequency-domain sequences, which are obtained by
+deconvoluting a received frequency-domain signal with that
+from other sensors. While the transmitted signal is a prior
+knowledge but the transmitting time is still unknown, FFT
+is operated to received signals after deconvolution with the
+1558-2558 © 2022 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.
+See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:44:51 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 2 ---
+842
+IEEE COMMUNICATIONS LETTERS, VOL. 27, NO. 3, MARCH 2023
+Fig. 1.
+Illustration of localization system.
+transmitted signal waveform. Then for each grid point in the
+search range, there always could ﬁnd a subset of FFT outputs,
+whose corresponding TDOAs or TOAs are closest to counter-
+parts of the grid point. That is, as long as the FFT length is
+sufﬁciently long, the cost function of the proposed algorithm
+could be approximately calculated by the combination of FFT
+outcomes, instead of the exhaustive grid point search. Then,
+the redundant calculation in traditional SML DPD algorithm
+is avoided, and it can be observed from the simulations that,
+the estimation performance of the proposed DPD algorithm
+could achieve comparable performance to traditional SML
+DPD algorithm with a conspicuously smaller computational
+load.
+Notations: Vectors and matrices are represented in lower-
+case and upper-case bold fonts, respectively. The Euclidean
+norm of any vector is denoted as ∥·∥. Moreover, (·)∗, (·)T and
+(·)H denote the conjugate, transpose and Hermitian transpose,
+respectively. |·| stands for the absolute value. IN denotes the
+N ×N identity matrix and 1N stands for N ×1 vector of ones.
+For a vector ν, diag {ν} is a diagonal matrix with diagonal
+elements be ν, and [ν]i stands for i-th element in ν. For a
+matrix X, [X]i,g and [X]g denote its (i, g)-th element and g-th
+column, respectively. Finally, j is the pure complex number
+that veriﬁes j2 = −1, and
+Δ= is used for deﬁnitions.
+II. PROBLEM FORMULATION
+Consider a scenario with L stationary sensors as illustrated
+in Fig. 1, where the D × 1 vector ul denotes the position
+vector of the l-th sensor (for planar geometry D = 2 and
+for the spatial case D = 3). All sensors are assumed to be
+synchronized in frequency and time.
+Assuming that a stationary source is also in the scenario,
+whose location is denoted by a D×1 vector of coordinate p0.
+The source radiates narrowband signal with the transmitting
+time t0. The bandwidth of the transmitted signal is B. To
+separate the delay and the transmitting time from the signal
+waveform, we consider the OFDM system [16]. Hence, the
+discrete complex signal observed by the l-th sensor is given
+by
+¯rl(n) = bl¯s (n) e−j2πnΔf[τl(p0)+t0] + ¯wl(n),
+(1)
+where n = {0, . . . , N −1} and Δf = B/N is the spacing
+of adjacent frequency bins (or subcarriers). bl is an unknown
+complex attenuation factor that represents the path attenuation
+from the source to the l-th sensor. ¯s (n) is the discrete
+frequency-domain sequence of the transmitted signal. The
+noise ¯wl(n) is independent to the source signal and follows a
+complex Gaussian distribution with zero mean and covariance
+σ2, and propagation delay τl (p0) can be expressed as
+τl (p0) = ∥ul −p0∥/c,
+(2)
+where c is the signal’s propagation speed.
+For simplicity, the received signal (1) can be written in a
+vector form as
+¯rl = blFl (p0) ¯Sg (t0) + ¯wl,
+(3)
+where
+¯rl
+Δ= [¯rl(0), . . . , ¯rl(N −1)]T ,
+¯S
+Δ= diag {¯s(0), . . . , ¯s(N −1)} ,
+¯wl
+Δ= [ ¯wl(0), . . . , ¯wl(N −1)]T ,
+Fl (p0)
+Δ= diag
+
+1,e−j2πΔfτl(p0),. . ., e−j2π(N−1)Δfτl(p0)
+,
+g (t0)
+Δ=
+
+1,e−j2πΔft0, . . ., e−j2π(N−1)Δft0T
+.
+(4)
+Then, the problem at hand now is to estimate the location
+of the source from {¯rl}L
+l=1.
+III. MODIFIED SINGLE SOURCE ML DPD ALOGRITHM
+In this letter, two common cases are discussed separately. In
+the ﬁrst case, the transmitted signal is completely unknown.
+While in the second case, the waveform of the transmitted
+signal is assumed to be known (e.g., the training or synchro-
+nization sequences), whereas the transmitting time t0 is still
+unknown. To simplify the notation, we consider the planar
+case where D = 2.
+The single source ML estimator of p0 is given by [11]
+ˆp0 = arg max
+p0
+L,
+(5)
+where
+L
+Δ= gH¯SHEEH¯Sg,
+E
+Δ=
+
+FH
+1 (p0)¯r1, . . . , FH
+L (p0)¯rL
+
+.
+(6)
+A. Unknown Transmitted Signal
+When the vector ¯Sg is unknown, the maximization of (5)
+can be regarded as maximizing the largest eigenvalue of EEH
+from all possible p0 [12], i.e.,
+ˆp0 = arg max
+p0
+λmax
+
+EEH	
+,
+(7)
+where λmax {·} denotes the largest eigenvalue of the operand.
+Note that N × N EEH and L × L EHE have the identical
+nonzero eigenvalues [17], to save the computational load,
+EEH in (7) should be substituted by EHE since normally
+L ≪N. Let Q
+Δ= EHE, thus from (6), we can derive that
+[Q]i,g (1 ≤i < g ≤L) is given by
+[Q]i,g = ¯rH
+i FiFH
+g ¯rg.
+(8)
+Then FiFH
+g can be expressed as
+FiFH
+g = diag
+
+
+vi,g
+0 , vi,g
+1 , . . . , vi,g
+N−1
+T 
+,
+(9)
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:44:51 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 3 ---
+WANG et al.: COMPUTATIONALLY EFFICIENT DIRECT POSITION DETERMINATION ALGORITHM BASED ON OFDM SYSTEM
+843
+where
+vi,g
+n (p0)
+Δ= ej2πnΔf(τg(p0)−τi(p0)).
+(10)
+Thus (8) can be rewritten as
+[Q]i,g =
+N−1
+
+n=0
+ej2πnΔfτ i,g(p0)¯r∗
+i (n) ¯rg (n) ,
+= f H
+N
+
+τ i,g
+¯ri,g,
+(11)
+where
+τi,g (p0)
+Δ= τg (p0) −τi (p0) ,
+¯ri,g
+Δ= [¯r∗
+i (0) ¯rg (0),. . .,¯r∗
+i (N −1) ¯rg (N −1)]T ,
+fN
+
+τ i,g Δ= [1, e−j2πΔfτ i,g, . . . , e−j2π(N−1)Δfτ i,g]T .
+(12)
+For a speciﬁc position p′
+0 with τ i,g (p′
+0) = n0/B, n0 ∈
+[0, 1, . . . , N −1], the calculation of [Q]i,g can be transformed
+as
+[Q]i,g (p′
+0) = f H
+N (n0/B)¯ri,g.
+(13)
+Note that (13) is the Inverse Discrete Fourier Trans-
+form (IDFT) operation to ¯ri,g. Thus, for all p′
+0 that sat-
+isfy τi,g (p′
+0) ∈{(2n0 −N) /2B}N−1
+n0=0, [Q]i,g (p′
+0) could
+be simultaneously calculated by performing IDFT to ¯ri,g,
+which can be executed by FFT technique. By doing that,
+the computational load is prominently saved. Intuitively, the
+candidate search points for proposed DPD algorithm should be
+chosen from the set p′
+0. Thus, by introducing another TDOA
+τi,k (g < k ≤L), a candidate grid point set P1 is constructed,
+where the position ¯pns should satisfy
+⎧
+⎨
+⎩
+τi,g (¯pns) ∈{(2n1 −Nf) /2B}Nf−1
+n1=0 ,
+τi,k (¯pns) ∈{(2n2 −Nf) /2B}Nf−1
+n2=0 .
+(14)
+where Nf is the FFT length (Nf ≥N).
+However, when L > 3, P1 maybe not applicable for
+the calculation of elements except [Q]i,g and [Q]i,k in
+Q, e.g., for [Q]i,h (k < h ≤L) on a position ¯pns
+that
+belongs to P1, there may not exist any output of Nf-point
+FFT to ¯ri,h equals [Q]i,h (¯pns), because it is possible that
+τi,h (¯pns) /∈{(2n1 −Nf) /2B}Nf−1
+n1=0 . Under this condition,
+[Q]i,h (¯pns) can be approximately estimated as the FFT out-
+put on the TDOA that closest to f1
+
+τi,h (¯pns)
+	
+, which is
+acceptable as long as Nf is sufﬁciently large and f1 {·} is a
+function satisﬁes
+f1 {τ} =
+⎧
+⎪
+⎨
+⎪
+⎩
+τ
+−(Nf + 1)/2B ≤τ <(Nf + 1)/2B
+f1 {τ + Nf/B} τ < −(Nf + 1)/2B
+f1 {τ −Nf/B}
+τ ≥(Nf + 1)/2B.
+(15)
+Hence,
+the
+proposed
+modiﬁed
+SML
+DPD
+algorithm
+(MSML-DPD) with the unknown transmitted signal could be
+summarized in Algorithm 1.
+B. Known Transmitted Signal
+Under the condition that the waveform of the transmitted
+signal ¯S is known, (5) can be rewritten as
+ˆt0, ˆp0
+
+= arg max
+[t0,p0]
+∥μ∥2 ,
+(16)
+Algorithm 1 MSML-DPD Algorithm With the Unknown
+Transmitted Signal
+Input: All received complex signal vectors {¯rl}L
+l=1.
+Output: Position estimation of the source ˆp0.
+1 Choosing Ns positions {¯pns}Ns
+ns=1 in P1;
+2 for l1 ←1 to L do
+3
+for l2 ←l1 to L do
+4
+Caculating ¯rl1,l2;
+5
+if l2 > l1 then
+6
+Nf-point FFT to ¯rl1,l2 then obtaining FFT
+output vector ¯rf
+l1,l2;
+7
+for ns ←1 to Ns do
+8
+ˆn1 = arg min
+n1
+f1
+
+τl1,l2(¯pns)
+	
+−
+(2n1 −Nf) /2B∥
+;
+9
+[Q]l1,l2(¯pns) =
+
+¯rf
+l1,l2
+
+ˆn1+1;
+10
+end
+11
+[Q]l2,l1 (¯pns) = [Q]l1,l2 (¯pns)∗;
+12
+else
+13
+
+[Q]l1,l2 (¯pns)
+Ns
+ns=1 = 1T
+N¯rl1,l2;
+14
+end
+15
+end
+16 end
+17 Finding the highest peak from the spectrum of λmax {Q}
+on {¯pns}Ns
+ns=1, the location of the peak corresponds to
+ˆp0;
+where L × 1 vector μ
+Δ= ET ¯S∗g∗, and under a given
+transmitting time t′
+0 ∈{n0/B}N−1
+n0=0, [μ]i is given by
+[μ]i =
+N−1
+
+n=0
+ej2πnΔf[τi(p0)+t′
+0]¯s∗(n) ¯ri (n) ,
+= f H
+N (τi + t′
+0) ¯S∗¯ri.
+(17)
+Similar to the condition that the transmitted signal is
+completely unknown, if positions p′
+0 satisfy τi (p′
+0) + t′
+0 ∈
+{n0/B}N−1
+n0=0, [μ]i could be transformed as f H
+N (n0/B) ¯S∗¯ri,
+and be calculated by N-point FFT to ¯S∗¯ri. By introducing
+another TOA τg, we can also construct a candidate grid point
+set P2 with the position ¯pns satisfying following requirements
+⎧
+⎨
+⎩
+τi (¯pns) ∈{n1/B}Nf−1
+n1=0 ,
+τg (¯pns) ∈{n2/B}Nf−1
+n2=0 .
+(18)
+Note that Nf-point FFT to ¯S∗¯ri and ¯S∗¯rg can be directly
+utilized for calculating [μ]i and [μ]g on P2, respectively. For
+other elements in μ, an additional operation should also be
+included, which is similar to STEP 8-9 in Algorithm 1. The
+MSML-DPD with the known transmitted signal is summarized
+in Algorithm 2.
+Remark: Here, we assess the computational complexity of
+the proposed computationally efﬁcient SML DPD estimator
+with Nf = N. The complexity is counted through the order
+of the number of complex-valued multiply operations. On the
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:44:51 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 4 ---
+844
+IEEE COMMUNICATIONS LETTERS, VOL. 27, NO. 3, MARCH 2023
+Algorithm 2 MSML-DPD Algorithm With the Known
+Transmitted Signal
+Input: All received complex signal vectors {¯rl}L
+l=1.
+Output: Position estimation of the source ˆp0.
+1 Choosing Ns positions {¯pns}Ns
+ns=1 in P2;
+2 Constructing Nf candidate transmitting times
+¯tnf
+	Nf −1
+nf =0
+with ¯tnf = nf/B;
+3 for l1 ←1 to L do
+4
+Nf-point FFT to ¯S∗¯rl1 then obtaining vector ¯rf
+l1;
+5
+for nf ←0 to Nf −1 do
+6
+for ns ←1 to Ns do
+7
+ˆn2 =arg min
+n2
+f1
+
+τl1 (¯pns)+¯tnf−Nf/2B
+	
++
+Nf/2B −n2/B∥
+;
+8
+[μ]l1
+¯tnf , ¯pns
+
+=
+
+¯rf
+l1
+
+ˆn2+1;
+9
+end
+10
+end
+11 end
+12 Finding the highest peak from the spectrum of ∥μ∥2 on
+¯tnf
+	Nf −1
+nf =0 and {¯pns}Ns
+ns=1, the location of the peak
+corresponds to ˆp0;
+condition that ¯S is unknown, for MSML-DPD the computa-
+tional resource is mainly consumed by processing ¯rl1,l2 and
+eigenvalue decomposition to Q. Due to ¯rl1,l2 = (¯rl2,l1)∗, cal-
+culating all ¯rl1,l2 and N-point FFT to them require 1
+2N(L2 +
+L) and 1
+2(L2 −L)N log2 N multiplications, respectively. The
+computational complexity of eigenvalue decomposition to Q
+is O
+
+NsL3
+. Hence, the total computational complexity is
+O(L2N log2 N + NsL3), while the computational complexity
+of SML-DPD in the same scenario is O(NsL2N). It can be
+seen that the MSML-DPD has signiﬁcantly lower complexity
+when L ≪N, which is common in actual scenarios. Similarly,
+when the transmitted signal is a prior knowledge, most of the
+computational burden in MSML-DPD is focused on the FFT to
+¯S∗¯rl1, which requires N log2 N multiplications. Thus accord-
+ing to Algorithm 2, the computational complexity in this con-
+dition is O(LN log2 N), while its counterpart of SML-DPD is
+O(NsLN log2 N). Apparently, in both aforementioned cases
+the proposed MSML-DPD exhibits remarkable computational
+saving compared to SML-DPD.
+IV. NUMERICAL RESULTS
+To evaluate the performance of the proposed MSML DPD
+algorithm, we compare it with the traditional SML-DPD [12].
+The root mean square error (RMSE) is selected as the perfor-
+mance metric, i.e.,
+RMSE =
+
+1
+NMc
+NMc
+nMc=1
+ˆp[nMc] −p
+2,
+(19)
+where NMc is the number of Monte Carlo trials, and ˆp[nMc] is
+the estimated source position at the nMc-th trial. All estimators
+will also be gauged against the CRLB [18], which reﬂects the
+theoretical achievable performance taken as a benchmark for
+all compared algorithms.
+Fig. 2.
+Spectrum of MSML-DPD
+(a) transmitted signal is unknown and
+(b) transmitted signal is known.
+Let L = 4 synchronized sensors be located in [0, 0]m,
+[500, 0]m, [500, 500]m and [0, 500]m, respectively. A source
+is located in [200, 300] m and transmits OFDM signal on a
+typical WiFi standard 802.11ac, then sensors obtain channel
+state information (CSI) via a deconvolution of the known
+training sequence and pulse shape function [16]. That is,
+Δf = 312.5 kHz and [¯s (n)]N
+n=0 = 1. The transmitting time of
+the source is selected randomly from the interval [0, 500] ns,
+the channel attenuation is also randomly generated following
+the normal distribution with mean one and standard deviation
+0.1, and the channel phase is selected from [0, 2π] uniformly.
+We use τ1,2 and τ 1,4 to generate candidate positions when
+the transmitted signal waveform is unknown, while in the
+scenario that [¯s (n)]N
+n=0 is a prior knowledge, τ1 and τ4 are
+utilized for the same purpose. The number of Monte Carlo
+trials NMc = 5000.
+Firstly, let SNR= 25dB, Nf = N = 256, the position
+spectrum of MSML-DPD is showed in Fig. 2. It can be seen
+that, the estimated position is close to the true source position,
+and the shape of grid line in Fig. 2(a) is the hyperbola, while it
+is the circle line in Fig. 2(b). Despite with the unconventional
+grid point layout, the proposed MSML DPD algorithm could
+still achieve high position estimation performance.
+To better evaluate the position estimation performance,
+we adjust N = 16 yet Nf is still unchanged. Fig. 3 presents
+the RMSE of position estimation for varying SNR. It can be
+observed that when the transmitted signal is unknown, the
+proposed MSML-DPD estimator can achieve the performance
+of SML-DPD for almost all SNRs, and the estimation accuracy
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:44:51 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 5 ---
+WANG et al.: COMPUTATIONALLY EFFICIENT DIRECT POSITION DETERMINATION ALGORITHM BASED ON OFDM SYSTEM
+845
+Fig. 3.
+RMSEs of different algorithms versus SNR.
+Fig. 4.
+Averaged processing times of different algorithms versus L.
+is very close to the CRLB when SNR ≥1 dB. The similar
+phenomenon can also be seen on the condition that [¯s (n)]N
+n=0
+is a prior knowledge. Simulation results prove that even if
+with the approximation, the proposed MSML-DPD estimator
+is still an accurate implementation of the ML estimation.
+In the last experiment, we compare the averaged processing
+time of MSML-DPD and SML-DPD for varying L. Except
+adjusting Ns = 15000, other simulation parameters are the
+same as that produces Fig. 2. It can be seen from Fig. 4
+that, no matter whether the transmitted signal is known or not,
+as L becomes larger the averaged processing time increases
+for both MSML-DPD and SML-DPD, yet MSML-DPD is
+conspicuously faster than SML-DPD, which is about one or
+two orders of magnitude. The results in Fig. 4 indicate that,
+the proposed MSML DPD algorithm can always achieve the
+estimation performance of the SML-DPD with a signiﬁcantly
+lower computational load.
+V. CONCLUSION
+In this letter, we proposed a computationally efﬁcient
+implementation of the single source DPD algorithm based on
+OFDM system. In the proposed algorithm, FFT is performed
+to the received frequency-domain signals after deconvolution.
+Then, for each candidate grid point, the DPD cost function
+is calculated based on a speciﬁc FFT outputs subset that
+corresponds to the point position. Thus, a large number of
+repetitive computations in the traditional SML DPD algo-
+rithm are eliminated. Simulation results show that with the
+comparable accuracy, the proposed MSML-DPD has the clear
+superiority over the traditional SML-DPD in terms of the
+computational efﬁciency.
+REFERENCES
+[1] F. Liu, W. Yuan, C. Masouros, and J. Yuan, “Radar-assisted predic-
+tive beamforming for vehicular links: Communication served by sens-
+ing,” IEEE Trans. Wireless Commun., vol. 19, no. 11, pp. 7704–7719,
+Nov. 2020.
+[2] L. Xie, S. H. Song, Y. C. Eldar, and K. B. Letaief, “Collaborative
+sensing in perceptive mobile networks: Opportunities and challenges,”
+2022, arXiv:2205.15805.
+[3] L. Xie, P. Wang, S. H. Song, and K. B. Letaief, “Perceptive mobile
+network with distributed target monitoring terminals: Leaking commu-
+nication energy for sensing,” IEEE Trans. Wireless Commun., vol. 21,
+no. 12, pp. 10193–10207, Dec. 2022.
+[4] A. Amar and A. J. Weiss, “Direct position determination of OFDM
+signals,” in Proc. IEEE Int. Conf. Acoust., Speech, Signal Process.,
+Jun. 2007, pp. 1–5.
+[5] Z. Lu, J. Wang, B. Ba, and D. Wang, “A novel direct position
+determination algorithm for orthogonal frequency division multiplexing
+signals based on the time and angle of arrival,” IEEE Access, vol. 5,
+pp. 25312–25321, 2017.
+[6] O. Bialer, D. Raphaeli, and A. J. Weiss, “Unsynchronized OFDM
+network positioning in multipath,” Signal Process., vol. 168, Mar. 2020,
+Art. no. 107344.
+[7] O. Bar-Shalom and A. J. Weiss, “Efﬁcient direct position determination
+of orthogonal frequency division multiplexing signals,” IET Radar,
+Sonar Navigat., vol. 3, no. 2, pp. 101–111, Apr. 2009.
+[8] J. Bai, G. Wei, S. Wang, X. Wang, and Z. Fei, “Efﬁcient direct
+localization of OFDM emitters in multipath environment with mobile
+receivers,” IEEE Trans. Veh. Technol., vol. 71, no. 1, pp. 545–556,
+Jan. 2022.
+[9] A. Amar and A. J. Weiss, “A decoupled algorithm for geolocation of
+multiple emitters,” Signal Process., vol. 87, no. 10, pp. 2348–2359,
+Oct. 2007.
+[10] Z. Wang, Y. Sun, Q. Wan, L. Xie, and N. Liu, “A modest power con-
+sumption maximum likelihood direct position determination approach
+for multiple targets with moving sensor arrays,” IEEE Sensors J., vol. 22,
+no. 22, pp. 21885–21898, Nov. 2022.
+[11] A. J. Weiss, “Direct position determination of narrowband radio trans-
+mitters,” in Proc. IEEE Int. Conf. Acoust., Speech, Signal Process.,
+vol. 2, May 2004, p. 249.
+[12] T. Tirer and A. J. Weiss, “High resolution direct position determination
+of radio frequency sources,” IEEE Signal Process. Lett., vol. 23, no. 2,
+pp. 192–196, Feb. 2015.
+[13] S. Stein, “Differential delay/Doppler ML estimation with unknown
+signals,” IEEE Trans. Signal Process., vol. 41, no. 8, pp. 2717–2719,
+Aug. 1993.
+[14] J. Ren, T. Zhang, J. Li, and P. Stoica, “Sinusoidal parameter estima-
+tion from signed measurements via majorization–minimization based
+RELAX,” IEEE Trans. Signal Process., vol. 67, no. 8, pp. 2173–2186,
+Apr. 2019.
+[15] H. Zhu, F. Liu, and J. Li, “Angle and waveform estimation from coarsely
+quantized array data,” in Proc. IEEE 90th Veh. Technol. Conf. (VTC-
+Fall), Sep. 2019, pp. 1–5.
+[16] F. Wen, P. Liu, H. Wei, Y. Zhang, and R. C. Qiu, “Joint azimuth,
+elevation, and delay estimation for 3-D indoor localization,” IEEE Trans.
+Veh. Technol., vol. 67, no. 5, pp. 4248–4261, May 2018.
+[17] C. R. Rao, C. R. Rao, M. Statistiker, C. R. Rao, and C. R. Rao, Linear
+Statistical Inference and Its Applications, vol. 2. Hoboken, NJ, USA:
+Wiley, 1973.
+[18] A. J. Weiss and A. Amar, “Direct position determination of multiple
+radio signals,” EURASIP J. Adv. Signal Process., vol. 2005, no. 1,
+pp. 1–13, Dec. 2005.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:44:51 UTC from IEEE Xplore.  Restrictions apply. 

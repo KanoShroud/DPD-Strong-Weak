@@ -1,0 +1,69 @@
+Y. Zeng et al.: QNOMP: A Quasi-Newton-Based Joint Multipath Optimization Method
+
+
+negligible. For other scenarios, analyzing the sensitivity of     the estimation error. When λi(c)/c ≪σ 2/mE, the i-th basis
+log det(6) is challenging; however, numerical experiments     contributes minimally to error reduction. Therefore, only a
+indicate that this term exhibits negligible variation near the     small number of top eigenvectors are required to achieve
+optimum and has minimal impact on the objective function     satisfactory estimation accuracy.
+value.
+  Thus, we approximately have τ MAP ≈˜τ MAP, and a Taylor   ACKNOWLEDGMENT
+expansion of log p(τ|h′) around τ MAP yields:               The authors would like to thank Prof. An Liu for stimulating
+                                                                 discussions.       log p(τ|h′) ≈log(p(τ MAP))
+          −1  −τ MAP)HH(τ −τ MAP),         REFERENCES                    2(τ
+                                                                                          [1]  T. L. Marzetta, ‘‘Noncooperative cellular wireless with unlimited numbers
+implying that p(τ|h′) ∼N(τ|τ MAP, H−1). This provides a            of base station antennas,’’ IEEE Trans. Wireless Commun., vol. 9, no. 11,
+Gaussian approximation of the posterior with mean τ MAP            pp. 3590–3600, Nov. 2010.
+                                                                                          [2]  F. Rusek, D. Persson, B. K. Lau, E. G. Larsson, T. L. Marzetta, O. Edfors,
+and covariance matrix H, where H is the Hessian matrix          and F. Tufvesson, ‘‘Scaling up MIMO: Opportunities and challenges with
+of −log p(τ|h′), or −log p(τ, β∗(τ)|h′) equivalently. As a           very large arrays,’’ IEEE Signal Process. Mag., vol. 30, no. 1, pp. 40–60,
+byproduct, the BFGS iterations used to minimize the reduced            Jan. 2013.
+loss function −log p(τ, β∗(τ)|h′) automatically generate an        [3]  E. G. Larsson, O. Edfors, F. Tufvesson, and T. L. Marzetta, ‘‘Massive                                                    MIMO for next generation wireless systems,’’ IEEE Commun. Mag.,
+approximation of the inverse Hessian matrix.                                   vol. 52, no. 2, pp. 186–195, Feb. 2014.
+                                                                                          [4]  L. Lu, G. Y. Li, A. L. Swindlehurst, A. Ashikhmin, and R. Zhang,
+APPENDIX C                                                                     ‘‘An  overview  of  massive  MIMO:  Benefits  and   challenges,’’
+                                                                    IEEE  J.  Sel.  Topics  Signal  Process.,  vol.  8,  no.  5,  pp. 742–758,
+OPTIMAL LOW-RANK BASIS UNDER UNIFORM PRIOR                 Oct. 2014.
+We show that for the channel estimation problem, when        [5]  T. L. Marzetta, E. G. Larsson, H. Yang, and H. Q. Ngo, Fundamentals of
+L = Np = 1 and τ|h′ ∼Uniform[−1τ/2, 1τ/2], β ∼           Massive MIMO. Cambridge, U.K.: Cambridge Univ. Press, 2016.
+CN(0, E), the optimal low-rank basis is the DPSS in [60].           [6] A. M. Sayeed, ‘‘Deconstructing multiantenna fading channels,’’ IEEE
+                                                                                        Trans. Signal Process., vol. 50, no. 10, pp. 2563–2579, Oct. 2002.
+  Recall that optimal basis in (29) is the top r eigenvectors        [7]  Y. C. Pati, R. Rezaiifar, and P. S. Krishnaprasad, ‘‘Orthogonal matching
+of  matrix  Cov(Ae(τ)β, h′)Cov(h′, h′)−1Cov(h′, Ae(τ)β).             pursuit: Recursive function approximation with applications to wavelet
+In channel estimation, Ae = A0, so Cov(h′, Ae(τ)β) =            decomposition,’’  in Proc. 27th Asilomar Conf.  Signals,  Syst. Com-
+                                                                                                       put., 1993, pp. 40–44.
+Cov(A0β, A0β) and Cov(h′, h′) = Cov(A0β, A0β) + σ 2I        [8] W. Dai and O. Milenkovic, ‘‘Subspace pursuit for compressive sens-
+share the same eigenvectors. Therefore, the optimal basis            ing signal reconstruction,’’ IEEE Trans.  Inf. Theory, vol. 55, no. 5,
+consists of the first r eigenvectors of Cov(A0β, A0β).                    pp. 2230–2249, May 2009.
+  When L = Np =  1, β reduces to a scalar variable.        [9] D. Needell and J. A. Tropp, ‘‘CoSaMP: Iterative signal recovery from
+                                                                                   incomplete and inaccurate samples,’’ Appl. Comput. Harmon. Anal.,
+Since β is independent of τ, under the uniform prior of τ|h′,             vol. 26, no. 3, pp. 301–321, May 2009.
+direct calculation shows that the covariance matrix is given      [10] D. Needell and R. Vershynin, ‘‘Signal recovery from incomplete and
+by Cov(A0β) = E · Toeplitz(u), where u is a vector with            inaccurate measurements via regularized orthogonal matching pursuit,’’
+components uk =  sin(k1f 1τ), k = 0   : m −1, and         IEEEApr. 2010.J.  Sel.  Topics  Signal  Process.,  vol.  4,  no.  2,  pp. 310–316,
+Toeplitz(u) denotes the Toeplitz matrix generated by u.             [11]  J. Wang, S. Kwon, and B. Shim, ‘‘Generalized orthogonal matching
+  Denoting c = m1f 1τ, T(c)  :=  c/m  · Toeplitz(u),              pursuit,’’ IEEE Trans. Signal Process., vol. 60, no. 12, pp. 6202–6216,
+we have the following properties: 1). T(c)  is a positive           Dec. 2012.
+                                                                                   [12] D. L. Donoho, Y. Tsaig,  I. Drori, and J.-L. Starck, ‘‘Sparse solution
+definite matrix, whose eigenvalues and eigenvectors are            of underdetermined systems of linear equations by stagewise orthogonal
+denoted by λk(c), φk(c), respectively, for k = 0  : m −           matching pursuit,’’ IEEE Trans. Inf. Theory, vol. 58, no. 2, pp. 1094–1121,
+1. These eigenvectors are known as the DPSS [60]. 2).            Feb. 2012.
+If c < m, then λk(c) ∈(0, 1) and Pk λk(c) = c. 3). The      [13]  tiveT.  T.matchingDo,  L.  pursuitGan, N.algorithmNguyen, forand practicalT. D.  Tran,compressed‘‘Sparsitysensing,’’adap-
+top c + o(c) eigenvalues are close to 1 and the remaining             in  Proc. 42nd Asilomar  Conf.  Signals,  Syst. Comput.,  Oct. 2008,
+eigenvalues decay exponentially to 0 as k  increases. 4).            pp. 581–587.
+As c →0, λ0(c) →1, φ0(c) →1. 5). If the posterior is      [14]  Inf.E. J.Theory,Candès vol.and 51,T. Tao,no. 12,‘‘Decodingpp. 4203–4215,by linearDec.programming,’’2005.     IEEE Trans.
+replaced by Uniform[τ0−1τ/2, τ0+1τ/2], the eigenvectors      [15] A. Beck and M.  Teboulle,  ‘‘A  fast  iterative shrinkage-thresholding
+become φk(c) ⊙{e−j2πk1f τ0} while the eigenvalues remain           algorithm for linear inverse problems,’’ SIAM J. Imag. Sci., vol. 2, no. 1,
+unchanged.                                                                          pp. 183–202, Jan. 2009.
+  The NMSE of channel estimation using the first k bases in      [16]  S. Boyd,  ‘‘Distributed  optimization and  statistical  learning  via  the
+                                                                                              alternating direction method of multipliers,’’ Found. Trends Mach. Learn.,
+the LMMSE framework can be expressed as:                                   vol. 3, no. 1, pp. 1–122, 2010.
+                                                                                   [17] R. Chartrand and W. Yin, ‘‘Iteratively reweighted algorithms for compres-
+                  k−1     (λi(c)/c)2                                          sive sensing,’’ in Proc. IEEE Int. Conf. Acoust., Speech Signal Process.,
+             1 − X                           .            (36)           Mar. 2008, pp. 3869–3872.
+                         λi(c)/c + σ 2/mE                      i=0                                                    [18]  S. Ji, Y. Xue, and L. Carin, ‘‘Bayesian compressive sensing,’’ IEEE Trans.
+                                                                                      Signal Process., vol. 56, no. 6, pp. 2346–2356, Jun. 2008.
+The NMSE increases monotonically with c. Both the param-      [19] M. E. Tipping, ‘‘Sparse Bayesian learning and the relevance vector
+eter c and the corresponding eigenvalues λi(c) characterize            machine,’’ J. Mach. Learn. Res., vol. 1, pp. 211–244, Apr. 2001.
+
+
+VOLUME 13, 2025                                                                                                         212669

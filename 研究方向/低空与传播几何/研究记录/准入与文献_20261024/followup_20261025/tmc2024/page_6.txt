@@ -1,0 +1,69 @@
+14060                                                              IEEE TRANSACTIONS ON MOBILE COMPUTING, VOL. 23, NO. 12, DECEMBER 2024
+
+
+                                                              consistency of the support set. The signal vector z is charac-
+                                                                    terized by having a non-zero element at the location of the
+                                                LoS component. Therefore, for every group of N elements
+                                                            corresponding to each anchor in vector z, there should be at
+                                                                        least one non-zero element at the LoS position. To enforce this
+                                                                  structured sparsity constraint, we examine pairwise comparisons
+                                                       between the groups of N elements corresponding to each anchor
+                                                              within vector z. Given that z is binary, the Hamming distance
+                                                                serves as the most effective metric for this comparison. The
+                                                                  objective is to minimize the Hamming distance between these
+                                                              groups, aligning them as closely as possible. This comparison
+                                                         can be mathematically represented as:
+
+                                                               Na−1  Na
+                                                                  PiN −PjN z 2                                                                                                               2 ≤ϵ           (9)
+Fig. 3.  The representation of (a) the signal vector support and (b) the permu-
+                                                                          i=0 j=i+1
+tation process
+                                                               In this expression, P is deﬁned as an NNa × NNa permuta-
+                                                                    tion matrix facilitating a circular shift, as shown in Fig. 3(b),
+like minimum descriptor length (MDL) and Akaike information   described by:
+criteria (AIC) [40].                                         ⎡             ⎤
+                                                                       0  0  0    · · ·  0  1  Now consider the vector y = [yT1 , yT2 , . . . , yTNa]T which is a
+complex vector with dimensions NaNe × 1 and represents the                     1  0  0    · · ·  0  0
+aggregation of the signals received at all anchors. The signal                                          P =  0  1  0    · · ·  0  0
+represented by y can be modeled using the aggregated over-                                                                                                                                                                                                                                                                                                                                                                                ⎢⎢⎢⎢⎢⎢⎣  ...               ...               ...    ...                 ...               ... ⎥⎥⎥⎥⎥⎥⎦complete dictionary Φ as per the following relation:
+                                                                       0  0  0    · · ·  1  0
+                y = Φs + n,                       (7)
+                                                               In applying this constraint, PiN symbolizes the iN-th power
+In this formulation Φ is a block-diagonal matrix that contains the
+                                                               of the permutation matrix P. This formulation is crucial as it
+array manifold for each anchor as deﬁned in (5) in the diagonal
+                                                                     dictates that the permutations of the binary signal z in groups of
+blocks and is deﬁned as follows:
+             ⎡              ⎤                   size N (equivalent to N gridpoints per anchor) should closely
+              Φ1   0     · · ·    0                    resemble each other. This requirement is critical because the
+                   0  Φ2    · · ·    0                       signals from all anchors are concatenated into a single vector,
+        Φ =                                         (8)   necessitating a high degree of similarity among every group of                                                                ⎢⎢⎢⎢⎣       ...                         ...     ...                          ...       ⎥⎥⎥⎥⎦         N elements in the signal. In addition, ϵ determines the level of
+                   0    0     · · ·  ΦNa                      similarity between different groups of variables, and it depends
+                                                     on the signal-to-noise ratio (SNR). Adhering to this structured
+Also, in (7), s ∈CNNa × 1 is the amplitude vector representing   sparsity constraint is fundamental to maintaining group sparsity,
+the contributions from all dictionary atoms across all anchors,   particularly concerning the speciﬁed LoS location requirements.
+and n ∈CNaNe×1 is the complex Gaussian noise vector.
+
+                                                      D. Problem Formulation
+C. Structured Sparsity Constraint
+                                                                  In this section, our goal is to explain the formulation of the
+  As mentioned in Section III, it is established that the LoS                                                             multi-anchor location estimation problem. The important point
+path radiates from a consistent gridpoint across all anchors. To                                                               of estimating the source location lies in determining the support
+enhancetheaccuracyofourmodel,itisimperativetoincorporate                                                               of the vector s and ﬁnding the common elements indicative of
+this observation as a structured sparsity constraint in our formu-                                                                 the LoS, as elaborated in the previous section. Considering the
+lation. This constraint mandates that the LoS component of the                                                                   constraints and factors outlined earlier, we propose the following
+signal must originate from a single, uniform gridpoint among                                                               optimization problem for sparse recovery:
+all anchors, thereby ensuring that the support set of the signal
+vectors for each of the anchors includes a consistent element          min  ||y −Φs||22
+                                                                                       s
+across all anchors. The visualization of this concept is depicted
+inFig.3(a),wherethegrayboxesrepresentthezeroelementsand                     s.t.  ||s||0 ≤LNa
+thenon-zeroelementsofthesignalvectorareinothercolors.The                Na−1  Na
+orange box in particular indicates the consistent LoS element                             ||(PiN −PjN)z||22 ≤ϵ
+across all signal vectors.                                                       i=0 j=i+1
+  To formalize this constraint, we utilize the binary represen-
+tation of each signal vector, denoted by z = I(s), ensuring the                z = I(s)                                (10)
+
+
+        Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:02:23 UTC from IEEE Xplore. Restrictions apply.

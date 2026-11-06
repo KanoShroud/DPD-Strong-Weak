@@ -1,0 +1,63 @@
+Y. Zeng et al.: QNOMP: A Quasi-Newton-Based Joint Multipath Optimization Method
+
+
+
+ℓ1 minimization [14], with typical algorithms including the    (LSTM) networks [50], score-based generative models [51],
+Fast Iterative Shrinkage-Thresholding Algorithm (FISTA)    and Transformer architectures [52], [53], [54], etc. The sec-
+[15],  the  Alternating  Direction Method  of  Multipliers    ond category consists of hybrid model-based deep learning
+(ADMM)  [16], and  Iterative Reweighted Least Squares     approaches, which ‘‘unfold’’ conventional algorithms, such
+(IRLS) [17]. Bayesian frameworks are also widely adopted     as compressed sensing, into neural network layers. Relevant
+for sparse reconstruction, as they can incorporate rich sparsity     literature includes [55], [56] and the references therein.
+priors. Notably, ℓ1 relaxation methods can be interpreted     We propose a two-stage super-resolution algorithm dubbed
+within a Bayesian framework using a Laplace prior [18].    Quasi-Newton Orthogonal Matching  Pursuit (QNOMP).
+Other Bayesian CS approaches include Sparse Bayesian     Building upon the NOMP framework, QNOMP comprises
+Learning (SBL) [19], Approximate Message Passing (AMP)    an on-grid OMP sparsity selection stage followed by an
+[20], and their numerous extensions [21], [22], [23], [24],     off-grid joint optimization stage. Our approach introduces
+[25], [26], [27].                                        two key modifications to this framework: First, a locally
+  By operating on a predefined grid in the virtual domain,     refined multi-resolution OMP strategy is adopted in the on-
+these algorithms are susceptible to off-grid effects and energy     grid stage. Second, the quasi-Newton method is employed
+leakage due to grid discretization. While arbitrarily dense     to jointly estimate all multipath parameters, in contrast to
+grids can theoretically yield precise solutions [28], simple     the cyclic optimization of individual parameters adopted in
+grid refinement strategies tend to incur residual off-grid   NOMP. Numerical results demonstrate that the proposed
+errors [29], which can substantially degrade performance,     joint estimation, in combination with a block reweighting
+particularly for CSI extrapolation. Consequently, off-grid     technique, achieves rapid convergence, high accuracy, and
+super-resolution algorithms  are generally  preferred over    low  computational  complexity. Moreover,  the QNOMP
+on-grid refinement for high-resolution parameter estimation.     algorithm can be directly applied to the task of optimal CSI
+This challenge motivates the development of super-resolution     extrapolation.
+techniques for virtual parameter estimation [30].               Our major contributions are summarized as follows:
+  Among  super-resolution  algorithms,  Multiple  Signal                                                                        • A Computationally Efficient Super-Resolution Algo-
+Classification (MUSIC) [31], [32] and Estimating Signal                                                               rithm. We  propose  the Quasi-Newton  Orthogonal
+Parameters via Rotational Invariance Techniques (ESPRIT)                                                           Matching  Pursuit (QNOMP)  algorithm. QNOMP
+[33] are known to be effective under high signal-to-noise                                                                    operates  in two  stages: an  on-grid OMP  sparsity
+ratio (SNR) conditions. Atomic Norm Soft Thresholding                                                                       selection stage followed by an off-grid joint optimization
+(AST) [28], which solves a convex optimization problem                                                                         stage. The  first stage incorporates a locally refined
+in a continuous parameter space, can be viewed as the                                                                      multi-resolution OMP strategy to achieve high reso-
+continuous-domain counterpart of the LASSO method. The                                                                        lution with low complexity. The second stage uses
+Newtonized Orthogonal Matching Pursuit (NOMP) algo-                                                                     the Broyden-Fletcher-Goldfarb-Shanno (BFGS) quasi-
+rithm [34], [35], an OMP variant, incorporates Newton-based                                                      Newton method for joint optimization, which avoids
+refinements to mitigate basis mismatch, achieving a favorable                                                                 matrix inversion, enabling faster convergence. Crucially,
+balance between computational efficiency and estimation                                                                              this efficiency enables the simultaneous optimization of
+accuracy. Furthermore, various  off-grid sparse Bayesian                                                                                     all multipath parameters, a key difference from NOMP’s
+learning  (SBL)  methods  have  been  developed,  which                                                                     sequential approach. Consequently, QNOMP achieves
+typically adopt linear approximations for off-grid errors or                                                                         significant improvements in both estimation speed and
+dynamic off-grid models within the SBL framework [36],                                                                    accuracy.
+[37], [38], [39], [40], [41], [42], [43].                                • Linear Optimal Extrapolation. We derive the linear
+  Moreover, MIMO channels exhibit intrinsic structures [44]                                                                 optimal extrapolation solution for multipath channels
+that can be exploited to improve the performance of CSI                                                              based on  the  linear minimum mean squared  error
+estimation and extrapolation. For instance, burst sparsity                                               (LMMSE) criterion. By employing a Gaussian approxi-
+in the angular domain has been exploited to develop the                                                                 mation, we efficiently compute this extrapolation using
+Burst LASSO algorithm [45], and a non-uniform burst-                                                                     the estimates from QNOMP, which yields superior
+sparsity prior has been proposed to mitigate the off-grid                                                                performance.
+mismatch problem [46]. Furthermore, several algorithms        • Exploitation of Block-Sparsity Structure. We intro-
+leverage Markov priors to characterize such burst-sparsity                                                            duce a novel block reweighting technique that uses the
+patterns [47], [48].                                                                     high-resolution parameter estimates from QNOMP to
+  In  recent  years, deep  learning has been  increasingly                                                                       exploit the inherent block-sparsity of MIMO channels
+applied to channel estimation, demonstrating considerable                                                                        in the angular domain, thereby enhancing the accuracy
+potential. Existing methods can be broadly categorized into                                                                    of both channel estimation and extrapolation.
+two categories. The first comprises purely data-driven neural
+network techniques, such as those based on convolutional      Numerical experiments on simulated models and Clustered
+                                                       Delay Line (CDL) channels confirm the low computationalneural networks (CNNs)  [49], long short-term memory
+
+
+
+VOLUME 13, 2025                                                                                                         212653

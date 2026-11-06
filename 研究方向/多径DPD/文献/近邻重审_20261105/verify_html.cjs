@@ -1,0 +1,20 @@
+const {chromium}=require('C:/Users/Administrator/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const {pathToFileURL,fileURLToPath}=require('node:url');
+const fs=require('node:fs'),path=require('node:path');
+(async()=>{
+const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'});
+const page=await browser.newPage({viewport:{width:1360,height:950},deviceScaleFactor:1});const errors=[];
+page.on('pageerror',e=>errors.push(String(e)));
+await page.goto(pathToFileURL(path.join(__dirname,'文献重审与整理报告.html')).href);
+await page.screenshot({path:path.join(__dirname,'preview_desktop.png')});
+const all=await page.locator('.paper:visible').count();await page.locator('#missing').check();const missingPapers=await page.locator('.paper:visible').count();
+await page.locator('#grade').selectOption('A');const missingCore=await page.locator('.paper:visible').count();
+await page.locator('#missing').uncheck();const core=await page.locator('.paper:visible').count();
+await page.locator('#grade').selectOption('');await page.locator('#query').fill('SAGE');const sage=await page.locator('.paper:visible').count();await page.locator('#query').fill('');
+const links=await page.locator('a').evaluateAll(a=>a.map(x=>x.href));const broken=links.filter(u=>u.startsWith('file:')).filter(u=>!fs.existsSync(fileURLToPath(u)));
+const desktop=await page.evaluate(()=>({viewport:innerWidth,scroll:document.documentElement.scrollWidth}));
+await page.setViewportSize({width:390,height:844});await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:path.join(__dirname,'preview_mobile.png')});
+const mobile=await page.evaluate(()=>({viewport:innerWidth,scroll:document.documentElement.scrollWidth}));
+const report={errors,broken,all,missingPapers,missingCore,core,sage,desktop,mobile,passed:!errors.length&&!broken.length&&all===68&&missingPapers===33&&missingCore===0&&core===10&&sage>0&&desktop.scroll<=desktop.viewport&&mobile.scroll<=mobile.viewport};
+fs.writeFileSync(path.join(__dirname,'html_qa.json'),JSON.stringify(report,null,2),'utf8');console.log(report);await browser.close();if(!report.passed)process.exitCode=1;
+})().catch(e=>{console.error(e);process.exitCode=1});

@@ -1,0 +1,73 @@
+14058                                                              IEEE TRANSACTIONS ON MOBILE COMPUTING, VOL. 23, NO. 12, DECEMBER 2024
+
+
+                                                                                 [˜x(u), ˜y(u)]. This source utilizes an omnidirectional antenna for
+                                                                 the purpose of signal transmission.
+
+
+                                                             B. The Signal Model
+
+                                                     The main component of our localization methodology is the
+                                                                  signal emitted by the source and received by each anchor. The
+                                                                  signal received at anchor a, at any subcarrier can be encapsulated
+                                                                    in the following mathematical representation:
+
+
+                                                                  L
+                                                                ya =    a(θla, rla)sla + na.               (1)
+                                                                                     l=1
+
+                                                            Here, ya symbolizes the complex vector of the received signal
+                                                                         at anchor a, with a dimension of Ne × 1. The components of
+                                                                         this equation include sla, the complex received signal amplitude
+Fig. 1.  A sample schematic of a 2-D environment.                       of path l at anchor a, na, a complex white Gaussian noise vector
+                                                               of the same dimension Ne × 1, and the term a(θla, rla), also a
+                                             Ne × 1 vector, represents the complex array steering vector. The
+                                                                array steering vector is determined by the AoA of the path l at
+  The use of structured sparsity methods is motivated by their
+                                                          anchor a, θla, and the distance that the path l travels to reachability to be more interpretable and efﬁcient, especially in situa-
+                                                          anchor a, rla.tions where there are more input variables than observations.
+                                                              This array steering vector for the ns-th subcarrier is further
+These methods are also good at incorporating prior knowl-
+                                                              depicted as:
+edge about the structure of input variables, such as groups
+that overlap or do not overlap, or hierarchical structures like               a(θ, r) = Ωns−1r    [1, Γθ, . . . , ΓNe−1θ    ]T .          (2)graphs. Structured sparsity has been applied in various ﬁelds,
+including localization methods, due to its ability to provide a                                                   The variables within this equation, Γθ and Ωr, are complex
+more explainable view of the relationships between non-zero                                                              exponential factors dependent on antenna spacing, wavelength,
+elements in sparse models [28].                                                                  subcarrier frequency spacing, and the speed of light. To be more
+  While structured sparsity methods such as Group Lasso are                                                               speciﬁc:
+effective,theyencounterseveralcomputationalandperformance       r                                                                                                                                          λ sin(θ) where d is the spacing be-                                                         Γθ is deﬁned as e−j2π d
+challenges. These include the need for complex parameter tun-                                                            tween antennas, λ represents the wavelength of the signal,
+ing, scalability issues, and challenges in managing overlapping
+                                                           and θ is the angle at which the signal arrives.
+groups. These methods can also become computationally inten-       r                                                    Ωr is described by e−j2πΔf/C, with Δf indicating the
+sive as the size of the data and the number of groups increase.
+                                                                 spacing between subcarrier frequencies, and C being the
+Furthermore, they may have difﬁculties dealing with noise and
+                                                               speed of light.
+outliers within the groups, which can compromise both the
+                                                     The components of the steering vector play a crucial role
+robustness and the interpretability of the model [36].
+                                                                    in capturing the directional properties and the distance-related
+                                                                     characteristics of the incoming signals. This vector integrates
+                           III. SYSTEM MODEL                     phase information related to both the AoA and the propagation
+  This study investigates the problem of localization within a   distance of the signals. This model serves as a fundamental
+2-D multipath environment. This environment contains a num-  framework for localization, focusing on the received signals at
+ber of ﬁxed anchors and the goal is to precisely determine the   the anchors.
+location of a singular signal source within this environment.
+The following sections provide a detailed description of the   C. Key Observations in the Multipath Environment
+2-D multipath environment, the received signal model, and the
+                                                     To accurately locate the signal source, we jointly processchallenges posed by multipath reﬂections.
+                                                                 the received signals at all anchors. Given the sparse nature of
+                                                                 the signal in the spatial domain, a grid is created within the
+A. The Environment
+                                                            environment. It is assumed that the source is located at one of
+  As illustrated in Fig. 1, the environment consists of Na   these grid points. There are a couple of important observations
+anchors, each equipped with a uniform linear array (ULA)   regarding the spatial sparsity of the signal:
+                                                                             rcomprising Ne antenna elements. These anchors are placed      The direct LoS signals, which travel from the source to
+at known coordinates [˜xa, ˜ya], a = 1, 2, . . ., Na. As mentioned       each anchor, are presumed to emanate from the same grid
+earlier, the main goal of this study is to determine the location        point for all anchors. This uniform origin assumption is
+of the signal source which is positioned at unknown coordinates        central to our localization process.
+
+
+        Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:02:23 UTC from IEEE Xplore. Restrictions apply.

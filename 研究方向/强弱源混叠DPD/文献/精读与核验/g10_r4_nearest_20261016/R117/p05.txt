@@ -1,0 +1,66 @@
+Y. Yang et al.                                                                                                   Journal of Sound and Vibration 517 (2022) 116549
+
+estimation of source coordinates and strengths
+                                                                      (      (           )                       )
+      argmin‖ p −A(ΩS)qS‖22 = argmax 2R pHA(ΩS)qS −(A(ΩS)qS)H(A(ΩS)qS)  ,                                                (8)
+           ΩS,qS                             ΩS,qS
+
+where ℜ(⋅) denotes taking the real part, and the superscript “H” denotes the Hermitian transpose operator. The detailed derivation is
+shown in Appendix I. We define the likelihood function as
+                                           (           )
+    L (ΩS, qS)Δ = 2R pHA(ΩS)qS −(A(ΩS)qS)H(A(ΩS)qS).                                                                    (9)
+
+It is difficult to synchronously obtain ΩS and qS that maximizes L (ΩS,qS). Treating ΩS as a constant yields the least-squares solution of
+qS
+                     (
+       qS = (A(ΩS))HA(ΩS))−1(A(ΩS))Hp.                                                                                 (10)
+
+Substituting Eq. (10) into Eq. (9) yields the maximum likelihood ratio test cost function G (ΩS)
+                                          (
+    G (ΩS)=ΔpHA(ΩS) (A(ΩS))HA(ΩS))−1(A(ΩS))Hp.                                                                      (11)
+
+Therefore, the estimation of the source coordinates is ̂ΩS = argmaxG (ΩS). Substituting ̂ΩS into Eq. (10) yields the corresponding
+strength estimate ̂qS.
+
+4.2. Synchronous solution
+
+   To synchronously estimate the coordinates of all sources in the entire 2D continuous plane is hard. Therefore, the proposed
+BNOMP-CB has two simplifications. ◆ Discretize the continuous plane and initially estimate the source coordinates based on the
+multi-frequency synchronous compressive beamforming model (Eq. (7)). ◆Identify each source sequentially. The proposed method
+includes 4 processing steps to identify a new source. (a) Initial estimation based on the multi-frequency synchronous compressive
+beamforming model with the discretized grids. (b) Local Newtonian optimization within the local 2D continuous plane near the initial
+estimated coordinates. (c) Global cyclic feedback optimization for all the identified sources using the Newtonian method. (d)
+Orthogonal solution for the estimated sources’ strengths at all frequencies. The following is the equation derivation and description for
+the initial estimation, local Newtonian optimization, global cyclic feedback optimization, and source strength orthogonal solution.
+    (a) Initial estimation based on the multi-frequency synchronous on-grid compressive beamforming model
+  When s −1 sources have been identified, the residual can be written as
+                         (̂   )̂     ∑s−1
+        pr = p −   A  rSj   qSj,⋅,                                                                                           (12)
+                     j=1
+
+where ̂rSj and ̂qSj,⋅ are the coordinates and strengths of the jth estimated source, respectively. To identify the sth source, the likelihood
+function, the cost function, and the least squares function for source strength estimation will degrade into
+       (     )   (         )  (       )H(       )
+    L   rSs, qSs,⋅ =Δ2ℜ pHr A(rSs)qSs,⋅    −    A(rSs)qSs,⋅     A(rSs)qSs,⋅   ,                                                          (13)
+
+                                         (
+    G (rSs)=ΔpHr A(rSs) (A(rSs))HA(rSs))−1(A(rSs))Hpr,                                                                      (14)
+
+                       (
+       qSs,⋅=  (A(rSs))HA(rSs))−1(A(rSs))Hpr.                                                                                (15)
+  We discretize the 2D continuous plane into N grid points and select one to be the initial source position estimate. Therefore, the
+problem is transformed as a block sparse recovery problem of searching the one block that maximizes the cost function G (rSs) from the
+sensing matrix A(ΩG) with N prior blocks A(rGn), n = 1, …, N involved. That is, one grid point will be selected from ΩG to be the
+initially estimated source coordinates ̂rSs based on the multi-frequency synchronous compressive beamforming model (Eq. (7))
+         rSs = argmax G (rSs),                                                                                                (16)
+                        rSs ∈ΩG
+   Substituting the initially estimated source coordinates ̂rSs into Eq. (15) yields the corresponding estimated source strength vector at
+all frequencies ̂qSs,⋅.
+   (b) Local Newtonian optimization
+   Refining the initial estimated source location in a local continuous zone by Newtonian optimization can make the likelihood
+function converge towards the current local maximum, to obtain a more accurate estimate of the source coordinates and strengths. The
+2D Newtonian optimization is expressed as
+
+
+
+                                                                5

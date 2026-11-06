@@ -1,0 +1,127 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>哪些物理约束能排除假位置？</title><style>
+:root{--ink:#193b43;--muted:#5c7175;--teal:#14746b;--paper:#f5f5ef;--line:#d7e2dd;--soft:#e8f1eb}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;background:var(--研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿);color:var(--ink);font:16px/1.85 "Segoe UI","Microsoft YaHei",sans-serif}a{color:var(--teal);text-underline-offset:4px;overflow-wrap:anywhere}a:hover{color:#0e4944}a:focus-visible,summary:focus-visible{outline:3px solid #b07e32;outline-offset:4px}.wrap{max-width:1120px;width:calc(100% - 64px);margin:auto}header{padding:32px 0 26px}header .eyebrow{color:var(--teal);font-size:13px;letter-spacing:.12em}h1{font-size:clamp(30px,4vw,48px);line-height:1.3;max-width:900px;margin:20px 0}header p{max-width:830px;font-size:18px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:26px 0 8px}.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:19px 23px}.stat b{font-size:28px;display:block}.stat span{font-size:13px;color:var(--muted)}nav{position:sticky;top:0;z-index:2;background:#f5f5eff5;border-block:1px solid var(--line);backdrop-filter:blur(8px)}nav .wrap{display:flex;gap:22px;overflow-x:auto;white-space:nowrap;padding-block:13px}nav a{text-decoration:none;font-size:14px;color:var(--ink)}main{padding-bottom:36px}main>h2{font-size:27px;line-height:1.45;margin:52px 0 18px;padding-top:12px;border-top:2px solid var(--teal)}p{margin:14px 0}main>p:first-child{color:var(--muted);font-size:13px}main>p:nth-child(2){font-size:20px;background:var(--soft);padding:22px 26px;border-radius:14px}blockquote{margin:20px 0;padding:18px 25px;background:var(--soft);border-left:4px solid var(--teal);border-radius:0 12px 12px 0}blockquote p{margin:0;font-size:19px}strong{font-weight:650}ol,ul{padding-left:26px}li+li{margin-top:12px}main>ol>li{padding:5px 0}table{width:100%;border-collapse:collapse;font-size:14px;background:white}th,td{text-align:left;vertical-align:top;padding:15px 18px;border-bottom:1px solid var(--line);min-width:160px}th{background:var(--soft)}tr:last-child td{border:0}.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:13px;margin:18px 0}details{background:#fff;border:1px solid var(--line);border-radius:12px;margin:12px 0}summary{padding:18px 22px;cursor:pointer;font-weight:650;line-height:1.6}summary:hover{background:#f0f6f1;border-radius:12px}.paper-body{padding:0 23px 18px;border-top:1px solid var(--line)}.paper-body p:first-child{font-size:15px}.paper-body p{margin:16px 0 0}.source-list ul{padding:0 30px 20px 45px;font-size:14px}.source-list span{color:var(--muted);white-space:nowrap}pre{overflow-x:auto;max-width:100%;padding:22px;border:1px solid var(--line);border-radius:13px;background:white;font:14px/1.9 Consolas,"Microsoft YaHei",monospace}code{overflow-wrap:anywhere;font-size:13px}footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--muted);font-size:13px}.pill{display:inline-block;border-radius:6px;background:var(--soft);color:var(--teal);font-size:12px;padding:4px 9px;margin-right:7px}.pill.amber{background:#f6ecd7;color:#855c28}#motion{scroll-margin-top:90px}
+@media(max-width:680px){.wrap{width:calc(100% - 32px)}header{padding-top:23px}.stats{gap:8px}.stat{padding:14px 11px}.stat b{font-size:23px}.stat span{font-size:12px}nav .wrap{gap:19px}main>h2{font-size:23px;margin-top:38px}main>p:nth-child(2),blockquote{padding:17px 19px;font-size:18px}summary{padding:16px}th,td{padding:13px;min-width:145px}pre{font-size:12px;padding:15px}}
+@media print{nav{position:static}details:not([open])>.paper-body{display:block}summary{list-style:none}.wrap{width:100%}.stats{break-inside:avoid}body{background:white}h2{break-after:avoid}}
+
+h1{font-size:clamp(28px,4vw,38px)}main{padding-top:18px}main>p:nth-child(2){font-size:14px;background:none;padding:0}.top{padding-top:24px}.intro{padding:22px;border-left:4px solid #177e80;background:#e6efea;border-radius:0 12px 12px 0}.table-wrap{overflow:auto}td{min-width:120px}code{overflow-wrap:anywhere}summary{padding:18px 0;cursor:pointer;font-weight:650}details{border-top:1px solid #d4dfdc;margin-top:30px}footer{padding:30px 0;color:#627575}</style></head><body><div class="wrap top"><a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E7%A0%94%E7%A9%B6%E8%AE%B0%E5%BD%95/%E5%87%86%E5%85%A5%E4%B8%8E%E6%96%87%E7%8C%AE_20261024/%E5%87%86%E5%85%A5%E6%8A%A5%E5%91%8A.html">← 文献准入总报告</a><p class="intro">不能只问“反射能否拟合”。还要问：<br><strong>拟合出的环境，会不会同时挡住那些本应直达的信号？</strong></p></div><main class="wrap"><h1>哪些物理约束真的能排除假位置？</h1>
+<p>2026-10-25｜小规模机制核验完成。没有运行定位性能批次，没有冻结新增先验。</p>
+<h2>一句话结论</h2>
+<p><strong>最值得进一步检查的是“反射解释与直达可见性是否同时符合一个环境”，而不是把最强、最早或最短绕行当成直达标签。</strong> 本例中，仅共享平面、甚至仅共享垂直墙，都不足以排除假位置；要求同一不透明无限墙面不能截断已有直达线段，才排除了该替代解释。</p>
+<p>这说明可见性结构可能提供真实信息，但尚未证明有限建筑立面下也能消歧，更没有确认新的算法贡献。</p>
+<h2>1 实际完成的三项检查</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>检查</th>
+<th>结果</th>
+<th>能说明什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>假位置是否仅来自5.7cm绕行</td>
+<td>保存结果中还有米级替代绕行</td>
+<td>不能只删掉那个厘米级案例就认定问题消失</td>
+</tr>
+<tr>
+<td>两个源的反射共享一个未知平面</td>
+<td>真、假解释均找到合法同侧平面</td>
+<td>“不独立拟合每条反射”还不一定足够</td>
+</tr>
+<tr>
+<td>共享垂直平面，再核对全部直达线段</td>
+<td>仅反射长度：真、假各4个不同平面；不穿越无限不透明墙：真剩1个、假剩0个</td>
+<td>排除来自新增可见性约束，不是“垂直”两个字，也不是优化器更好</td>
+</tr>
+</tbody></table></div>
+<p>保留每源4LOS、总5站、未知波形与路径常复增益。另一源位置与两份已保存的IQ解释都不改。对照中允许真假解释各估计一个环境，因为接收端没有地图；没有把真实墙面直接给算法。</p>
+<h2>2 为什么最强、最早不能直接解决</h2>
+<p>**最早：**直达存在且可分辨时，它是该源到该站最短的几何路径。但直达缺失时，最先收到的也只是反射/绕射；多个未知源同时出现时，直接比较混合信号的峰时刻更不能给出逐源LOS标签。上轮反例每个源—站只保留一条到达，所以“选第一条”根本没有新增信息。<a href="https://research.njit.edu/cwcspr/high-precision-localization-rf-sources-multipath-channels">NJIT研究组的说明</a>也明确指出直达遮挡和旁瓣混淆会使首到达判断出错。</p>
+<p>**最强：**接收功率同时受距离、遮挡、天线和反射影响。不能保证不同站之间所有直达都强于所有反射。<a href="https://www.nist.gov/ctl/smart-connected-systems-division/indoor-localization">NIST的室内定位实测项目总结</a>说明多径妨碍直达隔离；这是定性旁证，不是低空场景的定量功率先验。</p>
+<p>**已知自由空间相对幅度：**能够增加约束，但当前新方向允许路径系数未知。旧反例也不是按严格1/d生成的，不能事后对它施加1/d后声称物理模型已验证。是否恢复已标定幅度模型是研究范围选择，本轮没有自动变更。</p>
+<h2>3 短绕行究竟有多重要</h2>
+<p>复用上轮540条条件，全量保留工作域内不同支持的合法替代根：</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>部署</th>
+<th align="right">涉及的条件数</th>
+<th align="right">替代根数</th>
+<th>替代NLOS超额长度范围</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>同高</td>
+<td align="right">3</td>
+<td align="right">5</td>
+<td>0.0146—2.5176m</td>
+</tr>
+<tr>
+<td>斜平面</td>
+<td align="right">3</td>
+<td align="right">5</td>
+<td>0.0142—2.5185m</td>
+</tr>
+<tr>
+<td>屋顶高差</td>
+<td align="right">4</td>
+<td align="right">6</td>
+<td>0.6229—4.0139m</td>
+</tr>
+</tbody></table></div>
+<p>合计16个根、10条条件，范围0.0142—4.0139m。它们不是独立随机样本，不估计出现概率。</p>
+<p>几何反射可以连续接近直线长度，因此“反射至少绕行若干米”不是一般物理定律。具体墙体、站点安全距离与可见性可能给出下界，但需要先给环境依据。本轮没有选择一个恰好过滤这些根的阈值。</p>
+<h2>4 共同墙面核验：把收益来源拆清楚</h2>
+<p>对源p、接收站r和平面nᵀx=b（n为单位法向量），镜像法给出：</p>
+<p><code>L² = ||p−r||² + 4(nᵀp−b)(nᵀr−b)。</code></p>
+<p>两条反射共用n、b，就不再各自任意调延迟。一般平面仍有三个几何自由度，本例两条长度约束可同时拟合真假解释；数值求解32个预定初值中，真解释29次、假解释30次得到满足条件的平面。这不是定位成功率，也不是自由度计数代替证明，明确平面证据都已保存。</p>
+<p>再限制n的竖直分量为0，用半角代换求多项式根，处理分母零和角度极点，并回代原长度与反射定律。去掉重复法向表示后：</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>条件逐步增加</th>
+<th align="right">原位置解释</th>
+<th align="right">约75m外替代解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>两条反射共享垂直平面，各自满足镜面条件</td>
+<td align="right">4个不同平面</td>
+<td align="right">4个不同平面</td>
+</tr>
+<tr>
+<td>再要求已有LOS线段均不穿过该无限不透明面</td>
+<td align="right">1个</td>
+<td align="right">0个</td>
+</tr>
+</tbody></table></div>
+<p><strong>关键限制：这是“无限不透明面”的可见性检查。</strong> 有限墙面的边缘允许直达线段从墙外通过；它还可能产生其他可见反射，需要一并生成。原来缺LOS的两条链路也仍需有遮挡原因。当前结果没有验证这些完整环境条件，不能直接宣布“共同垂直墙已解决真实场景”。</p>
+<p>本轮只排除了这一个固定替代位置，没有证明真实位置是结构化模型的全部解，也没有运行新的全域盲定位。</p>
+<h2>5 论文依据给出的约束</h2>
+<ul>
+<li>Briso等，<a href="https://doi.org/10.1109/TVT.2020.2968136">TVT 2020</a>，PDF第2—4页、§II—IV：低空遮挡与高度、具体建筑和工作频率有关；该试验的低频遮挡段以绕射为主，高频多径更显著。它支持物理环境生成的必要性，不能据此把所有低空NLOS都设成一条镜面反射。原文为连续波接收功率测量，不提供本任务逐条路径的幅度排序或最小延迟阈值。</li>
+<li>Garcia等，<a href="https://arxiv.org/abs/1505.03193">2015预印本</a>，PDF第6页Assumptions 2、3和Theorem 1：保证需要路径数量与几何唯一性条件；不能用“已发表方法有保证”省略本模型检查。</li>
+<li>Wang等，<a href="https://doi.org/10.1109/TWC.2025.3601543">TWC正式版本</a>，PDF第3页、式(1)：阵列与已知导频反卷积后的CSI提供了当前盲单天线任务没有的信息。不免费借入其方向信息或干净信道。</li>
+<li>多径虚拟点/共同反射几何已有丰富研究。此次公式和镜像检查不是创新；潜在问题只能是明确场景下仍存在的关联困难，以及有别于常规共同几何拟合的必要处理。</li>
+</ul>
+<h2>6 下一步建议：先闭合生成模型，不再追加经验门槛</h2>
+<p>目前不宜直接开定位性能批次，也不需要再增加一串候选算法。若继续，最小有意义的工作是<strong>用一个有限主立面与明确遮挡规则生成完整可见路径，再判断可辨识范围</strong>：</p>
+<ol>
+<li>生成端知道环境，估计端仍无地图、无波形、无真LOS标签；只声明真实可用的结构假设。</li>
+<li>同一环境同时决定直达是否被挡、反射点是否落在墙面内、其他反射是否可见，不再独立指定支持和延迟。</li>
+<li>不要求所有构型都唯一；但多解条件应被识别并记录，不能删掉难例后宣称全局定位可靠。</li>
+<li>在这一模型能成立后，再测试普通关联/联合拟合是否留下值得研究的困难。</li>
+</ol>
+<p>“单主立面”“相应遮挡机制”和是否纳入绕射尚不是用户冻结的正式场景。该建议涉及实质建模收敛，因此本轮到此停止，没有自动引入建筑地图、墙面真值或新的主算法。</p>
+<details><summary>复现、原文阅读范围与验证记录</summary>
+
+<ul>
+<li><a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E7%A0%94%E7%A9%B6%E8%AE%B0%E5%BD%95/%E5%87%86%E5%85%A5%E4%B8%8E%E6%96%87%E7%8C%AE_20261024/step1_constraints_20261025/%E6%89%A7%E8%A1%8C%E5%90%88%E5%90%8C.md">执行合同与追加诊断登记</a>、<a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E7%A0%94%E7%A9%B6%E8%AE%B0%E5%BD%95/%E5%87%86%E5%85%A5%E4%B8%8E%E6%96%87%E7%8C%AE_20261024/step1_constraints_20261025/check_constraints.py">一般平面源码</a>、<a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E7%A0%94%E7%A9%B6%E8%AE%B0%E5%BD%95/%E5%87%86%E5%85%A5%E4%B8%8E%E6%96%87%E7%8C%AE_20261024/step1_constraints_20261025/check_vertical.py">垂直墙枚举源码</a>、<a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E7%A0%94%E7%A9%B6%E8%AE%B0%E5%BD%95/%E5%87%86%E5%85%A5%E4%B8%8E%E6%96%87%E7%8C%AE_20261024/step1_constraints_20261025/summarize.py">独立汇总源码</a>。</li>
+<li><a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E7%A0%94%E7%A9%B6%E8%AE%B0%E5%BD%95/%E5%87%86%E5%85%A5%E4%B8%8E%E6%96%87%E7%8C%AE_20261024/step1_constraints_20261025/run_20261025_151228_347508/result.json">一般平面原始结果</a>、<a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E7%A0%94%E7%A9%B6%E8%AE%B0%E5%BD%95/%E5%87%86%E5%85%A5%E4%B8%8E%E6%96%87%E7%8C%AE_20261024/step1_constraints_20261025/vertical_20261025_151450_154591/result.json">垂直墙原始结果</a>、<a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E7%A0%94%E7%A9%B6%E8%AE%B0%E5%BD%95/%E5%87%86%E5%85%A5%E4%B8%8E%E6%96%87%E7%8C%AE_20261024/step1_constraints_20261025/%E7%8B%AC%E7%AB%8B%E6%A0%B8%E9%AA%8C.json">独立审计</a>。原始枚举计数含正负法向和极点重复，报告中的不同平面数量已去重。</li>
+<li>原IQ和结果输入SHA保持不变；一般平面阶段之后合同追加了垂直墙条款。先前合同前缀已回溯恢复并与当时SHA核对一致，副本明确不是事前另存：<a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E7%A0%94%E7%A9%B6%E8%AE%B0%E5%BD%95/%E5%87%86%E5%85%A5%E4%B8%8E%E6%96%87%E7%8C%AE_20261024/step1_constraints_20261025/run_20261025_151228_347508/%E5%8E%9F%E5%90%88%E5%90%8C%E5%9B%9E%E6%BA%AF%E5%89%AF%E6%9C%AC.md">原合同回溯副本</a>。</li>
+<li>已知垂直平面x=-900m的正对照通过。一般平面有效解镜像长度独立误差最大9.387e-08m；垂直反射回代误差最大3.809e-12m。</li>
+<li>一般平面脚本内部0.640s，垂直枚举0.033s。不是DPD定位耗时；没有训练、性能统计或参数调优。</li>
+<li>本轮重读既有PDF相关页；公开查询只补充NIST/NJIT及候选论文元数据。IEEE文档10509551网页受验证页阻挡，没有把检索摘要写成全文结论，也不因此宣称查重新颖性已完成。</li>
+</ul>
+</details>
+</main><footer class="wrap">有限机制诊断，不是性能排行榜；新物理假设尚未冻结，未启动正式定位实验。</footer></body></html>

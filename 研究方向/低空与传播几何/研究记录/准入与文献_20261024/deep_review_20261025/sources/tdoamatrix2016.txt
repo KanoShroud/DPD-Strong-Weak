@@ -1,0 +1,904 @@
+
+=== PAGE 1 ===
+                                                                                                                                                  1
+
+ TDOA Matrices: Algebraic Properties and their
+Application to Robust Denoising with Missing Data
+
+                    Jose Velasco, Daniel Pizarro, Javier Macias-Guarasa and Afsaneh Asaei,
+
+
+
+  Abstract—Measuring the Time delay of Arrival (TDOA) be-   are referred to as the non-redundant set. This problem has
+tween a set of sensors is the basic setup for many applications,   been studied in the  past, showing that one can optimally
+such as localization or signal beamforming. This paper presents                                                               obtain the non-redundant set when TDOA measurements are
+the  set  of TDOA matrices, which are  built from  noise-free
+                                                           contaminated with additive Gaussian noise. This is known asTDOA measurements, not requiring knowledge of the sensor
+array geometry. We prove that TDOA matrices are rank-two   the Gauss-Markov estimator [14]. However, in more realistic
+and have a special SVD decomposition that leads to a compact   scenarios errors are not Gaussian and some of the TDOA
+linear parametric representation. Properties of TDOA matrices   measurements may contain outliers. In these cases the Gauss-
+are applied  in  this paper  to perform  denoising, by ﬁnding                                                  Markov estimator performs poorly.
+the TDOA matrix closest to the matrix composed with noisy
+                                                              This paper presents the TDOA matrix, which  is createdmeasurements. The paper shows that this problem admits a
+closed-form solution for TDOA measurements contaminated with  by the arrangement of the  full TDOA set inside a skew-
+Gaussian noise which extends to the case of having missing   symmetric matrix, and studies the algebraic properties of this
+data. The paper also proposes a novel robust denoising method   matrix, showing that it has rank 2 and a SVD decomposition
+resistant to outliers, missing data and inspired in recent advances   with n −1 degrees of freedom. Such matrices have been
+in robust low-rank estimation. Experiments in synthetic and real
+                                                               previously deﬁned in the literature [15], but their propertiesdatasets show signiﬁcant improvements of the proposed denoising
+algorithms in TDOA-based localization, both in terms of TDOA  and applications have not been studied until now.
+accuracy estimation and localization error.                      These algebraic properties are used in this paper to per-
+                                                      form denoising under different scenarios, which include the
+                                                            presence of missing TDOA measurements and outliers. These
+                           I. INTRODUCTION                                                             denoising algorithms are tested in the context of speaker local-
+   IME delay of arrival (TDOA) estimation is an essential   ization with microphone arrays, using synthetic and publicly
+     pre-processing step for multiple applications in the con-   available real datasets. Our denoising algorithms are able toT
+text of sensor array processing, such as multi-channel source   recover accurate TDOA values for high rates of missing data
+localization [1], self-calibration [2] and beamforming [3]. In  and outliers, signiﬁcantly outperforming the Gauss-Markov
+all cases, performance is directly related to the accuracy of   estimator in those cases. All the proposed methods don’t
+the estimated TDOAs [4].                                       require knowledge of the sensor positions, so that they can
+  Estimating TDOA in noisy environments has been subject   also be used for calibration [2].
+of study during the last two decades [5]–[7], and is still an    The main contributions of this work are threefold: i) Def-
+active area of research, beneﬁting from current advances in   inition of the algebraic properties of TDOA matrices.  ii) A
+signal processing and optimization strategies [8]–[11].         closed-form solution for TDOA denoising for Gaussian noise
+   Typically, the TDOA between a single pair of sensors is  and the presence of missing data. iii) Novel robust-denoising
+obtained by measuring the peak of the generalized cross-  methods for handling additive correlated noise, outliers and
+correlation (GCC) of the received signals on each sensor [12],   missing data.
+which are assumed to be generated from a single source. Many
+factors, such as the spectral content of the signal, multipath   A. Notation
+propagation, and noise contribute to errors in the estimation     Real  scalar values are represented by lowercase  letters
+of the TDOA.                                                          (e.g. δ). Vectors are by default arranged column-wise and are
+  Given a set of sensors, TDOA measurements can be ob-   represented by lowercase bold letters (e.g. x). Matrices are
+tained for every possible pair of sensors. This is commonly   represented by uppercase bold letters (e.g. M). Lower-case
+known as the full TDOA set or spherical set [13]. This paper   letters are reserved to deﬁne vector and set sizes (e.g. vector
+studies how to reduce noise and errors from the full TDOA set.  x = (x1, · · · , xn)⊤is of size n), and x⊤denotes transpose of
+The intuition behind this denoising is to exploit redundancy   vector x. Calligraphic fonts are reserved to represent generic
+of the full TDOA set. For n sensors, the full set of n(n−1)/2   sets (e.g. G) or functions applied to matrices (e.g. P(X)). The
+measurements can be represented by n −1 values, which   l2 norm ∥· ∥2 will be written by default as ∥· ∥for simplicity,
+                                                       and ∥· ∥F  is the Frobenius norm, while  | · | is reserved to
+   J. Velasco, D. Pizarro, and J. Macias-Guarasa are with the Department of
+Electronics, Escuela Polit´ecnica Superior, University of Alcal´a, 28805 Alcal´a   represent absolute values of scalars. The l0 norm of a matrix,
+de Henares, Spain.                                                  written ∥·∥0, is deﬁned as the number of non-zero elements of
+  A. Asaei is with Idiap Research Institute, Martigny, Switzerland.          the matrix. A ◦B is the Hadamard product between A and B,
+  E-mails:       {jose.velasco,       pizarro,      macias}@depeca.uah.es,
+afsaneh.asaei@idiap.ch).                                     deﬁned as the entrywise multiplication of the corresponding
+  Manuscript received Month Day, 2015; revised Month Day, 2015.          matrices. tr(·) is the trace function.
+
+=== PAGE 2 ===
+2
+
+
+  We  also  deﬁne  the  normalized  unitary  vector   ˆ1  as      Typically, when only two sensors are employed, the peak
+ˆ1  =    (1, . . . , 1)⊤/√n,  and  the   null  vector   ˆ0  as   of the generalized cross-correlation (GCC) function of the
+ˆ0 =  (0, . . . , 0)⊤, both  of them having  size  n.  Finally,   signals of two sensors is a good estimator for the TDOA,
+1 = n  ˆ1 ˆ1⊤is a n × n matrix with all elements equal to   for reasonable noise and reverberation levels [12].
+1, Dx is a n × n diagonal matrix where its main diagonal is    When more than two sensors are used (n > 2), there are
+the vector x, and I is the identity matrix.                  n(n −1)/2 different TDOA measurements from all possible
+                                                                    pairs of sensors, forming the  full TDOA  set or spherical
+                                                                       set [13]. However, all those TDOA measurements are redun-
+B. Paper Structure                                                                   dant. In fact, usually one sensor is considered the reference
+  The rest of the paper is distributed as follows. Section II   sensor, and only the subset of n −1 TDOA measurements
+describes the related work and Section III the problem state-  which involve that sensor are considered. That non-redundant
+ment. In section IV TDOA matrices are described along   set is the set of measurement used by the majority of TDOA-
+with a derivation of  their  properties. TDOA denoising in   based positioning algorithms proposed in the literature [16],
+Gaussian noise case is addressed in section V, also providing   [18]–[22]. Nevertheless, an optimal (denoised) version of the
+a closed-form solution. In sections VI and VII we propose   non-redundant set can be estimated from the redundant set
+novel algorithms for robust handling of noise and missing   using a Bayesian Linear Unbiased Estimator (BLUE), also
+data, respectively. Section VIII combine the proposals of the  known as the Gauss-Markov estimator [14].
+previous two sections  into an uniﬁed algorithm. We also   A closed-form solution for the BLUE estimator is provided
+provide an extensive experimentation to validate the proposed   in [23], also proving that  it  is equal to the standard least
+algorithms using both synthetic (Section IX) and real data   squares estimator, and that  it reaches the Cramer-Rao lower
+(Section X). Finally, conclusions are drawn in section XI.     bound for positioning estimation. However, all the results in
+                                                                      that work are based on the assumption of additive Gaussian
+                                                                   noise, which is unrealistic in many practical applications [24],                        II. RELATED WORK
+                                                       and doesn’t yield good results when correlated noise is present
+ TDOA estimation  is an essential ﬁrst step for multiple   as a consequence,  for  instance, of multipath propagation.
+applications related to 1) localization, 2) self-calibration and   Additionally, the experimental results shown in their work are
+3) beamforming (among others):                             only applied to synthetic data, thus not allowing to assess the
+  1) Localization: widely used in radar, sonar and acoustics,   performance of their proposal in real scenarios (in section X
+since no synchronization between the source and sensor is  we show the limitations of their method when evaluated on
+needed. The TDOA information is combined with knowledge   real data).
+of the sensors’ positions to generate a Maximum Likelihood   A least-squares solution to TDOA denoising is proposed
+spatial estimator made from hyperboloids intersected in some   in  [25].  It  is based on  projecting  the non-redundant  set
+optimal sense. A linear closed-form solution of the former   of TDOA measurements into a set of “feasible” bivectors
+problem, valid when the TDOA estimation errors are small, is   (rank 2, antisymmetric tensors) that show the same geometric
+given in [16].                                                    properties of TDOA matrices. This denoising is also optimal
+  2) Self-calibration: since knowing the position of sensors is   for Gaussian noise but as in [24] the experimental analysis is
+mandatory for localization techniques, some strategies have   based on simulated data and  it does not cope with missing
+been also proposed in order to calibrate them using only   data or the presence of outliers in the TDOA measurements.
+TDOA measurements. In  [2], [17], the TDOA problem  is      Periodicity in correlated signals, coherent noise and multi-
+converted in a Time of Arrival (TOA) problem estimating the   path due  to  reverberation  are  the major sources of non-
+departure time of signals. Then, self-calibration techniques for   Gaussian error in TDOA estimation. Different approaches have
+TOA can be employed. The main drawback of this approach is   been proposed to deal with them. A basic method consists
+that the conversion step from TDOA to TOA is very sensitive   in making the GCC function more robust, de-emphasizing
+to outliers and correlated noise.                                 the frequency-dependent  weighting. The Phase Transform
+  3) Beamforming: precise TDOA estimations is also critical  (PHAT) [26]  is one example of this procedure which has
+for beamforming techniques and its applications. In [3], for   received considerable attention as the basis of acoustic source
+example, additional steps are proposed for selecting the ap-   localization systems due to its robustness in real world scenar-
+propriate TDOA value among the correlation peaks, and also   ios [27], [28]. Other approaches are based in blind estimation
+dealing with TDOA outliers. These steps include a Viterbi   of multi-path (room impulse response) [29] but they need a
+decoding based algorithm which maximizes the continuity  good initialization to perform well.
+of the TDOA estimations in several frames. However, the    Some previous works have also proposed more complicated
+TDOA selection  criteria  is just based on their distance to   structures in order to represent TDOA redundancy, while not
+surrounding TDOA values and their GCC-PHAT values, thus   imposing strong assumptions on the noise distribution. In [30]
+not attempting to beneﬁt from the actual redundancy of the   a representation based on graphs allows to disambiguate if a
+TDOA measurements.                                     peak in correlation was generated by the direct path or by
+  Hence, an accurate estimation of TDOA is essential for a   reverberation applying an efﬁcient search algorithm among all
+good performance of any of the former applications based on   possible combinations. However, they do not explicitly attempt
+these measurements.                                              to provide improved TDOA estimations by exploiting their
+
+=== PAGE 3 ===
+                                                                                                                                                  3
+
+
+redundancy.
+  Also different matrix representations have been used in
+the bibliography regarding TDOA formulation. For example
+[31] uses a representation  slightly different to the TDOA
+matrices we describe here, but such representation does not
+have the algebraic properties that TDOA matrices have, and
+their authors do not address an study in this sense.
+  So, to the best of our knowledge, there are no previous
+reported work dealing with improving TDOA estimations by
+exploiting  their redundancy, while not imposing Gaussian
+noise restrictions, not requiring the sensor positions, and being
+able to deal with the presence of outliers and missing mea-     Fig. 1: Example of three different geometrical conﬁgurations (grey, green
+                                                                               and blue) of 4 sensor with identical TDOA matrix.
+surements (errors that will severely impact the performance of
+applications based on TDOA measurements). In this paper we
+show that TDOA matrices are a powerful tool that combined   with
+with recent advances in robust low-rank estimation, are able                     ∆τij = (τi −τj) ,                    (2)
+to generate novel solutions for these problems.
+                                                       where τi is the time of arrival of the signal x(t) at the sensor
+                    III. PROBLEM STATEMENT                       si.
+   Hereafter, we assume  only one  source  located  at  the   We   will   also   express M   in   terms   of    its
+position  r  =   (rx, ry, rz)⊤,  and n  sensors  synchro-  columns   as M   =    (m1, m2, · · · , mn),   being
+nized  between  them  and  placed  in  different  positions  mi = (∆τ1i, ∆τ2i, . . . , ∆τni)⊤.
+si = (six, siy, siz)⊤, i ∈[1, n].                      We denote as MT (n) to the set of TDOA matrices of size
+  Given this setup, we will assume that the source is emitting  n × n.
+an unknown signal x(t). Then, the signal received by the sen-     Notice that there is a bijection between the full TDOA set
+sor i, xi(t), is without loss of generality, a delayed and attenu-  and the corresponding TDOA matrix. Nevertheless expressing
+ated version of x(t) (direct propagation) in addition to a signal  TDOA measurements as a matrix has important advantages,
+gi(t) which summarizes  all the adverse effects,  i.e. noise,   that we will discover throughout this article.
+interference, multipath, etc. Thus, xi(t) = x(t −τi) + gi(t),     Note also that in the former deﬁnition, knowing the sensor
+where τi = ∥r −si∥2/c is the time of arrival (TOA) of the   array geometry is not required. For a given geometry, all the
+signal x(t) at the sensor si, being c the propagation speed.     feasible TDOA matrices (those that are consistent with that
+  Assuming that TOA cannot be estimated directly, the time   particular geometry) are a subset of MT (n). Studying the
+delay of  arrival (TDOA) between the sensors  i and j  is   properties of such subset is out of the scope of this paper
+estimated by correlating the received signals xi(t) and xj(t)  and the interested reader can refer to [8], [9], [32] for further
+(typically using the Generalized Cross-Correlation GCC [26]).   details.
+                                             On the other hand, given a particular TDOA matrix, there
+                   IV. TDOA MATRICES                      are inﬁnite number of sensors geometries which match with
+  In  this section we deﬁne TDOA matrices, and develop    it. Left side of Fig. 1 shows  that, given a  set of TOAs
+their main properties. In a nutshell, given any TDOA matrix    (τ1,..., τn) compatible with the set of TDOA measurements,
+M, we show that: i) M is rank 2 (Theorem 1),  ii) M can   the microphones can be  situated  in any place along  the
+be decomposed as M =  x ˆ1⊤−ˆ1 x⊤  with x = M ˆ1   circumference (sphere in the 3D case) with center in the source
+(Lemma 1) and  iii) the previous decomposition is bijective   (dotted lines), preserving its corespondent TOA (and therefore,
+(Theorem 2).                                                                   its TDOA). Right side of Fig. 1 shows that there are a inﬁnite
+  These properties are the foundations of the denoising algo-  number of TOA sets that comply with a given set of TDOA
+rithms that we present in sections V and VI, and the missing   measurements.
+data recovery proposal described in section VII, plus their
+combination described in section VIII.                         B. Rank of TDOA matrices
+                                                Theorem 1. Let M ∈MT (n), then M is rank 2 or 0 (trivial
+A. Deﬁnition of TDOA matrices                                  case).
+Deﬁnition 1. A TDOA matrix M, is a (n×n) skew-symmetric
+                                                                  Proof: The matrix M can be expressed as:
+matrix where the element (i, j) is the time difference of arrival
+(TDOA) between the signals arriving at sensor i and sensor          M = T −T⊤,                     (3)
+j:
+             0    ∆τ12    · · ·  ∆τ1n         where T is a rank 1 matrix deﬁned as:
+                    ∆τ21    0       · · ·  ∆τ2n                  τ1    · · ·   τ1                         
+   M = {∆τij} =                  (1)                                                                                                                                  (4)                       ...                                    ...       ...                          ...                                            T =     ...     ...                   ...                                                 ,
+                   ∆τn1  ∆τn2    · · ·    0                                    τn    · · ·   τn
+
+=== PAGE 4 ===
+4
+
+
+Applying the well known inequality:                            leads to a parametric representation of M that has important
+                                                                  properties that we will exploit later for TDOA denoising.
+         rank(A + B) ≤rank(A) + rank(B),         (5)
+                                                         Corollary 2.1. Given any M ∈MT (n), the corresponding
+we can deduce that rank(M) ≤2.                                                               vector x ∈Rn, perpendicular to 1, can be calculated as:
+  Moreover, since the rank of any skew-symmetric matrix
+must be even, rank 1 is not feasible. So we can conclude that,                   x = M ˆ1.                        (7)
+excepting the case that M is the zero matrix (trivial case), the
+                                                         Corollary 2.2. M ∈MT (n) can also be expressed as:
+rank of M is 2. This completes the proof.
+  Note that the formerly referred as ’trivial case’ only occurs                  1
+                             M =    (Dx 1 −1 Dx)    , ˆ1 ⊥ˆx,          (8)when the time of arrival is the same for all the sensors, i.e            √n
+sensors are geometrically placed on a sphere with center in
+                                                                    1                                                                since x ˆ1⊤= Dx 1/√n and ˆ1 x⊤=                                                                       Dx/√n,the source.
+  Rank deﬁciency of TDOA matrices means that their rows     1) Singular Value Decomposition: Because M ∈MT (n)
+and columns are linearly dependent. That is consistent with    is a skew-symmetric matrix of rank 2,  it has the following
+the fact that, in the noise-free case, the full TDOA set can be   singular value decomposition (SVD) [33, Supplementary ma-
+generated from the non-redundant set using linear equations    terial]:
+[23]. In fact, in a TDOA matrix, the column j is the TDOA
+                                                           σ  0
+non-redundant set when the sensor j is the reference for TDOA M = (ˆu2, −ˆu1)           (ˆu1, ˆu2)⊤= σ (ˆu2, −ˆu1) (ˆu1, ˆu2)⊤,
+                                                                    0  σ
+measurements. Hereafter, and without loss of generality, we
+                                                                                                                                  (9)
+will consider the ﬁrst sensor as the reference for the non
+                                                      where ˆu1 and ˆu2 are orthonormal vectors and σ ≥0. Note
+redundant-set.
+                                                                      that the SVD decomposition of M is not unique. Given any
+                                                             orthogonal 2×2 matrix R, the vectors (ˆv1, ˆv2) = (ˆu1, ˆu2) R
+C. Bijective mapping for TDOA matrices                       also represent a valid SVD decomposition:
+  We show next a particular representation of TDOA matrices                         M = σ (ˆv2, −ˆv1) (ˆv1, ˆv2)⊤= σ (ˆu2, −ˆu1) (ˆu1, ˆu2)⊤. (10)
+with n −1 parameters that describes their spectral properties
+and also forms the base for our denoising algorithms.       Among  all possible SVD decompositions of M note that
+                                                        theorem 2 guarantees that always exists one where ˆu1 = ˆ1.Theorem 2. Let H ⊂Rn be a n −1 dimensional hyperplane
+                                                               In such case SVD decomposition can be computed from (6)of Rn such that span(ˆ1) ⊈H, then there always exits an
+                                                               as stated in the following theorem:
+isomorphism between MT (n) and H of form:
+                                        Lemma 1. Given M ∈MT (n), it admits the following SVD
+            φH : H −→  MT (n)
+                                                            decomposition:
+                    z 7−→z ˆ1⊤−ˆ1 z⊤
+                                                          ⊤      M ˆ1
+                        M = σ  ˆu, −ˆ1    ˆ1, ˆu     with   ˆu =        σ = ∥M ˆ1∥     Proof: Theorem 2 states that a bijective linear map exists                                                      ∥M ˆ1∥
+between MT (n) an a n −1 dimensional subset of Rn. Since                                                           (11)
+the matrix T in (4) can be rewritten as T = z ˆ1⊤, where
+                                                        Note that, according the previous lemma, not all rank 2z = (τ1, · · · , τn)⊤, we can deﬁne the following linear map:
+                                                        skew-symmetric matrices are TDOA-Matrices. In fact, if ˆv1
+             φ : Rn −→  MT (n)                    and  ˆv2 in (10) are not coplanar with  ˆ1  (i.e. (ˆ1⊤ˆv1)ˆv1 +
+                   z 7−→z ˆ1⊤−ˆ1 z⊤                          (ˆ1⊤ˆv2)ˆv2̸ = ˆ1), then the resulting matrix is rank 2 and skew-
+                                                        symmetric but not a TDOA matrix.
+that is clearly surjective but not injective. That is, any vector
+z′ = z + α ˆ1 represents the same TDOA matrix. Indeed, the                                                                             V. TDOA DENOISING
+kernel of φ is the linear subspace of Rn generated by ˆ1.
+                                                                  In this section we propose a denoising strategy to deal
+  Since we are looking for an isomorphism, we will restrict
+                                                           with Gaussian noise in the estimated TDOA measurements,
+the domain of φ to ensure injectivity.  It yields φH, where
+H ⊂Rn is a hyperplane of Rn not containing ker(φ). Note   deriving a closed form solution for the proposed optimization
+that φH  is bijective as H ⊂Rn keeps the surjectivity of φ   problem. This solution  is also compared with the Gauss-
+                                                  Markov Estimator.
+and, since ker(φH) = {0}, the function is also injective.
+   Hereafter, we will only consider the particular case of φH
+for the hyperplane H = ker(φ)⊥.  It yields the following   A. Denoising Strategy
+expression for any M ∈MT (n):                     We assume now that each TDOA measurement is contami-
+                                                             nated with uncorrelated Gaussian noise nij = −nji, such that   M = x ˆ1⊤−ˆ1 x⊤      ,  x ⊥ˆ1    , x ∈Rn      (6)
+                                                                      ∆˜τij = ∆τij + nij. Therefore, the measured TDOA matrix
+  Choosing x perpendicular to  ˆ1 is very convenient, since  ˜M = {∆˜τij} is also a skew-symmetric matrix, sum of a noise-
+both  it simpliﬁes φ−1H  as shown in the corollary 2.1, and  it   free M ∈MT (n) and a skew-symmetric matrix containing
+also can be used for calculate the singular value decomposition   noise N = {nij}:
+(SVD) of any M ∈MT (n), as discussed in IV-C1. This                    ˜M = M + N.                   (12)
+
+=== PAGE 5 ===
+                                                                                                                                                  5
+
+
+Because of the noise, ˜M /∈MT (n) and thus Theorem 1   proposed solution (x∗and λ∗) satisﬁes the equations of a
+is no longer satisﬁed. Consequently, the rank of ˜M may be   critical point, it is the global minimum
+higher than two. Nevertheless, we will show that we can     Since ˜M is skew-symmetric (˜M −˜M⊤) = 2˜M. Therefore,
+take advantage of the structure of TDOA matrices in order   (18) becomes:
+to denoise the measured data.
+                                                                     2 ˜M ˆ1 −λˆ1
+  For   denoising,  we   propose   ﬁnding   the   closest          x∗=       = ˜M ˆ1                (19a)
+M∗∈MT (n), to the measured matrix ˜M, in the sense                       2
+                                                                     2ˆ1⊤˜M ˆ1of the Frobenius norm. This approach yields the following                                                        λ =      = 2ˆ1⊤˜M ˆ1 = 0.        (19b)
+optimization problem:                                                               2ˆ1⊤ˆ1
+                                              2                  In (19b) we use the fact that ˆ1⊤A ˆ1 = 0 for A being a skew-       M∗= arg min    ˜M −M     .          (13)
+             M∈MT (n)           F                symmetric matrix. Also,  it is interesting to note from (19a)
+                                                                      that x∗follows the same expression as the one stated in (6)
+B. Closed-Form Solution                                         for x in the noise-free case.
+                                      A compact expression for M∗can be easily derived fromTheorem  3. Problem (13) has the following closed form
+solution: M∗= (˜M 1 + 1 ˜M)/n                              (19a) via (6):
+     Proof: From (6), the denoising problem (13) is equivalent                       ⊤                                M∗=   ˆ1, ˜M ˆ1  −˜M ˆ1, ˆ1  = ˜M ˆ1 ˆ1⊤+ ˆ1 ˆ1⊤˜M =
+to the following constrained convex optimization problem:
+                                                  2                          = (˜M 1 + 1 ˜M)/n.  (20)
+          minimize    ˜M − x ˆ1⊤−ˆ1 x⊤
+              x                          F       (14)   This completes the proof.
+           subject to  ˆ1⊤x = 0.                             Since lemma 1 relates (6) with SVD, the proposed denoising
+                                                          approach can be considered as a version of Eckart-Young-Using the deﬁnition of Frobenius norm ∥A∥2F = tr(AA⊤),
+                                                       Mirsky theorem [34], [35] constrained to TDOA matrices.and trace properties tr(AB) = tr(BA) and tr(A) = tr(A⊤)
+we rewrite the cost as:
+                                                          C. Equivalence with the Gauss-Markov Estimator
+                           2                            By operating in (20), each element (i, j) of the denoised   ˜M − x ˆ1⊤−ˆ1 x⊤   =
+                     F                                   matrix M∗is obtained as follows:
+
+                                                                               n                                             (                                                         !) = tr        h ˜M − x ˆ1⊤−ˆ1 x⊤ i h ˜M − x ˆ1⊤−ˆ1 x⊤ i⊤                                                                          1                           X                                                                                                                                                                          .      (21)                                                                                 ∆τik + ∆τkj                                 M∗= {∆τ ij}∗ =
+                                                             n
+   = 2 x⊤x −x⊤ˆ1 ˆ1⊤x −ˆ1⊤˜M⊤x + ˆ1⊤˜M x +                               k=1
+                                                     The closed-form in (21) is identical to the one reported in
+              + tr ˜M ˜M⊤ = f  x; ˜M  .  (15)   [23, eq.(14)] as the Gauss-Markov estimator of the TDOA
+                                                         measurements, so that all the properties there can be extrapo-
+  To solve the constrained problem (14) we use the method of
+                                                                    lated to this work. This is not surprising as the least-squares
+Lagrange multipliers, resulting in the following unconstrained
+                                                                  cost of (13) is optimal for Gaussian noise. The same denoising
+equivalent:
+                                                                       result was found in [25] by projecting TDOA measurements          x∗= arg min [Λ (x; λ)] ,              (16)
+                            x,λ                                    into the set of “feasible” bivectors in a least-squares sense.
+                                                     Under the assumption of Gaussian noise, we can conclude
+where λ is the Lagrange multiplier and
+                                                                      that [23], [25] and our denoising result in (21) are completely
+         Λ (x; λ) = f  x; ˜M + λˆ1⊤x.           (17)   equivalent.
+
+  We ﬁnd extrema in (17) by taking ﬁrst derivatives with
+                                                                     VI. ROBUST TDOA DENOISINGrespect to both x and λ and solving the following system:
+                                                                  In some application scenarios, the assumption of uncorre-
+ ∇Λ (x; λ) = ˆ0 ⇒                                              lated white noise made in section V is fully unrealistic. In
+  (4x⊤  I −ˆ1 ˆ1⊤ + 2ˆ1⊤ ˜M −˜M⊤ + λˆ1⊤= ˆ0⊤        cases where the noise is correlated with the signal, measure-
+                                                       ments are prone to contain outliers in the TDOA measurements
+     ˆ1⊤x = 0                                                       due to spurious peaks in the correlation. For such cases, a more
+                                                          complete model for the measured matrix is:
+                   ˜M −˜M⊤   ˆ1 −λˆ1
+                                                                ˜M = M + N + S,                 (22)          x∗=
+                           2
+                        ˆ1⊤ ˜M −˜M⊤   ˆ1                   where M ∈MT (n), N is a skew-symmetric matrix contain-
+          λ∗=                             .               (18)   ing Gaussian noise, much like in (12), and the new matrix
+                             2ˆ1⊤ˆ1                   S models the addition of all the outliers. Since the number
+  Given that the objective function  is  strictly convex, the   of outliers is usually small as compared with the number of
+solution to the system is unique, and therefore because the   measurements, we will assume S to be sparse and unknown.
+
+=== PAGE 6 ===
+6
+
+
+  In order to denoise ˜M, we propose solving the following    From now on, we will refer to this algorithm as Robust
+optimization problem, ﬁnding both matrices M and S:        DeN.
+
+                                              2
+             minimize    ˜M −M −S
+              M,S                  F                              VII. MISSING DATA RECOVERY                                                         (23)
+              subject to M ∈MT (n)
+                                                             A. Recovery Strategy                       ∥S∥0 < 2k,
+                                                                  In real scenarios, there may be situations where some ofwhere k is the maximum number of outliers supposed to be
+                                                                 the elements of M˜ might not be available (for instance, duepresent in the TDOA measurements.
+                                                                    to communications failure) or even when they are available,  Robust denoising  in (23)  is a non-convex optimization
+                                                                  there are reasons  to avoid using them  (for example, dueproblem with constraints that are not even differentiable. This
+                                                                    to a priori knowledge of unreliable measurements, or whenkind of optimization problems have been explored in Robust
+                                                                  calculating the whole redundant set  is computationally tooPCA (RPCA) [36] or robust low-rank  factorizations such
+                                                       demanding) [32]. In such cases, we want to be able to avoidin GoDec [37]. Despite TDOA matrices are low-rank, these
+                                                  some measurements, thus performing estimations when partalgorithms are not well suited here as they do not include all
+                                                               of the values in M˜ are missing.the algebraic constraints in TDOA matrices.
+  In order to solve (23), we propose an iterative algorithm, in-     In this section, we address the matrix completion problem
+spired in GoDec. It consists of an alternation method in which   ([38], [39]) for TDOA matrices. We assume that in a measured
+M and S are obtained in turns, with close-form solutions for  TDOA matrix M,˜  some of  its elements are unknown, and
+these two steps (we use a subindex t to denote the iteration   the rest are contaminated with additive Gaussian noise. We
+count):                                                         take advantage of the redundancy present in TDOA matrices
+                                                                    to estimate a complete denoised TDOA matrix including the
+                                            2                                                           missing                                                                                  entries.                         ˜M −M −St−1
+                                         F                            (n)                                                     The matrix                                                                        completion problem is stated as follows:     Mt = M∈MTarg min
+                                               2          (24)
+                                                                                                                    2
+                                     F             M∗= arg min   L ◦  ˜M −M                                                                                                                                                                          ,      (26)     St = arg∥S∥0<2kmin   ˜M −Mt −S
+                                                 M∈MT (n)                 F
+  The ﬁrst sub-problem of (24) is the same as our denoising
+problem in (13), therefore Mt can be updated via (20). Then,  where L is a symmetric binary matrix whose element (i, j) is
+St is updated via entry-wise hard thresholding of ˜M −Mt.  1 if the TDOA between the sensor i and j is known, being 0
+Thus:                                                          otherwise. For convenience and without loss of generality, the
+                                                           elements on the main diagonal of L will be set to 1.
+                                                              Solving (26) is equivalent to ﬁnding the full TDOA matrix      Mt =  ˜M −St−1  ˆ1ˆ1⊤+ ˆ1ˆ1⊤ ˜M −St−1                                                    whose elements best ﬁt the available elements of M.˜  Note that,                                                           (25)
+                                            ◦(                                                     ˜M −M)                                           −L                                                           = (L                                                           ◦M),                                                                                  ◦˜M) is                                          = ( ˜ML                                                                                    where ˜ML   St = P2k  ˜M −Mt                      L
+                                                                 the                                                                            result                                                                         of setting                                                                                     the                                                                     unknown                                                                                           elements                                                                                                          of M˜                                                                                                                         to zero.
+where Pl(X) is an function which generates a matrix with the
+same size of X, preserving the l elements of X with the largest
+absolute value, and making the rest of elements zero. Note   B. Closed-Form Solution
+that, since X is skew symmetric in our application, the result
+                                                Theorem 4. The problem (26) has the following closed form
+provided by P2k(·) is also skew symmetric. The convergence                                                                   solution: M∗=  Dβ + ¯L −1 ˜ML 1 + 1 ˜ML Dβ + ¯L −1
+to a local minimum of this algorithm is guaranteed in similar
+                                                       where Dβ =  I ◦LL⊤   is a n × n diagonal matrix with
+circumstances as GoDec [37], as the solutions to both sub-                                               β = n −¯β1, · · · , n −¯βn ⊤= √n L ˆ1 as its main diagonal.problems in (25) are solved globally.
+                                                                                             ¯βi is the number of missing measurements with the sensor i.  So, the proposed robust denoising algorithm is shown in
+Alg. 1.                                                            Proof: Using Corollary 2.2, problem (26) is rewritten as
+
+Algorithm 1 Robust denoising.                                        ◦(Dx1 −1Dx)  2                                                           minimize    ˜ML −LRequire: ˜M, k, ϵ                                                 x              √n        F      (27)
+Ensure: M ∈MT (n), ∥S∥0 < 2k,                                                                 subject to  ˆ1⊤x = 0.
+  1: M0 = ˜M ; S0 = 0 ; t = 0
+  2: while ∥˜M −Mt −St∥2F /∥˜M∥2F > ϵ do                  Since 1 is the identity element of the hadamard product and
+  3:     t = t + 1                             Dx is a diagonal matrix, we can rewrite (27) as:
+  4:   Mt = (˜M −St−1)ˆ1ˆ1⊤+ ˆ1ˆ1⊤(˜M −St−1)
+                                                                                                                     2  5:    St = P2k(˜M −Mt)                                             −LDx)
+                                                              minimize                                                                    ˜ML −(DxL  6: end while                                                                    x                                                           √n      F      (28)
+  7: return Mt, St                                                                     subject to  ˆ1⊤x = 0.
+
+=== PAGE 7 ===
+                                                                                                                                                  7
+
+
+Operating in a similar manner to (15) we get:
+                                                                                −1
+                             2                              x∗= n Dβ + ¯L    ˜MLˆ1.             (38)
+           −LDx)      2   ˜ML −(DxL       =   tr DxLL⊤Dx −          √n      F   n                                   Finally, the solution of problem (26) can be calculated from
+                                                               (38) using (6):  −2 tr (DxLDxL) +  2  tr  h ˜ML −˜M⊤L i DxL +     n           √n
+                    + tr ˜ML ˜M⊤L   .  (29)   M∗ =  Dβ + ¯L −1 ˜ML 1 + 1 ˜ML Dβ + ¯L −1   (39)
+
+Using the identity x∗(A ◦B) y = tr Dx ∗ADyB⊤ we get:     This completes the proof.
+                             2                            From now on, we will refer to this algorithm as MC.  It
+           −LDx)      2                                                                               is noteworthy to comment that the matrix (Dβ + ¯L) contains   ˜ML −(DxL       =       I ◦LL⊤ x          √n      F  nx⊤                         important information about the recoverability of missing data:
+ −2   L ◦L⊤ x + 2 ˆ1⊤  h ˜ML −˜M⊤L i ◦L⊤ x+       if  it is full-rank, then the solution of (26) is unique and  if   nx⊤                                       (Dβ + ¯L) is rank-deﬁcient, missing data is not recoverable
+            + tr ˜ML ˜M⊤L = g  x; ˜M, L    (30)   uniquely without any further assumption.
+                                                               Furthermore,   in   the   absence   of   missing   data,
+and ﬁnally:                                     n(Dβ + ¯L)−1 = I, hence the matrix completion solution in
+                             2                                   (39) becomes the solution of the denoising problem stated in
+           −LDx)   ˜ML −(DxL       =                                  (20).          √n      F
+    2
+     x⊤Dβ x −x⊤L x + n ˆ1⊤  ˜ML −˜M⊤L  x +   n                                                        VIII. ROBUST TDOA DENOISING WITH MISSING DATA
+            + tr ˜ML ˜M⊤L = g(x; ˜M, L).  (31)                                                                  In this section we aim to combine the results of sections VI
+                                                       and VII, addressing the more general case in which both out-   It is important to note that equations (15) and (31) are iden-
+tical when there is no missing data in ˜M (i.e L = 1 = n ˆ1 ˆ1⊤    liers and missing data are considered. Therefore, the problem
+                                                                               is a combination of (23) and (26) deﬁned as:and Dβ = n I).
+  We use the method of Lagrange multipliers to express (27)                                                     2
+as the following unconstrained optimization problem:                   minimize   L ◦  ˜M −M −S
+                                                             M,S                        F
+        Λ (x; λ) = g  x; ˜M, L + λˆ1⊤x.         (32)              subject to M ∈MT (n)                   (40)
+                                                                        ∥S∥0 < 2k
+By taking derivatives we obtain the following system:                                                         S = L ◦S.
+ ∇Λ (x; λ) = ˆ0 ⇒
+                                                                  In the same way as in section VI, (40) can be solved
+ ( nx⊤(Dβ2     −L) + ˆ1⊤ ˜ML −˜M⊤L + λˆ1⊤= ˆ0          by alternatively solving the following two subproblems until                                                         (33)                                                            convergence:    ˆ1⊤x = 0.
+
+Since ˆ1⊤x = 0 implies that 1x =  ˆ0, we substitute in (33)                                                       2
+obtaining:                                   Mt = arg min   L ◦  ˜M −M −St−1         (41a)
+                                             M∈MT (n)                        F
+         2                                                                                                     2         Dβ + ¯L x =  ˜ML −˜M⊤L   ˆ1 −λˆ1,      (34)       n                                                  St = arg min  L ◦  ˜M −Mt −S     .       (41b)
+                                                                     ∥S∥0<2k                      F
+where  ¯L = 1 −L  (logical not operator over all elements of
+L). Note that: (Dβ + ¯L) is symmetric and, furthermore, ˆ1 is  The  subproblem  (41a)   is  equivalent   to  the  missing
+one of its eigenvectors.                                         data  problem  solved  in  section  VII  but  considering
+                                                 ˜ML = (L ◦˜M −St−1). Therefore, according to theorem 4,                       β +  ¯β¯β¯β
+           Dβ + ¯L  ˆ1 = √n = nˆ1.            (35)    it has a closed form solution:
+Therefore, if the two terms of (34) are multiplied on the right   M∗t = (Dβ + ¯L)−1(L ◦˜M −St−1) 1+
+by ˆ1⊤we get:
+                                             + 1(L ◦˜M −St−1)(Dβ + ¯L)−1.  (42)
+           2 ˆ1⊤x = ˆ1⊤ ˜ML −˜M⊤L   ˆ1 −λ.         (36)
+                                                           Since (41b) is of the same form as the second subproblem in
+Then applying to (36) the fact that                                (24), it can also be solved by entry-wise hard thresholding of
+                                      L ◦(˜M −Mt).         ˆ1⊤x = 0  and  ˆ1⊤(˜ML −˜M⊤L)ˆ1 = 0,      (37)
+                                                     The pseudocode shown in Alg. 2 summarizes the proposed
+we can conclude that λ = 0. Thus, the solution of (27) is:      algorithm for the general case.
+
+=== PAGE 8 ===
+8
+
+
+Algorithm 2 Robust denoising with missing data.                        (a) Robust DeN         (b) Gauss-Markov    (c) Only non-redundant set
+Require: ˜M, L, k, ϵ                                                                                 80                                    80                                    80
+Ensure: M ∈MT (n), ∥S∥0 < 2k,                                                      60                                    60                                    60
+
+                                                                                                                        40                                    40                                    40  1: Dβ = I ◦LL⊤
+
+                                                                                                                        20                                    20                                    20  2: Q = (Dβ + ¯L)−1
+
+
+                                                                                                                         0                                                                                                                                                               0                                                                                                                                                                                                     0  3:                                                                                                                    0                                     0                                     0    =                        0        ˜M ;                  0 ; t =  M0            S0 =                                                                                                                          1                                                                                                                                                                1                                                                                                                                                                                                      1
+                                                                                                                                                                                                                                                -2  10 -3                                                                                                                                                                                                                                                                                                            -2  10 -3                                                                                                                                                                                                                                                                                                                                                                       -2  10 -3                                                                                                                                                      10                                                                                                                                                                                            10                                                                                                                                                                                                                                 10  4:        ∥˜M   while       −Mt               −St∥2                                        #                                                    #                                                                 #                            F < ϵ do                      F /∥˜M∥2                                                                                                                                                10 -1                                                                                                                                                                                      10 -1                                                                                                                                                                                                                           10 -1                                                                                   of                                                                                                             of                                                                                                                                      of                                                                                                                          [ms]                                                                                                                                                        [ms]                                                                                                                                                                                      [ms]                                                                                                                            2 3 4 5 6 7 8 910  10 0                                                                                                                                                                  2 3 4 5 6 7 8 910  10 0                                                                                                                                                                                                       2 3 4 5 6 7 8 910  10 0                                                                                                                            noise                                                                                                                                                            noise                                                                                                                                                                                            noise  5:     t = t + 1                                                                                              outliers                                                                                                                                                                                                     outliers                                                                                                                                                                outliers                                                                                                                                        10 SDof                                                                                                                                                        20                                                                                                                                                                        30    SDof40                                                                                                                                                                                                       50                                                                                                                                                                                                                       60SDof
+  6:   Mt = Q(L ◦˜M −St−1) 1 + 1(L ◦˜M −St−1)Q
+  7:    St = P2k(˜M −Mt)                                                  Fig. 2: Robust denoising in synthetic data: SNR in dB, higher is better.
+  8: end while
+  9: return Mt, St
+                                                             B. Evaluation of Robust TDOA Denoising
+  Note that in line 2 the matrix Q = (Dβ + ¯L)−1 can be     In this ﬁrst experiment, we evaluated the performance of
+precalculated in order to get an efﬁcient implementation of   the Robust DeN algorithm proposed in section VI, imposing
+the algorithm.                                                       that some TDOA values were outliers. To simulate this, we
+  From now on, we will refer to this algorithm as Robust   randomly chose some measurements (between 0 and 10) and
+DeN+MC.                                                     replaced them with a zero-mean Gaussian distributed noise,
+                                                           with a standard deviation of 0.1 ms. It is worth mentioning
+       IX. EXPERIMENTS WITH SYNTHETIC DATA            that the outlier values calculated that way are not related at all
+  In this section computer simulations will be used to compare   to the real TDOAs, thus being true outliers. The parameter k
+the proposed algorithms with some of the alternatives existing   of the proposed algorithm, which ﬁxes the maximum number
+in the state of the art.                                          of identiﬁable outliers, was set to 8.
+  For evaluating the Robust DeN and Robust DeN+MC     1) SNR Improvements Evaluation: Fig. 2a shows the SNR
+algorithms, two different metrics will be used:                 values for the Robust DeN algorithm when modifying the
+  • The   Signal-to-Noise-Ratio  SNR   [dB]   of   the   noise standard deviation and the number of outliers, compared
+    non-redundant   set  referenced   to  the   ﬁrst  sensor   with that obtained by the Gauss-Markov estimator (Fig. 2b),
+     (10 log(Pni=1 ∥∆τi1∥2/ Pni=1 ∥∆τ i1∗ −∆τi1∥2)).   This  and also when only the non redundant set is used,  i.e. not
+      is an  application independent metric (where ∆τ i1∗  is   using the redundancy of TDOA measurements (Fig. 2c).
+     the estimation of ∆τi1), that will allow assessing the    As predicted in section V, when no outliers are present, the
+     proposal improvements in the TDOA measurements per   performance of the Robust DeN algorithm is the same as
+      se.                                               Gauss-Markov (see row 0 in Figs. 2a and 2b), hence it reaches
+  • The localization error, measured as the average distance   the Cramer-Rao Bound [23], while being much better than
+    between the source ground truth position and the position   using no redundancy. Nevertheless, the proposed algorithm
+     estimated using any given localization algorithm based on   clearly outperforms the other two approaches when outliers
+   TDOA estimations (such as [16] in our case). This is an   are present in the measurements (rows 1 through 10 in the
+     application dependent metric, that will allow assessing   graphics of Fig. 2).
+     the actual beneﬁts of the proposal in an example of     2) Source Localization Improvements Evaluation: The op-
+     a  real  task. Note  that our proposal  is not  restricted   timized non redundant set provided by the algorithms applied
+     to localization and can be used in other applications   in Section IX-B1 were used in a localization algorithm using
+     that could beneﬁt from denoised TDOAs (such as self-   [16]. The average localization errors (in mm) are shown in
+     calibration or beamforming).                                Fig. 3. Again, the Robust DeN algorithm performs as Gauss-
+                                                  Markov when there are no outliers, but is clearly superior when
+                                                                      outliers are present.A. Experimental setup
+                                                                                          It is also worth mentioning that the behaviour of the robust
+  For  all the synthetic data experiments, a set of 10 sen-                                                             denoising keeps the improvements at roughly the same level
+sors (which implies 45 different sensor pairs) and 1 source                                                                    for increasing number of  outliers  present, thus  validating
+were randomly located. Therefore, 45 different TDOA mea-                                                                 the ability of the algorithm to pinpoint and eliminate their
+surements were generated per experiment, and independent                                                               presence.
+Gaussian noise was added to them, using the same variance
+for all the measurements.
+                                                          C. Evaluation of Missing Data Recovery  The sensor locations were uniformly distributed in a cube
+of 1 meter side, and the source positions were uniformly     In this second experiment, we evaluated the capability of
+distributed in a 2 meter side cube. The propagation speed   the MC algorithm proposed in section VII to recover missing
+of the signal was set to 343.313 m/s. In all the experiments   values. For our purposes, the missing TDOA measurements
+where it’s required, ϵ is set to 10−10. To increase the statistical  were also chosen randomly but, in contrast to the previous
+signiﬁcance of the results, they are provided as averages of 20   experiment, the matrix positions of the missing measurements
+independent runs.                                        were known.
+
+=== PAGE 9 ===
+                                                                                                                                                  9
+
+
+        (a) Robust DeN         (b) Gauss-Markov    (c) Only non-redundant set   former corresponds to a standard deviation of 10−3 ms., and
+ 2000                                  2000                                  2000                       the latter to 0.2 ms. ii) Two conditions related to the presence
+ 1500                                  1500                                  1500                      of outliers, imposing the existence of 2 or 6 outliers. iii) A
+ 1000                                  1000                                  1000                       variable number of missing TDOA measurements, deﬁned as
+  500                                   500                                   500                     a percentage of missing TDOA values in the TDOA matrix.
+
+    0                                     0                                     0
+                                                                               10   10                                         10                                                                  In all                                                                            cases,                                                                                the                                                                   number                                                                                          of                                                                                                        outliers is ﬁxed                                                                                    among                                                                                                                       the full      9                                           9                                                                                 9
+                                                    0                                                                                                    0
+                                                        -1  10                                                                                                                   -1  10                                 10                                                                       10                                                                                                            10                                                                                                                                                                               -1  10 0  TDOA                                                                                set                                                                 and                                                                                    then,                                                                   some                                                                                measurements                                                                                                             are                                                                                                                discarded,                                                                                                                                                                     i.e.  #              #                          #                           10 -2                                                                 10 -2                                                                                                       10 -2     of                              of                                                        of                            [ms]                                                          [ms]                                                                                         [ms]       8 7 6 5 4 3 2 1 0  10 -3                                             8 7 6 5 4 3 2 1 0  10 -3                                                                                   8 7 6 5 4 3 2 1 0  10 -3
+                    ofnoise                                               ofnoise                                                                           ofnoise     some of the discarded measurements may be outliers. Note         outliers 200 SD                                400          600outliers   800SD                                                                       1000         1200outliers    1400SD
+                                                                      that this is consistent with the real case, where it is not possible
+ Fig. 3: Robust denoising in synthetic data: Localization error in mm (using    to anticipate where the outliers are.
+                              [16]), lower is better.                             Fig. 6 and Fig. 7 show, respectively, the SNR values, and
+                                                                 the localization error for different algorithms, and for different
+         (a) Matrix Completion (MC)           (b) Only non-redundant set
+                                                                evaluation scenarios.
+            80                                                      80                      As  it can be seen in Fig. 6a, 6c, 7a, and 7c, when there
+            60                                                      60                           are a low number of outliers (2 in this case), the best results
+            40                                                      40                           are obtained for lower k values. However, when the number of
+            20                                                      20                             outliers increase, (Fig. 6b, 6d, 7b and 7d, low k values perform
+
+              0                                                            worse.                                                                    So,                                                     we                                                                      can                                                                            conclude                                                                                                      that                                                                             k must                                                                                            be                                                                                                     a                                                                                         number                                                                                                                     as low
+                                                                     0             0
+                                                                     0%of                                                   10 -3 %of                                                                      possible,                                                                           but                                                                              higher                                                                                    than                                                                                             the                                                                              number                                                                                                       of                                                                                                               actual                                                                                                                                  outliers.                                                                                                            10 -3    as
+                                                                         -2                    50                                                                                                                                                                   -2                                                                            50                                            10                                                                                                     10     missing                                                                missing                                                               -1                                                                                                                                                         -1                                      10                                                                                               10                                                                  Nevertheless,                                                                                                                       it                                                                                                     is                                                                           worth                                                                                                to                                                                                       observe                                                                                                      the                                                                                                  behaviour                                                                                                                  of Fig.                                                                                                                         6b,                                           [ms]                                                                                                  [ms]                                                                                  100  10 0                          100  10 0                                         noise                                                                                                   noise                                  of                                                                                    of                     SD                                                        SD           measurements                                                                    measurements                                                               6d,                                                        7b                                                              and                                                                7d                                                                               (with                                                                      more                                                                                                         outliers)                                                                               when                                                                                                                the                                                                                                             percentage
+         0               10               20               30               40               50               60     of missing data increases.  It can be clearly seen that the
+Fig. 4: Missing data recovery in synthetic data: SNR in dB, higher is better.   lines corresponding  to  different values of k  are crossing
+                                                among them. This seems to indicate that as the missing data
+         (a) Matrix Completion (MC)           (b) Only non-redundant set      percentage increases, the number of outliers that we are able
+                                                                    to detect decreases.
+          2000                                                     2000                        Anyway, the  results obtained by the Robust DeN+MC
+          1500                                                     1500                         algorithm outperforms the Gauss-Markov estimator, asymp-
+          1000                                                     1000                              totically approaching it when the noise is very high. Note also
+           500                                                                    500
+
+
+             0                                                                      0                             that for high values of noise, the noise and the outliers are
+%of      100                                     10 0 %of      100                                     10 0      practically indistinguishable.
+                    50                                                                            50                                                                                                     10 -1     missing                                             10 -1              missing
+                                      10 -2                                                                                               10 -2
+                                            [ms]                                                                                                  [ms]                            0  10 -3                                                                                     0  10 -3                                         noise                                                                                                   noise
+                      SDof                                                        SDof                                                             X. EXPERIMENTS WITH REAL DATA                                                                     measurements           measurements
+                    200          400          600          800         1000         1200         1400         1600
+                                                     The aim of  this section  is to evaluate whether the im-
+  Fig. 5: Missing data recovery in synthetic data: Localization error in mm    provements obtained in section IX using synthetic data are
+                        (using [16]), lower is better.                       actually found in real environments. To do this, the proposed
+                                                              algorithms have been evaluated using audio recordings from
+                                                                 the AV16.3 database [40], an audio-visual corpus recorded in   Fig. 4 and Fig. 5 show, respectively, the SNR values, and the
+localization error for the MC algorithm, when modifying the   the Smart Meeting Room of the IDIAP Research Institute, in
+                                                               Switzerland. The same metrics and localization algorithm ofnoise standard deviation and the percentage of missing TDOA
+                                                                 the previous section has been employed.values in the TDOA matrix, as compared with using only the
+                                                                    Additionally,  the  proposed Robust DeN  algorithm  isnon-redundant set (missing values were set to zero).
+                                                      compared with other recent state-of-the-art methods in sec-  From the ﬁgures, it can be clearly seen that the proposed
+                                                                    tion X-D. In that case, we have employed the same frameworkalgorithm can take advantage of the knowledge about which
+                                                          used in [8], wherein many methods were already compared.measurements were missing, achieving even better results than
+                                                               In order to make the comparison as fair as possible, in thiswhen the positions of the outliers were unknown. For example,
+                                                                    part the localization algorithm will be the same as in [8].removing 50% of the full TDOA set of measurements implies
+23 missing values of 45 measurements , much more than the
+maximum of 10 outliers evaluated in Fig. 2, while keeping   A. Experimental Setup
+good performance.                                                     The IDIAP  Meeting Room  (shown  in  Fig.  8)  is  a
+                                                 8.2m × 3.6m × 2.4m rectangular space containing a centrally
+D. Evaluation of Robust TDOA Denoising with Missing Data   located 4.8m × 1.2m rectangular table, on top of which two
+  In this third experiment, we evaluated the capability of the   circular microphone arrays of 10cm radius are located, each
+Robust DeN+MC algorithm proposed in section VIII to face   of them composed by 8 microphones. The centers of the two
+both outliers and recover missing values.                       arrays are separated by 80cm and the origin of coordinates is
+  To provide a wide range of evaluation scenarios, we deﬁned:   located in the middle point between the two arrays. A detailed
+i) Two conditions related to noise, namely low and high. The   description of the meeting room can be found in [41].
+
+=== PAGE 10 ===
+10
+
+
+
+
+
+        70                                                 70                                                 23                                                 22
+
+        60                                                 60                                                 22                                                 20
+                                                                                                             21
+         [dB] 5040                                                                                  [dB] 5040                                                                                  [dB] 2019                                                                                  [dB] 1816                            Gauss−Markov
+       SNR 30                                                              SNR 30                                                              SNR 18                                                              SNR 14                             (No missing measurements)
+                                                                                                             17                                                                      Matrix Completion (MC)
+        20                                                 20                                                 16                                                 12                              Robust DeN+MC (k=3)
+                                                                                                                               Robust DeN+MC (k=5)
+        100      10      20      30      40      50        100      10      20      30      40      50        150      10      20      30      40      50        100      10      20      30      40      50
+         % of missing measurements            % of missing measurements            % of missing measurements            % of missing measurements         Robust DeN+MC (k=7)
+
+   (a) SNR with low noise and   (b) SNR with low noise and     (c) SNR with high noise       (d) SNR with high noise
+          2 outliers                  6 outliers                 and 2 outliers               and 6 outliers
+
+                                                   Fig. 6: Algorithm evaluation in synthetic data: SNR in dB.
+
+
+
+
+      500                                               1000                                              800                                               1100
+
+      400                                                800                                              700                                               1000
+                                                                                                                                                             900
+
+
+      300                                                         600                                                                                               [mm]                                                                                                                                                                                       [mm] 600                                                                                                                                                                                                                                                                                [mm] 800      [mm]
+                                                                                                          500                                                                                                                                                             700                            Gauss−Markov
+      200                                                         400       Error                                                                                                                      Error                                                                                                                                                                                                                                     Error 400                                                                                                  Error 600                              (No missing measurements)
+                                                                                                                                                             500                                   Matrix Completion (MC)
+      100                                                200                                              300                                                400                              Robust DeN+MC (k=3)
+                                                                                                                                Robust DeN+MC (k=5)
+        00      10      20      30      40      50           00      10     20     30     40     50        2000      10      20      30      40      50         3000      10     20     30     40     50
+        % of missing measurements            % of missing measurements            % of missing measurements            % of missing measurements          Robust DeN+MC (k=7)
+
+   (a) Localization error with     (b) Localization error with     (c) Localization error with     (d) Localization error with
+   low noise and 2 outliers      low noise and 6 outliers      high noise and 2 outliers      high noise and 6 outliers
+
+  Fig. 7: Algorithm evaluation in synthetic data: Localization error in mm ([16] is used for source position estimation from the optimized TDOA values).
+
+
+         3,60 m                                                  TABLE I: Robust denoising performance in real data
+
+                                                                     SNR (dB)   Average Localization error (mm)
+                     Microphone                                 Robust DeN              27.46                 354                                                                                                                                                                                                                                                                   .
+                          Arrays                                           Gauss-Markov              23.19                 515
+ m                                                                Only non-redundant set     17.83                 858
+     8,20
+
+                 Table                                                  B. Evaluation of Robust TDOA Denoising
+
+                                                                  In  this experiment,  all the microphone pairs have been
+                                                               considered, hence 120 TDOA values have been computed for
+    (a) IDIAP room layout showing the        (b) Positions evaluated in
+    centered table, and the microphones       the real data experiments.     each frame.
+      arranged in two circular arrays.         Only the relevant room         In table I we show an example of the results for the Robust
+                                                    section is shown.
+                                            DeN algorithm with k = 10. As it also happened with synthetic
+         Fig. 8: IDIAP Smart Meeting Room: experimental details.           data, in  this case the proposed algorithm outperforms the
+                                                      Gauss-Markov estimator, yielding great improvements in both
+                                         SNR and localization precision. Fig. 9 shows that the selection
+  The  audio  recordings  are  synchronously  sampled  at   of k is not very critical in this dataset as improvements over
+16 KHz, and the complete database along with the corre-  Gauss-Markov are obtained for a wide range of k.
+sponding annotation ﬁles containing the recordings ground     These results are the baseline for the experiments with
+truth (3D coordinates of the speaker’s mouth) is fully accessi-   missing data described in the next subsection.
+ble on-line at [42]. It is composed by several sequences from
+which we are using sequence 01, with a single male speaker
+generating digit strings in 16 positions (which can be seen   C. Evaluation of Robust TDOA Denoising with Missing Data
+as small circles in Fig. 8b), distributed along the room. The                                                                  In the second experiment with  real  data, we randomly
+sequence duration accounts for 208 seconds in total, with 823                                                     remove a set of TDOA measurements. Fig. 9 shows the ob-
+ground truth frames.                                                                 tained results. The dotted lines correspond to the performance
+  The TDOA measurements ∆˜τij, from which the measured  (SNR and localization error) achieved by the Gauss-Markov
+TDOA matrix M˜  is built, where estimated using the highest   estimator when there are no missing measurements. The solid
+peak of the GCC-PHAT function[26].                             lines with circular marks are the results obtained by the MC
+  As in a real scenario outliers are common but difﬁcult to   algorithm described in section VII.
+anticipate or enforce, the sweep over noise levels and the    On    the    other   hand,    the    solid    lines   with
+number of outliers that we performed with synthetic data are   squared/triangular/diamond  marks  correspond  with   the
+not feasible. Therefore, in our experiments with real data,   results  of  the Robust DeN+MC  algorithm  presented  in
+we will only provide the SNR values and localization errors   section VIII. The  different colors/shapes indicate  different
+obtained after using each algorithm.                           values of the hyperparameter k.
+
+=== PAGE 11 ===
+                                                                                                                                                 11
+
+
+   28                                             600                               interested reader may refer to [8] for further details about the
+
+   27                                                  550                          used methods, and the results of some other methods as well.
+   26     Gauss−Markov                                           The Robust DeN algorithm is the only one of the eval-
+ [dB] 25      Matrix(No missingCompletionmeasurements)(MC)                                       [mm] 500     Gauss−Markov(No missing measurements)             uated algorithms that does not require information about the
+
+              DeN+MC                              (k=7)   24     Robust
+           Robust              DeN+MC                                                  450     RobustRobust DeN+MCDeN+MC (k=5)(k=7)                array geometry to perform denoising of the TDOA estimations.SNR        Robust DeN+MC (k=5)                                               Matrix Completion (MC)                             (k=10)                                                 Error
+   23                                                                Robust DeN+MC (k=10)            The localization algorithm (i.e converting TDOA to angles),
+                                                  400
+   22                                                     implemented in [43], was used after all the methods in order
+
+                                                  350   21                                                    0      10      20      30      40      50    to make the comparison as fair as possible.     0      10      20      30      40      50
+      % of missing measurements          % of missing measurements        The ﬁrst row in table II shows the percentage of localization
+             (a) SNR in dB              (b) Localization error in mm (using   measurements with an angular error lower than 30o, the second
+                                                         [16])             row shows their mean angular error, and the third row their
+      Fig. 9: Results for real data with missing TDOA measurements.        standard deviation.
+                                                     To complement the data of Table II, we have also evaluated
+                                                                 the execution timing details of the evaluated algorithms, with
+   Fig. 9 highlights the relevance of the proposed robust-                                                                 the results shown in Table III.
+denoising algorithm (Robust DeN+MC)  in  real-scenarios,                                                              Table II shows that the Robust DeN algorithm performs
+with important improvements over its non robust version (MC):                                                                      better than the x-mult algorithms. Note that this happens even
+higher than 4dB absolute improvement in terms of SNR, and                                                 when the input data is the same, and neither the geometry
+around 30% relative improvement (15 cm absolute) in terms                                                               of the array, nor the distance to the source r are used for
+of localization precision.                                                            denonising in our proposal. In what respect to computational
+  We again observe that as the percentage of missing data                                                        demands, our proposal is over 50 times faster.
+increases, the lines corresponding to different values of k are    Comparing with the b&b algorithm, our proposal is close
+crossing among them. This behaviour is very similar to that   to its performance, which is also an important result provided
+found in the synthetic experiments above (refer to Fig. 6 and   that (again) we do not use the array geometry for denoising,
+Fig. 7) for a high number of outliers, what suggests that this  and our execution time is over 110 times faster.
+is the case in the real experiment, also serving as a validation
+for our simulation conclusions.                                               XI. CONCLUSIONS
+   It is also noteworthy that, in order to get the best result, the                                                              This paper has studied the properties of TDOA matrices,
+maximum number of outliers k should be decreased when the                                                       showing that they can be effectively used for solving TDOA
+number of missing measurements increases.                                                             denoising problems. In particular, the paper has investigated
+                                                              challenging scenarios where the TDOA matrix is contaminated
+D. Comparison with Other Methods in a Localization Task    with Gaussian noise, outliers and where a percentage of the
+                                                       measurements are missing. The paper shows that denoising
+  In this section we made use of the code and real data of
+                                                                    in the presence of Gaussian noise and missing data can
+the gtde MATLAB toolbox [8], [43]. In this toolbox, real
+                                                        be solved in closed-form. This result is important, as  it is
+recordings were performed under noisy conditions in a 4x4x4
+                                                                 the basis of an iterative algorithm that can also cope with
+(m) room, in which an array of 4 microphones forming a
+                                                                         outliers. The paper has tested the proposed algorithms in the
+tetrahedron of 20 cm side has been placed. Sound waves
+                                                               context of acoustic localization using microphone arrays. The
+coming from a loudspeaker placed at 189 different locations
+                                                             experimental results, both on real and synthetic data have
+1.7 m away from the array were recorded at 48 KHz.
+                                                   shown  that our algorithms successfully perform denoising
+  Table II shows the results of the different algorithms on
+                                                           (up to 30% of improvement in localization accuracy) with a
+the localization task. The ﬁrst 5 columns refer to the results
+                                                           high rate of missing data (up to 50%) and outliers, without
+of the Robust DeN algorithm for 5 different values of the
+                                                     knowing the sensor positions. This is important as it opens its
+parameter k. The rest of the columns show the results of a
+                                                                 application to tasks where the sensors geometry is unknown.
+selection of the algorithms implemented and evaluated in [8]
+                                                                       Interestingly, in real datasets our robust denoising algorithm
+(the nomenclature has been kept and the results are essentially
+                                                                               is systematically better than the Gauss-Markov estimator even
+the same).
+                                                 when there  is no missing data. This  is also an important
+  From [8], we selected three multilateration methods (gener-
+                                                                       result as it proves that the assumption of Gaussian noise does
+ically referred to as x-mult) which are implementations of the
+                                                              not hold in real cases, while our robust model is capable of
+algorithm described in [44]. These methods require to be ini-
+                                                               automatically discard erroneous measurements. The proposedtialized with the distance r to the source1. They were selected
+                                                                robust denoising method has also been compared with other
+because they also make use of the redundancy between all
+                                                       methods in literature on a localization task. Our results are
+the correlations, using the same input as the Robust DeN
+                                                            very similar to the state of the art, even though we do not
+algorithm. We also compare our proposal with the branch
+                                                                 require knowing the array geometry in the denoising stage.
+& bound (b&b) method proposed by the authors of [8], as
+                                                            Furthermore, our proposal is signiﬁcantly less computationally
+this is the one with the best performance in that work. The
+                                                        demanding.
+  1n-mult,  t-mult and  f-mult, use r  values  of 0.9m, 1.7m and 2.5m    As for future work, we plan to further test our denoising
+respectively, following [8].                                         algorithms in applications where the position of the sensors is
+
+=== PAGE 12 ===
+12
+
+
+        TABLE II: Real data performance comparison between Robust DeN and selected algorithms in [8] (marked with ∗) (T60 ≈0.5s)
+
+                                                  Robust DeN
+                                                                                                     n-mult∗    t-mult∗    f-mult∗    b&b∗
+                                        k = 0    k = 1    k = 2    k = 3    k = 4
+   % Measurements with angular error < 30◦   23.78%   24.12%   25.20%   25.71%   23.52%   13.99%   17.38%   17.91%   27.60%
+     Mean angular error                          17.21     16.44     16.60     16.78     17.66     17.08     16.05     15.25     16.89
+      Standard deviation of angular error             7.52      7.44      7.52      7.52      7.38       7.31       7.80      7.78      7.50
+
+
+
+  TABLE III: Average execution time (s) and standard deviation for each
+                                                                               [12]  J. DiBiase, H. Silverman, and M. Brandstein, “Robust  localization                 method (evaluated on 9435 trials).
+                                                                                           in  reverberant  rooms,”  in Microphone  Arrays,  ser.  Digital  Signal
+                     Robust DeN    x-mult   b&b                      Processing, M.  Brandstein  and  D.  Ward,  Eds.   Springer  Berlin
+                                                                                   Heidelberg, 2001, pp. 157–180. [Online]. Available: http://dx.doi.org/
+         Mean time (s)        0.024        1.255    2.649                                                                            10.1007/978-3-662-04619-7 8
+               Std (s)          0.0011       0.086    0.339                [13] B. Yang and J. Scheuing, “A theoretical analysis of 2D sensor arrays for
+                                                   TDOA based localization,” in Acoustics, Speech and Signal Processing,
+                                                                              2006. ICASSP 2006 Proceedings. 2006 IEEE International Conference
+                                                                                     on, vol. 4.  IEEE, 2006, pp. IV–IV.
+unknown in advance, such in self-localization and beamform-    [14] W. Hahn and S. Tretter, “Optimum processing for delay-vector estima-
+ing.                                                                                      tion in passive signal arrays,” Information Theory, IEEE Transactions
+                                                                                     on, vol. 19, no. 5, pp. 608–614, Sep 1973.
+                                                                               [15] N.  Zhu,  “Locating  and  extracting  acoustic  and  neural  signals,”
+             ACKNOWLEDGEMENTS                        Wayne State University, Dissertation 422, 2011. [Online]. Available:
+                                                                                  http://digitalcommons.wayne.edu/oa dissertations/422
+                                                                               [16] Y. Chan and K. Ho, “A simple and efﬁcient estimator for hyperbolic
+  This work has been supported by the Spanish Ministry                                                                                            location,” Signal Processing, IEEE Transactions on, vol. 42, no. 8, pp.
+of Economy and Competitiveness under project SPACES-        1905–1915, 1994.
+UAH (TIN2013-47630-C2-1-R), and by the University of    [17] M. Pollefeys and D. Nister, “Direct computation of sound and micro-
+Alcal´a under  projects DETECTOR and ARMIS. Afsaneh        phone locations from time-difference-of-arrival data.” in ICASSP, 2008,
+                                                                                     pp. 2445–2448.
+Asaei is supported by funding from SNSF project PHASER,    [18]  J. O. Smith and J. S. Abel, “Closed-form least-squares source location
+grant agreement number 200021-153507. We specially thank         estimation from range-difference measurements,” Acoustics, Speech and
+the anonymous reviewers for  their careful reading of our         Signal Processing, IEEE Transactions on, vol. 35, no. 12, pp. 1661–
+                                                                              1669, 1987.
+manuscript and their many insightful comments and sugges-    [19] M. D. Gillette and H. F. Silverman, “A linear closed-form algorithm for
+tions.                                                                           source localization from time-differences of arrival,” Signal Processing
+                                                                                              Letters, IEEE, vol. 15, pp. 1–4, 2008.
+                                                                               [20] Y. Weng, W. Xiao, and L. Xie, “Total least squares method for robust
+                 REFERENCES                                     source localization in sensor networks using TDOA measurements,”
+                                                                                       International Journal of Distributed Sensor Networks, vol. 2011, 2011.
+                                                                               [21] L. Lin, H.-C. So, F. K. Chan, Y. Chan, and K. Ho, “A new constrained [1] X. Sheng and Y.-H. Hu, “Maximum likelihood multiple-source localiza-
+                                                                             weighted least squares algorithm for TDOA-based localization,” Signal      tion using acoustic energy measurements with wireless sensor networks,”
+                                                                                    Processing, vol. 93, no. 11, pp. 2872–2878, 2013.    IEEE Transactions on Signal Processing, vol. 53, no. 1, pp. 44 – 53,
+      jan. 2005.                                                                [22] H. Jamali-Rad and G. Leus, “Sparsity-aware multi-source TDOA local-
+                                                                                               ization,” Signal Processing, IEEE Transactions on, vol. 61, no. 19, pp. [2] Y. Kuang and K. Astrom, “Stratiﬁed sensor network self-calibration from
+   TDOA measurements,” in Signal Processing Conference (EUSIPCO),        4874–4887, 2013.
+     2013 Proceedings of the 21st European.  IEEE, 2013, pp. 1–5.           [23] H. C. So, Y. T. Chan, and F. Chan, “Closed-form formulae for time-
+ [3] X. Anguera, C. Wooters, and  J. Hernando, “Acoustic beamforming          difference-of-arrival estimation,” Signal Processing, IEEE Transactions
+      for speaker diarization of meetings,” Audio, Speech, and Language         on, vol. 56, no. 6, pp. 2614–2620, June 2008.
+     Processing, IEEE Transactions on, vol. 15, no. 7, pp. 2011–2022, 2007.    [24] A. Renaux,  P.  Forster, E. Boyer, and  P.  Larzabal, “Unconditional
+ [4] M. Brandstein and D. Ward, Eds., Microphone Arrays : Signal Process-       maximum likelihood performance at ﬁnite number of samples and high
+     ing Techniques and Applications.  Springer, 2001.                               signal-to-noise ratio,” Signal Processing, IEEE Transactions on, vol. 55,
+ [5] G. C. Carter et al., “Special issue on time delay estimation,” in IEEE         no. 5, pp. 2358–2364, 2007.
+     Trans. Acoust., Speech, Sig. Process., G. C. Carter, Ed., Jun 1981, vol.    [25] R. Schmidt, “Least squares range difference location,” Aerospace and
+     ASSP-29, no. 3, pp. 461 – 624.                                                Electronic Systems, IEEE Transactions on, vol. 32, no. 1, pp. 234–242,
+ [6]  J. Chen, J. Benesty, and Y. Huang, “Time delay estimation in room         Jan 1996.
+      acoustic environments: an overview,” EURASIP Journal on applied    [26] C. Knapp and G.  Carter, “The generalized  correlation method  for
+      signal processing, vol. 2006, pp. 170–170, 2006.                               estimation of time delay,” IEEE Transactions on Acoustics, Speech and
+ [7] K. Ho, “Bias reduction for an explicit solution of source localization         Signal Processing, vol. 24, no. 4, pp. 320 – 327, aug 1976.
+     using TDOA,” Signal Processing, IEEE Transactions on, vol. 60, no. 5,    [27] C. Zhang, D. Florencio, and Z. Zhang, “Why does PHAT work well
+     pp. 2101–2114, 2012.                                                              in low noise, reverberative environments?” in Proceedings of ICASSP
+ [8] X. Alameda-Pineda and R. Horaud, “A geometric approach to sound        2008, 31 2008-april 4 2008, pp. 2565 –2568.
+     source  localization from time-delay  estimates,” Audio, Speech, and    [28]  J. Velasco, C.  J.  Mart´ın-Arguedas,  J. Macias-Guarasa, D.  Pizarro,
+     Language Processing, IEEE/ACM Transactions on, vol. 22, no. 6, pp.        and M. Mazo, “Proposal and validation of an analytical generative
+     1082–1095, 2014.                                                   model of SRP-PHAT power maps in reverberant scenarios,” Signal
+ [9] M. Compagnoni, R. Notari, F. Antonacci, and A. Sarti, “A comprehen-         Processing,  vol.  119,  pp. 209 –  228,  2016.  [Online].  Available:
+      sive analysis of the geometry of TDOA maps in localization problems,”         http://www.sciencedirect.com/science/article/pii/S0165168415002650
+      Inverse Problems, vol. 30, no. 3, p. 035004, 2014.                        [29]  J. Benesty, “Adaptive eigenvalue decomposition algorithm for passive
+[10] A. Nouvellet, M. Charbit, F. Roueff, and A. Le Pichon, “Slowness         acoustic source localization,” The Journal of the Acoustical Society of
+     estimation from noisy time delays observed on non-planar arrays,”        America, vol. 107, no. 1, pp. 384–391, 2000.
+     Geophysical Journal International, vol. 198, no. 2, pp. 1199–1207, 2014.    [30]  J. Scheuing and B. Yang, “Disambiguation of TDOA estimation for
+[11] B. Huang, L. Xie, and Z. Yang, “TDOA-based source localization with         multiple sources  in  reverberant environments,” Audio, Speech, and
+     distance-dependent noises,” Wireless Communications, IEEE Transac-        Language Processing, IEEE Transactions on, vol. 16, no. 8, pp. 1479–
+      tions on, vol. 14, no. 1, pp. 468–480, 2015.                                 1489, 2008.
+
+=== PAGE 13 ===
+                                                                                                                                                 13
+
+
+
+[31]  P. Annibale, J. Filos, P. Naylor, R. Rabenstein et al., “TDOA-based speed
+      of sound estimation for air temperature and room geometry inference,”
+     Audio, Speech, and Language Processing, IEEE Transactions on, vol. 21,
+     no. 2, pp. 234–246, 2013.
+[32] M. Compagnoni, A. Canclini,  P. Bestagini,  F. Antonacci, A.  Sarti,
+     and S. Tubaro, “TDOA denoising for acoustic source localization,”
+    CoRR, vol. abs/1509.02380, 2015. [Online]. Available: http://arxiv.org/
+     abs/1509.02380
+[33] G. Ye, D. Liu, I.-H. Jhuo, and S.-F. Chang, “Robust late fusion with rank
+     minimization,” in Computer Vision and Pattern Recognition (CVPR),
+     2012 IEEE Conference on.  IEEE, 2012, pp. 3021–3028.
+[34] C. Eckart and G. Young, “The approximation of one matrix by another
+      of lower rank,” Psychometrika, vol. 1, no. 3, pp. 211–218, 1936.
+[35] L. Mirsky, “Symmetric gauge functions and unitarily invariant norms,”
+     The quarterly journal of mathematics, vol. 11, no. 1, pp. 50–59, 1960.
+[36] E. J. Cand`es, X. Li, Y. Ma, and J. Wright, “Robust principal component
+      analysis,” Journal of the ACM (JACM), vol. 58, no. 3, p. 11, 2011.
+[37]  T. Zhou and D. Tao, “GoDec: Randomized low-rank & sparse matrix
+     decomposition in noisy case,” in in International Conference on Machine
+     Learning, 2011.
+[38] A.  Goldberg,  B.  Recht,   J.  Xu,  R.  Nowak,  and  X.  Zhu,
+     “Transduction  with  matrix  completion:  Three  birds  with  one
+      stone,”  in  Advances  in  Neural  Information  Processing  Systems
+     23,  J.  D.  Lafferty,  C.  K.   I.  Williams,  J.  Shawe-Taylor,  R.  S.
+     Zemel,  and  A.  Culotta,  Eds.   Curran  Associates,   Inc.,  2010,
+     pp.   757–765.    [Online].   Available:    http://papers.nips.cc/paper/
+     3932-transduction-with-matrix-completion-three-birds-with-one-stone.
+     pdf
+[39] E.   J.  Cand`es  and  T.  Tao,  “The  power  of  convex  relaxation:
+     Near-optimal matrix completion,” IEEE Trans.  Inf. Theor.,  vol. 56,
+     no.   5,  pp.  2053–2080,  May  2010.  [Online].  Available:   http:
+     //dx.doi.org/10.1109/TIT.2010.2044061
+[40] G. Lathoud, J.-M. Odobez, and D. Gatica-Perez, “AV16.3: An audio-
+      visual corpus for speaker localization and tracking,” in Procceedings
+      of the MLMI, ser. Lecture Notes in Computer Science, S. Bengio and
+     H. Bourlard, Eds., vol. 3361.  Springer-Verlag, 2004, pp. 182–195.
+[41] D. C. Moore, “The IDIAP smart meeting room,” IDIAP Research
+      Institute, Switzerland, Tech. Rep., November 2004.
+[42] G.  Lathoud,  “AV16.3  dataset,”  http://www.idiap.ch/dataset/av16-3/,
+      [Last accessed in december 2015].
+[43] X. Alameda-Pineda, “The gtde matlab toolbox.” [Online]. Available:
+      https://team.inria.fr/perception/the-gtde-matlab-toolbox/
+[44] M. S. Brandstein and H. F. Silverman, “A practical methodology for
+     speech source localization with microphone arrays,” Computer Speech
+   & Language, vol. 11, no. 2, pp. 91–126, 1997.

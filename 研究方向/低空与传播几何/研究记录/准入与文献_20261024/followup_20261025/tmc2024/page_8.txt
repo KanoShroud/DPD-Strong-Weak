@@ -1,0 +1,64 @@
+14062                                                              IEEE TRANSACTIONS ON MOBILE COMPUTING, VOL. 23, NO. 12, DECEMBER 2024
+
+
+is to minimize the energy of the system in order to reach this         Na−1  Na
+                                     =          zT (PiN −PjN)T (PiN −PjN)zequilibrium state. The process of minimizing energy is essential
+to comprehend the actions of spin systems in diverse physical            i=0 j=i+1
+situations. This energy source is described by:                          Na−1  Na
+               K      K K                = zT          (PiN −PjN)T (PiN −PjN) z
+     E(z; b, W) = −     bizi −        Wi,jzizj,      (12)                i=0 j=i+1
+                      i=1       i=1 j=1               = zT Kz                                          (14)
+where zi are binary variables, and E(z; b, W) denotes the                 Na−1  Na
+                                                      where  K =   i=0    j=i+1(PiN −PjN)T (PiN −PjN).objective function. This formulation facilitates the utilization
+                                                             So, (13) can be rewritten as follows:of the DA for efﬁcient problem-solving.
+  The Ising model  is favored for binary approximation of        min      ||y −Φz||22 + γ1||z||0 + γ2||K 1                                                                                                                          2 z||22    (15)
+                                                                    z∈{0,1}NNaNP-hard problems, especially in applications like localization,
+detection and classiﬁcation, because of its inherent advantages  We then merge the two ℓ2-norms to further modify problem (15)
+in simplicity, efﬁciency, scalability, and adaptability. This bi-   to a QUBO problem:
+nary model, which conceptualizes decision states as spins, is
+                                                           min    ||y∗−Φ∗z||22 + γ∗||z||0        (16)ideally suited for scenarios requiring binary decisions, such as               z∈{0,1}NNa
+determining signal presence at speciﬁc points. This simplicity
+                                                                    in which γ∗= γ1 and y∗is the modiﬁed observation vector ofnot only ensures robust decision-making but also facilitates inte-
+                                                                    size Na(Ne + N) × 1 and is deﬁned as follow:gration with advanced hardware technologies like quantum and
+digital annealers. These technologies expedite the exploration of                        y
+                                                    y∗=           ,                    (17)solution spaces through physical properties like quantum ﬂuctu-                             0
+ations, offering substantial computational speed over traditional
+                                                       and Φ∗is the modiﬁed Na(Ne + N) × NaN dictionary whichmethods.
+                                                                               is given as follows:  Furthermore, the scalability of the Ising model allows it to
+handle complex problems involving a large number of variables,                 Φ
+                                              Φ∗=           1   .                 (18)such as in wireless communication networks, without signiﬁcant                                               2                                                         √γ2K
+performance drops. Its adaptability also means  it can effec-
+                                                   The augmented observation vector, denoted as y∗, comprisestively incorporate various constraints and extensions, making
+                                              Na(Ne + N) samples, reﬂecting a comprehensive data set thatit versatile enough to model a wide range of both physical and
+                                                               includes both environmental and signal-related information. Innon-physical systems. While alternative methods like graphical
+                                                                   addition, the augmented matrix Φ∗is a full-column rank matrixmodels, genetic algorithms, and simulated annealing could also
+                                                                      that enables it to incorporate up to N distinct atoms within itsaddress NP-hard problems, they often do not match the direct
+                                                                      structure. This attribute of Φ∗is important, as it ensures a robustapplicability of Ising model to binary problems, efﬁciency in
+                                                                 reconstruction of the signal space according to the conditionscomputation, or speed in convergence. Consequently, the Ising
+                                                        mentioned in the previous section [28].model is a preferred choice for efﬁciently solving complex
+                                                    Now, in order to transform (16) into an Ising model formatbinary optimization problems in challenging environments.
+                                                                    stated in (12), we follow the method in [15]. We deﬁne the matrix  To solve problem (11), a binary programming problem with
+                      W and the vector b as follows:linear or quadratic constraint and objective functions and binary
+variables, must be reformulated in an Ising model format. Fol-      W = −Φ∗HΦ∗+ diag(Φ∗HΦ∗),          (19)
+lowing the methodology outlined in [15] along with some other
+                                                       andmathematical manipulations, we determine the weight matrix
+W and bias vector b.                               b = 2ℜ{y∗HΦ∗} −γ∗1 −vec(diag(Φ∗HΦ∗)).     (20)
+  To transform problem (11) into an Ising model format, ﬁrst,
+                                                       Using (19) and (20), we can form the Ising model structure inwe rewrite it as a regularized optimization problem in the fol-
+                                                               (12) and use the DA to solve the problem. The step by steplowing manner:
+                                                  summary of this transformation is given in Algorithm 1.
+      min      ||y −Φz||22 + γ1||z||
+    z∈{0,1}NNa
+                                                      G. Complexity Analysis
+                  Na−1  Na
+         + γ2           ||(PiN −PjN)z||22    (13)     Annealing-based  solvers  often  applied  to  Ising model-
+                                                                    related problems, effectively utilize Markov Chain Monte Carlo                      i=0 j=i+1
+                                          (MCMC) sampling techniques. The foundation of MCMC tech-
+in which γ1 and γ2 are regularization parameters.               niques is based on the generation of random samples to estimate
+  Next, we can further simplify the third term in the objective    statistical quantities or distributions, where each sample is de-
+function of problem (13) as follows:                          pendent only on its predecessor. The steady-state equilibrium of
+     Na−1  Na                                                  the system is gradually approached by this sequential sampling
+                ||(PiN −PjN)z||22                             process. This equilibrium state is described by the Gibbs (Boltz-
+      i=0 j=i+1                                      mann) distribution in the framework of the Ising model, which
+
+        Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:02:23 UTC from IEEE Xplore. Restrictions apply.

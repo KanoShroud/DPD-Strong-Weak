@@ -1,0 +1,77 @@
+
+--- PDF PAGE 3 ---
+7092                                                                                IEEE TRANSACTIONS ON COMMUNICATIONS, VOL. 74, 2026
+
+
+  Simulation results demonstrate that at a 5% sampling rate     This paper uses the multipath RSS received by distributed
+and 10 dB signal-to-noise ratio (SNR), the proposed method   nodes, each equipped with a single antenna, for multipath
+achieves over 85% accuracy in RS number estimation and   environment cognition and partitioning, estimation of the RS
+localization errors below 10 meters, outperforming existing   number, and RS localization. We consider the combined effect
+RSS-based  positioning approaches by  at  least 10%  [23].   of the direct signals from multiple RSs and their reﬂected
+Moreover Some initial results of this study were presented   multipath signals on a node. We estimate the positions of the
+in [34]. This paper signiﬁcantly expands the environmental  RSs based on the superimposed signals.
+cognition and RS number estimation algorithms for multipath
+environments.                                                                    III. MODEL-DATA INTEGRATED MULTIPATH
+  The rest of this paper is organized as follows. Section II             ENVIRONMENT PARTITIONING
+introduces  the  system  model. The  model-data  integrated                                                                  In this section, we construct a new unsupervised learn-
+multipath  environment  partitioning  method  is  delineated                                                              ing network by developing a new dense conditional random
+in Section  III.  In Section IV, we  describe  the proposed                                                           ﬁeld (DCRF) module for multipath environment partitioning.
+environment cognition-based data grouping method. The vari-                                                          Unlike conventional CRF and DCRF-based networks [35],
+ational Bayesian multi-RS positioning algorithm is developed                                                                     [36], [37], [38] that perform image segmentation by lever-
+in Section V. The simulation results are presented in Sec-                                                           aging differences in pixel-level image features, e.g., color and
+tion VI. The conclusions are drawn in Section VII.                                                               shape, our network also accounts for the variation in signal
+  Notation: a, a and A stand for a scalar, column vector,                                                                  strength under different propagation conditions. Speciﬁcally,
+and matrix, respectively; L represents a set; IN represents an  we ﬁrst employ an encoder-decoder network to extract the
+N × N identity matrix; [A]i,: denotes the i-th row of A; the  RSS features from the training dataset and generate class
+inverse and transpose of A are represented by A−1 and AT ,   activation maps. The training dataset includes the data samples
+respectively; ⊗denotes the Kronecker product; the expectation  and their interpolation-based simulation datasets. Then, we
+of a random variable  is denoted by E [·]; q(·) denotes the   construct a dense conditional random ﬁeld (DCRF) to capture
+probability distribution.                                         the spatial variations in signal attenuation magnitude across
+                                                                      different regions of the spectrum map and the signal strength
+                         II. SYSTEM MODEL                        differences of adjacent data samples. The application of this
+  This paper uses the multipath RSSs received by distributed  DCRF enables the partitioning of the positioning area into
+single-antenna nodes for multipath environment cognition and  SA-NLOS and SA-LOS. This resulting partition aligns with
+partitioning, estimation of the RS number, and RS localization.   the  distinct propagation environment  characteristics  in the
+We consider the combined effect of direct signals from mul-   spectrum map and consistent with the principles of signal
+tiple RSs and their reﬂected multipath signals on a node, and   propagation.
+estimate the positions of the RSs based on the superimposed
+signals.                                                      A. Encoder-Decoder Network Construction
+  Consider an urban scenario where the receivers randomly
+                                          We treat the spectrum map of the area as the training set
+collect N data samples of multipath RSS. The data samples
+                                                       and input the map into the encoder network. In this paper,
+obtained by each receiver represent the RSS values at their
+                                             we select DeepLabv3 as the segmentation model and employ
+respective locations. The positioning area is evenly discretized
+                                                           a pre-trained Resnet101 model as the backbone framework.
+into S×W grids. Suppose that, after the positioning area divi-
+                                                 DeepLabV3 is the 3rd variant of the DeepLab model proposed
+sion, the positioning area is divided into two types of subareas.
+                                                     by [39]. By using atrous convolution and atrous spatial pyra-
+In one type (referred to as “SA-NLOS”), only the NLOS signal
+                                                   mid pooling (ASPP), DeepLabV3 can capture the target details
+can be received. In the other subarea type (referred to as “SA-
+                                                       and achieve robust object segmentation at multiple scales in
+LOS”), both the LOS and NLOS signals can be received from
+                                        NLOS scenarios. Moreover, since ResNet101 applies the skip
+the RSs. The numbers of data samples collected in SA-NLOS
+                                                            connection to improve the model’s generalization ability to
+and SA-LOS are Nnlos and Nlos, respectively. N = Nlos+Nnlos.                                                                  learn from the training dataset, it can provide higher precision
+  In SA-LOS, we use Ω=  [ζ1, · · · , ζNlos]T and Y =                                                                    in object segmentation than other models, e.g., ResNet34 and
+[y1, y2, · · · , yNlos]T to denote the positions and values of the                                                      ResNet50 [40]. By using the encoder network, we segment
+collected RSS data samples, respectively. The position of the                                                                      different data samples in the spectrum map and obtain the
+n-th data sample (ζn,x, ζn,y) is represented as ζn,x + jζn,y,                                             RSS of different locations.
+where ζn,x and ζn,y are the horizontal and vertical coordinates
+of the n-th sampling point, with 1 ≤n ≤Nlos, and j = √−1.
+                                                             B. DCRF-Based Environment Cognition
+In this case, we have
+                                                                  In this subsection, we exploit the signal propagation prop-
+   Ω= [ζ1, · · · , ζNlos]T                                        erty to construct a DCRF, and then assign the classiﬁcation
+     = [ζ1,x + jζ1,y, · · · , ζNlos,x + jζNlos,y]T ∈CNlos.   (1)   labels for the data samples with clear boundaries. The structure
+                                                               of the DCRF in our paper remains consistent with conven-
+The positions and values of data samples in SA-NLOS, repre-
+                                                                      tional designs. Considering the input of our network, i.e., the
+             h          iTsented as ˜Ω=   ˜ζ1, · · · , ˜ζNnlos  and ˜Y = [˜y1, ˜y2, · · · , ˜yNnlos]T ,   spectrum map, representing signal strength variations across
+respectively, are deﬁned in the same way.                        different environments, we develop new  contrast-sensitive
+
+          Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 23,2026 at 08:23:20 UTC from IEEE Xplore. Restrictions apply.

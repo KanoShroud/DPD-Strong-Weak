@@ -1,0 +1,1190 @@
+
+=== PAGE 1 ===
+                                                                                                                                                             1
+
+    High Precision TOA-based Direct Localization of
+              Multiple Sources in Multipath
+
+                        Nil Garcia*†, Alexander M. Haimovich*, Martial Coulon† and Jason A. Dabin**
+       * CWCSPR, New Jersey Institute of Technology, USA, nil.garcia@njit.edu, haimovich@njit.edu
+                 † University of Toulouse, INP-ENSEEIHT/IRIT, France, martial.coulon@enseeiht.fr
+                            ** SPAWAR Systems Center Paciﬁc, San Diego (CA), USA
+
+
+
+
+            Abstract—Localization of radio frequency sources over mul-   without estimating any parameters such as propagation delays.
+          tipath channels  is a difﬁcult problem arising in applications  The concept of direct localization was ﬁrst introduced by
+         such as outdoor or indoor gelocation. Common approaches that                                                  Wax and Kailath [4, 5] in the 70’s. However,  it  is in the2015  combine ad-hoc methods for multipath mitigation with indirect
+                                                                                       last decade that Weiss et  al. have further investigated and          localization relying on intermediary parameters such as time-of-
+           arrivals, time difference of arrivals or received signal strengths,   proposed actually efﬁcient techniques [6–9]. In the absence of
+         provide limited performance. This work models the localization of   multipath, the state-of-the-art is Direct Position DeterminationMay  known waveforms over unknown multipath channels in a sparse  (DPD) [6] which outperforms standard indirect localization,
+        framework, and develops a direct approach in which multiple                                                                               particularly at low signal-to-noise ratio (SNR), because it takes
+         sources are localized jointly, directly from observations obtained
+                                                                              into account the fact that signals arriving at different sensors12   at distributed sources. The proposed approach exploits channel
+          properties that enable to distinguish line-of-sight (LOS) from   are emitted from the same location. The literature on direct
+        non-LOS signal paths. Theoretical guarantees are established   localization in the presence of multipath is scarce. In [10] a
+          for correct recovery of the sources’ locations by atomic norm  maximum likelihood (ML) estimator has been developed for
+         minimization. A second-order cone-based algorithm is developed                                                                          the location of a single source assuming a ﬁxed and known
+          to produce the optimal atomic decomposition, and it is shown to
+                                                           number of multipath, but without providing an efﬁcient way to[cs.IT]   produce high accuracy location estimates over complex scenes,
+          in which sources are subject to diverse multipath conditions,  compute the estimator. In [9], a Direct Positioning Estimation
+          including lack of LOS.                                  (DPE) technique is proposed for operating in dense multipath
+                                                                     environments, but requires knowledge of the power delay
+                                                                     proﬁle and is limited to localization of a single source.
+                                        I. INTRODUCTION                                           A requirement of direct localization  is that the signals,
+            Traditional time-of-arrival (TOA)-based localization is ac-   or a function of them, are sent to a fusion center which
+        complished through a two-step  process. In the  ﬁrst  step,   estimates the source’s locations. Thus direct techniques are
+         sensors estimate TOA’s from  all incoming  signals; in the   best suited for centralized networks. An example of this are
+        second step, such estimates are transmitted to a central node,  Cloud Radio Access Networks (C-RAN) [11, 12]. C-RAN is
+          that subsequently estimates the location of each source by   a novel architecture for wireless cellular systems whereby the
+          multilateration [1]. We refer to these localization techniques   base stations relay the received signals to a central unit which
+         as  indirect  localization. In a multipath environment, each   performs  all the baseband processing. Cellular systems are
+         sensor receives, in addition to a line-of-sight (LOS) signal,   required to be location-aware, that is they must be able to
+         multiple (possibly overlapping) replicas due to non-line-of-   estimate the locations of the user equipments (UE) for appli-arXiv:1505.03193v1   sight (NLOS) paths. Due to these multiple arrivals,  it is, in   cations such as security, disaster response, emergency relief
+          general, more challenging to obtain accurate TOA estimates  and surveillance in GPS-denied environment [13]. In addition,
+         of the LOS components at the sensors. Matched ﬁltering is a   in the USA,  it is required by the Federal Communications
+        method for time delay estimation. However, its performance  Commission (FCC) that by 2021 the wireless service providers
+         degrades greatly in the presence of multipath whose delay is  must locate UE’s initiating an Emergency 911 (E-911) call
+         of the same order than the inverse of the bandwidth of the   with an accuracy of 50 meters for 80% of all wireless E-911
+          signal [2]. Moreover, in the case of blockage of the LOS path,   calls [14]. In uplink localization, the base stations perform
+         the TOA of the ﬁrst arrival does not correspond to a LOS   time measurements of the received signals emitted by the UE’s
+        component anymore, and will corrupt localization. In such a   in order to infer their positions. Thus, a high accuracy direct
+          case, it is customary to apply techniques, like the one in [3],   localization technique designed for multipath channels, such
+          to mitigate NLOS channel biasing of the geolocation estimate.   as the one proposed in this work, may enhance the localization
+       A  better approach than  indirect  localization  is  to  infer   accuracy of current existing cellular networks by utilizing the
+         the source locations directly from the signal measurements  C-RAN infrastructure. Moreover,  it exists other applications
+                                                                                 that may beneﬁt from high accuracy TOA-based geolocation
+           The work of A. M. Haimovich was partially supported by the U.S. Air   such as in WLAN and WPAN networks. For instance, the
+           Force Ofﬁce of Scientiﬁc Research under agreement No. FA9550-12-1-0409.
+             This paper was presented in part at 2014 48th Asilomar Conference on   setup of [15] uses radios with the IEEE 802.15 (WPAN)
+            Signals, Systems and Computers.                                     standard to localize devices. The setups proposed in [16, 17]
+
+=== PAGE 2 ===
+                                                                                                                                                  2
+
+
+employ TOA-based localization for localizing 802.11 devices  where Mql denotes the unknown number of NLOS paths
+(WLAN). In [18] it is proposed a hybrid RSS(received signal   between the q-th source and the  l-th  sensor, α(m)ql    is an
+strength)-TOA based localization algorithm that works with  unknown complex scalar representing the amplitude of the
+802.11 and 802.15 technologies. Other TOA-based localization  m-th NLOS path between the q-th source and l-th sensor,
+applications are in the radio frequency identiﬁcation (RFID)  and τ ql(m) is the delay of the NLOS component. The received
+ﬁeld [19].                                                        signal (1) is sampled at a frequency fs satisfying the Nyquist
+  In this paper, we present a TOA-based direct localization   sampling criterion: fs ≥2B, where B is the bandwidth of
+technique  for multiple sources  in multipath environments   r(t). Each sensors collects N time samples at each observation
+(DLM) assuming known waveforms and no prior knowledge of   time. By stacking the N acquired samples, the received signal
+the statistics of the NLOS paths. Preliminary results of DLM   rl = [rl(0), . . . , rl((N −1)/fs)]T  at the l-th sensor can be
+were presented in [20]. Without some prior knowledge on the   written in the following vector form
+multipath, NLOS components carry no information, and the
+                                               Q             Q  Mql
+best performance is obtained by using only LOS components                                             (m)
+                                                                          rl = X αqlsq (τl(pq)) + X X α(m)ql  sq  τ ql  + wl, (5)[13]. We propose an innovative approach, based on ideas of
+                                                              q=1               q=1 m=1
+compressive sensing and atomic norm minimization [21], for
+jointly estimating the sources’ locations using as inputs the  where sq(τ) is the vector of the N received samples from the
+signals received  at  all sensors. Numerical evidence shows   q-th source waveform with delay τ:
+that DLM has higher accuracy than indirect techniques, and                                                 T
+                                                              sq(τ) =  sq (0 −τ)    · · ·   sq ((N −1)/fs −τ)    .   (6)that  it works well in a wide range of multipath scenarios,
+including sensors with blocked LOS. Moreover DLM requires   Since all sensors acquire the same number of samples, the
+no channel state information.                               samples may be stacked in an N × L matrix
+  In Section  II, we introduce the signal model. Section III
+brieﬂy introduces our proposed technique. Sections IV and   R =  r1    · · ·  rL =
+V provide in-depth explanations on the different parts of our         Q
+technique. Section VII compares DLM to previous existing     = X αq1sq (τ1(pq))    · · ·  αqLsq (τL(pq)) +
+techniques. Finally, Section VIII reports our conclusions.              q=1
+
+                                                       Q  L  Mql
+                         II. SIGNAL MODEL                     + X X X α(m)ql  sq  τ ql(m) vTl + W,   (7)
+  Consider a network composed of L sensors and Q sources                   q=1 l=1 m=1
+located in a plane. The location of the q-th source is deﬁned by                                                      where the rows and columns index time instants and sensors,
+two coordinates stacked in a vector pq. All sources share the                                                                     respectively, and vl  is an all-zeros vector except for the l-
+same bandwidth B, and transmit their own signals {sq(t)}Qq=1.   th entry which  is one. The LOS and NLOS components
+The number of sources Q and their waveforms are known.                                                                 are parametrized by the ﬁrst and second summands in (7),
+The observation time is T, assumed to be shorter than the                                                                     respectively. In the rest of the paper, we will switch between
+time coherence of the channel, therefore, the channel is time-                                                                 the notations in (5) and (7) depending on whether we are
+invariant. The complex-valued baseband signal  at the  l-th                                                                    interested in the signal of one sensor only or of all sensors.
+sensor is
+    rl(t) = rLOSl   (t) + rNLOSl    (t) + wl(t)    0 ≤t ≤T,    (1)             III. PROPOSED LOCALIZATION TECHNIQUE
+                                                                  In order  to develop a  localization technique,  it  is  ﬁrstwhere wl(t) is circularly-symmetric complex white Gaussian
+noise with known variance E |wl(t)|2 = σ2w. The term rLOSl   (t)   necessary  to understand what parameters  of  the  received
+                                                                   signals depend on the sources locations. In the signal modelis the sum of all LOS components:
+                                                              introduced in the previous section, the propagation delays of
+                 Q
+                                                                 the NLOS components (4) were assumed to be unknown and
+             rLOSl   (t) = X αqlsq (t −τl(pq)) ,            (2)                                                                         arbitrary, because of the lack of prior statistical knowledge
+                     q=1
+                                                               of the channel. Thus, information on the sources locations
+where αql  is an unknown complex scalar representing the    is carried only by the LOS components (2). This claim is
+signal strength and phase of the LOS path between the q-   supported by the analysis in [13], which showed that the CRB
+th source and l-th sensor, and τl(p) is the delay of a signal   increases when NLOS components are present. Consequently,
+originating at p and reaching the l-th sensor:                  without a priori knowledge, the optimal strategy is to reject
+                                        NLOS components as much as possible, and rely on the LOS                   τl(p) = ∥p −p′l∥2 /c.                  (3)
+                                                       components to infer the sources’ locations.
+In (3), p′l is the location of the l-th sensor, c is the speed of    With indirect techniques, ﬁrst, the TOA’s of the LOS com-
+light and ∥·∥2 denotes the standard Euclidean norm. The term   ponents are estimated, and then used to localize the sources by
+rNLOSl    (t) in (1) aggregates all NLOS arrivals:                    multilateration. However, indirect techniques are suboptimal
+               Q  Mql                               because they estimate the TOA of the ﬁrst path at each sensor
+         rNLOSl    (t) = X X α(m)ql  sq  t −τ ql(m)   ,        (4)   independently, instead of taking into account that  all LOS
+                    q=1 m=1                             components originate from a single source location. In this
+
+=== PAGE 3 ===
+                                                                                                                                                  3
+
+
+section, we propose a direct localization technique that relies   delay, then in the Fuchs’ technique, the continuous set of all
+on the fact that all LOS components associated with a source   possible propagation delays [0, τmax] is discretized forming a
+must originate from the same location. Under the Gaussian   grid of delays
+assumption, the maximum likelihood estimator (MLE) is the            D = {0, τres, . . . , τmax} ,                 (9)
+solution to the following ﬁtting problem
+                                                      where parameter τres denotes the resolution of the grid. Deﬁne
+             L      Q                                    the dictionary matrix stacking the received signal waveforms
+     min X  rl − X αqlsq (τl(pq)) −                   for all possible (discrete) delays (9):
+      p1,...,pQ
+     α11,...,αLQ  l=1      q=1
+                                      A =  s (0)    · · ·  s (τmax)  .            (10)    M11,...,MLQ          Q  Mql                  2
+   τ11(1) ,...,τ LQ(MLQ)              − X X α(m)ql  sq  τ ql(m)       (8)   Then, the propagation delays of all paths from a single source        MLQ
+   α111,...,α LQ              q=1 m=1                  2        reaching the l-th sensor are estimated by solving the following
+           (m)                                            Lasso problem of the form
+subject to τ ql > τl(pq), for all q, l and m. The parameters of
+interest are the source locations {pq}Qq=1, while the rest act as               minx λ ∥x∥1 + ∥rl −Ax∥22 ,             (11)
+nuisance parameters. Besides the fact that it is an enormous
+                                                      where λ  is a  regularization parameter, ∥· ∥1  is  the  ℓ1-
+challenge to ﬁnd an efﬁcient technique for minimizing this
+                                                  norm of a vector, and rl  is the received signal deﬁned in
+objective function, the ML criterion does not even lead to a
+                                                                           (5). Solving this convex optimization problems, results in a
+satisfactory solution. The reason is that Mql, for all  l and
+                                                               sparse vector ˆx whose non-zero entries indicate the estimated
+q, are hyperparameters  that control the number of NLOS
+                                                                  delays. More precisely,  if the d-th entry of  ˆx  is different
+paths in our model.  It is known that increasing the values
+                                                             than zero, then a path has been detected with propagation
+of hyperparameters always leads to a better ﬁtting error [22],
+                                                             delay (d −1)τres. After estimating the propagation delays,
+and in our case,  it would lead to the erroneous conclusion
+                                                       Fuchs uses a maximum description length (MDL) criterion to
+that there are a very large number of NLOS arrivals. Instead,
+                                                                      ﬁlter out false detections. For more details on this technique
+we assume that the number of NLOS arrivals and the number
+                                                              see [23], and for a better understanding on the mathematics
+of sources is low with respect to the number of observations.
+                                                          behind the Lasso problem see [25]. In [23], the time delay
+This assumption enables the formulation of a feasible solution
+                                                               estimation technique was designed for real-valued signals, and
+to the ML multipath estimation problem by means of a sparse
+                                                        assuming only a single emitting source. Here, we generalize
+recovery technique.
+                                                          such approach to complex valued signals by simply allowing
+  In order to obtain a high-precision localization technique,
+                                                                 the variables and parameters in (11) to be complex. We also
+there are two properties of the signal paths that need to be
+                                                                generalize it to multiple sources by expanding the columns of
+exploited. These properties allow to distinguish LOS from
+                                                                 the dictionary (10) to the waveforms of all sources:
+NLOS components. The ﬁrst one is that NLOS components
+arrive with a longer delay than LOS components, and the A =  s1 (0)    · · ·  s1 (τmax)   · · ·  sQ (0)    · · ·  sQ (τmax)  .
+second property is that all LOS paths originate from the same                                                           (12)
+location. Our technique is divided into two stages, which are    It is possible to use other delay estimation techniques. Ob-
+explained in the following two sections. In the ﬁrst stage,   viously, the more accurate the delay estimation technique,
+NLOS components are canceled out from the received signals   the better performance would be expected from this NLOS
+by exploiting the fact that LOS components must arrive ﬁrst.   interference mitigation. Contrary to indirect localization tech-
+This processing can be done locally at each sensor. In the   niques, the goal here is not to precisely estimate the prop-
+second stage, the cleaned version of the received signals are   agation delays of the ﬁrst paths, but rather to estimate the
+sent to a fusion center that ﬁnds the sources’ location. It is in   propagation delays of all subsequent arrivals, and cancel them
+this stage that the source locations are estimated by exploiting   out.
+                                                                          1        Pql
+the fact that LOS components must originate from the same     Let ˜τql, . . . , ˜τql  be the estimated propagation delays from
+location, whereas NLOS components may be local to the   source q to sensor l, then their amplitudes may be estimated
+sensors.                                              by solving a linear least squares ﬁt
+
+                                                                                                                      2
+                                                              Q  Pql
+              IV. STAGE 1: DECONVOLUTION              n˜αpql o = arg min  rl − X X αpqlsq   ˜τqlp       .     (13)
+  In  this  stage, the multipath channel  is deconvolved, or                 {αpql}       q=1 p=1              2
+equivalently, the propagation delays of different paths are                                                    Assuming the estimated propagation delays are ordered in
+estimated, and the multipath contributions are removed from                      1               Pql
+                                                           ascending order  ˜τql <  . . . <  ˜τql   , then all arrivals, exceptthe received signals. Our technique of choice for deconvolution                                                                 the ﬁrst, can be canceled out from the received signals
+is the sparsity-based delay estimation technique proposed by
+Fuchs [23] because of its high accuracy and because it uses                   Q  Pql
+only a single snapshot of data as in our case. Other high                               ˜rl = rl − X X ˜αpqlsq   ˜τqlp   .           (14)
+accuracy time delay estimation methods, like MUSIC [24], are                         q=1 p=2
+not applicable here because they require multiple uncorrelated   Ideally, all NLOS arrivals would be perfectly detected and
+data snapshots. Let τmax be the largest possible propagation   their propagation delays estimated, in which case we could
+
+=== PAGE 4 ===
+                                                                                                                                                  4
+
+
+continue with a direct localization technique designed for  where c(k) > 0 for all k, and A is the set of all atoms (or
+absent multipath. However, (14) is not guaranteed to cancel   atomic set). The atomic set includes all different LOS and
+all NLOS components for two reasons.  First,  if the LOS  NLOS atoms,
+path between a source and sensor is blocked, then the ﬁrst            A = ALOS ∪ANLOS                 (18)
+arrival corresponds to a NLOS paths, in which case it is not
+                                                      where ALOSremoved. Also, it is possible that the chosen delay estimation
+technique misses some arrivals or detects some false ones, thus         Q
+failing to remove some NLOS components or adding some   ALOS = [ nLq (b, p) : b ∈CL, p ∈S ⊂R2, ∥b∥2 = uq o
+extra components, respectively. In short, this stage is essential           q=1
+as it reduces the multipath, but does not necessarily remove                                                           (19)
+it completely. In the next section, we present a localization  and ANLOS
+technique designed to work in the presence of the residual           Q  L
+multipath as well as blocked paths.                         ANLOS = [ [ nNql (τ) : 0 ≤φ < 2π, τ ∈[0, τmax]o.
+                                                                   q=1 l=1
+               V. STAGE 2: LOCALIZATION                                                                           (20)
+  This stage seeks to estimate the sources locations using   Here, S denotes the search area of the sources and τmax the
+the signals {˜rl}Ll=1 output by Stage 1. As explained in the  maximum possible delay in the system. Notice that the set of
+preceding section, such signals include LOS and also NLOS  LOS atoms and the set of NLOS atoms are inﬁnite in the sense
+components, therefore, the signal model introduced in (5) for   that p and τ are continuous variables within their domains.
+rl is also valid for ˜rl. Obviously, since ˜rl and rl are different,  Thus this framework is inherently different in that the discrete
+so are the values of the parameters appearing in (5) that   dictionaries used in traditional compressive sensing.
+characterize them. From here on, to keep the notation in check,     Since the atomic sets are inﬁnite, determining the coefﬁ-
+we abuse the notation by writing rl instead of  ˜rl. However,   cients c(k) from measurements ˆR is a highly undetermined
+always bear in mind that the observations in this stage are the   problem. This problem is solved by seeking a sparse or simple
+signals output by Stage 1.                                       solution in some sense to the coefﬁcients c(k). As motivated
+  To compute the MLE (8), it is required that the number of   in [21], this can be accomplished with the help of the concept
+LOS and NLOS paths be known, otherwise the minimization   of the atomic norm. More precisely, the atomic norm ∥· ∥A
+(8) tends towards a nonsensical solution with a very large   induced by the set A is deﬁned as
+number of paths, a problem known as noise overﬁtting [22]. In                                                              )this section, it is ﬁrst assumed that the number of sensors that     ˆR  =  inf (X c(k) : ˆR = X c(k)A(k), A(k) ∈A   .
+receive a LOS path from the q-th source, say Sq, is known. It      A    c(k)>0   k              k
+will be shown later in Section V-C that such information is not                                                           (21)
+really needed. Nevertheless, even if {Sq}Qq=1 are known, but  An atomic decomposition of ˆR is any set of coefﬁcients {c(k)}
+since the number of NLOS paths is not, a pure MLE approach   for given atoms {A(k)} such that ˆR = Pk c(k)A(k). The
+is still not feasible. To bypass this issue, we will rely on the   cost of an atomic decomposition  is deﬁned as the sum of
+fact that the number of sources and NLOS paths is relatively    its positive coefﬁcients: Pk c(k). An atomic decomposition is
+small with respect to the number of observations.              optimal if its cost achieves ∥ˆR∥A, or equivalently, if its cost
+  Deﬁne a LOS atom as the N × L matrix of measurements    is the smallest among all atomic decompositions. Sparsity is
+of LOS paths of a signal sq(t) emitted from location p and  imposed here in the sense that we assume that the coefﬁcients
+received at the L sensors, i.e.,                                     c(k) for which the atomic decomposition is optimal (i.e., lowest
+                                                                    cost) are associated with the true solution of locations and
+  Lq (b, p) =  b(1)sq (τ1(p))    · · ·  b(L)sq (τL(p))    (15)
+                                                           time delays. This sparsity condition resolves the undetermined
+where b = [b(1) · · · b(L)]T are the complex amplitudes of the   nature of (17). In practice, in the presence of noise, we seek
+LOS components. It is important to normalize b as it will be   the optimal atomic decomposition that approximately matches
+discussed shortly. Hence, ∥b∥2 is constrained to a given value   the received signals. Precisely, in [21] it is suggested that the
+that we will denote uq, i.e., ∥b∥2 = uq. Deﬁne a NLOS atom   noiseless signals ˆR may be estimated by minimizing
+as the N × L matrix of measurements due to a single NLOS
+path from the q-th source to the l-th sensor                              min   ˆR                           (22a)
+                                                                                                        ˆR     A
+                Nql (τ) = eiφsq(τ)vTl                (16)                                       2                                                                                                                        s.t. R −ˆR   ≤ϵ,              (22b)
+where the phase and delay are φ and τ, respectively, and vl                               F
+is a unit vector, with the unit entry indexed by l. Note that  where ∥· ∥F   is  the  Frobenius  norm,   i.e., ∥M∥f  =
+the dependence of Nql(τ) with respect to φ is omitted in the qPi,j |M(i, j)|2, for any matrix M, where M(i, j) is the
+notation for simplicity reasons. Let ˆR denote the matrix of                                                                entry at the i-th row and j-th column. Roughly speaking,
+received signals (7) in the absence of noise. Then, ˆR may be                                                         minimizing the atomic norm (22a) enforces sparsity, while
+expressed as a positive linear combination of given atoms                                                                   constraint (22b) sets a bound on the mismatch between the
+              ˆR = X c(k)A(k),  A(k) ∈A           (17)   noisy signals and the estimated signals. In fact, the left hand
+                     k                                          side of (22b) is an ML-like cost function (8), hence, parameter
+
+=== PAGE 5 ===
+                                                                                                                                                  5
+
+
+ϵ may be regarded as an educated guess of the ML cost. The
+optimum solution to problem (22), say ˆR⋆, may be regarded
+as an estimate of the received signals in the absence of noise.                                    𝑄, 𝐿, search area (𝒮),
+However, notice that solving such problem produces ˆR⋆only                              maximum delay (𝜏𝑚𝑎𝑥),                                                                   Solve problem (22)
+and not its optimal atomic decomposition. Thus, in general, in                                        sensors locations and
+order to recover the optimal atomic decomposition, ﬁrst, the                                   waveforms
+optimum ˆR⋆to problem (22) is computed, and second, the             
+optimal atomic decomposition of ˆR⋆is found.
+  The atomic decomposition of ˆR⋆may be expressed            Find optimal atomic
+                                                              decomposition (23)
+     Q  Kq               Q  L  Kql
+ˆR⋆= X X c(k)q Lq  b(k)q   , p(k)q  +X X X c(k)ql Nql  τ ql(k)
+      q=1 k=1                   q=1 l=1 k=1                    Non-zero atoms           Proxy for locations
+                                                         (23)
+                                                                            Coefficients            Proxy for amplitudes
+where {c(k)q }Kqk=1 are the positive coefﬁcients associated to the
+Kq non-zero LOS atoms from the q-th source, and {c(k)ql }Kqlk=1    Fig. 1.  Flow diagram of the process for recovering the sources’ locations.
+are the positive coefﬁcients associated to the Kql non-zero
+NLOS atoms between the source-sensor pair (q, l). Given ˆR⋆
+                                                             simultaneously solving the atomic norm minimization problemis expressed as in (23) and given that (23) is an optimal atomic
+                                                               (22) and recovering the optimal atomic decomposition (23).decomposition, i.e., its cost
+                                                          Before delving  into the  details on how  to  actually solve
+            Q  Kq      Q  L  Kql                  problem (22) and ﬁnd the optimal atomic decomposition as
+       C = X X c(k)q + X X X c(k)ql          (24)   expressed in (23), it is shown in the next section that tuning
+                q=1 k=1      q=1 l=1 k=1                    the parameters {uq}Qq=1 appropriately is critical to the correct
+is the smallest, then the set of locations for the q-th source   recovery of the sources’ locations.
+associated with the optimal atomic decomposition is
+                                                             A. Guarantee for Correct Recovery of the Sources’ Locations
+          np(k)q   for all k = 1, . . . , Kq o ,           (25)                                                                  In this part are developed guarantees for correct recovery of
+the set of LOS propagation delays between source q and sensor   the sources’ location in the sense of Deﬁnition 1. To ensure an
+l is                                                             identiﬁable signal model, the following assumption is made:
+   n       τl  p(k)q      : b(k)q   (l)̸ = 0, for all k = 1, . . . , Kq o ,    (26)  Assumption 1. For each sensor, signal model (5) is identi-
+                                                           ﬁable in the sense that the observed data is explained by a
+and the set of NLOS propagation delays between source q and   unique set of delays, τl(p) for q = 1, . . . , Q, and τ ql(m) for
+sensor l is                                                  q = 1, . . . , Q and m = 1, . . . , Mql.
+         n  (k)              o
+                τ ql  for all k = 1, . . . , Kql   .           (27)      Further, to develop correct recovery guarantees, we assume
+                                                                  noiseless observations, in which case the solution to (22)
+Next, a deﬁnition of correct recovery is provided.                                                                               is trivially ˆR⋆= R. However, as shown in the numerical
+Deﬁnition 1. Given ˆR⋆is expressed as in (23) and given   section, the theoretical results obtained in this section are also
+that (23) is an optimal atomic decomposition, then the sources   meaningful in the presence of noise. The key properties that
+locations are correctly recovered if                             are exploited to obtain guarantees are:
+                                                                  1) LOS signal paths associated with a source have a com-
+                  Kq = 1                       (28)                                                 mon location (see (2)).
+                         p(1)q = pq,                     (29)     2) NLOS signal paths are local to sensors (see (4)).
+                                                     To formalize the notion that LOS paths emitted by a sourcefor q = 1, . . . , Q.
+                                                         have a common location, we introduce the notion of location
+  Condition Kq = 1 is required for all q because, obviously,   consistency:
+it exists only one valid location for each source, and in such
+case p(1)q  must match the true location of the q-th source.     Deﬁnition 2. A location p is said to be consistent with X
+                                                             paths (LOS or NLOS), or vice-versa, if the propagation delays  In Table 1, the procedure for recovering the sources’ lo-
+                                                                    of such paths, say τ1, . . . , τX, satisfycations from the received signals  is summarized. In some
+speciﬁc cases, such as estimating frequencies from a mixture                τx = τlx (p)   for x = 1, . . . , X,          (30)
+of complex sinusoids  [26], some  sophisticated techniques
+                                                       where  {l1, . . . , lX} ⊆{1, . . . , L} are the indexes  of the
+have been devised for minimizing the atomic norm, and then
+                                                                 destination sensors of the X paths, and τlx(p) is the delayrecover the optimal atomic decomposition of ˆR⋆, thanks to the
+                                                                    of the direct path between location p and sensor lx.
+particular structure of the atomic set. However, in general, it is
+challenging to solve (22), because computing the atomic norm     In order to ﬁnd the sources’ locations exploiting the notion
+is not always straightforward. In Section V-B, an approximate   of consistency in Deﬁnition 2, the following assumptions are
+method based on discretizing the atomic set is proposed for  made.
+
+=== PAGE 6 ===
+                                                                                                                                                  6
+
+
+Assumption 2. The number of LOS paths from source q, Sq,     For the proof of Lemma 2, see Appendix B. The interpre-
+is known.                                                           tation of this lemma is that given a solution that does not
+                                                         produce a location for the q-th source, and if condition (32)
+  By its very nature, a source location cannot be consistent
+                                                                               is met, there exists another lower cost solution that produces
+with any NLOS. Thus the location of the q-th source  is
+                                                           a location for the q-th source.
+consistent with exactly Sq paths.
+                                                     The two lemmas lead directly to the following theorem
+Assumption 3. Only the true location of the q-th source is   establishing the guarantee for correct recovery of the sources’
+consistent with Sq paths emitted by the q-th source.             locations.
+
+  By Assumptions 2 and 3, given a source with a known  Theorem 1. A sufﬁcient condition for the correct recovery in
+emitted waveform and a known number S of LOS paths, its   the sense of Deﬁnition 1 of the sources’ locations is that
+true location is the only one consistent with S paths.                                                                      1             1
+  From (23) and Deﬁnition 1, the solution containing the               < uq <                         (33)
+                                  pSq    p Sq −1true locations of the sources is associated with the optimal
+atomic decomposition. However, from (18) and the deﬁnition   for all q.
+of atoms, namely, LOS atoms (15) and NLOS atoms (16), the                                                                  Proof: If uq > 1/√ Sq for all q, by Lemma 2, at least oneoptimal atomic decomposition is parameterized by the norm
+                                                                  location is associated to the optimal atomic decomposition for
+of the amplitudes in the LOS atoms uq (15). For given data
+                                                          each source. By Assumption 2, the number of LOS paths SqˆR⋆, decreasing uq has to be balanced by an increase in the
+                                                                               is known for each source q. Therefore, if uq is chosen such
+coefﬁcients of the LOS atoms, thus raising their contribution                                                                      that uq < 1/√ Sq−1 for all q, then by Lemma 1, the locations
+to the cost C (24). Put another way, different values of uq lead
+                                                                associated to the optimal atomic decomposition for the sourceto different explanations of the data ˆR⋆manifested as different
+                                                           q are consistent with Sq or more paths. However, according
+optimal atomic decompositions, and thus corresponding to
+                                                                    to Assumption 3, only the location of the source is consistent
+different solutions of the source localization problem. We
+                                                           with Sq or more paths, thus completing the proof.
+seek to determine which values of parameters uq ensure that
+                                                     The interpretation of Theorem 1  is that the LOS atoms
+the corresponding optimal atomic decomposition results in
+                                                           should be large enough to guarantee at least one LOS solution,
+locations that are consistent with the number of paths indicated
+                                                               but small enough to guarantee that the solution is the correct
+by Assumption 2. This in turn guarantees that these are the true
+                                                              one. A numerical examples illustrates Theorem 1. Let the
+sources’ locations. The next lemma establishes the condition
+                                                              search area be of size 200 m × 200 m and centered around the
+on uq under which a location associated with the optimal
+                                                                  origin of the coordinate system. A single source is positioned
+atomic decomposition is also consistent with the number of
+                                                                         at (20 m, 30 m) and 5 sensors are positioned at coordinates
+LOS paths.
+                                                           (40 m, −40 m), (−40 m, −40 m), (−40 m, 40 m), (40 m, 40 m)
+Lemma 1. Given a known number of LOS paths Sq of the  and (0 m, 0 m). All sensors receive a LOS path except for
+q-th source, if parameter uq satisﬁes                            the sensor located at (40 m, −40 m). Therefore, the number of
+                                          LOS paths is S1 = 4. In addition, the sensor at the origin                           1
+                    uq <                             (31)   receives a NLOS path whose path length is 91 m. The goal is            pSq −1,                                                                    to compute the probability of correct recovery in the sense of
+then any location  (for the q-th source) associated  to the   Deﬁnition 1 as a function of u1 and under the conditions of
+optimal atomic decomposition (25) is consistent, in the sense  Theorem 1, i.e., the noiseless case. The implementation of the
+of Deﬁnition 2, with Sq or more paths.                       procedure leading to Fig. 2 is discussed in Section V-B. To
+                                                               estimate the probability of correct recovery, the experiment
+  For the proof of Lemma 1, see Appendix A. The interpre-
+                                                                               is repeated 1000 times, and in each experiment the emitted
+tation of this lemma is that given a solution that produces
+                                                     waveform as well as the amplitudes of the LOS and NLOS
+a location with less than Sq paths, and if condition (31) is
+                                                               paths are chosen randomly. The exact model for generating
+met, there exists another lower cost solution, implying that a
+                                                                 the waveforms, as well as other parameters is the same as
+solution with fewer than Sq paths cannot be optimal.
+                                                                 the one detailed in Section VII. Figure 2 plots the probability
+  The previous lemma guarantees that any location associated
+                                                               of correct recovery versus parameter v which is deﬁned as
+with the optimal atomic decomposition is consistent with Sq                                                      v = (1/u1)2. Theorem 1 guarantees a correct solution if
+paths. The next lemma establishes the condition on uq that
+ensures that at least one location is associated with the optimal                    S1 −1 < v < S1.                 (34)
+atomic decomposition.
+                                                As it can be seen in Fig. 2, for values of v within the interval
+Lemma 2. Given a known number of LOS paths Sq of the   ]3, 4[, the probability of correct recovery  is close to one,
+q-th source, if parameter uq satisﬁes                        whereas it is smaller for other values.
+                           1
+                      uq >         ,                    (32)
+             p Sq                           B. Practical Implementation: Discretization of the Atomic Set
+
+then at least one location (for the q-th source) is associated    Remind the reader that in general, when noise is present
+to the optimal atomic decomposition.                           the process for recovering the sources locations follows Fig. 1.
+
+=== PAGE 7 ===
+                                                                                                                                                  7
+
+
+
+    1
+                                                      where the grid resolution is deﬁned as dres = mini̸=j ∥θi −
+    0.9                                                      θj∥2, a new set of LOS atoms is obtained
+
+    0.8
+
+                                                Q
+    0.7 recovery                                                  ALOS˜  = [ nLq (b, p) : b ∈CL, p ∈G ⊂R2, ∥b∥2 = uq o.
+    0.6                                                            q=1
+                                                                                                                        (38) correct 0.5
+of                                                 The discrete atomic set including the LOS and NLOS atoms
+    0.4                                                                         is
+
+
+    0.3 Probability
+                                            A = ALOS  ANLOS,                (39)    0.2                                                           e   e  ∪e
+
+
+    0.1
+                                                       and the atomic norm induced by A has the same expression                                                                         e
+    0     0     0.5    1     1.5    2     2.5    3     3.5    4     4.5    5   than in (21)
+                                      v
+
+Fig.     2.          Probability                     of correct recovery in the sense of Deﬁnition 1 in the
+absence        of            noise.                                                                ˆR  =  inf (X c(k) : ˆR = X c(k)A(k), A(k) ∈˜A) ,
+                                             A                                                                e   c(k)>0   k              k
+                                                                                                                        (40)
+The most straightforward method for solving problem (22) and   except  for the  fact  that A has been replaced by A.˜ By
+obtain its optimal atomic decomposition (23) is to substitute   expressing the generic atoms A(k) in (40) as LOS or NLOS
+                                                               A may be cast asthe atomic norm in the objective function (22a) by its deﬁ-   atoms, the new atomic norm ∥· ∥enition (21), and optimize over the set of positive coefﬁcients
+{c(k)}. However, such approach yields an inﬁnite-dimensional
+problem because the number of atoms is inﬁnite. Except for             ( Q  |G|      Q  L  |D|
+some particular cases, like recovering frequencies of mixtures      ˆR  =    inf  X X c(g)q + X X X c(d)ql   (41a)
+                                              A                                                                 e    c(g)q  ,c(d)ql ≥0  q=1 k=1      q=1 l=1 g=1of sinusoids [26, 27],  it  is in general very challenging to
+optimize inﬁnite-dimensional convex problems. In [28], it is
+advocated that dictionaries whose atoms depend on continuous
+parameters are discretized. For instance, the NLOS atoms   with coefﬁcients c(g)g  and c(d)ql  such that
+(16) depend on a delay, which  is by deﬁnition within the
+interval [0, τmax], and can be discretized into a grid of discrete
+delays such as (9). In [28], it is proven that the optimization        Q  |G|
+problem based on the discretized atomic set converges to the     ˆR = X X c(g)q Lq  b(g)q   , θg +
+original problem (22) as the grid ﬁnesse increases. Indeed, grid         q=1 g=1
+reﬁnement approaches can be found in some signal processing               Q  L  |D|                                                           )
+applications such as delay estimation [23], direction-of-arrival          + X X X c(d)ql Nql ((d −1)τres)   ,  (41b)
+estimation [29–31] or direct localization of sources [7].                        q=1 l=1 d=1
+  The atomic set is composed of LOS (15) and NLOS atoms
+(16). The LOS atoms are parametrized by the location of the
+source whereas the NLOS atoms are parametrized by their  and b(g)q  may be any vector such that ∥b(g)q  ∥2 = uq for all
+propagation delays. Therefore, two different types of grids   q and g. By replacing the LOS and NLOS atoms in (41b) by
+need to be created: one grid of locations and one grid of delays.   their deﬁnitions (15)-(16), constraint (41b) becomes
+The propagation delays of the NLOS paths vary between 0 and
+τmax. Upon discretizing the interval of delays with a resolution
+of τres                                            Q  |G|
+                                  τmax                                                                                                               ˆrl = X X c(g)q  b(g)q  (l)sq (τl (θg)) +        D =   0, τres, . . . ,                                                     τres   ,           (35)
+                                              τres                              q=1 g=1
+a new set of NLOS atoms is obtained                           Q  L  |D|
+                                                                                                                                        ql sq ((d −1)τres)         Q  L                              + X X X c(d)ql eiφ(d)
+   ANLOS˜   = [ [ nNql (τ) : 0 ≤φ < 2π, τ ∈D o.    (36)               q=1 l=1 d=1
+            q=1 l=1                                                                                       for l = 1, . . . , L  (42)
+
+Similarly, upon discretizing the search area S into a uniform
+grid of squared cells whose center points are
+                                                      where ˆR = [ˆr1 · · · ˆrL] and b(g)q = [b(g)q  (1) · · · b(g)q  (l)]T . Next,
+                                                              A instead of ∥·∥A in problem              G = {θ1, . . . , θ|G|},                (37)   substituting the atomic norm ∥·∥e
+
+=== PAGE 8 ===
+                                                                                                                                                  8
+
+(22) with (41a) and (42) yields                                 of the q-th source is the grid location θg for which ∥ˆy(g)q  ∥2
+                                                                               is larger than zero. Intuitively speaking, minimizing the term          Q  |G|      Q  L  |D|
+                               PQq=1 PLl=1 P|D|d=1 |z(d)q  (l)|  in the objective function (46a)    min X X c(g)q + X X X c(d)ql            (43a)
+    c(g)q  ,c(d)ql ≥0  q=1 k=1      q=1 l=1 g=1                      induces a sparse number of NLOS paths, whereas minimizing
+   ∥b(g)q ∥2=uq                         PQq=1 P|G|g=1 ∥y(g)q  ∥2 induces a sparse number of sources’
+   0≤φ(d)ql <2π                                                       locations.
+
+            L
+              s.t. X ∥rl −ˆrl∥22 ≤ϵ                      (43b)   C. Estimation of the Number of LOS Sensors
+              l=1
+             Q  |G|                                   According to Theorem 1, we must ﬁx uq to a value that
+                                                         1/√ Sq < uq < 1/√ Sq−1 for each source q, where Sq                        ˆrl = X X c(g)q  b(g)q  (l)sq (τl (θg)) +              satisﬁes
+                 q=1 g=1                                              is the number of sensors receiving a LOS component from
+                                                                 the q-th source. Hence, uq must be set to uq = 1/√ Sq−µ for a            Q  L  |D|                           (43c)
+                                                           parameter µ ∈]0, 1[. For instance, it has been observed that a                                                  ql sq ((d −1)τres)        + X X X c(d)ql eiφ(d)
+                                                                     satisfactory choice is µ = 0.2 as it led to the best probability               q=1 l=1 d=1
+                                                               of correct recovery for  all experiments in Section VII. In
+                                       for l = 1, . . . , L.
+                                                                         this section, we propose a method for estimating the sources
+Problem (43)  is not convex because of the bilinear forms,   locations that not only does not require a priori knowledge on
+                               ql  , appearing in constraint (43c). This   the number of LOS sensors Sq, but in fact estimates them.c(g)q  b(g)q  (l) and c(d)ql eiφ(d)
+can be easily remedied by the following variable changes     The method works as follows. We start by assuming that all
+                                                               sensors receive a LOS component from all sources, ˆSq = L
+                         c(g)q  b(g)q = y(g)q                    (44a)   for all q, and set uq such that it satisﬁes (33). Then problem
+                                       ql = z(d)q  (l),               (44b)   (46) is solved. According to Lemma 1, the sources’ locations                       c(d)ql eiφ(d)
+                                                                associated to the optimal atomic decomposition for the q-th
+from which it follows that                                    source are consistent with at least  ˆSq  paths. However, by
+                  c(g)q  b(g)q   = c(g)q  uq =  y(g)q             (45a)  Assumption 3, no location is consistent with more than Sq                          2                    2                  paths. Therefore, if the number of LOS sensors (ˆSq > Sq) had
+                                ql = c(d)ql =  z(d)q  (l)  .          (45b)   been overestimated, no location would be obtained for source                  c(d)ql eiφ(d)
+                                                                        q. In the next step, ˆSq is decreased by one for all those sources
+Combining (44) and (45) with (43c) and (43a), respectively,   without a location estimate, and problem (46b) is solved again.
+results in the following optimization problem                These steps are repeated until a location is obtained for each
+                                                                 source. The last value of ˆSq  is the estimated number LOS
+                     Q  L  |D|         Q  |G|   y(g)q                                                               sensors for the q-th source. This method corresponds to steps
+    min X X        2 + X X X z(d)q  (l)     (46a)
+       y(g)q    q=1 g=1   uq     q=1 l=1 d=1                     10, 11, 20–28 of DLM’s algorithm described in Section VI.
+      z(d)q  (l)
+          L                                          D. Spurious Locations
+           s.t. X ∥rl −ˆrl∥22 ≤ϵ                        (46b)                                                                                          It  is observed  in numerical  simulations  that when  the
+            l=1
+                                                              sources are off-grid (pq /∈G for any q) and/or when the            Q  |G|
+                                                                                                      (m) , τl(pq) /∈D                                                                                                                                            ql                    ˆrl = X X y(g)q  (l)sq (τl(θg)) +                  propagation delays of the paths are off-grid (τ
+                                                                    for any q, l, m), then some spurious locations may be obtained               q=1 g=1
+                                                      from problem (46). This phenomenon is not new and it was
+           Q  |D|                                (46c)
+       + X X z(d)q  (l)sq ((d −1)τres)                  studied in [35] in the case of delay estimation using the ℓ1-
+                                                  norm (11). It was shown that if the propagation delay of a path
+              q=1 d=1
+                                                                               is off-grid, a peak appears around such propagation delay but
+                                for l = 1, . . . , L,
+                                                                  also secondary peaks of much weaker strength appear further
+which is convex and ﬁnite-dimensional. Problem (46) is equiv-   apart.
+alent to the latent group Lasso problem [32], and speciﬁc    To eliminate spurious locations, it is set a simple threshold
+algorithms for solving (46) exist in the literature [33]. More-   criterion. Let ˆy(g)q   be, for all q and g, the solution to problem
+over, the problem also falls into the class of second-order   (46). Ideally, for each source q, ∥ˆy(g)q  ∥is zero for all g except
+cone programs (SOCP), a subfamily of convex problems, for    if θg matches the location of the source. However, in practice,
+which efﬁcient algorithms are available [34]. In our case, the   for a given source q, problem (46) may produce some spurious
+SOCP type of algorithms resulted in the fastest computational   locations, in which case ∥ˆy(g)q ∥may be different than zero
+times. The variable y(g)q  (l) represents the amplitude of a LOS   for more than a single value of g. If θg is the true location
+paths from source q to sensor l with delay τl(θg), whereas   of the q-th source, then the Sq largest components of ˆy(g)q
+the variable z(d)q  (l) represents the amplitude of a NLOS path   are the amplitudes of the Sq LOS paths. In contrast, if θg
+from source q to sensor l with delay (d−1)τres. Let {ˆy(g)q } and    is a spurious location, we have observed through numerical
+{ˆz(g)q  (l)} be the solutions to problem (46). Then, the location   experimentation that some of the Sq largest entries will be
+
+=== PAGE 9 ===
+                                                                                                                                                  9
+
+approximately zero. Denote ˆy(g)↓q    the vector with the same    At low signal-to-noise ratio (SNR),  it is possible that the
+components than ˆy(g)q   , but sorted in descending order,  i.e.,   energy of the received signals is too low compared to the
+|ˆy(g)↓q   (1)| ≥· · · ≥|ˆy(g)↓q   (L)|. We propose that, for a given   energy of the noise causing that PLl=1 ∥rl∥22 ≤ϵ. In such case
+source q, all locations whose ˆSq strongest components do no   problem (46) has the trivial solution y(g)q  (l) = z(g)q  (l) = 0
+satisfy                                                             for all q,  l, g and d, and  it will not output any locations.
+                           ˆy(g)↓q      ˆSq  > A T.                (47)    If PLl=1 ∥rl∥22 ≤ϵ, we propose to estimate the locations by
+                                                        ﬁnding the LOS signals that have the highest correlation with
+are dismissed. Here, ˆSq is the number of LOS paths assumed   the received signals:
+for source q as explained in more detail in Section V-C,                        L                 2
+                                                                        sHq  (τl (p)) rlparameter A is the largest signal strength of a LOS or NLOS                                                                                              ˆpq = arg max X                                                                                                                  2  .        (53)
+path                                                                  p∈G   l=1  sHq  (τl (p))
+     A = max max  ˆy(g)q  (l)  , max  ˆz(d)q  (l)    ,     (48)
+                             g,q,l               d,q,l                           F. Grid Reﬁnement
+and T is a value smaller than 1. For instance, in the simulations                                                     The computational complexity of minimizing the second-
+it was used T =  1/30, so that  all locations whose signal                                                               order cone problem (46) is O((Q|G| + QL|D|)3.5) [36]. To
+strengths are 20 log10(30) ≈30 dB weaker than the strongest   lower  it we propose a recursive grid reﬁnement procedure
+path are discarded. If after the threshold criterion (47) one                                                                  inspired by the ones in [29–31]. The optimization problem
+or more locations  still remain for the q-th source, then the                                                               (46) employs a grid of delays in order to estimate the NLOS
+location with the largest strength is picked                                                               paths between every source-sensor pair, and a grid of locations
+                                                                    in order to estimate the location of every source. In total,              ˆpq = θˆg : ˆg = arg max  ˆy(g)↓q      ˆSq    .        (49)
+                                g                                 there are Q grids of location and QL grids of delays. In
+It  is important to not skip  (47), and apply (49)  directly.   comparison to previous grid reﬁnement approaches, ours is
+As explained in Section V-C, the proposed technique works   a more complex due to the two different types of grids used
+by  initially assuming  that  the number of LOS paths  for   to explain the observed data. The idea behind a grid reﬁnement
+the q-th source is ˆSq = L and  if no location is obtained,   procedure  is to start with a coarse grid(s) and reﬁne each
+then successively decreasing ˆSq until problem (46) outputs a   grid only around the active points. Let τres and dres be the
+location. However, if the threshold criterion (47) is skipped   grid resolutions we wish to achieve in the grids of delays and
+and ˆSq > Sq, a spurious location may be erroneously selected   locations, respectively, and suppose that in order to lower the
+as the correct source location instead of concluding that there   computational complexity, the grids are reﬁned R times. If the
+is no location and that ˆSq needs to be decreased.               resolution of the grids is increased by a factor of two at every
+                                                                       step, then the grids resolutions at each step are
+E. Tuning Parameter ϵ                                                                                                      τres,r = 2R−rτres   for r = 1, . . . , R         (54)
+  Parameter ϵ in optimization problem (46) constraints the                                                                                                 dres,r = 2R−rdres   for r = 1, . . . , R.        (55)
+ﬁtting error between the received signals and the estimated
+signals. Such a parameter is set so that the received signals   Let Dql,r be the grid of delays for the source-sensor pair (q, l)
+without noise are a feasible solution. Let  ˆrl be the noiseless   at step r, and Gq,r the grid of locations for source q. At the
+received signal at sensor l, then we require that                 ﬁrst step (r = 1), the continuous set of delays [0, τmax] is
+            L            L                               discretized with resolution τres,1
+    X ∥rl −ˆrl∥22 = X ∥wl∥22 ≤ϵ.          (50)                Dql,1 = {i τres,1 ∈[0, τmax] : i ∈Z} ,       (56a)
+              l=1              l=1
+If ϵ is chosen too small, then it can happen that PLl=1 ∥wl∥22 ≮  and the search area S is discretized uniformly with resolution                                                                                dres,1ϵ, thus excluding the noiseless signals from the set of possible
+                                                                                                               i
+solutions. Because the noise {wl}Ll=1 are random independent                Gq,1 =   dres,1   ∈S : i, j ∈Z   ,       (56b)                                                                                             j
+complex Gaussian vectors of length N,  it follows that the
+error normalized by the noise variance 2σ−2w PLl=1 ∥wl∥22 is  where Z is the set of integers. Consider step r, and let the
+a Chi-square random variable with 2NL degrees of freedom.   active propagation delays between the source-sensor pair (q, l)
+Thus, parameter ϵ must be set to a large enough value so that   be {ˆτql,r(m)  : m = 1, . . . , Mql,r},ˆ     and the active locations for
+PLl=1 ∥wl∥22 ≤ϵ is satisﬁed with high probability, e.g.,        source q be {ˆp(m)q,r  : m = 1, . . . , ˆKq,r}. Then, the grids at step
+                  L      !                       r + 1 include the previous active delays and locations plus
+             Pr X ∥wl∥22 ≤ϵ = γ.             (51)  some neighbor points. For instance, in addition to the active
+                      l=1                                     delays and locations, we include two points at the left and
+Let F(x, k) be the cumulative distribution function of the chi-   right of the active delays
+squared distribution with k degrees of freedom evaluated at x                 Mql,rˆ
+and F−1 its inverse function. Then                                                              Dql,r+1 = [ nˆτql,r(m) + i τres,r+1 : i = −2, −1, 0, 1, 2 o ,
+                   σ2w                                     m=1
+                   ϵ =   F−1 (γ, 2NL) .               (52)                                                          (57a)                    2
+
+=== PAGE 10 ===
+                                                                                                                                                 10
+
+           Step 1                          Step 2                          Step 3        they are set according to
+
+                                                                             c τres,r = dres,r    for any r,             (59)
+
+                                                      where c is the speed of light.
+
+                                                                           VI. ALGORITHM
+Estimate:     𝜏∗                   𝜏∗+ 𝜏res(2)                𝜏∗+ 𝜏res(2) −𝜏res(3)       In this section, it is presented the proposed DLM algorithm
+                                                                    for source localization in multipath. The inputs to the DLM
+                                                             algorithm are the received  signals {rl}Ll=1 and the noise
+                                                               variance σ2w. The number of sensors L, sources Q and samples
+                                                              per sensor N are assumed known. The outputs of the algorithm
+                                                                 are the source locations estimates {ˆpq}Qq=1. The summary of
+                                                                 the proposed algorithm for direct localization of RF sources
+                                                               (2)                               (2)            (3)    in the presence of multipath is as follows:                                                                    𝑑res                                            𝑑res Estimate:    θ∗                  θ∗+                                                                                                 (2) + −𝑑res                                                                (2)          θ∗+                                                                    0     Input: L, Q, N, {rl}Ll=1 and σ2w.                                                            −𝑑res                                       −𝑑res
+                                                      Parameters that need to be selected: S, τmax, dres, T, γ.
+Fig. 3.   Illustration of three steps of a grid reﬁnement procedure. The top  Output: The source locations estimates {ˆpq}Qq=1
+image shows the grid reﬁnement for the delays between a hypothetical source   Procedure:
+and sensor, and the bottom image shows the grid reﬁnement for the locations
+of some hypothetical source, for r = 1, 2, 3. The dots point out the position      1: for sensor l where l = 1, . . . , L do
+                                                                                                      p
+of a non-zero delay and location as a result of optimizing problem (58). The      2:     Estimate multipath TOA’s  {˜τql} using [23] or any
+positions of such non-zeros are progressively reﬁned at each step.                other delay estimation technique of choice.
+                                                                                       3:     Estimate multipath amplitudes {˜αpql} through (13).
+                                                                                       4:    Reduce NLOS interference on the received signal rl
+and all points within distance 2dres,r+1 in the x- or y-axis of                                                               through (14).
+the active locations                                                                                       5: end for
+          Kq,rˆ                                                                        6: Compute parameter ϵ through (52).
+                                        i
+Gq,r+1 = [   ˆp(m)q,r + dres,r+1         : i, j = −2, −1, 0, 1, 2.   .    7:  if PLl−1 ∥rl∥2 > ϵ then                                  j
+       m=1                                                                    8:    Compute the initial coarse grids with (56) and (59).
+                                                     (57b)                                                                                       9:      Initialize ˆSq = L for q = 1, . . . , Q
+For a more intuitive picture on the grid reﬁnement procedure                                                                              10:    while ˆpq = ∅for any q ∈{1, . . . , Q} do
+see the examples in Figure 3 with three steps. Next, problem                         1
+                                                                              11:       uq = √ˆSq−0.2 for q = 1, . . . , Q(46) is solved again but only for the new grid points:
+                                                                              12:        for r = 1, . . . , R do
+                        Q  L                            13:           Optimize problem (58). Output:  {ˆy(g)q,r} and       Q             y(g)q
+  min X X           2 + X X X    z(d)q  (l)            {ˆz(d)q,r(l)}.
+  {y(g)q  },  q=1      g:      uq     q=1 l=1     d:                    14:           Find the active locations {ˆp(m)q,r } and the active
+  {z(d)q }      θg∈Gq,r+1                         (d−1)τres                         (m)
+                                            ∈Dql,r+1                 delays {ˆτql,r }.
+                                                                              15:                if  r̸ = 1 then
+                                                                              16:            Reﬁne the grid with (57) and (59).
+                                                       (58a)                                                                              17:          end if
+        L                                                                              18:       end for
+        s.t. X ∥rl −ˆrl∥22 ≤ϵ                          (58b)    19:       Compute A through (48).
+          l=1                                                              20:        for q = 1, . . . , Q do
+           Q
+                                                                              21:                if any locations are active for the q-th source
+                 ˆrl = X X   y(g)q  (l)sq (τl(θg)) +                 and such locations satisfy (47) then
+             q=1      g:
+                   θg∈Gq,r+1                                            22:               Estimate the location of the q-th source
+          Q                                               through (49).
+                                                       (58c)       + X X   z(d)q  (l)sq ((d −1)τres)                   23:             else if ˆSq > 1 then
+             q=1     d:                                                  24:                    ˆSq ←ˆSq −1
+                       (d−1)τres                                                                              25:             else                   ∈Dql,r+1
+                                                                              26:               Estimate the location of the q-th source
+                                  for l = 1, . . . , L.
+                                                               through (53).
+The process of reﬁning the grids and solving problem (58)    27:          end if
+is repeated for the R steps. The proposed grid reﬁnement    28:       end for
+procedure corresponds to steps 12–18 in DLM’s algorithm    29:    end while
+described in Section VI.                                                 30: else
+  In regards to the resolutions of the grids, instead of choosing    31:    Recover sources’ locations through (53).
+the resolution of both types of grids completely independently,    32: end if
+
+=== PAGE 11 ===
+                                                                                                                                                 11
+
+
+ 100                                                       components at all sensors are modelled by a Poisson process.
+                                                   The mean inter-arrival time is set to 0.2 µs, and the average
+  80                                                     power ¯P of a NLOS arrival at sensor l is governed by the
+                                                     power delay proﬁle (PDP)  60
+                                                       !
+                                                                                                                                                                        l                                                                                                                        (61)  40                                                                                           ¯Pl(t) = exp  −t −t(0)
+                                                                                         trms
+  20
+                                                      where t is the arrival time of the NLOS component, t(0)l    is
+   0                                                            the arrival time of the LOS path and trms is the root mean
+                                                             square (rms) delay spread. An exponential PDP assigns smaller
+  -20                                                  power to later arrivals. Unless otherwise stated, all LOS paths
+                                                         have normalized unit power. In multipath environments, it is
+  -40
+                                                                possible that some sensors have their LOS blocked, thus at
+                                                          each Monte Carlo repetition one randomly selected sensor
+  -60
+                                                among the ﬁve receives no LOS component.
+  -80          source                                    The ﬁgures compare the performance of the following two
+              sensors                                              direct localization techniques:
+ -100                                                             1) DLM — The proposed technique.
+   -100          -50          0          50          100
+                                                                  2) DPD — Direct Position Determination as originally
+Fig. 4.  Map with the locations of the sensors and source used in many of        propose in [6] for AWGN channels.
+the experiments in Section VII.                                         3) DPD with NLOS mitigation — In this variation, DPD
+                                                                                      is preceded by the NLOS mitigation method introduced
+                                                                          in Section IV. The goal is to show that DLM outper-
+               VII. NUMERICAL RESULTS                      forms this variation of DPD, to demonstrate that DLM’s
+                                                                 high accuracy is not due only to such NLOS interference
+  In this section, we  illustrate the performance of the lo-
+                                                                      mitigation method.
+calization method by numerical examples, and compare it to
+                                                                  4) Indirect, CS TOA — Indirect localization comprises a
+other existing techniques via Monte Carlo simulations. In all
+                                                                   two-step process. In a ﬁrst step, the TOA of the ﬁrst path
+examples, the sources and sensors are positioned within a
+                                                                                at each sensor is estimated by a delay estimation method
+square area of 200 m × 200 m, which is divided into a grid
+                                                               based on compressive sensing (CS) [23]; in a second
+of 1 m × 1 m  cells, thus  resulting  in 40,000  cells. Unless
+                                                                             step, multilateration is performed using the well-known
+stated otherwise, we simulate a scenario containing one source
+                                                          method developed by Chen [3] to mitigate the problem
+positioned at coordinates (20 m,30 m) and 5 sensors positioned
+                                                                     of potential LOS blockage on sensors.
+at coordinates (40 m, −55 m), (−45 m, −40 m), (−50 m, 55 m),
+                                                                  5) Indirect, matched ﬁlter TOA — Same as previous
+(60 m, 60 m) and (5 m, 0 m) as pictured in Fig. 4. The signals
+                                                                            indirect technique, except that TOA’s are estimated by a
+emitted by the sources are drawn from a white Gaussian pro-
+                                                                    threshold-based matched ﬁlter.
+cess and ﬁltered so that their passband bandwidth is 10 MHz. If
+multiple sources, such as in the experiment of Section VII-F,  To solve the conic problem in DLM (step 13 of DLM’s
+the waveforms are generated independently, thus the cross-   algorithm described in Section 13) and in CS TOA, we utilize
+correlation between signals from different sources is low but   the Mosek solver [38]. The bandwidth of the emitted signals
+not necessarily zero. All sensors are time-synchronized and   limits the localization accuracy, and  it  is known  that the
+sample the received signals at a 20 MHz frequency for a total   ranging resolution is approximately
+time of 5 µs, thus each sensor observes 100 samples. For each                                 c
+                                                                                   r =                          (62)
+source, we deﬁne the SNR per observation time as                        B
+                        NLPLOS                  where c is the speed of light and B is the signal bandwidth.
+          SNR = 10 log10                     ,           (60)   For the particular case of a 10 MHz bandwidth, the waveform                                        σ2w
+                                                            ranging resolution is then 30 m. Also, we deﬁne the probability
+where N  is the number of observations per sensor, L is the   of correct recovery for the case of a single source as
+number of sensors, PLOS is the power of a LOS component,
+and σ2w  is the variance of the sampled noise. According to                   1  Z
+                                                                Pc = X 1  |p −ˆp(z)| < ζ   ,          (63)[37], in urban and suburban areas, the signal strengths of              Z
+LOS and NLOS paths may be modeled as random variables                      z=1
+with log-normal distribution. It follows that the channel tap  where p is the true source’s location, Z is the number of times
+powers expressed in dB are random variables with normal   that the experiment is repeated, ˆp(z) is the source’s location
+distribution. For our simulations, we set the standard deviation   estimate for the z-th  repetition, and 1(·)  is the indicator
+of the tap powers to 10 dB. All multipath experiments simulate   function. Unless otherwise stated, the error is set to ζ = r/3,
+Turin’s urban channel model [37]. The arrival times of NLOS  which is a value smaller than the ranging resolution r. In some
+
+=== PAGE 12 ===
+                                                                                                                                                 12
+
+
+
+    3.5                                                                                 3.5
+                              DLM                                                        DLM
+                              DPD / DPD with NLOS mitigation                                     DPD
+     3                                              indirect, CS TOA                       3                             DPD with NLOS mitigation
+                                                       indirect, matched filter TOA                                                                          indirect, CS TOA
+                                                                                                                                                                  indirect, matched filter TOA
+    2.5                                                                                 2.5
+  rMSE  2                                                                                                                                                 rMSE  2
+
+
+    1.5                                                                                 1.5     Normalized                                                                                                                                                                                                                                                                                                                                                                                              Normalized
+
+     1                                                                     1
+
+
+    0.5                                                                                 0.5
+
+
+     0                                                                     0
+      0         5        10        15        20        25        30          0      5      10     15     20     25     30     35     40
+                         SNR [dB]                                                  SNR [dB]
+
+Fig. 5.  Root mean square error vs. SNR for the scenario in Fig. 4 when no    Fig. 7.   Root mean square error vs. SNR for the scenario in Fig. 4 in a
+multipath is present.                                                          multipath environment.
+
+
+     1                                                                     1
+                                                                   DLM
+    0.9                                                                                 0.9       DPD
+                                                                   DPD with NLOS mitigation
+    0.8                                                                                 0.8
+                                                                                                                          indirect, CS TOA
+    0.7                                                                                 0.7             indirect, matched filter TOA   recovery                                                                                                                                                                                                                                                                                                                 recovery
+   correct 0.60.5                            DLM                                                                                                          correct 0.60.5
+ of                              DPD / DPD with NLOS mitigation      of
+    0.4                                                          indirect, CS TOA                        0.4
+                                                          indirect, matched filter TOA
+    0.3     Probability                                                                                     0.3                                                                                                                                                                                                                                                                                                                                                                                                                                                   Probability
+    0.2
+                                                                                        0.2
+
+    0.1
+                                                                                        0.1
+
+     0
+      0         5        10        15        20        25        30          0
+                         SNR [dB]                                      0      5      10     15     20     25     30     35     40
+                                                                                 SNR [dB]
+
+Fig. 6.   Probability of correct recovery vs. SNR for the scenario in Fig. 4
+                                                                                   Fig. 8.  Probability of correct recovery vs. SNR for the scenario in Fig. 4 inwhen no multipath is present.
+                                                                          a multipath environment.
+
+
+of the tests, it is plotted the normalized root mean square error
+                                                                  probability of recovery because essentially both techniques, in
+          v
+                   1          u 1  Z                                the absence of multipath, look up for the location whose LOS
+          rMSE = u         X p −ˆp(z) 2.          (64)   signals correlate the most with the received signals. DPD and          t                     r  Z
+                          z=1                 DLM perform substantially better in comparison to indirect
+All experiments are repeated 1000 times, i.e., Z = 1000.       techniques as it is expected from the theory.
+
+A. Performance in the Absence of Multipath                   B. Performance in Multipath
+
+  This experiment’s purpose  is to validate that DLM per-     In this example is simulated the multipath channel model
+forms optimally in the absence of multipath, i.e., its accuracy   described  at  the top of  this  section. The rMSE and  the
+matches that of the DPD, which was shown to be optimal (see   probability of correct recovery vs. SNR are plotted in Figs. 7
+[6]). All ﬁve sensors receive LOS components, and Turin’s  and 8, respectively. Observe in Figs. 7 and 8 that DPD fails to
+channel model does not apply here, since there are no NLOS   localize the sources irrespective of the SNR due to the fact that
+paths.  Figures 5 and 6 plot the rMSE and the probability    it is not designed for multipath. Also, the indirect technique
+of correct recovery, respectively. DPD and DPD with NLOS   relying on estimating by matched ﬁlter the TOA of the ﬁrst
+mitigation are plotted together because their performance is   arrival, does not perform much  better than DPD because
+exactly the same in the absence of multipath. As it can be ob-  matched ﬁlter suffers from severe bias when multiple arrivals
+served, DPD and DLM perfom equally in terms of rMSE and   overlap in time. Interestingly,  it seems as if DLM does not
+
+=== PAGE 13 ===
+                                                                                                                                                 13
+
+
+
+     1                                                                    1
+
+
+    0.9
+                                                                                       0.9
+
+    0.8
+                                                                                       0.8
+    0.7   recovery                                                                                                                                                                                                                                                                                                            recovery 0.7
+   correct 0.60.5                                                                                                                                                                                                                                                          correct 0.6
+ of                                                                           of
+    0.4
+                                                                                       0.5
+
+    0.3                            DLM
+                                                                  DLM     Probability                                                                                                                                                                                                                                                                                                                                                                                                                                             Probability 0.4                                 DPD
+    0.2                                                             DPD                                 DPD with NLOS mitigation
+                                                                  DPD with NLOS mitigation
+                                                            indirect, CS TOA                     0.3
+    0.1                                                                                                               indirect, CS TOA
+                                                            indirect, matched filter TOA
+                                                                                                                       indirect, matched filter TOA
+     0                                                                                0.2
+          0.2    0.4    0.6    0.8    1     1.2    1.4    1.6    1.8    2          0          0.1         0.2         0.3         0.4         0.5
+                                Normalized error                                           RMS delay [us]
+
+Fig. 9.   Probability of correct recovery vs. error for the scenario in Fig. 4    Fig. 10.  Probability of correct recovery vs. rms delay spread for the scenario
+for a 30 dB SNR.                                                                  in Fig. 4 in a multipath environment for a 30 dB SNR.
+
+
+
+                                                                                                                                            30
+perform better, in terms of rMSE, than the indirect technique
+employing CS TOA estimates. In Fig. 9, the probability of
+correct recovery (63) is plotted for different errors ranging        1                                                            25
+from 0 to 2r for an SNR value of 30 dB. DLM achieves a
+high probability of correct recovery for much smaller errors        0.8                                                            20 [s]                                                                                                                                                                                                                                                                                                                                               recoverythan the other methods. For instance, DLM’s probability of                                                                                                                                                                time
+correct recovery is 0.9 for an error smaller than 0.4r, whereas                                                                                                                                                                                                                                                                                                     correct 0.6                                                            15for the indirect technique with CS TOA, such probability is    of                                                                                                                                                                                                                                                                 elapsed
+only achieved when the error is 0.9r. The other techniques
+perform substantially worse than DLM, and in fact, they never                                                                                             0.4                                                            10   Average                                                                                                                                                                                                                                                                                                                                                                                                                                                                            Probabilityachieve a probability of recovery close to one even when very
+large errors are allowed. In summary, DLM can achieve a                                                                                             0.2                                                            5
+high probability of recovery for very small errors. In terms of
+rMSE, DLM and the indirect technique employing CS TOA
+estimates perform similarly, because in the rMSE metric small        0 11         22         33         44         55         66         77 0
+errors have a much smaller impact compared to the large                         Number of grid refinement steps
+errors. Hence, in the next experiments, we focus only on the
+                                                                                   Fig. 11.  The left axis plots the probability of correct recovery and the right
+probability of correct recovery.                                                                                  axis the mean elapsed time for running DLM’s Stage 2, vs. the number of
+                                                                                  grid reﬁnement steps. The SNR is ﬁxed at 30 dB.
+
+C. Probability of Correct Recovery vs. Delay Spread
+                                                      D. Probability of Correct Recovery vs. Number of Grid Re-  The considered channel model depends on the rms delay
+                                                       ﬁnement Stepsspread, which determines the interval between the LOS com-
+ponent and the last arriving NLOS component. In general,    The purpose of the grid reﬁnement procedure introduced
+larger delay spreads imply more multipath  that make the   in Section V-F is to reduce the computational complexity of
+localization more challenging. In Fig. 10, the probability of  DLM, while maintaining the localization accuracy. Figure 11
+correct recovery is plotted for an rms delay spread ranging   plots the probability of correct recovery (square marker) and
+from 0 to 0.6 µs at 30 dB SNR. At high-SNR and at a zero   the DLM’s mean elapsed time at Stage 2 (circle marker),
+delay spread  all  localization techniques perform  similarly.   versus the number of grid reﬁnement steps. The SNR is ﬁxed at
+However,  as soon  as  the rms delay spread  increases by  30 dB. DLM is run on a computer with an Intel Xeon processor
+a  little as 0.2 µs, DPD’s performance drops markedly. The   at 2.8 GHz with 4 GB of RAM memory. Perhaps surprisingly,
+techniques speciﬁcally designed for multipath channels, such   the probability of correct recovery remains almost constant
+as the indirect technique based on CS TOA estimates and   irrespective of the number of steps. The lowest computational
+DLM, degrade very slightly as the rms delay spread increases.   time is 5 s and is obtained for ﬁve grid reﬁnement steps. The
+DLM outperforms  all other techniques and  is capable of  number of grid steps that results in the lowest computational
+recovering the sources locations with a high probability of   time depends on many factors such as number of grid points,
+correct recovery irrespective of the delay spread.               efﬁciency of the conic solver, particular scenario and so forth.
+
+=== PAGE 14 ===
+                                                                                                                                                 14
+
+
+
+     1                                                                                  0.9
+                                                                                           DLM
+                5 LOS sensors
+    0.9                4 LOS sensors                                                       0.8                               DPD
+                                                                                           DPD with NLOS mitigation
+                3 LOS sensors    0.8                                                                                                                                                             indirect, CS TOA
+                2 LOS sensors                                                       0.7
+                                                                                                                                                                     indirect, matched filter TOA    0.7          1 LOS sensor                                                                                                                                                                                                     recovery
+                                                                                         0.6    recovery
+    0.6                                                                                                                                                                                                                                                                                      correct
+                                                                                         0.5
+                                                                                of   correct 0.5
+ of                                                                                      0.4
+    0.4                                                                                                                                                                                                                                                                                                                                                                                                                                                     probability 0.3
+    0.3     Probability
+                                                                                         0.2    0.2                                                                                                                                                                                                                                                               Average
+
+    0.1                                                                                  0.1
+
+     0                                                                      0
+      0      5      10     15     20     25     30     35     40          1              2              3              4              5
+                         SNR [dB]                                                        Number of sources
+
+Fig. 12.   Probability of correct recovery vs. the number of LOS sensors for    Fig. 13.  Average probability of correct recovery vs. the number of sources
+a 30 dB SNR.                                                                      for a 30 dB SNR.
+
+
+Thus, in general, the optimum number of steps must be found                     VIII. CONCLUSIONS
+by in situ testing.
+                                               By combining concepts from compressive sensing and direct
+                                                                      localization, we have developed a novel direct localization
+E. Number of LOS sensors                                   technique for mutliple sources in the presence of multipath
+                                                  (DLM). This technique assumes the emitted waveforms are  The information about the sources’ locations is carried on
+                                                 known but requires no prior information on the channel. Inthe LOS components (see signal model (5)). This experiment
+                                                                            fact, its localization accuracy is almost constant irrespective ofevaluates DLM’s probability of correct recovery versus the
+                                                                 the delay spread of the channel. At the core of our techniquenumber of sensors receiving a LOS path. Since the setup of
+                                                                            lies an optimization problem that recovers the locations of theFig. 4 includes ﬁve sensors, the number of LOS sensors is
+                                                              sources with high accuracy by exploiting properties that arevaried between one and ﬁve. As expected, Fig. 12 shows that
+                                                                      different for LOS and NLOS paths. It is shown theoreticallya larger number of LOS sensors results in better localization
+                                               how to set the algorithm’s parameters to guarantee successfulaccuracy. For the cases where there is only one or two LOS
+                                                             recovery including a parameter that determines the relativesensor, the probability of correct recovery drops drastically
+                                                                 contributions of the LOS and NLOS components to the costbecause, in general, the minimum number of LOS sensors
+                                                                  function. Contrary to indirect techniques, the proposed tech-required for unambiguous TOA-based localization is three.
+                                                           nique is capable of localizing sources with an accuracy beyond
+                                                                      that of the signal resolution, with high probability. In absence
+F. Multiple Sources                                            of multipath, DLM’s accuracy matches that of the maximum
+                                                                 likelihood estimator of the sources’ locations. In the presence  In this example is evaluated the probability of correct recov-
+                                                               of multipath, DLM’s accuracy is better than the accuracy ofery of multiple sources emitting different signals overlapping
+                                                                               all compared methods and can ﬁnd the sources’ location evenin the time and frequency domain. The SNR is ﬁxed at 30 dB.
+                                                 when some sensors suffer from LOS blockage. The gain inThe deﬁnition of the probability of correct recovery deﬁned in
+                                                                    localization accuracy does not come for free, as DLM requires(63) was for a single source. In the case of multiple sources,
+                                                                    larger computational resources than previous techniques. Towe deﬁne the average probability of correct recovery
+                                                                         this end, we propose a grid reﬁnement procedure which sub-
+                 Z  Q                                         stantially reduces the computational complexity. Nonetheless,               1
+          Pav =  X X 1  |pq −ˆp(z)q   | < ζ   ,      (65)   this should be less of a burden as computational power keeps         ZQ
+                   z=1 q=1                                   increasing and second-order cone program solvers become
+                                                   more efﬁcient. DLM’s high accuracy is validated by extensive
+where pq  is the true location of the q-th source, ˆp(z)q   is its                                                           numerical simulations.
+estimate, and ζ  is the error set to ζ = r/3 where r  is the
+waveform’s ranging resolution as deﬁned in (62). In Fig. 13,
+it is shown how the average probability of correct recovery                    APPENDIX A
+degrades as the number of sources increases. This is expected                 PROOF OF LEMMA 1
+because the signals from different sources interfere with each
+other. Nonetheless, we can observe that DLM outperforms all     Let an atomic decomposition of R be (23). The goal of the
+other localization techniques when localizing multiple sources.   proof is to show that all locations, p(k)q   for q = 1, . . . , Q and
+
+=== PAGE 15 ===
+                                                                                                                                                 15
+
+k = 1, . . . , Kq are consistent with Sq or more paths if        However, ∥b(1)1  ∥2 = u1, and by equation (66), ∥b(1)1  ∥2 <
+                                1                       1/√S1−1. Moreover, by assumption (68), ∥b(1)1  ∥0 ≤S1 −1.
+              = uq <                  p(k)q                                                               Therefore, it follows                         2              pSq −1.            (66)
+                                  r
+From (23), the signal at the l-th sensor is                                             b(1)1      b(1)1   < 1,              (74)
+                                                                                               0        2
+      Q   Kq
+   rl = X X   c(k)q  b(k)q  (l)sq  τl  p(k)q   +              which combined with (72) and (73) results in
+       q=1  k=1                                                     L
+               b(k)q  (l)̸=0                   X    b(1)1  (l) < 1,                (75)
+                  Q  Kql                                                   l=1
+                                                                                                       1  (l)̸=0             + X X c(k)ql eiφ(k)                                                          ql sq  τ ql(k)   .  (67)                               b(1)
+                        q=1 k=1                         which contradicts (71).
+By Assumption 3, τl(p(k)q  ) is a true propagation if b(k)q   (l)̸ = 0.
+Therefore, if b(k)q  has Sq or more non-zero entries, according                    APPENDIX B
+to Deﬁnition 2, p(k)q   is consistent with Sq or more paths. It is                 PROOF OF LEMMA 2
+left to prove that ∥b(k)q  ∥0 ≥Sq. The proof is by contradiction.     Let (23) be an atomic decomposition of R. Recall that
+                                                           parameter Kq  is the number of locations associated to theFor instance,
+                         b(1)1   < S1.                   (68)   optimal atomic decomposition for the q-th source. We aim to
+                               0                              prove that if parameter uq
+and  let the atomic decomposition (23) in which the atom                                                                                    1
+L1  b(1)1  , p(1)1     is replaced by ∥b(k)q  ∥0 NLOS atoms as fol-                       b(k)q   2 = uq > p Sq ,               (76)
+lows
+                  L                                     then the optimal decomposition has Kq ≥1. The proof is by
+  L1  b(1)1  , p(1)1  = X    b(1)1  (l) N11  τl  p(1)1       .  (69)   contradiction. Let K1 = 0, then a presumed optimal atomic
+                      l=1                                   decomposition (23) simpliﬁes to
+                            b(1)1  (l)̸=0                           Q  Kq               Q  L  Kql
+Consider now  the two decompositions  (23) and  the one R = X X c(k)q Lq  b(k)q   , p(k)q  +X X X c(k)ql Nql  τ ql(k)   .
+obtained with (69). The costs of the two decompositions differ       q=2 k=1                   q=1 l=1 k=1
+only in the coefﬁcients of the atoms shown in (69). Ignoring                                                           (77)
+the common atoms, the cost of decomposition (23) is c(1)1   ,  From (77), the signal at the l-th sensor is
+whereas the cost of decomposition obtained from combining
+                                               Q   Kq
+(69) with (23) is
+                                                                           rl = X X   c(k)q  b(k)q  (l)sq  τl  p(k)q   +
+                    L
+                       c(1)1 X    b(1)1  (l)  .                (70)         q=2 b(k)q k=1(l)̸=0
+                          l=1                                         Q  Kql
+                                b(1)1  (l)̸=0
+                                                                                                                                                    ql sq  τ ql(k)   .  (78)                                               + X X c(k)ql eiφ(k)
+Normalizing the two costs by c(1)1   , and if (23), which by (68)                          q=1 k=1
+has a location p(1)1  with less than Sq paths, is optimal, then    Notice that the ﬁrst summation begins with q = 2, because
+                     L                       K1 = 0. By Assumption 3,
+                1 ≤ X    b(1)1  (l)  .                (71)                                                       n  (k) oK1l
+                          l=1                                                          τ 1l                           (79)
+                                b(1)1  (l)̸=0                                                       k=1
+                                                                 are the true propagation delays of the paths between source 1  We show next that inequality (71) cannot be satisﬁed  if
+∥b(1)1  ∥2  satisﬁes  (66). Deﬁne the vector function 1(b(1)1  )  and sensor l. By Assumption 2, there are S1 LOS paths from
+whose l-th entry is one if b(1)1  (l)̸ = 0, and 0 otherwise, and   source 1. Let
+denote  | · | the element-wise absolute value. Then the right                      {l1, . . . , lS1} ⊆{1, . . . , L}             (80)
+hand side of (71) is
+                                                        be the indexes of the destination sensors of such LOS paths,
+           L                                                                     (1)
+                                                                                            1l  in (79) be the propagation delay corresponding to    X    b(1)1  (l) = h 1  b(1)1   iT  b(1)1    ,       (72)  and let τ
+                                                                 the LOS path between source 1 and sensor l, i.e.,
+             l=1
+               b(1)1  (l)̸=0                                                                       (1)
+                                                                        τ 1l = τl (p1) for l ∈{l1, . . . , lS1} .        (81)
+and by the Cauchy-Schwarz inequality
+                                        We show next  that there  exists a decomposition  different
+  h           iT   1  b(1)1                 b(1)1  ≤                                      than (77) for which K1 ≥1 and whose cost is lower, thus
+                                                                 contradicting the assumption that (77) is optimal. According
+              r                                                                    to  (15) and  (16),  the sum  of NLOS atoms with delays    ≤ 1  b(1)1       b(1)1   =    b(1)1      b(1)1       .  (73)     (1)
+                       2        2             0        2          τ 1l   for  l ∈{l1, . . . , lS1} in the presumed optimal atomic
+
+=== PAGE 16 ===
+                                                                                                                                                 16
+
+
+decomposition (77), i.e., P                                             c(1)1l N1l(τ 1l(1) ), can be        Signal Processing, IEEE Transactions on, vol. 31, no. 5,                                   l∈{l1,...,lS1}
+expressed for any parameter c as                                    pp. 1210–1217, 1983.
+                                                                     [6] A.                                                                                             J. Weiss                                                                      and A.                                                                         Amar, “Direct                                                                                                          position                                                                                                            determination                       √S1c                                                                     EURASIP                                                                                                   Journal                                                                                              on Applied                                                                     of multiple                                                                                 radio                                                                                               signals,”                             L1 (b, p1) +  X     c(1)1l N1l  τ 1l(1) =
+                             u1                                Signal Processing, vol. 2005, no. 1, pp. 37–49, 2005.
+    l∈{l1,...,lS1}
+                                                                     [7]  J. S. Picard and A. J. Weiss, “Localization of multiple
+         + X      c(1)1l −c N1l  τ 1l(1)   ,  (82)        emitters by spatial sparsity methods in the presence of
+                         l∈{l1,...,lS1}                                     fading channels,” in Positioning Navigation and Com-
+where b is                                                      munication (WPNC), IEEE 7th Workshop on, 2010, pp.
+                                                              62–67.
+         (                                     1l    for l ∈{l1, · · · , lS1}                                                                     [8] O. Bar-Shalom and A. J. Weiss, “Direct positioning of                √S1u1 eiφ(1)          b(l) =                                                         (83)
+               0           otherwise.                              stationary targets using MIMO radar,” Signal Processing,
+                                                                            vol. 91, no. 10, pp. 2345–2358, 2011.
+Let c = cmin deﬁned by
+                                                                     [9] O. Bialer, D. Raphaeli, and A.  J. Weiss, “Maximum-
+                  cmin =   min    c(1)1l  .               (84)        likelihood direct position estimation in dense multipath,”
+                                 l∈{l1,...,lS1}                               Vehicular Technology, IEEE Transactions on, vol. 62,
+Next it is shown that the cost of the decomposition obtained        no. 5, pp. 2069–2079, 2013.
+by combining (82)–(84) with (77) is lower than the cost of the   [10] K. Papakonstantinou and D. Slock, “Direct location esti-
+decomposition (77), contradicting the assumption that (77) is       mation using single-bounce NLOS time-varying channel
+optimal. Notice the former decomposition includes the LOS        models,” in IEEE 68th Vehicular Technology Conference,
+atom L1(b, p1). The costs of the two decompositions differ       2008, pp. 1–5.
+only in the coefﬁcients of the atoms shown in (82). Ignoring   [11] K. Chen and R. Duan, “C-RAN: the road towards green
+the common atoms, the cost of decomposition (77) is            RAN,” China Mobile Research Institute, White Paper,
+                                                               2011, version 2.5.
+        X     c(1)1l                    (85)   [12]  J. Wu, S. Rangan, and H. Zhang, Green communications:
+                             l∈{l1,...,lS1}                                     theoretical fundamentals, algorithms and applications.
+whereas the cost of the decomposition obtained from (82)–(84)       Boca Raton, FL: CRC Press, 2012.
+                                                               [13] S.                                                                         Gezici,                                                                            Z. Tian,                                                                           G. B.                                                                                          Giannakis,                                                                                          H. Kobayashi,                                                                                                      A. F.
+is        √S1cmin                                                                 Molisch,                                                                   H.                                                                                 V. Poor,                                                                               and                                                                                             Z. Sahinoglu,                                                                                                              “Localization           + X      c(1)1l −cmin   .       (86)            u1                                                     via ultra-wideband radios: a look at positioning aspects
+                              l∈{l1,...,lS1}
+                                                                         for future sensor networks,” IEEE Signal Processing
+Since (77) is presumed optimal, it means it must satisfy            Magazine, vol. 22, no. 4, pp. 70–84, 2005.
+                                                               [14] “FCC Docket No. 07-114. In the Matter of Wireless E911                √S1cmin
+  X     c(1)1l ≤      + X      c(1)1l −cmin   ,         Location Accuracy Requirements,” Federal Communica-                    u1
+   l∈{l1,...,lS1}                         l∈{l1,...,lS1}                           tions Commission, Tech. Rep., January 2015.
+                                                         (87)                                                               [15] C. M. De Dominicis,  P. Pivato,  P. Ferrari, D. Macii,
+which after simpliﬁcation leads to u1 ≤1/√S1, contradicting                                                                  E. Sisinni, and A. Flammini, “Timestamping of ieee
+(76).                                                                   802.15. 4a CSS signals for wireless ranging and time syn-
+                                                                       chronization,” Instrumentation and Measurement, IEEE
+                 REFERENCES                               Transactions on, vol. 62, no. 8, pp. 2286–2296, 2013.
+ [1]  I. G¨uvenc and C. C. Chong, “A survey on TOA based   [16] S. A. Golden and S. S. Bateman, “Sensor measurements
+     wireless localization and NLOS mitigation techniques,”         for Wi-Fi location with emphasis on time-of-arrival rang-
+    IEEE Communications Surveys & Tutorials, vol. 11, pp.         ing,” Mobile Computing, IEEE Transactions on, vol. 6,
+     107–124, August 2009.                                        no. 10, pp. 1185–1198, 2007.
+ [2] D. Dardari, C.-C. Chong, and M. Z. Win, “Threshold-   [17] M. Ciurana,  F. Barcelo-Arroyo, and  F. Izquierdo, “A
+     based time-of-arrival estimators in UWB dense multi-        ranging system with ieee 802.11 data frames,” in IEEE
+     path channels,” Communications, IEEE Transactions on,       Radio and Wireless Symposium, 2007, pp. 133–136.
+      vol. 56, no. 8, pp. 1366–1377, August 2008.              [18] A. Hatami and K. Pahlavan, “Hybrid TOA-RSS based
+ [3] P. C. Chen, “A non-line-of-sight error mitigation algo-         localization using neural networks,”  in IEEE Global
+     rithm in location estimation,” IEEE Wireless Communi-       Telecommunications   Conference  (GLOBECOM’06),
+     cations and Networking Conference, vol. 1, pp. 316–320,       2006, pp. 1–5.
+     September 1999.                                          [19] G. Li, D. Arnitz, R. Ebelt, U. Muehlmann, K. Witrisal,
+ [4] M. Wax, T.-J. Shan, and T. Kailath, “Location and the       and M. Vossiek, “Bandwidth dependence of cw ranging
+      spectral density estimation of multiple sources,” Defense         to UHF RFID tags in severe multipath environments,”
+     Technical Information Center (DTIC) Document, Stan-         in IEEE International Conference on RFID, 2011, pp.
+      ford, CA, Tech. Rep., 1982.                                 19–25.
+ [5] M. Wax and T. Kailath, “Optimum localization of mul-   [20] N. Garcia, A. M. Haimovich, J. A. Dabin, M. Coulon,
+      tiple sources by passive arrays,” Acoustics, Speech and       and M. Lops, “Direct  localization  of  emitters using
+
+=== PAGE 17 ===
+                                                                                                                                                 17
+
+
+     widely spaced sensors in multipath environments,” in Sig-        “Applications of second-order cone programming,” Lin-
+      nals, Systems and Computers, IEEE Asilomar Conference        ear algebra and  its applications, vol. 284, no. 1, pp.
+     on, November 2014, pp. 695–700.                          193–228, 1998.
+[21] V.  Chandrasekaran,  B.  Recht,  P.  A.  Parrilo,  and   [37] G. L. Turin, F. D. Clapp, T. L. Johnston, S. B. Fine,
+    A. S. Willsky, “The convex geometry of linear inverse       and D. Lavry, “A statistical model of urban multipath
+     problems,” Foundations of Computational mathematics,        propagation,” Vehicular Technology, IEEE Transactions
+      vol. 12, no. 6, pp. 805–849, 2012.                              on, vol. 21, no. 1, pp. 1–9, 1972.
+[22] D.  Koller and N. Friedman,  Probabilistic  graphical   [38] MOSEK ApS, “The MOSEK optimization toolbox for
+     models: principles and techniques.   Cambridge, Mas-     MATLAB manual, version 7.1  (revision  24),”  http://
+     sachusetts: MIT press, 2009.                              mosek.com, (accessed on March 20, 2015).
+[23]  J.-J. Fuchs, “Multipath time-delay detection and estima-
+      tion,” Signal Processing, IEEE Transactions on, vol. 47,
+     no. 1, pp. 237–243, 1999.
+[24] X. Li and K. Pahlavan, “Super-resolution TOA estimation
+     with diversity for indoor geolocation,” Wireless Commu-
+      nications, IEEE Transactions on, vol. 3, no. 1, pp. 224–
+     234, 2004.
+[25] M. Elad, Sparse and redundant representations: from
+     theory to applications in signal and image processing.
+   New York: Springer Science & Business Media, 2010.
+[26] G. Tang, B. N. Bhaskar, P. Shah, and B. Recht, “Com-
+     pressed sensing off the grid,” Information Theory, IEEE
+     Transactions on, vol. 59, no. 11, pp. 7465–7490, 2013.
+[27] E. J. Cand`es and C. Fernandez-Granda, “Towards a math-
+     ematical theory of super-resolution,” Communications on
+     Pure and Applied Mathematics, vol. 67, no. 6, pp. 906–
+     956, 2014.
+[28] G. Tang, B. N. Bhaskar, and B. Recht, “Sparse recovery
+     over continuous dictionaries-just discretize,” in Signals,
+     Systems and Computers, IEEE Asilomar Conference on,
+     2013, pp. 1043–1047.
+[29] D. Malioutov, M. C¸ etin, and A. S. Willsky, “A sparse
+     signal reconstruction perspective for source localization
+     with sensor arrays,” Signal Processing, IEEE Transac-
+      tions on, vol. 53, no. 8, pp. 3010–3022, 2005.
+[30] M. M. Hyder and K. Mahata, “Direction-of-arrival es-
+     timation using a mixed norm approximation,” Signal
+     Processing, IEEE Transactions on, vol. 58, no. 9, pp.
+     4646–4655, 2010.
+[31] N. Hu, Z. Ye, D. Xu, and S. Cao, “A sparse recovery
+     algorithm for DOA estimation using weighted subspace
+      ﬁtting,” Signal processing, vol. 92, no. 10, pp. 2566–
+     2570, 2012.
+[32] G. Obozinski, L. Jacob, and J.-P. Vert, “Group lasso with
+     overlaps: the latent group lasso approach,” arXiv preprint
+     arXiv:1110.0413, 2011.
+[33] E. van den Berg and M. P. Friedlander, “Sparse opti-
+     mization with least-squares constraints,” SIAM Journal
+    on Optimization, vol. 21, no. 4, pp. 1201–1229, 2011.
+[34] E. D. Andersen, C. Roos, and T. Terlaky, “On imple-
+     menting a primal-dual interior-point method for conic
+     quadratic  optimization,”  Mathematical  Programming,
+      vol. 95, no. 2, pp. 249–277, 2003.
+[35]  J.-J. Fuchs and B. Delyon, “Minimal l1-norm reconstruc-
+      tion function for oversampled signals: applications to
+     time-delay estimation,” Information Theory, IEEE Trans-
+     actions on, vol. 46, no. 4, pp. 1666–1673, 2000.
+[36] M. S. Lobo, L. Vandenberghe, S. Boyd, and H. Lebret,

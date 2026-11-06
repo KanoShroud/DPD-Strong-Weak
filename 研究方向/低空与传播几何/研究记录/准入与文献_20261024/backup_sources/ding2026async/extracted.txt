@@ -1,0 +1,4074 @@
+
+=== PDF PAGE 1 ===
+Distributed Direct Position
+Determination of Moving
+Sources in Asynchronous
+Sensor Networks
+Bowen Ding
+Sun Yat-sen University, Shenzhen 518107, China
+Dan Song
+Test Center, National University of Defense Technology, Xi’an
+710106, China
+Weijie Wang
+Wei Wang
+Sun Yat-sen University, Shenzhen 518107, China
+Abstract— Existing direct position determination (DPD) meth-
+ods for moving radiation sources based on time difference of arrival
+(TDOA) and frequency difference of arrival (FDOA) typically
+assume synchronous sensor networks, rendering them unsuitable
+for asynchronous networks affected by clock and frequency biases.
+To address this limitation and extend applicability to large-scale
+sensor networks, this paper proposes a distributed DPD algorithm
+for moving sources in asynchronous sensor networks based on
+calibration sources. To achieve distributed global optimization of
+parameters including clock and frequency offsets between neigh-
+boring sensors as well as the position and velocity of the source,
+this study introduces a distributed multiple particle filtering (MPF)
+framework. Utilizing the coarse estimates provided by the dis-
+tributed MPF, the algorithm then applies a diffusion-based gradient
+method to obtain the refined estimates. Throughout the entire
+process, the radiation source is regarded as an increasingly reliable
+calibration source. The algorithm jointly utilizes information from
+the radiation source and the calibration sources to estimate clock
+and frequency biases. Meanwhile, information exchange in the
+algorithm is restricted to neighboring sensors, eliminating the
+need for multi-hop transmission. Experimental results demonstrate
+consistent convergence of the estimated parameters across sensors
+and validate the superior performance of the proposed algorithm,
+even under challenging conditions of low signal-to-noise ratio (SNR)
+and limited observation duration.
+This work was supported in part by the National Natural Science
+Foundation under Grant 62471058, and in part by the National Nat-
+ural Science Foundation for Young Scientists of China under Grant
+62101558.
+(Corresponding authors: Wei Wang; Dan Song).
+Bowen Ding, Weijie Wang and Wei Wang are with the School
+of Electronic and Communication Engineering, Sun Yat-sen Univer-
+sity, Shenzhen 518107, China. (e-mail: dingbw@mail2.sysu.edu.cn;
+wangwj268@mail2.sysu.edu.cn;
+wangw278@mail.sysu.edu.cn);
+Dan
+Song is with the Test Center, National University of Defense Tech-
+nology, Xi’an 710106, China. (e-mail: dansong91@hotmail.com)
+0018-9251 © 2022 IEEE
+Index Terms— Direct position determination (DPD), distributed
+localization, asynchronous sensor network, time difference of arrival
+(TDOA), frequency difference of arrival (FDOA).
+I.
+INTRODUCTION
+Passive localization of moving radiation sources has
+gained significant research attention in recent years. This
+technology is a crucial function of wireless sensor net-
+works, widely applied in electronic reconnaissance, en-
+vironmental sensing, the Internet of Things (IoT), and
+security systems [1]–[3].
+To achieve high-precision localization of moving ra-
+diation sources, sensor networks typically combine time
+difference of arrival (TDOA) and frequency difference of
+arrival (FDOA) information for localization [4]. Tradi-
+tional localization approaches, known as two-step meth-
+ods, perform localization in two stages. In the first stage,
+the TDOA and FDOA values relative to a reference
+node are estimated based on the signals received by the
+sensors [5], [6]. In the second stage, these estimated
+parameters are further processed to derive the target’s
+position estimate. Classical data processing algorithm
+linearizes the localization equations and obtains target
+velocity and position estimates using a two-step weighted
+least squares method [7]. Numerous other algorithms for
+data processing have also been proposed in [8]–[10].
+However, the two-step methods do not fully leverage the
+correlation among received signals and incur information
+loss during the initial estimation of parameters, leading
+to significant localization errors under low signal-to-noise
+ratio (SNR) environments. To address this limitation, A. J.
+Weiss proposed the direct position determination (DPD)
+algorithm in [11]. The DPD method bypasses the interme-
+diate estimation of localization parameters such as TDOA,
+while directly estimates the target position from the re-
+ceived signals via a one-step signal processing procedure.
+Specifically, the DPD algorithm constructs a cost function
+related to the source position and searches for its extreme
+point. The cost function exploits the correlation among
+the received signals and is commonly constructed based
+on the maximum likelihood (ML) criterion. The point
+that maximizes or minimizes the cost function within
+the search space corresponds to the estimate, at which
+the correlation among the received signals is maximized.
+Compared with two-step methods, the DPD algorithm
+achieves higher localization accuracy, especially in low
+SNR environments [12]–[14].
+Building upon the introduced DPD algorithm, meth-
+ods for direct localization or direct tracking of moving
+targets using TDOA and FDOA information have been
+proposed in recent decades. In [15], particle filter (PF)
+was utilized to implement direct tracking of moving
+targets based on TDOA and FDOA information. To enable
+scalability for large-scale sensor networks, [16] proposed
+a distributed particle filtering approach for distributed
+direct tracking, thereby reducing the computational and
+communication burdens on individual sensors. However,
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS
+VOL. XX, No. XX
+XXXXX 2022
+1
+This article has been accepted for publication in IEEE Transactions on Aerospace and Electronic Systems. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TAES.2026.3685604
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 27,2026 at 02:13:14 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 2 ===
+both methods require multiple observations of the ra-
+diation source. In practical scenarios, the source signal
+may be intermittent, rendering these methods unsuit-
+able for single-shot localization applications. Addressing
+the single-shot localization scenario, [17] employed the
+Gaussian-Newton (GN) method to iteratively estimate
+the source position from a single set of measurements.
+While well-suited for single-shot localization, the GN
+method is highly sensitive to the initial value and may
+become trapped in local optima if the initial guess is
+unsuitable, resulting in large localization errors. To ad-
+dress the challenge of global optimization, a multiple
+particle filtering (MPF) method was introduced in [4].
+This approach not only ensures global solutions but also
+employs two interacting PFs that separately optimize the
+source’s position and velocity, decomposing the search
+space into two lower-dimensional subspaces. This division
+significantly reduces the number of particles required
+and lowers the computational complexity compared with
+traditional PF methods.
+The aforementioned algorithms assume the use of
+synchronous sensor networks for direct localization of
+moving targets. However, in the absence of devices such
+as the global positioning system (GPS) for time syn-
+chronization, clock biases commonly exist among sensors
+and the sensor network is asynchronous. When localizing
+targets using asynchronous sensor networks, it has been
+demonstrated in [18] that uncorrected clock biases can
+cause substantial localization errors. To address this, the
+authors proposed a DPD algorithm based on calibration
+sources. This approach first obtains initial estimates of
+the target position and clock biases via the expectation-
+maximization (EM) algorithm, and then refines these
+estimates using the GN method. In [19], the impact of
+time synchronization errors was mitigated by repeatedly
+changing the sensor positions and performing multiple
+observations of the target. However, both of these methods
+focus exclusively on localizing stationary targets and con-
+sider only TDOA information. When the frequency shifts
+caused by the Doppler effect are not taken into account,
+significant localization errors may occur for high-speed
+moving targets. Moreover, neither approach addresses the
+issue of frequency biases. In sensor networks, each sensor
+uses its local oscillator to down-convert the received
+signals. Due to factors such as manufacturing variations
+and temperature-induced oscillator drift, frequency offsets
+arise among the received baseband signals from different
+sensors [20], [21]. These frequency biases can adversely
+affect both position and velocity estimation of sources.
+Therefore, to achieve high-precision localization, it is
+essential to calibrate both the clock and frequency biases
+across the sensors [22], [23].
+This paper thus focuses on the problem of localizing
+moving radiation sources using asynchronous sensor net-
+works subject to both time and frequency synchronization
+errors. To overcome the inherent drawbacks of centralized
+processing, such as limited system robustness and the high
+communication bandwidth and computational demands
+placed on the fusion center [24]–[26], we propose a
+distributed DPD algorithm. The algorithm is designed to
+estimate a high-dimensional parameter formed by clock
+and frequency biases as well as source’s position and
+velocity. The estimation of clock and frequency biases
+is achieved by leveraging calibration sources with known
+positions and velocities but unknown transmitted signals.
+To address the challenge of distributed global optimiza-
+tion in the high dimensional parameter space, we intro-
+duce a distributed MPF method based on the diffusion
+strategy in [26]–[28]. By decomposing the search space
+and enabling interaction among PFs as well as local
+fusion among sensors, this approach effectively reduces
+the required number of particles and achieves globally
+consistent estimation. For further improvement of local-
+ization accuracy, the output of the distributed MPF is
+utilized as the initialization for subsequent processing,
+which employs the diffusion strategy and the gradient
+method to refine estimates toward consistent and accurate
+results. Unlike the distributed DPD methods in [19],
+[25], and [29], which require multi-hop transmissions and
+global data fusion, the proposed algorithm only necessi-
+tates information exchange between neighboring sensors,
+eliminating the need for storage and forwarding. Each
+sensor processes only local information, and consistent
+convergence across the network is achieved through the
+diffusion strategy. Consequently, the algorithm is well-
+suited for application in large-scale sensor networks.
+The main contributions of this paper are as follows:
+• The scenario of distributed localization of moving
+sources in asynchronous sensor networks with both
+clock and frequency biases is modeled. Calibration
+sources are utilized to correct clock and frequency
+biases. For this setting, the local and global cost
+functions based on the ML criterion are proposed.
+The Cram´er-Rao lower bound (CRLB) for this sce-
+nario is also derived, which is distinct from the
+results provided in [4], [15], and [18].
+• A fully distributed DPD algorithm is developed to lo-
+calize moving radiation sources in asynchronous sen-
+sor networks based on the constructed cost functions.
+This algorithm utilizes the proposed distributed MPF
+method to obtain reliable initial estimates, which
+are then refined using a diffusion-based gradient
+approach. All sensors in the network achieve con-
+sistent convergence across the estimated parameters.
+Throughout the entire process, information is ex-
+changed only between neighboring sensors, and local
+fusion is performed, thereby eliminating the need for
+multi-hop transmission and centralized processing.
+• The impact of clock and frequency biases on local-
+ization is analyzed both theoretically and numeri-
+cally.
+This paper is organized as follows. Section II presents
+the mathematical modeling of the considered scenario.
+Section III provides a detailed introduction to the pro-
+posed distributed DPD algorithm, including its cost func-
+2
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS
+VOL. XX, No. XX
+XXXXX 2022
+This article has been accepted for publication in IEEE Transactions on Aerospace and Electronic Systems. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TAES.2026.3685604
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 27,2026 at 02:13:14 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 3 ===
+TABLE I
+Important symbols and notations in this paper.
+(·)T, (·)H: Matrix transpose and Hermitian transpose operators.
+(·)−1: Matrix inversion operator.
+(·)∗: Complex conjugate operator.
+∥· ∥: Euclidean norm.
+F, D: Discrete Fourier transform and Doppler shift operators.
+exp {·}, diag {·}: Exponential function and diagonalization operators.
+blkdiag{·}: Block diagonal operator.
+E{·}: Expectation operator.
+R {·}, I {·}: Real and imaginary part operators.
+In: n × n identity matrix.
+0m×n: m × n zero matrix.
+d: Dimension of the localization space.
+pi: Position of sensor i.
+˜pi: Unit direction vector from sensor i to the radiation source.
+M: Number of sensors.
+u, v: Position and velocity vectors of the source to be estimated.
+δi, ξi: Clock and frequency biases of sensor i relative to the reference.
+η: Path gain coefficient.
+τ, f: Propagation delay and Doppler frequency.
+c: Speed of light.
+f0, fs: Carrier frequency and baseband sampling rate.
+r(k)
+i
+: Baseband signal vector received by sensor i from the k-th
+calibration source (k=0 denotes the radiation source).
+W, w: Adjacency matrix and the associated adjacency status.
+Ni, |Ni|: Neighbor set and number of neighbors of sensor i.
+p(m)
+i,l , ω(m)
+i,l : Position and weight of the m-th particle in the l-th
+filter at sensor i.
+Q: Number of calibration sources.
+K: Number of signal segments.
+N: Number of baseband samples.
+| ˜
+N|: Average number of neighbors.
+n: Discrete time sequence.
+α, β: Weighting and decay coefficients for source calibration.
+Φ: Diffusion information.
+θi, ˆθi: Parameter vector for sensor i and its estimate.
+tions, coarse estimation procedure, and fine estimation
+procedure. Section IV analyzes the computational and
+communication load of the proposed algorithm. Section
+V presents the simulation results. Section VI concludes
+the paper. The CRLB for direct localization of moving
+sources in asynchronous sensor networks using calibration
+sources is derived in the Appendix. The Appendix also
+theoretically analyzes the impact of clock and frequency
+biases on localization accuracy. The key symbols and
+notations used throughout this paper are summarized in
+Table I.
+II. MODELING
+This section provides the mathematical modeling of
+the scenario in which an asynchronous sensor network
+is used to localize moving radiation sources. Since the
+localization of multiple sources after signal separation can
+be transformed into a series of single-source localization
+problems, a single source is assumed for simplification.
+The non-cooperative radiation source to be located moves
+with a speed of v at a position of u, where both the
+velocity and position are unknown, and the dimension
+of the localization is denoted as d. The sensor network
+consists of M fixed sensors distributed in space to localize
+the radiation source. It is assumed that each sensor
+knows its position precisely, with the position of the i-th
+sensor denoted as pi. The signal emitted by the radiation
+source propagates to each sensor via line-of-sight. Under
+the narrowband Doppler assumption, the Doppler effect
+is modeled as introducing solely a frequency shift to
+the received baseband signal. After down conversion,
+the baseband signal received by the i-th sensor can be
+expressed as
+ri(t) = ηis(t −τi −δi)ej2π(fi+ξi)t + qi(t),
+(1)
+where s(t) is the unknown baseband signal emitted by the
+radiation source, τi and ηi are the propagation delay and
+path gain coefficient of the signal arriving at the sensor i,
+and fi is the Doppler frequency shift. qi(t) represents the
+Gaussian white noise introduced by the channel, with a
+mean of zero and a variance of σ2
+q, and the noise at each
+sensor is independent. δi denotes the clock bias between
+the local clock of the sensor i and the reference clock,
+while ξi is the frequency bias between the local oscillator
+frequency of the sensor i and the reference frequency.
+Considering the impact of the channel on the signal
+phase, ηi is a complex number. To calibrate for clock
+and frequency biases, Q calibration sources are placed
+in the space. The sensors receive the radiation source
+and calibration source signals at different times. Given
+prior knowledge of the transmission characteristics of cal-
+ibration sources, we can verify whether a received signal
+originates from a specific calibration source by extracting
+parameters such as center frequency, bandwidth, pulse
+width, cyclic frequency, and pulse repetition frequency
+and matching them against the known characteristics.
+Similar to (1), the baseband signal received by the sensor
+i from the k-th calibration source can be expressed as:
+r(k)
+i
+(t) = η(k)
+i
+s(k)(t−τ (k)
+i
+−δi)ej2π(f (k)
+i
++ξi)t+q(k)
+i
+(t), (2)
+where τ (k)
+i
+, η(k)
+i
+, and f (k)
+i
+represent the propagation time
+delay, path gain coefficient, and Doppler frequency shift
+of the signal emitted by the calibration source k reaching
+the sensor i. s(k)(t) represents the unknown baseband
+signal emitted by the calibration source k, and the velocity
+v(k) and position u(k) of the calibration source are
+assumed to be known. The noise q(k)
+i
+(t) follows the same
+Gaussian distribution with zero mean and variance σ2
+q. To
+simplify the notation, we define k = 0 for the radiation
+source and k = 1, 2, · · · , Q for the calibration sources.
+For example, η(0)
+i
+= ηi. The time delays and Doppler
+frequencies in (1) and (2) can be calculated by
+τ (k)
+i
+= ∥u(k) −pi∥
+c
+,
+(3)
+f (k)
+i
+= −f0v(k)T(u(k) −pi)
+c∥u(k) −pi∥
+,
+(4)
+where c denotes the speed of light, and f0 is the carrier
+frequency. After sampling the received baseband signals
+from the radiation source and the calibration sources at
+B.Ding ET AL.: Distributed Direct Position Determination of Moving Sources in Asynchronous Sensor Networks
+3
+This article has been accepted for publication in IEEE Transactions on Aerospace and Electronic Systems. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TAES.2026.3685604
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 27,2026 at 02:13:14 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 4 ===
+Communication Link
+Sensor
+Calibration Source
+Radiation Source
+Fig. 1.
+The positioning scene.
+a sampling rate of fs with N points, the discrete signals
+can be expressed as
+r(k)
+i
+=η(k)
+i
+D
+
+f (k)
+i
++ ξi
+
+FHΓ
+
+τ (k)
+i
++ δi
+
+Fs(k) + q(k)
+i
+,
+(5)
+where
+r(k)
+i
+=
+h
+r(k)
+i
+(0), r(k)
+i
+(1/fs), · · · , r(k)
+i
+((N −1)/fs)
+iT
+,
+q(k)
+i
+=
+h
+q(k)
+i
+(0), q(k)
+i
+(1/fs), · · · , q(k)
+i
+((N −1)/fs)
+iT
+,
+(6)
+and F = exp
+
+−j2πnnT/N
+	
+/
+√
+N is the discrete Fourier
+transform (DFT) operator, with n = [0, 1, · · · , N −
+1]T. Γ(τ) = diag {exp {−j2πfsnτ/N}} represents the
+phase delay induced by time delay τ, and D(f) =
+diag {exp {j2πfn/fs}} represents the Doppler shift op-
+erator.
+In addition to receiving signals from the sources,
+each sensor also shares its received signals and other
+positioning-related information with other sensors to
+achieve co-localization. Due to constraints on power and
+communication bandwidth, each sensor can only com-
+municate with those within a communication radius R.
+The communication topology of the sensor network is
+denoted as G(L, E, W), where L = {1, 2, · · · , M} is the
+set of all sensor indices, E is the set of communication
+edges, and W is the adjacency matrix. If two sensors i
+and l can communicate directly with each other, they are
+considered neighbors, i.e., (i, l) ∈E ⇐⇒(l, i) ∈E, and
+wi,l = wl,i = 1, where wi,l is the (i, l)-th entry of W.
+Otherwise, wi,l = wl,i = 0. The set of all neighbors of
+sensor i is denoted as Ni = {l | l ∈L, (i, l) ∈E} =
+{i1, i2, · · · , i|Ni|}, where |Ni| represents the number of
+neighbors. The sensor network is a single-hop communi-
+cation network, meaning that the information shared by
+a sensor with its neighbors is not stored and forwarded
+further. Fig. 1 illustrates a simplified scenario of using
+an asynchronous sensor network to localize a moving
+radiation source based on a calibration source.
+III.
+PROPOSED ALGORITHM
+For DPD algorithms, the procedure begins with con-
+structing a cost function, followed by searching within
+the parameter space for a point that maximizes or min-
+imizes this cost function. This point corresponds to the
+algorithm’s estimate of the parameter. Therefore, this
+section derives the cost function on which the algorithm
+is based and presents the solution procedure. The solution
+consists of two stages: distributed coarse estimation and
+distributed fine estimation. The coarse estimation provides
+a reliable initialization for the iterative refinement in the
+fine estimation stage.
+A.
+Cost Function
+The ML criterion is widely employed in DPD, al-
+lowing the algorithm to obtain optimal estimates un-
+der standard statistical assumptions. Accordingly, this
+subsection first derives the cost function for the sce-
+nario described in Section II based on the ML cri-
+terion. Let the received signal vector from the radia-
+tion source be r(0) = [(r(0)
+1 )T, (r(0)
+2 )T, · · · , (r(0)
+M )T]T,
+and the received signal vector from the k-th calibra-
+tion source be r(k) = [(r(k)
+1 )T, (r(k)
+2 )T, · · · , (r(k)
+M )T]T.
+Then, the vector formed by all received signals is
+l
+=
+
+(r(0))T, (r(1))T, · · · , (r(Q))TT. Define the pa-
+rameter vector as θ =
+
+δT, ξT, uT, vTT, where δ =
+[δ1, δ2, · · · , δM]T and ξ = [ξ1, ξ2, · · · , ξM]T represent
+the clock bias vector and frequency bias vector, respec-
+tively. Ignoring constant terms independent of θ, the log-
+likelihood function can be expressed as
+L(l|θ) = −1
+σ2q
+Q
+X
+k=0
+M
+X
+i=1
+∥r(k)
+i
+−˜r(k)
+i
+∥2,
+(7)
+where
+˜r(k)
+i
+= η(k)
+i
+D
+
+f (k)
+i
++ ξi
+
+FHΓ
+
+τ (k)
+i
++ δi
+
+Fs(k)
+(8)
+denotes the noise-free version of r(k)
+i
+. This log-likelihood
+function is employed as the cost function. By setting
+the partial derivative of the log-likelihood function with
+respect to the path gain coefficient to zero, the ML
+estimate of the path gain coefficient can be obtained by
+η(k)
+i
+=
+
+D
+
+f (k)
+i
++ ξi
+
+FHΓ
+
+τ (k)
+i
++ δi
+
+Fs(k)H
+rk
+i
+ s(k)H s(k)
+.
+(9)
+Substituting (9) into (7) and utilizing the independence of
+r(k)
+i
+from θ, the cost function can be further simplified
+as follows:
+C1(θ) = 1
+σ2q
+Q
+X
+k=0
+ s(k)H
+∥s(k)∥Q(k)(θ) s(k)
+∥s(k)∥,
+(10)
+where
+Q(k)(θ) = V(k) 
+V(k)H
+,
+(11)
+4
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS
+VOL. XX, No. XX
+XXXXX 2022
+This article has been accepted for publication in IEEE Transactions on Aerospace and Electronic Systems. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TAES.2026.3685604
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 27,2026 at 02:13:14 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 5 ===
+V(k) =
+
+FHΓH 
+τ (k)
+1
++ δ1
+
+FDH 
+f (k)
+1
++ ξ1
+
+r(k)
+1 , · · · ,
+FHΓH 
+τ (k)
+M + δM
+
+FDH 
+f (k)
+M + ξM
+
+r(k)
+M
+
+.
+(12)
+According to the work in [30], the cost function in
+(10) can be expressed as
+C2(θ) = 1
+σ2q
+Q
+X
+k=0
+λmax
+n
+Q(k)(θ)
+o
+,
+(13)
+where the operator λmax{·} denotes the largest eigenvalue
+of the matrix. For a network consisted of M sensors,
+only (M −1) clock biases and (M −1) frequency biases
+need to be calibrated. Taking sensor 1 as the reference
+node, the clock bias vector ˜δ = [δ2,1, δ3,1, · · · , δM,1]T
+and frequency bias vector ˜ξ = [ξ2,1, ξ3,1, · · · , ξM,1]T each
+consist of (M −1) terms, where δi,l = c(δi−δl) represents
+the clock bias in meters between sensor i and sensor l,
+and ξi,l = ξi −ξl denotes the frequency bias. Estimating
+˜δ and ˜ξ completes the calibration of the sensor network.
+Let the new parameter vector be ˜θ =
+˜δT, ˜ξT, uT, vTT.
+Based on (13), and using the property that the non-zero
+eigenvalues of the matrices VVH and VHV are identical,
+the cost function related to ˜θ can be expressed as
+C3(˜θ) = 1
+σ2q
+Q
+X
+k=0
+λmax
+n
+˜Q(k)(˜θ)
+o
+= 1
+σ2q
+Q
+X
+k=0
+λmax
+
+˜V(k)H ˜V(k)
+
+,
+(14)
+where
+˜V(k) =
+
+FHΓH 
+τ (k)
+1
++ δ1,1/c
+
+FDH 
+f (k)
+1
++ ξ1,1
+
+r(k)
+1 ,
+· · · ,FHΓH 
+τ (k)
+M + δM,1/c
+
+FDH 
+f (k)
+M + ξM,1
+
+r(k)
+M
+
+,
+(15)
+and ˜Q(k) is the cross-ambiguity matrix (CAM), composed
+of M×M cross-ambiguity function (CAF) values. Specif-
+ically, δ1,1 = 0 m and ξ1,1 = 0 Hz. However, the cost
+function derived in (14) is designed for centralized sensor
+networks and is not suitable for distributed processing. In
+distributed networks, individual sensors cannot access the
+received signals from the entire network. Instead, they can
+only compute the CAFs with respect to their neighboring
+sensors. Subsequently, the global cost function designed
+for distributed sensor networks can be formulated as
+Cglobal(˜θ) = 1
+σ2q
+Q
+X
+k=0
+λmax
+n
+W ⊙˜Q(k)(˜θ)
+o
+,
+(16)
+where
+⊙denotes the element by element product
+(Hadamard product). According to [31], the matrix’s
+maximum eigenvalue can be approximated by its sum
+norm. Ignoring the diagonal elements unrelated to ˜θ, the
+global cost function can be approximated as
+Cglobal(˜θ) = 1
+σ2q
+Q
+X
+k=0
+M
+X
+i=1
+M
+X
+l=1
+wl,i|CAF(k)
+l,i (˜θ)|
+= 1
+σ2q
+Q
+X
+k=0
+M
+X
+i=1
+X
+l∈Ni
+|CAF(k)
+l,i (˜θ)|,
+(17)
+where CAF(k)
+l,i (˜θ) is the (l, i)-th element of ˜Q(k). In a
+distributed sensor network, each sensor considers itself
+as the reference node. Let the clock bias vector for the
+i-th sensor be ˜δi = [δi1,i, δi2,i, · · · , δi|Ni|,i]T, and the
+frequency bias vector be ˜ξi = [ξi1,i, ξi2,i, · · · , ξi|Ni|,i]T.
+The parameter vector to be estimated for the i-th sensor is
+θi =
+
+uT, vT, ˜δT
+i , ˜ξT
+i
+T. The CAF value between sensor
+i and sensor l is then computed as
+CAF(k)
+l,i (θi) =
+
+r(k)
+l
+H
+D
+
+f (k)
+l
++ ξl,i
+
+FH×
+Γ
+
+τ (k)
+l,i + δl,i/c
+
+FDH 
+f (k)
+i
+
+r(k)
+i
+,
+(18)
+where τ (k)
+l,i
+= τ (k)
+l
+−τ (k)
+i
+is the TDOA term, and the
+operator × represents matrix multiplication. Define the
+local cost function for sensor i as
+Clocal
+i
+(θi) = 1
+σ2q
+Q
+X
+k=0
+X
+l∈Ni
+|CAF(k)
+l,i (θi)|,
+(19)
+the global cost function is then the sum of the local cost
+functions across the network:
+Cglobal(˜θ) =
+M
+X
+i=1
+Clocal
+i
+(θi).
+(20)
+B.
+Distributed Coarse Estimation
+Based on the cost function derived above, this subsec-
+tion employs a distributed MPF method for each sensor
+to estimate its corresponding parameter vector θi.
+In this method, each sensor employs 2 + 2|Ni| PFs,
+dividing the high-dimensional vector θi into multiple low-
+dimensional parameters θi,l:
+θi =
+h
+θT
+i,1, θT
+i,2, · · · , θT
+i,2+2|Ni|
+iT
+=
+h
+uT, vT, δi1,i, · · · , δi|Ni|,i, ξi1,i, · · · , ξi|Ni|,i
+iT
+.
+(21)
+Specifically, the first PF estimates the radiation source’s
+position, while the second PF estimates its velocity. The
+remaining PFs estimate |Ni| clock biases and |Ni| fre-
+quency biases associated with the neighbors. The l-th PF
+for sensor i can be represented as
+n
+p(m)
+i,l , ω(m)
+i,l
+oNl
+m=1 , i =
+1, 2, · · · , M, where p(m)
+i,l
+denotes the m-th particle of the
+l-th PF for sensor i, ω(m)
+i,l
+is the corresponding weight,
+and Nl is the number of particles in the l-th PF. Let
+θ(−l)
+i
+denote the parameter vector excluding θi,l from θi.
+Since sensor i can only access the received signals from
+itself and its neighboring sensors, the local observation
+vector for the radiation source is defined as r(0)
+local,i =
+B.Ding ET AL.: Distributed Direct Position Determination of Moving Sources in Asynchronous Sensor Networks
+5
+This article has been accepted for publication in IEEE Transactions on Aerospace and Electronic Systems. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TAES.2026.3685604
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 27,2026 at 02:13:14 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 6 ===
+[(r(0)
+i
+)T, (r(0)
+i1 )T, · · · , (r(0)
+i|Ni|)T]T, and similarly the local
+observation vector for the calibration source k is denoted
+as r(k)
+local,i. The total local observation vector is then given
+by llocal
+i
+= [(r(0)
+local,i)T, (r(1)
+local,i)T, · · · , (r(Q)
+local,i)T]T. Uti-
+lizing llocal
+i
+, the particle weight is computed as
+ω(m)
+i,l
+=P
+
+p(m)
+i,l |llocal
+i
+
+=
+Z
+P
+
+p(m)
+i,l |llocal
+i
+, θ(−l)
+i
+
+P
+
+θ(−l)
+i
+
+dθ(−l)
+i
+.
+(22)
+Since the integral above is computationally intensive,
+the Laplace approximation [32] is applied to simplify the
+calculation of the particle weight:
+ω(m)
+i,l
+= P
+
+p(m)
+i,l |llocal
+i
+, ˆθ(−l)
+i
+
+,
+(23)
+where ˆθ(−l)
+i
+is the estimated vector formed by the current
+estimates of the remaining 1 + 2|Ni| filters. Thus, each
+particle updates its weight iteratively based on the latest
+estimates from other filters and its own position, effec-
+tively avoiding the need for explicit integral computation.
+Based on the cost function proposed in (14), the particle
+weight is calculated as
+ω(m)
+i,l
+=
+1
+Cσ2q
+Q
+X
+k=0
+λmax
+n
+˜Q(k)
+i
+
+p(m)
+i,l , ˆθ(−l)
+i
+o
+,
+(24)
+where the CAM ˜Q(k)
+i
+is computed from the local obser-
+vation r(k)
+local,i, similar to the calculation of ˜Q(k) in (14).
+The constant C is used to stabilize the particle weights.
+Based on (24), the detailed expressions for the parti-
+cle weights corresponding to different low-dimensional
+parameters are derived below. Notably, the time delay
+τ (k)
+i
+and Doppler frequency f (k)
+i
+associated with the k-
+th calibration source are independent of the radiation
+source’s position u and velocity v. The CAM ˜Q(k)
+i
+for
+the k-th calibration source is then independent of the
+radiation source’s position and velocity. Therefore, the
+particle weight calculation for estimating the position and
+velocity (corresponding to θi,1 and θi,2) simplifies to
+ω(m)
+i,l
+=
+1
+Cσ2q
+λmax
+n
+˜Q(0)
+i
+o
+, l = 1, 2.
+(25)
+According to (18), the synchronization errors δl,i and
+ξl,i are only related to the cross ambiguity function
+CAF(k)
+l,i , meaning that no other CAFs need to be cal-
+culated. Based on (17), the computation of the particle
+weight for estimating the frequency bias ξil,i (correspond-
+ing to θi,2+|Ni|+l, l = 1, 2, · · · , |Ni|) can be simplified as
+follows:
+ω(m)
+i,2+|Ni|+l =
+1
+Cσ2q
+ 
+α|CAF(0)
+il,i| +
+Q
+X
+k=1
+|CAF(k)
+il,i|
+!
+, (26)
+where α is a weight coefficient. The introduction of α is
+due to the inaccurate estimated position and velocity of
+the radiation source at early iterations. At this time, the
+calibration information provided by the radiation source
+is unreliable. As the iterations progress, the position
+and velocity estimates converge to their true values. The
+calibration information provided becomes more accurate,
+and thus α increases accordingly. Furthermore, to mitigate
+the impact of inaccurate frequency bias estimates on clock
+bias estimation during the early iterations, the segmenta-
+tion approach in [33] is adopted. When the frequency bias
+is inaccurately estimated, the resulting phase variation
+accumulates over time, leading to a progressive loss
+of signal correlation in the time domain. Consequently,
+processing the signal directly over a long duration causes
+the peak of the CAF to smear or even vanish. In contrast,
+by segmenting the signal into multiple short intervals,
+the phase variation induced by the inaccurate frequency
+bias within each segment becomes negligible, thereby
+preventing the divergence of the CAF peak. Specifically,
+the radiation source and calibration source signals are
+divided into K segments. Then, the particle weight for
+estimating the clock bias δil,i (corresponding to θi,2+l, l =
+1, 2, · · · , |Ni|) is computed as:
+ω(m)
+i,2+l =
+1
+Cσ2q
+
+α
+K
+X
+n=1
+|CAF(0)
+il,i,n| +
+Q
+X
+k=1
+K
+X
+n=1
+|CAF(k)
+il,i,n|
+
+,
+(27)
+where CAF(0)
+il,i,n and CAF(k)
+il,i,n represent the CAF between
+sensors i and il calculated using the n-th segment of the
+radiation source signal and the n-th segment of the k-th
+calibration source signal, respectively.
+Similarly, to reduce the influence of inaccurate veloc-
+ity estimate, the particle weight for estimating position is
+calculated by
+ω(m)
+i,1 =
+1
+Cσ2q
+K
+X
+n=1
+λmax
+n
+˜Q(0)
+i,n
+o
+,
+(28)
+where ˜Q(0)
+i,n is the CAM computed from the n-th segment
+of the radiation source signal. Moreover, the calculation of
+the largest eigenvalue of the matrices in (25) and (28) can
+be approximated using the matrix’s sum norm similarly
+to (17).
+After obtaining the particles’ positions and weights,
+sensor i estimates θi,l by
+ˆθi,l =
+Nl
+X
+m=1
+˜w(m)
+i,l p(m)
+i,l ,
+(29)
+where
+˜w(m)
+i,l
+=
+w(m)
+i,l / PNl
+k=1 w(k)
+i,l
+is the normalized
+weight. Let the estimation of the radiation source position
+by sensor i be ˆui = ˆθi,1, the velocity be ˆvi = ˆθi,2,
+the clock bias be ˆδil,i
+=
+ˆθi,2+l, and the frequency
+bias be ˆξil,i = ˆθi,2+|Ni|+l. In each iteration, sensor i
+obtains a local estimate of θi,l via (29). To ensure global
+consistency, the diffusion strategy is employed in which
+sensor i shares its estimates with its neighbors and obtains
+fusion results. The fusion of different low-dimensional
+parameters is performed in different ways:
+ˆθfus
+i,1 =
+X
+k∈Ni∪{i}
+ˆuk/ (|Ni| + 1) ,
+ˆθfus
+i,2 =
+X
+k∈Ni∪{i}
+ˆvk/ (|Ni| + 1) ,
+6
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS
+VOL. XX, No. XX
+XXXXX 2022
+This article has been accepted for publication in IEEE Transactions on Aerospace and Electronic Systems. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TAES.2026.3685604
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 27,2026 at 02:13:14 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 7 ===
+1
+2
+2,1
+2,1
+1,2
+(
+) / 2
+ˆ
+ˆ
+ˆ
+fus
+
+
+
+
+
+1,2
+ˆ
+3
+(a) Non-diffusive fusion.
+1
+2
+1,2
+ˆ
+1,3
+ˆ
+2,3
+ˆ
+2,1
+2,1
+1,2
+2,3
+1,3
+(
+) / 3
+ˆ
+ˆ
+ˆ
+ˆ
+ˆ
+fus
+
+
+
+
+
+
+
+
+
+3
+(b) Diffusive fusion.
+Fig. 2.
+The difference between non-diffusive and diffusive fusion of
+clock bias.
+ˆθfus
+i,2+l =
+(ˆδil,i −ˆδi,il) + P
+k∈Ni∩Nil (ˆδil,k −ˆδi,k)
+2 + |Ni ∩Nil|
+,
+l = 1, · · · , |Ni|,
+ˆθfus
+i,2+|Ni|+l =
+(ˆξil,i −ˆξi,il) + P
+k∈Ni∩Nil (ˆξil,k −ˆξi,k)
+2 + |Ni ∩Nil|
+,
+l = 1, · · · , |Ni|,
+(30)
+where clock and frequency biases are also diffused. Fig. 2
+shows the difference between non-diffusive and diffusive
+fusion of clock bias using three neighboring sensors. In
+non-diffusive fusion, sensor 1 fuses its own estimate ˆδ2,1
+with sensor 2’s estimate ˆδ1,2 to obtain the fused estimate
+of δ2,1, while sensor 3 does not influence this estimate.
+In contrast, with diffusive fusion, sensor 3 can influence
+sensor 1’s estimate of δ2,1, which in turn affects sensor
+2’s estimate of δ3,2. This influence propagates throughout
+the network, ultimately synchronizing the clocks of all
+sensors.
+After obtaining the fusion results, the covariance ma-
+trix is computed as
+Cov
+
+ˆθi,l
+
+=
+Nl
+X
+m=1
+˜w(m)
+i,l
+
+p(m)
+i,l
+−ˆθfus
+i,l
+ 
+p(m)
+i,l
+−ˆθfus
+i,l
+T
+.
+(31)
+Subsequently, the PF adopts ˆθfus
+i,l
+as the latest estimate
+of θi,l, and samples new particles from a Gaussian
+distribution with mean ˆθfus
+i,l
+and covariance Cov(ˆθi,l)
+for the next iteration. During initialization, the particles
+are uniformly sampled within the corresponding low-
+dimensional search space. After a small number of it-
+erations, the estimates from each PF serve as coarse
+estimates. Since the estimation of source’s position and
+velocity relies heavily on accurate estimates of clock and
+frequency biases, the PFs for clock and frequency biases
+undergo a pre-calibration phase. After pre-calibration, the
+     DPF
+1,i
+
+      DPF
+2,i
+
+     DPF
+|
+|,
+i i
+N
+.
+.
+.
+     DPF
+1,i
+
+      DPF
+2,i
+
+     DPF
+|
+|,
+i i
+N
+.
+.
+.
+     DPF
+u
+     DPF
+v
+Sensor i
+Weight 
+calculation
+Parameter
+estimation
+Local
+fusion
+Sampling
+Fig. 3.
+The process in the proposed distributed MPF.
+PFs for estimating source’s position and velocity begin
+their iterations. Inspired by the approach in [34], no
+local fusion between sensors is performed during the pre-
+calibration procedure to avoid getting trapped in local
+optima. Moreover, only calibration source information
+is used to calculate particle weights during the pre-
+calibration procedure, as given by
+α =
+
+0,
+if 0 < n ≤Niter1
+1 −βn−Niter1,
+Niter1 < n ≤Niter2
+,
+(32)
+where n is the current iteration number, Niter1 is the
+number of pre-calibration iterations, Niter2 is the total
+number of iterations for the PF, and β is the decay factor.
+Therefore, the distributed rough estimation is divided into
+two stages: pre-calibration and joint calibration. In the
+pre-calibration stage, clock and frequency biases are pre-
+calibrated using only the calibration source. In the sub-
+sequent joint calibration stage, information from both the
+radiation source and the calibration sources is combined
+to estimate the radiation source’s position and velocity
+while further calibrate the clock and frequency biases.
+The iterative interaction process of the proposed dis-
+tributed MPF is illustrated in Fig. 3. Within this frame-
+work, each PF operates in a distributed manner and is
+therefore referred to as a distributed PF (DPF). The DPFs
+iterate sequentially in the order of clock biases, frequency
+biases, radiation source’s position, and radiation source’s
+velocity. In each iteration, every DPF first computes the
+weights according to (23), and estimates its corresponding
+parameter based on (29). Subsequently, local fusion is
+performed via (30), followed by covariance matrix calcu-
+lation and particle sampling according to (31).
+C.
+Distributed Fine Estimation
+In this subsection, the gradient method and diffusion
+strategy are employed to refine the parameter estimates
+based on the coarse results obtained from the proposed
+distributed MPF method. Before detailing the fine esti-
+mation method, we first clarify the objective at this stage.
+B.Ding ET AL.: Distributed Direct Position Determination of Moving Sources in Asynchronous Sensor Networks
+7
+This article has been accepted for publication in IEEE Transactions on Aerospace and Electronic Systems. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TAES.2026.3685604
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 27,2026 at 02:13:14 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 8 ===
+The goal is to find the parameter vector that maximizes
+the global cost function defined in (17):
+ˆ˜θ = arg max
+˜θ
+Cglobal(˜θ),
+(33)
+which corresponds to the algorithm’s estimate of ˜θ. In
+the distributed sensor networks, each sensor cannot obtain
+global observations and thus cannot directly compute the
+gradient of the global cost function with respect to ˜θ. By
+employing the diffusion strategy, maximizing the global
+cost function is equivalently achieved through two steps
+performed by each sensor at every iteration. In the first
+step, each sensor applies a gradient ascent update based
+on its local cost function evaluated at the current estimate
+to generate the diffusion information. In the second step,
+each sensor fuses its own diffusion information with that
+of neighbors, and the fused result becomes the updated
+parameter estimate. According to (19), the first step of
+the (n + 1)-th iteration for sensor i is expressed as
+Φi,l[n + 1] = ˆθi,l[n] + µi,l
+Q
+X
+k=0
+X
+m∈Ni
+∇θi,l
+CAF(k)
+m,i[n]
+ ,
+l = 1, 2, · · · , 2 + 2|Ni|,
+(34)
+where ˆθi,l[n] denotes sensor i’s estimate of θi,l at the n-th
+iteration of fine estimation, Φi,l is the diffusion informa-
+tion, µi,l is the step size, and CAF(k)
+m,i[n] is computed
+from ˆθi,l[n] via (18). Using the properties of derivatives,
+the gradient of |CAF(k)
+m,i[n]| in (34) can be expressed as
+∇θi,l
+CAF(k)
+m,i[n]
+ =
+R
+(
+CAF(k)
+m,i[n]
+∗∂CAF(k)
+m,i[n]
+∂ˆθi,l[n]
+)
+CAF(k)
+m,i[n]
+
+.
+(35)
+In the following, the derivatives of CAF(k)
+m,i[n] with re-
+spect to different parameters ˆθi,l[n] are derived. It should
+be noted that the CAF computed from the calibration
+source signal is independent of the radiation source’s
+position and velocity, thus the corresponding derivatives
+are zero:
+∂CAF(k)
+m,i[n]
+∂ˆui[n]
+=
+∂CAF(k)
+m,i[n]
+∂ˆvi[n]
+= 0d×1, k = 1, · · · , Q,
+(36)
+where ˆui[n] and ˆvi[n] represent sensor i’s estimates of
+the radiation source’s position and velocity at the n-th
+iteration, respectively. Applying the chain rule, the partial
+derivative of the CAF with respect to the radiation source
+position is computed as follows:
+∂CAF(0)
+m,i[n]
+∂ˆui[n]
+=
+∂CAF(0)
+m,i[n]
+∂ˆτ (0,i)
+m,i [n]
+∂ˆτ (0,i)
+m,i [n]
+∂ˆui[n] +
+∂CAF(0)
+m,i[n]
+∂ˆf (0,i)
+i
+[n]
+∂ˆf (0,i)
+i
+[n]
+∂ˆui[n]
++
+∂CAF(0)
+m,i[n]
+∂ˆf (0,i)
+m
+[n]
+∂ˆf (0,i)
+m
+[n]
+∂ˆui[n] ,
+(37)
+where ˆτ (0,i)
+m,i [n] and ˆf (0,i)
+m
+[n] are sensor i’s estimates of
+τ (0)
+m,i and f (0)
+m
+at iteration n, computed from ˆui[n] and
+ˆvi[n] via (3) and (4). For simplicity, ˆτ (k,i)
+m,i [n] and ˆf (k,i)
+m
+[n]
+are similarly defined based on the known location u(k)
+and velocity v(k) of calibration source k. According to
+(18), the partial derivatives in (37) are calculated by
+∂CAF(0)
+m,i[n]
+∂ˆτ (0,i)
+m,i [n]
+= c
+
+r(0)
+m
+H
+D
+
+ˆf (0,i)
+m
+[n] + ˆξm,i[n]
+
+FH×
+˜nΓ
+
+ˆτ (0,i)
+m,i + ˆδm,i[n]/c
+
+FDH 
+ˆf (0,i)
+i
+[n]
+
+r(0)
+i
+,
+∂ˆτ (0,i)
+m,i [n]
+∂ˆui[n]
+= 1
+c
+ (ˆui[n] −pm)
+∥ˆui[n] −pm∥−(ˆui[n] −pi)
+∥ˆui[n] −pi∥
+
+,
+∂CAF(0)
+m,i[n]
+∂ˆf (0,i)
+i
+[n]
+=
+
+r(0)
+m
+H
+D
+
+ˆf (0,i)
+m
+[n] + ˆξm,i[n]
+
+FH×
+Γ
+
+ˆτ (0,i)
+m,i + ˆδm,i[n]/c
+
+FDH 
+ˆf (0,i)
+i
+[n]
+
+˜˜nHr(0)
+i
+,
+∂CAF(0)
+m,i[n]
+∂ˆf (0,i)
+m
+[n]
+=
+
+r(0)
+m
+H ˜˜nD
+
+ˆf (0,i)
+m
+[n] + ˆξm,i[n]
+
+FH×
+Γ
+
+ˆτ (0,i)
+m,i + ˆδm,i[n]/c
+
+FDH 
+ˆf (0,i)
+i
+[n]
+
+r(0)
+i
+,
+∂ˆf (0,i)
+m
+[n]
+∂ˆui[n]
+=
+f0ˆvT
+i [n]
+(ˆui[n] −pm)(ˆui[n] −pm)T
+∥ˆui[n] −pm∥2
+−Id
+
+c∥ˆui[n] −pm∥
+,
+(38)
+where
+ˆξm,i[n] and ˆδm,i[n] represent sensor i’s esti-
+mates of the frequency bias ξm,i and clock bias δm,i
+at the n-th iteration, respectively. The matrices ˜n =
+−j2πfsdiag {n} /(Nc) and ˜˜n = j2πdiag {n} /fs are
+defined accordingly. Furthermore, the derivative of the
+CAF computed from the radiation source signal with
+respect to the source velocity is given by
+∂CAF(0)
+m,i[n]
+∂ˆvi[n]
+=
+∂CAF(0)
+m,i[n]
+∂ˆf (0,i)
+i
+[n]
+∂ˆf (0,i)
+i
+[n]
+∂ˆvi[n] +
+∂CAF(0)
+m,i[n]
+∂ˆf (0,i)
+m
+[n]
+∂ˆf (0,i)
+m
+[n]
+∂ˆvi[n] ,
+(39)
+where
+∂ˆf (0,i)
+m
+[n]
+∂ˆvi[n]
+= −f0 (ˆui[n] −pm)
+c∥ˆui[n] −pm∥.
+(40)
+In addition, since CAF(k)
+m,i[n] depends only on the
+clock bias δm,i and frequency bias ξm,i, its partial deriva-
+tives with respect to other clock and frequency biases are
+zero. The derivatives of CAF(k)
+m,i[n] with respect to δm,i
+and ξm,i are expressed as
+∂CAF(k)
+m,i[n]
+∂ˆδm,i[n]
+=
+
+r(k)
+m
+H
+D
+
+f (k)
+m [n] + ˆξm,i[n]
+
+FH×
+˜nΓ
+
+τ (k)
+m,i[n] + ˆδm,i[n]/c
+
+FDH 
+f (k)
+i
+[n]
+
+r(k)
+i
+,
+∂CAF(k)
+m,i[n]
+∂ˆξm,i[n]
+=
+
+r(k)
+m [n]
+H ˜˜nD
+
+f (k)
+m + ˆξm,i[n]
+
+FH×
+Γ
+
+τ (k)
+m,i[n] + ˆδm,i[n]/c
+
+FDH 
+f (k)
+i
+[n]
+
+r(k)
+i
+.
+(41)
+8
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS
+VOL. XX, No. XX
+XXXXX 2022
+This article has been accepted for publication in IEEE Transactions on Aerospace and Electronic Systems. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TAES.2026.3685604
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 27,2026 at 02:13:14 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 9 ===
+Signal 
+detection
+Parameter 
+measurement
+BPF 1
+BPF 2
+.
+.
+.
+BPF
+s
+N
+Emitter 
+matching
+Proposed 
+DPD
+algorithm
+CF clustering
+BW clustering
+Fig. 4.
+Localization of signals overlapping in the time domain via
+frequency-domain separation.
+The above equations describe how sensors generate
+diffusion information. After each sensor obtains diffusion
+information of all estimated parameters via (34), it shares
+and fuses diffusion information with its neighbors. At
+the (n + 1)-th iteration, the second step for sensor i is
+formulated as
+ˆui[n + 1] =
+X
+k∈Ni∪{i}
+Φk,1[n + 1]/ (|Ni| + 1) ,
+ˆvi[n + 1] =
+X
+k∈Ni∪{i}
+Φk,2[n + 1]/ (|Ni| + 1) ,
+ˆδm,i[n + 1] =(χm,i[n + 1] −χi,m[n + 1])
+2 + |Ni ∩Nm|
++
+P
+k∈Ni∩Nm(χm,k[n + 1] −χi,k[n + 1])
+2 + |Ni ∩Nm|
+,
+ˆξm,i[n + 1] =(ψm,i[n + 1] −ψi,m[n + 1])
+2 + |Ni ∩Nm|
++
+P
+k∈Ni∩Nm(ψm,k[n + 1] −ψi,k[n + 1])
+2 + |Ni ∩Nm|
+,
+(42)
+where χm,i[n + 1] and ψm,i[n + 1] denote the diffu-
+sion information generated by sensor i from ˆδm,i[n] and
+ˆξm,i[n], respectively. The above equations employ average
+weighting for the diffusion information, consistent with
+the weighting scheme described in (30). Once the fine
+estimation satisfies the stopping criterion, the estimated
+results are output.
+Finally, the algorithmic procedure is summarized
+in Algorithm 1, where θmin
+i,l
+and θmax
+i,l
+represent the
+lower and upper bounds of the search space corre-
+sponding to parameter θi,l, respectively. The notation
+U(θmin
+i,l , θmax
+i,l
+) refers to a uniform distribution over the
+interval [θmin
+i,l , θmax
+i,l
+], while N(ˆθfus
+i,l , Cov(ˆθi,l)) denotes
+a Gaussian distribution with mean ˆθfus
+i,l
+and covariance
+matrix Cov(ˆθi,l). Niter3 denotes the number of iterations
+for the fine estimation. It is noteworthy that the algorithm
+is fully distributed, with all information exchanged be-
+tween neighboring sensors and locally fused, eliminating
+the need for multi-hop transmissions. Meanwhile, the
+proposed algorithm is not limited by the dimension of
+localization, and is applicable to both two-dimensional
+and three-dimensional scenarios.
+Algorithm 1 Proposed DPD algorithm.
+Each sensor i executes the following steps in parallel:
+1. Initialization
+Exchange received radiation source signals and calibra-
+tion source signals with neighbors.
+for l = 1, 2, · · · , |Ni| + 2 do
+Draw p(m)
+i,l
+∼U(θmin
+i,l , θmax
+i,l
+), m = 1, 2, · · · , Nl.
+ˆθi,l = (θmin
+i,l
++ θmax
+i,l
+)/2
+end for
+2. Distributed Coarse Estimation
+for n = 1, 2, · · · , Niter2 do
+Calculate α according to (32).
+for l = 3, 4, · · · , |Ni| + 2, 1, 2 do
+if n < Niter1 and l = 1, 2 then
+continue
+end if
+Calculate
+ω(m)
+i,l
+according
+to
+(23),
+m
+=
+1, 2, · · · , Nl.
+Compute ˆθi,l according to (29).
+Exchange ˆθi,l with neighbors.
+if n < Niter1 then
+Calculate ˆθfus
+i,l
+according to (30).
+else
+ˆθfus
+i,l
+= ˆθi,l
+end if
+Calculate Cov(ˆθi,l) according to (31).
+Draw
+p(m)
+i,l
+∼
+N(ˆθfus
+i,l , Cov(ˆθi,l)),
+m
+=
+1, 2, · · · , Nl.
+ˆθi,l = ˆθfus
+i,l
+end for
+end for
+3. Distributed Fine Estimation
+Choose ˆθi,l as the initial value ˆθi,l[0].
+for n = 1, 2, · · · , Niter3 do
+for l = 1, 2, · · · , |Ni| + 2 do
+Calculate Φi,l[n] according to (34).
+Exchange Φi,l[n] with neighbors.
+Calculate ˆθi,l[n] according to (42).
+end for
+end for
+Output ˆθi,l[Niter3], l = 1, 2, · · · , |Ni| + 2.
+D.
+Multi-Source Localization
+The preceding derivation rests on the assumption
+of a single radiation source. In multi-source scenarios
+where signals are non-overlapping in the time domain,
+the proposed algorithm can simply be executed Ns times
+to locate each target individually, where Ns denotes the
+total number of sources. However, when signals overlap
+in the time domain, signal separation via frequency-
+domain or spatial-domain filtering is required prior to
+localization. Fig. 4 illustrates the localization workflow
+for scenarios where source signals overlap in the time
+domain but are separable in the frequency domain. Upon
+B.Ding ET AL.: Distributed Direct Position Determination of Moving Sources in Asynchronous Sensor Networks
+9
+This article has been accepted for publication in IEEE Transactions on Aerospace and Electronic Systems. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TAES.2026.3685604
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 27,2026 at 02:13:14 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 10 ===
+TABLE II
+Computation overhead and communication load comparisons.
+Method
+Computation overhead
+Communication load
+Proposed
+O  | ˜
+N|2N(Niter2 −Niter1) + | ˜
+N|N(Q + 1)(Niter2 + Niter3)
+| ˜
+N|N(Q + 1) + (2| ˜
+N| + 2)| ˜
+N|(Niter2 + Niter3)
+MPF DPD [4]
+O  M3NNMP F + MNQS1
+
+(M −1)N(Q + 1)
+Two-step [9]
+O (MNQS1 + MNS2 + MNT S)
+(M −1)N(Q + 1)
+the signal detection, the spectral parameters of each signal
+component such as the center frequency (CF) and band-
+width (BW) are measured. Subsequently, digital bandpass
+filters (BPFs) are generated based on these parameters to
+separate the signals. Before localization, emitter matching
+is also essential to aggregate the separated signals from
+different sensors within the neighborhood that correspond
+to the same source. As depicted in the figure, emitter
+matching is achieved via a two-stage clustering approach.
+While the proposed algorithm could be executed Ns times
+sequentially, joint localization is adopted here to avoid
+redundant corrections. By processing all source signals,
+the optimization cost function in (13) is reformulated as:
+C4 = 1
+σ2q
+ Ns
+X
+k=1
+λmax
+n
+Q(k)
+s
+o
++
+Q
+X
+k=1
+λmax
+n
+Q(k)o!
+,
+(43)
+where Q(k)
+s
+represents the CAM computed from the k-
+th radiation source’s signals, similar to the calculation
+in (14). Consequently, the proposed algorithm requires
+corresponding extensions. In the coarse estimation, the
+number of PFs utilized for estimating source position and
+velocity is increased from 2 to 2Ns. In the fine estimation,
+diffusion information must be generated for the position
+and velocity estimates of each individual source, followed
+by local weighting processing.
+IV. COMPUTATION OVERHEAD AND
+COMMUNICATION LOAD ANALYSIS
+This section presents an analysis of the computa-
+tional and communication load of the proposed algorithm.
+During the coarse estimation step, the primary com-
+putational cost arises from calculating particle weights.
+For particles estimating the radiation source’s position
+and velocity, weight computation involves evaluating ev-
+ery CAF in the CAM, resulting in a complexity of
+O(| ˜
+N|2N(Niter2 −Niter1)), where | ˜
+N| = PM
+i=1 |Ni|/M
+denotes the average number of neighbors in the distributed
+sensor network. In contrast, estimating clock and fre-
+quency biases require weight calculations only over the
+CAFs of adjacent sensors, with complexity O(| ˜
+N|N(Q+
+1)(Niter2)). In the fine estimation step, computational
+resources are mainly allocated to derivative calculations
+when generating diffusion information, with complexity
+O(| ˜
+N|N(Q+1)Niter3). Overall, the algorithm’s computa-
+tional complexity is given by O(| ˜
+N|2N(Niter2−Niter1)+
+| ˜
+N|N(Q + 1)(Niter2 + Niter3)).
+The communication load of the algorithm comprises
+three parts. The first part is the exchange of radiation
+source and calibration source signals between adjacent
+sensors, amounting to | ˜
+N|N(Q + 1). The second part
+corresponds to the exchange of locally fused results be-
+tween adjacent sensors during the joint calibration phase
+of the coarse estimation step, with communication load
+(2| ˜
+N|+2)| ˜
+N|(Niter2−Niter1). The third part is the trans-
+mission of diffusion results among adjacent sensors in the
+fine estimation step, with communication load (2| ˜
+N| +
+2)| ˜
+N|Niter3. Consequently, the total communication load
+is | ˜
+N|N(Q+1)+(2| ˜
+N|+2)| ˜
+N|(Niter2−Niter1+Niter3).
+Moreover, the computational complexity and commu-
+nication load of the proposed algorithm are compared
+with the MPF DPD method from [4] and the two-step
+method from [9], as summarized in Table II. The esti-
+mation of clock and frequency biases in both benchmark
+algorithms, as well as the estimation of TDOA and FDOA
+in the two-step method, utilize the CAF maximization
+approach described in [5] and [6], where S1 denotes the
+number of search points for biases and S2 for TDOA
+and FDOA. In the table, NMP F and NT S represent the
+number of iterations of the MPF DPD algorithm and
+the two-step method, respectively. In large-scale sensor
+networks, since | ˜
+N|
+≪
+M, the proposed algorithm
+exhibits lower computational and communication loads
+compared to the centralized MPF DPD. Furthermore,
+relative to the centralized two-step method, the proposed
+algorithm reduces communication overhead while main-
+taining comparable computational complexity. Although
+the two-step method can significantly reduce communi-
+cation and computation load by calculating arrival time
+and frequency locally at each sensor instead of using
+correlation-based methods to compute TDOA and FDOA,
+it compromises localization accuracy by not exploiting
+the correlation between received signals, especially under
+poor observation conditions.
+V.
+SIMULATION RESULTS
+The simulation setup is first described in this section.
+A sensor network consisting of ten stationary sensors and
+three stationary calibration sources are deployed over a
+4000 m × 4000 m area to localize a moving radiation
+source. The positions of the calibration sources are pre-
+cisely known to the sensors, but their emitted signals are
+unknown. The region of interest for localization corre-
+sponds to the central 1600 m × 1600 m area, which defines
+the search space for the source’s position. The coordinates
+of the sensors, calibration sources, and the radiation
+source are listed in Table III. The target moves along
+the positive x-axis at a speed of 100 m/s. The velocity
+search range in each dimension is bounded between -
+10
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS
+VOL. XX, No. XX
+XXXXX 2022
+This article has been accepted for publication in IEEE Transactions on Aerospace and Electronic Systems. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TAES.2026.3685604
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 27,2026 at 02:13:14 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 11 ===
+TABLE III
+The locations of the sensors, calibration sources, and the target.
+Type
+Coordinates (m)
+Type
+Coordinates (m)
+Sensor 1
+(-1780,866)
+Sensor 8
+(586,-500)
+Sensor 2
+(-1780,-866)
+Sensor 9
+(1000,-300)
+Sensor 3
+(-1280,0)
+Sensor 10
+(1200,-1000)
+Sensor 4
+(-414,500)
+Calibrator 1
+(-1000,-500)
+Sensor 5
+(0,914)
+Calibrator 2
+(-1000,1000)
+Sensor 6
+(-414,-500)
+Calibrator 3
+(500,800)
+Sensor 7
+(500,48)
+Target
+(100,50)
+300 m/s and 300 m/s. Each sensor has a communication
+radius of R = 1800 m, and sensors within this radius
+are considered neighbors. The employed sensor network
+is asynchronous. The clock bias and frequency bias of
+sensor i follow uniform distributions δi ∼U(−1µs, 1µs)
+and ξi ∼U(−5000Hz, 5000Hz), respectively. Doubling
+these ranges defines the search space for the biases.
+The signal sampling rate is fs = 2 MHz, the carrier
+frequency is f0 = 3 GHz, and the observation duration
+is 0.2 ms. Without loss of generality, the signals emitted
+by both the radiation source and the calibration sources
+are zero-mean Gaussian white with a power of 100 W.
+The magnitudes of all path gain coefficients are set to
+unity, i.e.,|η(k)
+1 | = · · · = |η(k)
+10 | = 1, k = 0, 1, 2, 3, while
+their phases are uniformly randomized over the interval
+[0, 2π). Unless otherwise specified, the configurations
+of the sensors, radiation source, and calibration sources
+remain unchanged throughout the experiments. Except for
+the experiment in Section D where the number of calibra-
+tion sources varies, all other experiments utilize a single
+calibration source (calibrator 1) for synchronization.
+In the coarse estimation stage of the proposed algo-
+rithm, the number of particles in each PF is set to 30, with
+the number of pre-calibration iterations Niter1 = 10 and
+the total number of iterations Niter2 = 30. The factor β
+is set to 0.95. During the fine estimation step, the number
+of iterations is set to Niter3 = 500, and the iterative step
+sizes for the radiation source’s position, velocity, clock
+biases, and frequency biases are 0.05, 0.05, 0.015, and
+10, respectively.
+In the experiments, the algorithm’s performance is
+evaluated using the root mean square error (RMSE).
+Taking position and clock offset estimation as examples,
+the RMSE over the entire sensor network is computed by
+RMSE(u) =
+v
+u
+u
+t
+1
+MNexp
+Nexp
+X
+n=1
+M
+X
+i=1
+∥ˆu(n)
+i
+−u∥2,
+RMSE(δ) =
+v
+u
+u
+t
+1
+MNexp
+Nexp
+X
+n=1
+M
+X
+i=1
+X
+l∈Ni
+∥ˆδ(n)
+l,i −δl,i∥2
+|Ni|
+,
+(44)
+where Nexp denotes the number of Monte Carlo trials,
+set to 1000 in this paper. ˆu(n)
+i
+and ˆδ(n)
+l,i are the estimates
+of the target position u and clock bias δl,i by sensor i in
+the n-th trial, respectively. The RMSE for velocity and
+frequency bias estimation is computed similarly.
+-10
+-5
+0
+5
+10
+15
+SNR (dB)
+10-1
+100
+101
+102
+Location RMSE (m)
+Theoretical (synchronized)
+Experimental (synchroinzed)
+Theoretical (
+=3m,
+=0Hz)
+Experimental (
+=3m,
+=0Hz)
+Theoretical (
+=0m,
+=1kHz)
+Experimental (
+=0m,
+=1kHz)
+Theoretical (
+=30m,
+=1kHz)
+Experimental (
+=30m,
+=1kHz)
+(a) The position estimation performance.
+-10
+-5
+0
+5
+10
+15
+SNR (dB)
+100
+101
+102
+103
+Velocity RMSE (m)
+Theoretical (synchronized)
+Experimental (synchroinzed)
+Theoretical (
+=3m,
+=0Hz)
+Experimental (
+=3m,
+=0Hz)
+Theoretical (
+=0m,
+=1kHz)
+Experimental (
+=0m,
+=1kHz)
+Theoretical (
+=30m,
+=1kHz)
+Experimental (
+=30m,
+=1kHz)
+-5
+9.10
+9.11
+(b) The velocity estimation performance.
+Fig. 5.
+Impact of clock and frequency biases on the localization
+algorithm.
+A.
+Impact of Clock and Frequency Biases on Position
+and Velocity Estimation
+Before evaluating the performance of the proposed
+algorithm, this subsection demonstrates the necessity of
+calibrating the clock and frequency biases present in the
+sensor network through both numerical and theoretical
+analyses. Different clock and frequency biases (δi,i−1 =
+∆δ, ξi,i−1 = ∆ξ) are introduced to the sensor network,
+and the algorithm’s estimation performance for the radi-
+ation source’s position and velocity without calibration
+is examined. The results are shown in Fig. 5, with the
+theoretical RMSE values of the algorithm calculated as
+detailed in Appendix A. When ∆δ=0 m and ∆ξ=0 Hz, the
+sensor network is fully synchronized. The blue solid lines
+in the figure represent the theoretical RMSE values of
+the algorithm under full synchronization, corresponding
+to the CRLB for position and velocity estimation in a
+synchronized sensor network.
+From the figure, it is evident that in the presence
+of significant clock and frequency biases, the estimation
+performance is dominated by these biases rather than
+measurement noise. Specifically, the impact of clock bias
+on the RMSE of position estimation far exceeds that of
+noise. Similarly, the velocity estimation error caused by
+the frequency bias is significantly greater than the error
+B.Ding ET AL.: Distributed Direct Position Determination of Moving Sources in Asynchronous Sensor Networks
+11
+This article has been accepted for publication in IEEE Transactions on Aerospace and Electronic Systems. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TAES.2026.3685604
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 27,2026 at 02:13:14 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 12 ===
+(a)
+(b)
+(c)
+(d)
+Fig. 6.
+Convergence curves of the estimated parameters across the sensor network. (a) Convergence curves of the target position estimates. (b)
+Convergence curves of the target velocity estimates. (c) Clock synchronization curves. (d) Frequency synchronization curves.
+induced by noise. Consequently, in high-bias regimes,
+the RMSE curves become insensitive to SNR, indicating
+that biases are the primary limiting factors for estimation
+accuracy. Additionally, clock bias has a negligible effect
+on velocity estimation, while frequency bias substantially
+degrades the algorithm’s ability to achieve high-precision
+localization. For instance, when the SNR of the received
+signal is 10 dB, the localization error of the algorithm in a
+synchronized sensor network is only 0.7 m. However, the
+localization error increases to 7 m when the frequency bias
+∆ξ is 1 kHz. In subsequent experiments, the algorithm
+incorporates calibration for clock and frequency biases to
+achieve high-precision localization.
+B. Consistent Convergence Across the Sensor
+Network
+To evaluate the convergence performance of the pro-
+posed algorithm across sensors, the RMSE curves of the
+estimated parameters at each sensor are presented in Fig.
+6. In this experiment, the received SNR of the radiation
+source and calibration source signals at each sensor is
+set to 10 dB. As shown, during both the coarse and
+fine estimation stages, the RMSE curves from sensors
+converge together for every estimated parameter as the
+iterations progress. These results demonstrate that the
+algorithm achieves consistent convergence throughout the
+sensor network. It can also be observed that the velocity
+RMSE curve has a part of rising during coarse estimation
+stage. This phenomenon is caused by the weighted combi-
+nation of local estimates within the distributed algorithm.
+During coarse estimation stage, sensors that settle near
+the true value are influenced by neighbors that are still far
+from the true value. The integration of these larger errors
+through the neighborhood weighting mechanism causes
+the estimates of the “better” sensors to deviate slightly
+from the truth, resulting in the observed rise in RMSE.
+Furthermore, the RMSE values at each sensor con-
+tinue to decrease in the fine estimation stage, indicating
+that the fine estimation step refines the estimates with
+higher accuracy. Notably, the RMSE curves for clock
+and frequency biases exhibit a three-level step pattern.
+This phenomenon arises because the algorithm performs
+synchronization in two phases during the coarse estima-
+tion stage: pre-calibration and joint calibration. During
+joint calibration, by further leveraging the calibration
+information from the radiation source and applying the
+diffusion strategy to incorporate information from the
+entire network, sensors obtain more reliable estimates
+of clock and frequency biases. According to the signal
+model in (1), the clock and frequency bias are strongly
+coupled with the position and velocity of the radiation
+source, respectively. Therefore, improved coarse estimates
+provide more accurate initializations for the subsequent
+fine estimation step, allowing the algorithm to converge to
+more precise estimates through gradient-based methods.
+C.
+Performance Comparison
+After verifying the consistent convergence of the
+proposed algorithm, this subsection compares its perfor-
+mance with other methods that localize moving targets
+using TDOA and FDOA information. The benchmark
+algorithms include the two-step algorithm from [9], the
+DPD algorithm from [4] (denoted as MPF DPD), and a
+DPD algorithm using only the proposed distributed MPF
+(denoted as DMPF DPD). Both the two-step algorithm
+and MPF DPD are centralized algorithms, whereas the
+proposed algorithm and DMPF DPD are distributed. In
+the two-step algorithm, TDOAs and FDOAs are estimated
+by searching for the maximum points of CAFs via grid
+search (referred to as the CAF method), with grid sizes
+of 15 m for TDOA (equivalent to 0.1/fs) and 100 Hz for
+FDOA. In both the two-step algorithm and MPF DPD,
+clock and frequency biases are also estimated by the
+CAF method using calibration source information. For
+a fair comparison, the PFs in MPF DPD are configured
+with 100 particles and run for 100 iterations. Conse-
+quently, the computational load at the fusion center in
+MPF DPD is significantly higher than the computational
+burden distributed across individual sensors in DMPF
+DPD. The CRLBs for all estimated parameters are derived
+in Appendix B.
+The received SNR of the radiation source and cal-
+ibration source signals at each sensor is varied from -
+7.5 dB to 12.5 dB in 2.5 dB increments to compare the
+estimation performance among different algorithms. As
+shown in Fig. 7, the proposed algorithm achieves the
+best estimation performance across all parameters, with
+results closer to the CRLBs than competing methods. By
+12
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS
+VOL. XX, No. XX
+XXXXX 2022
+This article has been accepted for publication in IEEE Transactions on Aerospace and Electronic Systems. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TAES.2026.3685604
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 27,2026 at 02:13:14 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 13 ===
+-10
+-5
+0
+5
+10
+15
+SNR (dB)
+100
+101
+102
+103
+Location RMSE (m)
+Proposed
+DMPF DPD
+MPF DPD
+Two-step
+CRLB
+(a) Comparison of position estimation performance.
+-10
+-5
+0
+5
+10
+15
+SNR (dB)
+101
+102
+Velocity RMSE (m/s)
+Proposed
+DMPF DPD
+MPF DPD
+Two steps
+CRLB
+(b) Comparison of velocity estimation performance.
+-10
+-5
+0
+5
+10
+15
+SNR (dB)
+100
+101
+102
+Clock bias RMSE (m)
+Proposed (calibrate with the target)
+Proposed (calibrate without the target)
+DMPF DPD
+CAF method
+CRLB
+(c) Comparison of clock calibration performance.
+-10
+-5
+0
+5
+10
+15
+SNR (dB)
+102
+103
+Frequency bias RMSE (Hz)
+Proposed (calibrate with the target)
+Proposed (calibrate without the target)
+DMPF DPD
+CAF method
+CRLB
+(d) Comparison of frequency calibration performance.
+Fig. 7.
+Estimation performance of different algorithms under various SNRs.
+0.1
+0.15
+0.2
+0.25
+0.3
+0.35
+0.4
+Observation duration (ms)
+101
+102
+103
+Location RMSE (m)
+Proposed
+DMPF DPD
+MPF DPD
+Two-step
+CRLB
+(a) Comparison of position estimation performance.
+0.1
+0.15
+0.2
+0.25
+0.3
+0.35
+0.4
+Observation duration (ms)
+101
+102
+Velocity RMSE (m/s)
+Proposed
+DMPF DPD
+MPF DPD
+Two-step
+CRLB
+(b) Comparison of velocity estimation performance.
+Fig. 8.
+Estimation performance of different algorithms under different observation durations.
+using the estimates provided by DMPF DPD as the initial
+values and subsequently performing fine estimation, the
+proposed algorithm attains more precise results compared
+to DMPF DPD. When the SNR exceeds -5 dB, DMPF
+DPD outperforms MPF DPD despite using fewer particles
+in both position and velocity filters. This improvement is
+partly attributed to the fact that although each sensor in
+DMPF DPD has fewer particles, the diffusion strategy al-
+lows each sensor’s estimate to be influenced by the entire
+sensor network. Additionally, the absence of a reference
+node in DMPF DPD avoids the degradation caused by the
+fusion of poor-quality observations at the fusion center
+[26]. It is noteworthy that at high SNRs, the performance
+of both DMPF DPD and MPF DPD is limited by the
+discretization error due to finite particle sampling. At
+low SNRs, the position estimation performance of the
+two-step method deteriorates rapidly, while the proposed
+algorithm maintains good localization accuracy. This ro-
+bustness benefits from the direct localization framework,
+which avoids information loss inherent in estimating
+intermediate parameters such as TDOA and fully exploits
+the correlation of received signals. Moreover, obtaining
+covariance matrices for TDOAs and FDOAs in the two-
+step method is challenging. Although CRLBs can be used
+B.Ding ET AL.: Distributed Direct Position Determination of Moving Sources in Asynchronous Sensor Networks
+13
+This article has been accepted for publication in IEEE Transactions on Aerospace and Electronic Systems. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TAES.2026.3685604
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 27,2026 at 02:13:14 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 14 ===
+0
+0.5
+1
+1.5
+2
+Frequency (Hz)
+106
+0
+200
+400
+600
+800
+1000
+Power spectrum
+Power spectrum estimate
+Threshold
+Filter1
+Filter2
+(a) Separation of two source signals in the frequency
+domain with SNR=0 dB.
+0
+5
+10
+15
+20
+SNR (dB)
+100
+101
+Location RMSE (m)
+proposed (Source 1)
+proposed (Source 2)
+MPF DPD (Source 1)
+MPF DPD (Source 2)
+Two steps (Source 1)
+Two steps (Source 2)
+(b) Position estimation performance for two sources.
+0
+5
+10
+15
+20
+SNR (dB)
+4
+6
+8
+10
+12
+14
+16
+18
+20
+Velocity RMSE (m/s)
+proposed (Source 1)
+proposed (Source 2)
+MPF DPD (Source 1)
+MPF DPD (Source 2)
+Two steps (Source 1)
+Two steps (Source 2)
+(c) Velocity estimation performance for two sources.
+Fig. 9.
+Localization results for two sources with signals overlapping
+in the time domain.
+as substitutes, the initial TDOA and FDOA estimates
+often do not closely approach these bounds.
+Fig. 7 (c) and Fig. 7 (d) compare the performance
+of the proposed algorithm with and without calibration
+using the radiation source. When the radiation source is
+excluded from calibration, the weighting factor α is set
+to zero throughout the iterations. The results demonstrate
+that including the radiation source in calibration improves
+clock and frequency bias estimation, particularly at low
+SNRs. This improvement occurs because accurate posi-
+tion and velocity estimates of the radiation source enable
+it to serve effectively as an additional calibration source.
+The impact of the number of calibration sources on
+-1000
+-500
+0
+500
+1000
+x (m)
+-500
+0
+500
+1000
+1500
+y (m)
+Sensors (add to 9)
+Sensors (add to 12)
+Sensors (add to 16)
+Sensors (add to 20)
+Sensors (add to 25)
+Sensors (add to 30)
+Sensors (add to 36)
+Radiation source
+Communication Link
+Fig. 10.
+Sensor network topology under different scales.
+localization performance is further discussed in Section D.
+Therefore, the simulation results validate the rationality
+of joint calibration using both calibration and radiation
+sources.
+Furthermore, with the received SNR fixed at -5 dB
+across the sensor network, the observation duration is
+varied to compare algorithm performance. As shown in
+Fig. 8, when the observation duration falls below 0.2 ms,
+the estimation errors of the two-step method increase
+sharply as the observation duration decreases, particularly
+the positioning error. In contrast, the proposed algorithm
+maintains robust position and velocity estimation perfor-
+mance even with limited observation duration. The results
+from Fig. 7 and Fig. 8 indicate that the proposed algorithm
+exhibits robust performance under challenging conditions
+such as low SNR and short observation duration.
+Subsequently, the localization scenario is extended
+to a multi-source environment where signals overlap
+in the time domain. In addition to the previously de-
+fined source, a second source is introduced at position
+[−200m, −100m]T with a velocity of [−100 m/s, 0 m/s]T.
+Both sources emit band-limited signals with a bandwidth
+of 0.5 MHz and baseband center frequencies of 0.5 MHz
+and 1.5 MHz, respectively. The transmit power for both
+sources is identical, set at 100 W. Each sensor employs the
+Burg method from [35] to estimate the power spectrum
+of the received signals. The frequency-domain detection
+threshold is determined by averaging multiple ambient
+noise measurements and incorporating an appropriate
+margin. Upon detecting the baseband signals with a
+duration of 0.2 ms, the sensors perform spectral parameter
+measurements for both sources. By utilizing the detection
+threshold to identify the left and right edges of the signals
+in the frequency domain, the bandwidth is determined
+as the difference between these edges, while the center
+frequency is calculated as their midpoint. Based on the
+measured parameters, the sensors generate digital BPFs to
+separate the two source signals in the frequency domain,
+as shown in Fig. 9 (a). Fig. 9 (b) and Fig. 9 (c) present the
+position and velocity estimation performance of various
+algorithms. It can be observed that for SNR ranging
+from 0 dB to 20 dB, the proposed algorithm consistently
+14
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS
+VOL. XX, No. XX
+XXXXX 2022
+This article has been accepted for publication in IEEE Transactions on Aerospace and Electronic Systems. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TAES.2026.3685604
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 27,2026 at 02:13:14 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 15 ===
+5
+10
+15
+20
+25
+30
+35
+40
+M
+10-1
+100
+101
+102
+Location RMSE (m)
+proposed
+MPF DPD
+Two steps
+CRLB
+(a) Localization performance under different sensor net-
+work scales.
+5
+10
+15
+20
+25
+30
+35
+40
+M
+0
+0.5
+1
+1.5
+2
+2.5
+Communication load (Byte)
+105
+proposed
+MPF DPD
+Two steps
+(b) Communication load under different sensor network
+scales.
+5
+10
+15
+20
+25
+30
+35
+40
+M
+0
+5
+10
+15
+20
+25
+30
+Running times (s)
+proposed
+MPF DPD
+Two steps
+(c) Running time under different sensor network scales.
+Fig. 11.
+Performance comparison of algorithms under different
+sensor network scales.
+achieves superior estimation accuracy compared to the
+two-step method and the MPF-DPD.
+Finally, the impact of sensor network scale on algo-
+rithm performance is analyzed. The number of sensors
+M is incrementally increased from 9 to 36 (see Fig. 10).
+The source is located at [0m, 400m]T with a velocity of
+[100 m/s, 50 m/s]T, and the SNR is set to 10 dB. The inter-
+sensor distance is set equal to the communication radius
+R = 300 m. The transmitted data size between sensors
+is 4 bytes, and the observation duration for the source is
+set to 0.4 ms. For the proposed algorithm, the number of
+iterations for fine estimation is set to 100. As observed
+in Fig. 11, increasing the number of sensors reduces the
+localization error of the proposed algorithm. Furthermore,
+the proposed method consistently outperforms the two-
+step method and MPF DPD across all network scales.
+Additionally, as the network scale expands, both the
+communication load and computational load (indicated by
+the running time) of the two-step method and MPF DPD
+increase significantly. In contrast, the proposed distributed
+algorithm exhibits stable resource consumption regardless
+of network scale. This disparity arises because the two-
+step method and MPF DPD are centralized approaches,
+requiring the fusion center to collect and process ob-
+served signals from all sensors. Conversely, the proposed
+algorithm is distributed, confining communication and
+computation to local neighborhoods. Since the number of
+neighbors does not scale linearly with the total number of
+sensors, the load remains stable. Therefore, the proposed
+method significantly lowers communication bandwidth
+and processing requirements, making it highly suitable
+for large-scale sensor network applications. Although the
+processing time of the proposed algorithm remains on the
+order of seconds, this delay is acceptable since we are
+not considering the recursive online tracking of moving
+sources [4]. Moreover, the running time can be further
+reduced by utilizing high-performance servers, multi-
+threading techniques (e.g., assigning separate threads to
+particles during coarse estimation), or low-level program-
+ming languages.
+D.
+The Influence of Calibration Sources
+In this subsection, the impact of calibration sources on
+the performance of the proposed algorithm is investigated
+by varying both the number and signal strength of cali-
+bration sources. The SNR of the radiation source signal
+is fixed at 5 dB, while the SNR of each calibration source
+signal is gradually increased from -7.5 dB to 12.5 dB. As
+shown in Fig. 12 (c) and Fig. 12 (d), the estimation
+performance for clock and frequency biases improves
+with an increasing number of calibration sources and
+higher SNRs of the calibration source signals. Since clock
+bias and frequency bias are respectively coupled with the
+target’s position and velocity, the accuracy of position and
+velocity estimation improves as the number of calibration
+sources increases, as illustrated in Fig. 12 (a) and Fig. 12
+(b). This also explains why joint calibration yields more
+accurate estimates compared to relying on a single cali-
+bration source. When the position and velocity estimates
+of the radiation source are accurate, joint calibration is
+effectively equivalent to using two calibration sources.
+Moreover, the results indicate that under conditions of
+low calibration source SNR, increasing the number of cal-
+ibration sources significantly enhances estimation perfor-
+mance. However, when the SNR of the calibration sources
+exceeds 10 dB, adding additional calibration sources has
+little impact on localization performance. These results
+validate the theoretical analysis presented in the Appendix
+C.
+B.Ding ET AL.: Distributed Direct Position Determination of Moving Sources in Asynchronous Sensor Networks
+15
+This article has been accepted for publication in IEEE Transactions on Aerospace and Electronic Systems. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TAES.2026.3685604
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 27,2026 at 02:13:14 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 16 ===
+-10
+-5
+0
+5
+10
+15
+SNR (dB)
+100
+101
+102
+Location RMSE (m)
+Proposed (Q=1)
+Proposed (Q=2)
+Proposed (Q=3)
+CRLB (Q=1)
+CRLB (Q=2)
+CRLB (Q=3)
+(a) Position estimation performance curves under differ-
+ent numbers of calibration sources.
+-10
+-5
+0
+5
+10
+15
+SNR (dB)
+101
+Velocity RMSE (m)
+Proposed (Q=1)
+Proposed (Q=2)
+Proposed (Q=3)
+CRLB (Q=1)
+CRLB (Q=2)
+CRLB (Q=3)
+(b) Velocity estimation performance curves under dif-
+ferent numbers of calibration sources.
+-10
+-5
+0
+5
+10
+15
+SNR (dB)
+100
+101
+Clock bias RMSE (m)
+Proposed (Q=1)
+Proposed (Q=2)
+Proposed (Q=3)
+CRLB (Q=1)
+CRLB (Q=2)
+CRLB (Q=3)
+(c) Clock calibration performance curves under different
+numbers of calibration sources.
+-10
+-5
+0
+5
+10
+15
+SNR (dB)
+101
+102
+Frequency bias RMSE (Hz)
+Proposed (Q=1)
+Proposed (Q=2)
+Proposed (Q=3)
+CRLB (Q=1)
+CRLB (Q=2)
+CRLB (Q=3)
+(d) Frequency calibration performance curves under dif-
+ferent numbers of calibration sources.
+Fig. 12.
+Impact of the number of calibration sources on the parameter estimation performance of the proposed algorithm.
+VI. CONCLUSION
+This paper addressed the problem of direct localiza-
+tion of moving sources in asynchronous sensor networks,
+which are subject to both time and frequency synchro-
+nization errors. A distributed algorithm that leverages
+calibration sources for synchronization was proposed.
+The algorithm first obtains coarse estimates of clock
+biases, frequency biases, and the position and velocity
+of the radiation source using the proposed distributed
+MPF method. Subsequently, refined estimates are ob-
+tained at each sensor through a diffusion-based gradient
+method. The proposed distributed MPF achieves global
+optimization with a relatively small number of particles by
+enabling interactions among PFs within each sensor and
+local fusion among neighboring sensors. This provides
+reliable initial values for the subsequent fine estimation
+stage. Throughout the entire processing, information is
+shared via single-hop transmissions between neighboring
+sensors and fused locally, making the algorithm well-
+suited for large-scale sensor networks. Experimental re-
+sults demonstrated that the proposed algorithm achieves
+consistent convergence across the entire sensor network
+and maintains robustness even under low SNR environ-
+ments and limited observation durations.
+APPENDIX
+A.
+Theoretical Analysis of the Impact of Clock and
+Frequency Biases on Localization
+Similar to (7), when clock and frequency biases are
+not calibrated, the cost function for the DPD algorithm
+based on the ML criterion is given by
+C5(ˆu, ˆv) = −1
+σ2q
+M
+X
+i=1
+∥ri −˜˜ri(ˆu, ˆv)∥2,
+(45)
+where
+˜˜ri(ˆu, ˆv) =
+ηi,1D (fi(ˆu, ˆv)) FHΓ (τi,1(ˆu)/c) FDH (f1(ˆu, ˆv)) ˜r1,
+(46)
+with ηi,1 = ηi/η1. fi(ˆu, ˆv) denotes the Doppler frequency
+of the radiation source signal at sensor i, calculated
+based on the estimated position ˆu and velocity ˆv of
+the source. τi,1(ˆu) and f1(ˆu, ˆv) are defined similarly.
+Expanding ˜˜ri(ˆu, ˆv) around the true values (u, v) using a
+first-order Taylor expansion and neglecting higher-order
+terms yields:
+˜˜ri(ˆu, ˆv) = ˜˜ri(u, v) + Ju
+i (ˆu −u) + Jv
+i (ˆv −v),
+(47)
+where the first-order derivatives are computed by
+Ju
+i = ηi,1D (fi) FHΓ (τi,1/c) ˜nFDH (f1) ˜r1 (˜pi −˜p1)T
++ηi,1D (fi) FHΓ (τi,1/c) FDH (f1) ˜˜n˜r1
+
+˜˜pi −˜˜p1
+
+,
+16
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS
+VOL. XX, No. XX
+XXXXX 2022
+This article has been accepted for publication in IEEE Transactions on Aerospace and Electronic Systems. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TAES.2026.3685604
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 27,2026 at 02:13:14 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 17 ===
+Jv
+i = −f0ηi,1
+c
+D (fi) FHΓ (τi,1/c)FDH (f1) ˜˜n˜r1×
+(˜pi −˜p1)T ,
+(48)
+where ˜pi =
+u −pi
+∥u −pi∥denotes the unit direction vec-
+tor from sensor i to the radiation source, and ˜˜pi =
+f0vT
+c∥u −pi∥
+ ˜pi ˜pT
+i −Id
+
+. Substituting (47) into the cost
+function defined in (45) and setting its derivatives with
+respect to ˆu and ˆv to zero, the ML estimates for the
+source position and velocity are obtained as
+
+ˆu
+ˆv
+
+=
+
+u
+v
+
++J−1
+u,v
+ M
+X
+i=1
+
+(Ju
+i )H
+(Jv
+i )H
+  ri −˜˜ri(u, v)
+
+!
+,
+(49)
+where
+Ju,v =
+ M
+X
+i=1
+
+(Ju
+i )H Ju
+i
+(Ju
+i )H Jv
+i
+(Jv
+i )H Ju
+i
+(Jv
+i )H Jv
+i
+!
+.
+(50)
+Expanding ri to the biases δi,1 and ξi,1 yields
+ri = ˜˜ri(u, v) + Jτ
+i τi,1 + Jf
+i fi,1 +
+
+Ju
+i
+Jv
+i
+ 
+ϵu
+ϵv
+
+,
+(51)
+where ϵu and ϵv denote the noise-induced errors in
+position and velocity estimation, respectively. The first-
+order derivatives Jτ
+i and Jf
+i are computed by
+Jτ
+i = ηi,1D (fi) FHΓ (τi,1/c) ˜nFDH (f1) ˜r1,
+Jf
+i = ηi,1D (fi) FHΓ (τi,1/c) FDH (f1) ˜˜n˜r1.
+(52)
+Substituting (51) into (49) results in
+
+ˆu
+ˆv
+
+=
+
+u
+v
+
++
+
+eu
+ev
+
++
+
+ϵu
+ϵv
+
+,
+(53)
+where the estimation errors caused by clock and frequency
+biases are given by
+
+eu
+ev
+
+= J−1
+u,v
+ M
+X
+i=1
+
+(Ju
+i )H
+(Jv
+i )H
+ 
+Jτ
+i τi,1 + Jf
+i fi,1
+!
+.
+(54)
+Since the errors caused by clock and frequency biases
+are uncorrelated with noise-induced errors, the theoretical
+RMSEs of the ML-based DPD algorithm without calibra-
+tion are computed by
+RMSE(u) =
+p
+eT
+ueu + E(ϵT
+uϵu),
+RMSE(v) =
+p
+eT
+v ev + E(ϵT
+v ϵv),
+(55)
+where the expectations E(ϵT
+uϵu) and E(ϵT
+v ϵv) are de-
+rived from the diagonal elements of the CRLB matrix
+CRLBsync. The matrix CRLBsync is computed by
+CRLBsync =
+˜E3,3
+˜E3,4
+˜ET
+3,4
+˜E4,4
+−1
+,
+(56)
+where the matrices ˜E3,3, ˜E3,4 and ˜E4,4 are provided in
+Appendix B.
+B.
+Derivation of the CRLB for Moving Source
+Localization Using Asynchronous Sensor
+Networks
+Before deriving, it is necessary to identify all unknown
+parameters involved in the localization of a moving source
+using an asynchronous sensor network. Let the path gain
+vector be η(k) = [η(k)
+2,1, η(k)
+3,1, · · · , η(k)
+M,1]T, where η(k)
+m,n =
+η(k)
+m /η(k)
+n . The vector ζ(k) = [(R{η(k)})T, (I{η(k)})T]T
+contains the real and imaginary parts of η(k). Define
+the vector R(k)
+1
+= [(R{˜r(k)
+1 })T, (I{˜r(k)
+1 })T]T, which
+comprises the real and imaginary parts of the noise-
+free received signal at sensor 1. The full parame-
+ter vector to be estimated is Θ
+=
+[RT
+1 , ζT, ˜θT]T,
+where ζ = [(ζ(0))T, (ζ(1))T, · · · , (ζ(Q))T]T and R1 =
+[(R(0)
+1 )T, (R(1)
+1 )T, · · · , (R(Q)
+1
+)T]T. According to [18], the
+Fisher information matrix (FIM) associated with Θ is
+computed as follows:
+I(Θ) = 2
+σ2q
+R
+( ∂l
+∂ΘT
+H
+∂l
+∂ΘT
+)
+.
+(57)
+Through mathematical derivation, the FIM can be
+expressed in a block matrix form:
+I(Θ) = 2
+σ2q
+
+A
+R {B}
+R {B}T
+R {C}
+
+,
+(58)
+where the sub-matrix A, corresponding to the parameter
+R1, can be computed by
+A = blkdiag
+ 
+1 +
+
+η(0)H
+η(0)
+
+I2N, · · · ,
+
+1 +
+
+η(Q)H
+η(Q)
+
+I2N
+
+.
+(59)
+The sub-matrix B is given by
+B =
+
+B1
+B2
+
+,
+B1 =
+
+
+B(0)
+3
+jB(0)
+3
+−jB(0)
+3
+B(0)
+3
+...
+B(Q)
+3
+jB(Q)
+3
+−jB(Q)
+3
+B(Q)
+3
+
+
+,
+B(k)
+3
+=
+h
+η(k)
+2,1
+∗
+˜r(k)
+1 , · · · ,
+
+η(k)
+M,1
+∗
+˜r(k)
+1
+i
+,
+B2 =
+
+
+B(0)
+4
+B(0)
+5
+B6
+B7
+−jB(0)
+4
+−jB(0)
+5
+−jB6
+−jB7
+B(1)
+4
+B(1)
+5
+0N×dim
+0N×dim
+−jB(1)
+4
+−jB(1)
+5
+0N×dim
+0N×dim
+...
+...
+...
+...
+B(Q)
+4
+B(Q)
+5
+0N×dim
+0N×dim
+−jB(Q)
+4
+−jB(Q)
+5
+0N×dim
+0N×dim
+
+
+,
+B(k)
+4
+=
+h
+|η(k)
+2,1|2b(k)
+1 , · · · , |η(k)
+M,1|2b(k)
+1
+i
+,
+B(k)
+5
+=
+h
+|η(k)
+2,1|2d(k)
+1 , · · · , |η(k)
+M,1|2d(k)
+1
+i
+,
+B.Ding ET AL.: Distributed Direct Position Determination of Moving Sources in Asynchronous Sensor Networks
+17
+This article has been accepted for publication in IEEE Transactions on Aerospace and Electronic Systems. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TAES.2026.3685604
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 27,2026 at 02:13:14 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 18 ===
+B6 =
+M
+X
+i=2
+|η(0)
+2,1|2b(0)
+1
+(˜pi −˜p1)T +
+M
+X
+i=2
+|η(0)
+2,1|2d(0)
+1
+
+˜˜pi −˜˜p1
+
+,
+B7 =
+M
+X
+i=2
+−f0
+c |η(0)
+2,1|2d(0)
+1
+
+˜˜pi −˜˜p1
+
+,
+(60)
+where b(k)
+1
+= D(f (k)
+1
++ ξ1)FH˜nFDH(f (k)
+1
++ ξ1)˜r(k)
+1
+and d(k)
+1
+= ˜˜n˜r(k)
+1 . The sub-matrix C can be further
+decomposed into blocks:
+C =
+
+C1
+C2
+CH
+2
+C3
+
+,
+(61)
+where C1 and C3 represent the sub-blocks corresponding
+to η and ˜θ, respectively. The expressions for these sub-
+blocks are as follows:
+C1 =
+
+
+C(0)
+1,1
+jC(0)
+1,1
+−jC(0)
+1,1
+C(0)
+1,1
+...
+C(Q)
+1,1
+jC(Q)
+1,1
+−jC(Q)
+1,1
+C(Q)
+1,1
+
+
+,
+C(k)
+1,1 =
+
+˜r(k)
+1
+H
+˜r(k)
+1 IM−1,
+C2 =
+
+
+C(0)
+2,1
+C(0)
+2,2
+C2,3
+C2,4
+−jC(0)
+2,1
+−jC(0)
+2,2
+−jC2,3
+−jC2,4
+C(1)
+2,1
+C(1)
+2,2
+0(M−1)×d
+0(M−1)×d
+−jC(1)
+2,1
+−jC(1)
+2,2
+0(M−1)×d
+0(M−1)×d
+...
+...
+...
+...
+C(Q)
+2,1
+C(Q)
+2,2
+0(M−1)×d
+0(M−1)×d
+−jC(Q)
+2,1
+−jC(Q)
+2,2
+0(M−1)×d
+0(M−1)×d
+
+
+,
+C(k)
+2,1 = diag
+
+η(k) 
+˜r(k)
+1
+H
+b(k)
+1 ,
+C2,2 = diag
+
+η(k) 
+˜r(k)
+1
+H
+d(k)
+1 ,
+C2,3 =
+
+˜r(k)
+1
+H
+b(0)
+1
+
+
+η(0)
+2,1 (˜p2 −˜p1)T
+...
+η(0)
+M,1 (˜pM −˜p1)T
+
++
+
+˜r(k)
+1
+H
+d(0)
+1
+
+
+η(0)
+2,1
+
+˜˜p2 −˜˜p1
+
+...
+η(0)
+M,1
+
+˜˜pM −˜˜p1
+
+
+,
+C2,4 = −f0
+c
+
+˜r(k)
+1
+H
+d(0)
+1
+
+
+η(0)
+2,1 (˜p2 −˜p1)T
+...
+η(0)
+M,1 (˜pM −˜p1)T
+
+,
+C3 =
+
+
+E1,1
+E1,2
+E1,3
+E1,4
+EH
+1,2
+E2,2
+E2,3
+E2,4
+EH
+1,3
+EH
+2,3
+E3,3
+E3,4
+EH
+1,4
+EH
+2,4
+EH
+3,4
+E4,4,
+
+,
+(62)
+where the sub-blocks E1,1, E2,2, E3,3, and E4,4 corre-
+spond to the parameters ˜δ, ˜ξ, u, and v, respectively.
+Define the vector g(k) = [|η(k)
+2,1|, |η(k)
+3,1|, · · · , |η(k)
+M,1|]T and
+the diagonal matrix G(k) = diag{g(k)}. Then, the sub-
+blocks of matrix C3 can be expressed as
+E1,1 =
+Q
+X
+k=0
+˜x(k) 
+G(k)2
+,
+E1,2 =
+Q
+X
+k=0
+˜z(k) 
+G(k)2
+,
+E2,2 =
+Q
+X
+k=0
+˜y(k) 
+G(k)2
+,
+E1,3 = ˜x(0) 
+G(0)2
+ρ + ˜z(0) 
+G(0)2
+˜ρ,
+E1,4 = −f0
+c
+˜z(0) 
+G(0)2
+ρ,
+E2,3 =
+
+˜z(0)∗
+G(0)2
+ρ + ˜y(0) 
+G(0)2
+˜ρ,
+E2,4 = −f0
+c
+˜y(0) 
+G(0)2
+ρ,
+E3,3 = ˜x(0)ρT 
+G(0)2
+ρ + ˜y(0) ˜ρT 
+G(0)2
+˜ρ
++˜z(0)ρT 
+G(0)2
+˜ρ + ˜z(0) ˜ρT 
+G(0)2
+ρ,
+E3,4 = −f0
+c
+˜z(0)ρT 
+G(0)2
+ρ −f0
+c ˜y(0) ˜ρT 
+G(0)2
+ρ,
+E4,4 = f 2
+0
+c2 ˜y(0)ρT 
+G(0)2
+ρ,
+(63)
+where ˜x(k) = (b(k)
+1 )Hb(k)
+1 , ˜y(k) = (d(k)
+1 )Hd(k)
+1 , ˜z(k) =
+(b(k)
+1 )Hd(k)
+1 , ρ = [˜p2 −˜p1, · · · , ˜pM −˜p1]T, and ˜ρ =
+[(˜˜p2 −˜˜p1)T, · · · , (˜˜pM −˜˜p1)T]T. Direct computation of
+the entire FIM I(Θ) is overly complex. In practice, the
+primary interest lies in the CRLB for ˜θ. To simplify
+the calculation of the CRLB for ˜θ, define the parameter
+vector ϑ = [ζT, ˜θT]T. According to (58) and the Schur-
+complementary theorem in [36], the FIM corresponding
+to ϑ is given by
+I(ϑ) = 2
+σ2q
+
+R {C} −(R {B})T A−1R {B}
+
+= 2
+σ2q
+ ˜C1
+˜C2
+˜CT
+2
+˜C3
+
+,
+(64)
+where the block ˜Ci corresponds positionally to the block
+Ci in (70), for i = 1, 2, 3. By exploiting the properties
+R{(˜r(k)
+1 )Hb(k)
+1 } = 0 and R{(˜r(k)
+1 )Hd(k)
+1 } = 0, it can
+be shown that ˜C2 is a zero matrix. Applying the Schur-
+complementary theorem once more yields the FIM for the
+parameter ˜θ:
+I(˜θ) = 2
+σ2q
+˜C3,
+(65)
+18
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS
+VOL. XX, No. XX
+XXXXX 2022
+This article has been accepted for publication in IEEE Transactions on Aerospace and Electronic Systems. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TAES.2026.3685604
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 27,2026 at 02:13:14 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 19 ===
+where ˜C3 can be expressed as a 4 × 4 bolck matrix:
+˜C3 =
+
+
+˜E1,1
+˜E1,2
+˜E1,3
+˜E1,4
+˜ET
+1,2
+˜E2,2
+˜E2,3
+˜E2,4
+˜ET
+1,3
+˜ET
+2,3
+˜E3,3
+˜E3,4
+˜ET
+1,4
+˜ET
+2,4
+˜ET
+3,4
+˜E4,4,
+
+,
+(66)
+corresponding to the four parameters of interest in ˜θ. The
+expressions for each sub-blocks are as follows:
+˜E1,1 =
+Q
+X
+k=0
+˜x(k)U(k),
+˜E1,2 =
+Q
+X
+k=0
+R
+n
+˜z(k)o
+U(k),
+˜E2,2 =
+Q
+X
+k=0
+˜y(k)U(k),
+˜E1,3 = ˜x(0)U(0)ρ + R
+n
+˜z(0)o
+U(0) ˜ρ,
+˜E1,4 = −f0
+c R
+n
+˜z(0)o
+U(0)ρ,
+˜E2,3 = R
+n
+˜z(0)o
+U(0)ρ + ˜y(0)U(0) ˜ρ,
+˜E2,4 = −f0
+c
+˜y(0)U(0)ρ,
+˜E3,3 = ˜x(0)ρTU(0)ρ + ˜y(0) ˜ρTU(0) ˜ρ
++R
+n
+˜z(0)o
+ρTU(0) ˜ρ + R
+n
+˜z(0)o
+˜ρTU(0)ρ,
+˜E3,4 = −f0
+c R
+n
+˜z(0)o
+ρTU(0)ρ −f0
+c ˜y(0) ˜ρTU(0)ρ,
+˜E4,4 = f 2
+0
+c2 ˜y(0)ρTU(0)ρ,
+(67)
+where
+U(k) =
+
+G(k)2
+−G(k)g(k)  g(k)T G(k)
+1 +
+ g(k)T g(k)
+.
+(68)
+Therefore, only the FIM I(˜θ) in (65) needs to be
+evaluated. By inverting I(˜θ) and taking the diagonal
+elements, the CRLBs for the clock biases, frequency
+biases, radiation source position, and velocity can be
+obtained.
+C. Theoretical Analysis of the Impact of Calibration
+Sources on Parameter Estimation
+In this subsection, a theoretical analysis of the im-
+pact of calibration sources on parameter estimation is
+conducted. First, the effect of the number of calibration
+sources on the estimation performance is analyzed. As
+the number of calibration sources increases, the eigen-
+values of ˜E1,1, ˜E1,2 and ˜E2,2 in (67) also increase.
+Since ˜E1,1 corresponds to the FIM for clock biases and
+˜E2,2 corresponds to the FIM for frequency biases, the
+estimation accuracy of both clock and frequency biases
+improves accordingly. Next, we examine the influence of
+the number of calibration sources on the estimation of the
+radiation source’s position and velocity. By applying the
+Schur-complementary theorem, the FIM for the radiation
+source’s position and velocity can be computed by
+I(
+
+uT, vTT) = 2
+σ2q
+
+E3 −(E2)T E−1
+1 E2
+
+,
+(69)
+where
+E1 =
+˜E1,1
+˜E1,2
+˜ET
+1,2
+˜E2,2
+
+,
+E2 =
+˜E1,3
+˜E1,4
+˜E2,3
+˜E2,4
+
+,
+E3 =
+˜E3,3
+˜E3,4
+˜ET
+3,4
+˜E4,4
+
+.
+(70)
+As the number of calibration sources increases, the ma-
+trices E2 and E3 remain unchanged, while the elements
+of E1 increase. Consequently, the eigenvalues of the FIM
+for the radiation source’s position and velocity increase as
+well. Therefore, a greater number of calibration sources
+leads to improved estimation accuracy for clock biases,
+frequency biases, and the radiation source’s position and
+velocity.
+Finally, the impact of the calibration sources’ signal
+strength on parameter estimation is analyzed. When the
+signal strength of the calibration sources increases, the
+values of ˜x(k), ˜y(k) and R
+
+˜z(k)	
+increase. By analogous
+derivations, it follows that the estimation accuracy of all
+parameters improves correspondingly.
+REFERENCES
+[1] Z. Dai, G. Wang, and H. Chen, “Sensor selection for TDOA-based
+source localization using angle and range information,” IEEE Trans.
+Aerosp. Electron. Syst., vol. 57, no. 4, pp. 2597–2604, 2021.
+[2] H.-W. Wei, R. Peng, Q. Wan, Z.-X. Chen, and S.-F. Ye, “Multi-
+dimensional scaling analysis for passive moving target localization
+with TDOA and FDOA measurements,” IEEE Trans. Signal Pro-
+cess., vol. 58, no. 3, pp. 1677–1688, 2009.
+[3] M.-Y. You, W. Pu, R. Zhou, Y.-X. Ye, M. Xiao, W. Wang, and
+Q. Shi, “Calibration signal assisted emitter localization under sensor
+position uncertainty,” IEEE Trans. Aerosp. Electron. Syst., vol. 61,
+no. 3, pp. 6913–6927, 2025.
+[4] F. Ma, F. Guo, and L. Yang, “Direct position determination of
+moving sources based on delay and Doppler,” IEEE Sensors J.,
+vol. 20, no. 14, pp. 7859–7869, 2020.
+[5] R. Ulman and E. Geraniotis, “Wideband TDOA/FDOA processing
+using summation of short-time CAF’s,” IEEE Trans. Signal Pro-
+cess., vol. 47, no. 12, pp. 3193–3200, 2002.
+[6] S. Stein, “Algorithms for ambiguity function processing,” IEEE
+Trans. Acoust., Speech, Signal Process., vol. 29, no. 3, pp. 588–
+599, 2003.
+[7] K. Ho and W. Xu, “An accurate algebraic solution for moving
+source location using TDOA and FDOA measurements,” IEEE
+Trans. Signal Process., vol. 52, no. 9, pp. 2453–2463, 2004.
+[8] G. Wang, S. Cai, Y. Li, and N. Ansari, “A bias-reduced nonlinear
+WLS method for TDOA/FDOA-based source localization,” IEEE
+Trans. Veh. Technol., vol. 65, no. 10, pp. 8603–8615, 2015.
+[9] X. Qu, L. Xie, and W. Tan, “Iterative constrained weighted least
+squares source localization using TDOA and FDOA measurements,”
+IEEE Trans. Signal Process., vol. 65, no. 15, pp. 3990–4003, 2017.
+[10] F. Zhang, M. Li, Y. Sun, J. Zou, and Q. Wan, “A TDOA-FDOA
+localization method in closed-form based on deviation refining,” in
+Proc. 11th Int. Conf. Wireless Commun. Signal Process., 2019, pp.
+1–5.
+B.Ding ET AL.: Distributed Direct Position Determination of Moving Sources in Asynchronous Sensor Networks
+19
+This article has been accepted for publication in IEEE Transactions on Aerospace and Electronic Systems. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TAES.2026.3685604
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 27,2026 at 02:13:14 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 20 ===
+[11] A. Weiss, “Direct position determination of narrowband radio
+frequency transmitters,” IEEE Signal Process. Lett., vol. 11, no. 5,
+pp. 513–516, 2004.
+[12] A. Amar and A. Weiss, “Advances in direct position deter-
+mination,” in Proc. Sensor Array Multichannel Signal Process.
+Workshop, 2004, pp. 584–588.
+[13] A. J. Weiss, “Direct geolocation of wideband emitters based on
+delay and Doppler,” IEEE Trans. Signal Process., vol. 59, no. 6,
+pp. 2513–2521, 2011.
+[14] G. Wu, M. Zhang, and F. Guo, “Direct position determination: An
+overview,” J. Radars, vol. 9, no. 6, pp. 998–1013, 2020.
+[15] A. Y. Sidi and A. J. Weiss, “Delay and Doppler induced direct
+tracking by particle filter,” IEEE Trans. Aerosp. Electron. Syst.,
+vol. 50, no. 1, pp. 559–572, 2014.
+[16] W. Xia, M. Sun, and Q. Wang, “Direct target tracking by dis-
+tributed gaussian particle filtering for heterogeneous networks,”
+IEEE Trans. Signal Process., vol. 68, pp. 1361–1373, 2020.
+[17] D. Wang and G. Zhang, “A direct localization method for mov-
+ing narrowband source based on Doppler frequency shifts,” Acta
+Electronica Sinica, vol. 45, no. 3, pp. 591–598, 2017.
+[18] F. Ma, Z.-M. Liu, and F. Guo, “Direct position determination in
+asynchronous sensor networks,” IEEE Trans. Veh. Technol., vol. 68,
+no. 9, pp. 8790–8803, 2019.
+[19] K. Zhu, H. Jiang, J. Li, and F. Zhou, “A direct position determi-
+nation method using distributed UAVs with synchronization error,”
+IEEE Sensors J., vol. 24, no. 1, pp. 780–787, Jan. 2024.
+[20] J. Zhao, L. Li, and Y. Gong, “Joint navigation and synchronization
+in LEO dual-satellite geolocation systems,” in Proc. IEEE 85th Veh.
+Technol. Conf., 2017, pp. 1–5.
+[21] C. Liu, L. Yang, and L. Mihaylova, “Dual-satellite source geolo-
+cation with time and frequency offsets and satellite location errors,”
+in Proc. 20th Int. Conf. Inf. Fusion, 2017, pp. 1–8.
+[22] W.-Q. Wang, “Carrier frequency synchronization in distributed
+wireless sensor networks,” IEEE Syst. J., vol. 9, no. 3, pp. 703–
+713, 2014.
+[23] H. Seut´e, J.-F. Grandin, C. Enderli, A. Khenchaf, and J.-C. Cexus,
+“Why synchronization is a key issue in modern electronic support
+measures,” in Proc. 16th Int. Radar Symp., 2015, pp. 794–799.
+[24] L. Lv, S. Wu, H. Li, C. Jiang, and Y. Su, “DNN-aided distributed
+direct position determination for UAV cluster,” IEEE Trans. Veh.
+Technol., vol. 72, no. 12, pp. 16839–16844, Dec. 2023.
+[25] F. Ma, Z.-M. Liu, and F. Guo, “Distributed direct position deter-
+mination,” IEEE Trans. Veh. Technol., vol. 69, no. 11, pp. 14007–
+14012, 2020.
+[26] W. Xia and W. Liu, “Distributed adaptive direct position determi-
+nation of emitters in sensor networks,” Signal Process., vol. 123,
+pp. 100–111, 2016.
+[27] Z. Chen, Y. Weng, and D. Peng, “A low-complexity direct position
+determination method based on the diffusion strategy in wireless
+sensor array networks,” IEEE Trans. Circuits Syst. II: Exp. Briefs,
+vol. 70, no. 12, pp. 4584–4588, Dec. 2023.
+[28] J. Chen and A. H. Sayed, “Diffusion adaptation strategies for
+distributed optimization and learning over networks,” IEEE Trans.
+Signal Process., vol. 60, no. 8, pp. 4289–4305, 2012.
+[29] M. Pourhomayoun and M. L. Fowler, “Distributed computation for
+direct position determination emitter location,” IEEE Trans. Aerosp.
+Electron. Syst., vol. 50, no. 4, pp. 2878–2889, 2014.
+[30] A. Amar and A. J. Weiss, “Localization of narrowband radio
+emitters based on Doppler frequency shifts,” IEEE Trans. Signal
+Process., vol. 56, no. 11, pp. 5500–5508, 2008.
+[31] B. Ding, D. Song, Z. Yang, and W. Wang, “Neighborhood
+selection-based distributed maximum correlation accumulation di-
+rect position determination,” IEEE Trans. Aerosp. Electron. Syst.,
+vol. 61, no. 2, pp. 4296–4312, Apr. 2025.
+[32] A. Azevedo-Filho and R. D. Shachter, “Laplace’s method approx-
+imations for probabilistic inference in belief networks with contin-
+uous variables,” in Uncertainty in Artificial Intelligence.
+Elsevier,
+1994, pp. 28–36.
+[33] E. Weinstein and D. Kletter, “Delay and Doppler estimation by
+time-space partition of the array data,” IEEE Trans. Acoust., Speech,
+Signal Process., vol. 31, no. 6, pp. 1523–1535, 2003.
+[34] X. Li, “Niching without niching parameters: particle swarm op-
+timization using a ring topology,” IEEE Trans. Evol. Comput.,
+vol. 14, no. 1, pp. 150–169, 2009.
+[35] J. C. Burgess, “On digital spectrum analysis of periodic signals,”
+J. Acoust. Soc. Amer., vol. 58, no. 3, pp. 556–567, 1975.
+[36] R. A. Horn and C. R. Johnson, Matrix analysis.
+Cambridge
+university press, 2012.
+Bowen Ding was born in China in 1999. He
+received the B.E. degree in electronic informa-
+tion science and technology from Sun Yat-sen
+University (SYSU), China, in 2021.
+He is currently pursuing the Ph.D. degree
+with the School of Electronic and Communica-
+tion Engineering, SYSU, China. His research
+interests include direct position determination,
+signal processing, and distributed sensor net-
+works.
+Dan Song was born in China in 1991. He
+received the B.E. and M.Sc. degrees in infor-
+mation and communication engineering from
+National University of Defense Technology
+(NUDT), China, in 2012 and 2014, and the
+Ph.D. degree in electrical and computer engi-
+neering from McMaster University, Canada in
+2019, respectively.
+He is currently an associate professor with
+the Test Center, NUDT, China. His research
+interests include target tracking, information fusion, sensor resource
+management and situation awareness for autonomous driving.
+Weijie Wang was born in China in 2002.
+He received the B.E. degree in the School of
+Electronic and Information Engineering from
+South China University of Technology (SCUT),
+in July 2024. He is currently pursuing the
+M.E. degree with the School of Electronic and
+Communication Engineering, Sun Yat-sen Uni-
+versity (SYSU), Shenzhen, China. His research
+interests include signal processing and passive
+localization.
+Wei Wang is currently a professor with the
+School of Electronic and Communication En-
+gineering, Sun Yat-sen University (SYSU),
+China. His research interests include signal
+processing and electromagnetic environment
+effects, electronic information system modeling
+simulation and evaluation.
+20
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS
+VOL. XX, No. XX
+XXXXX 2022
+This article has been accepted for publication in IEEE Transactions on Aerospace and Electronic Systems. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TAES.2026.3685604
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 27,2026 at 02:13:14 UTC from IEEE Xplore.  Restrictions apply. 

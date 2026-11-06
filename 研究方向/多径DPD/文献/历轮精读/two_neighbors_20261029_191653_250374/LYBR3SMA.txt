@@ -1,0 +1,997 @@
+
+=== PDF PAGE 1 ===
+ IEEE TRANSACTIONS ON AUDIO, SPEECH AND LANGUAGE PROCESSING, VOL. 34, 2026                                                               3941
+
+   Multi-Source Position and Direction-of-Arrival
+  Estimation Based on Euclidean Distance Matrices
+
+         Klaus Brümann    , Graduate Student Member, IEEE, and Simon Doclo    , Senior Member, IEEE
+
+
+
+   Abstract—A popular method  to estimate the  positions or                                   I. INTRODUCTION
+ directions-of-arrival (DOAs) of multiple sound sources using an
+array of microphones is based on steered-response power (SRP)      STIMATING the locations, i.e., positions or directions-of-
+beamforming. For a three-dimensional scenario, SRP-based meth-         arrival (DOAs), of multiple speech sources in a noisy and             Eods need to jointly optimize three continuous variables for position   reverberant environment is important for several applications,
+estimation or two continuous variables for DOA estimation. This   such as source tracking, speech enhancement, and speaker ex-
+canbecomputationallyexpensive,especiallywhenhighlocalization
+                                                                      traction [1], [2], [3], [4]. In this paper, we consider both com-accuracy is desired. In this paper, we propose novel methods for
+multi-source position and DOA estimation by exploiting proper-   pact microphone arrays with relatively small inter-microphone
+ ties of Euclidean distance matrices (EDMs) and their respective   distances as well as spatially distributed microphones with large
+Gram matrices. All methods require estimated time-differences   inter-microphone distances. For compact microphone arrays the
+ of arrival (TDOAs) between the microphones. In the proposed   sources will be assumed to be in the far ﬁeld, such that we
+multi-source position estimation method only a single continuous
+                                                                    will focus on estimating the DOA (azimuth and elevation) of variable, representing the distance between each source and a
+ reference microphone, needs to be optimized. For each source, the   each source, whereas for spatially distributed microphones we
+optimal continuous distance variable and set of candidate TDOA   will focus on estimating the three-dimensional position of each
+ estimates are determined by minimizing a cost function that is   source. Existing model-based methods for source localization
+deﬁned using the eigenvalues of the Gram matrix. The estimated    fall into two main categories [1], [2]: one-step methods such as
+ relative source positions are then mapped to estimated absolute
+                                                                steered-response power methods [5], [6], [7] or the subspace-source positions by solving an orthogonal Procrustes problem for
+each source. The proposed multi-source DOA estimation method   based multiple signal classiﬁcation (MUSIC) method [8], and
+ entirely eliminates the need for continuous variable optimization   two-step methods, which rely on the prior estimation of variables
+by deﬁning a relative coordinate system per source such that one   such as time-differences of arrival (TDOAs) between micro-
+ of its coordinate axes is aligned with the respective source DOA.   phones [9]. In addition, several learning-based methods [10],
+The optimal set of candidate TDOA estimates is determined by
+                                                                     [11], [12], [13], [14], [15], [16] for source localization haveminimizing a cost function that is deﬁned using the eigenvalues of a
+rank-reduced Gram matrix. For two sources in a noisy and rever-   recently been proposed, showing promising results. However,
+berant environment, experimental results for different source and  most learning-based methods are trained for a speciﬁc array
+microphone conﬁgurations with six microphones show that the pro-   geometry and do not support source localization with arbitrary
+posed EDM-based method consistently outperforms the SRP-based   array geometries. In this paper, we only consider model-based
+method in terms of position and DOA estimation accuracy. Despite
+                                                                    localization methods, which provide the ﬂexibility to use dif-the fact that the computational complexities of the EDM-based
+methods grow combinatorially with the number of microphones   ferent array geometries without the need to retrain a neural
+and candidate TDOA estimates, they exhibit lower run times than   network. A popular model-based method for single-source DOA
+the SRP-based methods for the considered experimental setup with   or position estimation is based on the steered-response power
+a moderate number of microphones.                            with phase transform (SRP-PHAT) functional [6], [17], [18],
+   Index Terms—Source localization, position estimation, direct-   [19], [20], [21], [22], [23]. While DOA estimation requires
+ ion-of-arrival estimation, multi-source, Euclidean distance matrix,   jointly optimizing the SRP-PHAT functional in up to two con-
+Gram matrix, rank, time-difference of arrival.                     tinuous variables (azimuth and elevation), position estimation
+                                                                  requires jointly optimizing the SRP-PHAT functional in up to
+                                                                   three continuous variables (x, y, and z coordinates). To perform
+                                                                accurate source localization, the SRP-PHAT functional needs to
+   Received 20 April 2026; revised 9 July 2026; accepted 16 July 2026. Date of   be evaluated on a discrete multi-dimensional grid with a high
+ publication 27 July 2026; date of current version 12 August 2026. This work was
+ supported by the Deutsche Forschungsgemeinschaft (DFG, German Research  enough resolution in each variable resulting in a high compu-
+ Foundation) through Germany’s Excellence Strategy – EXC 2177/2 - under   tational complexity [21], [24]. To avoid the multi-dimensional
+ Project 390895286 and Project 352015383 - SFB 1330 B2. The associate editor   search of SRP-based methods, in [25] we proposed a method
+ coordinating the review of this article and approving it for publication was Prof.
+ Daniele Salvati. (Corresponding author: Klaus Brümann.)                    to estimate the three-dimensional position of a single source
+  The authors are with the Department of Medical Physics and Acoustics and   based on Euclidean distance matrices. This method minimizes
+ the Cluster of Excellence Hearing4all, Carl von Ossietzky Universität Olden-   a cost function deﬁned using the eigenvalues of a Gram matrix
+ burg, 26129 Oldenburg, Germany (e-mail: klaus.bruemann@uni-oldenburg.de;
+ simon.doclo@uni-oldenburg.de).                                      associated with an EDM containing the inter-microphone dis-
+   Digital Object Identiﬁer 10.1109/TASLPRO.2026.3717238                tances and the source-microphone distances. Using estimated
+
+
+
+     2998-4173 © 2026 IEEE. All rights reserved, including rights for text and data mining, and training of artiﬁcial intelligence and similar technologies.
+Personal use is permitted, but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+
+
+          Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 2 ===
+3942                                                          IEEE TRANSACTIONS ON AUDIO, SPEECH AND LANGUAGE PROCESSING, VOL. 34, 2026
+
+
+TDOAs, this problem can be reformulated as an optimization
+in only a single distance variable, where the solution repre-
+sents the distance between the source and the reference micro-
+phone. Several model-based methods have also been proposed
+for multi-source DOA and position estimation, e.g., based on
+determining multiple peaks in the SRP-PHAT functional or
+MUSIC spectrum [7], [8], [26], [27], [28], [29] often using
+clustering/association of acoustic features [26], [30], [31]. It
+shouldbenotedthatmostofthesemethodsfocusonmulti-source
+DOA estimation and not on multi-source position estimation. In    Fig. 1.  Exemplary acoustic scenario with two sources at positions p1 and p2
+this paper, we ﬁrst extend the EDM-based single-source position   and a microphone array at positions m1, . . . , mM, with the ﬁrst microphone
+                                                                   deﬁned as the reference microphone.
+estimation method in [25] to multi-source position estimation,
+assuming the number of sources S to be known. For each
+combination of candidate TDOA estimates, the optimal distance  SRP-based methods only grow quadratically in terms of the
+variable is determined by minimizing the EDM-based cost func-  number of microphones. At the same time, the EDM-based
+tion using a one-dimensional exhaustive search. Assuming that  methods reduce the number of continuous variables that need
+each source position corresponds to a unique combination of   to be jointly optimized, resulting in lower run times. The ex-
+TDOAs1, the optimal set of candidate TDOA estimates and   perimental results also demonstrate that position estimation
+corresponding source distances are determined, thereby also   performance can be improved by setting the number of candidate
+solving the association of candidate TDOA estimates to sources.  TDOA estimates equal to the number of sources plus one.
+The estimated relative position of each source to the microphone     This paper is organized as follows. In Section II, we in-
+array can then be determined from the Gram matrix with the   troduce the acoustic scenario and the theoretical background
+estimated source distance. The estimated relative positions are  and properties of EDMs. After reviewing the EDM-based po-
+then mapped to estimated absolute source positions by solving   sition estimation method for a single source, we extend this
+an orthogonal Procrustes problem for each source. As the second  method for multi-source position estimation in Section III. In
+contribution of this paper, we propose an EDM-based method   Section IV we propose EDM-based methods for single-source
+to estimate the DOAs of multiple sources relative to a compact  and multi-source DOA estimation considering far-ﬁeld sources
+microphone array, which does not require continuous variable  and compact microphone arrays. After discussing the baseline
+optimization. We construct a rank-reduced Gram matrix by  SRP-based method in Section V, we compare the performance
+subtracting a rank-1 matrix based on the estimated TDOAs   of the EDM-based and SRP-based methods for multi-source
+from the Gram matrix associated with the EDM containing   position and DOA estimation in Section VI.
+the microphone distances. We deﬁne a cost function using the
+eigenvalues of this rank-reduced Gram matrix and, similarly as                        II. THEORETICAL BACKGROUND
+for multi-source position estimation, determine the optimal set                                          We consider a noisy and reverberant acoustic environment
+of candidate TDOA estimates by considering the S smallest cost                                                           with S  static sources, where ps ∈RP denotes the position
+function values. The DOA of each source is then estimated from                                                               of the s-th source in the absolute coordinate system with P-
+the mapping between the absolute coordinate system and the                                                           dimensional canonical basis vectors e1, . . . , eP (1 ≤P ≤3).
+relative coordinate system, which depends on the combinations                                        We assume the number of sources S to be known. We consider
+of TDOA estimates corresponding to each source.                                                        an array with M microphones whose positions are assumed to
+  Two sets of experiments are conducted for several simulated                                                        be known, with M > P, where mm ∈RP denotes the position
+scenarios with two sources and six microphones in a room with                                                               of the m-th microphone. The P × M-dimensional microphone
+mild background noise and reverberation. The results of the                                                                  positions matrix spans P-dimensional space and is deﬁned as
+ﬁrst experiment considering spatially distributed microphones M = [m1, . . . , mM]. The origin of the coordinate system
+show that the proposed EDM-based method outperforms the                                                                               is deﬁned at the centroid of the microphone positions,  i.e.,
+SRP-based method in estimating the positions of the sources for    1                                   M M1M = 0P , with 1M denoting an M-dimensional vector
+all considered distances between the sources and the microphone                                                               of ones and 0P denoting a P-dimensional vector of zeros. The
+array. Similarly, the results of the second experiment considering                                                             source and microphone positions are exempliﬁed in Fig. 1.
+compact microphone arrays show that the proposed EDM-based                                                     The P × (M + 1)-dimensional microphones and source po-
+method also consistently outperforms the SRP-based method in                                                                       sitions matrix for the s-th source is deﬁned as Ps = [M, ps].
+estimating the DOAs of the sources. In terms of computational                                                   The M × M-dimensional Gram matrix of the microphones
+complexity, the complexities of the EDM-based methods grow GMM and the (M + 1) × (M + 1)-dimensional Gram matrix
+combinatorially with the number of microphones and the num-                                                                    for the s-th source Gs are deﬁned as
+ber of candidate TDOA estimates, whereas the complexities of
+                                          GMM = MTM ,
+  1The probability that sources have the same TDOAs in all pairs of mi-
+crophones is extremely low. This would only occur for a planar (or linear)
+microphone array with symmetric sources with respect to this plane (or line). In
+this paper, we focus on three-dimensional microphone conﬁgurations.                     Gs = PTsPs ,                     (1)
+
+
+        Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 3 ===
+BRÜMANN AND DOCLO: MULTI-SOURCE POSITION AND DIRECTION-OF-ARRIVAL ESTIMATION BASED ON EUCLIDEAN DISTANCE MATRICES            3943
+
+
+where {·}T denotes the transpose operator. An important prop-   This important property will be used in the EDM-based DOA
+erty of both Gram matrices, which will be used throughout   estimation in Section IV. Similarly as in (7), the Gram matrix
+this paper, is that their rank is at most P. When considering   for the s-th source Gs can be written in terms of the EDM Ds
+another orthonormal basis, relative to the original canonical   as
+basis (obtained by rotating and/or reﬂecting the original basis),
+                                          Gs =−1                                                         (IM+1 −1M+1aTM+1) Ds (IM+1 −aM+11TM+1) ,the relative microphone positions matrix Mr and the relative                                                            2
+microphones and source positions matrix for the s-th source Ps                                                                 (8)
+are given by                                            where the centering vector is deﬁned as aM+1 = M1 [1TM, 0]T,
+                                                             again to ensure that the centroid of the relative microphone
+  Mr = RTM ,    Prs = RTPs = [Mr , RTps] ,    (2)                                                                  positions is at the origin. Let us consider the eigenvalue de-
+with R a P × P-dimensional orthogonal matrix, for which   composition
+RT = R−1.                                                        Gs = SΛST ,                     (9)
+   It is important to realize that the Gram matrices in (1) are
+unaffected by a basis rotation and/or reﬂection, i.e.,             with S and Λ denoting the matrices containing the eigenvectors
+                                                       and eigenvalues, respectively. Since the rank of the positive
+    GMM = MTr Mr ,      Gs = PTrsPrs .      (3)                                                             semi-deﬁnite matrix Gs is at most P, this means that at most P
+  The distance between the i-th and the j-th microphone is   eigenvalues are non-zero, i.e., λ1 ≥· · · ≥λP ≥0 and λP +1 =
+denoted by Dij = ||mi −mj||2 and the distance between the s-    · · · = λM+1 = 0. Using (3) and (9), the relative microphones
+thsourceandthem-thmicrophoneisdenotedbydms = ||mm −  and source positions matrix Prs can hence be written as
+ps||2. We assume that the microphones are time-synchronized          √    √
+                                                           Prs =  diag   λ1, . . . ,  λP   , 0P ×(M+1−P ) ST .   (10)and the acoustic waves of the sources propagate freely towards
+the microphones (i.e., no objects between the sources and the   Using (2), the (absolute) source position vector of the s-th source
+microphones). The TDOA of the direct component of the s-th  ps can be obtained from Prs as
+source between the i-th and j-th microphones is given by
+                                                                     ps = RPrs eM+1,                (11)
+             ||mj −ps||2 −||mi −ps||2      djs −dis
+ τij(ps) =                 =                  ,                             Ps                       ν                    ν
+                                                              (4)                                                           with eM+1 the (M + 1)-dimensional selection vector, consist-where ν denotes the speed of sound. Without loss of generality,                                                              ing of zeros except for a one in the (M + 1)-th entry.
+we deﬁne the ﬁrst microphone as the reference microphone.
+From(4),itcanbedirectlyseenthatthedistancebetweenthes-th
+                                                                                           III. EUCLIDEAN DISTANCE MATRIX-BASED POSITIONsource and the m-th microphone can be written in terms of the
+                                                                          ESTIMATIONdistance between the s-th source and the reference microphone
+as                                                                In Section III-A, we review the EDM-based method in [25] to
+                                                               estimate the 3D position of a single source. Considering multiple
+             dms = d1s + ντm(ps) ,               (5)                                                              candidate TDOA estimates, this method estimates the distance
+with d1s denoting the distance between the reference micro-   between the source and a reference microphone by minimizing
+phone m = 1 and the s-th source, and τm(ps) denoting the   an EDM-based cost function in a single continuous variable,
+TDOA between the m-th microphone and the reference micro-   considering all possible combinations of candidate TDOA esti-
+phone. The (M + 1) × (M + 1)-dimensional EDM Ds for the   mates. In Section III-B, we propose an extension of this method
+s-th source is deﬁned as                                           to estimate the 3D positions of multiple sources. The proposed
+                                                     method estimates the optimal set of candidate TDOA estimates
+                                                       and corresponding source distances to the reference microphone              DMM  ds   ,                 (6)            Ds =                       dT                                   s    0                     by considering the S smallest values of the EDM-based cost
+                                                                  function. For each source, the absolute position is then computed
+where  the submatrix DMM = [D2ij]  contains  the squared  from the estimated relative position by solving an orthogonal
+inter-microphone  distances and  the  vector ds = [d21 s, d22 s,   Procrustes problem.
+. . . , d2Ms]T contains the squared distances between the s-th
+source and the microphones. In [32], [33], it was shown that the                                                             A. Single-Source Position Estimation
+Gram matrix of the microphones GMM in (1) could be written
+in terms of the EDM DMM as                                    In this section, we consider a single-source scenario, i.e.,
+                                           S = 1. The EDM-based method in [25] estimates the source
+                                                                                  ,  (7)   position p1 by ﬁrst estimating the vector of squared distances GMM = −1 (IM −1MaTM) DMM (IM −aM1TM)
+             2                                      d1 between the source and all microphones. To this end, an
+where IM denotes the M × M-dimensional identity matrix  EDM-based cost function using the eigenvalues of the Gram
+and aM denotes the so-called centering vector. To ensure that   matrix of the source is deﬁned and minimized. In Section III-A1
+the centroid of the relative microphone positions Mr is at the  we deﬁne the cost function assuming the TDOAs to be known.
+origin,wedeﬁnethecenteringvectorforGMM asaM = M1 1M.  Aiming at improving robustness against noise and reverberation,
+
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 4 ===
+3944                                                          IEEE TRANSACTIONS ON AUDIO, SPEECH AND LANGUAGE PROCESSING, VOL. 34, 2026
+
+
+in Section III-A2 we explain how to incorporate multiple TDOA  where Ym(ω) denotes the m-th microphone signal in the
+estimates.                                                  frequency-domain, {·}∗denotes the complex-conjugate oper-
+  1) EDM-Based Cost Function: By introducing the variable   ator, and E{·} denotes the expectation operator. The TDOA
+α, which represents the distance between the source and the   between the m-th microphone and the reference microphone
+reference microphone, the distance between the source and    is then estimated by determining the main peak of ξm(τ), i.e.,
+the m-th microphone can be written using (5) as a function of
+the variable α as                                                                       ˆτm =  argmaxτ ξm(τ) .              (18)
+
+             dm1(α) = α + ν τm(p1),            (12)   Although the PHAT weighting in (17) has been shown to im-
+                                                           prove robustness against reverberation and noise [35], [36], [37],
+assumingtheTDOAsτm(p1), m = 2, . . . , M,tobeknown(see   acoustic reﬂections can introduce peaks in ξm(τ) that are higher
+Fig. 1). Using (12), we construct the vector of squared distances   than the peak corresponding to the direct source component,
+as d1(α) = [d211(α), d221(α), . . . , d2M1(α)]T and the EDM in (6)  which means that the direct path peak is not guaranteed to be the
+as a function of α, i.e.,                                          global maximum. Therefore, it was proposed in [25] to consider
+                                     C candidate TDOA estimates,2 corresponding to the C largest
+                                                                    local maxima, instead of considering only the global maximum              DMM  d1(α)   .           (13)            D1(α) =
+                      dT1(α)    0                       of the GCC-PHAT function as in (18), and let the EDM-based
+                                                     method determine the combination of candidate TDOA esti-
+The Gram matrix G1(α) corresponding to the EDM D1(α) in   mates which corresponds to the most feasible 3D source posi-
+(13) can be constructed using (8). Based on the fact that the rank   tion. For each microphone m = 2, . . . , M, the set of C candi-
+of the Gram matrix G1(α) attains its minimum value (at most   date TDOA estimates is denoted as ˆTm = {ˆτm(1), . . . , ˆτm(C)},
+P) when α = d11, and is larger for other values of α, it was   corresponding to the C largest local maxima of the GCC-PHAT
+proposed in [25] to deﬁne a cost function based on all but the P   function ξm(τ). No association between candidate TDOA esti-
+largest eigenvalues λi(α) of G1(α), i.e.,                      mates and the source is applied at the TDOA estimation stage.
+                                                   The EDM-based method associates the best combination of
+                    M+1                             candidate TDOA estimates to the source by determining which
+              J (α) =        |λi (α) |              (14)   of the Q = CM−1 possible combinations of candidate TDOA
+                         i=P +1                             estimates corresponds to the most feasible source and micro-
+                                                        phones geometry. We deﬁne the combination vectors
+It should be noted that since it cannot be guaranteed that the
+eigenvalues of G1(α) are positive for all values of α (e.g., in case       c(q) =  [ c2(q), . . . , cM(q) ]    ,   q = 1, . . . , Q ,    (19)
+ofamismatchbetweenthedistancevariableandtheTDOAs),the
+absolute values of the eigenvalues are used in (14). If α = d11,  where the index cm(q) ∈{1, . . . , C} refers to one of the C
+all but the P largest eigenvalues of G1(d11) are equal to zero,   largestlocalmaximaofξm(τ).Itshouldbenotedthatthenumber
+such that J(d11) = 0. The optimal value αopt = d11 can hence   of combinations Q increases exponentially with M, which can
+be found as                                              be computationally demanding if M is large. For each possible
+                                                         combinationofcandidateTDOAestimates,thevectorofsquared
+                   αopt =  argminα J (α) .              (15)   distances between the source and the reference microphone is
+                                                             given by
+It should be noted that no closed-form solution is available, such
+that an exhaustive search over the (single) continuous variable       d1(α, q) =  d211(α, q), d221(α, q), . . . , d2M1(α, q) T ,
+α needs to be performed.
+                                                                            q = 1, . . . , Q,                         (20)  2) TDOA Estimation and Selection: Since in practice the
+TDOAs of the source are obviously not available, in [25] a
+                                                           where, similarly to (12),method was proposed to incorporate TDOA estimates into the
+EDM-based cost function. A commonly used method to estimate               dm1(α, q) = α + νˆτm(cm(q)),
+TDOAs between microphone pairs is based on the generalized
+                                     m = 1, . . . , M , q = 1, . . . , Q.           (21)cross correlation with phase transform (GCC-PHAT) [34]. The
+continuous-time GCC-PHAT function between the m-th and the
+                                                       Using (20), for each possible combination of candidate TDOAreference microphone is deﬁned as
+                                                                estimates we can construct the cost function in (14) as
+                          ω0
+           ξm(τ) =     ψm1(ω)e−jωτdω ,          (16)              M+1
+                       −ω0                                   J(α, q) =       |λi(α, q)|  ,  q = 1, . . . , Q ,      (22)
+                                                                       i=P +1with radial frequency ω, j = √−1, and time lag τ. The normal-
+ized phase spectrum ψm1(ω) in (16) is given by
+
+                                              ∗                                  (ω)}                    E{Ym(ω)Y                                        1                                                                                                 2It                                                                               should                                                                                 be noted                                                                                                                that a small number of candidate TDOA estimates, e.g.,                                                                     ,          (17)           ψm1(ω) =                                              ∗                                            C                                         = 2,                                                                                                             is typically                                                                                                        sufﬁcient.                                        |                                     (ω)}|                    E{Ym(ω)Y                                        1
+
+
+        Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 5 ===
+BRÜMANN AND DOCLO: MULTI-SOURCE POSITION AND DIRECTION-OF-ARRIVAL ESTIMATION BASED ON EUCLIDEAN DISTANCE MATRICES            3945
+
+
+with λi(α, q) the eigenvalues of the Gram matrix G1(α, q)   B. Multi-Source Position Estimation
+associated with the EDM                                                                  In this section, we propose an extension of the EDM-based
+         DMM   d1(α, q)     ,  q = 1, . . . , Q.  (23)   methodpresentedintheprevioussection,toestimatetheposition D1(α, q) =
+             dT1(α, q)     0                                of multiple sources. For each source, we now introduce the
+                                                                  variable αs, which represents the distance between the s-th
+When the candidate TDOA estimates and distance variable α   source and the reference microphone. Similarly as in (12), the
+are inconsistent with a feasible 3D geometry of the source and   distance between the s-th source and the m-th microphone can
+the microphones, the Gram matrix deviates from its ideal struc-   be written as a function of the variable αs as dms(αs) = αs +
+ture, which manifests itself as nonzero eigenvalues λi(α, q), for  ντm(ps) , m = 2, . . . , M ,  s = 1, . . . , S.Usingds(αs) =
+i > P and, in some cases, even as negative eigenvalues. Using   [d21 s(αs), d22 s(αs), . . . , d2Ms(αs)]T, we can construct the vector
+absolute values in (22) ensures that the cost function penalizes   of squared distances for the s-th source.
+the magnitudes of these deviations, regardless of whether they       It is indeed possible to construct an (M + S) × (M + S)-
+appear as positive or negative eigenvalues. In other words, the   dimensional EDM for all sources, similarly to (13), i.e.,
+cost function (22) describes the degree of geometric inconsis-
+tency of the candidate solution.                            D(α1, . . . , αS, DSS) =
+  The optimal combination of candidate TDOAs is then esti-            ⎡                     ⎤
+                                         DMM   d1(α1)    · · ·  dS(αS)mated by ﬁrst determining the optimal distance variable for each
+                                                                dT1(α1)combination, i.e.,
+                                                                                                                                                                               ,   (30)         ˆα(q) =  argmin J(α, q)  ,  q = 1, . . . , Q,     (24)                                                           ⎢⎢⎢⎢⎣                  ...         DSS                               ⎥⎥⎥⎥⎦
+                 α                                              dTS(αS)
+and then determining the combination which results in the
+smallest value of the cost function at these solutions, i.e.,       where it should be realized that this EDM depends on S con-
+                                                               tinuous distance variables and furthermore contains the S × S-
+                         ˆq1 =  argmin  J(ˆα(q), q),             (25)                            q=1,...,Q                              dimensional EDM DSS with unknown inter-source distances.
+                                                       However, since jointly optimizing α1, . . . , αS and the unknown
+with  corresponding Gram  matrix  ˆG1 = G1(ˆα(ˆq1), ˆq1).  It   entries of DSS is not straightforward, we propose a simpler
+should be noted that due to possible TDOA estimation errors,   procedure, assuming that each source corresponds to a unique
+J(ˆα(ˆq1), ˆq1) is not guaranteed to be 0 unlike J(αopt) in (15).     combination of TDOAs.
+  As explained in Section II, from the eigenvalue decompo-     Similarly as for single-source position estimation, in the
+sition of the estimated Gram matrix ˆG1 = ˆS ˆΛˆST, the relative  TDOA estimation stage, no explicit association between the can-
+microphones and source positions matrix can be estimated as in   didate TDOA estimates and sources is performed. We consider
+(10) using the P largest eigenvalues, i.e.,              C TDOA estimates for the microphones m = 2, . . . , M, with
+                                     C ≥S. For each combination of candidate TDOA estimates,
+ ˆPr1 =   diag      ˆλ1, . . . ,   ˆλP    , 0P ×(M+1−P )  ˆST . (26)   the optimal value ˆα(q) , q = 1, . . . , Q, is determined using (24).
+                                                                Instead of only considering the overall smallest value of the
+   It should be noted that due to estimation errors  it cannot                                                                  cost function at these solutions, as in the single-source case,
+be guaranteed that the estimated relative microphone positions                                                                 the candidate TDOA estimates are automatically associated to
+matrix ˆMr1 (ﬁrst M columns of ˆPr1) can be perfectly mapped to                                                                      different sources by identifying the S of Q combinations with
+the known absolute microphone position matrix M by rotation                                                                 the smallest values J(ˆα(ˆq1), ˆq1), . . . , J(ˆα(ˆqS), ˆqS) and their
+and/or reﬂection as in (2). As proposed in [25], the mapping                                                            corresponding Gram matrices ˆG1, . . . , ˆGS. For each source,
+between the estimated relative microphone positions ˆMr1 and                                                                 the relative microphones and source positions matrix ˆPrs isthe absolute microphone positions M can be computed by
+                                                              estimated based on the eigenvalue decomposition of the cor-
+solving an orthogonal Procrustes problem [33], [38]. First, the                                                           responding Gram matrix ˆGs, similarly to (26). Then, similarly
+singular value decomposition (SVD) of ˆMr1MT is computed as                                                                    to (29), the position of the s-th source is estimated as
+              ˆMr1MT = ˆU1 ˆQ1 ˆVT1 ,              (27)                                                                                                               ˆprs = ˆRs ˆPrseM+1 ,                (31)
+where ˆQ1 contains the singular values and ˆU1 and ˆV1 contain
+the left and right singular vectors, respectively. The orthogonal   with ˆRs the orthogonal mapping matrix for the s-th source,
+mapping matrix ˆR1 in (2), is then computed using the orthogonal  computed using the left and right singular vectors of ˆMrsMT.
+Procrustes problem solution as                                  Since for reverberant and noisy scenarios with multiple
+                                                              sources the peaks of the GCC-PHAT functions may contain
+                      ˆR1 = ˆV1 ˆUT1 ,                   (28)                                                              spurious peaks that don’t correspond to the true TDOAs, but to
+and the absolute source position is computed using (11) as        early reﬂections or noise, it may be beneﬁcial to set C > S. This
+                                                                               is especially true for spatially distributed microphones, where
+                        ˆp1 = ˆR1 ˆPr1eM+1 .                (29)                                                       due to the potentially large distances between microphones, the
+No additional regularization beyond the eigenvalue truncation   range of plausible TDOAs in (18) is larger than for compact
+in (26) is applied for solving the orthogonal Procrustes problem.   microphone arrays. The proposed EDM-based method can then
+
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 6 ===
+3946                                                          IEEE TRANSACTIONS ON AUDIO, SPEECH AND LANGUAGE PROCESSING, VOL. 34, 2026
+
+
+
+
+
+Fig. 2.   (a) Cost functions J(α, q) for all combinations of TDOA estimates q, (b) Corresponding minimum cost function values.
+
+
+ Algorithm 1: EDM-Based Multi-Source Position Estima-     cost function values J(ˆα(q), q). For this scenario,  it can be
+ tion.                                                      observed that only 2 out of 32 cost functions exhibit clear
+    Parameters: Number of microphones M, number of candidate    minima. Moreover, it can be observed that the estimated distance
+   TDOA estimates C, dimensionality P, number of sources S,      variables ˆα1 and ˆα2 for these combinations of TDOA estimates
+     combinations of candidate TDOA estimates Q = CM−1.                                                           correspond very closely to the distances d11 and d12.
+    Input: EDM of microphones DMM, vector of candidate
+   TDOA estimate selection indices c(q), set of candidate TDOA
+      estimates ˆTm (m = 2, . . . , M), combination vectors c(q).
+    Output: Estimated source positions ˆp1, . . . , ˆpS                   IV. EUCLIDEAN DISTANCE MATRIX-BASED DOA ESTIMATION
+     for q ←1, . . . , Q do
+                                                       Whereas in Section III we considered spatially distributed      for m ←1, . . . , M do
+        ˆdm1(α, q) ←α + νˆτm(cm(q))                        microphones and proposed an EDM-based method to estimate
+     end for                                                    the 3D positions of multiple sources, in this section we will con-
+           DMM    ˆd(α, q)                              sider compact microphone arrays and assume that the sources      ˆD(α, q) ←
+                     ˆdT(α, q)     0                                are in the far ﬁeld of the microphone array. In Section IV-A we
+      ˆG(α, q) ←−12 (IM+1 − M1 1M+1[1TM, 0]) ˆD(α, q) . . .       propose an EDM-based method to estimate the DOA of a single
+                          . . . (IM+1 − M1 [1TM, 0]T1TM+1)                   source. By deﬁning a relative coordinate system in which one
+       ˆS(α, q) ˆΛ(α, q)ˆST(α, q) ←ˆG(α, q)                         of the basis vectors is the DOA vector of the source, the rank
+     J(α, q) ←   M+1i=P +1 |ˆλi(α, q)|                              of the Gram matrix associated with the EDM containing the
+       ˆα(q) ←  argminα J(α, q)                             microphone distances can be reduced by subtracting a rank-1
+    end for                                                  matrix based on the TDOAs. Using the eigenvalues of this rank-
+    Determine the S combinations ˆq1, . . . , ˆqS which result in the      reduced Gram matrix, we deﬁne an EDM-based cost function to
+      smallest cost function values J(ˆα(ˆq1), ˆq1), . . . , J(ˆα(ˆqS), ˆqS)     estimate the DOA, which does not require continuous variable
+     for s ←1, . . . , S do
+                                                                 optimization. In Section IV-B we extend this method to estimate
+       ˆPrs ←  diag     ˆλ1(ˆα(ˆqs), ˆqs), . . . ,   ˆλP (ˆα(ˆqs), ˆqs)    . . .     the DOAs of multiple sources. Similarly as for multi-source
+                    . . . 0P ×(M+1−P )  ˆST(ˆα(ˆqs), ˆqs)                       position estimation, we determine the optimal set of candidate
+                                       TDOA estimates based on the EDM-based cost function, solving
+     Mrsˆ   ←ˆPrs[IM , 0M×1]T                                                                 the association of candidate TDOA estimates to sources.
+      ˆUs ˆQs ˆVTs ← MrsMTˆ
+      ˆRs ←ˆVs ˆUTs
+        ˆps ←ˆRs ˆPrseM+1
+    end for                                                   A. Single-Source DOA Estimation
+                                          We consider a compact microphone array and a source in the
+                                                                        far ﬁeld of the microphone array, assuming that the acoustic
+be considered as a peak-to-source assignment method aiming  waves arriving at the microphones from the source can be
+at identifying the combinations of candidate TDOA estimates   approximated as planar waves (see Fig. 3 for an exemplary
+which correspond to the most feasible 3D geometry of sources   two-dimensional conﬁguration). This assumption is valid when
+and microphones. As a trade-off between performance and   the distances between the source and the microphones are much
+computational complexity, it will be shown in Sections VI-D   larger than the inter-microphone distances. In Section IV-A1 we
+and VI-E that setting C = S + 1 is a good choice for multi-  deﬁne a rank-reduced Gram matrix, assuming the TDOAs to be
+source position estimation. The EDM-based position estimation  known. In Section IV-A2 we explain how to incorporate multiple
+method is summarized in Algorithm 1.                TDOA estimates.
+  For an exemplary scenario, Fig. 2(a) illustrates the cost func-     1) Rank-Reduced Gram Matrix: In the absolute 3D coordi-
+tion J(α, q) in (22) for M = 6 spatially distributed microphones   nate system (with canonical basis vectors e1, e2, and e3), the
+and S = 2 sources, while Fig. 2(b) shows the sorted minimum   unit-norm DOA vector, pointing in the direction of the source
+
+
+        Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 7 ===
+BRÜMANN AND DOCLO: MULTI-SOURCE POSITION AND DIRECTION-OF-ARRIVAL ESTIMATION BASED ON EUCLIDEAN DISTANCE MATRICES            3947
+
+
+                                                           Since the relative distance δm between the m-th microphone and
+                                                                 the centroid of the microphone array is directly related to the
+                                       TDOA ˜τm = mTmv1/ν between the m-th microphone and the
+                                                                centroid of the microphone array as δm = −ν˜τm, the coordinate
+                                                                vector xr can be written as
+                                                                                       xr = −ν˜τ ,                    (37)
+                                                      where  ˜τ = [˜τ1, . . . , ˜τM]T  denotes  the vector of  (centered)
+                                               TDOAs, for which ˜τ T1M = 0. As will be shown in the next
+                                                                 subsection, these centered TDOAs can be estimated despite
+                                                                  there not necessarily being a microphone at the centroid of the
+                                                       microphone array.
+Fig. 3.  Exemplary two-dimensional conﬁguration, consisting of a compact     Using (36), it can easily be seen that the M × M-dimensional
+array with M = 4 microphones and a far-ﬁeld source at azimuth angle θ1.                                              Gram matrix of the microphones GMM in (3) can be written asIn the relative coordinate system, deﬁned by the DOA vector v1, the relative
+distances between the m-th microphone and the centroid of the microphone   the sum of three rank-1 matrices, i.e.,
+array, in the direction of the source, are denoted by δm , m = 1, . . . , M.
+                                       GMM = xrxTr + yryTr + zrzTr  ,          (38)
+(see Fig. 3), is deﬁned as                                whose rank is at most 3 (i.e., P). Assuming the TDOA vector ˜τ
+                                                                    to be known, we now deﬁne the Gram matrix
+  v1 = [cos(θ1)cos(φ1) ,  sin(θ1)cos(φ1) ,  sin(φ1)]T ,
+                                                        (32)         G                                                               −  = GMM −ν2˜τ ˜τ T            (39)                                           MM
+with θ1 and φ1 the azimuth and elevation angle, respectively.
+These angles can be computed from the DOA vector as         Using (37) and (38), it can be easily seen that G MM−  = yryTr +
+                                                                        rank is at most                                                                             2 (i.e.,                                                                 P −1). Considering                                                                                                                            the                                                             zrzTr , whose
+                                                                      −                                         G                                                    = WΣWT                                                                                                      with the matrix                             eT2v1    ,                     eigenvalue                                                                    decomposition                                                MM                  θ1 = tan−1
+                             eT1v1         W containing the eigenvectors and the diagonal matrix Σ
+                                                               containing the eigenvalues, this means that at most 2 eigenvalues
+                 φ1 = sin−1 eT3v1  .                (33)   are positive, σ1 ≥σ2 ≥0, while the other eigenvalues are equal
+                                                                    to zero, σ3 = · · · = σM = 0. By deﬁning
+  We now deﬁne a relative coordinate system with orthonormal
+                                                                            yTbasis vectors ex, ey, and ez, which are not necessarily canonical,          M                                                                    − =       r    ,                  (40)                                                                                                                                                              r
+where we set one of the basis vectors equal to the DOA vector,                                zTr
+e.g., ex = v1. The basis vectors of the relative coordinate system
+                                                                 the rank-reduced Gram matrix can be written ascan be mapped to the basis vectors of the absolute coordinate
+system through a rotation with the angles θ1 and φ1, i.e.,             G MM−  = (M r− )TM r− .               (41)
+  ex = v1 = R1e1,   ey = R1e2,   ez = R1e3 ,  (34)  As explained in Section  II, a Gram matrix is only deﬁned
+                                                     up to an arbitrary orthogonal transformation. This means that
+with orthogonal             mapping                        matrix                                                                          −                                            G                                                                 the                                                                rank-reduced                                                           Gram                                                                                    matrix                                                                                            can                                                                                                              also                                                                                                  be                                                                                                                     written                                                                                                                          as                                                  MM                                   ⎤     ⎡                                                   −                                                                     R−                             G                                                    = (R−                                                                                  with M−                                                                                                 and                                      = (M−ar)T(M−                                                                                                                 ar),                                                                                                                                                  ar                                                                                   ar)TM−                                                                                                                                                                                                   r ,                                                                                                                                                                                      ar an                                  MM         cos(θ1)                cos(φ1)                       −sin(θ1)  −cos(θ1) sin(φ1)
+                                                                                           − can                                                                                                                                                                                     ar R1 = ⎢⎣ sin(θ1) cos(φ1)   cos(θ1)   −sin(θ1) sin(φ1) ⎥⎦.     arbitrary orthogonal matrix. Based on (10), the matrix M
+                                                        be computed as
+             sin(φ1)         0          cos(φ1)
+                                   M−                                                         (35)                                                                                                                                                 , 02×(M−2) WT .      (42)                                                                                                              ar =  diag (√σ1, √σ2)
+The transpose of this matrix maps the microphone positions to
+                                                       Using (37) and (40), the relative microphone positions can be
+the relative microphone positions as in (2), i.e., Mr = RT1M.                                                                 written as
+Equivalently, the matrix Mr describes the same microphone                                                                                                           T                                                                   xT                                                                                  0T                                                                               1                                                                                           −ν˜τ                                                                                                         2                                                                                                                                                        rpositions         with                respect to                           the                              absolute                                       coordinate                                                =                                                                                                                                                                          .      (43)                                              system as        Mr = M−                                                          R−                                                      M−                                                                                02                                                                                                                                                        r                                                                                                                                                          ar                                                                                                                                                                      arthe matrix    M describes                      with                              respect                                       to the                                                relative coordinate
+system. The M-dimensional relative coordinate vectors xr, yr,                                          Rar       Mar
+and zr are deﬁned as
+                                                               Therefore, using (2), the absolute microphone positions can be                   ⎡  ⎤
+                          xT                             written as                                                            r
+                                                                                                                                                                   ,           (44)              Mr =  ⎢⎣ yTr ⎥⎦.                   (36)       M = R1Mr = R1Rar Mar
+                             zT
+                                                            r                                                                  R′
+It should be realized that the coordinate vector xr contains the   with R′ an orthogonal matrix mapping the matrix Mar to the ab-
+relative distances between the microphones and the centroid of   solutemicrophonepositionsmatrixM,whichcanbedetermined
+the microphone array in the direction of the source (see Fig. 3).  by solving an orthogonal Procrustes problem. Realizing that the
+
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 8 ===
+3948                                                          IEEE TRANSACTIONS ON AUDIO, SPEECH AND LANGUAGE PROCESSING, VOL. 34, 2026
+
+
+canonical basis vector e1 of the absolute coordinate system is
+equal to the ﬁrst column of the matrix Rar deﬁned in (43), i.e.,
+e1 = Rare1, the DOA vector v1 in (34) can be written as
+
+              v1 = R1Rare1 = R′e1              (45)
+
+This means that the DOA vector is equal to the ﬁrst column of
+the mapping matrix R′ and does not depend on the arbitrary
+orthogonal matrix R−ar.
+  2) TDOA Estimation and Selection: Computing the matri-
+ces G MM−   in (39) and Mar in (43) requires centered TDOAs
+˜τ m, which  are not  available  in  practice. Similarly as  in    Fig. 4.   Cost function values I(q) for all combinations of candidate TDOA
+Section III-A2, we consider C candidate TDOA estimates    estimates q.
+ˆ˜τ m ,m = 2, . . . , M, corresponding to the C largest local max-
+ima of the GCC-PHAT function, and consider the Q = CM−1
+combination vectors c(q) in (19). Similarly as for position   values I(ˆq1), . . . , I(ˆqS) and their corresponding Gram matrices
+estimation, it should be noted that the number of combinations   ˆG MM(ˆq1),−           . . . , ˆG MM(ˆqS).−       Using the eigenvalue decomposi-
+Q increases exponentially with M. For each combination q of   tion ˆG MM(ˆqs)−    = W(ˆqs)ˆ      ˆΣ(ˆqs) WT(ˆqs),ˆ        the matrices M−ar in
+candidate TDOA estimates, the centered TDOA between the   (42) and Mar in (43) can be estimated for each source as
+m-th microphone and the centroid of the microphone array can
+be estimated as
+                                                      ˆM−ar(ˆqs) =  diag     ˆσ1(ˆqs), . . . ,   ˆσP −1(ˆqs)   ,                     M
+                                                                            .     (46)         τˆ m(q) = ˆτm(cm(q)) −1M     ˆτj(cj(q))                                                                             0(P −1)×(M−P +1) WT(ˆqs),ˆ             (50)
+                                  j=1
+                                                                                              −νˆ˜τ T(ˆqs)
+The selection of candidate TDOA estimates will be explained in           ˆMar(ˆqs) =   ˆM−         .                        (51)the next section for multiple sources (which can obviously also                                   ar(ˆqs)
+be used for a single source).
+                                                   The mapping matrix ˆR′(ˆqs) between the matrix ˆMar(ˆqs) and
+B. Multi-Source DOA Estimation                                the absolute microphone positions matrix M can be computed
+                                                     by solving an orthogonal Procrustes problem, similarly to (27)  In this section, we present a method to estimate the DOAs
+                                                       and (28). From these mapping matrices, the DOA vectors canof multiple sources based on the eigenvalues of the Gram
+                                                             then be estimated using (45) as ˆvs = ˆR′(ˆqs) e1. No additionalmatrix deﬁned in (39). Contrary to the EDM-based position
+                                                             regularizationbeyondtheeigenvaluetruncationin(50)isappliedestimation method in Section III, which requires an exhaustive
+                                                                    for solving the orthogonal Procrustes problem. Experimentalsearch over the continuous variable α, the proposed EDM-based
+                                                                       results in Section VI-F indicate that setting C = S is sufﬁcientDOA estimation method does not require continuous variable
+                                                                    for multi-source DOA estimation using compact microphoneoptimization.
+  Using  the  vector  of  centered TDOA  estimates  ˆ˜τ(q) =   arrays and that larger values of C bring no notable beneﬁt. This
+[ˆτ 1(q), . . . , τˆ M(q)]T based on (46), the Gram matrix in (39)   can be explained by the fact that the range of plausible TDOAs
+                                                                    in the GCC-PHAT function (18) is much smaller for compactis deﬁned for each possible combination of candidate TDOA
+                                                       microphone arrays than for spatially distributed microphones,estimates as
+                                                                    resulting in a low probability of picking up additional peaks due
+   ˆG MM(q)−    = GMM −ν2ˆ˜τ(q)ˆ˜τ T(q)   ,  q = 1, . . . , Q .      to early reﬂections or noise.
+                                                         (47)     For an exemplary scenario, Fig. 4 shows the sorted cost
+Similarly to (22), we deﬁne a cost function based on all but the   function values I(q) for M = 6 closely spaced microphones
+P −1 largest eigenvalues ˆσi(q) of ˆG MM(q),−         i.e.,             and S = 2 sources. For this scenario, it can be observed that
+                                                                  there is a clear difference between the two smallest values and
+            M
+                                                                 the other values.
+            I(q) =      |ˆσi(q)|,  q = 1, . . . , Q         (48)
+                   i=P
+                                                                          V. BASELINE LOCALIZATION METHODSFor a single source (S = 1), the optimal combination of candi-
+date TDOA estimates is determined as the one minimizing the     In this section, we brieﬂy review SRP-based methods to local-
+cost function, i.e.,                                                 ize multiple sources, both for position estimation (Section V-A)
+                                                       and DOA estimation (Section V-B). These methods will be used
+                       ˆq1 =  argminq=1,...,Q I(q) .            (49)                                                               as baselines in the experimental evaluation in the next section.
+It should be noted that due to possible TDOA estimation errors   Contrary to the EDM-based methods proposed in Sections III
+the rank of ˆG MM(ˆq1)−         is not guaranteed to be equal to P −1.  and IV, SRP-based methods require joint optimization of a
+For multiple sources, we consider the S smallest cost function   functional over multiple continuous variables.
+
+
+        Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 9 ===
+BRÜMANN AND DOCLO: MULTI-SOURCE POSITION AND DIRECTION-OF-ARRIVAL ESTIMATION BASED ON EUCLIDEAN DISTANCE MATRICES            3949
+
+
+                                                             B. SRP-Based Multi-Source DOA Estimation
+ Algorithm 2 EDM-Based Multi-Source DOA Estimation.
+    Parameters: Number of microphones M, number of           Similarly to the SRP-PHAT function for position estimation,
+     candidate TDOA estimates C, dimensionality P,           the SRP-PHAT functional for DOA estimation is deﬁned as
+    number of sources S, combinations of candidate TDOA                               ω0
+                                                        Ψ(v) =          ψij(ω)e−jωτij(v) dω ,      (53)     estimates Q = CM−1.
+                                                                                     i>j  −ω0    Input: EDM of microphones DMM, vector of candidate
+   TDOA estimate selection indices c(q), set of candidate                                                      where τij(v) = (mi −mj)Tv/ν denotes the TDOA corre-
+   TDOA estimates ˆTm (m = 2, . . . , M), combination                                                          sponding to the DOA vector v, which depends on the azimuth
+     vectors c(q).                                                       and elevation angles. The estimated azimuth and elevation an-
+    Output: Estimated source DOA vectors ˆv1, . .                                                                          . , ˆvS                                                                  gles ˆθ1, . . . , ˆθS and ˆφ1, . . . , ˆφS are determined from the DOA                                                   1
+  GMM ←−12 (IM −1M 1M1TM)DMM(IM − M 1M1TM)     vectors that correspond to the S largest local maxima of the
+    for q ←1, . . . , Q do                                              SRP-PHAT functional. This requires a joint optimization of two
+      for                             . . . , M do     m ←1,                                                              < θ ≤π                                                           continuousvariablesforallfeasibleazimuthangles−π
+        τˆ m(q)            ←ˆτm(cm(q))                − M1  Mj=1 ˆτj(cj(q))           and                                                                      elevation angles −π/2 < φ ≤π/2. Practical considerations
+     end for                                                              regarding the discretization of the azimuth and elevation an-
+      ˆG MM(q)−   ←GMM −ν2ˆ˜τ(q)ˆ˜τ T(q)                      gles and the determination of local maxima are discussed in
+    W(q)ˆ    ˆΣ(q) WT(q)ˆ   ←ˆG MM(q)−                             Section VI-C.
+      I(q) ←  Mi=P |ˆσi(q)|
+   end for                                                               VI. EXPERIMENTAL EVALUATION
+    Determine the S combinations ˆq1, . . . , ˆqS which result in
+     the smallest cost function values I(ˆq1), . . . , I(ˆqS)             In this section, we compare the performance of the proposed
+    for s ←1, . . . , S do                              EDM-based methods with the baseline SRP-based methods for
+                                                               multi-source position and DOA estimation in noisy and rever-     ˆM−             ar ←  diag(   ˆσ1(ˆqs), . . . ,   ˆσP −1(ˆqs)) ,   . . .                                                               berant environments. We conducted two sets of experiments,
+                          . . .  0(P −1)×(M−P +1) WT(ˆqs)ˆ                  where in experiment 1 we evaluated 3D position estimation
+                                                             using spatially distributed microphones and in experiment 2
+                       T(ˆqs)
+                                      ]                           we evaluated 3D DOA estimation using compact microphone      ˆMar ←[−νˆ˜τˆM−
+                                ar                                             arrays. Section VI-A describes the acoustic scenarios for both
+      ˆUs ˆQs ˆVTs ← ˆMarMT                                  experiments. The implementation details of the EDM-based and
+       ˆR′ ←ˆVs ˆUTs                                     SRP-based methods are presented in Sections VI-B and VI-C,
+        ˆvs ←ˆR′e1                                                 respectively, and their computational complexity is compared in
+   end for                                                  Section VI-D. The results of experiment 1 (position estimation)
+                                                                 are discussed in Section VI-E, while the results of experiment 2
+                                           (DOA estimation) are discussed in Section VI-F.
+
+A. SRP-Based Multi-Source Position Estimation                                                             A. Acoustic Scenarios
+  Similarly to the GCC-PHAT function in (16), the SRP-PHAT                                                            For both experiments, we considered a rectangular room with
+functional for 3-dimensional position estimation [22] is deﬁned                                                          dimensions 6 m × 6 m × 2.4m, M = 6 microphones and
+as                                          S = 2 static speech sources. For each experiment, 100 different
+                                                                acoustic scenarios were simulated, where the room impulse
+                          ω0
+                                                             responses (RIRs) between the sources and the microphones were        Ψ(p) =          ψij(ω)e−jωτij(p) dω ,      (52)
+                                                             generated using the image source method [39], [40], assuming                    i>j  −ω0
+                                                             equal reﬂection coefﬁcients for all walls.
+                                                                  In experiment 1, the spatially distributed microphones were
+where τij(p) denotes the TDOA (4) corresponding to position   positioned randomly for each scenario within a cube with sides
+p = [px, py, pz]T, and the summation considers all microphone   of length 2 m, with a minimum distance of 10 cm between
+pairs, where i > j. The estimated source positions ˆp1, . . . , ˆpS   microphones. In experiment 2, the microphones were positioned
+are determined as the vectors that correspond to the S largest   randomly for each scenario within a smaller cube with sides
+local maxima of the SRP-PHAT functional. This requires a   of length 10 cm, with a minimum distance of 4 cm between
+joint optimization of three continuous variables for all feasi-   microphones. In both experiments, the distance between the
+ble positions within the room boundaries (P xmin ≤px ≤P xmax ,   second source and the centroid of the microphone array was
+P
+  y  min ≤py ≤P ymax , and P zmin ≤pz ≤P zmax ). Practical consid-  ﬁxed at dc2 = 2 m. To evaluate the inﬂuence of source distance
+erations regarding the discretization of the continuous position  on localization accuracy, different distances dc1 between the ﬁrst
+variables and the determination of local maxima are discussed   source and the centroid of the microphone array were consid-
+in Section VI-C.                                                  ered. In experiment 1, we considered dc1 ∈{0, 1, 2, 3, 4} m,
+
+
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 10 ===
+3950                                                          IEEE TRANSACTIONS ON AUDIO, SPEECH AND LANGUAGE PROCESSING, VOL. 34, 2026
+
+
+
+
+
+Fig. 5.  Exemplary source and microphone constellations for experiment 1 (position estimation) and experiment 2 (DOA estimation), for S = 2 sources and
+distance between the ﬁrst source and centroid of the microphone array dc1 = 4 m.
+
+where dc1 = 0 m and dc1 = 1 m correspond to the ﬁrst source   frame l ∈{1, . . . , L}, where L denotes the number of frames
+being inside of the cube, while dc1 = 3 m and dc1 = 4 m corre-    (i.e., L = 313 frames for a 5-second signal). Similarly to (16),
+spond to the ﬁrst source being outside of the cube. In experiment   the discrete-time GCC-PHAT function between the m-th and
+2, we considered dc1 ∈{0.5, 1, 2, 3, 4} m, corresponding to   the reference microphone is computed as
+both sources being outside of the cube (in the far ﬁeld of the
+                                                           K−1
+microphone array). For all scenarios, both sources were spaced     ξm[n, l] =    ψm1[k, l]e−j2πnk/K, m = 2, . . . , M ,
+at least 1 m apart and maintained a minimal angular separation of
+                                                                   k=0
+20◦relative to the array centroid. Exemplary simulated scenarios                                                           (55)
+for both experiments are plotted in Fig. 5.                    where n denotes the discrete-time index, with τ = n/fs. To
+  For each scenario, a 5-second speech signal, randomly se-   achieve a more precise TDOA estimate, the discrete-time GCC-
+lected from the M-AILABS dataset [41], with equal probability  PHAT function ξm[n, l] is interpolated by a factor R = 20 using
+of being a male or female speaker, was used for each source and   resampling. Only plausible time-lags nm between the m-th and
+convolvedwiththesimulatedRIRs.Thesamplingfrequencywas   the reference microphone are considered, determined by the
+equal to fs = 16 kHz. Spherically isotropic multi-talker babble   inter-microphone distance Dm1, i.e., |nm| < RfsDm1/ν. To
+noise generated using [42] was added to the reverberant speech   emphasize strong peaks, the function is weighted as ˜ξm[nm, l] =
+mixtures at the microphones, with a reverberant signal-to-noise  exp (γξm[nm, l]), with γ = 30 for position estimation (experi-
+ratio (SNR) of 20 dB (averaged across the microphones). For  ment 1) and γ = 50 for DOA estimation (experiment 2). Since
+each scenario, the reﬂection coefﬁcients were set such that the   the sources are assumed to be static, the GCC-PHAT function is
+direct-to-reverberant ratio (DRR) of the second source (at a ﬁxed   averaged over all frames, i.e.,
+distance dc2 = 2 m) was equal to 5 dB (averaged across the
+                                                                        L
+microphones). The resulting reverberation times were equal to                          1
+                                                                          ˜ξm[nm] =       ˜ξm[nm, l] .            (56)T60 ≈186 ± 16 ms for experiment 1 and T60 ≈193 ± 20 ms                   L
+for experiment 2. Obviously, the power ratio of the reverberant                                 l=1
+speech signals between the ﬁrst and the second source (averaged  The C discrete candidate TDOA estimates ˆnm(1), . . . , ˆnm(C)
+across microphones and scenarios) decreased for increasing   between the m-th microphone and the reference microphone are
+source distance dc1, being approximately equal to 0dB when   determined from (56) by using a peak-ﬁnding algorithm, which
+dc1 = dc2 = 2 m.                                              picks the C highest local maxima. Each estimated TDOA is then
+                                                           ﬁne-tuned using quadratic interpolation [43]. The continuous
+B. Implementation of EDM-Based Source Localization          candidate TDOA estimates are then computed as ˆτm(cm(q)) =
+                                                          ˆnm(cm(q))/(Rfs).
+  As explained in Sections III and IV, the proposed EDM-based
+                                                            For EDM-based position estimation, the optimal distance
+localization methods require candidate TDOA estimates, which
+                                                                  variable in (24) was ﬁrst determined using a one-dimensional
+areobtainedfromtheGCC-PHATfunction.Inpractice,thetime-
+                                                                  grid search, with a resolution of 1 cm and a maximum distance
+domain microphone signals are ﬁrst transformed to the short-                                                               of 6 m (i.e., Gα = 601 grid points) and then ﬁne-tuned with a
+time Fourier transform (STFT) domain, with a frame length of                                                                quadratic interpolation. C ∈{2, 3} candidate TDOA estimates
+K = 512 samples (i.e., 32 ms), 50% overlap between frames,                                                      were considered per microphone pair, resulting in Q = CM−1 ∈
+and using a square-root-Hann analysis window. Similarly to                                                           {32, 243} total combinations, respectively. After computing the
+(17), the instantaneous normalized phase spectrum between the                                                 EDM-based cost functions J(α, q) in (22) and determining the
+i-th and j-th microphones is computed as                                                            optimal distance variable ˆα(q) using a one-dimensional grid
+                              Yi[k, l]Y j∗ [k, l]                    search for all Q possible combinations of candidate TDOA
+                ψij[k, l] =             ∗         ,           (54)   estimates, the respective cost function minima were sorted. The                              |Yi[k, l]Y j [k, l]|
+                                                          combination ˆq1 yielding the smallest cost function minimum
+where Yi[k, l] denotes the STFT coefﬁcient of the i-th micro-   J(ˆα(ˆq1), ˆq1) was used to estimate the source position ˆp1. To es-
+phone signal at frequency bin k ∈{0, . . . , K −1} and time   timate the second source position ˆp2, only combinations where
+
+
+        Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 11 ===
+BRÜMANN AND DOCLO: MULTI-SOURCE POSITION AND DIRECTION-OF-ARRIVAL ESTIMATION BASED ON EUCLIDEAN DISTANCE MATRICES            3951
+
+
+at least four candidate TDOA estimates differ were considered,   (especially for three-dimensional position estimation). There-
+as the likelihood that more than three TDOAs are shared between   fore, we ﬁrst compute β ≥S candidate positions/DOAs on a
+sources was assumed to be negligible. This rule prevents the   coarse grid (similarly to [46]) that spans the entire range of
+EDM-based method from detecting sources that are spatially   feasible positions/DOAs. We then reﬁne these coarse estimates
+close. For EDM-based DOA estimation, C ∈{2, 3} candidate  by re-evaluating the functional on a ﬁner grid in the vicinity of
+TDOA estimates were considered per microphone pair, resulting   the coarse estimates. Finally, the S positions ˆpSRP1   , . . . , ˆpSRPS
+in Q ∈{32, 243} total combinations, respectively. After com-   or DOAs ˆvSRP1   , . . . , ˆvSRPS   are estimated using the S highest
+puting the EDM-based cost function values I(q) in (48) for  SRP-PHAT values on the ﬁner grids.
+all Q possible combinations of candidate TDOA estimates, the     For position estimation, the functional in (59) was ﬁrst eval-
+respective cost function values were sorted. The combination   uated on a coarse grid with a 10 cm resolution along the x-,
+ˆq1 yielding the smallest value I(ˆq1) was used to estimate the   y-, and z-axes (i.e., 59 × 59 × 23 = 80, 063 grid points). The
+source DOA ˆv1. To estimate the second source DOA ˆv2, only  β = 3 coarse grid points with the highest SRP-PHAT values
+combinations where at least four candidate TDOA estimates  were then re-evaluated on a ﬁner grid with a 1cm resolu-
+differ were considered.                                            tion around those points, within a 20 cm × 20 cm × 20 cm
+   It is known that the choice of reference microphone affects   cube (i.e., 3 × 213 = 27, 783 grid points, resulting in a total of
+the TDOA estimation accuracy for single source scenarios [44].  Gp = 107, 843 grid points). After estimating the ﬁrst source
+Since preliminary experiments using multiple sources also   position ˆpSRP1   corresponding to the largest value of the ﬁne
+demonstrated that the localization accuracy of the EDM-based   grids, for the second source only coarse grid points at least
+methods may be negatively inﬂuenced by a poor choice of  50 cm from the coarse estimate corresponding to the ﬁrst source
+reference microphone, the reference microphone was chosen   position were considered. This rule prevents the SRP-based
+depending on the array geometry. For spatially distributed mi-  method from detecting sources that are spatially close. For DOA
+crophone arrays (experiment 1), the reference microphone was   estimation, the functional in (59) was ﬁrst evaluated on a coarse
+chosen as the microphone closest to the array centroid, reducing   grid with a 5◦resolution in azimuth (θ) and elevation (ψ) (i.e.,
+the likelihood that the reference microphone is located at a   (72 × 34) + 2 = 2, 450 grid points - noting that for elevation
+large distance from one or both sources which would result in a   angles 0 and 180◦the DOA is independent of the azimuth angle).
+poor SNR. For compact microphone arrays (experiment 2), the  The β = 2 coarse grid points with the highest SRP-PHAT values
+reference microphone for estimating the centered TDOAs ˆτm   were then re-evaluated on a ﬁner grid with a 0.5◦resolution,
+in (46) was chosen as the microphone which was on average   within 10◦in azimuth and elevation angles (i.e., 2 × 212 = 882
+farthest from the other microphones, aiming at mitigating the   grid points, resulting in a total of Gα = 3, 332 grid points).
+inﬂuence of reverberation and noise on the reliability of the   After estimating the azimuth ˆθSRP1   and elevation ˆψSRP1   of the
+GCC-PHAT function [45].                                         ﬁrst source, for the second source only coarse grid points at
+                                                                        least 20◦away from the coarse estimate corresponding to the
+C. Implementation of SRP-Based Source Localization            ﬁrst source DOA were considered (sometimes resulting in an
+                                                                  additional coarse grid point being considered).
+  For the SRP-based localization methods (Section V), the
+exhaustive search over continuous variables is implemented as
+a discretized grid search. Using the instantaneous normalized  D. Computational Complexity Analysis
+phase spectrum in (54), the SRP-PHAT functionals for position
+                                                              This section analyzes the computational complexity of the
+and DOA estimation in Sections V-A and V-B are computed as
+                                                 EDM-based and SRP-based methods in terms of Big-O nota-
+                 K−1                                       tion [47] and run time. For the EDM-based method, the compu-
+        Ψ[l](p) =         ψij[k, l]e−j2πfsτij(p)k/K,     (57)   tational complexity associated with TDOA estimation is domi-
+                   i>j k=0                                   nated by the computation of the resampled GCC-PHAT function
+                 K−1                                        (55), i.e., O(KRM log(KR)) per frame. The complexity of the
+        Ψ[l](v) =         ψij[k, l]e−j2πfsτij(v)k/K.     (58)   subsequent EDM-based localization steps, using the candidate
+                   i>j k=0                      TDOA estimates based on the time-averaged GCC-PHAT func-
+                                                                    tion in (56), is dominated by the eigenvalue decomposition with
+Similarly as for the GCC-PHAT function in (56), the SRP-PHAT
+                                                           complexity O(M 3), i.e., O(CM−1M 3Gα) for position estima-
+functionals are averaged over all frames, i.e.,                                                                    tion and O(CM−1M 3) for DOA estimation. The complexity of
+                       L                                the SRP-based methods is given by O(GpM 2 LK) for position                       1
+              Ψ(p) =                                Ψ[l](p) ,                     estimation and O(GvM 2 LK) for DOA estimation.                 L
+                             l=1                                             It can be observed that the complexity of the EDM-based
+                                                                    localization methods grows combinatorially with C and M,
+                       L                           which can become prohibitively large for a large number of mi-                       1
+              Ψ(v) =       Ψ[l](v) .              (59)                 L                                crophones and/or when using many candidate TDOA estimates.
+                             l=1                               In contrast, the complexity of the SRP-based methods only
+Exhaustively searching for the local maxima of these functionals   grows quadratically with M. In terms of discretized continuous
+can be computationally demanding if the grid resolution is high   variables, the complexity of the SRP-based methods depends
+
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 12 ===
+3952                                                          IEEE TRANSACTIONS ON AUDIO, SPEECH AND LANGUAGE PROCESSING, VOL. 34, 2026
+
+
+
+
+
+Fig. 6.  Box plots of position estimation errors for both sources. The position estimation errors are shown for the EDM-based method (for C ∈{2, 3}) and
+SRP-based method, for different distances dc1 between source 1 and the array centroid (dc2 = 2 m, 2 m cube). The red numbers at the top denote the number of
+results outside of the plotted range.
+
+
+
+                      TABLE I                                               TABLE II
+ AVERAGE RUN TIMES OF THE EDM-BASED AND SRP-BASED POSITION AND        MEDIAN POSITION ESTIMATION ERRORS FOR THE EDM-BASED AND
+              DOA ESTIMATION METHODS                      SRP-BASED METHODS FOR DIFFERENT DISTANCES dC1 BETWEEN SOURCE 1
+                                                                           AND THE ARRAY CENTROID
+
+
+
+
+
+on the resolution Gp of the three-dimensional variable p for
+position estimation and the resolution of Gv of the variable v for
+DOAestimation,whichdependsontheazimuthandelevation. In
+contrast, the complexity of the EDM-based position estimation                                                        microphones described in Section VI-A. To evaluate the perfor-
+method only depends on the resolution of the single variable α                                                       mance, we consider the position estimation error for each source,
+and the DOA estimation does not even require the discretization                                                      deﬁned as εposs = ||ps −ˆps||2, s = 1, 2, where the estimated
+of a continuous variable.                                                             source positions ˆp1 or ˆp2 are assigned to true source positions
+  For the considered experimental setup with M = 6 micro-                                                   p1 or p2 using greedy assignment [48] (i.e., assigning each
+phones and using the discretized grid values Gα, Gp, and                                                              estimated source to the closest true source sequentially, in order
+Gv mentioned in the previous sections, we measured the run                                                               of increasing εposs  ). Fig. 6 presents box plots of the position
+times of the EDM-based methods (for C = 2 and C = 3) and                                                               estimation errors εpos1  and εpos2  over 100 simulated scenarios,
+the SRP-based methods using 5-second signals on a Ryzen                                                              considering different distances dc1 between source 1 and the ar-
+5900X processor. The average run times over all 100 simulated                                                                raycentroid. TableII summarizes themedianpositionestimation
+scenarios and 5 different distances dc1 between source 1 and                                                                    errors for both sources.
+the array centroid are shown in Table I. For the values of the                                                 As can be observed from Table II, for all source distances
+variables deﬁned in the previous subsections, the EDM-based   dc1 the proposed EDM-based method yields considerably lower
+position estimation method is around 350 times faster than the                                                      median position estimation errors for both sources than the SRP-
+SRP-based position estimation when using C = 2, and around                                                          based method. In addition, it can be observed from Fig. 6 that
+280 times faster when using C = 3, and the EDM-based DOA                                                                 the spread of the box plots is much smaller for the EDM-based
+estimation method is around 25 times faster than the SRP-based                                                     method (for both C = 2 and C = 3) than for the SRP-based
+method (for both C = 2 and C = 3). It should be noted that in                                                     method for all source conﬁgurations. Furthermore, it is interest-
+two-dimensional scenarios the number of grid points required                                                              ing to note that both methods behave quite differently for dif-
+for SRP-based position and DOA estimation is signiﬁcantly                                                                    ferent source conﬁgurations. As can be observed from Table II,
+smaller, which would correspondingly reduce the complexity                                                                 the median position estimation error for the EDM-based method
+and run time of the SRP-based approaches.                                                         mainly depends on source distance, i.e., increases for source 1
+                                                           with increasing dc1, whereas it remains relatively constant for
+                                                             source 2 (at dc2 = 2 m). On the other hand, the median position
+E. Experiment 1: Position Estimation
+                                                               estimation error for the SRP-based method depends both on the
+  This section compares the position estimation accuracy of   absolute distances between the sources and the array centroid
+the proposed EDM-based method and the baseline SRP-based   as well as on the relative distance between the sources. For
+method for the acoustic scenarios with spatially distributed   instance, it can be clearly observed that the median position
+
+
+        Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 13 ===
+BRÜMANN AND DOCLO: MULTI-SOURCE POSITION AND DIRECTION-OF-ARRIVAL ESTIMATION BASED ON EUCLIDEAN DISTANCE MATRICES            3953
+
+
+
+
+
+Fig. 7.  Box plots of DOA estimation errors for both sources. The DOA estimation errors are shown for the EDM-based method (for C ∈{2, 3}) and SRP-based
+method, for different distances dc1 between source 1 and the array centroid (dc2 = 2 m, 10 cm cube). The red numbers at the top denote the number of results
+outside of the plotted range.
+
+
+estimation error is larger for the source that is farther away                        TABLE III
+from the array centroid (e.g., for dc1 = 3 m, εpos1  (s) = 182 cm   MEDIANMETHODSDOAFORESTIMATIONDIFFERENTERRORSDISTANCESFOR dC1THEBETWEENEDM-BASEDSOURCEAND 1SRP-BASEDAND THE
+and εpos2  (s) = 3.7 cm). This can be explained by the peaks of                        ARRAY CENTROID
+the farther source in the SRP functional being overpowered by
+the peaks of the closer source. In addition, when both sources
+are close to the microphones, the median position estimation
+error for both sources is large (e.g., for dc1 = 0 m, εpos1  (s) = 60
+cm and εpos2  (s) = 196.9 cm). This corresponds to [21], [24],
+where it was shown that the accuracy of SRP-based position
+estimation degrades for sources located close to the microphone
+array because the peaks in the SRP-PHAT functional become
+narrow. This would necessitate a high 3D grid resolution to
+detect these peaks, which is computationally impractical in  we consider the DOA estimation error for each source, deﬁned
+most applications. In contrast, the EDM-based method only   as εDOAs  = cos−1(ˆvTsvs/(||ˆvs||2 · ||vs||2)), s = 1, 2, where the
+requires a one-dimensional grid search on the distance variable   estimated DOA vectors ˆv1 or ˆv2 are assigned to true DOA
+α, which is computationally more efﬁcient to optimize at a high   vectors v1 or v2 using greedy assignment. Fig. 7 presents box
+resolution. Comparing the EDM-based methods for different   plots of the DOA estimation errors εDOA1   and εDOA2    over 100
+numbers of candidate TDOA estimates,  it can be observed   simulated scenarios, considering different distances dc1 between
+that considering C = 3 candidate TDOA estimates can slightly   source 1 and the array centroid. Table III summarizes the median
+improve the position estimation accuracy compared to C = 2,  DOA estimation errors for both sources.
+especially when one of the sources is far from the microphones    As can be observed from Table III for all source distances dc1,
+(e.g., for dc1 = 4 m, εpos1 = 94.3 cm for C = 2 vs εpos1 = 8.1   the proposed EDM-based method (for both C = 2 and C = 3)
+cm for C = 3). Considering that choosing C = 3 compared   yields median DOA estimation errors below 4◦for both sources,
+to C = 2 only results in a minor increase in run time, from  which are consistently smaller than the median DOA estimation
+1.6s to 2s as shown in Table I, while slightly improving the   errors obtained by the SRP-PHAT method. In addition, it can be
+position estimation performance, based on the results in Fig. 6   observed from Fig. 7 that the spread of the box plots is smaller
+and Table II, we recommend using C = S + 1 for multi-source   for the EDM-based method than for the SRP-based method
+position estimation as a practical choice that balances position   for all source conﬁgurations. It is also interesting to note that
+estimation performance and computational complexity.           for both methods the median DOA estimation error is larger
+  In conclusion, the consistently small median errors and small   for the source that is farther away from the array centroid. This
+error distributions demonstrate the versatility of the proposed   can be explained by the fact that the amplitudes of the peaks in
+EDM-based multi-source position estimation method across a   the GCC-PHAT and SRP-PHAT functionals corresponding to
+wide range of conﬁgurations.                                 both sources depend on their signal power ratio. This effect is
+                                                much more pronounced for the SRP-based method than for the
+                                                 EDM-based method. For instance, when source 1 is close to the
+F. Experiment 2: DOA Estimation                                                       microphone array (dc1 = 0.5 m), the median DOA estimation
+  This section compares the DOA estimation accuracy of   error for source 1 is smaller than the median DOA estimation
+the proposed EDM-based method and the baseline SRP-based   error for source 2 (1.3◦and 3.3◦for the EDM-based method
+method for the acoustic scenarios with compact microphone  (C = 2); 1.4◦and 50.2◦for the SRP-based method). In contrast,
+arrays described in Section VI-A. To evaluate the performance,  when source 1 is far from the microphone array (dc1 = 4 m),
+
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 14 ===
+3954                                                          IEEE TRANSACTIONS ON AUDIO, SPEECH AND LANGUAGE PROCESSING, VOL. 34, 2026
+
+
+the median DOA estimation error for source 1 is larger than the   combinatorially with the number of microphones, due to the
+median DOA estimation error for source 2 (3.2◦and 0.9◦for the   reduction of the number of continuous variables to be jointly
+EDM-based method (C = 2); 18.7◦and 2.2◦for the SRP-based   optimized, the run times of the EDM-based methods are lower
+method). When both sources are equidistant (dc1 = dc2 = 2 m),   than the SRP-based methods for the considered experimental
+both methods achieve similar median DOA estimation errors for   setups with six microphones. In future work, it would be inter-
+both sources (1.4◦and 1.2◦for the EDM-based method (C = 2);   esting to explore the inﬂuence of stronger reverberation on the
+3.0◦and 3.7◦for the SRP-based method). For dc1 = 0.5 m, it can   practical choice of the number of candidate TDOA estimates
+be seen that the median DOA estimation errors are also slightly  and to combine the estimated 3D positions or DOAs from the
+larger than for dc1 = 1 m, reﬂecting that the far-ﬁeld model  EDM-based methods with source tracking methods [49], [50],
+assumption becomes less valid for small distances between the   [51] for moving source scenarios.
+source and the microphones. Comparing the EDM-based meth-
+ods for different numbers of candidate TDOA estimates, it can
+                                                                        REFERENCES
+be observed that, unlike for spatially distributed microphones,
+considering C = 3 candidate TDOA estimates does not improve     [1] N. Madhu, R. Martin, U. Heute, and C. Antweiler, “Acoustic source
+DOA estimation accuracy compared to C = 2. This is consistent          localizationTransmission,withR. Martin,microphoneU. Heute,arrays,”andinC.AdvancesAntweiler,in Eds.DigitalChichester,Speech
+withthefactthatthenumberofspuriouspeaksintheGCC-PHAT         U.K.: Wiley, 2008, pp. 135–170.
+functions is typically low for compact microphone arrays when     [2]  P. Pertilä, A. Brutti, P. Svaizer, and M. Omologo, “Multichannel source
+only plausible time lags are considered. Since C = S + 1 brings          activityand Speechdetection,Enhancement,localization,E. Vincent,and tracking,”T. Virtanen,in AudioandsourceS. Gannot,SeparationEds.
+no notable performance beneﬁt compared to choosing C = S,        Hoboken, NJ, USA: Wiley, 2018, pp. 47–64.
+based on the results in Fig. 7 and Table III, we recommend     [3] A. Aroudi and S. Doclo, “Cognitive-driven binaural beamforming us-
+choosing C = S for multi-source DOA estimation.                       ingSpeech,EEG-basedLang. Process.,auditoryvol.attention28, pp.decoding,”862–875, 2020.IEEE/ACM Trans. Audio,
+  Similarly as for the position estimation results, the consis-     [4] K. Tesch and T. Gerkmann, “Multi-channel speech separation using spa-
+tently small median DOA estimation errors and small error           tially selective deep non-linear ﬁlters,” IEEE/ACM Trans. Audio, Speech,
+                                                                             Lang. Process., vol. 32, pp. 542–553, 2024.
+distributions demonstrate the versatility of the proposed EDM-     [5] M. Omologo and P. Svaizer, “Use of the crosspower-spectrum phase in
+based multi-source DOA estimation method across a wide range         acoustic event location,” IEEE Trans. Speech Audio Process., vol. 5, no. 3,
+of source conﬁgurations.                                                       pp. 288–292, May 1997.
+                                                                                      [6]  J. H. DiBiase, H. F. Silverman, and M. S. Brandstein, “Robust local-
+                                                                                           ization in reverberant rooms,” in Microphone Arrays: Signal Processing
+                                                                               Techniques and Applications, M. Brandstein and D. Ward, Eds. Berlin,
+                     VII. CONCLUSIONS                             Germany: Springer, 2001, pp. 157–180.
+                                                                                      [7] A. Brutti, M. Omologo, and P. Svaizer, “Multiple source localization based
+  In this paper, we have proposed novel TDOA-based multi-        on acoustic map de-emphasis,” EURASIP J. Audio, Speech Music Process.,
+source position and DOA estimation methods that exploit prop-          vol. 2010, 2010, Art. no. 147495.
+erties of Euclidean distance matrices. For 3D position estima-     [8] R. Schmidt, “Multiple emitter location and signal parameter estimation,”
+                                                                 IEEE Trans. Antennas Propag., vol. AP-34, no. 3, pp. 276–280, Mar. 1986.
+tion, the proposed method requires optimizing only a single     [9] Y. A. Huang, J. Benesty, and J. Chen, “Time delay estimation and source
+continuous variable instead of jointly optimizing three position          localization,” in Springer Handbook of Speech Processing, J. Benesty, Y.
+variables as in SRP-based methods. This variable, representing        A. Huang, and M. Christensen, Eds. Berlin, Germany: Springer, 2008,
+                                                                                     pp. 1043–1063.
+the distance between each source and a reference microphone, is    [10] N. Yalta, K. Nakadai, and T. Ogata, “Sound source localization using deep
+optimized for each combination of candidate TDOA estimates         learning models,” J. Robot. Mechatron., vol. 29, no. 1, pp. 37–48, 2017.
+with a cost function based on the eigenvalues of the Gram    [11]  S. Adavanne, A. Politis, and T. Virtanen, “Differentiable tracking-based
+                                                                                           training of deep learning sound source localizers,” in Proc. IEEE Work-
+matrix associated with the EDM. The estimated relative source        shop Appl. Signal Process. Audio Acoust., New Paltz, NY, USA, 2021,
+positions, obtained from the Gram matrices corresponding to the         pp. 211–215.
+optimal cost function values, are then mapped to absolute source    [12] M. J. Bianco, S. Gannot, E. Fernandez-Grande, and P. Gerstoft, “Semi-
+                                                                                   supervised source localization in reverberant environments with deep
+positions by solving an orthogonal Procrustes problem for each         generative modeling,” IEEE Access, vol. 9, pp. 84956–84970, 2021.
+source. For 3D DOA estimation, we deﬁne a relative coordinate    [13]  P.-A. Grumiaux, S. Kiti´c, L. Girin, and A. Guérin, “A survey of sound
+system for each source, with one axis aligned to the DOA vector.         source localization with deep learning methods,” J. Acoust. Soc. Amer.,
+                                                                                              vol. 152, no. 1, pp. 107–151, 2022.
+The optimal set of candidate TDOA estimates is determined    [14] B. Yang, H. Liu, and X. Li, “SRP-DNN: Learning direct-path phase
+by minimizing a cost function based on the eigenvalues of a         difference for multiple moving sound source localization,” in Proc. IEEE
+rank-reduced Gram matrix, requiring no continuous variable           Int. Conf. Acoust., Speech Signal Process., Singapore, 2022, pp. 721–725.
+                                                                               [15] E. Grinstein, C. M. Hicks, T. van Waterschoot, M. Brookes, and P. A. Nay-
+optimization. The source DOA vectors are then estimated by           lor, “The neural-SRP method for universal robust multi-source tracking,”
+mapping the relative microphone positions, obtained from the       IEEE Open J. Signal Process., vol. 5, pp. 19–28, 2024.
+rank-reduced Gram matrices, to the absolute microphone posi-    [16] R. Varzandeh, S. Doclo, and V. Hohmann, “Improving multi-talker bin-
+                                                                                        aural DOA estimation by combining periodicity and spatial features in
+tions, for each source. For two sources in a noisy and reverberant         convolutional neural networks,” EURASIP J. Audio, Speech Music Pro-
+environment, experimental results across a wide range of source           cess., vol. 2025, no. 1, 2025, Art. no. 5.
+and microphone conﬁgurations, including compact as well as    [17] M.Cobos,A.Marti,andJ.J.Lopez,“AmodiﬁedSRP-PHATfunctionalfor
+                                                                                     robust real-time sound source localization with scalable spatial sampling,”
+distributed microphone arrays, show that the proposed EDM-       IEEE Signal Process. Lett., vol. 18, no. 1, pp. 71–74, Jan. 2011.
+based methods consistently outperform the SRP-based methods    [18] L. O. Nunes et al., “A steered-response power algorithm employing hier-
+in terms of position and DOA estimation accuracy. Although the          archical search for acoustic source localization using microphone arrays,”
+                                                                 IEEE Trans. Signal Process., vol. 62, no. 19, pp. 5171–5183, Oct. 2014.
+computational complexities of the EDM-based methods grow
+
+
+        Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 15 ===
+BRÜMANN AND DOCLO: MULTI-SOURCE POSITION AND DIRECTION-OF-ARRIVAL ESTIMATION BASED ON EUCLIDEAN DISTANCE MATRICES            3955
+
+
+
+[19] D. Salvati, C. Drioli, and G. L. Foresti, “Exploiting a geometrically    [42] E. A. P. Habets,  I. Cohen, and S. Gannot, “Generating nonstationary
+     sampled grid in the steered response power algorithm for localization         multisensor signals under a spatial coherence constraint,” J. Acoust. Soc.
+     improvement,” J. Acoust. Soc. Amer., vol. 141, no. 1, pp. 586–601, 2017.         Amer., vol. 124, no. 5, pp. 2911–2917, 2008.
+[20]  T. Long, J. Chen, G. Huang, J. Benesty, and I. Cohen, “Acoustic source    [43] A. V. Oppenheim and R. W. Schafer, Discrete-Time Signal Process., 3rd
+      localization based on geometric projection in reverberant and noisy envi-          ed. Englewood Cliffs, NJ, USA: Prentice Hall, 2009.
+     ronments,” IEEE Sel. Topics Signal Process., vol. 13, no. 1, pp. 143–155,    [44] K. Brümann, K. Yamaoka, N. Ono, and S. Doclo, “Incremental averaging
+     Mar. 2019.                                                         method to improve graph-based time-difference-of-arrival estimation,” in
+[21] G. García-Barrios, J. M. Gutiérrez-Arriola, N. Sáenz-Lechón, V. J. Osma-         Proc. IEEE Workshop Appl. Signal Process. Audio Acoust., Tahoe City,
+     Ruiz, and R. Fraile, “Analytical model for the relation between signal       CA, USA, 2025, pp. 1–5.
+     bandwidth and spatial resolution in steered-response power phase trans-    [45] K. Brümann and S. Doclo, “Steered response power-based direction-of-
+     form (SRP-PHAT) maps,” IEEE Access, vol. 9, pp. 121549–121560, 2021.          arrival estimation exploiting an auxiliary microphone,” in Proc. Eur. Signal
+[22] E. Grinstein et al., “Steered response power for sound source localization:         Process. Conf., Lyon, France, 2024, pp. 917–921.
+   A tutorial review,” EURASIP J. Audio, Speech Music Process., vol. 2024,    [46] H. Do and H. F. Silverman, “A fast microphone array SRP-PHAT source
+     no. 1, 2024, Art. no. 59.                                                          location implementation using coarse-to-ﬁne region contraction (CFRC),”
+[23]  T. Dietzen, E. De Sena, and T. van Waterschoot, “Scalable-complexity          in Proc. IEEE Workshop Appl. Signal Process. Audio Acoust., New Paltz,
+      steered response power based on low-rank and sparse interpolation,”       NY, USA, 2007, pp. 295–298.
+    IEEE/ACM Trans. Audio, Speech, Lang. Process., vol. 32, pp. 5024–5039,    [47] W. H. Press, S. A. Teukolsky, W. T. Vetterling, and B. P. Flannery, Numer.
+     2024.                                                                       Recipes: The Art of Sci. Comput., 3rd ed. Cambridge, U.K.: Cambridge
+[24] Y. Huang, J. Tong, X. Hu, and M. Bao, “A robust steered response power         Univ. Press, 2007.
+      localization method for wireless acoustic sensor networks in an outdoor    [48] H. E. Romeijn and D. R. Morales, “A class of greedy algorithms for the
+     environment,” Sensors, vol. 21, no. 5, 2021, Art. no. 1591.                       generalized assignment problem,” Discrete Appl. Math., vol. 103, no. 1–3,
+[25] K. Brümann and S. Doclo, “3D single source localization based on         pp. 209–235, 2000.
+     euclidean distance matrices,” in Proc. IEEE Int. Workshop Acoust. Echo    [49] D. B. Ward, E. A. Lehmann, and R. C. Williamson, “Particle ﬁltering
+     Noise Control, Bamberg, Germany, 2022, pp. 1–5.                              algorithms for tracking an acoustic source in a reverberant environment,”
+[26] Y. Oualil, F. Faubel, and D. Klakow, “A fast cumulative steered response        IEEETrans.SpeechAudioProcess.,vol.11,no.6,pp. 826–836,Nov.2003.
+     power for multiple speaker detection and localization,” in Proc. Eur. Signal    [50]  S. Gannot and T. G. Dvorkind, “Microphone array speaker localizers
+     Process. Conf., Marrakech, Morocco, 2013, pp. 1–5.                            using spatial-temporal information,” EURASIP J. Adv. Signal Process.,
+[27] D. Salvati and S. Canazza, “Incident signal power comparison for local-          vol. 2006, pp. 1–17, 2006, Art. no. 59625.
+      ization of concurrent multiple acoustic sources,” Sci. World J., vol. 2014,    [51] C. Evers et al., “The LOCATA challenge: Acoustic source localization
+     no. 1, 2014, Art. no. 582397.                                            and tracking,” IEEE/ACM Trans. Audio, Speech, Lang. Process., vol. 28,
+[28]  S. Gerlach, J. Bitzer, S. Goetze, and S. Doclo, “Joint estimation of pitch and         pp. 1620–1643, 2020.
+      direction of arrival: Improving robustness and accuracy for multi-speaker
+      scenarios,” EURASIP J. Audio, Speech Music Process., vol. 2014, no. 1,
+     2014, Art. no. 31.
+[29] D. Fejgin, E. Hadad, S. Gannot, Z. Koldovsky, and S. Doclo, “Comparison
+      of frequency-fusion mechanisms for binaural direction-of-arrival estima-                        Klaus Brümann (Graduate Student Member, IEEE)
+      tion for multiple speakers,” in Proc. IEEE Int. Conf. Acoust., Speech Signal                             received the B.Eng. and M.Sc. degrees in engineering
+      Process., Seoul, Korea, 2024, pp. 731–735.                                                        physics from Carl von Ossietzky Universität Olden-
+[30] H. Liu, Y. Chen, Y. Lin, and Q. Xiao, “A multiple sources localization                             burg, Oldenburg, Germany, in 2019 and 2021, respec-
+     method based on TDOA without association ambiguity for near and                                   tively. Since 2021, he has been working toward the
+      far mixed ﬁeld sources,” Circuits, Syst., Signal Process., vol. 40, no. 8,                              Dr.-Ing. degree with the Signal Processing Group,
+     pp. 4018–4046, 2021.                                                                           Carl von Ossietzky Universität, focusing on the anal-
+[31] X.DangandH.Zhu,“Afeature-baseddataassociationmethodformultiple                               ysis and development of multi-source localization
+      acoustic source localization in a distributed microphone array,” J. Acoust.                         methods using compact and distributed microphones.
+     Soc. Amer., vol. 149, no. 1, pp. 612–628, 2021.
+[32]  J. C. Gower, “Euclidean distance geometry,” Math. Scientist, vol. 7, no. 1,
+     pp. 1–14, 1982.                                                                Simon Doclo (Senior Member, IEEE) received the
+[33]  I. Dokmani´c, R. Parhizkar, J. Ranieri, and M. Vetterli, “Euclidean distance                         M.Sc. degree in electrical engineering and the Ph.D.
+      matrices: Essential theory, algorithms, and applications,” IEEE Signal                           degree in applied sciences from KU Leuven, Leuven,
+     Process. Mag., vol. 32, no. 6, pp. 12–30, Nov. 2015.                                            Belgium, in 1997 and 2003. From 2003 to 2007
+[34] C. Knapp and G. Carter, “The generalized correlation method for estima-                         he was a Postdoctoral Fellow with KU Leuven and
+      tion of time delay,” IEEE Trans. Acoust., Speech, Signal Process., vol. 24,                       McMaster University, Canada. From 2007 to 2009 he
+     no. 4, pp. 320–327, Aug. 1976.                                                        was a Principal Scientist with NXP Semiconductors
+[35]  J. Chen, J. Benesty, and Y. Huang, “Time delay estimation in room acoustic                               in Leuven. Since 2009 he has been a Full Professor
+     environments: An overview,” EURASIP J. Adv. Signal Process., vol. 2006,                           with the University of Oldenburg, Oldenburg, Ger-
+     2006, Art. no. 26503.                                                                    many, and Scientiﬁc Advisor for the Branch Hearing,
+[36]  J. Velasco, C. J. Martin-Arguedas, J. Macias-Guarasa, D. Pizarro, and M.                         Speech and Audio Technology HSA of the Fraun-
+     Mazo, “Proposal and validation of an analytical generative model of SRP-    hofer Institute for Digital Media Technology IDMT. His research interests
+    PHAT power maps in reverberant scenarios,” Signal Process., vol. 119,    include around signal processing for acoustical and biomedical applications,
+     pp. 209–228, 2016.                                             more speciﬁcally microphone array processing, speech enhancement, active
+[37] C. Zhang, D. Florêncio, and Z. Zhang, “Why does PHAT work well in    noise control, acoustic sensor networks and hearing aid processing. He was
+     low noise, reverberative environments?,” in Proc. IEEE Int. Conf. Acoust.,    the recipient of several best paper awards (International Workshop on Acoustic
+     Speech Signal Process., Las Vegas, NV, USA, 2008, pp. 2565–2568.      Echo and Noise Control 2001, EURASIP Signal Processing 2003, IEEE Signal
+[38]  P. H. Schönemann, “A generalized solution of the orthogonal procrustes   Processing Society 2008, VDE Information Technology Society 2019, ITG
+     problem,” Psychometrika, vol. 31, no. 1, pp. 1–10, 1966.                 Conference on Speech Communication 2025). He was an Associate Editor
+[39]  J. B. Allen and D. A. Berkley, “Image method for efﬁciently simulating    for EURASIP Journal on Advances in Signal Processing from 2014 to 2019
+     small-room acoustics,” J. Acoust. Soc. Am., vol. 65, no. 4, pp. 943–950,   and Senior Area Editor for IEEE TRANSACTIONS ON AUDIO, SPEECH AND
+     1979.                                                   LANGUAGE PROCESSING from 2021 to 2025. He was Member of the IEEE
+[40] E. A. P. Habets, “RIR-generator,” Accessed: Aug., 01, 2025. [Online].    Signal Processing Society Technical Committee on Audio and Acoustic Signal
+      Available: https://github.com/ehabets/RIR-Generator .                    Processing and the EURASIP Technical Area Committee on Acoustic, Speech
+[41]  I. Solak, “M-ailabs speech dataset,” 2010. Accessed: Aug. 01, 2025. [On-   and Music Signal Processing. He is also a Member of the EAA Technical
+       line]. Available: https://www.caito.de/2019/01/03/the-m-ailabs-speech-   Committee on Audio Signal Processing.
+      dataset/
+
+
+
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.

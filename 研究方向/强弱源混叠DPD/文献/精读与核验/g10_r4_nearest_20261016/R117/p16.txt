@@ -1,0 +1,65 @@
+Y. Yang et al.                                                                                                   Journal of Sound and Vibration 517 (2022) 116549
+
+settings are the same as those in Fig. 3. Fig. 6 shows the colormaps of the three methods. It can be seen that for FB, the mainlobes are
+wide, the mainlobes corresponding to the sources S1 and S2, are still slightly fused, and the source strengths are underestimated since
+the acoustic sources lie off the grid points. DAMAS and CLEAN-SC have narrower mainlobes than FB and can successfully separate
+sources S1 and S2, and they locate the source at one or several grid points near the true location. Combining Fig. 4 and Fig. 6, it can be
+seen that both the proposed method and the above three methods can accurately identify the acoustic sources, and the proposed
+BNOMP-CB can break constraints of the grid points (overcome the basis mismatch) and obtain higher accuracy of source localization
+and quantification.
+    Fig. 7 shows the colormaps of FB, DAMAS and CLEAN-SC when the noise of the case in Fig. 6 is further adjusted to a SNR of 5 dB.
+Comparing Fig. 7 with Fig. 6, it can be seen that the main lobe of FB at SNR of 5 dB is slightly widened compared with that at SNR of 20
+dB. In general, the source identification performance of the three methods at a SNR of 5 dB is comparable to that at a SNR of 20 dB,
+which is attributed to the diagonal reconstruction for the microphone sound pressure CSM giving the above three methods strong anti-
+interference. Combining Figs. 4-7, we can see that the proposed BNOMP-CB is roughly equivalent to the FB, DAMAS and CLEAN-SC
+methods in terms of interference resistance.
+
+5.2. Cases of Gaussian pulse acoustic sources identification
+
+   To prove the effectiveness of the proposed method for transient source identification, in this section, we perform Gaussian pulse
+source identification and compare the source identification performance of these four methods. We assume that there are three
+Gaussian pulse sources S1, S2, and S3 located at ( −0.04, −0.2), (0.08, −0.2), and (−0.2, 0.32) m, respectively, all of them have a
+half-peak bandwidth of 0.0001 s, and the peak times of each source are 0.001 s apart. In this simulation, the settings of the array,
+measurement distance and discretized grid are the same as those in Section 5.1. Fast Fourier transform (FFT) is performed on the sound
+pressure signal of each microphone of the array to obtain the Fourier spectrum of the signal, where the sampling frequency is 102,400
+Hz and the frequency resolution (sub-band width) is 50 Hz. Fig. 8 shows the source identification results for 81 sub-bands from 1000
+Hz to 5000 Hz. The SNR at each frequency is set to 20 dB. Fig. 9 shows the results with SNR of 5 dB. In both sets of results, subplots (a)-
+(d) are the localization colormaps of each method, and subplots (e)-(h) are the source strength quantification results of all sources at
+each frequency.
+   For source S3, as shown in Fig. 8(a)-(d): OMP-CB has scattered localization at different frequencies with the lowest localization
+accuracy; NOMP-CB has more concentrated localization at all frequencies, and the localization accuracy is relatively high; BOMP-CB
+localizes the source to a nearby grid point, i.e. its localization accuracy is restrained by basis mismatch, and BNOMP-CB obtains the
+highest localization accuracy. The source strength quantification curves in Fig. 8(e)-(h) shows that all four methods can accurately
+quantify the source strength of S3 at each frequency. For S1 and S2 with small spacing, OMP-CB correctly quantifies the source
+strength only at frequencies above 4500 Hz, which is related to the fact that OMP-CB can separate them only when the frequency is
+above 4500 Hz. NOMP-CB can separate and accurately quantify the two sources at frequencies above 2500 Hz. BOMP-CB cannot obtain
+accurate source strength quantification for both two sources in 1000–5000 Hz. This is because it fails to separate them (as shown in
+Fig. 8(c)). BNOMP-CB achieves accurate localization and source strength estimates for them in the full frequency band of interest
+1000–5000 Hz. In summary, BNOMP-CB has a much higher spatial resolution than the other three methods and has a good perfor­
+mance on transient source identification. It can accurately locate the sources and quantify their strength of each frequency.
+   Comparing the identification results of 5 dB SNR in Fig. 9 with those of 20 dB SNR in Fig. 8, it can be seen that as SNR decreases, the
+localization results of OMP-CB and NOMP-CB at different frequencies become more scattered, while the localization results of BOMP-
+CB and BNOMP-CB keep unchanged or change little. Besides, the source strength quantification accuracy of all four methods is
+decreased due to the strong noise. From the location and quantification results of S1 and S2, we can see that when SNR is 5 dB, NOMP-
+CB still fails to separate these two closely-spaced sources even when the frequency is higher than 2500 Hz. It is only at frequencies close
+to 4500 Hz, NOMP-CB obtains a comparatively accurate source strength quantification. Its quantification curve shows an oscillation
+pattern similar to that of OMP-CB. This phenomenon indicates that strong noise interference degrades the spatial resolution of NOMP-
+CB. The quantification results of BOMP-CB and BNOMP-CB with SNR of 5 dB remain similar to those with SNR of 20 dB, except for
+increased fluctuations, which indicates that the introduction of multi-frequency synchronous processing makes their source identi­
+fication performance robust to the noise interference. Therefore, the proposed BNOMP-CB performs well even at low SNR.
+
+5.3. Simulations based on Monte Carlo
+
+   To further analyze the acoustic source identification performance of the above methods and examine the generality of the con­
+clusions, we conduct Monte Carlo simulations under different SNRs. We assume that two multiple-sinusoids acoustic sources randomly
+distributed in a 1 m × 1 m source plane with a spacing of at least 0.1 m. The source frequency vector is [1000, 2000, …, 5000] Hz(L =
+5), the source strength at each frequency is set to a random value in the range of [0.5, 1.5] Pa, and the phase is random. The settings of
+the array, measurement distance and discretized grid are the same as those in Section 5.1. 500 trials are generated, corresponding to
+500 sets of microphone sound pressure signals. We set the SNR increases from 0 dB to 30 dB in steps of 5 dB (7 levels of SNR in total)
+through adding incoherent white Gaussian noise with different energies to the above microphone signals. 7 × 500 groups of cases are
+processed using the above four methods. Besides, to simulate narrowband source identification, adjusting the source frequency vector
+as [2900, 2920, …, 3100] Hz(L = 11) and setting the source strength at each frequency to be a random value in the range of [0.5, 1.5]
+Pa, we generate a second set of 500 trials and perform the same processing on them as the first set.
+   To visualize the localization and quantification results, according to each measurement unit, we use the root mean square error of
+
+                                                                16

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>五分钟看懂：无人机、假位置，以及为什么要谈墙面</title>
+<style>
+:root{--bg:#f5f4ee;--ink:#193d44;--muted:#5b7073;--line:#d8e1db;--card:#fff;--teal:#087f82;--orange:#bf661d;--purple:#8063a4;--red:#b43d43;--soft:#e8f0eb}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI","Microsoft YaHei",sans-serif;line-height:1.8}main{max-width:1140px;margin:auto;padding:38px 24px 70px}a{color:var(--teal);text-underline-offset:4px}h1{font-size:clamp(29px,4.2vw,47px);line-height:1.35;letter-spacing:-1px;margin:20px 0}h2{font-size:28px;line-height:1.45;margin:0 0 18px}h3{font-size:20px;margin:12px 0}p{margin:10px 0}.eyebrow{font-size:13px;letter-spacing:2px;color:var(--teal)}.lede{font-size:20px;max-width:850px}.callout{background:var(--soft);border-left:4px solid var(--teal);padding:18px 24px;border-radius:0 14px 14px 0;margin:24px 0}.note{font-size:14px;color:var(--muted)}.section{border-top:1px solid var(--line);padding-top:34px;margin-top:44px}.number{font-size:14px;letter-spacing:2px;color:var(--teal);margin-bottom:8px}.split{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(240px,1fr);gap:28px;align-items:center}.figure{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:15px;overflow:hidden}svg{width:100%;height:auto;display:block}svg text{font-family:inherit;fill:var(--ink);font-size:18px}svg .small{font-size:15px}svg .a{stroke:var(--teal);fill:none;stroke-width:3}svg .b{stroke:var(--purple);fill:none;stroke-width:3}svg .reflect{stroke:var(--orange);fill:none;stroke-width:4}svg .guide{stroke:#a4b4b5;fill:none;stroke-width:2}svg .ghost{stroke-dasharray:7 6}svg .station{fill:var(--ink)}svg .source{fill:var(--teal)}svg .bad{stroke:var(--red);fill:none;stroke-width:3}.legend{display:flex;flex-wrap:wrap;gap:12px 22px;font-size:14px;color:var(--muted);padding-top:10px}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;background:var(--teal)}.dot.purple{background:var(--purple)}.dot.orange{background:var(--orange)}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}button{font:inherit;font-size:15px;background:var(--card);color:var(--ink);border:1px solid #baccc4;border-radius:9px;padding:10px 16px;cursor:pointer;min-height:44px}button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:white}button:focus-visible,a:focus-visible{outline:3px solid #e5a247;outline-offset:4px}.explain{min-height:255px}.tag{display:inline-block;padding:3px 10px;border-radius:6px;background:#e8f0eb;color:#31666a;font-size:13px}.bigword{font-size:24px;line-height:1.55}.answer{padding-top:10px;border-top:1px solid var(--line);margin-top:20px}.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}.plainbox{padding:22px;border:1px solid var(--line);border-radius:14px;background:var(--card)}.inline-label{font-size:14px;display:block;margin-top:10px;color:var(--muted)}.footer{margin-top:32px;padding-top:20px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}details{margin-top:24px;border-top:1px solid var(--line);padding-top:16px}summary{cursor:pointer;font-weight:600}li{margin:7px 0}.steps-note{min-height:48px}.linklist{display:grid;gap:8px}.wall-btn{flex:1;min-width:150px}#pulse{fill:var(--orange);stroke:white;stroke-width:2}.status{font-size:15px;color:var(--muted);min-height:30px}.figure figcaption{font-size:13px;color:var(--muted);margin-top:10px}figure{margin:0}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+@media(max-width:720px){main{padding:24px 16px 45px}.split,.two{grid-template-columns:1fr}.split{gap:16px}h2{font-size:24px}.lede{font-size:18px}.figure{padding:9px}.explain{min-height:0}.callout{padding:15px 18px}.tabs button{flex:1;min-width:120px}svg text{font-size:21px}svg .small{font-size:18px}.bigword{font-size:22px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body><main>
+<a href="../准入报告.html">← 返回研究准入报告</a>
+<header><p class="eyebrow">研究过程图解 · 2026 / 10 / 25</p>
+<h1>我们在找无人机，<br>为什么开始研究“墙面”？</h1>
+<p class="lede">因为接收站只听到了信号，却不知道它是直接飞过来的，还是绕了一次路。<strong>绕路的信号，有时会让另一个位置也显得合理。</strong></p>
+<div class="callout">过去几轮主要在问：<strong>这些观测是否足以分清真位置和假位置？</strong><br>还没有进入“哪种定位算法更准”的正式比较，也没有把画出来的墙面当作算法已知地图。</div>
+</header>
+
+<section class="section" id="scene"><div class="number">01 / 场景先讲清楚</div><h2>两个未知信号源，五个站一起听</h2>
+<div class="split"><figure class="figure">
+<svg viewBox="0 0 620 400" role="img" aria-labelledby="scene-title scene-desc"><title id="scene-title">五站盲双源定位示意</title><desc id="scene-desc">两个低空信号源向五个单天线接收站发射未知信号。每站收到两源混合。部分源站直达路径缺失，存在反射路径。图非实测布局。</desc>
+<rect x="25" y="25" width="570" height="340" rx="22" fill="#f2f6f3"/>
+<g opacity=".4"><path class="a" d="M235 125L90 75M235 125L510 70M235 125L530 320M235 125L80 310"/><path class="b" d="M365 250L90 75M365 250L510 70M365 250L530 320M365 250L295 345"/></g>
+<path class="a ghost" d="M235 125L295 345" opacity=".35"/>
+<rect x="223" y="230" width="80" height="30" rx="3" fill="#b9c5bf"/>
+<path class="reflect" d="M235 125L460 235L295 345"/>
+<path d="M460 190V255" stroke="#6c7b76" stroke-width="9"/>
+<text x="475" y="228" class="small">反射面</text>
+<text x="213" y="288" class="small">遮挡示意</text>
+<g class="station"><path d="M90 60l-12 24h24z"/><path d="M510 55l-12 24h24z"/><path d="M530 305l-12 24h24z"/><path d="M295 330l-12 24h24z"/><path d="M80 295l-12 24h24z"/></g>
+<text x="60" y="48">站1</text><text x="492" y="43">站2</text><text x="548" y="345">站3</text><text x="315" y="365">站4</text><text x="31" y="345">站5</text>
+<circle cx="235" cy="125" r="13" class="source"/><text x="191" y="103">源 A</text><circle cx="365" cy="250" r="13" fill="#8063a4"/><text x="339" y="225">源 B</text>
+<text x="220" y="390" class="small">每个站收到：A + B + 噪声</text>
+</svg><figcaption>平面投影示意，不是实际实验构型；真实任务还要估计高度。反射折线只表示绕路关系，不用于计算反射角。</figcaption>
+<div class="legend"><span><i class="dot"></i>源A</span><span><i class="dot purple"></i>源B</span><span><i class="dot orange"></i>反射路径</span><span>▲ 单天线接收站</span></div>
+</figure><div>
+<p><strong>我们知道：</strong>五个接收站的位置，站间时间与频率同步；先假定有两个源。</p>
+<p><strong>我们不知道：</strong>源在哪里、具体发了什么，以及哪些源—站路径是直达。</p>
+<p>目标仍是<strong>三维定位，不是轨迹跟踪</strong>。先用短记录、准静态条件检查能否定位，不先增加速度估计。</p>
+<p>“某站有直达”是<strong>针对某一个源</strong>说的：它可能直接听到A，却只能绕路听到B。</p>
+<p class="note">初始核验从每源3个直达站开始，之后经批准检查4个。完整环境如何生成，尚未最终冻结。</p>
+</div></div></section>
+
+<section class="section" id="history"><div class="number">02 / 过去几轮在排查什么</div><h2>先问“答案有没有唯一一个”，再比较算法</h2>
+<div class="tabs" aria-label="查看核验阶段">
+<button type="button" data-stage="0" aria-pressed="true">① 三条直达</button><button type="button" data-stage="1" aria-pressed="false">② 四条直达</button><button type="button" data-stage="2" aria-pressed="false">③ 合理部署</button><button type="button" data-stage="3" aria-pressed="false">④ 路径认错</button><button type="button" data-stage="4" aria-pressed="false">⑤ 共同墙面</button>
+</div>
+<div class="split"><figure class="figure"><svg id="history-svg" viewBox="0 0 600 350" role="img" aria-label="核验阶段原理示意"></svg><figcaption>此处是概念图，不是定位轨迹或原始结果图。右侧文字和证据链接对应实际核验。</figcaption></figure><div class="explain" aria-live="polite"><span class="tag" id="stage-kind"></span><h3 id="stage-title"></h3><p id="stage-question"></p><p class="bigword" id="stage-result"></p><p id="stage-meaning"></p><a id="stage-link" href="../step1_identifiability_20261025/第一步核验报告.html">查看本轮原始报告 →</a></div></div>
+<div class="callout">这里的“假位置”不一定是算法算错了。<strong>如果两种允许的物理解释产生同一份IQ，仅凭这份IQ就无法保证选对。</strong>所以先检查模型和信息，不能把所有失败都交给更复杂的优化器。</div>
+</section>
+
+<section class="section" id="mirror"><div class="number">03 / 最直观的解释</div><h2>反射为什么会像“另一个源”？</h2>
+<div class="split"><figure class="figure"><svg viewBox="0 0 620 450" role="img" aria-labelledby="mirror-title mirror-desc"><title id="mirror-title">镜像源与反射路径</title><desc id="mirror-desc">真实源位于墙前，信号经过墙面到接收站。将折线展开，可看成墙后镜像点直达接收站，两种路径等长。</desc>
+<path d="M50 250H570" stroke="#7b8983" stroke-width="9"/><text x="55" y="280" class="small">反射平面</text>
+<path id="reflection-path" class="reflect" d="M130 80L310 250L490 80"/>
+<g id="mirror-group" style="display:none"><path class="guide ghost" d="M130 420L490 80"/><path class="guide ghost" d="M130 80V420"/><circle cx="130" cy="420" r="10" fill="#fff" stroke="#bf661d" stroke-width="3"/><text x="150" y="423">镜像位置（不是真源）</text></g>
+<circle cx="130" cy="80" r="12" class="source"/><text x="70" y="48">真实源</text><path class="station" d="M490 65l-13 26h26z"/><text x="466" y="48">接收站</text><circle cx="310" cy="250" r="6" fill="#bf661d"/><text x="320" y="230" class="small">反射点</text>
+<circle id="pulse" cx="130" cy="80" r="7" visibility="hidden"/>
+</svg><div class="tabs"><button id="play" type="button">播放一次传播</button><button id="mirror-toggle" type="button" aria-pressed="false">显示镜像解释</button></div><div id="pulse-status" class="status" aria-live="polite">点击播放，观察信号怎样绕一次路。</div><figcaption>单条镜面路径的精确几何示意，无米制坐标。一个站的等长不代表多个站必然同时等价；此前完整IQ反例另外进行了验证。</figcaption></figure><div>
+<p>真实情况：信号从无人机出发，<strong>碰到墙面，再到接收站</strong>。</p>
+<p>如果算法误以为它没有绕路，就可能把“更晚到达”解释为“源在更远的另一处”。</p>
+<p>对理想镜面反射，把折线路径展开，就会出现墙后的<strong>镜像源</strong>：它并不存在，却能解释这条路径的长度。</p>
+<div class="answer"><strong>“墙面”不是忽然增加的研究目标。</strong><br>它是产生反射的一种简单物理原因，帮助我们检查：那些任意设置的反射延迟，能否真的来自同一个环境。</div>
+</div></div></section>
+
+<section class="section" id="wall"><div class="number">04 / 最新一轮为什么要检查墙会挡住谁</div><h2>能解释反射，不等于整个解释都合理</h2>
+<div class="tabs" aria-label="墙面约束演示"><button class="wall-btn" type="button" data-wall="0" aria-pressed="true">只看反射</button><button class="wall-btn" type="button" data-wall="1" aria-pressed="false">再检查直达</button><button class="wall-btn" type="button" data-wall="2" aria-pressed="false">改看有限墙面</button></div>
+<div class="split"><figure class="figure"><svg viewBox="0 0 650 420" role="img" aria-label="共同墙面对反射与直达路径的约束示意">
+<path id="wall-line" d="M350 35V390" stroke="#7b8983" stroke-width="10"/>
+<text id="wall-label" x="372" y="300" class="small">假设的不透明墙</text>
+<path class="reflect" d="M150 110L350 236.3158L170 350"/>
+<path id="los-line" d="M150 110L560 100" class="a" visibility="hidden"/>
+<g id="collision" visibility="hidden"><path d="M340 95L360 115M360 95L340 115" class="bad"/><text x="365" y="78" class="small">直达被挡住了</text></g>
+<circle cx="150" cy="110" r="12" class="source"/><text x="75" y="79">待检查的位置</text>
+<path class="station" d="M170 335l-13 26h26z"/><text x="115" y="390">站1：收到反射</text>
+<path class="station" d="M560 85l-13 26h26z"/><text x="462" y="145">站2：声明有直达</text>
+<circle cx="350" cy="236.3158" r="6" fill="#bf661d"/>
+</svg><figcaption>俯视原理图，不是固定反例的实际坐标。墙面在俯视图中是一条线；这里不展示高度。橙色折线满足该示意的镜面几何。</figcaption></figure><div aria-live="polite"><span class="tag" id="wall-tag">步骤 1</span><h3 id="wall-title">这面墙能解释一次反射</h3><p class="bigword" id="wall-main">只看橙色折线，暂时说得通。</p><p id="wall-detail">但不能只检查“需要的反射能否发生”，还要检查这面墙会不会挡住其他本该直达的信号。</p></div></div>
+<div class="callout"><strong>实际核验的结果：</strong>在固定的一对真假位置上，仅要求两条反射共用垂直平面，真假解释各有4个不同平面可用；再要求已有直达线段不穿越该无限不透明面，真实解释剩1个，替代解释剩0个。<br><span class="note">这只是一个已保存反例的条件检查，不是算法成功率，更没有证明所有假位置都能排除。</span></div>
+</section>
+
+<section class="section" id="meaning"><div class="number">05 / 不要把几件事混在一起</div><h2>墙面究竟是谁知道的？</h2><div class="two">
+<div class="plainbox"><h3>仿真生成端</h3><p>为了生成可信的信号，最终需要说明反射和遮挡怎样发生。生成器可以知道建筑位置，就像出题人知道答案。</p><p><strong>但过去几轮还不是完整街区仿真。</strong>最初只是设置路径长度和系数，之后才逐步检查单条反射、共同平面及可见性。</p></div>
+<div class="plainbox"><h3>定位算法端</h3><p>仍然只拿到各站混合IQ、站点位置以及公开的模型条件。<strong>没有免费获得墙的位置，也没有获得真实直达标签。</strong></p><p>核验时，我们甚至提前给了源分组或路径长度，检查信息更充分时是否仍有多解。这是诊断用的帮助，不是算法已经具备的能力。</p></div>
+</div><div class="callout"><strong>所以目前并不是在“造一堵墙把结果做对”。</strong><br>是在检查模型是否过于自由：如果每条反射都能随意绕路，假位置也可能总能找到一套解释；真实环境会让这些解释彼此关联、互相限制。这个限制是否足够、能否实际利用，仍要验证。</div>
+<h3>当前停在哪里？</h3><p class="bigword">知道了一条值得检查的线索，<br>还没有得到一个已经成立的新定位算法。</p>
+<p>下一步建议是先把<strong>有限墙面、遮挡和额外反射</strong>放到同一个自洽模型中。不能忽略墙面边缘，也不能只保留有利路径。确认可用条件后，才值得进入普通算法与候选方法的比较。</p>
+<p class="note">这一页只回顾与解释已完成核验；没有新增实验，没有批准或启动下一步模型变更。</p>
+</section>
+
+<details><summary>查看每轮证据，以及图中哪些是示意</summary><div class="linklist">
+<a href="../step1_identifiability_20261025/第一步核验报告.html">第一轮：每源三个直达站，仍有连续等价位置</a>
+<a href="../step1_four_los_20261025/四直达核验报告.html">第二轮：四直达局部约束恢复，但存在离散双解</a>
+<a href="../step1_deployment_20261025/部署与多径歧义报告.html">第三轮：合理部署与不同路径归属的假位置</a>
+<a href="../step1_constraints_20261025/物理约束核验报告.html">第四轮：共同平面、垂直墙与可见性的区别</a>
+<a href="../step1_constraints_20261025/独立核验.json">最新共同墙面结果独立审计</a>
+</div><p class="note">图1是场景概念图，时间线是结果示意；镜像动画和墙面俯视图用于解释几何，不是复现实际场景。21.17m、约75m及4→1/4→0来自对应保存报告；图中的点、线、建筑不用于估计这些数值。动画的移动点只是传播示意，不表示实测速度或算法迭代。</p></details>
+<footer class="footer">目标始终是非合作低空多源定位。当前工作是建模与可辨识检查，不是定位性能排行榜，也不是已经证实的论文创新。</footer>
+</main>
+<script>
+const stages=[
+{kind:'信息不足',title:'三条直达，只给出两条独立时差',question:'源有三个未知坐标：横向、纵向、高度。三个站的相对到达时间通常只提供两个独立约束。',result:'可能有一条位置曲线，都解释得通。',meaning:'其余反射延迟若可独立调整，新增站点未必能把曲线缩成一个点。核验找到了完整混合IQ等价的位置。',link:'../step1_identifiability_20261025/第一步核验报告.html'},
+{kind:'离散多解',title:'四条直达，约束够了，也不保证只有一个答案',question:'未知数与约束数量相当，通常能把连续曲线收缩成孤立点。但非线性几何仍可能给出两个合法位置。',result:'已保存的一对位置相距约21.17m。',meaning:'这一轮两种解释使用相同直达站集合。问题不全是“把反射误当直达”。',link:'../step1_four_los_20261025/四直达核验报告.html'},
+{kind:'解决了一层问题',title:'同平面布站，再公开目标在平面上方',question:'在正确四直达集合、对应距离差方程非退化时，可排除安装平面上下的镜像解。',result:'知道哪四站直达时，这一类双解可排除。',meaning:'这是带条件的几何结论，不是承诺所有布站、所有盲混合观测都可唯一定位。',link:'../step1_deployment_20261025/部署与多径歧义报告.html'},
+{kind:'路径归属也未知',title:'同一观测，还可能换一种路径身份来解释',question:'原解释说“站1绕路”；另一解释说“站4绕路”。位置与未知参数一起改变，观测可能不变。',result:'一对相距约75m的位置，五站IQ仍等价。',meaning:'这里的替代解释含短绕行及变化的路径强弱关系，已公开记录；不把它当真实环境发生概率。',link:'../step1_deployment_20261025/部署与多径歧义报告.html'},
+{kind:'检查物理一致性',title:'反射不能只在每条链路上各编一个故事',question:'如果两条反射来自同一面墙，墙还必须与其他直达路径相容。这开始把独立参数联系起来。',result:'仅共享墙面还不够；直达是否被墙挡住也重要。',meaning:'下方交互图解释最新检查。有限墙面的边缘和其他路径尚未验证，不能宣布已解决。',link:'../step1_constraints_20261025/物理约束核验报告.html'}];
+const station=(x,y,i)=>`<path class="station" d="M${x} ${y-12}l-11 22h22z"/><text x="${x-20}" y="${y+38}" class="small">站${i}</text>`;
+function setStage(i){
+ const s=stages[i];document.querySelectorAll('[data-stage]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.stage)===i)));
+ document.getElementById('stage-kind').textContent=s.kind;document.getElementById('stage-title').textContent=s.title;document.getElementById('stage-question').textContent=s.question;document.getElementById('stage-result').textContent=s.result;document.getElementById('stage-meaning').textContent=s.meaning;document.getElementById('stage-link').href=s.link;
+ let drawing='';
+ if(i===0){drawing=`<path class="a ghost" d="M240 65C290 110 235 190 345 225"/><g opacity=".35"><path class="guide" d="M270 110L100 275M270 110L300 285M270 110L490 275"/></g><circle class="source" cx="270" cy="110" r="11"/><circle cx="292" cy="192" r="11" fill="white" stroke="#087f82" stroke-width="3"/><text x="310" y="100">真位置</text><text x="320" y="184">其他等价位置</text><text x="36" y="41" class="small">一条曲线，不止一个点</text>${station(100,275,1)+station(300,285,2)+station(490,275,3)}`;}
+ else if(i===1){drawing=`<g opacity=".35"><path class="guide" d="M260 105L100 275M260 105L240 285M260 105L380 285M260 105L500 275"/></g><circle class="source" cx="260" cy="105" r="12"/><circle cx="310" cy="175" r="12" fill="white" stroke="#087f82" stroke-width="3"/><text x="285" y="85">原位置</text><text x="335" y="180">另一合法位置</text><text x="36" y="41" class="small">点变少了，不一定只剩一个</text>${station(100,275,1)+station(240,285,2)+station(380,285,3)+station(500,275,4)}`;}
+ else if(i===2){drawing=`<path d="M60 210H540" stroke="#a1b3aa" stroke-width="4"/><text x="390" y="196" class="small">安装平面</text><path class="guide ghost" d="M260 85V315"/><circle class="source" cx="260" cy="85" r="12"/><circle cx="260" cy="315" r="12" fill="white" stroke="#9aafaa" stroke-width="2"/><path class="bad" d="M243 298L277 332M277 298L243 332"/><text x="285" y="89">上方：允许</text><text x="300" y="318" class="small">下方：已知不在这里</text>${station(90,210,1)+station(220,210,2)+station(350,210,3)+station(500,210,4)}`;}
+ else if(i===3){drawing=`<circle class="source" cx="205" cy="98" r="12"/><circle cx="350" cy="170" r="12" fill="white" stroke="#bf661d" stroke-width="3"/><text x="140" y="62">原位置解释</text><text x="365" y="173">替代解释</text><path class="a" d="M205 98L260 280"/><path class="reflect ghost" d="M205 98L80 195L95 280"/><path class="reflect ghost" d="M350 170L455 210L405 280"/><text x="46" y="174" class="small">这条说是反射</text><text x="375" y="238" class="small">改说这条是反射</text>${station(95,280,1)+station(175,280,2)+station(260,280,3)+station(405,280,4)+station(510,280,5)}`;}
+ else{drawing=`<path d="M325 40V300" stroke="#8b9a91" stroke-width="9"/><circle class="source" cx="135" cy="100" r="12"/><path class="reflect" d="M135 100L325 200L135 290"/><path class="bad" d="M135 100L490 100"/><path class="bad" d="M313 88L337 112M337 88L313 112"/><text x="40" y="49">反射能解释</text><text x="362" y="151">直达却被挡住？</text>${station(135,290,1)+station(490,100,2)}`;}
+ document.getElementById('history-svg').innerHTML=`<title>${s.title}</title>${drawing}`;
+}
+document.querySelectorAll('[data-stage]').forEach(b=>b.addEventListener('click',()=>setStage(Number(b.dataset.stage))));setStage(0);
+let mirrored=false,frame=0;
+document.getElementById('mirror-toggle').addEventListener('click',()=>{mirrored=!mirrored;document.getElementById('mirror-group').style.display=mirrored?'':'none';document.getElementById('mirror-toggle').setAttribute('aria-pressed',String(mirrored));document.getElementById('mirror-toggle').textContent=mirrored?'隐藏镜像解释':'显示镜像解释';});
+document.getElementById('play').addEventListener('click',()=>{
+ cancelAnimationFrame(frame);const path=document.getElementById('reflection-path'),pulse=document.getElementById('pulse'),status=document.getElementById('pulse-status');const len=path.getTotalLength(),duration=matchMedia('(prefers-reduced-motion: reduce)').matches?0:2200;const start=performance.now();pulse.setAttribute('visibility','visible');
+ function tick(t){const v=duration===0?1:Math.min(1,(t-start)/duration);const point=path.getPointAtLength(len*v);pulse.setAttribute('cx',point.x);pulse.setAttribute('cy',point.y);if(v<1)frame=requestAnimationFrame(tick);else status.textContent='到达接收站：折线路径与镜像位置的直线路径等长。';}
+ status.textContent='传播示意：真实源 → 墙面 → 接收站';frame=requestAnimationFrame(tick);
+});
+const wallStates=[['步骤 1','这面墙能解释一次反射','只看橙色折线，暂时说得通。','但不能只检查“需要的反射能否发生”，还要检查这面墙会不会挡住其他本该直达的信号。'],['步骤 2','同一面墙，又挡住了声称存在的直达','如果墙是不透明、无限延伸的，这套解释矛盾。','在固定反例中，这类直达可见性检查排除了替代位置；仅拟合反射长度没有排除它。'],['步骤 3','现实墙面有边缘，结论要重新检查','有限墙面可能让直达从边缘之外通过。','所以不能把无限面的排除结果直接搬到建筑场景。还要统一检查墙面范围、遮挡和其他可见反射。']];
+function setWall(i){document.querySelectorAll('[data-wall]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.wall)===i)));const s=wallStates[i];['wall-tag','wall-title','wall-main','wall-detail'].forEach((id,j)=>document.getElementById(id).textContent=s[j]);document.getElementById('wall-line').setAttribute('d',i===2?'M350 190V310':'M350 35V390');document.getElementById('wall-label').textContent=i===2?'有限墙面':'假设的不透明墙';document.getElementById('los-line').setAttribute('visibility',i===0?'hidden':'visible');document.getElementById('los-line').setAttribute('class',i===1?'bad':'a');document.getElementById('collision').setAttribute('visibility',i===1?'visible':'hidden');}
+document.querySelectorAll('[data-wall]').forEach(b=>b.addEventListener('click',()=>setWall(Number(b.dataset.wall))));
+</script></body></html>

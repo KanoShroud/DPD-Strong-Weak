@@ -1,0 +1,1223 @@
+--- PDF PAGE 1 ---
+A Block-Sparse Bayesian Learning Algorithm with Dictionary
+Parameter Estimation for Multi-Sensor Data Fusion
+Jakob M¨oderl∗, Anders Malte Westerkam†, Alexander Venus∗, and Erik Leitinger∗
+∗Graz University of Technology, Graz, Austria, {jakob.moederl, a.venus, erik.leitinger}@tugraz.at
+†Aalborg University, Aalborg Denmark, amw@es.aau.dk
+Abstract—We propose an sparse Bayesian learning (SBL)-
+based method that leverages group sparsity and multiple param-
+eterized dictionaries to detect the relevant dictionary entries and
+estimate their continuous parameters by combining data from
+multiple independent sensors. In a MIMO multi-radar setup, we
+demonstrate its effectiveness in jointly detecting and localizing
+multiple objects, while also emphasizing its broader applicability
+to various signal processing tasks. A key benefit of the proposed
+SBL-based method is its ability to resolve correlated dictionary
+entries—such as closely spaced objects—resulting in uncorrelated
+estimates that improve subsequent estimation stages.
+Through numerical simulations, we show that our method out-
+performs the newtonized orthogonal matching pursuit (NOMP)
+algorithm when two objects cross paths using a single radar. Fur-
+thermore, we illustrate how fusing measurements from multiple
+independent radars leads to enhanced detection and localization
+performance.
+Index Terms—Sparse Bayesian Learning, Detection, Radar,
+Sensor Fusion
+I. INTRODUCTION
+Accurate detection, localization, and tracking of objects is
+the cornerstone of numerous real-world applications, including
+ocean science [1], integrated sensing and communications [2],
+and autonomous robotics [3]. Despite their fundamental impor-
+tance, these tasks become particularly challenging in scenarios
+characterized by highly cluttered environments and multiple
+closely spaced objects. In radar and related applications, the
+received signal can be modeled as linear combination of the
+radar’s response to each individual object in the scene. Fur-
+thermore, the radar’s response to each object is parameterized
+by the objects location - the parameter of interest. Jointly
+estimating (i) then number of components in a superimposed
+mixture and (ii) the parameters of each component in the
+mixture is fundamental for detecting and tracking objects, as
+well as for other related signal processing applications. Jointly
+addressing (i) and (ii) while fusing multiple observations—
+such as data from several independent radars monitoring the
+same area—introduces additional challenges but can also yield
+significant performance gains, for example, by leveraging the
+different vantage points of the sensors.
+Conventional radar processing chains apply a detect-then-
+track approach which typically relies on matched filtering in
+time and space and cell-based detectors, such as the constant
+false alarm rate (CFAR) detector, for preprocessing the raw
+This project was partly funded by the Christian Doppler Laboratory for
+Location-aware Electronic Systems.
+radar signals [4], [5]. The detections of this preprocessing
+stage are then used as inputs to multiobject tracking (MOT)
+methods, e.g., based on Bayesian inference [6]–[10]. Such
+two-step approaches significantly reduce data flow and are
+computationally efficient. Therefore, they are widely used
+in practice. Nevertheless, two-step approaches have notable
+limitations, e.g., when faced with low signal-to-noise ratio
+(SNR) objects and closely spaced objects whose signals be-
+come unresolvable after beamforming. One possible way to
+address this shortcoming is to use track-before-detect (TBD)
+methods, which operate directly on matched-filtered radar
+signals [11]–[15] or even on raw signals [16]–[19], thereby
+enhancing tracking performance in weak-object scenarios and
+improving the resolution of closely spaced objects. However,
+these benefits come at a considerable increase in computational
+complexity.
+We apply an alternate approach to TBD by decreasing the
+information loss of the preprocessing stage to improve tracking
+performance. To overcome the limitations of a cell-based
+detection stage, classic parameter estimation methods such
+as multiple signal classification (MUSIC) and estimation of
+signal parameters via rotational invariant techniques (ESPRIT)
+[20], assume that the number of objects (i.e., the model order)
+is known, which is typically not the case for radar and similar
+applications. Sparse signal reconstruction methods, such as
+the least absolute shrinkage and selection operator (LASSO)
+[21], matching pursuit (MP) [22] or sparse Bayesian learning
+(SBL) [23], [24], solve the problem of estimating the number
+of objects in an efficient way by modeling the observed
+signal as a product of a large dictionary matrix with a sparse
+amplitude vector. Thus, the number of objects is indirectly
+estimated as the number of nonzero amplitudes. Note that
+many sparse reconstruction methods can be unified within
+a common framework [25]. In [25], LASSO and MP are
+classified as Type-I Bayesian methods, whereas SBL belongs
+to the more general and typically superior Type-II methods.
+Furthermore, SBL is closely linked to stepwise regression [26]
+and can be implemented with a computational complexity
+comparable to that of MP [27].
+While initially developed for fixed dictionaries, sparse sig-
+nal reconstruction methods can be extended to estimate the
+parameters (e.g., the location of objects) on a continuum
+by considering a parameterized dictionary matrix [28]–[30],
+which further helps to improve the performance for correlated
+(e.g., closely-spaced) objects [31], [32]. Multiple radar-sensors
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:27:23 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 2 ---
+observing the same scene, i.e., the same objects, result in the
+amplitude vectors corresponding to each sensor/observation to
+share the same sparsity-pattern. Thus, resulting in a group-
+sparse signal reconstruction problem. Naturally, sparse signal
+reconstruction methods have been extended to group-sparsity,
+e.g., group-LASSO [33], block-MP [34] or block-SBL [35]–
+[40]. However, none of these methods estimate the dictionary
+parameters on a continuum, except for [40] which focuses on
+group-sparsity within a single observation vector and unknown
+group-sizes rather than multiple independent observations.
+In this work, we propose a novel preprocessing method
+for sensor fusion between multiple independent sensors (e.g.,
+mutually independent radars) based on SBL to jointly detect
+relevant dictionary entries and estimate their parameters on
+the continuum. The proposed SBL-based method extends the
+block-SBL method introduced in [39] to multiple parameter-
+ized dictionary matrices, making it applicable to multi-sensor
+data fusion. For MOT based on data from multiple radars,
+our method significantly enhances the measurements used
+by Bayesian MOT algorithms [6]–[10] by offering (i) more
+sensitive object-waveform-related detection, (ii) improved re-
+solvability of closely spaced objects, and (iii) reduced mea-
+surement correlation for effectively “point-like” detections.
+The main contributions of this paper are as follows.
+• We introduce an SBL-based method that utilizes multiple
+parameterized dictionaries to detect relevant dictionary
+entries and estimates the corresponding parameters (on
+the continuum) by fusing data from multiple independent
+sensors.
+• We apply the proposed algorithm to detect and localize
+objects in a multiple-input multiple-output (MIMO)-radar
+setup.
+• For a setup consisting of a single MIMO-radar system,
+we demonstrate that the proposed method outperforms
+the newtonized orthogonal matching pursuit (NOMP)
+algorithm [41] when the objects are closely spaced.
+• We show that the proposed method is able to fuse the
+data from multiple independent MIMO-radars to enhance
+the detection and localization accuracy compared to the
+single-radar case.
+II. SIGNAL MODEL
+We consider a multi-radar setup that aims to detect and
+localize an unknown number of objects with some area of
+interest by L ≥1 MIMO radars, as illustrated in Figure 1.
+Each radar consists of NTx and NRx co-located receive and
+transmit antennas, respectively, that surveil the area of interest.
+Each radar is assumed to processes its own signals fully
+coherent, i.e., NTx · NRx channel frequency responses are
+obtained for each transmission from each radar. The signals
+from multiple radars are considered to be well separated
+in time, frequency, or code, so that multiple radars operate
+independently and do not observe and or interfere with each
+others signals.
+We assume that, after down-conversion to baseband,
+matched filtering, sampling, and transformation into the fre-
+x
+y
+Radar 1
+Radar 2
+Radar l
+φ(l)
+R
+Object 1
+Object k
+d(l)
+k , α(l)
+k
+φ(l)
+k
+Tx1
+Rx1
+Tx2
+Rx2
+Tx3
+Rx3
+· · ·
+TxNTx
+· · ·
+RxNRx
+Fig. 1. The scenario considered with an unknown number of objects K, each
+located at position θk being observed by L ≥1 MIMO radars.
+quency domain, the received signal at the lth radar (l =
+1, . . . , L) can be written as
+y(l) =
+K
+X
+k=1
+ψ(l) θk
+
+α(l)
+k
++ v(l)
+(1)
+where y(l) ∈CN×1 is the backscattered signal received
+by the lth radar from K objects. Here, Nf denotes the
+number of samples obtained in the frequency domain for
+each Rx/Tx antenna pair and N = Nf NTx NRx denotes the
+total number of available samples per radar. Note that the
+number of objects K is unknown. The complex amplitude
+α(l)
+k
+corresponds to the reflection from the kth object, located
+at θk = [xk yk]T, in direction of the lth radar. The function
+ψ(l)(θ) is the array response of the lth radar to an object at
+position θ = [x y]T, considering only the direct path. Finally,
+v(l) ∈CN is circularly symmetric complex AWGN with
+covariance
+ λ(l) Λ(l)
+v
+−1, where the spectral envelope given
+by Λ(l)
+v
+is assumed to be known (e.g., Λ(l)
+v = I), but the total
+noise powers of each sensor, represented by the scalars λ(l),
+l = 1, . . . , L, are treated as a nuisance parameters.
+In the following, we assume that (i) the signals are narrow-
+band, (ii) the objects are located in the far-field of the array,
+and (iii) we consider a MIMO radar with NTx = NRx = 3
+transmit and receive antennas. The transmit antennas are
+spaced with λc/2 each whereas the receive antennas are
+spaced with λc, where λc denotes the carrier wavelength,
+resulting in a virtual linear array with the distances between
+the elements and the center of the array given by p =
+λc · [−1.5 −1 −0.5 −0.5 0 0.5 0.5 1 1.5]T. The broadside
+direction of the array is denoted as φ(l)
+R . For each Tx/Rx
+antenna pair we obtain a channel frequency response sampled
+at Nf = 15 points covering a total bandwidth of 20 MHz.
+Given assumptions (i)–(iii) above, the response of the lth radar
+with an array centered at θ(l)
+R = [x(l)
+R y(l)
+R ]T can be factorized
+into an angle-dependent and a distance-dependent part, i.e.,
+ψ(l)(θ) =
+1
+√
+N
+ ψφ(φ(l)) ⊗ψd(d(l))
+
+, where φ(l) and d(l) are
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:27:23 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 3 ---
+functions of θ, and ⊗denotes the Kronecker-product [42].
+Assuming isotropic antennas, the angle-dependent component
+is given by ψφ(φ(l)) = e−i 2π sin(φ(l)) p/λc, where ez (for
+a vector z) denotes the element-wise exponential, i is the
+imaginary unit, and φ(l) is the angle of an object located at
+θ = [x
+y]⊤relative to φ(l)
+R . The distance-dependent part
+is ψd
+ d(l)
+=
+λc
+(4π)3/2(d(l))2 e−i 2π (2d(l)/c) f, where c is the
+speed of light and d(l) = ∥θ −θ(l)
+R ∥is the distance from the
+lth radar to θ, with ∥· ∥denoting the Euclidean norm.1 The
+vector f =
+ −Nf+1
+2
+∆f
+−Nf+2
+2
+∆f · · ·
+Nf−1
+2
+∆f
+T specifies the
+equally spaced baseband frequency points at which the signal
+is sampled, with spacing ∆f.2
+Note that the presented method can be readily generalized—
+e.g., to other array geometries, wideband models, or com-
+pletely different sensor modalities—by appropriately choosing
+ψ(l)(θ) in (1).
+III. PROBABILISTIC MODEL AND SPARSE BAYESIAN
+LEARNING
+To estimate the number of objects K, we transform the
+problem into a sparse signal reconstruction problem such that
+K is estimated as the number of nonzero components of a
+sparse vector. Let Kmax ≥K be the largest possible number
+of objects (e.g. Kmax = N) and αk = 0 for K < k ≤Kmax
+we rewrite (1) as a sparse linear system
+y(l) = Ψ(l)(Θ)α(l) + v(l)
+(2)
+where Θ =
+
+θ1 θ2 · · · θKmax
+
+∈R2×Kmax is the joint parame-
+ter matrix with each of the Kmax columns of Θ corresponding
+to the XY-coordinates of a single (potential) object, Ψ(l)(Θ) =
+
+ψ(l)(θ1) ψ(l)(θ2) · · · ψ(l)(θM)
+
+is a dictionary matrix con-
+sisting of columns ψ(l)(θk), k = 1, . . . , Kmax, each of which
+is parameterized by the position θk of a single object, and
+α(l) = [α1 α2 · · · αKmax]T is a sparse vector of complex object
+reflectivities. Specifically, α(l) = [α(l)
+1
+α(l)
+2 · · · α(l)
+K 0 · · · 0]T,
+l = 1, . . . , L are vectors with K nonzero elements correspond-
+ing to the reflectivities of the K actual objects, and Kmax −K
+zeros. The likelihood of observing y(l) given Θ and α(l) is
+p(y(l)|α(l), Θ, λ(l)) = CN(y(l); Ψ(l)(Θ)α(l), (λ(l)Λ(l)
+v )−1)
+(3)
+where CN(x; µ, Σ) = |πΣ|−1e−(x−µ)HΣ−1(x−µ) denotes
+the probability density function (PDF) of multivariate complex
+Gaussian random variable x with mean µ and covariance Σ,
+and (·)H denotes the hermitian transpose.3 Assuming that the
+noise v(l) is independent across all radars l = 1, . . . , L yields
+the joint likelihood
+p(Y |A, Θ, λ) =
+L
+Y
+l=1
+p(y(l)|α(l), Θ, λ(l))
+(4)
+1With this definition, |α(l)
+k |2 corresponds the radar cross section of the kth
+object in direction of the lth radar, i.e., the unit of α(l)
+k
+is meters.
+2The definition of f given above is used for odd Nf, whereas for even Nf
+we use f = [ −Nf
+2
+∆f
+−Nf +1
+2
+∆f · · · Nf −1
+2
+∆f]T.
+3Note that the proposed method can readily be used for (non-complex)
+Gaussian models [23].
+where Y = [y(1) y(2) · · · y(L)] is the matrix of all observa-
+tions y(l), A = [α(1) α(2) · · · α(L)] ∈CKmax×L is the matrix
+of all amplitudes, consisting of K nonzero rows and Kmax−K
+rows of zeros, and λ = [λ(1) λ(2) · · · λ(L)]T.
+A. Sparse Bayesian Learning
+To jointly estimate the number of objects K and their
+positions θk, k = 1, . . . , K, the proposed multidictionary
+SBL-based method combines the fast update rule [23], [39],
+[43], continuous estimation of dictionary parameters [28]–
+[30], [40], and block-sparse models [37], [39]. To obtain a
+row-sparse sparse estimate of A, (i.e., sparse estimates of α(l),
+l = 1, . . . , L, with shared sparsity patterns), we introduce an
+improper prior with density [24], [39]
+p(A)=
+Kmax
+Y
+k=1
+sup
+γk>0
+ L
+Y
+l=1
+CN(α(l)
+k ; 0, γ−1
+k )
+
+∝
+K
+Y
+k=1
+1
+(∥A[k, ·]∥2)L
+(5)
+that is independent indentically distributed across k
+=
+1, . . . , Kmax, where A[k, ·] denotes the kth row of A. By
+omitting the maximization over the hyperparameters γ =
+[γ1 γ2 · · · γKmax]T in (5), we obtain a lower bound
+˜p(A; γ) =
+L
+Y
+l=1
+CN(α(l); 0, Γ−1) ≤p(A)
+(6)
+parameterized by γ, where Γ = diag(γ) is diagonal matrix
+with the elements of γ along its main diagonal. SBL then
+proceeds to estimate Θ, γ and λ by maximizing a lower bound
+L(Θ, γ, λ) on the (log) marginal likelihood p(Y |Θ, λ) of Y
+given Θ and λ [24], [25]
+( ˆΘ, ˆγ, ˆλ) = arg max
+Θ,γ⪰0,λ
+L(Θ, γ, λ)
+(7)
+where
+L(Θ, γ, λ) = log
+Z
+p(Y |A, Θ, λ)˜p(A; γ) dA
+=
+L
+X
+l=1
+−(y(l))H C(l)−1y(l) −log |C(l)| + const.
+(8)
+and C(l) = Ψ(l)(Θ)Γ−1Ψ(l)(Θ)H+(λ(l)Λ(l)
+v )−1. That is, the
+multi-dictionary SBL objective (8) is a sum over classic SBL
+objective functions [23, Eq. (8)] with each term corresponding
+to the observations of a single sensor.
+Once estimates ˆγ, ˆΘ, and ˆλ are obtained, the (approximate)
+posterior densities of α(l) conditional on y(l), ˆγ, ˆΘ, and ˆλ
+are independent across l = 1, . . . , L, i.e., p(A|Y , ˆΘ, ˆλ; ˆγ) =
+QL
+l=1 p(α(l)|y(l), ˆΘ, ˆλ(l); ˆγ), where
+p(α(l)|y(l), ˆΘ, ˆλ(l); ˆγ) = CN(α(l); ˆα(l), ( ˆΛ(l)
+α )−1)
+(9)
+with
+ˆα(l) = ( ˆΛ(l)
+α )−1( ˆΨ(l))H ˆΛ(l)
+v y(l)
+(10)
+ˆΛ(l)
+α = ( ˆΨ(l))H ˆΛ(l)
+v ˆΨ(l) + ˆΓ
+(11)
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:27:23 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 4 ---
+ˆΛ(l)
+v
+= ˆλ(l)Λ(l)
+v , ˆΨ(l) = Ψ(l)( ˆΘ), and ˆΓ = diag(ˆγ). This
+approach is known to result in many estimates ˆγk to diverge
+to infinity and so do the corresponding elements on the main
+diagonal of ˆΛ(l)
+α . Thus, p(α(l)|y(l), ˆΘ, ˆλ(l); ˆγ) collapses to a
+Dirac-delta in many dimension resulting in a amplitude vectors
+α(l) with many elements having value of zero with probability
+one, i.e., sparse vectors. Furthermore, all α(l) are informed by
+the same hyperparameters γ and, thus, share the same sparsity
+pattern.
+B. Object Parameter Updates
+Finding the global maximum of L(Θ, γ, λ) with respect
+to all parameters (Θ, γ, λ) jointly is computationally pro-
+hibitive. Thus, we maximize L(Θ, γ, λ) using coordinate
+ascent with respect to the tuple of parameters (θk, γk)
+corresponding to a single object at a time, while keep-
+ing the remaining parameters fixed. Let M (l)
+∼k
+=
+I −
+ˆΨ(l)
+∼k(( ˆΨ(l)
+∼k)H ˆΛ(l)
+v ˆΨ(l)
+∼k + ˆΓ∼k)−1( ˆΨ(l)
+∼k)H ˆΛ(l)
+v
+and ˆΨ(l)
+∼k =
+Ψ(l)([ˆθ1 ˆθ2 · · · ˆθk−1 ˆθk+1 · · · ˆθKmax]) denote a matrix of all
+but the kth column of the dictionary
+ˆΨ(l), and ˆΓ∼k
+=
+diag(ˆγ∼k) with ˆγ∼k as the vector ˆγ with the kth element
+removed. Following the derivation of [23], the dependency
+of L(Θ, γ, λ) on the tuple (θk, γk) corresponding to the kth
+object can be made explicit as L(Θ, γ, λ) = L∼k+ℓk(θk, γk)
+where L∼k is some function that does not depend on (θk, γk),
+and
+ℓk(θk, γk) =
+L
+X
+l=1
+|µ(l)
+k (θk)|2/s(l)
+k (θk)
+1 + γks(l)
+k (θk)
++ log
+γks(l)
+k (θk)
+1 + γks(l)
+k (θk)
+(12)
+with
+s(l)
+k (θk) =
+ ψ(l)(θk)H ˆΛ(l)
+v M (l)
+∼kψ(l)(θk)
+−1
+(13)
+µ(l)
+k (θk) = s(l)
+k (θk)ψ(l)(θk)H ˆΛ(l)
+v M (l)
+∼ky(l) .
+(14)
+Since there is no analytic solution to the joint maximum of
+ℓk(θk, γk) we resort to coordinate ascent. First, we find
+ˆθk = arg max
+θ
+ℓk(θ, ˆγk)
+(15)
+by means of a numeric optimizer using the previous estimate
+ˆγk. Next, we update ˆγk. Taking the derivative of ℓk(ˆθ, γk)
+with respect to γk yields the fixed point equation
+0 =
+L
+X
+l=1
+1 −γk(|µ(l)
+k (ˆθk)|2 −s(l)
+k (ˆθk))
+(1 + γks(l)
+k (ˆθk))2
+(16)
+which can be solved by finding the solutions to the polynomial
+equation Pk(γ) = 0 (i.e., by finding the roots of Pk), where
+Pk(γ):=
+L
+X
+l=1
+ 1−γ(|µ(l)
+k (ˆθk)|2−s(l)
+k (ˆθk)
+
+L
+Y
+j=1,j̸=l
+(1+γs(j)
+k (ˆθk))2
+(17)
+is a polynomial in γ of degree 2L −1. Let Gk := {γ > 0 :
+Pk(γ) = 0} denote the set of positive, real-valued roots of
+Pk, we proceed to update ˆγk using
+ˆγk =
+(
+arg maxγ∈Gk ℓk(ˆθk, γ)
+if Gk̸ = ∅
+∞
+else
+(18)
+where ∅denotes the empty set, i.e., we set ˆγk to the solution
+of (16) that increases ℓk(ˆθk, ·) the most.
+Single Radar: Lets consider the single-radar case (i.e., L =
+1) in this paragraph, where we omit the superscript (·)(l) for
+ease of notation. In this case, (16) has a single positive solution
+if |µk(θk)|2 > sk(θk), whereas no positive solution exists
+for otherwise [23]. Hence, for any given location θ, ℓl(θ, ·)
+achieves its maximum at
+γ⋆
+k(θ) =
+(
+1
+|µk(θk)|2−sk(θk)
+if Qk(θk) > 1
+∞
+else
+(19)
+where Qk(θ) := |µk(θ)|2/sk(θ) can be recognized as the
+component SNR [44]. Inserting the optimal value γ⋆
+k into ℓk
+yields ℓ⋆
+k(θ) := ℓk
+ θ, γ⋆
+k(θ)
+
+, where
+ℓ⋆
+k(θ) =
+(
+Qk(θ)−1−log Qk(θ)
+if Qk(θ) > 1
+0
+else
+.
+(20)
+It is straightforward to show, that ℓ⋆
+k(θ) is an increasing
+function of the component SNR Qk. Hence, in the single radar
+case we find the supremum of ℓk(θk, γk) jointly as
+ˆθk = arg max
+θ
+Qk(θ)
+(21)
+ˆγk = γ⋆
+k(ˆθk)
+(22)
+i.e., SBL objective L(Θ, γ, λ) is maximized with respect to
+the parameters of a single object (θk, γk) by the position θ
+that maximizes the component SNR Qk(θ) and the object
+is estimated to have nonzero amplitude if, and only if, the
+component SNR exceeds unity.
+Identical Sensors: Lets assume that the array responses
+ψ(l)
+k
+= ψk and noise distribution (i.e., λ(l)Λ(l)
+v ) are identical
+across all l = 1, . . . , L, corresponding to, e.g., multiple
+measurement vectors obtained from the same radar. In this
+case, the variables s(l)
+k = sk defined in (13) do not depend on
+l since all ψ(l) are equal such that (16) can be simplified to
+0 = 1 −γk(|¯µk(ˆθk)|2 −sk(ˆθk)
+(1 + γsk(ˆθk))2
+(23)
+where ¯µk = 1/L · PL
+l=1 µ(l)
+k
+is the average of all µ(l)
+k . Hence,
+the multiple measurement vector case with identical array
+responses can be treated same as the single measurement
+vector case L = 1, except that µk is replaced by the mean
+over observations ¯µk.
+Additional Thresholding: It is experimentally known, that
+the updates for the object parameters (θk, γk), k = 1, . . . , K
+(particular the update of the hyperparameter γk governing
+object existence) described in this section results in a relatively
+high number of false alarms [44]. To reduce the number of
+false alarms, we require all detections to exceed a certain
+component SNR (averaged over l = 1, . . . , L). Specifically,
+when updating the value of ˆγk we use
+ˆγk =
+(
+arg maxγ∈Gk ℓk(ˆθk, γ)
+if Gk̸ = ∅and ¯Qk(ˆθk) > χ
+∞
+else
+(24)
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:27:23 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 5 ---
+instead of (18), where ¯Qk(θ) = 1/L·PL
+l=1 |µ(l)
+k (θ)|2/s(l)
+k (θ)
+is the component SNR averaged over all radars and χ ≥1 is
+the minimum required average component SNR. See [44] for
+a detailed analysis of the relation between the threshold χ and
+the false alarm rate for the single radar case.
+C. Noise Power Estimate
+No closed form solution for the update of the noise pa-
+rameters λ(l) is available. Thus, we resort to an expectation-
+maximization (EM) update that increases a lower bound
+LEM(λ, ˆλold) ≤L( ˆΘ, ˆγ, λ) given the current estimates ˆλold,
+ˆΘ and ˆγ [45], [46]. We consider Y as the observed data
+and (Y , A) as the complete data. An improved estimate
+ˆλnew = arg maxλ LEM(λ, ˆλold) is obtained as maximizer of
+the EM objective
+LEM(λ, ˆλold) =
+Z
+p(A|Y , ˆΘ, ˆλold; ˆγ)
+× log p(Y , A| ˆΘ, λ; ˆγ) dA
+(25)
+where p(Y , A| ˆΘ, λ; ˆγ) = p(Y |A, ˆΘ, λ)p(A; ˆγ). Solving the
+integral and setting the derivative of LEM to zero yields the
+estimates
+ˆλ(l),new =
+N
+(ˆy(l)
+res )HΛ(l)
+v ˆy(l)
+res + tr
+ ( ˆΛ(l)
+α )−1( ˆΨ(l))HΛ(l)
+v ˆΨ(l)
+(26)
+for l = 1, . . . , L, where ˆy(l)
+res = y(l) −ˆΨ(l) ˆα(l), tr(·) is the
+trace operator, and ˆα(l) and ˆΛ(l)
+α are the mean and precision,
+respectively, of p(α(l)|y(l), ˆΘ, ˆλ(l),old; ˆγ) given by (10) and
+(11), respectively.
+The updates given in subsections III-B and III-C are re-
+peated in a round-robin fashion until convergence or until a
+fixed number of iterations is exceeded.
+IV. ALGORITHM
+We define an algorithm by combining the coordinate-ascent
+updates of estimates (ˆθk, ˆγk) together with an initialization
+and update-schedule as summarized in Algorithm1.4
+We
+start
+with
+an
+empty
+model
+ˆγk
+=
+∞,
+k
+=
+1, . . . , Kmax, and initialize the noise parameters as ˆλ(l) =
+10·N/(y(l))HΛ(l)
+v y(l). In each iteration, we first go through all
+“active” objects currently in the model k ∈{1 ≤k ≤Kmax :
+ˆγk < ∞} and update their estimated positions ˆθk. To do so,
+we use a numeric optimizer (Python’s scipy.optimize)
+to maximize
+ˆθk = arg max
+θ
+(
+Qk(θ)
+if L = 1
+ℓk(θ, ˆγk)
+if L > 1 .
+(27)
+Once ˆθk is obtained, we also update ˆγk using (24), potentially
+setting it to ˆγk = ∞and thereby “deactivating” kth the
+object. After iterating through all currently existing objects,
+we search for a new object to detect. To do so, we chose
+any k corresponding to a “deactivated” object (i.e., ˆγk = ∞)
+4Python code is available at https://doi.org/10.3217/kcn0n-03509
+Algorithm 1 SBL for Multiple Parameterized Dictionaries
+Input: Signals y(l), l = 1, . . . , L, noise precision Λ(l)
+v , array
+responses ψ(l) : R2 7→CN×1, threshold χ and grid ¯Θ.
+Output: Object locations ˆΘ, hyperparameters ˆγ, amplitudes
+ˆα(l), l = 1, . . . , L, and noise parameter ˆλ.
+Initialize ˆλ(l) ←10 · N/((y(l))HΛ(l)
+v y(l)), and ˆγk ←∞for
+l = 1, . . . , L, and k = 1, . . . , Kmax, respectively.
+while not converged do
+for k ∈{1 ≤k ≤Kmax : ˆγk < ∞} do
+Update ˆθk using (27).
+Update ˆγk using (24).
+end for
+k ←chose any from {1 ≤k ≤Kmax : ˆγk = ∞}.
+ˆθk ←arg maxθ ¯Qk(θ).
+Update ˆγk using (24).
+Update ˆλ(l) for l = 1, . . . , L using (26).
+end while
+Calculate ˆα(l) and ˆΛ(l)
+α for l = 1, . . . , L using (10) and
+(11), respectively.
+and find the position of this potential object by finding the
+position ˆθk that maximizes the average component SNR
+¯Qk(θ). To aid the numeric optimizer during the search for
+new objects, we first evaluate ¯Qk(θ) on a sub-Nyquist grid ¯Θ
+and initialize the numeric optimizer with the location of the
+maximum on the grid. Again, we use the computed position
+ˆθk = arg maxθ ¯Qk(θ) to set ˆγk according to (24), potentially
+including it as new object in the model. Finally, we update
+the estimate of the noise parameter ˆλ using (26). Once the
+algorithm is converged (or a maximum number of iterations
+is reached), we also compute the mean and covariance, ˆα(l)
+and ˆΛ(l)
+α for l = 1, . . . , L, respectively, of the (approximate)
+posterior p(A|Y , ˆΘ, ˆλ; ˆγ) = QL
+l=1 p(α(l)|y(l), ˆΘ, ˆλ(l); ˆγ).
+Note that the quantities µk(θ) and sk(θ) can be computed
+in an efficient manner by considering the symmetries of the
+matrix
+ˆΛv ˆ
+M∼k = ˆΛv −ˆΛv ˆΨ∼k( ˆΨH
+∼k ˆΛv ˆΨ∼k + ˆΓ∼k)−1 ˆΨH
+∼k ˆΛv
+(28)
+where we omitted the superscript (·)(l) for ease of notation. Let
+LLH = ˆΛv and DDH = ˆΛα be the choleskey decompositions
+of ˆΛv, and ˆΛα, respectively, and R = ˆΛv ˆΨ∼kD−1, such that
+ˆΛv ˆ
+M∼k = LLH −RRH. Thus we can compute
+sk(θ) = 1/(∥LHψ(θ)∥2 −∥RHψ(θ)∥2
+F)
+(29)
+µk(θ) = sk(θ)ψ(θ)Hyres
+(30)
+where yres = ˆΛvy −RRHy, and ∥· ∥F denotes the Frobenius
+norm. Here yres, L and R do not depend on θ. Thus, they
+can be pre-computed for the (numeric) optimization over θ in
+(27).
+V. RESULTS
+A. Single Radar
+We assume as single radar (L = 1) located at the origin (i.e,
+θ(1)
+R
+= [0 0]T) with broadside direction φ(1)
+R
+= π/2 oriented
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:27:23 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 6 ---
+−60
+−40
+−20
+0
+20
+40
+60
+0
+20
+40
+60
+start:
+t=−30
+start:
+t=−30
+crossing:
+t=0
+end:
+t=30
+end:
+t=30
+Radar
+x in m
+y in m
+SBL
+NOMP True Positions
+Fig. 2. Tracks crossing at an angle of 36◦with component SNR of 20 dB
+each, and locations of detected objects from SBL and NOMP using low
+thresholds (7.4 dB for SBL and 7 dB for MOMP). Best viewed in color.
+in parallel to the Y-axis. For ease of interpretation, we do not
+consider a distance-dependent path loss, since the path loss
+can be absorbed into α(l)
+k
+anyways. Finally, we set v(1) as
+additive white Gaussian noise (AWGN) with unit variance,
+i.e., λ(1) = 1 and Λ(1)
+v
+= I.
+We compare the presented SBL algorithm with the NOMP
+algorithm [41], but instead of using the Newton updates
+proposed in [41], we employ the same numeric optimizer
+that is used in our SBL implementation (i.e., Python’s
+scipy.optimize function). Note that unlike the proposed
+SBL algorithm, the NOMP algorithm assumes the noise co-
+variance to be fully known, i.e., it requires all λ(l) to be
+known in addition to Λ(l)
+v . Furthermore, with the parameters
+given in Section II, the radar has a resolution of roughly 7.5 m
+in range and 16.5◦in angle (corresponding to a cross-range
+resolution of 8.5 m at a range of 30 m). Thus, the performance
+of a CFAR detector (or similar grid-based approaches) will
+be significantly worse than either NOMP or the proposed
+SBL approach. Similarly, we focus on SBL as method to
+detect targets in individual time steps, e.g., when used as
+pre-processing for a multitarget tracking algorithm such as
+[8]. Thus, we consider a more thorough comparison against
+tracking algorithms outside the scope of this work.
+To evaluate the detection and estimation performance for
+both, well-separated and closely-spaced objects, we consider
+two objects that approach one another and cross paths, as
+depicted in Figure 2. Initially, these objects occupy regions
+where they are clearly separated in delay. At time step
+t = 0 the objects are located at positions θ1 = [0, 20]T and
+θ2 = [0.3, 20.4]T, i.e., separated only by 0.5 m. Note that the
+distance between the targets corresponds roughly to |t|, i.e., at
+t ∈{−30, 30} the targets are roughly 30 m apart whereas at
+t = 0 the targets (almost) coincide. As a performance metric,
+we consider the optimal subpattern assignment (OSPA) [47]
+with the OSPA order set to two (Euclidean metric) and cutoff
+distance of 10 m. For each time step we perform 500 Monte-
+Carlo runs and report the average OSPA. In each realization,
+the absolute value of the amplitudes |α(1)
+k |, k = 1, 2 is chosen
+−30
+−20
+−10
+0
+10
+20
+30
+0
+2
+4
+6
+8
+10
+Timestep t
+OSPA in m
+SBL 10 dB
+SBL 7.4 dB
+NOMP 10 dB
+NOMP 7 dB
+−30
+−20
+−10
+0
+10
+20
+30
+0
+2
+4
+Timestep t
+Number of detections ˆ
+K
+(a)
+(b)
+Fig. 3. OSPA (a) and estimated number of objects ˆ
+K (b) for crossing tracks
+with component SNR of 30 dB each. High thresholds (10 dB for both SBL
+and NOMP) are shown as solid lines and low thresholds (7.4 dB for SBL
+7 dB for NOMP) as dashed lines.
+such that the component SNR ∥ψ(1)(θk)α(1)
+k ∥equals 30 dB
+and the phase is drawn uniformly random with limits [0, 2π).
+Both algorithms are evaluated for two different thresholds. To
+achieve a low false alarm rate of approximately 3.3 %, the
+thresholds of the algorithms are set to χ = 10 dB for SBL
+and, equally, a threshold of 10 dB (denoted as τ in [41]) for
+NOMP. For a higher false alarm rate of approximately two
+false alarms per time step, we set the thresholds to χ = 7.4 dB
+for SBL and 7 dB for NOMP.
+Figure 3a shows the obtained OSPA whereas Figure 3b
+shows the estimated model order as function of the time step
+t. For well separated objects (|t| > 10), the performance of
+both NOMP and SBL is virtually identical in both cases. For
+medium to small separations (5 < |t| < 10), the performance
+of the SBL algorithm is similar to that of |t| > 10, whereas the
+number of detections (i.e., the false alarm rate) is increased for
+NOMP, resulting in an increased OSPA as well. For |t| < 5,
+the probability that either of the two algorithms can accurately
+detect that there are two objects decreases, due the objects
+close proximity. Thus, the performance of both algorithms
+deteriorates, with SBL still outperforming NOMP. This is in
+line with theoretical results concerning the advantages of Type-
+II Bayesian methods over Type-I Bayesian methods [25].
+B. Multiple Radars
+To demonstrate the ability of the proposed multi-dictionary
+SBL algorithm to fuse data from multiple radars, we consider
+a single object at θ1 = [0 30]T with component SNR of 15 dB
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:27:23 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 7 ---
+4
+6
+8
+10
+12
+14
+16
+18
+20
+0
+0.2
+0.4
+0.6
+0.8
+1
+Threshold χ in dB
+Probability of miss /
+Number of false alarms
+Pmiss
+NFA
+4
+6
+8
+10
+12
+14
+16
+18
+20
+0
+2
+4
+6
+8
+10
+Threshold χ in dB
+OSPA in m
+L = 1
+L = 2
+L = 3
+L = 4
+0.4
+0.6
+0.8
+1
+(a)
+(b)
+Fig. 4. Detection (a) and localization (b) performance of the proposed SBL
+algorithm for a single object at θ1 = [0 30]T with an component SNR of
+15 dB observed by multiple radars.
+that is observed by up to four radars located at θ(l)
+R = [0 0]T,
+[−30 30]T, [0 60]T, and [30 30]T for l = 1, . . . , 4. Each of
+those radars has a 3×3 MIMO array as described in Section II
+with broadside direction aimed towards the object and we
+assume AWGN with unit variance for all radars.
+To evaluate the detection performance as function of the
+threshold χ and the number of radars L, we consider the
+object to be detected if any estimated objected is located within
+5 m of the true object location. Depending on the threshold
+χ, Figure 4a shows the probability of miss detection Pmiss
+and the number of false alarms NFA, i.e., the number of
+estimated objects not located within 5 m of the true object
+location, averaged over 103 Monte-Carlo runs. The number of
+false alarms reduces with increasing number of radars. This
+is because, when testing a position θ, the probability that the
+noise contribution is (jointly) high decreases with the number
+of (independent) observations. The detection performance is
+approximately similar for all cases. However, the slope of the
+missed detection curve is smaller for the single-radar case
+L = 1 compared to L > 1. This is again due to the noise
+interfering either constructively or deconstructively with the
+signal reflected from the object. This effect is most prominent
+for L = 1 and reduces for increasing L due to the noise-
+averaging effect of multiple observations. In short, increasing
+the number of radars helps to decrease the number of false
+alarms. Equivalently, this allows the use of a smaller detection
+threshold to increase the detection performance in low-SNR
+cases.
+The localization performance (in terms of the OSPA) is
+shown in Figure 4b. For high thresholds (χ ≥15 dB), the
+4
+6
+8
+10
+12
+14
+0
+2
+4
+6
+8
+10
+Threshold χ in dB
+OSPA in m
+L = 1
+L = 2
+L = 3
+L = 4
+Fig. 5. OSPA of the proposed SBL algorithm for four object observed by up
+to four radars when considering the path loss.
+OSPA is dominated by missed detections. For small thresholds
+(depending on the number of radars L, e.g., χ < 8 dB for
+L = 1), the OSPA is dominated by false alarms. In between,
+e.g., for a threshold of χ = 11 dB, there are almost no miss
+detections or false alarms (see Figure 4a). Therefore the OSPA
+reflects the localization accuracy. It can be seen, that for
+χ = 11 dB an OSPA of 0.84 m, 0.53 m, 0.43 m, and 0.37 m is
+achieved for L = 1, 2, 3, 4, respectively.
+As a second multi-radar example, we simulate four objects
+at positions θk = [0 10]T, [20 −30]T, [0 50]T, and [20 30]T for
+k = 1, . . . , 4. All four objects are observed by up to four radars
+with the same positions as before. In this case, we consider the
+distance-dependent path loss and set the objects amplitudes
+α(l)
+k
+such that a component SNR of 30 dB is achieved at a
+distance of 10 m. Figure 5 shows the OSPA achieved by the
+proposed algorithm for varying thresholds χ. In this case, each
+additional radar improves the OSPA by a wide margin, due to
+the different radars achieving high SNRs in different regions
+of the surveilled area.
+VI. CONCLUSION
+We introduced a multidictionary SBL algorithm that jointly
+detects and estimates dictionary parameters on a continuum
+across multiple sensors. The algorithm has been used to detect
+and localize objects by fusing data from multiple MIMO
+radars. In the single-radar setting, the proposed multidictionary
+SBL algorithm outperforms the NOMP algorithm [41], espe-
+cially when multiple objects are closely spaced. We illustrate
+how combining data from multiple radars can reduce the
+false alarm rate and improve localization accuracy. By choos-
+ing an appropriate parameterized dictionary, the same multi-
+dictionary algorithm can be adapted to other applications,
+e.g., direction of arrival estimation in multi-frequency ocean
+acoustic channels [38].
+REFERENCES
+[1] J. Jang, F. Meyer, E. R. Snyder, S. M. Wiggins, S. Baumann-Pickering,
+and J. A. Hildebrand, “Bayesian detection and tracking of odontocetes
+in 3-D from their echolocation clicks,” J. Acoust. Soc., vol. 153, no. 5,
+pp. 2690–2705, May 2023.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:27:23 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 8 ---
+[2] N. Gonz´alez-Prelcic, M. Furkan Keskin, O. Kaltiokallio, M. Valkama,
+D. Dardari, X. Shen, Y. Shen, M. Bayraktar, and H. Wymeersch,
+“The integrated sensing and communication revolution for 6g: Vision,
+techniques, and applications,” Proc. IEEE, vol. 112, no. 7, pp. 676–723,
+July 2024.
+[3] J. Levinson, J. Askeland, J. Becker, J. Dolson, D. Held, S. Kammel,
+J. Z. Kolter, D. Langer, O. Pink, V. Pratt, M. Sokolsky, G. Stanek,
+D. Stavens, A. Teichman, M. Werling, and S. Thrun, “Towards fully
+autonomous driving: Systems and algorithms,” in IEEE Intell. Vehicles
+Symp., Baden-Baden, Germany, Jun. 5–9, 2011, pp. 163–168.
+[4] R. Nitzberg, “Constant-false-alarm-rate signal processors for several
+types of interference,” IEEE Trans. Aerosp. Electron. Syst., vol. AES-8,
+no. 1, pp. 27–34, Feb. 1972.
+[5] S. Mallat and Z. Zhang, “Matching pursuits with time-frequency dictio-
+naries,” IEEE Trans. Signal Process., vol. 41, no. 12, pp. 3397–3415,
+Dec. 1993.
+[6] Y. Bar-Shalom, P. K. Willett, and X. Tian, Tracking and Data Fusion: A
+Handbook of Algorithms.
+Storrs, CT, USA: Yaakov Bar-Shalom, 2011.
+[7] R. Mahler, Statistical Multisource-Multitarget Information Fusion. Nor-
+wood, MA, USA: Artech House, Inc., 2007.
+[8] F. Meyer, T. Kropfreiter, J. L. Williams, R. Lau, F. Hlawatsch, P. Braca,
+and M. Z. Win, “Message passing algorithms for scalable multitarget
+tracking,” Proc. IEEE, vol. 106, no. 2, pp. 221–259, Feb. 2018.
+[9] X. Li, E. Leitinger, A. Venus, and F. Tufvesson, “Sequential detection
+and estimation of multipath channel parameters using belief propaga-
+tion,” IEEE Trans. Wireless Commun., vol. 21, no. 10, pp. 8385–8402,
+Apr. 2022.
+[10] A. Venus, E. Leitinger, S. Tertinek, F. Meyer, and K. Witrisal, “Graph-
+based simultaneous localization and bias tracking,” IEEE Trans. Wireless
+Commun., vol. 23, no. 10, pp. 13 141–13 158, May 2024.
+[11] S. J. Davey, M. Wieneke, and H. Vu, “Histogram-PMHT unfettered,”
+IEEE J. Sel. Topics Signal Process., vol. 7, no. 3, pp. 435–447, Mar.
+2013.
+[12] F. Papi, B.-N. Vo, B.-T. Vo, C. Fantacci, and M. Beard, “Generalized
+labeled multi-Bernoulli approximation of multi-object densities,” IEEE
+Trans. Aerosp. Electron. Syst., vol. 63, no. 20, pp. 5487–5497, July 2015.
+[13] B. Ristic, L. Rosenberg, D. Y. Kim, X. Wang, and J. Williams, “Bernoulli
+track-before-detect filter for maritime radar,” IET Radar, Sonar &;
+Navigation, vol. 14, no. 3, pp. 356–363, Feb. 2020.
+[14] T. Kropfreiter, J. L. Williams, and F. Meyer, “A scalable track-before-
+detect method with Poisson/multi-Bernoulli model,” in 2021 IEEE 24th
+Int. Conf. Inf. Fusion, Sun City, South Africa, Nov. 1–4, 2021, pp. 1–8.
+[15] ——, “Multiobject tracking for thresholded cell measurements,” in 27th
+Int. Conf. Inf. Fusion.
+IEEE, Jul. 8–11, 2024, pp. 1–8.
+[16] A. M. Westerkam, J. M¨oderl, E. Leitinger, and T. Pedersen, “Variational
+message passing-based multiobject tracking for MIMO-radars using raw
+sensor signals,” in 28th IEEE Int. Conf. Inf. Fusion, Rio de Janeiro,
+Brazil, Mar. 7–11, 2025.
+[17] M. Liang, E. Leitinger, and F. Meyer, “A belief propagation approach
+for direct multipath-based SLAM,” in Proc. Asilomar-23, Pacific Grove,
+CA, USA, Nov. 2023.
+[18] ——, “Direct multipath-based SLAM,” IEEE Trans. Signal Process.,
+2025.
+[19] M. Liang and F. Meyer, “An approach of directly tracking multiple
+objects,” in Proc. Asilomar-24, Pacific Grove, CA, USA, 2024.
+[20] P. Stoica and R. Moses, Spectral analysis of signals.
+Upper Saddle
+River, NJ, USA: Pearson Prentice Hall, 2005.
+[21] R. Tibshirani, “Regression shrinkage and selection via the LASSO,” J.
+Roy. Statistical Soc.: Ser. B (Statistical Methodology), vol. 58, no. 1, pp.
+267–288, 1996.
+[22] S. Mallat and Z. Zhang, “Matching pursuits with time-frequency dictio-
+naries,” IEEE Trans. Signal Process., vol. 41, no. 12, pp. 3397–3415,
+1993.
+[23] A. Faul and M. Tipping, “Analysis of sparse Bayesian learning,” in
+Advances Neural Inf. Process. Syst., vol. 14, Vancouver, Canada, Dec.
+3–8, 2001, pp. 383–389.
+[24] J. Palmer, B. Rao, and D. Wipf, “Perspectives on sparse Bayesian
+learning,” in Adv. Neural Inf. Process. Syst., vol. 16, Vancouver, Canada,
+Dec. 8–13, 2003, pp. 249–256.
+[25] D. P. Wipf, B. D. Rao, and S. Nagarajan, “Latent variable Bayesian
+models for promoting sparsity,” IEEE Trans. Inf. Theory, vol. 57, no. 9,
+pp. 6236–6255, Sep. 2011.
+[26] S. E. Ament and C. P. Gomes, “Sparse Bayesian learning via stepwise
+regression,” in Proc. 38th Int. Conf. Mach. Learn., Jul. 18–24, 2021.
+[27] R. R. Pote and B. D. Rao, “Light-weight sequential SBL algorithm: An
+alternative to OMP,” in IEEE Int. Conf. Acoustics, Speech and Signal
+Process., Rhodes Island, Greece, Jun. 04–10, 2023.
+[28] T. L. Hansen, M. A. Badiu, B. H. Fleury, and B. D. Rao, “A sparse
+Bayesian learning algorithm with dictionary parameter estimation,” in
+IEEE 8th Sensor Array and Multichannel Signal Process. Workshop, A
+Coruna, Spain, Jun. 22–25, 2014, pp. 385–388.
+[29] S. Grebien, E. Leitinger, K. Witrisal, and B. H. Fleury, “Super-resolution
+estimation of UWB channels including the dense component – An SBL-
+inspired approach,” IEEE Trans. Wireless Commun., vol. 23, no. 8, pp.
+10 301–10 318, Feb. 2024.
+[30] T. L. Hansen, B. H. Fleury, and B. D. Rao, “Superfast line spectral
+estimation,” IEEE Trans. Signal Process., vol. 66, no. 10, pp. 2511–
+2526, Feb. 2018.
+[31] M. F. Duarte and R. G. Baraniuk, “Spectral compressive sensing,” Appl.
+Comput. Harmon. Anal., vol. 35, no. 1, pp. 111–129, Jul. 2013.
+[32] Y. Chi, L. L. Scharf, A. Pezeshki, and A. R. Calderbank, “Sensitivity to
+basis mismatch in compressed sensing,” IEEE Trans. Signal Process.,
+vol. 59, no. 5, pp. 2182–2195, May 2011.
+[33] M. Yuan and Y. Lin, “Model selection and estimation in regression
+with grouped variables,” J. Roy. Statistical Soc.: Ser. B (Statistical
+Methodology), vol. 68, no. 1, pp. 49–67, Feb. 2006.
+[34] Y. C. Eldar, P. Kuppinger, and H. Bolcskei, “Block-sparse signals: Un-
+certainty relations and efficient recovery,” IEEE Trans. Signal Process.,
+vol. 58, no. 6, pp. 3042–3054, Jun. 2010.
+[35] Z. Zhang and B. D. Rao, “Extension of SBL algorithms for the recovery
+of block sparse signals with intra-block correlation,” IEEE Trans. Signal
+Process., vol. 61, no. 8, pp. 2009–2015, Apr. 2013.
+[36] M. Luessi, S. D. Babacan, R. Molina, and A. K. Katsaggelos, “Bayesian
+simultaneous sparse approximation with smooth signals,” IEEE Trans.
+Signal Process., vol. 61, no. 22, pp. 5716–5729, Nov. 2013.
+[37] S. D. Babacan, S. Nakajima, and M. N. Do, “Bayesian group-sparse
+modeling and variational inference,” IEEE Trans. Signal Process.,
+vol. 62, no. 11, pp. 2906–2921, Jun. 2014.
+[38] S. Nannuru, K. L. Gemba, P. Gerstoft, W. S. Hodgkiss, and C. F.
+Mecklenbr¨auker, “Sparse Bayesian learning with multiple dictionaries,”
+Signal Processing, vol. 159, pp. 159–170, June 2019.
+[39] J. M¨oderl, E. Leitinger, B. H. Fleury, F. Pernkopf, and K. Witrisal,
+“Fast variational block-sparse Bayesian learning,” IEEE Trans. Signal
+Process., 2025.
+[40] J. M¨oderl, F. Pernkopf, K. Witrisal, and E. Leitinger, “Variational
+inference of structured line spectra exploiting group-sparsity,” IEEE
+Trans. Signal Process., Nov. 2024.
+[41] B. Mamandipoor, D. Ramasamy, and U. Madhow, “Newtonized orthog-
+onal matching pursuit: Frequency estimation over the continuum,” IEEE
+Trans. Signal Process., vol. 64, no. 19, pp. 5066–5081, Oct. 2016.
+[42] A. Richter, “Estimation of radio channel parameters: Models and algo-
+rithms,” PhD Thesis, Ilmenau University of Technology, Mar. 2005.
+[43] D. Shutin, T. Buchgraber, S. R. Kulkarni, and H. V. Poor, “Fast varia-
+tional sparse Bayesian learning with automatic relevance determination
+for superimposed signals,” IEEE Trans. Signal Process., vol. 59, no. 12,
+pp. 6257–6261, Dec. 2011.
+[44] E. Leitinger, S. Grebien, B. Fleury, and K. Witrisal, “Detection and
+estimation of a spectral line in MIMO systems,” in 2020 54th Asilomar
+Conf. Signals, Syst. and Computers, Pacific Grove, CA, USA, Nov. 01–
+04, 2020, pp. 1090–1095.
+[45] C. M. Bishop, Pattern Recognition and Machine Learning.
+Secaucus,
+NJ, USA: Springer-Verlag New York, Inc., 2006.
+[46] D. G. Tzikas, A. C. Likas, and N. P. Galatsanos, “The variational
+approximation for Bayesian inference,” IEEE Signal Process. Mag.,
+vol. 25, no. 6, pp. 131–146, Nov. 2008.
+[47] D. Schuhmacher, B.-T. Vo, and B.-N. Vo, “A consistent metric for
+performance evaluation of multi-object filters,” IEEE Trans. Signal
+Process., vol. 56, no. 8, pp. 3447–3457, Aug. 2008.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:27:23 UTC from IEEE Xplore.  Restrictions apply. 

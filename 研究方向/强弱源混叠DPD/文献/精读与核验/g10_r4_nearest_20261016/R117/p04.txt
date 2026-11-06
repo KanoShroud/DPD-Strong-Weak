@@ -1,0 +1,61 @@
+Y. Yang et al.                                                                                                   Journal of Sound and Vibration 517 (2022) 116549
+
+         [                                ]T
+where p =  p1,1,                     p2,1,               …, pM,1                                               , …, p1,L,                                               p2,L,                             …, pM,L                                          ∈CML×1, p⋅,l ∈CM×1 denotes the measured sound pressures for all M microphones                                                                                                                                                                              ⏟̅̅̅̅̅̅̅̅̅̅̅̅̅                                                                                                                                                 ⏞⏞̅̅̅̅̅̅̅̅̅̅̅̅̅                           ⏟                                                                                                                                                                                                                                                                                                                                                                                                                                                                        ⏟̅̅̅̅̅̅̅̅̅̅̅̅̅                                                                                                                                                                                                                                                                                                        ⏞⏞̅̅̅̅̅̅̅̅̅̅̅̅̅                                               ⏟
+                                    p⋅,1                                   p⋅,L
+                                                                   [                                  ]T
+at fl, pm,l denotes the measured sound pressure for the mth microphone at fl. n =  n1,1, n2,1, …, nM,1 , …, n1,L, n2,L, …, nM,L  ∈CML×1 is                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ⏟̅̅̅̅̅̅̅̅̅̅̅̅̅̅                                                 ⏞⏞̅̅̅̅̅̅̅̅̅̅̅̅̅̅      ⏟                                                            ⏟̅̅̅̅̅̅̅̅̅̅̅̅̅                                             ⏞⏞̅̅̅̅̅̅̅̅̅̅̅̅̅      ⏟
+                                                                                                                                                                      n⋅,1                                   n⋅,L
+the vector of noise floor in the measurement, which is incoherent with theoretical sound pressure vector pTheory. We define the SNR at fl
+                          /‖ n⋅,l‖2) [46,47].as SNRl = 20log10(‖ pTheory⋅,l    ‖2
+
+3. Multi-frequency synchronous two-dimensional on-grid compressive beamforming
+
+   Grid-based compressive beamforming discretizes the target source area into N (N >> M) grid points. The nth gird point’s co­
+ordinates are denoted as (xGn, yGn, h), and let rGn ≡[xGn, yGn]T. Then the grid point coordinates can be stacked as ΩG = [rG1, rG2, ⋯,
+rGN] ∈R2×N. Grid-based compressive beamforming assumes that each grid point corresponds to a potential source and utilizes the
+transfer matrix between the grid points and the microphones to establish the underdetermined equations between the measured sound
+pressure vector and the unknown source strength vector. Solving these underdetermined equations can obtain the estimate of source
+location and strength [26].
+   The measured microphone pressures at fl can be represented as
+           p⋅,l = Al(ΩG)qG⋅,l + n⋅,l,                                                                                                     (6)
+
+                                                        = [qG1,l, qG2,l, …, qGN,l]T ∈CN×1 is thewhere Al(ΩG) = [al(rG1), al(rG2), ⋯, al(rGN)] ∈CM×N is the sensing matrix at frequency of fl, qG⋅,l
+unknown source strength vector. When the sources are spatially sparse (S << N), Eq. (6) can be solved by compressive sensing.
+  When L frequencies are considered synchronously, these frequency components share the common support set (source location) but
+different source strengths, i.e., the non-zero elements of qG⋅,1, …, qG⋅,L are located in the same positions but take different values. The
+sensing matrix of all L frequencies between all N grid points and all M microphones can be constructed as A(ΩG) = [A(rG1), A(rG2), ⋯
+, A(rGN)] ∈CML×NL (herein, A(rGn) ∈CML×L). Then, the measured microphone pressures p can be represented as
+     p = A(ΩG)qG + n,                                                                                                          (7)
+
+         [                                   ]T
+where qG =  qG1,1, qG1,2, …, qG1,L , …, qGN,1, qGN,2, …, qGN,L   ∈CNL×1 is the source strength vector stacked by all the N grid points’ source                                                                                                                                                                                                                       ⏟̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅                                                          ⏞⏞̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅       ⏟                                                                        ⏟̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅                                                               ⏞⏞̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅       ⏟
+                                   qG1,⋅                               qGN,⋅
+strengths at all frequencies (qGn,⋅∈CL×1 denotes the source strengths of the nth grid point at all frequencies, qGn,l denotes the source
+strengths of the nth grid point at fl).
+   In the multi-frequency synchronous compressive beamforming model (Eq. (7)), the dimension of the unknown source strength
+vector is increased to NL from N in the single-frequency compressive beamforming model (Eq. (6)). Since every L adjacent source
+strengths in qG correspond to different frequencies of one source, the non-zero elements in qG present S blocks that are aggregated per L
+elements. The source strength vector can be regarded as S-block sparse. Accordingly, the multi-frequency synchronous compressive
+beamforming model (Eq. (7)) can be regarded as a block sparse compressive sensing problem of finding the most suitable S blocks
+A(rGn),n = 1,⋯,Nfrom the sensing matrixA(ΩG). In other words, with Eq. (7), the source identification problem of sparsely distributed
+S sources is transformed into a block sparse recovery problem. It can be solved by the existing block sparse recovery algorithms, such as
+convex relaxation algorithm [38], greedy algorithms (e.g., block-matching pursuit (BMP) and block-orthogonal matching pursuit
+(BOMP)) [48], and sparse Bayesian algorithm [49].
+   However, the above models assume that the source lies on the grid point. When the source lies off the grid point, i.e., when basis
+mismatch occurs, the linear combination of support sets (priori vectors or priori blocks of the sensing matrix) selected from the finite-
+dimensional discrete dictionary cannot accurately represent the measurement vector, and the grid points cannot represent the real
+locations of the sources. Thus, the acoustic source identification performance is degraded.
+
+4. Multi-frequency synchronous two-dimensional off-grid compressive beamforming
+
+   In this section, we further proposed a multi-frequency synchronous 2D off-grid compressive beamforming (denoted as BNOMP-CB).
+Firstly, the multi-frequency synchronous source identification in the 2D continuous plane is formulated as a maximum likelihood
+estimation of source coordinates and strengths. Then, a BNOMP solution algorithm for this model is developed. The following is the
+detail of its model and solution.
+
+4.1. Mathematical model
+
+   Minimizing the residual energy of a multi-frequency measurement model ‖ p −  A(ΩS)qS‖22, we can get the maximum likelihood
+
+                                                                4

@@ -1,0 +1,1282 @@
+--- PDF PAGE 1 ---
+Digital Signal Processing 96 (2020) 102600
+Contents lists available at ScienceDirect
+Digital Signal Processing
+www.elsevier.com/locate/dsp
+Low-complexity TDOA and FDOA localization: A compromise between 
+two-step and DPD methods
+Fuhe Ma a,∗, Fucheng Guo a, Le Yang b
+a State Key Laboratory of Complex Electromagnetic Environment Effects on Electronics and Information System, National University of Defense Technology, 
+Changsha 410073, PR China
+b Department of Electrical and Computer Engineering, University of Canterbury, Christchurch, 8020, New Zealand
+a r t i c l e 
+i n f o
+a b s t r a c t
+Article history:
+Available online 18 October 2019
+Keywords:
+Passive localization
+Time difference of arrival (TDOA)
+Frequency difference of arrival (FDOA)
+Direct position determination (DPD)
+Expectation maximization (EM)
+Conventional two-step passive localization methods have poor localization precision when the input 
+signal-to-noise ratio (SNR) is low, although they are usually computationally attractive. The direct 
+position determination (DPD) methods, on the contrary, exhibit stronger robustness to low SNRs at the 
+cost of much higher computational complexity. In this paper, an expectation-maximization (EM)-based 
+computationally inexpensive localization method is proposed, which serves as a compromise between the 
+two-step methods and DPD methods. During each iteration of the proposed method, the constraint that 
+all intermediate parameters correspond to a common source position is taken into account explicitly, and 
+this constraint is used to reﬁne the time difference of arrival (TDOA) and frequency difference of arrival 
+(FDOA) measurements. Then the source position is updated using these renewed measurements. The 
+proposed method has superior localization performance under low SNR conditions compared to the two-
+step methods at the cost of limited increment in computational load, and its computational complexity 
+is much lower than DPD methods at the cost of acceptable accuracy degradation. Moreover, the proposed 
+method is applicable to other localization scenarios as well with appropriate modiﬁcations. Simulation 
+results demonstrate the effectiveness of the proposed method.
+© 2019 Elsevier Inc. All rights reserved.
+1. Introduction
+The problem of passive localization has received considerable 
+research interest during the past decades. It is widely applied in 
+ﬁelds such as emergency rescue, surveillance, and wireless sensor 
+networks [1].
+Conventional localization methods mostly fall into the two-
+step localization category [2–11]. In the ﬁrst step, the location-
+dependent intermediate parameters are measured, such as the re-
+ceived signal strength (RSS), direction of arrival (DOA), time of 
+arrival (TOA), time difference of arrival (TDOA) and frequency dif-
+ference of arrival (FDOA). These intermediate parameters are fur-
+ther utilized to solve for the source position in the second step. 
+Particularly, the localization system based on TDOA and FDOA does 
+not require that the source signal transmission time be known, 
+and only a single receiving channel is used at each observer. If the 
+signal-to-noise ratio (SNR) is relatively high, the TDOA and FDOA 
+are measured accurately, which would yield satisfactory localiza-
+tion performance [5,6,8–11]. In passive localization scenarios, how-
+* Corresponding author.
+E-mail address: mafuhe14@nudt.edu.cn (F. Ma).
+ever, the source to be localized are usually uncooperative, which 
+may lead to low received SNR, especially when the source sig-
+nal sidelobe is intercepted or when receiving antenna gain is not 
+high enough. Under these circumstances, the localization accuracy 
+of the two-step methods is relatively poor.
+Recently, the direct position determination (DPD) methods have 
+drawn much attention for their robustness to low SNR scenarios 
+[12–18]. In most of the DPD methods, all the intercepted signals 
+are transmitted to a central processing station to solve for the 
+source position directly. As the cost function is constructed by re-
+lating directly received signals to source position, the constraint 
+that all intermediate parameters correspond to a common source 
+position is inherently applied during the DPD procedure [15]. In 
+this way, the information loss caused by estimating intermediate 
+parameters is avoided. Although empirical results validated that 
+DPD methods performed much better than their two-step counter-
+parts under low SNRs, the cost function of DPD methods is highly 
+non-convex with a large number of local optimums, which entails 
+an exhaustive grid search to ﬁnd the global optimal solution [14,
+15,19]. This computationally demanding procedure hampers prac-
+tical applications of DPD methods.
+By noting the advantages and disadvantages of the two-step 
+and DPD methods, one hopes to ﬁnd a compromise between them, 
+https://doi.org/10.1016/j.dsp.2019.102600
+1051-2004/© 2019 Elsevier Inc. All rights reserved.
+
+
+--- PDF PAGE 2 ---
+2
+F. Ma et al. / Digital Signal Processing 96 (2020) 102600
+which yields superior localization performance compared to two-
+step methods under low SNRs while being computationally eﬃ-
+cient compared to the DPD methods. Unfortunately, there have 
+been few works on this issue. In [20], three distributed DPD cal-
+culation methods were proposed to relieve the computational bur-
+den at the central processing node. The proposed methods made 
+the system more robust to the loss of central processing node. 
+In [21], the performances of two-step methods and DPD methods 
+were analyzed for a multi-array DOA source positioning system. 
+A new localization strategy was also proposed which combines 
+the measurements obtained in the ﬁrst step. However, the pro-
+posed method still belongs to the two-step localization category 
+because all the angular parameters are measured independently. 
+In [17], the authors proposed a novel expectation-maximization 
+(EM)-based DPD method to solve the source position using time 
+delay information for cooperative signals. The computational eﬃ-
+ciency and the global convergence rate of the proposed method 
+are relatively high. But it is tailored for cooperative TOA localiza-
+tion scenario only and not applicable to other localization schemes, 
+such as time delay and Doppler information based source localiza-
+tion considered in this work.
+In this paper, we propose an EM-based computationally in-
+expensive localization method using the time delay and Doppler 
+information of received signals at multiple observers. By exploring 
+the constraint inherently applied in DPD methods into the TDOA 
+and FDOA estimation procedure during each iteration, the localiza-
+tion performance of the proposed method is improved compared 
+to the two-step methods. Moreover, the source position is updated 
+in closed form during each iteration instead of grid search, which 
+makes the proposed method computationally much more eﬃcient 
+compared to the grid search DPD methods. As the development 
+of the proposed method is in the form of an EM algorithm, it 
+is guaranteed to converge, although local convergence may occur 
+at a small probability. It should be mentioned that the proposed 
+method is also applicable to other localization systems such as 
+those based on AOA, TOA, etc., after appropriate modiﬁcations.
+For brevity, the following notational conventions are used 
+throughout this paper. ∥ · ∥is the Euclidean norm of a given 
+vector or ℓ2-norm of a given matrix. (·)T , (·)H and (·)−1 denote 
+the transposition, the conjugate transposition and inverse oper-
+ators, respectively. ˆ(·) and (·)0 indicate the estimated value and 
+true value of a variable. Further let diag(·) denote the diagonal 
+matrix with main-diagonal elements taken from the given vec-
+tor, blkdiag{A1, A2, ··· , AM} the block-diagonal matrix formed by 
+A1, A2, ··· , AM, E p{·} the expectation over the distribution p, and 
+⌈·⌉the ceiling operator. O and I represent the zero matrix and 
+identity matrix, respectively, with their sizes derivable according 
+to the context.
+2. Problem formulation
+For ease of illustration, a two-dimensional (2-D) localization 
+scenario is considered in this paper, which can be extended to 
+three-dimensional (3-D) scenario easily. The static source located 
+at unknown position u0 = [x0, y0]T transmits radio signals, which 
+are received by K
+spatially separated observers, with the po-
+sition and velocity of observer k given by pk = [xk, yk]T
+and 
+vk = [˙xk, ˙yk]T . It is assumed that the locations and velocities 
+of observers are accurate, and the observer clocks are synchro-
+nized. When observer position/velocity errors and clock biases are 
+present, the methods in [22,23] can be applied to calibrate the sys-
+tem.
+The radio signal emitted from the source at time instant t is 
+expressed as
+s(t) = x(t) exp{ j2π f0t},
+(1)
+where j is the unit imaginary number with j2 = −1. x(t) repre-
+sents the baseband envelope of s(t), and f0 denotes the signal 
+carrier frequency. Assume that the multi-path effect can be ig-
+nored, such that all received signals arrive at the observers through 
+line-of-sight propagation. Thus the noise-free received signals at 
+observers k can be written as
+rc
+k(t) = βkx
+
+(1 + α0
+k )t −τ 0
+k
+
+exp
+
+j2π f0(1 + α0
+k )t
+
+,
+(2)
+where βk = ake−j2π f0τ 0
+k with ak denoting the unknown signal at-
+tenuation factor. τ 0
+k represents the signal propagation time from 
+the source to the observer k, and α0
+k indicates the Doppler scaling 
+due to the relative motion. They are given by
+τ 0
+k = ∥u0 −pk∥
+c
+, α0
+k =
+v T
+k (u0 −pk)
+c∥u0 −pk∥,
+(3)
+where we denoted by c the propagation speed of source signal. 
+When the signal s(t) is narrowband, i.e., the bandwidth B satis-
+ﬁes B ≪f0, the narrowband approximation can be applied such 
+that the Doppler scaling is approximated with a frequency shift. 
+After frequency down conversion, the received noise-contaminated 
+signal at observer k is given as
+rk(t) = ake jφkx(t −τ 0
+k ) exp{ j2π f 0
+k t} + wk(t),
+(4)
+where f 0
+k = f0α0
+k is the Doppler frequency shift, and φk is the 
+phase shift which takes into account the term −2π f0τ 0
+k
+and 
+the unknown phase of local oscillator. wk(t) denotes the additive 
+white Gaussian noise with zero mean and known variance σ 2
+n , and 
+it is usually assumed that the noises are uncorrelated across differ-
+ent observers over different time instants. As the source signal is 
+uncooperative, x(t) and its distribution are not available. A com-
+mon practice is to take the unknown noise-free received signal 
+at observer 1 (reference observer) as the reference signal, so that 
+rk(t), k = 2, 3, ··· , K in (4) could be reformulated as
+rk(t) = ak,1e jφk,1r0
+1(t −τ 0
+k,1)e j2π f 0
+k,1t + wk(t)
+(5)
+where
+τ 0
+k,1 = τ 0
+k −τ 0
+1
+f 0
+k,1 = f 0
+k −f 0
+1 ,
+(6)
+and r0
+1(t) is the unknown noiseless version of r1(t). ak,1 = ak/a1 is 
+real-valued relative gain between the signals received at observer 
+k and observer 1. φk,1 = φk −φ1 represents the unknown phase 
+offset.
+Sampling rk(t) discretely at a uniform interval ts = 1/ fs with 
+fs being the sampling frequency such that rk(n) ≡rk(t = nts), the 
+notation for transmission time, i.e., t is removed and the received 
+discrete signal of length N is given by [24]
+rk = bk,1D f ,k( f 0
+k,1)Dτ,k(τ 0
+k,1)r0
+1 + wk,
+(7)
+where rk = [rk(1), ··· , rk(N)]T . r0
+1 = [r0
+1(1), ··· , r0
+1(N)]T
+denotes 
+the noiseless reference signal vector at the reference observer. 
+bk,1 = ak,1e jφk,1 is the complex relative gain, and wk = [wk(1), ··· ,
+wk(N)]T . For given TDOA τk,1 and FDOA fk,1, we have
+D f ,k( fk,1) = diag
+
+exp{ j2π fk,1(N/2 + n)}
+
+Dτ,k(τk,1) = F H diag
+
+k,1(τk,1)
+
+F,
+(8)
+which signify the Doppler frequency shift and time delay opera-
+tors, respectively, where k,1(τk,1) = exp{−j2π fs
+N nτk,1} and n =
+[−N/2, −N/2 + 1, ··· , N/2 −1]T . F =
+1
+√
+N exp{−j2πnnT /N} is 
+
+
+--- PDF PAGE 3 ---
+F. Ma et al. / Digital Signal Processing 96 (2020) 102600
+3
+the fast Fourier transform (FFT) matrix. Deﬁne Q k,1(τ 0
+k,1, f 0
+k,1) =
+D f ,k( f 0
+k,1)Dτ,k(τ 0
+k,1), such that (7) can be reformulated compactly 
+as
+rk = bk,1 Q k,1(τ 0
+k,1, f 0
+k,1)r0
+1 + wk.
+(9)
+When all observers are stationary, there is no Doppler effect 
+caused by relative motion between the source and observers, i.e., 
+f 0
+k,1 = 0. Under this condition, one can obtain D f ,k = I, and the 
+signal model degenerates into a TDOA positioning one.
+Our aim is to determine the source position u0 using all the re-
+ceived signals r = [rT
+1 , rT
+2 , ··· , rT
+K ]T . In next section, the cost func-
+tions of two-step and DPD methods are retrieved to highlight the 
+differences between them and to make our proposed method more 
+accessible.
+3. Comparison of two-step and DPD methods
+In this section, we compare and analyze the differences be-
+tween the two-step and DPD methods regarding their cost func-
+tions and source positioning procedures. First deﬁne u as an ar-
+bitrarily given source position. As the measurement noise wk is 
+independently Gaussian distributed for k = 1, 2, ··· , K , the log 
+likelihood function of signal vector r with respect to the source 
+position u, the unknown r0
+1 and the relative gain b is given by
+ln P(r|u, r0
+1, b)
+= c0 −
+1
+2σ 2
+n
+K
+
+k=1
+rk −bk,1 Q k,1(τk,1(u), fk,1(u))r0
+1
+2,
+(10)
+where c0 is a constant independent of u, b = [b2,1, ··· , bK,1]T . Ob-
+viously we have b1,1 = 1, Q 1,1
+τ1,1(u), f1,1(u)
+
+= I according to 
+their deﬁnitions. τk,1(u) and fk,1(u) are obtained by substituting 
+u into (6).
+As the noise variance σ 2
+n
+is independent of source position, 
+scaling the log likelihood function above and ignoring irrelevant 
+terms, the generic cost function is given by
+C(u, r0
+1, b) =
+K
+
+k=1
+C(u, r0
+1, b,k)
+=
+K
+
+k=1
+rk −bk,1 Q k,1(τk,1(u), fk,1(u))r0
+1
+2.
+(11)
+3.1. DPD methods
+For the DPD methods, the intermediate parameters τ 0
+k,1 and f 0
+k,1
+are not estimated and one seeks to estimate u0 from the received r
+directly. The unknown relative amplitudes bk,1, k = 2, 3, ··· , K are 
+considered as nuisance parameters and their maximum-likelihood 
+(ML) estimates can be obtained by taking the partial derivative of 
+(11) with respect to bk,1 and setting it to zero, which yield [13,18]
+ˆbk,1 =
+(r0
+1)H Q H
+k,1
+τk,1(u), fk,1(u)
+
+rk
+∥r0
+1∥2
+.
+(12)
+Substituting ˆbk,1 into (11), ignoring irrelevant terms and after 
+some straightforward mathematical manipulations, one has the 
+simpliﬁed cost function given by
+C1(u, r0
+1) = (r0
+1)H V V Hr0
+1/∥r0
+1∥2,
+(13)
+where
+V = [r1, Q H
+2,1
+τ2,1(u), f2,1(u)
+
+r2,··· ,
+Q H
+K,1
+τK,1(u), f K,1(u)
+
+rK].
+(14)
+As r0
+1 is also unknown, to maximize (13) we simply set r0
+1/∥r0
+1∥as 
+the eigenvector corresponding to the maximal eigenvalue of V V H. 
+Then the DPD cost function can be given as [13]
+Cdirect(u) = λmax(V V H),
+(15)
+where λmax(·) denotes the maximal eigenvalue of a given square 
+matrix. However, with large signal length N the dimension of 
+V V H could be very high and performing eigenvalue decomposi-
+tion on V V H could be computationally very demanding. Note that 
+the nonzero eigenvalues of V V H are equivalent to that of V H V , 
+one can alternatively deﬁne Cdirect(u) as the maximal eigenvalue 
+of the K -dimensional V H V . The source position estimate is thus 
+given by
+ˆu = arg max
+u
+Cdirect(u)
+= λmax(V H V ).
+(16)
+The cost function Cdirect(u) is highly non-convex and multi-
+modal with a considerable number of local maximums. The com-
+monly applied method to ﬁnd global optimum is grid search, 
+which is known for its high computational complexity, especially 
+when the source localization scenario is in 3-D and relatively high 
+localization precision is required. However, as revealed in (14) and 
+(16), the source position is estimated directly from the received 
+signals without estimating TDOA and FDOA. In this way, the con-
+straint that all τk,1 and fk,1 correspond to the same source position 
+is inherently applied when one solves (16). Thus the DPD methods 
+generally exhibit superior performance compared with the two-
+step methods under low SNR conditions. Next the cost function 
+for the two-step localization is provided.
+3.2. Conventional two-step methods
+In the two-step methods, the constraint that all TDOAs and 
+FDOAs are correlated according to the source position is relaxed 
+such that (11) can be decomposed into C(u, r0
+1, b, k) for k =
+2, 3, ··· , K , each parameterized by τk,1 and fk,1 respectively. Thus 
+TDOA/FDOA between observer k, k = 2, 3, ··· , K and reference ob-
+server could be estimated independently. Then these TDOAs/FDOAs 
+are transferred to the central processing station to solve for the 
+source position eﬃciently via semi-deﬁnite relaxation and closed-
+form solvers during the second step [5,6,8–11].
+Classical TDOA and FDOA estimation methods mostly involve 
+ﬁnding the peak of the cross-ambiguity function (CAF) via interpo-
+lating the CAF surface. The cost function for estimating the TDOA 
+and FDOA between observer k and reference observer is given by 
+[25,26]
+Cs1(τ, f ,k) = |rH
+1 Q H
+k,1(τ, f )rk|,
+(17)
+and thus TDOA and FDOA estimates are given by
+[ ˆτk,1, ˆfk,1] = arg max
+τ, f
+Cs1(τ, f ,k).
+(18)
+Collecting and stacking the measured TDOAs and FDOAs in 
+a vector θ = [ ˆτ2,1, ˆf2,1, ··· , ˆτK,1, ˆf K,1]T , and their covariance 
+in a composite matrix  = E{(θ −θ0)(θ −θ0)T } where θ0 =
+[τ 0
+2,1, f 0
+2,1, ··· , τ 0
+K,1, f 0
+K,1]T . The ML cost function for the source 
+position determination in the second step is given by [5]
+Cs2(u) = (θ −θ(u))T −1(θ −θ(u)),
+(19)
+
+
+--- PDF PAGE 4 ---
+4
+F. Ma et al. / Digital Signal Processing 96 (2020) 102600
+where θ(u) denotes the predicted TDOA and FDOA vector obtained 
+by substituting u into (6). The source position estimate is thereby 
+obtained by
+ˆu = arg min
+u
+Cs2(u).
+(20)
+As the covariance matrix  is usually not known a priori, the CRLB 
+for TDOA and FDOA estimation is used instead [24]. The solution 
+for the cost function in (19) can be obtained quite eﬃciently as 
+mentioned before.
+From (17) and (19), one can ﬁnd that the two-step methods re-
+lax the constraint and introduce intermediate parameters to make 
+the cost function in (11) decoupled for each observer pair. To be 
+speciﬁc, the TDOA and FDOA between observer k and observer 1
+are estimated independently, without considering the constraint 
+that all τ 0
+k,1 and f 0
+k,1 correspond to a common source position u0. 
+The lines of positioning do not intersect at a single point. There-
+fore, the two-step methods are suboptimal in this sense compared 
+to DPD methods and its localization accuracy degrades signiﬁcantly 
+under low SNRs. However, as the two steps in (18) and (20) can 
+be solved successively with relatively low computational cost, the 
+two-step methods are computationally very eﬃcient compared to 
+DPD methods.
+In next section, we proceed to present a novel EM-based local-
+ization method, which serves as a compromise between the DPD 
+methods and the two-step methods.
+4. Proposed method
+According to the discussions in Section 3, if we introduce the 
+constraint that, all intermediate parameters are correlated accord-
+ing to the source position, into the two-step localization frame-
+work, we may improve the localization performance of two-step 
+methods under low SNR conditions while making the computa-
+tional cost lower compared with DPD methods. With this regards, 
+an EM-based localization method is proposed in the following, of 
+which the E step and M step correspond to the ﬁrst and second 
+steps of the two-step localization procedure, respectively. However, 
+different from the two-step methods, the constraint that all TDOAs 
+and FDOAs correspond to a common source position is taken into 
+consideration to reﬁne the TDOA and FDOA estimates during the E 
+step, thus the source position could be reﬁned in closed-form dur-
+ing the M step. In this way, the proposed method is computation-
+ally inexpensive compared to grid search DPD methods but with 
+superior performance at low SNRs over the two-step approaches.
+4.1. Proposed EM localization method
+To embed the constraint on TDOAs and FDOAs into their esti-
+mation procedures so as to improve the localization performance, 
+we propose to estimate the intermediate TDOA and FDOA param-
+eters and the source position iteratively. On the one hand, the 
+source position provides a constraint to the TDOAs and FDOAs 
+when they are estimated. On the other hand, these updated TDOAs 
+and FDOAs could reﬁne the source position in return. To achieve 
+this goal, the celebrated EM algorithm is resorted to, which is 
+widely applied to decouple the high-dimensional parameter esti-
+mation problems into multiple low-dimensional ones [27]. In our 
+proposed method, the observed r is deﬁned as incomplete data, 
+which is combined with the hidden data, i.e., the noisy TDOA 
+and FDOA measurement vector θ, to form the complete data z =
+[rT , θ T ]T .
+The log likelihood function of the complete data z is given by
+ln P(z|u) = ln P(r|θ, u) + ln P(θ|u)
+= ln P(r|θ) + ln P(θ|u),
+(21)
+where we have used the fact that, r is conditionally independent 
+of u given θ, in the second line of (21). ln P(r|θ) can be approxi-
+mately given by [26]
+ln P(r|θ) = 1
+σ 2
+n
+K
+
+k=2
+|ˆbk,1|
+1 + |ˆbk,1|2
+rH
+k Q k,1(θ)r1
+,
+(22)
+where ˆbk,1 is obtained by plugging τk,1 and fk,1 in θ into (12) with 
+r0
+1 replaced by r1.
+As θ is noise contaminated due to the noisy r, ln P(θ|u) is given 
+by
+ln P(θ|u) = −1
+2
+
+θ −θ(u)
+T −1
+θ −θ(u)
+
+,
+(23)
+where  is the covariance matrix of θ as deﬁned above.
+E step: Assume that after the mth iteration one has already 
+obtained the current source position estimate ˆu(m) and the cor-
+responding source position covariance matrix (m), where the 
+superscript (·)(m) denotes the index of iteration. For the E step 
+of the EM algorithm, the TDOA/FDOA vector θ is estimated by 
+maximizing the conditional probability density function (pdf) of 
+θ
+given the current source position estimate ˆu(m) as well as 
+the observed r, i.e., θ(m+1) = arg max
+θ
+P(θ|ˆu(m), r), where θ(m+1) =
+[(θ(m+1)
+2,1
+)T , ··· , (θ(m+1)
+K,1
+)T ]T , and where P(θ|ˆu(m), r) is given by
+P(θ|ˆu(m), r) = P(θ, r|ˆu(m))
+P(r|ˆu(m))
+∝P(θ|ˆu(m))P(r|θ)
+= c1 exp
+	 1
+σ 2
+n
+K
+
+k=2
+|ˆbk,1|
+1 + |ˆbk,1|2
+rH
+k Q k,1(θ)r1
+
+
+× exp
+	
+−1
+2(θ −θ(ˆu(m)))T ((m))−1(θ −θ(ˆu(m)))
+
+,
+(24)
+where c1 is a constant independent of θ, and (m) is the covari-
+ance matrix of θ after the mth iteration. Obviously (24) could be 
+solved with respect to each θ(m+1)
+k,1
+independently.
+Note that distinctive from the ﬁrst step of the two-step meth-
+ods, the correlation of θ with respect to u has been embedded 
+in (24). The resultant TDOA and FDOA are expected to be more 
+robust to low SNR conditions compared with conventional two-
+step methods. In the following we manage to obtain the TDOA and 
+FDOA estimate θ(m+1) via maximizing (24).
+The maximizers θ(m+1)
+k,1
+, k = 2, 3, ··· , K of (24) are usually ob-
+tained via grid search and cannot be solved in closed-form due 
+to the high nonlinearity of P(θ|ˆu(m), r) with respect to θ. As 
+an alternative, we propose to obtain an approximated solution 
+via computationally eﬃcient Gaussian weighted summation, i.e., 
+the weighted summation of predicted TDOA/FDOA vector ˜θk,1 =
+[ ˜τk,1, ˜fk,1]T and estimated TDOA/FDOA ¯θk,1 = [ ¯τk,1, ¯fk,1]T for k =
+2, 3, ··· , K , where ˜τk,1 = τk,1(ˆu(m)) and ˜fk,1 = fk,1(ˆu(m)) are TDOA 
+and FDOA predictions evaluated at the current source position es-
+timate ˆu(m). The Gaussian weighted summation procedure is given 
+in the following.
+On the one hand, substituting the current source position es-
+timate ˆu(m) into (6) yields the TDOA and FDOA prediction vector 
+˜θk,1 between observer k and reference observer. Although it is ob-
+vious that the predicted TDOA and FDOA vector does not follow 
+a Gaussian distribution, one can approximate this non-Gaussian 
+distribution with a Gaussian distribution as applied in non-linear 
+ﬁltering [28]. The corresponding covariance matrix of ˜θk,1 is ap-
+proximated as
+
+
+--- PDF PAGE 5 ---
+F. Ma et al. / Digital Signal Processing 96 (2020) 102600
+5
+˜k,1 = G T
+k,1(ˆu(m))(m)Gk,1(ˆu(m)),
+(25)
+where Gk,1(ˆu(m)) = [ ∂τk,1
+∂u , ∂fk,1
+∂u ]
+
+u=ˆu(m) is the Jacobian matrix com-
+posed of partial derivatives of τk,1 and fk,1 with respect to the 
+source position evaluated at ˆu(m).
+On the other hand, for the evaluation of ¯θk,1, one can readily 
+deﬁne the 3σ conﬁdence region of the TDOA τk,1 and FDOA fk,1
+determined by ˜θk,1 and ˜k,1, i.e.,
+¯τk,1 ∈[ ˜τk,1 −3στ , ˜τk,1 + 3στ ]
+¯fk,1 ∈[ ˜fk,1 −3σ f , ˜fk,1 + 3σ f ],
+(26)
+where στ and σ f are respectively, the square root of the main-
+diagonal entries of ˜k,1, indicating the TDOA and FDOA standard 
+deviation (SD). By ﬁnding the peak within this conﬁdence region 
+on the 2-D CAF surface and interpolating, the resultant TDOA and 
+FDOA estimates ( ¯τk,1 and ¯fk,1) are obtained. For the evaluation of 
+their covariance ¯k,1, it is a common practice to obtain it using 
+the CRLB expression [24].
+According to the property of Gaussian distribution, the updated 
+TDOA and FDOA sub-vector θ(m+1)
+k,1
+as well as its covariance matrix 
+is obtained using weighted summation as [29]
+θ(m+1)
+k,1
+= (m+1)
+τ, f ,k,1( ¯−1
+k,1 ¯θk,1 + ˜−1
+k,1 ˜θk,1),
+(27)
+and
+(m+1)
+τ, f ,k,1 = ( ¯−1
+k,1 + ˜−1
+k,1)−1.
+(28)
+In this way, one could obtain the updated TDOA and FDOA vec-
+tor θ(m+1) and the corresponding covariance matrix (m+1) =
+blkdiag{(m+1)
+τ, f ,2,1, (m+1)
+τ, f ,3,1 ··· , (m+1)
+τ, f ,K,1}.
+M step: The auxiliary function to be maximized in EM algo-
+rithm is given by [27]
+T(u|ˆu(m)) = EP(θ|ˆu(m),r){ln P(z|u)}.
+(29)
+Using the Laplacian approximation [30] and noticing that the term 
+ln P(r|θ) in ln P(z|u) is conditionally independent of u, one can 
+approximate the auxiliary function as
+T(u|ˆu(m)) ≈ln P(θ∗|u)
+s.t. θ∗= arg max
+θ
+P(θ|ˆu(m), r).
+(30)
+Since we have just obtained the maximizer θ∗= θ(m+1) during the 
+E step, the source position is updated in the M step by maximizing 
+the auxiliary function
+ˆu(m+1) = arg max
+u
+T(u|ˆu(m))
+= arg max
+u
+ln P(θ(m+1)|u).
+(31)
+Note that solving (31) is equivalent to the second step of the 
+conventional two-step methods, and thus the updated source po-
+sition ˆu(m+1) could be obtained eﬃciently using the closed-form 
+solvers [5,6,9,31] instead of grid search as applied in DPD methods. 
+The updated covariance matrix of source position is approximately 
+given by
+(m+1) =
+
+G(ˆu(m+1))((m+1))−1G T (ˆu(m+1))
+−1
+,
+(32)
+where
+G(ˆu(m+1)) =
+
+G2,1(ˆu(m+1)),··· , G K,1(ˆu(m+1))
+
+.
+(33)
+Repeating the E-step and M-step elaborated above, the source 
+position update sequence is expected to converge to the proximity 
+of u0, and the proposed method stops when ∥ˆu(m+1) −ˆu(m)∥is 
+within a given tolerance.
+4.2. Details of the proposed method
+In this part, details about the proposed method are given.
+4.2.1. Implementation of the propose method
+For the setup of source position initial value, i.e., ˆu(0), one can 
+choose it randomly within the region of interest when this region 
+is not so large. For a relatively large region, multiple initial points 
+may be needed for the proposed method to reduce the probability 
+of converging to local optimal solutions. To achieve this, one can 
+divide the a priori region uniformly into Np blocks with Dx and D y
+being respectively, the block widths along X and Y directions, and 
+the center of each block is selected as an initial source position, 
+with the initial covariance matrix given by (0) = diag([ D2
+x
+12 , 
+D2
+y
+12 ]). 
+For each initial position ˆu(0)
+p , p = 1, 2, ··· , Np, use the proposed 
+EM-based iterative method to obtain the estimate ˆup, and the ﬁ-
+nal source position estimate is given by choosing among all the 
+estimates ˆup, p = 1, 2, ··· , Np the one with the maximal CAF sur-
+face summations
+ˆu = arg max
+ˆup
+K
+
+k=2
+|rH
+1 Q H
+k,1
+τ(ˆup), f (ˆup)
+
+rk|.
+(34)
+It should be mentioned that a few Gauss-Newton iterations based 
+on the cost function in (15) could be applied to further reﬁne the 
+obtained source position estimates. A summary of the proposed 
+method is given in Algorithm 1.
+Algorithm 1 Summary of the proposed method.
+Given received r, the possible searching range of TDOA and FDOA τmax and fmax, 
+the initial source position set  =
+ˆu(0)
+1 , ··· , ˆu(0)
+Np
+
+, the tolerance ϵ and the maxi-
+mum iteration times M
+Generating the CAF surface of received signal pair rk, k = 2, ··· , K and r1 within 
+the possible TDOA and FDOA range τk,1 ∈[−τmax, τmax] and fk,1 ∈[−fmax, fmax]
+using [32]
+for
+p = 1 : Np do
+ˆu(0) = ˆu(0)
+p , m = 0
+while m < M do
+Step 1: Updating TDOA and FDOA estimates:
+Obtaining ˜θk,1 = [ ˜τk,1, ˜fk,1]T by substituting ˆu(m) into (6), and the covari-
+ance ˜k,1 by substituting (m) and ˆu(m) into (25)
+Obtaining ¯θk,1 = [ ¯τk,1, ¯fk,1]T by ﬁnding the peak on the CAF surface within 
+the conﬁdence region in (26), and the covariance ¯k,1 using the CRLB for-
+mulation
+Combining the TDOAs and FDOAs and their covariance matrices using (27)
+and (28)
+Step 2:Updating source position.
+Obtaining ˆu(m+1) using θ(m+1) and (m+1) via the closed-form algorithms 
+in [5,6,9,31] and (m+1) by substituting ˆu(m+1) into (32)
+if ∥ˆu(m+1) −ˆu(m)∥ < ϵ then
+break
+end if
+m = m + 1
+end while
+ˆup = ˆu(m+1)
+end for
+Selecting ˆu from ˆup, p = 1, 2, ··· , Np using (34)
+4.2.2. Determination of Dx and D y
+We would like to obtain upper bounds for Dx and D y such 
+that they are chosen as large as possible to reduce computational 
+complexity while keeping the local convergence rate very small. 
+However, as far as we are concerned, there exist no such explicit 
+criteria for the bounds. In [33], the monotonic convergence region 
+ℜ+ of the EM-type method was deﬁned as the largest open ball 
+in parameter space with center u0 such that for each ¯u in ℜ+, we 
+have
+
+
+--- PDF PAGE 6 ---
+6
+F. Ma et al. / Digital Signal Processing 96 (2020) 102600
+A1 ≻O
+∥A−1
+1
+A2∥< 1,∀u,
+(35)
+where A1 = − 
+ 1
+0 (1 −λ)∇20T
+
+λu + (1 −λ)u0|λ¯u + (1 −λ)u0
+dλ, 
+A2 =
+ 1
+0 (1 −λ)∇11T
+
+λu + (1 −λ)u0|λ¯u + (1 −λ)u0
+dλ with 
+∇20T(u|¯u) = T(u|¯u)
+∂u∂uT
+and ∇11T(u|¯u) = T(u|¯u)
+∂u∂¯uT . A ≻O means that 
+A is positive deﬁnite. Using (35), one can increase the radius of 
+ℜ+ gradually and determine the largest radius of ℜ+ which satis-
+ﬁes (35). Then Dx and D y can be chosen according to the radius 
+of ℜ+. However, it is rather tedious for us to evaluate (35) with 
+the given radius, which usually involves a large number of Monte 
+Carlo experiments. Note that the mainlobe of the cost function 
+for positioning becomes narrower as the signal observation in-
+terval and signal bandwidth increase. Smaller Dx and D y should 
+be selected for longer observation interval and larger signal band-
+width. In practice, one can also plot the surface of the cost function 
+in (15) and determine Dx and D y such that at least one point 
+is selected within the mainlobe of the cost function. Theoretical 
+bounds for Dx and D y with analytic expressions are left for fu-
+ture research. Next the computational complexity of the proposed 
+method is analyzed and compared with that of the conventional 
+two-step methods and DPD methods.
+4.2.3. Computational complexity analysis
+Denote by N f the number of FDOA candidates, and Ni the iter-
+ation number of the proposed method.
+First we give the computational complexity of generating CAF 
+surfaces, which are used both in two-step methods and the pro-
+posed method. For the calculation of CAF surface between ob-
+server k and reference observer, a computational complexity of 
+approximately O(N log2(N)) is required for each FDOA candidate 
+f . Therefore, the CAF surface is calculated with a complexity of 
+O(N f (K −1)N log2(N)).
+In our proposed method, during each iteration m for each ini-
+tial source position ˆu(0)
+p , TDOA and FDOA prediction and estimation 
+values are calculated and Gaussian weighted fusion is required 
+to obtain updated TDOA and FDOA, with a computational com-
+plexity of O(K 3). For the source position update in the second 
+step, the computational cost mainly involves the multiplication, 
+the inversion and singular value decomposition (SVD) of matri-
+ces of dimension 2(K −1), with a complexity of O(K 3). Thus 
+the total computational complexity of the proposed method is 
+O(N f (K −1)N log2(N) + (K −1)NiNp K 3).
+For the two-step methods, the TDOA/FDOA estimation complex-
+ity is given by O(N f (K −1)N log2(N)). And the second step is car-
+ried out with a computational complexity of O(K 3). Therefore, the 
+complexity of two-step methods is O(N f (K −1)N log2(N) + K 3). 
+As multiple iterations and multiple initial source positions are re-
+quired in our proposed method, it is computationally more de-
+manding than the two-step methods, especially when the signal 
+length N is relatively small. We also note here that the complexity 
+of the proposed method increases as Np increases.
+For the grid search DPD methods, assume that the grid is es-
+tablished within a 2x × 2y square around u0 with the search 
+intervals being δx and δy in X and Y directions. For each grid 
+point, a complexity of O((K −1)N log2(N)) is required, which ac-
+counts for the total computational complexity of DPD methods 
+being O(4⌈x
+δx ⌉⌈y
+δy ⌉(K −1)N log2(N)). As N f ≪4⌈x
+δx ⌉⌈y
+δy ⌉, the 
+complexity of the proposed method is much smaller than that of 
+the DPD methods.
+When the observers are stationary, the FDOA information is ig-
+nored and one can simply set N f = 1 in above analyses.
+5. Simulation results
+In this section, simulations are conducted to reveal the localiza-
+tion performance and computational complexity of the proposed 
+method. The source position is given by u0 = [10, −10]T m, and 
+we assume that the a priori localization region is a 2000 m ×
+2000 m square centered at u0. A total of K = 5 observers are 
+introduced for source localization, with their positions being 
+the same as that in [17]. The observers’ coordinates are p1 =
+[−1000, −1000]T m, p2 = [−1000, 1000]T m, p3 = [0, 1000]T m, 
+p4 = [1000, −1000]T m, p5 = [1000, 1000]T m, respectively. Their 
+velocities are v1 = [5, −5]T m/s, v2 = [0, −10]T m/s, v3 =
+[−5, 5]T m/s, v4 = [10, 0]T m/s, v5 = [5, 0]T m/s. The source sig-
+nal is a Gaussian-shaped chirp signal [24] with B = 0.3 MHz, and 
+its baseband form is given by
+x(t) = exp{−γ t2 + j2π K wt2},
+(36)
+where K w = B
+T and T is the signal observation interval. γ is the at-
+tenuating factor, and we set γ = 500 in the whole simulation. The 
+sampling frequency is fs = 5 MHz. The SNR of signal is deﬁned as 
+the SNR of the reference observer, i.e., SNR1. The relative ampli-
+tude at other observers are given as a2,1 = 0.8, a3,1 = 1.1, a4,1 = 1, 
+a5,1 = 0.9. For our proposed method, we set Dx = D y = 100 m em-
+pirically and ϵ = 10−3.
+As comparisons, the localization results of several other meth-
+ods are also shown. The ﬁrst one is the two-step approach, where 
+the TDOA/FDOA estimates are obtained using the methods in [34]
+(TDOA only) and [32] (TDOA/FDOA) during the ﬁrst step. For source 
+position determination, the iterative constrained weighted least 
+squares (ICWLS) method in [31] is resorted to. The reason for se-
+lecting the above works as the two steps for the two-step method 
+is that they are proved to be accurate when SNR is high. If the SNR 
+is low and the localization estimates of two-step methods are out 
+of the a priori region (outliers), these unbounded estimates are re-
+placed with points randomly selected within this region. The sec-
+ond one is the grid search DPD method given in [16] (TDOA only) 
+or [18] (TDOA/FDOA), and the cost function is given in (16). The 
+grid search interval is set to be δx = δy = 5 with x = y = 1000
+so as to ﬁnd a coarse estimate, which is followed by reﬁned grid 
+search in the vicinity of this coarse estimate. The third one is the 
+GN based DPD method [29], where the ﬁrst and second order par-
+tial derivatives of (15) w.r.t. unknown parameters are constructed 
+to yield the steepest descent directions. The initial solutions of 
+GN based DPD are chosen as the localization results of two-step 
+method. Furthermore, the corresponding CRLB curve for DPD is 
+plotted. All the results are obtained from a total of 500 indepen-
+dent Monte Carlo runs.
+5.1. TDOA only source localization
+In this subsection, the simulation results in TDOA-only source 
+localization scenario are provided. All the observers are stationary, 
+i.e., vk = 0. Under this circumstance, we simply set φk,1 = 0 thus 
+bk,1 = ak,1.
+First, the effect of SNR on localization performance is discussed. 
+In Fig. 1, the localization RMSEs of different methods are shown 
+in terms of varying SNRs, where T = 2 ms. As depicted in Fig. 1, 
+when SNR1 is relatively low, the two-step method yields poor lo-
+calization precision, with its localization RMSE in log scale being 
+higher than the proposed method by approximately 8 dB. The lo-
+calization RMSE of the proposed method in log scale drops from 
+16dB to less than 4 dB as SNR1 increases from −15 dB to 0 dB, al-
+though it is about 5 dB higher than that of the grid search DPD 
+method. The reason that our proposed method is inferior to the 
+
+
+--- PDF PAGE 7 ---
+F. Ma et al. / Digital Signal Processing 96 (2020) 102600
+7
+Fig. 1. Localization RMSEs of different methods with regard to varying SNR’s. B =
+0.3 MHz, fs = 5 MHz, N = 10, 000.
+Fig. 2. Localization RMSEs of different methods under different signal observation 
+durations. B = 0.3 MHz, fs = 5 MHz, SNR = 0 dB.
+grid search DPD is that in our method TDOA and FDOA are esti-
+mated and thus information loss is introduced. Moreover, the GN 
+based DPD method is also inferior to the proposed method due to 
+its higher local convergence rate. As SNR1 increases, these methods 
+tend to approach the CRLB curve gradually. It is worth mentioning 
+that the grid search DPD method could not reach the CRLB until 
+the SNR exceeds 10 dB. This is caused by the fact that the cost 
+function in (16) is highly non-convex with a considerable num-
+ber of local optima. When the SNR is not high enough, the highest 
+peak on cost function surface does not fall within the small error 
+region due to the perturbation caused by random noises. As our 
+proposed method focuses on reducing the computational load of 
+the grid search DPD rather than suppressing the local optima, it is 
+also subject to local convergence. Further studies on mitigating the 
+local convergence are left for future researches.
+To reveal the effect of signal observation duration T on local-
+ization performance, we set SNR1 = 0 dB and increase T gradually. 
+In Fig. 2, RMSEs of different methods are plotted as a function of 
+T . One could ﬁnd that the localization RMSEs of all these meth-
+ods decrease consistently as T increases. The reason behind this 
+phenomenon is that longer accumulation time of received source 
+signal could improve the TDOA estimation accuracy and thus re-
+duce the localization error. The proposed method works better 
+than the two-step method and the GN based DPD method although 
+it performs a little worse than the grid search DPD method. As 
+SNR1 is relatively low, the CRLB cannot be reached for the pro-
+posed method and the grid search DPD method, which is also due 
+to the existence of local convergence as mentioned above.
+In Fig. 3, the averaged execution times of different methods 
+under varying observation durations are provided. The simulation 
+Fig. 3. Averaged execution times of different methods for TDOA-only localization (in 
+seconds). B = 0.3 MHz, fs = 5 MHz, SNR = 0 dB.
+Fig. 4. Localization RMSEs of different methods under varying observer numbers 
+with random observer locations. B = 0.3 MHz, fs = 5 MHz, N = 5, 000.
+setup is the same as that produces Fig. 2. As shown in Fig. 3, the 
+two-step method requires the least execution time, and the grid 
+search DPD method consumes much longer time than the pro-
+posed method, especially when the observation duration is long. 
+This coincides with our theoretical computational complexity anal-
+ysis results in Section 4. From the computational complexity per-
+spective, the proposed method is more appealing compared to the 
+grid search DPD, especially in localization applications where the 
+computational resources are limited.
+Next, the performance of the proposed method under varying 
+observer numbers is provided. We set T = 1 ms, and the relative 
+amplitudes are ak,1 = 1, k = 2, 3, ··· , K . Without loss of general-
+ity, the observer numbers are selected to be K = 4, K = 6 and 
+K = 8, respectively. As the optimal observer conﬁguration is out of 
+scope of this paper, the observer positions pk, k = 1, 2, ··· , K are 
+deployed randomly within the a priori region to take into account 
+the effects of observer position on localization RMSE. The RMSEs 
+of the proposed method in log scale and the CRLBs are shown as a 
+function of SNR for different observer numbers in Fig. 4.
+The results in Fig. 4 indicate that the localization accuracy im-
+proves as the SNR or observer number increases, which coincides 
+with our intuition. The SNR value required to approach the CRLB 
+does not decrease with increased K for the proposed method. This 
+is mainly due to the fact that the proposed method does not com-
+bine the information from all observers coherently, as is done in 
+grid search DPD. Furthermore, as K increases, the improvement in 
+localization accuracy caused by the increase of K becomes negli-
+gible, which is largely accounted for by the fact that the RMSE of 
+the proposed method is inversely proportional to K .
+
+
+--- PDF PAGE 8 ---
+8
+F. Ma et al. / Digital Signal Processing 96 (2020) 102600
+Fig. 5. Localization RMSEs of different methods with regard to varying SNRs. B =
+0.3 MHz, fs = 5 MHz, N = 10, 000.
+5.2. Joint TDOA/FDOA localization
+In this subsection, the FDOA information is combined with 
+TDOA to jointly localize the source. The carrier frequency is f0 =
+1 GHz, and the phase shift is given by φk,1 = (k −1)π/6. The co-
+variance matrix of TDOA and FDOA is determined using the CRLB 
+expression in [24].
+Fig. 5 depicts the RMSEs of different methods under varying 
+SNRs. The signal observation interval is set to be T = 2 ms. From 
+Fig. 5, one can observe that the proposed method has better lo-
+calization accuracy under low SNRs (SNR1 < 0 dB) compared to 
+the two-step method and the GN based DPD method, although its 
+RMSE in log scale is higher than the grid search DPD by about 
+3 dB. When SNR1 is below 0 dB, the two-step method yields un-
+bounded position estimates that are outside the region of interest 
+and these results are manually reset randomly within the a priori
+region. As a result, its RMSE keeps perturbing around a constant 
+value for SNR1 < 0 dB. As SNR1 increases, these methods approach 
+the CRLB gradually. It is worth mentioning that the grid search 
+DPD and the proposed method both could not reach the CRLB 
+when SNR is not high, which is caused by the fact that the DPD 
+cost function has a lot of local optima and the presence of noise 
+may render the localization result deviate from the small localiza-
+tion error region. One may ﬁnd that the localization CRLB given 
+in Fig. 1 is lower than that in Fig. 5, which is counter-intuitive. 
+The explanation for this phenomenon is that φk,1 = 0 is assumed 
+known in Fig. 1 in the absence of frequency down conversion, such 
+that source position is not coupled with the phase shift under this 
+circumstance.
+We then set SNR1 = −5 dB, and evaluate the localization per-
+formance of these methods under varying signal observation inter-
+vals. Other settings remain the same as that produces Fig. 5. The 
+results are shown in Fig. 6. As revealed in Fig. 6, the localization 
+RMSEs of different methods decrease consistently as the observa-
+tion duration increases. This is very intuitive because longer sig-
+nal observation interval improves the TDOA and FDOA estimation 
+accuracy and thus reduces the localization RMSE. The proposed 
+method exhibits superior localization performance compared to 
+the two-step method and the GN based DPD method, which could 
+be explained by the introduction of the constraint during each iter-
+ation. Its RMSE is approximately 3 dB higher than the grid search 
+DPD method because it is only an approximation to the latter. Note 
+that even the grid search DPD method fails to approach the CRLB 
+in this case because SNR1 is relatively low such that the global op-
+timum on cost function surface is not in small error region.
+In Fig. 7, the averaged execution times of different methods are 
+given under varying observation durations. The simulation setting 
+is identical with the one that produces Fig. 6. From the ﬁgure, one 
+Fig. 6. Localization RMSEs of different methods under different signal observation 
+durations. B = 0.3 MHz, fs = 5 MHz, SNR = −5 dB.
+Fig. 7. Averaged execution times of different methods for joint TDOA and FDOA lo-
+calization (in seconds). B = 0.3 MHz, fs = 5 MHz, SNR = −5 dB.
+can ﬁnd that the two-step method requires very little execution 
+time. The execution times of the proposed method and the grid 
+search DPD method increase considerably with increased T . How-
+ever, the proposed method has an acceptable execution time while 
+the grid search DPD method requires much longer time. Particu-
+larly, when T exceeds 1 ms, the grid search DPD method requires 
+several minutes to solve for the source position. The proposed 
+method on the contrary, could yield almost realtime results for 
+most cases. Therefore, the proposed method appears to be more 
+suitable for applications in practice compared to the grid search 
+DPD method from the perspective of computational complexity.
+Finally, the RMSE of the proposed method in log scale is evalu-
+ated under K = 4, K = 6 and K = 8, respectively and compared 
+with the corresponding CRLBs to reveal the effects of observer 
+number on localization performance. We set T = 1 ms and ak,1 = 1
+with φk,1 = (k −1)π/8. The observer positions are randomly se-
+lected within the region of interest and their velocities are also 
+randomly chosen with a maximum velocity of 15 m/s. The simula-
+tion results are shown in Fig. 8.
+As shown in Fig. 8, the RMSE of the proposed method decreases 
+consistently as the SNR or K increases, because more observers 
+would bring more information about the source position. Similar 
+to Fig. 4, the improvement in localization RMSE becomes negligi-
+ble as K increases because localization RMSE is generally inversely 
+proportional to K . Due to the existence of local convergence, the 
+proposed method requires a relatively high SNR to reach the cor-
+responding CRLB.
+
+
+--- PDF PAGE 9 ---
+F. Ma et al. / Digital Signal Processing 96 (2020) 102600
+9
+Fig. 8. Localization RMSEs of different methods versus varying observer numbers 
+with random observer locations and velocities. B = 0.3 MHz, fs = 5 MHz, N =
+10, 000.
+6. Conclusion
+In this paper, we focused on improving TDOA/FDOA localization 
+performance with medium computational complexity, and a new 
+EM-based localization method was proposed. During each itera-
+tion of the proposed method, the current source position estimate 
+is used as a constraint to predict the TDOAs and FDOAs, which 
+are combined with TDOA and FDOA estimates to yield renewed 
+TDOA and FDOA measurements. The source position is updated 
+using these renewed measurements in closed form. Simulation re-
+sults showed that the proposed method outperformed the two-
+step method and the GN based DPD method in localization accu-
+racy when the SNR is low, and it had much lower computational 
+complexity compared to the grid search DPD method. Therefore, it 
+is more appealing from the computational complexity perspective 
+compared with the grid search DPD method. It should be noted 
+that the rationale behind the proposed method could also be ap-
+plied to other localization schemes.
+Declaration of competing interest
+The authors declare that they have no known competing ﬁnan-
+cial interests or personal relationships that could have appeared to 
+inﬂuence the work reported in this paper.
+Acknowledgment
+The authors would like to thank the anonymous reviewers for 
+their valuable comments that have helped improve the quality of 
+this paper.
+References
+[1] D.J. Torrieri, Statistical theory of passive location systems, IEEE Trans. Aerosp. 
+Electron. Syst. AES-20 (2) (1984) 183–198, https://doi .org /10 .1109 /TAES .1984 .
+310439.
+[2] S. Tomic, M. Beko, R. Dinis, RSS-based localization in wireless sensor net-
+works using convex relaxation: noncooperative and cooperative schemes, IEEE 
+Trans. Veh. Technol. 64 (5) (2015) 2037–2050, https://doi .org /10 .1109 /TVT.
+2014 .2334397.
+[3] I. Guvenc, C.C. Chong, A survey on TOA based wireless localization and NLOS 
+mitigation techniques, IEEE Commun. Surv. Tutor. 11 (3) (2009) 107–124, 
+https://doi .org /10 .1109 /SURV .2009 .090308.
+[4] Y. Liu, F. Guo, L. Yang, W. Jiang, An improved algebraic solution for TDOA 
+localization with sensor position errors, IEEE Commun. Lett. 19 (12) (2015) 
+2218–2221, https://doi .org /10 .1109 /LCOMM .2015 .2486769.
+[5] K.C. Ho, W. Xu, An accurate algebraic solution for moving source location us-
+ing TDOA and FDOA measurements, IEEE Trans. Signal Process. 52 (9) (2004) 
+2453–2463.
+[6] M. Sun, K.C. Ho, An asymptotically eﬃcient estimator for TDOA and FDOA 
+positioning of multiple disjoint sources in the presence of sensor location 
+uncertainties, IEEE Trans. Signal Process. 59 (7) (2011) 3434–3440, https://
+doi .org /10 .1109 /TSP.2011.2131135.
+[7] R. Amiri, F. Behnia, A. Noroozi, An eﬃcient estimator for TDOA-based source 
+localization with minimum number of sensors, IEEE Commun. Lett. 22 (12) 
+(2018) 2499–2502, https://doi .org /10 .1109 /LCOMM .2018 .2876525.
+[8] J. Liang, Y. Chen, H. So, Y. Jing, Circular/hyperbolic/elliptic localization via Eu-
+clidean norm elimination, Signal Process. 148 (2018) 102–113, https://doi .org /
+10 .1016 /j .sigpro .2018 .02 .006.
+[9] A. Noroozi, A.H. Oveis, S.M. Hosseini, M.A. Sebt, Improved algebraic solution for 
+source localization from TDOA and FDOA measurements, IEEE Wirel. Commun. 
+Lett. 7 (3) (2018) 352–355, https://doi .org /10 .1109 /LWC .2017.2777995.
+[10] G. Wang, S. Cai, Y. Li, N. Ansari, A bias-reduced nonlinear WLS method for 
+TDOA/FDOA-based source localization, IEEE Trans. Veh. Technol. 65 (10) (2016) 
+8603–8615, https://doi .org /10 .1109 /TVT.2015 .2508501.
+[11] Y. Wang, Y. Wu, An eﬃcient semideﬁnite relaxation algorithm for moving 
+source localization using TDOA and FDOA measurements, IEEE Commun. Lett. 
+21 (1) (2017) 80–83, https://doi .org /10 .1109 /LCOMM .2016 .2614936.
+[12] A. Amar, A.J. Weiss, Direct position determination in the presence of model 
+errors–known waveforms, Digit. Signal Process. 16 (1) (2006) 52–83, https://
+doi .org /10 .1016 /j .dsp .2005 .03 .003.
+[13] A.J. Weiss, A. Amar, Direct geolocation of stationary wideband radio signal 
+based on time delays and Doppler shifts, in: 2009 IEEE/SP 15th Workshop on 
+Statistical Signal Processing, 2009, pp. 101–104.
+[14] A. Amar, A.J. Weiss, Direct position determination (DPD) of multiple known and 
+unknown radio-frequency signals, in: 2004 12th European Signal Processing 
+Conference, 2004, pp. 1115–1118.
+[15] A.J. Weiss, Direct geolocation of wideband emitters based on delay and 
+Doppler, IEEE Trans. Signal Process. 59 (6) (2011) 2513–2521, https://doi .org /
+10 .1109 /TSP.2011.2128311.
+[16] N. Vankayalapati, S. Kay, Q. Ding, TDOA based direct positioning maximum 
+likelihood estimator and the Cramer-Rao bound, IEEE Trans. Aerosp. Electron. 
+Syst. 50 (3) (2014) 1616–1635, https://doi .org /10 .1109 /TAES .2013 .110499.
+[17] E. Tzoreff, A.J. Weiss, Expectation-maximization algorithm for direct posi-
+tion determination, Signal Process. 133 (2017) 32–39, https://doi .org /10 .1016 /j .
+sigpro .2016 .10 .015.
+[18] J. Li, L. Yang, F. Guo, W. Jiang, Coherent summation of multiple short-time sig-
+nals for direct positioning of a wideband source based on delay and doppler, 
+Digit. Signal Process. 48 (2016) 58–70, https://doi .org /10 .1016 /j .dsp .2015 .09 .
+008.
+[19] L. Tzafri, A.J. Weiss, High-resolution direct position determination using MVDR, 
+IEEE Trans. Wirel. Commun. 15 (9) (2016) 6449–6461, https://doi .org /10 .1109 /
+TWC .2016 .2585116.
+[20] M. Pourhomayoun, M.L. Fowler, Distributed computation for direct position de-
+termination emitter location, IEEE Trans. Aerosp. Electron. Syst. 50 (4) (2014) 
+2878–2889, https://doi .org /10 .1109 /TAES .2014 .130005.
+[21] J. Bosse, A. Ferreol, P. Larzabal, Performance analysis of passive localization 
+strategies: direct one step approach versus 2 steps approach, in: 2011 IEEE 
+Statistical Signal Processing Workshop (SSP), 2011, pp. 701–704.
+[22] L. Yang, K.C. Ho, An approximately eﬃcient TDOA localization algorithm in 
+closed-form for locating multiple disjoint sources with erroneous sensor po-
+sitions, IEEE Trans. Signal Process. 57 (12) (2009) 4598–4615, https://doi .org /
+10 .1109 /TSP.2009 .2027765.
+[23] S. He, X. Dong, High-accuracy localization platform using asynchronous time 
+difference of arrival technology, IEEE Trans. Instrum. Meas. 66 (7) (2017) 
+1728–1742, https://doi .org /10 .1109 /TIM .2017.2666278.
+[24] A. Yeredor, E. Angel, Joint TDOA and FDOA estimation: a conditional bound and 
+its use for optimally weighted localization, IEEE Trans. Signal Process. 59 (4) 
+(2011) 1612–1623, https://doi .org /10 .1109 /TSP.2010 .2103069.
+[25] S. Stein, Algorithms for ambiguity function processing, IEEE Trans. Acoust. 
+Speech Signal Process. ASSP-29 (3) (1981) 588–599.
+[26] X. Xiao, F. Guo, D. Feng, Low-complexity methods for joint delay and Doppler 
+estimation of unknown wideband signals, IET Radar Sonar Navig. 12 (4) (2018) 
+398–406, https://doi .org /10 .1049 /iet -rsn .2017.0368.
+[27] T.K. Moon, The expectation-maximization algorithm, IEEE Signal Process. Mag. 
+13 (6) (1996) 47–60, https://doi .org /10 .1109 /79 .543975.
+[28] D. Musicki, R. Kaune, W. Koch, Mobile emitter geolocation and tracking us-
+ing TDOA and FDOA measurements, IEEE Trans. Signal Process. 58 (3) (2010) 
+1863–1874, https://doi .org /10 .1109 /TSP.2009 .2037075.
+[29] S.M. Kay, Fundamentals of Statistical Signal Processing: Estimation Theory, PTR 
+Prentice Hall, 1993.
+[30] A. Azevedo-Filho, R.D. Shachter, Laplace’s method approximations for proba-
+bilistic inference in belief networks with continuous variables, in: Uncertainty 
+Proceedings 1994, Morgan Kaufmann, 1994, pp. 28–36.
+[31] X. Qu, L. Xie, W. Tan, Iterative constrained weighted least squares source lo-
+calization using TDOA and FDOA measurements, IEEE Trans. Signal Process. 
+65 (15) (2017) 3990–4003, https://doi .org /10 .1109 /TSP.2017.2703667.
+[32] R. Tao, W.Q. Zhang, E.Q. Chen, Two-stage method for joint time delay and 
+Doppler shift estimation, IET Radar Sonar Navig. 2 (1) (2008) 71–77, https://
+doi .org /10 .1049 /iet -rsn :20060014.
+
+
+--- PDF PAGE 10 ---
+10
+F. Ma et al. / Digital Signal Processing 96 (2020) 102600
+[33] A.O. Hero, J.A. Fessler, Asymptotic Convergence Properties of EM-Type Algo-
+rithms, EECS Univ. of Michigan, Ann Arbor, MI, 1993, pp. 1–31.
+[34] C. Knapp, G. Carter, The generalized correlation method for estimation of time 
+delay, IEEE Trans. Acoust. Speech Signal Process. ASSP-24 (4) (1976) 320–327.
+Fuhe Ma is now a Ph.D. candidate in National University of Defense 
+Technology (NUDT), Changsha, Hunan China. He received his M.Sc. degree 
+in statistical signal processing from NUDT in 2016. His research interests 
+include passive localization and statistical signal processing.
+Fucheng Guo received the B.S. and Ph.D. degrees from the National 
+University of Defense Technology (NUDT), Changsha, Hunan China, in 1998 
+and 2002, respectively. From 2006 to 2007, he was a visiting scientist at 
+the Xi’an Jiaotong University, Xi’an, Shanxi China. From 2009 to 2010, he 
+was a visiting scholar at the University of Missouri, Columbia, MO USA. 
+Currently, he is a professor with the NUDT. His current research interests 
+include passive localization, tracking and radar signal processing.
+Le Yang received the B.Eng. and M.Sc. degrees in Electrical Engineer-
+ing from the University of Electronic Science and Technology of China 
+(UESTC), Chengdu, China, in 2000 and 2003, respectively. He received the 
+Ph.D. degree in Electrical and Computer Engineering in 2010 from the 
+University of Missouri, Columbia, MO USA. Between 2003 and 2004, he 
+was a lecturer at the UESTC. From 2004 and 2005, he was with the Uni-
+versity of Victoria, Victoria, BC, Canada, working on diversity techniques 
+and performance evaluation of communication systems. In January 2006, 
+he transferred to the McMaster University, Hamilton, ON, Canada, where 
+he focused his research on artiﬁcial neural networks and computational 
+neuroscience. From 2011 to 2018, he was an associate Professor with the 
+Jiangnan University, Wuxi, Jiangsu China. Since 2019, he has been with 
+the Department of Electrical and Computer Engineering, University of Can-
+terbury, Christchurch, 8020, New Zealand. His current research interests 
+include sensor networks, passive localization, tracking and machine learn-
+ing.

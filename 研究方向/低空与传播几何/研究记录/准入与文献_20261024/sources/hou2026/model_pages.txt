@@ -1,0 +1,142 @@
+
+--- PDF PAGE 1 ---
+   A Joint Algorithm for Delay Estimation and Data
+       Fusion in 3D TDOA Localization for UAVs
+
+                                           Jiaming Hou, Wei Wu, Xuanli Wu, Zhuoming Li, Xuejun Sha
+                                              School of Electronics and Information Engineering
+                                                       Harbin Institute of Technology
+                                                        Harbin, Heilongjiang Province, China
+                 23s105157@stu.hit.edu.cn; kevinking@hit.edu.cn; xlwu2002@hit.edu.cn; zhuoming@hit.edu.cn; shaxuejun@hit.edu.cn
+
+
+            Abstract—Currently, UAV localization in noncooperative     under low SNR conditions due to the lack of prior information.
+         scenarios suffers from limited accuracy and poor stability. In     This leads to significant fluctuations  in delay estimates,
+       most traditional methods, delay estimation and localization      resulting in a marked decline in localization accuracy.
+         solving are studied separately, which causes estimation errors
+         to propagate into the localization process. To address this issue,        In  the  localization  stage,  existing   algorithms[10-13]
+          this paper investigates three-dimensional localization based on      typically assume TDOA measurement errors follow an ideal
+       Time Difference of Arrival (TDOA) and proposes a joint delay    random distribution. Consequently, they often struggle to
+        estimation and data fusion algorithm for UAV localization. In     handle outlier measurements. Since TDOA values are derived
+        the signal delay estimation stage, a signal delay estimation    from signal delay estimates, any anomalies in the delay
+        algorithm based on dual-layer least mean squares filters (D-     estimation stage directly impact the localization equations.
+      LMS) is proposed to improve the noise resistance of traditional     This is a primary factor that limits localization accuracy. To
+       methods under low signal-to-noise ratio (SNR) conditions. By     address  these  issues, some  studies[14-20]  have  explored
+        using two layers of adaptive filtering, the proposed method    methods such  as multi-reference  station  solving,  outlier
+        improves both the accuracy and stability of delay estimation. In     detection, and clustering fusion. However, several challenges
+        the localization stage, a data fusion algorithm based on cluster     remain, including high computational complexity, limited
+        weighting (CWDF)  is  proposed. The  algorithm performs                                                                            adaptability to various data distributions, and insufficient
+         clustering and adaptive weighting on localization data, which                                                                   accuracy in high-noise environments.
+         effectively reduces the influence of outlier measurements on
+         localization results. Simulation results show that the proposed       Based on the issues mentioned above, this paper proposes
+        algorithm achieves better estimation and localization accuracy     a joint delay estimation and data fusion algorithm for UAV
+        than existing methods under different SNR conditions.              localization using TDOA. First, to address the low accuracy
+                                                                       of traditional algorithms under low SNR conditions, a signal10.1109/ICCC70295.2026.11680261         Keywords—delay estimation, LMS filter, data fusion, TDOA     delay estimation algorithm based on dual-layer LMS filters
+DOI:       localization                                         (D-LMS) is proposed. This algorithm effectively suppresses
+|                                                                     noise interference and improves estimation precision through
+IEEE                                     I.  INTRODUCTION                                                                       adaptive  iterations.  Second,  to  mitigate  the  impact  of
+©2026      wideTherangerapidof developmentintelligent applicationsof UAV technologyacross multiplehas enabledsectors.a     estimationalgorithm basederrorsoninclusterthe localizationweighting (CWDF)stage, a isdataproposed.fusion
+       However, unauthorized UAV flights present serious safety    By performing  outlier  filtering and weighted fusion on
+         risks and regulatory challenges. Achieving high-precision     multiple sets of localization values, this method enhances
+         localization of these UAVs is now a critical component of     both  accuracy and  system  stability.  Finally,  a TDOA
+        airspace  awareness  and  countermeasure  systems.  In     localization simulation platform is established to verify the
+        noncooperative scenarios, passive detection based on time     performance of the proposed joint algorithm. The results
+        difference  of  arrival (TDOA)  has emerged  as  a  key     demonstrate  its  effectiveness  in  improving  localization
+         localization technique. This method is widely used because it     accuracy and noise immunity.979-8-3195-1399-1/26/$31.00      does not  require clock  synchronization with  the  target.
+|       Additionally,  it  offers a simple system  architecture and       The rest of the paper is organized as follows: Section Ⅱ
+(ICCC)      maintains high localization accuracy for static or low-speed     describes the proposed joint algorithm. Simulation results are
+       moving targets.                                              provided in Section Ⅲ, followed by conclusions in Section Ⅳ.
+China
+in        From the perspective of system implementation,  the                     II. THE PROPOSED JOINT ALGORITHM
+        accuracy of TDOA localization is primarily limited by two                                                                       This section describes the details of the proposed joint
+         factors: the precision of signal delay estimation and the                                                                        algorithm. For three-dimensional (3D) UAV localization, the
+        robustness of the localization solution. However, existing                                           TDOA method is adopted due to its passive nature and the
+        research typically treats these two stages as separate problems.Communications                                                                              fact that it does not require time synchronization between the
+on      There  is a lack of systematic integration between delay   UAV and the stations. The process begins by estimating the
+        estimation and the localization process.                                                                   time delay of the received signals. These estimates are then
+           In the delay estimation  stage,  traditional generalized     used to calculate the TDOA values between base stations,Conference       cross-correlation (GCC)  and  quadratic  cross-correlation    which form a set of nonlinear equations. Finally, the UAV
+      (QCC)  algorithms[1-5]  improve  noise  immunity  through     localization is determined by solving this system of equations.
+       frequency-domain   weighting   or   multiple   correlation                                                        As shown in Fig. 1, a 3D TDOA localization system with
+        operations. Furthermore, some  studies[6-9] have employedInternational                                            N   N  4  deployed base stations is considered for UAV         least mean  squares (LMS)  filters  to  achieve  adaptive
+        optimization against environmental interference. However,      localization within a monitoring area. Let the coordinates ofIEEE/CIC                                                                                                                  xi , yi , z i       when  processing  signals  from  noncooperative  UAVs,     the  base   stations  be  represented  by  S i  
+2026       traditional algorithms struggle to maintain stable performance                                                                                         ( i 1,    , N ) and the position of the UAV be denoted by
+
+
+
+
+
+                Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 25,2026 at 16:08:04 UTC from IEEE Xplore. Restrictions apply.
+                                           336
+--- PDF PAGE 2 ---
+                                                                                                                        Time Delay Estimation
+                                                                                                                                                                    (per group)
+
+
+
+
+                                                                                                                        Time Delay Estimation                Localization Data Fusion
+                                                                                                                         Station Grouping
+                                                                                                                                                                    (per group)                       (after solving the equation)
+
+
+
+                                                                                                                                                        ...
+
+
+                                                                                                                       Time Delay Estimation
+                                                                                                                                                                   (per group)
+
+                                                                                       Fig. 2. The flowchart of the joint delay estimation and data fusion
+                                                                                                          algorithm
+
+
+                                                      The least mean square time delay estimation (LMSTDE)
+                                                             algorithm  is based on the LMS  criterion. By  iteratively             Fig. 1. The system model for TDOA localization
+                                                             updating the weight vector,  it transforms the time delay
+                                                                estimation into a problem of determining filter coefficients.
+      xt , y t , z t  . The coordinates of the base stations are    The algorithm adaptively adjusts these weights based on theS t  
+                                                                 input signals to minimize the mean square error between theknown, while the position of the UAV is unknown and needs
+                                                              output and the desired signal, thereby accurately estimatingto be estimated.
+                                                                the signal delay.
+    Fig. 2 shows the flowchart of the joint delay estimation
+                                                              Consider  base  stations S1  and S 2  as an  example.and data fusion algorithm. First, the base stations within the
+monitoring area are grouped. For each group, the D-LMS    Suppose the UAV signals received by these two stations are
+algorithm is used to estimate the time delays between the     x1(t ) and x2(t ) , respectively, which serve as the input and
+stations. Next, a system of TDOA equations is formulated     desired signals for the LMS filter. In the delay estimation
+using these delay estimates and solved to obtain localization     process, the filter order L corresponds to a range of possible
+value  for each group.  Finally,  the CWDF algorithm  is     sampling delays between the two signals.
+employed to mitigate the impact of measurement errors. This
+process achieves precise 3D localization of UAVs.              To enable the filter to capture both positive and negative
+                                                             delay estimates, the desired signal x2(t )  is delayed by P
+A. Station Grouping
+                                                          sampling intervals before being input to the filter. The delay
+   In 3D space, a minimum of four base stations is required                                                                               is typically set to P  ( L  1) / 2 . The filter output y t  canto  determine  a  target's  position. However,  in  practical
+applications, more base stations are typically deployed to     then be expressed as:
+ensure the stability of the localization system. As the number
+of base stations increases, the number of TDOA equations                            y t w T t x1 t                     
+grows and the measurement data becomes redundant. Solving
+a single set of equations using all base stations provides only                                                   The weight vector w t  is updated according to:one localization result, which may not guarantee sufficient
+reliability. Therefore, without adding more hardware, the
+existing base stations can be divided into groups. Delay                  w  t  1  w t  e t x1 t              
+estimation and  localization solutions are then performed
+separately for each group to improve the reliability of the final                                                      where  denotes the iteration step size, and the error signalresult.
+                                                            e t   is updated as follows:
+   Assuming each group contains K  ( K  4) base stations
+and the composition of each group is unique, the total number                                                                                                                            e t  x 2  t  P   y t                  of groups M  is given by:
+                                                      where  2x  t  P   denotes  x2(t )  delayed by P  sampling                            K     N !                                                                                              M   N                                                                         intervals. Upon the convergence of the filter after several                   K ! N  K  !
+                                                                          iterations, the accurate delay estimate can be determined by
+         K                                                  performing peak detection on the stabilized weight vector,
+where  N denotes the number of combinations of N base      which is expressed as:
+stations taken K  at a time.
+B. Signal Delay Estimation Algorithm Based on Dual-                                        M                                                                                                                                                                                                                                                                                                                                      D  arg max                                                            w i sinc  t  i                                         Layer LMS Filters                                                                                M                                                                                                  i                                                                                                                         
+   For each group of K base stations, one is designated as
+the reference station. The D-LMS algorithm is then used to    where sinc() denotes the sinc interpolation.
+estimate the delays between the signals received by the
+reference station and the remaining K  1 base stations.
+
+
+
+
+
+      Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 25,2026 at 16:08:04 UTC from IEEE Xplore. Restrictions apply.
+                                      337

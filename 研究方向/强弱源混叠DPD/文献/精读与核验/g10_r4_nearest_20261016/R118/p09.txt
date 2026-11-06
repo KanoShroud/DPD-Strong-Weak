@@ -1,0 +1,61 @@
+                                                                                          Y. Zeng et al.: QNOMP: A Quasi-Newton-Based Joint Multipath Optimization Method
+
+
+  Estimating the conditional posterior variance Var[τi|h′])     Here, the high-dimensional expectation can be decomposed
+is non-trivial under general multipath conditions. Moreover,     into Np separate one-dimensional expectations. To further
+it can be proven that the mean squared error (MSE) of the    compute  Eτ|h′(·), we adopt  the Laplace approximation
+MMSE estimator  is dominated by Var[τi|h′]). Therefore,     that the  distribution of τ|h′  is approximately Gaussian
+quantifying the difference between MMSE and LOX is as     distribution N(τ|τ MAP, H−1), where H  is  the Hessian
+difficult as establishing the fundamental lower bound on     matrix of function (11) (see Appendix B). Consequently,
+estimation error. Nevertheless, in simplified scenarios, it is      τi|h′ is normally distributed with variance (H−1)ii. Thanks
+feasible to derive approximations for the conditional posterior     to QNOMP,  in  the BFGS  procedure,  the  matrix Hn
+variance.                                                       serves  as  an  approximation  to H−1.  This  framework
+  For further insight, we analyze the discrepancy between     naturally provides a Gaussian approximation of the posterior
+MMSE and LOX in a special case. As shown in Appendix B,     without introducing additional computational cost: τ|h′ ≈
+the marginal  posterior  distribution  of τ  is  p(τ|h′) ∝    N(τ|τ MAP, Hn). The expectation can then be efficiently
+det(6) exp (β∗)H6−1β∗  . When Np =  1, the posterior    approximated  using  Gaussian  quadrature.  Specifically,
+simplifies to                                    we have
+                                 |a(τi)Hh′|2                                                          S
+                                                                    .              p(τi|h′) ∝exp
+                      σ 2(M + σ 2/Ei)                                                                              Eτi|h′a0(τi)a0(τi)H ≈ X a0(τ ik )aH0 (τ ik )wk,
+A second-order Taylor expansion of the log-posterior around                               k=1
+the MAP estimate yields an approximation of the conditional                                       S
+posterior variance Var[τi|h′] that                                            Eτi|h′ae(τi)a0(τi)H ≈ X ae(τ ik )aH0 (τ ik )wk,
+                                                                                    k=1
+                         3σ 2
+                 Var[τi|h′] ≈                          12dft,                      2π2MEi                                                      where S is the order of Gauss-Hermite quadrature, τ ik =
+                                              =   (Hn)ii, xk and wk  denote the                                                            τ iMAP + √2δixk,  δimatching the Cramér-Rao lower bound (CRB) [35], [59]
+for parameter estimation. Consequently, the discrepancy    precomputed quadrature points and weights, respectively.
+between MMSE and LOX is bounded as                   The covariance matrices are then approximated by
+                           12
+                                                                     .       ∥MMSE −LOX∥22 = O        dft                                                 Np   S                     MSNR                                                         Cov(A0β, A0β) ≈ X X Eiwka0(τ ik )aH0 (τ ik )
+  This approximation provides a justification for using LOX                                i=1 k=1
+as a practical substitute for the MMSE estimator in general               = B0(τ s)DBH0 (τ s),
+settings.                                                                                    Np   S
+  As a comparison, the MAP estimator can be viewed          Cov(Aeβ, A0β) ≈ X X Eiwkae(τ ik )aH0 (τ ik )
+as replacing A0EAH0  in (21) by A0(τ MAP)EA0(τ MAP)H.                                i=1 k=1
+In contrast, the LOX estimator employs the expectation                                              = Be(τ s)DBH0 (τ s),             (25)
+Eτ|h′A0EAH0 , thus incorporating information from the full
+posterior distribution rather than relying solely on the point                                                      where τ s = [τ 11 , . . . , τ 1S , . . . τNp,1   . . . , τ Np]TS   ∈RSNp, B0 =estimate τ MAP. By utilizing more comprehensive posterior
+                                                     A0(τ s) ∈  CM×SNp, Be =  Ae(τ s) ∈  CK×SNp, D =information, LOX generally achieves a lower mean-squared
+                                                              diag{[E1, . . . , ENp] ⊗w}, and w = [w1, . . . , wS]. Thus, theextrapolation error than the MAP estimator.
+                                       LOX can be expressed as
+  Evaluating the LOX estimator in (20) involves computing
+expectations with respect to the posterior distribution τ|h′.                                                                                                                 ˜h ≈BeDBH0 (B0DBH0 + σ 2IM)−1h′Under the assumption  that path gains are uncorrelated,
+the  prior covariance matrix E  is  diagonal,  i.e., E =          = Be(BH0 B0 + σ 2D−1)−1BH0 h′.          (26)
+diag(E1, E2, . . . , ENp). The two covariance terms in (20) can
+                                               Due to the high accuracy of Gauss–Hermite quadrature,then be evaluated by
+                                                           a  small  quadrature  order S  is  sufficient.  In  practice,
+       Cov(A0β, A0β) = Eτ|h′A0EAH0                    S = 3 yields excellent results. The corresponding quadrature
+                             Np                              nodes and weights are given by x1,2,3 = −√3/2, 0, √3/2
+             = X Eτi|h′Eia0(τi)aH0 (τi)     (23)    and w1,2,3 = 1/4, 1/2, 1/4, respectively.
+                             i=1                              Note  that  the  coefficient  vector βs  =  (BH0 B0 +
+and                                              σ 2D−1)−1BH0 h′  corresponds  exactly  to  the LMMSE
+                                                                 solution  under  the  observation  matrix  B0  and  prior
+       Cov(Aeβ, A0β) = Eτ|h′AeEAH0                  CN(0, D).  This  implies  that  the  Gaussian  quadrature
+                            Np                               approximation  is  equivalent  to  performing  an  ensem-
+             = X Eτi|h′Eiae(τi)aH0 (τi).    (24)     ble LMMSE estimation based on the posterior samples
+                             i=1                             τ s.
+
+
+212660                                                                                                              VOLUME 13, 2025

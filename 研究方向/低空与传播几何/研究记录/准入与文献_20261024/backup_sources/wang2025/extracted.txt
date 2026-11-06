@@ -1,0 +1,1734 @@
+
+=== PDF PAGE 1 ===
+IEEE SENSORS JOURNAL, VOL. 25, NO. 20, 15 OCTOBER 2025
+38371
+Enhanced Direct Position Determination of
+Multiple Sources Based on 1-bit Sparse
+Bayesian Learning
+Qiuping Wang, Qing Liu , Student Member, IEEE, Jian Xie , Member, IEEE, and Yifeng He
+Abstract—The conventional direct position determination
+(DPD) algorithms impose significant communication over-
+head since the raw signals are required to be transmitted
+from all sensor stations to a central processor. To address
+this
+challenge,
+we
+propose
+a
+communication-efficient
+approach for multisource localization, named OBSBL-DPD,
+which integrates 1-bit quantized measurements with sparse
+Bayesian learning (SBL). The utilization of 1-bit quantiza-
+tion reduces the communication load between the central
+processor and distributed stations, while SBL improves the
+localization accuracy by exploiting signal sparsity. In contrast
+to existing ℓ1-penalty-based DPD approaches, the proposed
+framework employs SBL to solve the localization problems
+with partially unknown dictionaries in a sparsity-driven way.
+Moreover, the traditional single-snapshot model is extended
+to support multi-snapshot scenarios, which can further
+enhance robustness in practical applications. Additionally,
+we introduce an alternating minimization strategy to improve the convergence of the proposed algorithm. The simulation
+results demonstrate that the proposed OBSBL-DPD method exhibits superior localization accuracy and reduced
+computational complexity compared to conventional DPD approaches.
+Index Terms— 1-bit quantization, alternating minimization strategy, direct position determination (DPD), sparse
+Bayesian learning (SBL), sparsity-based localization model.
+I. INTRODUCTION AND RELATED WORK
+W
+IRELESS
+localization
+technologies
+have
+attracted
+extensive research interest due to their critical role
+in a wide range of applications [1]. In military scenarios,
+such technologies are utilized to localize electromagnetic
+sources for applications, including electronic warfare and
+Received 15 June 2025; revised 16 August 2025; accepted 19 August
+2025. Date of publication 9 September 2025; date of current version
+16 October 2025. This work was supported in part by the National Nat-
+ural Science Foundation of China under Grant 6257013173 and in part
+by the Innovation Foundation for Doctor Dissertation of Northwestern
+Polytechnical University under Grant CX2025077. The associate editor
+coordinating the review of this article and approving it for publication was
+Dr.-Ing. Ni Zhu. (Corresponding authors: Jian Xie; Yifeng He.)
+Qiuping Wang is with the School of Electronics and Informa-
+tion, Northwestern Polytechnical University, Xi’an 710072, China,
+and also with the Overall Payload Design Department, Xi’an Insti-
+tute
+of
+Space
+Radio
+Technology,
+Xi’an
+710100,
+China
+(e-mail:
+qiupwang@mail.nwpu.edu.cn).
+Qing Liu and Jian Xie are with the School of Electronics and Infor-
+mation, Northwestern Polytechnical University, Xi’an 710072, China
+(e-mail: liuqingnwpu@mail.nwpu.edu.cn; xiejian@nwpu.edu.cn).
+Yifeng He is with the Overall Payload Design Department, Xi’an
+Institute of Space Radio Technology, Xi’an 710100, China (e-mail:
+yifenghe@mail.nwpu.edu.cn).
+Digital Object Identifier 10.1109/JSEN.2025.3605149
+coordinated flight formations [2]. In civilian applications,
+localization systems are widely utilized in cellular networks,
+environment monitoring, and navigation [3]. Moreover, the
+rapid advancement of intelligent transportation systems has
+further emphasized the importance of high-accuracy local-
+ization for the effective management and maintenance of
+transportation infrastructure [4].
+Localization systems typically adopt a two-step subsequen-
+tial estimation process [5]. In the first stage, intermediate
+parameters such as time difference of arrival (TDOA), direc-
+tion of arrival (DOA), and frequency difference of arrival
+(FDOA) are estimated [6], [7]. These parameters are then
+used in the second stage to determine the positions of the
+sources [8]. The two-step approach offers several advantages
+in previous studies. By decoupling parameter estimation from
+position calculation, it significantly reduces the computa-
+tional complexity, especially in scenarios involving multiple
+sources or large-scale sensor networks [9]. Moreover, since
+each receiving station can estimate the intermediate param-
+eters independently, the need for centralized data fusion
+is minimized, which reduces the communication load and
+enhances scalability.
+1558-1748 © 2025 IEEE. All rights reserved, including rights for text and data mining, and training of artificial intelligence
+and similar technologies. Personal use is permitted, but republication/redistribution requires IEEE permission.
+See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 01,2026 at 04:12:35 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 2 ===
+38372
+IEEE SENSORS JOURNAL, VOL. 25, NO. 20, 15 OCTOBER 2025
+However, the traditional two-step localization approach is
+generally suboptimal. Since the intermediate parameters are
+estimated independently at each receiving station, the method
+fails to fully exploit the fact that all received signals originate
+from the same emitter [10]. Furthermore, the remaining sig-
+nal data are typically discarded after extracting these useful
+parameters, which may result in the loss of weak but infor-
+mative components embedded in noise [11]. In multisource
+scenarios, an additional data association step is required,
+leading to increased system complexity and computational
+cost.
+In contrast to the traditional two-step approach, Weiss [12]
+introduced an alternative method known as direct position
+determination (DPD). DPD is a single-step technique that
+directly utilizes the raw data collected from all stations jointly,
+thereby eliminating the intermediate parameter estimation pro-
+cess [13]. Specifically, it estimates the source position by
+maximizing a cost function established by all the raw signals.
+DPD demonstrates superior performance over the two-step
+methods by avoiding the information loss associated with
+parameter extraction, particularly in low signal-to-noise ratio
+(SNR) scenarios [14]. Furthermore, DPD exhibits enhanced
+robustness, as it inherently mitigates the need for data associ-
+ation by directly operating on the raw measurements.
+A variety of DPD algorithms have been proposed in
+recent years. Among these, the most representative approaches
+include multiple signal classification (MUSIC) [15], maximum
+likelihood (ML) [16], and minimum variance distortionless
+response (MVDR) [17]. However, each of these approaches
+has inherent limitations. The MUSIC-based approaches require
+the prior knowledge of source number, while the ML-based
+methods are often computationally intensive in multisource
+scenarios, and the performance of MVDR-based algorithms
+could be degraded in the presence of coherent sources or array
+imperfections [18]. These challenges highlight the need for
+more robust and computationally efficient DPD frameworks.
+Sparse signal processing and compressed sensing (CS)
+have attracted considerable attention over the past decade,
+particularly in the field of source localization [19], [20].
+By exploiting the signal sparsity in an appropriate domain,
+CS enables the reconstruction of high-dimensional parameters
+from limited measurements via ℓ1-norm optimization, thereby
+overcoming the limitations imposed by the Nyquist sampling
+criterion.
+As for DPD, CS-based methods address several
+fundamental challenges by enabling sparse signal reconstruc-
+tion under low SNR conditions and supporting localization
+in underdetermined scenarios through compressed measure-
+ments. Recent studies have further explored the integration
+of adaptive sparsity models and deep learning techniques
+to enhance reconstruction accuracy and scalability, making
+CS-based DPD as a promising direction for next-generation
+localization systems.
+A. Application of SBL in Parameter Estimation
+The methods based on CS are typically classified into three
+categories. The first includes greedy algorithms [21], [22],
+which iteratively match the observed signals with atoms in the
+sensing matrix. These methods are computationally efficient
+but often rely on accurate prior knowledge of the sparse
+vector’s structure. The second category consists of convex
+optimization-based approaches that reformulate sparse recov-
+ery as a norm-constrained optimization problem, including
+methods such as basis pursuit (BP) [23], BP denoising (BPDN)
+[24], and Lasso [25]. Although these methods typically offer
+superior performance, their solutions may not always converge
+to the global optimum. The third category is Bayesian com-
+pressive sensing, with sparse Bayesian learning (SBL) being
+the most representative approach [26]. The approach based
+on SBL estimates sparse vectors by iteratively approximating
+the maximum a posteriori (MAP) solution without requiring
+detailed prior knowledge. Compared to methods such as BP,
+SBL has demonstrated superior performance in various signal
+recovery scenarios [27]. By establishing a sparse model for
+array signal processing, sparse reconstruction algorithms can
+be applied to recover the received signals and enable accurate
+parameter estimation. This approach addresses the limitations
+of traditional DPD methods by reducing the number of sam-
+pling snapshots as well as the costs of data transmission,
+storage, and processing.
+A comparison with the classical DPD algorithm in [28]
+shows that the SBL-based method performs more accurately
+under low SNR conditions. Moreover, it operates effectively
+without requiring prior knowledge of the number of sources,
+and it also remains robust even when only a few snapshots
+are available. Furthermore, the work in [29] indicates that the
+SBL-based DPD algorithm maintains its superior performance
+even in the presence of mutual coupling effects between array
+elements. In [30], a multiple-sparse Bayesian learning (MSBL)
+algorithm was proposed for channel estimation in broad-
+band millimeter-wave multiple-input–multiple-output (MIMO)
+orthogonal frequency-division multiplexing (OFDM) systems.
+The simulation results in [30] show that the algorithm can
+accurately estimate the beamspace channels and outperforms
+traditional methods in normalized mean square error (NMSE).
+Many algorithms for parameter estimation, such as block
+SBL (BSBL), MSBL [31], and inverse-free SBL (IFSBL) [32],
+have been proposed and discussed in [33]. The SBL-based
+framework not only exhibits superior performance but also
+addresses the signal reconstruction challenges in highly corre-
+lated sources and limited snapshots scenarios.
+B. Application of 1-bit Quantization in DPD
+While the SBL-based DPD algorithm offers notable advan-
+tages, it suffers from high computational complexity, which
+limits its practicality in real-time or resource-constrained
+scenarios. In general, DPD algorithms require centralized
+processing of raw signals transmitted from distributed sensing
+nodes. Achieving high localization accuracy in distributed
+systems typically requires extended signal acquisition times,
+which substantially increase the demands on data storage and
+transmission. Furthermore, the deployment of high-resolution
+analog-to-digital converters (ADCs) raises the requirements in
+communication bandwidth and power consumption, resulting
+in exponentially rising costs in distributed systems [34]. These
+demands are impractical for resource-constrained applications,
+such as energy-efficient arrays or large-scale sensor systems
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 01,2026 at 04:12:35 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 3 ===
+WANG et al.: ENHANCED DPD OF MULTIPLE SOURCES BASED ON 1-bit SBL
+38373
+for coordinated environmental sensing [35]. In such scenarios,
+the performance of both conventional DPD algorithms and
+SBL-based techniques is severely limited.
+To reduce the computational complexity and communication
+load, recent studies have investigated the use of 1-bit ADCs,
+which preserve only the sign information of the received
+signals [36], [37]. In contrast to infinite-resolution ADCs,
+1-bit ADCs provide a promising alternative by substantially
+decreasing the transmission cost and power consumption via
+minimal bitwidth. Recent works have introduced efficient
+methods for parameter estimation with 1-bit quantized data,
+such as DOA determination, frequency estimation, and channel
+estimation [38], [39]. DPD algorithms based on 1-bit signals
+have also been developed from various perspectives, as demon-
+strated in [40], [41].
+Zhang et al. [42] derived a cost function from 1-bit signals
+and directly estimated the source location via the ML method.
+The work in [43] established an identifiability condition of
+the 1-bit DPD model, relying only on second-order statistical
+properties. Furthermore, it demonstrated that the 1-bit DPD
+method could achieve asymptotic localization performance.
+In [44], 1-bit ADCs were employed in a distributed array
+system, and a 1-bit DPD method based on MUSIC (1-bit
+DPD-MUSIC) was proposed. The 1-bit DPD-MUSIC method
+provided higher computational efficiency and improved local-
+ization accuracy compared to the ML-based 1-bit DPD
+method.
+C. Our Approach and Contribution
+SBL-based methods have shown strong potential in signal
+processing, offering lower computational complexity along
+with higher robustness and estimation accuracy [45]. These
+advantages motivate the exploration of direct localization
+algorithms within sparse Bayesian frameworks. In this work,
+we propose a DPD method based on SBL and 1-bit data quan-
+tization (OBSBL-DPD) for multisource scenarios. The use
+of 1-bit data reduces the communication bandwidth required
+for direct positioning while simultaneously decreasing the
+computational cost.
+The main contributions of this article are listed as follows.
+1) We
+propose
+a
+1-bit
+direct
+positioning
+approach
+that substantially reduces communication bandwidth
+requirements during signal transmission. This method
+effectively lowers computational complexity and is
+well-suited for broadband signal reconnaissance, result-
+ing in improved efficiency in a centralized processing
+framework.
+2) A DPD model based on SBL is developed to improve
+the localization accuracy in multisource scenarios. The
+proposed model simplifies the selection of regularization
+parameters in classical norm-based methods, enhancing
+the robustness and reliability of the localization process.
+3) An alternating optimization algorithm is introduced to
+iteratively update the model parameters of SBL, thereby
+ensuring convergence of the objective function and
+improving the stability of the solution.
+The rest of this article is organized as follows. The localiza-
+tion problem is formulated in Section II. Section III introduces
+the proposed OBSBL-DPD estimator, including its application
+to single-snapshot cases and its extension to multiple-snapshot
+scenarios. Numerical results are presented in Section IV.
+Finally, the conclusion of this article is drawn in Section V.
+Throughout this article, we use the following symbols.
+(·)∗, (·)T , and (·)H represent the conjugate, transpose, and
+conjugate transpose operators, respectively. Re{·} and Im{·}
+represent the real and imaginary parts, respectively. E{·} rep-
+resents the expectation operator. ⊗represents the Kronecker
+product operator. Tr{·} denotes the trace operator. det(·) sym-
+bolizes the determinant operator. Additionally, In represents
+the identity matrix of order n.
+II. SIGNAL MODEL AND PROBLEM FORMULATION
+A. Received Signal Modeling
+Consider a scenario with L spatially distributed sensing
+stations, each equipped with an M-elements antenna array,
+receiving signals from Q static far-field sources. The source
+locations are denoted by pq = (xq, yq)T , q = 1, . . . , Q, where
+the number of sources Q is unknown a priori. The received
+signals are downconverted to baseband after mixing with a
+predefined carrier frequency at each station. The temporal
+expression of the signal at the lth station can be given by
+rl (t) =
+Q
+X
+q=1
+al
+ pq
+
+sl,q (t) + el (t)
+(1)
+where sl,q(t), 0 ≤t ≤T denotes the complex envelope of the
+qth source at the lth station during the observation interval
+T . el(t) = [el,1(t), el,2(t), . . . , el,M(t)]T ∈C M represents
+the additive noise vector at the lth station, which is assumed
+as a complex zero-mean white Gaussian process. al(pq) =
+[al,1(pq), al,2(pq), . . . , al,M(pq)]T ∈C M×1 stands for the
+steering vector corresponding to the qth source. The steering
+vector depends on the geometry between the source and the
+lth station, and it is a function of the source position pq.
+The received signal in (1) can be expressed in matrix form
+and further simplified as follows:
+rl (t) = Al (p) sl (t) + el (t)
+(2)
+where
+Al (p) =
+
+al (p1) , al (p2) , . . . , al
+ pQ
+
+∈C M×Q
+(3)
+sl (t) =
+
+sl,1 (t) , sl,2 (t) , . . . , sl,Q (t)
+T ∈C Q.
+(4)
+Herein, Al(p) is the generalized steering matrix with p =
+[pT
+1, . . . , pT
+Q]T and sl(t) symbolizes the complex signal ampli-
+tudes of all the Q sources.
+Assuming that the channel attenuation is slow fading and
+the sources are all narrowband, the complex envelope sl(t)
+remains constant across the L stations. This means that s(t) =
+s1(t) = s2(t) = sl(t) · · · = sL(t). The collected signal from
+the L stations can be expressed as follows:
+r (t) = A (p) s (t) + e (t)
+(5)
+where
+r (t) =
+
+rT
+1 (t) , rT
+2 (t) , . . . , rT
+L (t)
+T ∈CML
+(6)
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 01,2026 at 04:12:35 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 4 ===
+38374
+IEEE SENSORS JOURNAL, VOL. 25, NO. 20, 15 OCTOBER 2025
+Fig. 1. Diagram of dividing G grids and the struct of sparse matrix ˜s(t).
+A (p) =
+
+AT
+1 (p) , AT
+2 (p) , . . . , AT
+L (p)
+T ∈CML×Q
+(7)
+e (t) =
+
+eT
+1 (t) , eT
+2 (t) , . . . , eT
+L (t)
+T ∈CML.
+(8)
+Subsequently, the 1-bit quantization is applied, and the
+quantized model of r(t) can be described as follows:
+y (t) = csgn [r (t)]
+(9)
+where y(t) ∈CML denotes the 1-bit observations from the L
+stations. The function csgn(x) = sgn[Re(x)] + jsgn[Im(x)],
+where Re(x) and Im(x) represent the real and imaginary parts
+of x, respectively. The function sgn(·) returns the componen-
+twise sign of its argument.
+In summary, this work aims to estimate the positions p
+of the Q sources from the observations y(t) without prior
+knowledge of the number of sources.
+B. SSR Model and Problem Formulation
+Based on the received signals in (5) and (9), we further
+introduce the sparse signal recovery (SSR) model to enable
+the application of the SBL.
+Let ˜p = [˜pT
+1, ˜pT
+2, . . . , ˜pT
+G]T
+denote a fixed set of sampling grids within the range of all
+possible source locations p, as illustrated in Fig. 1, Herein, G
+represents the number of grids, which is typically much larger
+than the aforementioned Q, M, and L.
+As for the L stations, the joint response matrix can be
+denoted as follows:
+˜A =
+
+AT
+1
+ ˜p
+
+, AT
+2
+ ˜p
+
+, . . . , AT
+L
+ ˜p
+T ∈CML×G
+(10)
+where
+Al
+ ˜p
+
+=
+
+al
+ ˜p1
+
+, al
+ ˜p2
+
+, . . . , al
+ ˜pG
+
+∈C M×G.
+(11)
+Moreover, we assume that all unknown positions of
+sources
+are
+exactly
+located
+on
+the
+grid,
+i.e.,
+pq
+∈
+{˜p1, ˜p2, . . . , ˜pG}, q = 1, . . . , Q. The 1-bit quantized data can
+be expressed as follows:
+r (t) = ˜A˜s (t) + e (t)
+y (t) = csgn [r (t)]
+(12)
+where ˜s(t) ∈CG represents the signals on the G grids,
+in which the gth entry equals sl,q(t) if the the source at posi-
+tion pq corresponds to the grid point ˜pg ∈[˜p1, ˜p2, . . . , ˜pG],
+while all the other entries in ˜s(t) are set to zero.
+The goal of this work is to determine the unknown position
+p through the given 1-bit data y(t). As illustrated in Fig. 1,
+the signal ˜s(t) is sparse because G ≫Q. Consequently,
+the parameter estimation problem for p can be transformed
+into an SSR problem for ˜s(t). The source positions can then
+be determined through the received signal matrix y(t) by
+recovering the sparse signal matrix ˜s(t).
+III. SBL DIRECT LOCALIZATION ALGORITHM
+BASED ON 1-BIT SIGNAL
+In this section, we present a detailed derivation of the
+proposed OBSBL-DPD. For simplicity, we first consider the
+case of a single temporal sample and then extend the method
+to multiple samples. The proposed approach consists of the
+following stages.
+1) Sparse Prior Assumption of the Signal: An priori
+assumption is considered regarding the received data
+and the signal envelope of the source. In this article, the
+signal is assumed to follow a Laplacian prior distribution
+to promote sparsity.
+2) Bayesian Parameter Derivation: An iterative update
+of
+the
+hyperparameters
+is
+performed
+using
+the
+expectation–maximization (EM) algorithm. The use of
+1-bit data significantly simplifies this process.
+A. SBL With Single Time Sample
+1) Sparse Prior Assumption: It is noted that the signal enve-
+lope of the source exhibits spatial sparsity, which is a necessary
+condition for using the sparse reconstruction methods. The
+sparse DPD estimation model in (12) is updated as follows:
+r = ˜A˜s + e
+y = csgn [r]
+(13)
+where the joint response matrix ˜A has been defined and
+described in (10) and (11), r,e ∈CML×1, ˜s ∈CG×1, and
+y ∈{−1, 1}ML×1.
+SBL typically involves two key components, including
+the Bayesian estimation procedure and the Bayesian prior
+hypothesis. According to Bayesian rules, the estimation pro-
+cess consists of updating the prior probability density to the
+posterior probability density based on observed sample data.
+The Bayesian prior hypothesis assumes that the parameters
+to be estimated follow a prior probability distribution, which
+reflects the initial knowledge about these parameters.
+For a random variable u ∈C N, a complex Gaussian
+distribution CN(u|µ, 6) with mean µ = E{u} and covariance
+6 = E{(u −µ)(u −µ)H} can be defined as follows:
+CN (u |µ, 6 ) =
+1
+π N |6| exp
+n
+−(u −µ)H6−1 (u −µ)
+o
+.
+(14)
+In addition, it is assumed that the real and imaginary
+components of the measurement noise e are independent and
+each follows a Gaussian distribution with zero mean and
+covariance (1/2)α−1
+0 IML, where IML is the identity matrix of
+dimension ML. The noise component e is complex Gaussian
+distributed with the probability density function (pdf)
+p
+ e
+α0
+
+= CN
+
+e
+0, α−1
+0 IML
+
+.
+(15)
+Hence, the received signal follows:
+p
+ r
+˜s, α0
+
+= CN
+
+r
+ ˜A˜s, α−1
+0 IML
+
+.
+(16)
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 01,2026 at 04:12:35 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 5 ===
+WANG et al.: ENHANCED DPD OF MULTIPLE SOURCES BASED ON 1-bit SBL
+38375
+For the sparse signal ˜s, a sparse prior is required for further
+processing. Here, we adopt a two-stage hierarchical prior for ˜s,
+which follows a Laplacian sparse prior. The complex Gaussian
+prior of ˜s can be defined as follows:
+p
+ ˜s |α
+
+= CN
+ ˜s |0, 3
+
+(17)
+where
+the
+covariance
+3
+=
+diag(α)
+and
+α
+=
+[α1, α2, . . . , αG] ∈RG. Additionally, gamma superpriors are
+considered on α
+p (α |ρ ) =
+G
+Y
+g=1
+0
+ αg |1, ρ
+
+(18)
+where ρ ∈R+ represents the fixed priori. Moreover, for a
+random variable u ∈R, the gamma distribution is given by
+0(u|a, b) = [0(a)]−1baua−1 exp(−bu), where 0(a) denotes
+the Gamma function.
+Correspondingly, the priors defined by (17) and (18) indicate
+that both the real and imaginary parts of ˜s follow a Laplace
+distribution with the same pdf [46]. Therefore, the hierarchical
+prior drives most elements of ˜s to be zero, which satisfies the
+requirement for a sparse prior.
+We consider the noise variance α−1
+0
+to be unknown, and a
+gamma prior is assigned to α−1
+0
+for further analysis
+p (α0|c, d) = 0 (α0|c, d)
+(19)
+where c, d ∈R+ are fixed priors. To ensure an uninformative
+gamma prior, the assumption c, d →0 is adopted [47], [48].
+Given y
+=
+csgn[r], the pdf of y can be written as
+p(y|r, ˜s, α0)
+p
+ y = −1
+r, ˜s, α0
+
+= p
+ r < 0
+˜s, α0
+
+=
+Z 0
+−∞
+p
+ r
+˜s, α0
+
+dr
+(20)
+p
+ y = 1
+r, ˜s, α0
+
+= p
+ r > 0
+˜s, α0
+
+=
+Z ∞
+0
+p
+ r
+˜s, α0
+
+dr
+= 1 −p
+ y = −1
+r, ˜s, α0
+
+.
+(21)
+From (20) and (21) and the standard normal cumulative
+distribution function (cdf) definition, we have
+p
+ y
+r, ˜s, α0
+
+= 8
+
+α0 · ˜A˜s ⊙y
+
+(22)
+where 8(·) denotes the cdf of the standard normal distribution
+8 (t) =
+Z t
+−∞
+1
+√
+2π
+exp
+
+−x2
+2
+
+dx.
+(23)
+In summary, the statistical distribution p(y|˜s, α0) can be
+expressed as follows:
+p
+ y
+˜s, α0
+
+= p
+ y
+r, ˜s, α0
+
+p
+ r
+˜s, α0
+
+p (r)
+∝p
+ y
+r, ˜s, α0
+
+p
+ r
+˜s, α0
+
+.
+(24)
+By incorporating the hierarchical model of each parameter,
+the joint distribution can be calculated as follows:
+p
+ y, ˜s, α, α0
+
+= p
+ y
+˜s, α0
+
+p
+ ˜s
+ α
+
+p (α|ρ) p (α0|c, d)
+(25)
+Fig. 2. Diagram of the relationship between parameters.
+where the distributions on the right side are defined by (16),
+(17), (18), (19), and (22). The sparse Bayesian model is shown
+in Fig. 2, where the sensor observation y is employed to
+estimate the other variables.
+2) Bayesian Parameter Inference: Based on the prior distri-
+bution defined in Section III-B, the posterior distribution of
+the unknown parameters in the Bayesian model is given by
+Bayes’ theorem as follows:
+p
+ ˜s, α, α0
+ y
+
+= p
+ y, ˜s, α, α0
+
+p (y)
+= p
+ y
+˜s, α0
+
+p
+ ˜s
+ α
+
+p (α|ρ) p (α0|c, d)
+p (y)
+(26)
+where
+p (y) =
+Z Z Z
+p
+ y, ˜s, α, α0
+
+d˜sdαdα0.
+(27)
+However, the direct computation of p(y) is complicated since
+it involves a 3-D integral. An alternative is to decompose (26)
+under the SBL probability model to derive the MAP distribu-
+tion of the parameters, which can be achieved via a type-II
+ML approach
+p
+ ˜s, α, α0
+ y
+
+= p
+ ˜s
+ y, α0, α
+
+p
+ α, α0
+ y
+
+.
+(28)
+It can be readily demonstrated that the posterior distribution
+of ˜s follows a complex Gaussian distribution:
+p
+ ˜s
+ y, α0, α
+
+= CN
+ ˜s |µ, 6
+
+.
+(29)
+In (29), the mean and covariance of the distribution can be
+given by
+µ = α06 ˜AHy
+(30)
+6 =
+
+α0 ˜AH ˜A + 3−1−1
+.
+(31)
+The term p(α, α0|y) remains unknown and it should be eval-
+uated. Following the Bayesian framework, the MAP approach
+can be adopted for its approximation:
+p
+ α, α0
+ y
+
+= p
+ y
+α, α0
+
+p (α|ρ) p (α0|c, d) .
+(32)
+Furthermore, the hyperparameters α0 and α can be estimated
+by maximizing the posterior p(α0, α|y), which is equivalent
+to maximizing the joint distribution p(y, α0, α) ∝p(α0, α|y).
+The estimation can be expressed as follows:
+p
+ y, α0, α
+
+= p
+ y
+α, α0
+
+p (α) p (α0)
+(33)
+where p(y|α, α0) = CN(y|0, C) with
+C = α-1
+0 I +
+˜
+A3 ˜AH.
+(34)
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 01,2026 at 04:12:35 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 6 ===
+38376
+IEEE SENSORS JOURNAL, VOL. 25, NO. 20, 15 OCTOBER 2025
+Accordingly, the objective function is defined as the loga-
+rithm of the joint pdf
+L
+ α, α0
+
+= log p
+ y, α0, α
+
+= −log |C| −yHC−1y + (c −1) log α0
+−dα0 −ρ
+G
+X
+g=1
+αg.
+(35)
+Thereafter,
+the
+EM
+algorithm
+is
+employed
+to
+max-
+imize
+(35).
+Specifically,
+the
+EM
+algorithm
+maximizes
+E˜s|y,α0,α{log p(y, r, α, α0)} with respect to the hyperparame-
+ters α and α0, where E˜s|y,α0,α{.} denotes the expectation over
+the posterior distribution of ˜s, and it is abbreviated as E{.} for
+simplicity. Using (25) and discarding terms independent of α,
+the objective function in (35) can be equivalently maximized
+by
+E
+
+log
+
+p
+ ˜s
+ α
+
+p (α)
+	
+= E
+
+
+−
+G
+X
+g=1
+log αg −˜sH3−1˜s −ρ
+G
+X
+g=1
+αg + const
+
+
+.
+(36)
+The partial derivative of (36) with respect to αg is calculated
+by
+∂
+∂αg
+E
+
+log
+
+p
+ ˜s|α
+
+p (α)
+	
+= −1
+αg
++ 1
+α2g
+E
+n˜sg
+2o
+−ρ = 0.
+(37)
+Hence, the update of αg can be computed by
+αnew
+g
+=
+r
+1 + 4ρE
+n˜sg
+2o
+−1
+2ρ
+(38)
+where E{|˜sg|2} = |µg|2 + 6gg.
+Similarly, for α0, we have
+E
+
+log
+
+p
+ y
+r, ˜s, α0
+
+p
+ r
+˜s, α0
+
+p (α0|c, d)
+	
+= E
+n
+log 8
+
+α0 · ˜A˜s ⊙y
+
++ ML log α0 −α0 ·
+
+r −˜A˜s
+H 
+r −˜A˜s
+
++ (c −1) log α0 −dα0 + const} .
+(39)
+The partial derivative of (39) with respect to α0 is
+∂
+∂α0
+E
+
+log
+
+p
+ y
+r, ˜s, α0
+
+p
+ r
+˜s, α0
+
+p (α0|c, d)
+	
+=
+∂
+∂α0
+E
+n
+log 8
+
+α0 · ˜A˜s ⊙y
+
++ ML
+α0
+−E
+
+r −˜A˜s
+H 
+r −˜A˜s
+
++ (c −1)
+α0
+−d = 0
+
+.
+(40)
+Accordingly, the update of α0 is given by
+αnew
+0
+=
+ML + c −1
+E
+r −˜A˜s
+
+2
+2
+
++ d
+(41)
+Algorithm 1 OBSBL-DPD With Single Time Sample
+1. Input: received signal y, dictionary matrix ˜A, number
+of sources Q, number of spatially diverse sensor
+stations L, number of elements in the antenna array
+M, and grid number G.
+2. Initialization: iteration loop variable i = 0, maximum
+number of iterations imax = 500, fixed prior
+hyperparameters ρ = 0.0001, c = 0.0001, d = 0.0001
+respectively, covariance 3 = IML, and noise variance
+α0 = 1.
+3. While i < imax or err > 10−4 do
+a) Estimate 6 by (31).
+b) Estimate µ by (30).
+c) Update αnew
+g
+by (38).
+d) Update αnew
+0
+by (41).
+e) Increase iteration loop variabl: i = i + 1.
+f) Calculate iterative error:
+err = ∥µ(i) −µ(i −1)∥2
+∥µ(i −1)∥2.
+end while
+4. Output: the spatial spectrum µ.
+where E{∥r −˜A˜s∥2
+2} = ∥r −˜A˜s∥2
+2 + α−1
+0
+PG
+g=1 γg with γg =
+1 −α−1
+g 6gg and c, d are defined in (19).
+The proposed OBSBL-DPD method is summarized in
+Algorithm 1. At each iteration of the SBL algorithm, the
+distribution of ˜s is estimated using (30) and (31) based on
+the current estimates of α and α0. Subsequently, α and α0 are
+updated according to (38) and (41), respectively. In practice,
+the values of α approach zero. Similarly, most elements of
+µ, along with the majority of rows and columns of 6, also
+converge to minimal values, as presented in (30) and (31).
+This implies that the posterior distribution of ˜sg are highly
+concentrated at zero, thus enforcing the sparsity. The spatial
+locations corresponding to the nonzero entries in µ indicate
+the positions of the target sources.
+B. DPD Estimation With Multiple Time Samples
+We now extend the model to accommodate multiple tem-
+poral samples. Correspondingly, the on-grid DPD estimation
+model in (12) is generalized as follows:
+R = ˜A˜S + E
+Y = csgn [R] .
+(42)
+Here, R is the received signal extended matrix, defined as
+the collection of the multisnapshot signals r(t) across t =
+1, 2, . . . , K, with K denoting the total number of snapshots
+R = [r (1) , r (2) , . . . , r (K)] ∈CML×K .
+(43)
+Analogously, E and ˜S are the extended forms of e(t) and
+˜s(t), respectively Fig. 3,
+E = [e (1) , e (2) , . . . , e (K)] ∈CML×K
+(44)
+˜S =
+˜s (1) , ˜s (2) , . . . , ˜s (K)
+
+∈CG×K .
+(45)
+Additionally, the joint response matrix ˜A has been defined
+and described in (10) and (11), and
+Y ∈{−1, 1}ML×K .
+(46)
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 01,2026 at 04:12:35 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 7 ===
+WANG et al.: ENHANCED DPD OF MULTIPLE SOURCES BASED ON 1-bit SBL
+38377
+Fig. 3. Structure of sparse matrix ˜S.
+Based on the multisnapshot model and following the single-
+snapshot approach, sparse prior assumptions and Bayesian
+parameter inference are subsequently initiated. The mea-
+surement noises e(k), k = 1, 2, . . . , K, are independently
+distributed with the same complex Gaussian distribution, i.e.,
+p
+ E|α0
+
+=
+K
+Y
+k=1
+CN
+
+e (k) |0, α−1
+0 1
+
+(47)
+where R is complex Gaussian distributed as follows:
+p
+
+R|˜S, α0
+
+=
+K
+Y
+k=1
+CN
+
+r (k) | ˜A˜s (k) , α−1
+0 1
+
+.
+(48)
+The received signals are further assumed to be statistically
+independent across distinct sampling snapshots. Meanwhile,
+these sparse signals share a common support, thereby enhanc-
+ing sparsity through their joint structure. To exploit this joint
+sparsity in R, we impose the same sparsity prior on all
+˜s(k), k = 1, 2, . . . , K
+p
+
+˜S|α
+
+=
+K
+Y
+k=1
+CN
+ ˜s (k) |0, 3
+
+.
+(49)
+The hyperprior of α, which induces a hierarchical sparse
+prior for ˜s(k), k = 1, 2, . . . , K, is maintained as in (18), while
+the hyperpriors of α0 and the other parameters remain as
+specified in (19).
+Similarly, we define Y = csgn[R]. The pdf p(Y|R, ˜S, α0)
+can be written as follows:
+p
+
+Y = −1|R, ˜S, α0
+
+= p
+
+R < 0|˜S, α0
+
+=
+Z 0
+−∞
+p
+
+R|˜S, α0
+
+dR
+(50)
+p
+
+Y = 1|R, ˜S, α0
+
+= p
+
+R > 0|˜S, α0
+
+=
+Z ∞
+0
+p
+
+R|˜S, α0
+
+dR
+= 1 −p
+
+Y = −1|R, ˜S, α0
+
+.
+(51)
+Given the sparse prior assumption, the posterior distribu-
+tion of ˜S is analytically established as a complex Gaussian
+distribution
+p
+
+˜S|R, α0, α
+
+=
+K
+Y
+k=1
+CN
+ ˜s (k) |µ (k) , 6
+
+(52)
+where 6 is defined in (31) and
+µ (k) = α06 ˜AHr (k) , k = 1, 2, . . . , K.
+(53)
+Following the single-sample case, the hyperparameters α,
+and α0 are estimated with the EM algorithm by maximizing
+the expected log likelihood E{log p(Y, R, α, α0)}, where the
+expectation is computed with respect to the posterior distri-
+bution of ˜S. By the same token, the parameters α and α0 in
+multiple temporal samples scenario can be updated by
+αnew
+g
+=
+r
+1 + 4 ¯ρE
+n
+|¯˜Sg|2
+o
+−1
+2 ¯ρ
+, g = 1, 2, . . . , G
+(54)
+αnew
+0
+=
+M + (c −1) /K
+E
+ ¯R −˜A¯˜S
+
+2
+F
+
++ d/K
+(55)
+where we denote ¯ρ = ρ/K,¯˜S = ˜S/(K)1/2, ¯R = R/(K)1/2,
+and
+E
+n
+|¯˜Sg|2o
+=
+ ¯Ug
+2
+2 + 6gg
+(56)
+¯U = U/
+√
+K,U = [µ (1) , µ (2) , . . . , µ (K)]
+(57)
+E
+ ¯R −˜A¯˜S
+
+2
+F
+
+=
+ ¯R −˜A ¯U
+
+2
+F + α−1
+0 6G
+g=1γg.
+(58)
+It is evident that the SBL algorithm designed for a single time
+sample reduces to the special case where K = 1.
+IV. NUMERICAL SIMULATION
+Simulation experiments are conducted to validate the per-
+formance of the proposed OBSBL-DPD algorithm. All sources
+and receivers are located in the xoy plane, with two sources at
+(−2, 2) km and (−1.2, 0.2) km. We consider L = 5 spatially
+distributed stations, each equipped with an antenna array of
+M = 8 elements. The sources transmit band-limited pulses
+at a carrier frequency of f0 = 1 GHz. At each station, the
+received signals are quantized by 1-bit ADCs and sampled
+over 512 snapshots.
+The root-mean-square error (RMSE) is used as a metric to
+assess positioning performance, which quantifies the differ-
+ence between the estimated position ˆpq and the true position
+pq. It is defined as follows:
+RMSE =
+s
+1
+QNexp
+XQ
+q=1
+XNexp
+n=1
+ˆpq (n) −pq
+2
+(59)
+where Nexp denotes the number of Monte Carlo trials, and we
+set Nexp = 100 in the following simulations. The estimated
+position in the nth trial is denoted as ˆpq(n).
+A. OBSBL-DPD Spectrum
+The simulation starts with a comparison of the spatial spec-
+trum of OBSBL-DPD under various SNR conditions. Figs. 4
+and 5 depict the cost function spectra of the OBSBL-DPD
+algorithm at −5- and 5-dB SNR, respectively. It is noteworthy
+that the cost function peaks are concentrated close to the actual
+source positions, indicating improved localization resolution.
+Higher SNR leads to sharper peaks, which corresponds to
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 01,2026 at 04:12:35 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 8 ===
+38378
+IEEE SENSORS JOURNAL, VOL. 25, NO. 20, 15 OCTOBER 2025
+Fig. 4. OBSBL-DPD spatial spectrum with SNR = −5.
+Fig. 5. OBSBL-DPD spatial spectrum with SNR = 5.
+better localization accuracy. This demonstrates the effective-
+ness and robustness of the proposed algorithm in multisource
+localization applications, even under low SNR conditions.
+B. Positioning Performance
+In
+this
+section,
+numerical
+simulations
+are
+employed
+to compare the performance of the proposed algorithm
+with traditional two-step localization algorithm, the MVDR
+algorithm [17], the 1-bit ML algorithm [40], and the
+1-bit DPD-MUSIC algorithm [44].
+To maintain consistent
+1-bit signal conditions, traditional two-step localization and
+the MVDR method in [17] are adapted by applying 1-bit
+quantization before localization. These modified approaches
+are referred to as OB-TwoStep and OBMVDR-DPD, while
+the 1-bit ML algorithm from [40] is denoted OBML-DPD
+and the 1-bit DPD-MUSIC algorithm from [44] is denoted
+as OBMUSIC-DPD.
+The success rate curves for these algorithms are shown in
+Fig. 6. The OBSBL-DPD algorithm successfully locates the
+source even at SNR= −10 dB, whereas the other methods
+achieve comparable success rates only when SNR = 0 dB.
+The results in Fig. 6 demonstrate that the proposed algorithm
+offers superior robustness.
+Fig. 6. Positioning success rate versus SNR.
+Fig. 7. RMSE versus SNR.
+As shown in Fig. 7, the proposed algorithm achieves lower
+localization errors at an SNR of approximately −10 dB,
+whereas the traditional methods require the SNR of around
+0 dB to achieve comparable accuracy. These results indicate
+that all the algorithms exhibit threshold effects, with the pro-
+posed OBSBL-DPD algorithm demonstrating a significantly
+lower threshold SNR compared to traditional OB-TwoStep,
+OBML-DPD, OBMUSIC-DPD, and OBMVDR-DPD. Addi-
+tionally, Fig. 7 also shows that the proposed algorithm
+consistently yields better localization performance across all
+tested SNR levels.
+The threshold effect in all five algorithms arises results from
+the interaction between SNR and noise. At low SNR, the signal
+is masked by noise, preventing accurate parameter estimation
+and leading to RMSE values close to random guessing.
+Once the SNR surpasses a critical threshold, the signal can
+be distinguished from the noise component. Meanwhile, the
+localization ambiguity in the spatial spectrum is reduced; thus,
+the RMSE sharply decreases as the estimates converge toward
+the actual source positions.
+The OBSBL-DPD algorithm uses a Bayesian SSR frame-
+work
+to
+iteratively
+estimate
+hyperparameters
+for
+signal
+reconstruction and localization. The incorporation of spar-
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 01,2026 at 04:12:35 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 9 ===
+WANG et al.: ENHANCED DPD OF MULTIPLE SOURCES BASED ON 1-bit SBL
+38379
+Fig. 8. RMSE versus the number of snapshots.
+Fig. 9. RMSE versus the number of sensors.
+sity priors allows SBL to more effectively exploit sparse
+structural information under low SNR conditions, thereby
+reducing noise sensitivity and relaxing critical SNR thresholds.
+Moreover, SBL also adaptively estimates key hyperparameters
+like sparsity level and noise variance, preventing overfitting
+or underfitting in low SNR conditions. Additionally, the
+alternating iterative optimization in OBSBL-DPD promotes
+progressive convergence to accurate solutions even when SNR
+is limited. In contrast, traditional two-step positioning methods
+or the subspace-based methods such as OBMUSIC-DPD suffer
+performance degradation at low SNR due to inaccurate noise
+subspace estimation, despite their effectiveness in high SNR
+environments.
+Fig. 8 presents the RMSE curves of the five algorithms
+with respect to the number of snapshots. It is evident that
+OBSBL-DPD consistently achieves higher positioning accu-
+racy compared to the other conventional algorithms in both
+large-sampling and small-sampling scenarios.
+The impact of the number of sensors on localization accu-
+racy is illustrated in Fig. 9. The results indicate that the
+localization accuracy improves for all five algorithms as the
+number of sensors increases, with OBSBL-DPD outperform-
+ing the other classical direct positioning approaches.
+Fig. 10.
+Computational complexity versus number of sensors for
+OBSBL and SBL in [47].
+C. Computational Complexity
+In this section, we compare the computational complex-
+ity of the proposed method with that of the SBL-DPD
+algorithm in [47]. The main computational cost of the pro-
+posed OBSBL-DPD algorithm is composed of (30) and the
+inverse process in (31). The adoption of 1-bit quantization
+enables the replacement of most multiplication-intensive oper-
+ations with simple additions, thereby reducing computational
+load. For each iteration, the complexity of (30) is O[GML +
+G2ML], while (31) requires O[G3 + G2ML + G], yielding a
+total complexity of O[G3 + G2ML + GML + G]. In contrast,
+the SBL-DPD algorithm in [47] exhibits a complexity of
+O[G3L + G2ML + G2 + GM2L2 + GML + M3L3]. The
+comparison indicates that the proposed method reduces the
+computational cost by several orders of magnitude.
+As illustrated in Fig. 10, the proposed algorithm demon-
+strates less complexity than the SBL-DPD algorithm as the
+number of sensors increases. Moreover, 1-bit quantization of
+the received data reduces data link transmission requirements,
+thereby enhancing the practical applicability of DPD.
+Furthermore, we evaluated the convergence and local-
+ization performance of the traditional SBL-DPD and the
+proposed OBSBL-DPD algorithms. As illustrated in Fig. 11,
+the SBL-DPD algorithm converges rapidly, stabilizing after
+approximately 22 iterations. In contrast, the OBSBL-DPD
+algorithm converges within 25 iterations. The slight increase
+in iterations is a tradeoff for lower computational complexity
+and comparable localization accuracy.
+Fig. 12 presents the RMSE curves of OBSBL-DPD and the
+SBL-DPD algorithm under varying SNR conditions, in which
+SBL-DPD is simulated with 16-bit quantization. As the
+SNR increases, both algorithms exhibit similar performance
+trends. Moreover, as shown in Fig. 12, OBSBL-DPD shows a
+slight performance degradation compared to the high-precision
+SBL-DPD approach, which indicates an acceptable tradeoff for
+the reductions in computational complexity and communica-
+tion bandwidth.
+D. Communication Data Volume
+We further conduct numerical simulations to evaluate the
+performance of the proposed OBSBL-DPD and SBL-DPD,
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 01,2026 at 04:12:35 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 10 ===
+38380
+IEEE SENSORS JOURNAL, VOL. 25, NO. 20, 15 OCTOBER 2025
+Fig. 11. Convergence condition versus the count of iterations.
+Fig. 12. RMSE versus SNR for the proposed OBSBL and SBL.
+and the comparison focuses on data transmission volume and
+communication bandwidth. In the simulations, we fix the SNR
+at 0 dB and all other parameter settings are kept consistent with
+those in specified at the beginning of Section IV. Monte Carlo
+simulations are employed to quantify the effect of varying the
+number of sampling snapshots on the RMSE performance of
+the two methods. Through this analysis, the required number
+of snapshots to achieve comparable accuracy is identified,
+allowing for a subsequent evaluation and comparison of their
+data transmission volumes.
+Fig. 13 depicts the RMSE versus the number of sampling
+snapshots for those two localization algorithms. The results
+indicate a consistent decrease in RMSE as the snapshot num-
+ber increases. Although the OBSBL-DPD algorithm shows
+relatively inferior performance under low snapshot conditions,
+it demonstrates faster convergence with the increase in sam-
+pling snapshots. Within the range of 250–500 snapshots, the
+OBSBL-DPD algorithm achieves considerable performance
+enhancements, exhibiting slightly lower RMSE compared to
+the SBL-DPD algorithm. These results show that the proposed
+OBSBL-DPD can mitigate the data dependence through sparse
+signal reconstruction.
+Fig. 13.
+RMSE versus the number of snapshots for the proposed
+OBSBL and SBL.
+Fig. 14. Statistical comparison of data transmission volume.
+As presented in Fig. 13, the OBSBL-DPD algorithm
+achieves an RMSE of approximately 40 m with 250 snapshots,
+whereas the SBL-DPD algorithm reaches a similar RMSE with
+only 150 snapshots. Under equivalent positioning accuracy,
+the proposed OBSBL-DPD requires approximately 1.67 times
+more snapshots than the conventional SBL-DPD.
+However,
+it should be noted that the OBSBL-DPD offers enhanced
+computational efficiency relative to other 1-bit DPD methods.
+These insights are valuable for engineering tradeoffs involv-
+ing data transmission and localization accuracy in practical
+applications.
+Fig. 14 illustrates a statistical comparison of data transmis-
+sion volume for achieving equivalent localization accuracy.
+The traditional SBL-DPD algorithm uses 16-bit ADCs,
+whereas the proposed method achieves the same accuracy
+with only 26.7% of the data volume, indicating a notable
+improvement in communication efficiency.
+V. CONCLUSION
+This article proposes a DPD approach for multisource
+scenarios using SBL and 1-bit quantized data. The approach
+integrates two types of sparsity, including the spatial sparsity
+from the SBL model and the data reduction from 1-bit
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 01,2026 at 04:12:35 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 11 ===
+WANG et al.: ENHANCED DPD OF MULTIPLE SOURCES BASED ON 1-bit SBL
+38381
+quantization. The use of 1-bit quantization reduces the commu-
+nication overhead between receiving stations, which provides
+a more efficient and cost-effective DPD framework. More-
+over, the incorporation of the SBL algorithm compensates for
+quantization-induced information loss with enhanced localiza-
+tion accuracy. Simulation results demonstrate that the proposed
+OBSBL-DPD method achieves comparable localization perfor-
+mance to MUSIC-based and MVDR-based DPD algorithms.
+The results also indicate that the proposed method yields a few
+accuracy degradations compared to SBL-DPD, but these can
+be improved by moderately increasing the number of sampling
+snapshots.
+In the future, we plan to extend the proposed DPD method
+based on 1-bit quantization to more diverse scenarios by
+incorporating mixed-bit processing techniques. The mixed-bit
+DPD framework will be employed to further improve posi-
+tioning accuracy and robustness, especially in challenging
+environments with varying signal qualities.
+ACKNOWLEDGMENT
+The authors would like to thank the associate editor and
+reviewers for their useful feedback that improved this article.
+REFERENCES
+[1] K. Zhu, H. Jiang, J. Li, and F. Zhou, “A direct position determination
+method using distributed UAVs with synchronization error,” IEEE Sen-
+sors J., vol. 24, no. 1, pp. 780–787, Jan. 2024.
+[2] S. Motie, H. Zayyani, M. Salman, and M. Bekrani, “Self UAV localiza-
+tion using multiple base stations based on TDoA measurements,” IEEE
+Wireless Commun. Lett., vol. 13, no. 9, pp. 2432–2436, Sep. 2024.
+[3] Z. Wang, Y. Sun, L. Xie, N. Liu, and Q. Wan, “An iterative direct
+position determination approach based on Doppler frequency shifts,”
+IEEE Trans. Veh. Technol., vol. 73, no. 2, pp. 2431–2443, Feb. 2024.
+[4] B. Zhou, Z. Liu, and H. Su, “5G networks enabling cooperative
+autonomous vehicle localization: A survey,” IEEE Trans. Intell. Transp.
+Syst., vol. 25, no. 11, pp. 15291–15313, Nov. 2024.
+[5] L. Zhang, T. Zhang, and H.-S. Shin, “An efficient constrained weighted
+least squares method with bias reduction for TDOA-based localization,”
+IEEE Sensors J., vol. 21, no. 8, pp. 10122–10131, Apr. 2021.
+[6] Q. Liu, J. Xie, Z. Zhang, Y. Gong, and L. Wang, “Tensor-based passive
+localization of multiple wideband emitters using PARAFAC decompo-
+sition,” Digit. Signal Process., vol. 164, Sep. 2025, Art. no. 105290.
+[7] X. Kang, D. Wang, Y. Shao, M. Ma, and T. Zhang, “An efficient hybrid
+multi-station TDOA and single-station AOA localization method,” IEEE
+Trans. Wireless Commun., vol. 22, no. 8, pp. 5657–5670, Aug. 2023.
+[8] C. Zhang, W. Wang, X. Hong, and J. Zhou, “A multi-sources DOA
+localization method based on UAV cluster systems,” IEEE Trans. Veh.
+Technol., vol. 73, no. 6, pp. 8681–8692, Jun. 2024.
+[9] V. Annepu et al., “Review on unmanned aerial vehicle assisted sensor
+node localization in wireless networks: Soft computing approaches,”
+IEEE Access, vol. 10, pp. 132875–132894, 2022.
+[10] L. Lv, S. Wu, H. Li, C. Jiang, and Y. Su, “DNN-aided distributed direct
+position determination for UAV cluster,” IEEE Trans. Veh. Technol.,
+vol. 72, no. 12, pp. 16839–16844, Dec. 2023.
+[11] M. Sadeghi, F. Behnia, and R. Amiri, “Optimal geometry analysis
+for TDOA-based localization under communication constraints,” IEEE
+Trans. Aerosp. Electron. Syst., vol. 57, no. 5, pp. 3096–3106, Oct. 2021.
+[12] A. J. Weiss, “Direct position determination of narrowband radio fre-
+quency transmitters,” IEEE Signal Process. Lett., vol. 11, no. 5,
+pp. 513–516, May 2004.
+[13] B. Ding, D. Song, Z. Yang, and W. Wang, “Neighborhood selection-
+based distributed maximum correlation accumulation direct position
+determination,” IEEE Trans. Aerosp. Electron. Syst., vol. 61, no. 2,
+pp. 4296–4312, Apr. 2025.
+[14] J. Li, Y. Li, H. Jiang, X. Zhang, and Q. Wu, “Multi-TDOA estimation
+and source direct position determination based on parallel factor analy-
+sis,” IEEE Internet Things J., vol. 10, no. 8, pp. 7405–7415, Apr. 2023.
+[15] A. Amar and A. J. Weiss, “Direct position determination of multiple
+radio signals,” in Proc. IEEE Int. Conf. Acoust., Speech, Signal Process.,
+Jun. 2004, p. 81.
+[16] J. Xie, Q. Liu, L. Wang, Y. Gong, and Z. Zhang, “Localizing GNSS
+spoofing attacks using direct position determination,” IEEE Sensors J.,
+vol. 22, no. 15, pp. 15323–15333, Aug. 2022.
+[17] T. Tirer and A. J. Weiss, “High resolution direct position determination
+of radio frequency sources,” IEEE Signal Process. Lett., vol. 23, no. 2,
+pp. 192–196, Feb. 2016.
+[18] Q. Liu, J. Xie, Z. Zhang, Y. Sun, and L. Wang, “Direct position
+determination for multiple signals without prior knowledge of source
+number,” IEEE Wireless Commun. Lett., vol. 14, no. 8, pp. 2591–2595,
+Aug. 2025.
+[19] X. Jiang, N. Li, Y. Guo, W. Xie, K. Xu, and M. Guo, “Localization of
+multiple RF sources via priori knowledge-aided Bayesian compressive
+sensing in UAV-based WSN,” IEEE Commun. Lett., vol. 25, no. 12,
+pp. 3848–3852, Dec. 2021.
+[20] X. Lyu, D. Luo, Y. He, B. Liu, W. Fan, and Z. Quan, “Improved
+target localization with off-grid compressed sensing for multistatic
+MIMO-OFDM signals,” IEEE Internet Things J., vol. 12, no. 13,
+pp. 23222–23232, Jul. 2025.
+[21] C.-L.
+Tai,
+S.-H.
+Hsieh,
+and
+C.-S.
+Lu,
+“Greedy
+algorithms
+for
+hybrid compressed sensing,” IEEE Signal Process. Lett., vol. 27,
+pp. 2059–2063, 2020.
+[22] J. Chae, S. Kim, and S. Hong, “Stacked Bayesian matching pursuit
+for one-bit compressed sensing,” IEEE Signal Process. Lett., vol. 27,
+pp. 550–554, 2020.
+[23] S. Zhang, Y. Xia, Y. Xia, and J. Wang, “Matrix-form neural networks for
+complex-variable basis pursuit problem with application to sparse signal
+reconstruction,” IEEE Trans. Cybern., vol. 52, no. 7, pp. 7049–7059,
+Jul. 2022.
+[24] K. Qian, Y. Wang, P. Jung, Y. Shi, and X. X. Zhu, “Basis pur-
+suit denoising via recurrent neural network applied to super-resolving
+SAR tomography,” IEEE Trans. Geosci. Remote Sens., vol. 60, 2022,
+Art. no. 4710015.
+[25] L. Liu, D. Sun, and Y. Zhang, “A family of sparse group lasso RLS
+algorithms with adaptive regularization parameters for adaptive decision
+feedback equalizer in the underwater acoustic communication system,”
+Phys. Commun., vol. 23, pp. 114–124, Jun. 2017.
+[26] F. Wang, X. Tian, X. Liu, B. Gu, F. Zhou, and Y. Chen, “Combina-
+tion complex-valued Bayesian compressive sensing method for sparsity
+constrained deconvolution beamforming,” IEEE Trans. Instrum. Meas.,
+vol. 71, pp. 1–13, 2022.
+[27] Z. A. Wang, Y.-X. Liu, and P. Li, “Bayesian compressive sensing
+enabled EMI source localization in shielding enclosures from complex
+and phaseless near-field scanning,” IEEE Trans. Electromagn. Compat.,
+vol. 67, no. 1, pp. 158–173, Feb. 2025.
+[28] Y. Wang, Q. Shi, C. Han, L. Wang, and C. Tellambura, “Sparse Bayesian
+learning-based direct localization for distributed sensor arrays with
+unknown gain and phase errors,” in Proc. IEEE Int. Conf. Acoust.,
+Speech Signal Process. (ICASSP), Apr. 2024, pp. 8761–8765.
+[29] F. Ma, Y. Wang, L. Wang, and C. Han, “Sparse Bayesian learn-
+ing for direct position determination with mutual coupling,” in Proc.
+IEEE USNC-URSI Radio Sci. Meeting (Joint AP-S Symp.), Dec. 2021,
+pp. 116–117.
+[30] S. Wang, J. He, J. Cao, Y. Guan, M. Han, and W. Yu, “A sparse Bayesian
+learning algorithm for channel estimation in wideband mmWave MIMO-
+OFDM systems,” in Proc. Int. Conf. Culture-Oriented Sci. Technol.
+(CoST), Aug. 2022, pp. 298–302.
+[31] Z.-M. Liu, “Direction-of-arrival estimation with time-varying arrays via
+Bayesian multitask learning,” IEEE Trans. Veh. Technol., vol. 63, no. 8,
+pp. 3762–3773, Oct. 2014.
+[32] H. Duan, L. Yang, J. Fang, and H. Li, “Fast inverse-free sparse Bayesian
+learning via relaxed evidence lower bound maximization,” IEEE Signal
+Process. Lett., vol. 24, no. 6, pp. 774–778, Jun. 2017.
+[33] Y. Shao, H. Ma, and H. Liu, “A study and comparison of different sparse
+Bayesian learning algorithms in DOA estimation,” in Proc. 5th Int. Conf.
+Inf. Commun. Signal Process. (ICICSP), Nov. 2022, pp. 1–5.
+[34] Y. Noh and S. Hong, “Compressed sensing based active user detection in
+MIMO systems with one-bit ADC,” IEEE Trans. Veh. Technol., vol. 72,
+no. 1, pp. 1313–1317, Jan. 2023.
+[35] Z. Wang, Q. He, and R. S. Blum, “Target detection using quantized
+cloud MIMO radar measurements,” IEEE Trans. Signal Process., vol. 70,
+pp. 1–16, 2022.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 01,2026 at 04:12:35 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 12 ===
+38382
+IEEE SENSORS JOURNAL, VOL. 25, NO. 20, 15 OCTOBER 2025
+[36] T.-K. Kim, M. Min, and Y.-S. Jeon, “Performance bound for MIMO
+systems using one-bit ADCs over Rayleigh fading channels,” IEEE
+Trans. Veh. Technol., vol. 71, no. 8, pp. 9067–9072, Aug. 2022.
+[37] A. Eamaz, F. Yeganegi, D. Needell, and M. Soltanalian, “Harnessing
+the power of sample abundance: Theoretical guarantees and algorithms
+for accelerated one-bit sensing,” IEEE Trans. Inf. Theory, vol. 70, no. 9,
+pp. 6690–6713, Sep. 2024.
+[38] S. Sedighi, B. S. Mysore R, M. Soltanalian, and B. Ottersten, “On the
+performance of one-bit DoA estimation via sparse linear arrays,” IEEE
+Trans. Signal Process., vol. 69, pp. 6165–6182, 2021.
+[39] L. Xu, C. Qian, F. Gao, W. Zhang, and S. Ma, “Angular domain channel
+estimation for mmWave massive MIMO with one-bit ADCs/DACs,”
+IEEE Trans. Wireless Commun., vol. 20, no. 2, pp. 969–982, Feb. 2021.
+[40] P. Li, J. Li, X. Zhang, and Q. Wu, “Gridless maximum likelihood one-
+bit direct position determination,” IEEE Signal Process. Lett., vol. 31,
+pp. 3099–3103, 2024.
+[41] L. Ni, D. Zhang, Y. Sun, N. Liu, J. Liang, and Q. Wan, “Detection and
+localization of one-bit signal in multiple distributed subarray systems,”
+IEEE Trans. Signal Process., vol. 71, pp. 2776–2791, 2023.
+[42] G. Zhang, Q. Zhou, T. Zhou, and W. Yi, “Direct position determination
+with one-bit sampling for bandwidth-constrained radar,” in Proc. IEEE
+6th Int. Conf. Signal Image Process. (ICSIP), Oct. 2021, pp. 595–600.
+[43] A. Weiss and G. W. Wornell, “One-bit direct position determination
+of narrowband Gaussian signals,” in Proc. IEEE Stat. Signal Process.
+Workshop (SSP), Jul. 2021, pp. 466–470.
+[44] L. Ni, D. Zhang, T. Xing, M. Ran, N. Liu, and Q. Wan, “Direct position
+determination with one-bit signal for multiple targets,” in Proc. IEEE
+Int. Conf. Acoust., Speech Signal Process. (ICASSP), Jun. 2023, pp. 1–5.
+[45] P. Chen, Z. Cao, Z. Chen, and C. Yu, “Sparse off-grid DOA estimation
+method with unknown mutual coupling effect,” Digit. Signal Process.,
+vol. 90, pp. 1–9, Jul. 2019.
+[46] S. Gogineni and A. Nehorai, “Target estimation using sparse modeling
+for distributed MIMO radar,” IEEE Trans. Signal Process., vol. 59,
+no. 11, pp. 5315–5325, Nov. 2011.
+[47] M. Chen, X. Mao, and C. Zhao, “Direct localization of emitters based
+on sparse Bayesian learning,” IEEE Trans. Veh. Technol., vol. 68, no. 6,
+pp. 5769–5781, Jun. 2019.
+[48] S. D. Babacan, R. Molina, and A. K. Katsaggelos, “Bayesian compres-
+sive sensing using Laplace priors,” IEEE Trans. Image Process., vol. 19,
+no. 1, pp. 53–63, Jan. 2010.
+Qiuping Wang received the M.S. degree from
+the School of Electronic Information, North-
+western Polytechnical University, Xi’an, China,
+in 2022.
+She is currently working as a System Designer
+with the Overall Payload Design Department,
+Xi’an Institute of Space Radio Technology, Xi’an.
+Her research interests are array signal process-
+ing, emitter localization, and reconnaissance
+satellite system design.
+Qing Liu (Student Member, IEEE) received the
+M.S. degree from the School of Electronic Infor-
+mation, Northwestern Polytechnical University,
+Xi’an, China, in 2023, where she is pursuing the
+Ph.D. degree with the Department of Information
+and Communications Engineering.
+Her research interests include array signal pro-
+cessing and emitter localization.
+Jian Xie (Member, IEEE) received the M.S. and
+Ph.D. degrees from the School of Electronic
+Engineering, Xidian University, Xi’an, China, in
+2012 and 2015, respectively.
+He is now a Professor with Northwestern Poly-
+technical University, Xi’an. His research interests
+include antenna array processing, adaptive anti-
+jamming, direction of arrival (DOA) estimation,
+and emitter localization.
+Yifeng He received the Ph.D. degree from the
+School of Electronic Information, Northwestern
+Polytechnical University, Xi’an, China, in 2020.
+His research interests include communication
+and information technology.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on April 01,2026 at 04:12:35 UTC from IEEE Xplore.  Restrictions apply. 

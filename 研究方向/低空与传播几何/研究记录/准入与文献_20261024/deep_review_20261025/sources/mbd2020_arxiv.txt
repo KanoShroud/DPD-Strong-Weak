@@ -1,0 +1,745 @@
+
+=== PAGE 1 ===
+         DRAFT;                                                                                                                                           1
+
+          Identiﬁability Conditions for Compressive
+            Multichannel Blind Deconvolution
+
+              Satish Mulleti, Member, IEEE, Kiryung Lee, Senior Member, IEEE, and Yonina C. Eldar, Fellow, IEEE
+
+
+
+
+
+           Abstract—In applications such as multi-receiver radars and  and ultrasound imaging  [6],  [7], where a transmit  signal
+         ultrasound array systems, the observed signals can often be    is observed through multiple receivers after reﬂecting from
+        modeled as a linear convolution of an unknown signal which                                                                          sparsely located targets. The ﬁlters indicate the locations of the
+          represents the transmit pulse and sparse ﬁlters which describe the
+                                                                                targets relative to the position of the receivers. Typically, the         sparse target scenario. The problem of identifying the unknown
+          signal and the sparse  ﬁlters  is a sparse multichannel blind   transmit signal is assumed to be known, however, in practice,
+         deconvolution (MBD) problem and is in general ill-posed. In this    it is often distorted while transmission and propagation [8].2020   paper, we consider the identiﬁability problem of sparse-MBD and   Hence, the output signals from the receivers can be modeled
+        show that, similar to compressive sensing, it is possible to identify                                                                       within the sparse MBD framework.
+          the sparse ﬁlters from compressive measurements of the output
+                                                                           In the aforementioned applications, the implementation cost         sequences. Speciﬁcally, we consider compressible measurementsJan          in the Fourier domain and derive identiﬁability conditions in a    is determined by the number of receivers (or equivalently the
+2   deterministic setup. Our main results demonstrate that L-sparse  number of channels) and the computational cost is governed
+          ﬁlters can be identiﬁed from 2L2 Fourier measurements from  by the length of the output sequences. Hence, it is desirable
+         only two coprime channels. We also show that 2L measurements                                                                              to identify the MBD problem from a minimal number of
+         per channel are necessary. The sufﬁcient condition sharpens as
+                                                                     channels and minimal number of samples per channel. We          the number of channels increases asymptotically in the number of
+          channels, it sufﬁces to acquire on the order of L Fourier samples   study the problem of identifying the sparse ﬁlters from fewer
+         per channel. We also propose a kernel-based sampling scheme   measurements of the output sequences compared  to  their
+          that acquires Fourier measurements from a commensurate num-   ambient dimension, which we call as compressive MBD. We
+         ber of time samples. We discuss the gap between the sufﬁcient and[eess.SP]                                                     show that compressive MBD is possible by combining the
+         necessary conditions through numerical experiments including
+                                                                           deterministic MBD approach developed for the non-sparse        comparing practical reconstruction algorithms. The proposed
+         compressive MBD results require fewer measurements and fewer   case  [9] and the sparse  signal  identiﬁability  results from
+         channels for identiﬁability compared to previous results, which   compressive sensing framework [10].
+          aids in building cost-effective receivers.                     Any blind deconvolution linear measurements of the output
+           Index Terms—Sparse multichannel blind deconvolution, iden-   signal suffers from shift and scaling ambiguity. Having redun-
+           tiﬁability, deterministic sparsity model, subsampling, blind gain   dant observations through multiple channels does not remove
+        and phase calibration                                                 this fundamental ambiguity. Hence, the identiﬁability of the
+                                        MBD problem is considered within fundamental ambiguity
+                                                                                   class. Even though the fundamental ambiguities are accept-                                        I. INTRODUCTION
+                                                                               able, in general, MBD is still an ill-posed problem and can be
+            In a wide range of applications, an unknown signal  is   solved only by imposing additional conditions on the source
+        observed through multiple channels. The output signal in each  and the ﬁlters. Several MBD results have been discussed in
+         channel is given as the linear convolution of the unknown sig-   the literature where the source and the ﬁlters are assumed to
+         nal and the ﬁlter corresponding to the impulse response of the   have different structures in addition to the assumption that thearXiv:2001.00613v1   channel. The problem of identifying both the unknown signal   ﬁlters have ﬁnite impulse responses (FIRs).
+        and the ﬁlters is known as multichannel blind deconvolution     During the 90s several identiﬁability results and reconstruc-
+       (MBD). In general, this problem is ill-posed. It can be solved   tion algorithms for MBD have been presented, largely in the
+        by imposing models on the source and the ﬁlters. In this paper,   context of blind channel identiﬁcation where the goal is to
+       we consider the sparse-MBD problem, where the ﬁlters are   uniquely identify the ﬁlters [9], [11]–[16]. The methods are
+        assumed to be sparse.                                          classiﬁed as  statistical [11]–[14] or deterministic [9], [15],
+         Sparse-MBD models arise in many practical applications   depending on whether statistics of the source signal is used
+        such as radar imaging  [1],  [2], seismic signal processing   to identify the unknown ﬁlters (cf. [16] for a comprehensive
+           [3], room impulse response modeling [4], sonar imaging [5],   review of classical MBD results). In the statistical framework,
+                                                                                                             it has been shown that an MBD problem is identiﬁable up to
+                S. Mulleti                        and Y.                                C.                                     Eldar are                                              with                                                       the                                                         Faculty                                                                   of                                                       Math                                                                  and Computer                                                                                           Science,
+          Weizmann                            Institute                                 of                                    Science,                                                     Israel.                                            K.                                              Lee                                                                          is with                                                                     the                                                               Department                                                                                   of Electrical                                                                                   and   the fundamental ambiguities of scaling and shift if the source
+           Computer Engineering at The Ohio State University. Email: mulleti.satish@gmail.com,    is zero-mean and white random process, and the ﬁlters are
+            lee.8763@osu.edu, yonina.eldar@weizmann.ac.il                               deterministic and coprime [16]. A set of sequences are coprime               This project has received funding from the Benoziyo Endowment Fund for the
+           Advancement of Science, Estate of Olga Klein - Astrachanthe; European Unions Horizon    if their z-transform do not share any common zeros except
+           2020 research and innovation program under grant No. 646804-ERC-COG-BNYQ; and   the zeros at z = 0. In this framework, ﬁrst, the second-order             the Israel Science Foundation under grant no. 0100101. K. Lee was supported in part by
+         NSF under grant CCF 17-18771.                                                 statistics of the output sequences are estimated; the ﬁlters are
+
+=== PAGE 2 ===
+DRAFT;                                                                                                                                           2
+
+
+then estimated from their statistics. The estimation accuracy of     There are three major limitations in applying the existing
+these approaches depends on how well the source statistics is   results [20]–[22] to our setting.
+known a priori and how accurately the second-order statistics                                                                  1) The sparsity was introduced to solve sparse-MBD from
+are estimated from the available data. In applications where the                                                                            fully observed output sequences. Their results do not
+source statistics may vary over time or is difﬁcult to estimate                                                                 apply to the case where  it  is enforced or desired to
+from limited data, deterministic approaches are preferred.                                                                          identify the signals from partial observations.
+  Xu et al. [9] developed a deterministic MBD approach for                                                                  2) Their identiﬁability result has been derived with the
+estimating FIR channels from their outputs to an unknown                                                         number of channels increasing  in the signal  length.
+deterministic sequence where the ﬁlters are FIR with length                                                                 This sufﬁcient condition  is conservative in the sense
+Mx (without any further sparsity condition). Starting from                                                                             that sparse-MBD can be solved empirically with fewer
+3Mx truncated convolutive measurements Xu et al. [9] showed                                                                     channels, that is, only two channels.
+that the ﬁlters are uniquely identiﬁable under the following two                                                                  3) Their analysis of sparse-MBD assumed that the ﬁlters
+conditions: i) the ﬁlters are coprime; ii) the linear complexity                                                                   follow certain stochastic models, which are not relevant
+of the source, within the observation interval of the measure-                                                                          to practical applications of our interest. Therefore their
+ments, is greater than twice the order of the ﬁlters. The linear                                                                             results do not apply due to the model mismatch.
+complexity of any sequence is a measure of its predictability
+                                                     Our main results, summarized below, overcome the aboveand is given by the minimum number of exponentials which
+                                                                    limitations in the existing results on sparse MBD.the signal consists of. In this paper, we show that the ﬁlters
+                                          We present a set of identiﬁability results on sparse MBD that
+under the same FIR model are identiﬁable from 2Mx−1 linear   apply uniformly to any instance satisfying given constraints.measurements with less restrictive condition on the source
+                                                               In other words, unlike some of the recent  results relyingsequence compared to the linear complexity condition.
+                                                     on certain stochastic models, our  identifability  results are  During the last decade, there has been renewed interest in
+                                                              purely deterministic. We show  that the sparsity constraintMBD and, particularly in blind gain and phase calibration
+                                                              enables compressive-MBD similar to compressive sensing.(BGPC) problems with sparsity and subspace constraints (e.g.,
+                                                                 Speciﬁcally, it is possible to recover the ﬁlters and the source[17]–[29]). A BGPC is a bilinear inverse problem arising in
+                                                      from a small number of Fourier measurements.a multi-sensor or multi-receiver system where the objective is
+to determine the unknown gains and phases of the sensing     In the sparse and deterministic setup, we consider two sub-
+system as well as the unknown observed signals from the   problems. The ﬁrst is to uniquely identify only the ﬁlters. Such
+sensors. It can be shown that the Fourier-domain formulation   a problem is useful in the radar and sonar applications where
+of an MBD problem  is a special case of BGPC. In  this   the ﬁlters contain the information about the targets and the
+case, the unknown gains and phases are given by the Fourier   source need not be identiﬁed. We combine the ideas of Xu et
+coefﬁcients of the common source sequence and the unknown    al. [9] and compressive sensing to derive identiﬁability results.
+observed signals are Fourier transforms of the ﬁlters. Recent  By applying a cross-convolution approach, the identiﬁability
+results analyzed the case of uniform samples in the Fourier   problem reduces to the recovery of a superposition of convolu-
+domain under the assumption that the sparse ﬁlters are random   tions of sparse ﬁlters from their partial Fourier measurements.
+or generic [19]–[22]. In these works,  it is assumed that the  Our main results follow by applying the full spark property
+output sequences are obtained by the circular convolution   of partial Fourier matrices and the coprimeness condition of
+between the source and the sparse ﬁlters. Assuming that all   the ﬁlters. We show that to identify the ﬁlters, two channels
+the output samples are available and the ﬁlters are random  (N = 2) are sufﬁcient. When N = 2, taking 2L2 Fourier
+and sparse, identiﬁability results have been derived in terms   samples per channel are sufﬁcient. Furthermore, we show that
+of a sufﬁcient number of channels. Speciﬁcally, in [21] and   the problem is not uniquely identiﬁable from fewer than 2L
+[22],  it is shown that the sparse MBD problem is uniquely   measurements per channel. For N ≫2, we demonstrate a
+identiﬁable provided that the ﬁlter coefﬁcients are modeled   gain and establish that on average (averaged over the number
+as independent and identically distributed Bernoulli-Gaussian   of channels) we need order L measurements per channel.
+random variables and all M output samples are available from     Second, we consider the simultaneous identiﬁcation of both
+N = O(M log4 M) channels. In addition, they have shown   the source and the ﬁlters. Using the results of ﬁlter identiﬁa-that sparse MBD and the corresponding BGPC problem can    bility, we propose a pairwise measurement strategy where we
+be solved by a practical algorithm [21], [25].                  consider different Fourier measurements from each unique pair
+  BGPC can also be posed as a blind dictionary calibration   of channels. Starting from N ≥2 channels, we show that 2L2(BDC) problem where the goal is to recover the calibration   Fourier measurements are sufﬁcient from     Ms−L2−1 ,                                                                          max{  L2−1   2}weights  for a known  dictionary  together with  the sparse   channels and 2L from the rest. Here Ms is length of the source.
+vectors. Gribonval et al. [29] showed that a BDC problem  We discuss practical algorithms to identify the source and
+can be posed as a convex optimization problem and a solution   the ﬁlters for the two-channel case [25], [29]. By applying
+can be achieved by using off-the-shelf optimization solvers.   these algorithms, we discuss the gap between the necessary
+However, identiﬁability results are not derived in [29]. We  and sufﬁcient conditions through simulations.
+will apply the algorithm in [25] and an alternate minimization    Our main results are derived by assuming that only partial
+approach for the problem formulation in [29] to compressive   Fourier measurements of the output sequences are available.
+MBD in Section VI.                                      However, in certain applications, the output sequences can be
+
+=== PAGE 3 ===
+DRAFT;                                                                                                                                           3
+
+
+measured only in the time domain. We propose a sampling-  method by Xu et al. [9] (resp. recent sparse MBD methods
+kernel based technique that computes partial Fourier measure-  by [20]–[22]) provided that the assumed conditions on s and
+                                                         n=1 therein are satisﬁed (cf. Section V for details).ments without accessing all time samples. Then we obtain the  {xn}Nanalogous identiﬁability result from time-domain samples.       The main question of our interest is whether one can de-
+  We also specialize our results to the non-sparse FIR case.   convolve s and {xn}Nn−1 from the compressive measurements
+Our frequency-domain approach requires fewer measurements   of {yn}Nn=1, which will be referred to as compressive MBD.compared to the classical time-domain approach by Xu et al.   We speciﬁcally consider partial Fourier measurements given
+[9]. Moreover, our approach is guaranteed when the Fourier   as the DTFT of yn at selected frequencies, that is, the set of
+transform of the source signal does not vanish at the observed   linear measurements is written as
+frequencies, which is a milder condition than the analogous
+                                                                      k      n = 1, . . . ,              (3)condition on the linear complexity of the source [9].                     {Yn(ejkω0) |  ∈Kn,         N},
+  The         rest of                the                   paper                                  is                             organized                                         as  follows.                                                      In                                                           the                                                      where                                                                       denotes                                                                                    the                                                                                 index                                                                                                        set                                              Kn                                                                                    {mn,1, mn,2,                                                                                                                                                                   . . . , mn,Kn}                                                                 ⊂                                        Znext     section,          we                 present                         the                         problem                                     formulation                                               along                                                     with                                                                       for                                                       We are                                                                                                       particularly                                                                                                                   interested                                                                                                                              in the                                                 n =                                                                                  1, . . . ,                                                           N.
+relevant mathematical preliminaries. In Section III we show   setting when |Kn| ≪M where M is length of yn.how to achieve compressive Fourier measurements from a    Our choice of the partial Fourier measurements is motivated
+ﬁnite set of time-domain samples. Identiﬁability results for  by the following two reasons. First, in the Fourier-domain, the
+compressive MBD are discussed in Section IV. In Section V,   measurements in (3) are written as the product of the Fourier
+we present a detailed comparison of the proposed results with   transforms of the source and the ﬁlters, that is,
+the recent sparse and classical non-sparse results. Simulations
+                                                           Yn(ejkω0) = S(ejkω0)Xn(ejkω0), k      n = 1, . . . , N. (4)are shown in Section VI followed by the proof of the main                                                                 ∈Kn,
+results in Section VII.                                 The entrywise product form in (4) allows the ﬂexibility to
+  Throughout               the                   paper,                  we                          use the                                  following                                                notations.                                                  For a   design                                                                sampling patterns. For any n1̸ = n2 and k ∈Kn1∩Kn2,positive         integer                          denote                                    the                                           set          M,                         let [M]                                                 1, . . . , M                                             we have                                         {0,       −1}.For a sequence x, its support denoted by supp(x) is deﬁned
+by         =    The ℓ0 pseudo-norm of x, denoted         Yn2(ejkω0)Xn1(ejkω0) = Yn1(ejkω0)Xn2(ejkω0),   {k ∈Z | x[k]̸    0}.by       counts the number of its nonzero elements. the z-                                                      which enables to apply the cross-convolution approach by Xu   ∥x∥0,transform and the discrete-time Fourier transform (DTFT) of                                                                         et al. [9] even with sampling in the Fourier domain for any
+x are denoted by X(z) and X(ejω) respectively.
+                                             {Kn}Nn=1. Second, due to the uncertainty principle, the Fourier                                                              transforms of the ﬁlters are well spread in the Fourier domain
+ II. COMPRESSIVE MBD FROM FOURIER MEASUREMENTS   as they are sparse in the time domain. This helps recover the
+  In this section, we formulate the compressive MBD problem   ﬁlters from fewer Fourier coefﬁcients.
+and discuss the assumptions made to deriving the main results.     In order to uniquely identify the solution to compressive
+                                          MBD, we impose the following structural assumptions on the
+                                                              n=1 and the source s:                                                                      ﬁlters {xn}NA. Problem Statement
+                                                               Sparse                                                                                     ﬁlters:                                                          (A1)                                                                         ∥xn∥0 ≤L and supp{xn} ⊂[Mx]  Let y1, . . . , yN denote multichannel output sequences from                                                                              for                                                     n =                                                                                       1, . . . , N.
+a common source sequence s. Let x1, . . . , xN denote the ﬁlters     (A2)  Finite-length source: s is supported within [Ms].
+corresponding to the impulse responses of the channels. Then     (A3)  Coprime  ﬁlters: X1(z), . . . , XN(z) do not share
+                                                               any common zeros except at z = 0.
+             yn = s ∗xn,  n = 1, . . . , N,              (1)     (A4)  Non-vanishing source: S(ejkω0)̸ = 0 for all k ∈
+where           the linear convolution. The MBD problem is        ∪Nn=1Kn.      ∗denotes                                            (A5)  Universal sampling: The sampling interval ω0 andto   identify s and {xn}N                  n=1 from the output sequences {yn}Nn=1.           index sets                                                                          n=1 form the universal sampling  Let                                                            {Kn}N                                                                                      sets. Such sets are deﬁned in Section II-B.
+             n
+                                        n=1      A few remarks on these assumptions are in order.  C  s, {xn}N           n=1 =   α−1S−m(s), {αSm(xn)}N                                                              (2)
+                      o                            (A1) and (A2) imply that each yn is supported on [M],
+                           α̸ = 0, m ∈Z                               • where M = Mx + Ms                                                                 −1.
+denote the orbit of (s, {xn}Nn=1) by the actions of shift and     • (A2) is not necessary if one only concerns the identiﬁca-
+scaling, where Sm denotes a shift operator that maps a se-        tion of the ﬁlters.
+quence to its shifted version by m samples. Then any element     • (A3) is a necessary condition for unique identiﬁability
+in C(s, {xn}Nn=1) generates the same output sequences. There-       without (A1) and (A2). See Section II-C for more details.
+fore, we aim to identify (s, {xn}Nn=1) up to the fundamental-     • (A4) avoids the case where the Fourier measurements atambiguity class given by (2), that is, to ﬁnd any element in       a sampled frequency are zero for all channels.
+C(s, {xn}Nn=1) that satisﬁes (1). Unique identiﬁcation hereafter     • (A5) enables to solve sparse MBD from compressivewill be referred to as this case.                                     Fourier measurements.
+  When all time-samples of yn are available, one can uniquely    Unique identiﬁcation in compressive MBD is then deﬁned
+identify the ﬁlters (resp. both the source and the ﬁlters) by the   as follows.
+
+=== PAGE 4 ===
+DRAFT;                                                                                                                                           4
+
+
+Deﬁnition 1  (Identiﬁability of Compressive MBD). Com-                                                                                                          ¯yn
+pressive MBD is uniquely identiﬁable if any feasible solution       yn      h                V−1     Yn(ejk!0)
+(ˆs, {ˆxn}Nn=1), which satisﬁes (A1)-(A4) and is consistent withthe measurements in (3), belongs to the fundamental ambiguity                       m                       , Mh                                                                                                    2 {M −1, · · ·    −1}
+class C  s, {xn}N             n=1  of the ground-truth signals (s, {xn}Nn=1)    Fig. 1.  Compressive measurements of Fourier samples of yn by usingdeﬁned in (2).
+                                                                           discrete-SOS ﬁlter h: the sequence yn of dimension of M is passed through
+  Our objective is to derive necessary and sufﬁcient conditions   an FIR kernel of length Mh deﬁned as in (7). The output sequence ¯yn has
+                                                                               length Mh +M −1 out of which few measurements are taken by closing the
+                    n=1 such that either only the ﬁlters   switch at sample indices m ∈{M −1, . . . , Mh −1}. From the truncatedon the index sets {Kn}N                                                                                                                             is                                                                                       computed by                                                                                                                           inverting                                                                                                                      a linear system of equations                                                                        samples Yn(ejkω0)    n=1 or both the source s and the ﬁlters are uniquely{xn}N                                                                        governed                                                                          by matrix V                                                                                                  considered                                                                                                                          in Section                                                                                                                            II-Bidentiﬁable according to Deﬁnition 1 under (A5).                                                                          .
+  Simultaneous identiﬁcation of both the source and the ﬁlters
+requires extra conditions, which go beyond universal sampling
+                                                      where ˆs =      and     n=1 provide an alternative solution(see Section IV-B). We ﬁrst derive conditions for the unique          s∗h0     {ˆxn}N                                                                      that produces the same outputs. Hence, without any assump-
+identiﬁcation of the ﬁlters followed by those extra conditions
+                                                                    tions on the source and the ﬁlters, coprimeness is a necessary
+for the identiﬁcation of the source signal. Note that recovery
+                                                                  condition. With (A1) and (A2),  it is no longer a necessary
+of the ﬁlters is equivalent to the simultaneous recovery of both
+                                                               condition as the alternative solution may not satisfy these
+the ﬁlters and the DTFT of the source signal at the observed
+                                                             assumptions. However, we keep the coprimeness assumption
+frequencies. Therefore partial identiﬁability is as follows.
+                                                                    to our settings to derive the identiﬁability conditions.
+Deﬁnition 2 (Partial Identiﬁability Only for Filters). Compres-
+sive MBD is partially identiﬁable if for any feasible solution                                                                                   III. COMPRESSIVE MBD FROM TIME DOMAIN
+                                                           MEASUREMENTS(ˆs, {ˆxn}Nn=1), there exists ˜s such that
+  1)  ˜S(ejkω0) = ˆS(ejkω0) for k ∈∪Nn=1Kn.                      In this section we propose a method that acquires the com-
+  2)  (˜s, {ˆxn}Nn=1) ∈C  s, {xn}Nn=1  .                           pressive Fourier measurements of an FIR sequence without
+                                                                      explicitly observing the entire sequence. The number of timeB. Universal Sets
+                                                         samples can be as small as the number of Fourier measure-
+  Universal sampling  sets have been introduced for com-                                                            ments. Our approach is inspired by the kernel-based sampling
+pressed sensing from partial Fourier measurements (e.g., see                                                       and reconstruction approach for ﬁnite-rate-of-innovation (FRI)
+[10, Def.  14.1]). The  partial Fourier measurement matrix                                                                   signals [6], [35]. It has been shown that Fourier measurements
+corresponding to the nth channel measurements in (3) is given                                                               of FRI signals can be computed from time samples at a sub-
+as a |Kn| × M¯  Vandermonde matrix Vn whose (k, m)th   Nyquist rate by applying a suitable sampling kernel. Thenelement is given as ejkmω0. In our settings, it is satisﬁed that                                                                 the parameters of FRI signals can be computed from Fourier
+M¯ ≥|Kn|, where M¯ = max{2Mx −1, Ms} (See Section   measurements on a grid.
+IV-B for details). To avoid aliasing, ω0 is chosen such that                                   ¯                             Let y be an FIR signal supported on [M] and        be                                                              K                                                     ⊂Z                                                                                                                          for                        m=0  are distinct. For each   a ﬁnite set. The DTFT coefﬁcients Y (ejkω0) of y                                                                                              kthe elements of the set {emω0}M−1n          . . . ,     the index set      is called universal if every                            ∈K  ∈{1,    N},         Kn                               are computed from     consecutive time samples of y with ansubmatrix of Vn obtained by taking      columns has full                     |K|                                  |Kn|                     appropriate sampling kernel.
+rank [10, Def. 14.1], that is, Vn has full spark [30]. Note that                                                              Let h be an FIR ﬁlter supported on [Mh], where Mh > M,
+the universal sets depend on the frequency interval ω0.                                                      which satisﬁes
+  For      example,                              is                         a set                                 of consecutive                                                   integers                                                 and                       if Kn                  each                        index                                    set                                                  is universal.                                                   Various  =     2π/M¯  thenω0                        Kn                                h[m] = X ejkω0m, m ∈[Mh].            (7)
+alternative constructions of universal sets have been studied                   k∈K
+(e.g., [31]–[34], also see [10]).                                                   The ﬁlter h in (7) is a discrete-time analog of the sum-of-sincs
+                                                     (SOS) ﬁlter proposed by Tur et al. [6]. The ﬁltered version of
+C. Coprimeness of the Filters                                                      y by h, denoted ¯y, satisﬁes
+  In an MBD framework, unless any further restriction  is
+                                                    M−1imposed on the supports of the source and the ﬁlters, the                                                                         ¯y[m] = X y[p]h[m   = X ejkω0m Y (ejkω0)   (8)coprime condition on the ﬁlters is a necessary for the unique                     −p]
+                                                                    p=0             k∈Kidentiﬁcation of  the  solution. To  elaborate,  let  the  ﬁlters
+    n=1 share nontrivial common zeros in the z-domain.                                     −1 ≤m ≤Mh −1.{xn}N                                                             for M                    Then the vectors respectively                                                               containing                                                                               and                  are  relatedSpeciﬁcally, each ﬁlter can be decomposed as                                                          {Y (ejkω0)}k∈K      {¯y[m]}Mh−1m=M−1
+                                                           through a Vandermonde matrix V of size (Mh −M +1)×|K|
+                  xn = h0 ∗ˆxn,                      (5)   with its (m, k)th element given as ejmkω0. Therefore if ω0 and
+                                                        form the universal set then the condition Mhwhere the sequence h0 contains the common zeros except at  K                  ≥M +|K|−1                                                              ensures  that                   are computed uniquely fromz = 0 and ˆxn  is the novel factor. As a result, the outputs             {Y (ejkω0)}k∈K                                                                                In other words,     observations of the ¯y are  = s     n=1 can also be decomposed as                {¯y[m]}Mh−1m=M−1.                |K|{yn   ∗xn}N                                                sufﬁcient to compute     Fourier measurements of y without                                                                                |K|
+           yn = s ∗xn = s ∗h0 ∗ˆxn = ˆs ∗ˆxn,          (6)   observing the entire sequence.
+
+=== PAGE 5 ===
+DRAFT;                                                                                                                                           5
+
+
+ A schematic of the sampling mechanism is shown in Fig. 1.  where the tilde is used to distinguish the variables of the prob-
+The switch is closed for the samples at m ∈{M−1, . . . , Mh−  lem from the corresponding ground-truth signals. If the solu-
+1}. If we further assume that K is a universal set, any |K| time   tion to (9) is unique up to a scaling and shift ambiguity, then
+
+                                                                            n=1                                                                        Kn, {xn}Nn=1) is uniquely identiﬁable, upsamples of ¯y from [M −1, Mh −1] will make the resulting   ({S(ejω0k)}k∈SNmatrix V  full rank. This enables optimizing the sampling   to a shift and scaling ambiguity, from the measurements in (4).
+pattern to improve the condition number of V.              The following lemma, whose proof is deferred to Section VII,
+                                                              provides necessary and sufﬁcient conditions for the uniqueness
+       IV. IDENTIFIABILITY OF COMPRESSIVE MBD
+                                                               of the feasibility problem in (9) when N = 2.
+  We consider a two-step approach to the compressive MBD
+problem. The ﬁrst step identiﬁes only the ﬁlters corresponding  Lemma 1. Let ω0, K1, K2, and K be as in Theorem 1. If
+to the impulse responses of the channels, similarly to blind   |K| ≥min{2L2, 2Mx −1}, then the feasibility problem in (9)
+channel estimation in communications (e.g., [9], [15]). Once   has a unique solution. On the other hand, if |K| < 2L, then
+the ﬁlters are identiﬁed, then the second step reconstructs the   the problem in (9) is not uniquely identiﬁable.
+common input source to the channels.
+                                                                    S                                                     The ground-truth signals ({S(ejω0k)}k∈K1                                                                                                        K2, {x1, x2})                                                                 are feasible to (9). LetA. Identifying Sparse Filters
+  We identify the ﬁlters from the Fourier measurements in                     q = x1 ∗ˆx2 −x2 ∗ˆx1,               (10)
+(4) under the assumptions (A1) to (A5) except (A2). The
+                                                      where                       ˆx1, ˆx2)  is another feasible solutionfollowing theorem presents the result in the two-channel case.         ({ ˆS(ejω0k)}k∈K,                                                                    to (9). In the proof of Lemma 1, we have shown that the
+Theorem 1  (Partial Identiﬁability of Compressive MBD).  number of Fourier measurements for the unique identiﬁcation
+Suppose that (A1), (A3), (A4), and (A5) hold with K1 = K2 =    is determined as the worst-case ∥q∥0 maximized over  all  and L < √Mx.                                                feasible (ˆx1, ˆx2). Since x1, x2, ˆx1, and ˆx2 are L-sparse vectorsK
+  1)  If |K| ≥2L2, then compressive MBD  is  partially   with support over [Mx], in general, the worst case support of q
+      identiﬁable from the Fourier measurements according to    is min{2L2, 2Mx −1}. For high sparse signals, that is, when     Deﬁnition 2.                            L        or L < √Mx, we have that   = 2L2. Therefore                              ≪Mx                          ∥q∥0
+  2)  If |K| < 2L, then compressive MBD is not partially  by modifying constraints on ˜x1 and ˜x2 in (9), we obtain similar
+      identiﬁable.                                                    results in a different scenario as an immediate corollary.
+  Recall that {S(ejω0k)}k∈K, x1, and x2 were arbitrary in   Corollary 2 (Sufﬁcient Conditions for General Sparsity Case).
+Deﬁnition 2. Therefore, the partial identiﬁability in Theorem 1   Let ω0, K1, K2, and K be as in Theorem 1. Let L ≤Mximplies that for any instance within the assumed model, the   without the restriction L < √Mx. If           2Mx                                                                                              |K| ≥min{2L2,   −
+ﬁlters are uniquely identiﬁed up to the ambiguity class. When   1}, then the feasibility problem in (9) has a unique solution.
+it is not partially identiﬁable, there exists an instance where  On the other hand,  if |K| < 2L the problem in (9) is notthe ﬁlters are not uniquely determined.                        uniquely identiﬁable.
+  Next, by combining the Fourier domain identiﬁability re-
+                                                           Without assuming that x1 and x2 are sparse, the worst-sults of Theorem 1 with the kernel-based measurement scheme
+proposed in Section  III, we obtain the following corollary,                                                             case ∥q∥0 becomes 2Mx −1, which results in the following                                                                      corollary.which provides the analogous results for compressive MBD
+from time-domain measurements.                           Corollary 3 (Non-Sparse FIR Filters). Assume the hypotheses
+Corollary 1 (Time-Domain Compressive MBD). Suppose that   of Theorem 1. Let L = Mx. Then the same identiﬁability result
+the hypotheses of Theorem 1 and (A2) hold. Let h be an FIR   as in Theorem 1 holds if and only if |K| ≥2Mx −1.
+                                                     Compared with the results of [9], where 3Mx time-samplesﬁlter of length |K| with impulse response deﬁned in (7). Thencompressive MBD is partially identiﬁable from    consecutive                                                                 are sufﬁcient to identify the ﬁlters, in our frequency-domain                                           |K|
+                                                          approach 2Mx     Fourier measurements are necessary andtime-samples of y1∗h and y2∗h, where the samples are indexedby the set               . . . , M +                if         On the          −1                                                                   sufﬁcient. Further, the Fourier measurements can be com-      {M −1,          |K| −2},   |K| ≥2L2.other hand, compressive MBD is not partially identiﬁable if
+                                                           puted uniquely from 2Mx −1 time-measurements by using  < 2L.                                                           a sampling kernel as shown in Section III. Hence, for a large|K|
+  The time-domain results are similar to the result in the  Mx, we gain signiﬁcantly in terms of reducing the number of
+context of FRI signal sampling where the number of Fourier   measurements compared with the approach in [9]. A detailed
+coefﬁcients needed for the identiﬁcation governs the desired   comparison of these methods is presented in Section V.
+number of time samples and the sampling rate [6].             Next we show how the identiﬁability result in Theorem 1
+  The proof of Theorem 1 directly follows from the results   for the two-channel case generalizes to the case of more than
+on the following feasibility problem:                       two channels. We obtain a particular sufﬁcient condition by
+                                                        assuming that there exists a pair of coprime channels from
+    ﬁnd  {˜S(ejω0k)}k∈∪nKn  and   (˜x1, ˜x2, . . . , ˜xN)        which at least 2L2 Fourier measurements are available.
+        s.t.   Yn(ejω0k) = ˜S(ejω0k)˜Xn(ejω0k), k ∈Kn, ∀n,           (A1), (A3), (A4) and (A5) are satisﬁed,          Theorem  2. Suppose (A1), (A3), (A4), and (A5) hold for
+                                                              (9) N     and L < √Mx. Then compressive MBD is partially                                  ≥2
+
+=== PAGE 6 ===
+DRAFT;                                                                                                                                           6
+
+
+identiﬁable from the Fourier measurements  if the following    Below we show that when there are more than two channels,
+conditions are satisﬁed: i) There exist 1 ≤n1 < n2 ≤N   with a carefully designed sampling pattern, one can signiﬁ-
+such that Kn1 = Kn2 = K for a universal  set K with   cantly reduce the peak number of measurements per channel,
+|K| ≥min{2L2, 2Mx −1};  ii) Kn  is a universal set such  where  the gain  is almost  proportional  to  the number  of
+that Kn ⊆K and |Kn| ≥2L for all n̸ ∈{n1, n2}.             channels. This is interesting, particularly when Ms dominates
+                                                         L, that is, MsProof. By Theorem 1, the triplet                 xn1, xn2)            ≫2L2.                               ({S(ejkω0)}k∈K,                                      A na¨ıve approach is to consider Ms Fourier measurementsis uniquely  identiﬁed. Then  for                               an appropriate choice of
+                                                      from any pair of channels and to apply Theorem 1 to identify
+the sets Kn, the recovery of the ﬁlters for the rest of the   the corresponding ﬁlters and the source  s. As the source
+channels (those indexed by  n̸ ∈{n1, n2}) reduces  to a    is  identiﬁed,  the problem  is reduced  to a non-blind onenon-blind problem. Since Yn(ejkω0) = S(ejkω0)Xn(ejkω0),
+                                                                    for the remaining channels, and  to  identify the  ﬁlters  in
+if  the  sets Kn  are chosen such  that Kn ⊆  Kn1,  then   those channels, 2L Fourier measurements are necessary and
+we can compute {X(ejkω0)}k∈Kn  from {Yn(ejkω0)}k∈Kn   sufﬁcient. However,  this naive approach may not be well
+as {S(ejkω0)}k∈Kn1  is already  identiﬁed. Next, from  the   suited for practical applications. For example, in the radar
+measurements {X(ejkω0)}k∈Kn,  the  ﬁlters  are  identiﬁable  and ultrasound applications, the Fourier measurements are
+uniquely if |Kn| ≥2L.                                  computed as follows: The analog signal is ﬁrst pre-ﬁltered with
+  Theorem 2 implies that a total 4L2 + (N −2)2L Fourier   a kernel followed by an analog-to-digital converter (ADC).
+measurements from N  channels  are  sufﬁcient  for unique   Then, as discussed in Section III, the time-domain samples
+identiﬁcation of the ﬁlters. Therefore on average  it sufﬁces   are linearly combined to give the Fourier measurements [6],
+to take (4L2 + (N −2)2L)/N measurements per channel.   [35]. Here the sampling rate is determined by the number ofParticularly, with sufﬁciently many channels (N ≳L), the   Fourier measurements. In practice, it has been shown that the
+average number of measurements per channel is of the order   bit resolution of ADCs is limited when the sampling rate is
+of L which is the same as required by the necessary condition.   high [36]. Therefore, it is desirable to minimize the maximum
+Note that when the source is known, a minimum of 2L Fourier  number of Fourier measurements per channel.
+measurements are necessary to uniquely identify the ﬁlters.                                                     To achieve recovery we consider a pairwise strategy. For
+Hence, for N ≳L the requirement on the average number of                                                          example, assume there are four channels (N = 4). Consider
+measurements per channel matches that of the known source                                                                     n=1 such that they satisfy the following                                                                  universal sets {Kn}4case in order.
+                                                                 conditions: (i) K1 = K2 and K3 = K4 ; and (ii) |Kn| ≥2L2                                                                    for n = 1, 2, 3, 4. By applying Theorem 1, independently to
+B. Recovering the Common Source Signal                      the measurements from the pair channels (1, 2) and (3, 4), we
+                                                                    identify the ﬁlters     n=1 as well as the Fourier measure-  As discussed in the introduction, in certain applications such                  {xn}4                                                       ments               and               These two sets ofas radar, sonar, and ultrasound, it sufﬁces to identify only the         {s(ejkω0)}k∈K1     {s(ejkω0)}k∈K3.                                                                        partial Fourier measurements may be differently scaled due
+ﬁlters, which describe the target. On the other hand, there
+                                                                    to shift and scaling ambiguities. Let us assume that there
+exist applications where the recovery of the source signal
+                                                                 are no such  inter-pair ambiguities. Then we have overall
+is important. For example, in communications or imaging,
+                                                                                   Fourier measurements of the source.  Ifthe source signal carries information and the ﬁlters describe   {s(ejkω0)}k∈K1∪K3                                                                                then we can uniquely recover the source.the channel impulse response or sensitivity functions. In this   |K1 ∪K3| ≥Ms,                                                            Here, the maximum number of the Fourier measurements can
+section, we present conditions under which the source and
+                                                        be 2L2. In this particular case, if we consider more channels, it
+ﬁlters are simultaneously identiﬁed.
+                                                                               is necessary and sufﬁcient to consider 2L measurements from
+  The results in Theorems 1 and 2 guarantee that the ﬁlters
+                                                                 the additional channels to identify the corresponding ﬁlters
+are fully identiﬁed but the source signal is partially identiﬁed
+                                                               as the source is identiﬁed from the ﬁrst four channels. We
+up to its Fourier measurements at the selected frequencies. In
+                                                                generalize the example to any N channels and show how to
+general, the recovery of the source s from its partial Fourier
+                                                         choose the universal sets     n=1 to eliminate the inter-pairmeasurements is ill-posed. However, recovery becomes feasi-                    {Kn}N                                                           ambiguity and uniquely identify the source and the ﬁlters.
+ble by introducing further restrictions on s.
+  For example, suppose  that s  is supported within [Ms]    To this end, to apply the pairwise strategy for any N ≥
+for a ﬁnite  integer Ms >  0. To uniquely determine an  2 channels, we consider the Fourier-domain sampling grids
+arbitrary source signal s supported within [Ms], the number   given by
+of measurements                 needs                           to                         be  at                                        least                                On                                                    the other                               Ms.
+hand,      since we choose                        and                                such                                             that                                              the                                              elements                                                               in    K2r−1 = K2r, |K2r−1| = K, K2r−1 is a universal set, (11)                   ω0                  K                                and           = 2,   r = 1, 2, . . . , R,      k=0   are distinct, the linear system that generates the              |K2r−1 ∩K2r+1|{ejω0k}Ms−1
+Fourier measurements at Kω0 corresponds to a Vandermonde  where R ≤⌊N/2⌋. The ﬁrst three conditions with K ≥2L2matrix of full column rank and s is uniquely determined.       are necessary and sufﬁcient for the recovery of the ﬁlters
+  Combining the above argument with Theorem 1 provides  and the partial Fourier measurements of the source. The last
+the following result in the two-channel case: All s, x1, and x2   condition is that there should be overlap of two samples in
+are identiﬁed from the sampling pattern given by K1 = K2 =   successive pairs of sample sets. We show that this overlap
+K if and only if |K| ≥max{Ms, 2L2} and (A5) is satisﬁed.    aids in removing inter-pair ambiguity of shift and scaling.
+
+=== PAGE 7 ===
+DRAFT;                                                                                                                                           7
+
+
+  The identiﬁability result for both the source and ﬁlter for    By Corollary  3, we obtain an immediate extension of
+compressive MBD is stated in the following theorem.        Theorem 3 to the non-sparse case.
+Theorem 3. Suppose that (A1) to (A5) hold for N ≥2 and   Corollary 4 (Identiﬁability Results for Source and Non-S-L < √Mx. Then compressive MBD is uniquely identiﬁable   parse Filters). In Theorem 3, let      = [Mx], where                                                                                 supp{xn}
+according  to Deﬁnition 1 from the Fourier measurements  Mx ≤M/2. Then compressive MBD is uniquely identiﬁable
+if  the  following  conditions  are  satisﬁed:  i) For  at  least   from 2Mx −1 Fourier measurements from each of N ≥            omax       + 1, 1   n Ms−K                       pair  of  channels,  the corresponding  2 · Ms−2Mx+12Mx−3  + 2 channels.     K−2
+sampling sets satisfy the conditions in (11) with K ≥2L2;    Even in the non-sparse case, the measurement system canand ii) At least 2L Fourier measurements are available from   be compressive when the number of Fourier measurements
+the rest of the channels.                          2Mx −1 is smaller than the available time-domain measure-
+                                                       ments M = Mx + Ms      that is, Ms > Mx.Proof. Let us assume that we can recover Ms Fourier mea-                  −1,
+surements of s from the ﬁrst 2R channels together with the   C. Extension to Sparse MBD with Circular Convolution
+corresponding ﬁlters where 2R ≤N. For these channels, the    The MBD problem considered in the previous sections
+sampling pattern is chosen such that K2r−1 = K2r for r =   assumes that the measurements consist of a linear convo-
+1, . . . , R with |K2r| = K ≥2L2. For each pair of (2r −1)th   lution of the source and ﬁlters, whereas, the recent resultsand 2rth channels for r = 1, . . . , R, the assumptions imply                                                                    in the  literature consider the MBD problem with circular
+via Theorem 1 that x2r−1, x2r, and S(ejkω0) for k ∈K2r−1   convolutions. Here we extend our  results  to  the case ofare uniquely identiﬁed up to a scaling and shift ambiguity.                                                                     circular convolution. In this setup, the N-channel MBD time-
+In other words, S(ejkω0) is identiﬁed up to multiplication by                                                     domain outputs are given as   = s       n=1, where ⊛αrejkω0pr  for k             for unknown constants   = 0                            {yn    ⊛xn}N                                                            denotes circular convolution, and the supports of the ﬁlters           ∈K2r−1                                αr̸
+and pr ∈Z. Due to the overlaps |K2r−1 ∩K2r+1| = 2 for  and source  are  within  the  set [M].  In  other words, we
+r = 1, . . . , R in the design of {K2r−1}Rr=1. These inter-pair  assume that                and               Due toambiguity constants can be removed up a global constant              supp{s} ⊆M     supp{xn} ⊆M.                                                                     circular convolution, the measurements yn = s ⊛xn are
+in a sequential manner. For example,  let us assume  that                                                           M-periodic. We further assume that the ﬁlters are L-sparse
+K1 ∩K3 = {k1, k2}. In other words, for the channel pairs  and they are coprime. In  this case, the goal  is to derive(1, 2) and (3, 4), Fourier measurements are taken at the over-                                                                     identiﬁability conditions  to uniquely recover the source s
+lapped frequencies k1ω0 and k2ω0. By applying Theorem 1                                                       and the ﬁlters     n=1 from the discrete Fourier transformto these pairs, we obtain the Fourier measurements of the              {xn}N                               2π
+                                                    (DFT) measurements                 where ω0 = M andsource at the overlapped frequencies up to inter-pair ambi-                      {Yn(ejkω0)}k∈Kn,                                                                With these settings, for N = 2, following the stepsguities, which are α1S(ejk2ω0)ejk2ω0p1, α1S(ejk1ω0)ejk1ω0p1,  Kn ⊆[M].                                                                    in the proof of Lemma 1, the sequence q in (10) is given as
+α2S(ejk2ω0)ejk2ω0p2, and α2S(ejk1ω0)ejk1ω0p2. Then α1/α2                                                           q = x1 ⊛ˆx2      ⊛ˆx1. To follow the remaining steps of theand p1        are computed from  the  ratios among these          −x2     −p2                                                proof and prove the identiﬁability results, we have to ensure
+measurements and enable to obtain {α1S(ejkω0)ejkp1ω0}k∈K3   that q = x1 ⊛ˆx2     ⊛ˆx1 = x1                 This isfrom                        where the former is aligned             −x2            ∗ˆx2 −x2 ∗ˆx1.     {α2S(ejkω0)ejkp2ω0}k∈K3,                              indeed true if we assume that the ﬁlters are supported withinto the ﬁrst pair.
+                                                                 the set ⌊M/2⌋. With these assumptions, we state the extension  Applying this process successively, we identify the ﬁlters                                                               of Theorem 2 for the circular convolution case.
+x1, x2, . . . , x2R, up  to a  global  scaling  factor 1/α1 and
+                                                                           Let                                                                          and                                                                                                     Let                                                                                                           be                                                Theorem                                                                                  4.                                          N                                        M                                                                                                                      (s,                                                                                                   n=1)a   shift                   together                          with                                   the  Fourier                                         measurements                                         ≥2                                                           ∈N.                                                                                    {xn}N       by −p1,                                                                 arbitrary                                                                      while                                                                                       satisfying                                                                                    (A1)                                                                                                      to                                                                                            (A5)                                                                                                    with                                                             =                                                                Mx                    forα1S(ejkω0)ejkp1ω0                        n=1                                                                                    ⌊M/2⌋                  k ∈SR                          Kn.                                                                              Let                                                                                                        for                                                                                                   Then                                               M.                                              =                                                                                s                                                                      n                                                        =                                                                                                                  1,                                                                                                                    2,                                                                                                                                                                      . . .                                                                                                                                                                           , N.                                                     and Ms =                                                                       yn                                                      ⊛xn  To      identify                       the                       above                                 Fourier                                     measurements,                                                                                     it is             s from
+                                                              n=1 are simultaneously identiﬁed from the DFTsufﬁcient to satisfy                                        s and {xn}N                                                        measurements                             if the following conditions        N1                                                           {Yn(ejω0k)}k∈Kn   n        o
+    [    = (R       + K             (12)   are satisﬁed:  (i) For at least max M−K + 1, 1   pair of           K2r−1    −1)(K −2)    ≥Ms.            channels, the corresponding samplingK−2sets       satisfy the        r=1                                                                        Kn                                                               conditions in (11) where K       and (ii) a minimum of 2LIn other words the source can be identiﬁed from a minimum                     ≥2L2;                                          DFT measurements are available from the rest of the channels.
+2R ≥2· Ms−KK−2 +2 channels if K ≥2L2. From the remaining
+N −2R channels it is sufﬁcient to consider any 2L Fourier    Then the following result for the non-sparse case is obtained
+measurements to identify the corresponding ﬁlters.             as an immediate corollary.
+
+                                                         Corollary 5 (Non-Sparse FIR with Circular Convolution).
+  The maximum number of measurements per channel in
+                                                          Consider the assumptions of Theorem 4. Let      = [Mx]Theorem 3 can be restricted to 2L2. The inequality in (12)                                      supp{xn}                                                       where Mx        Suppose that N   2M−4  Then both theimplies that when K increases beyond 2L2, the number of         ≤M/2.         ≥ 2Mx−3.                                                            source and the ﬁlters are identiﬁable iff the number of Fourier
+channels for the identiﬁability can be reduced. In other words,
+                                                        measurements are greater then or equal to 2Mxone can trade-off between the number of measurements per                                     −1.
+channel and the number of channels. For K                       = 2L2 the source                                                        Note that the condition supp{xn} = [Mx] implies that the                          n                                    oand the ﬁlters are identiﬁable if N        Ms−2L2 + 2, 2   .   ﬁlters are in a low-dimensional subspace of dimension Mx.                    ≥max   L2−1
+
+=== PAGE 8 ===
+DRAFT;                                                                                                                                           8
+
+
+D. Recovery from Samples in the z-Domain                              V. COMPARISON WITH PRIOR ART
+
+                                          We ﬁrst compare our results for non-sparse cases and then A DTFT can be considered as a special case of the z-domain
+                                                             provide a comparison for sparse MBD.sample evaluated at a complex number of unit modulus. In
+this section we show that the results in the previous sections
+generalize to the case where the measurements of the output   A. Comparison of Non-Sparse Case
+channels are given as samples in the z-domain                                             Xu  et  al. [9] considered the problem of estimating ﬁl-
+  For example, as in  (9),  let us consider the  ﬁlter iden-   ters only without sparsity assumption with linear-convolution.
+tiﬁcation problem  for the two-channel case from samples  They made the assumptions that the ﬁlters are coprime and
+                                                                 the source has a linear complexity1 greater than or equal to{Yn(zk) = S(zk)Xn(zk)}k∈[K] where {zk}k∈[K] denotessampling          grid in the                    We assume that                   z-domain.                                                           which                                                                           implies                                                                                             that                                                                                     With these assumptions,                                               2Mx,                                                      Ms                                          {S(zk)}k∈[K]                                                          ≥4Mx.is  non vanishing.              To show                          the identiﬁability,                               we can                                                 follow the   the                                                                   authors                                                            show                                                                                          that                                                                                        the                                                                                                  ﬁlters                                                                                                  are identiﬁable                                                                                                from N = 2
+lines of the proof of Theorem 1 by substituting ejkω0 by zk.   channels if 3Mx consecutive measurements of yn are avail-
+With                  measurements,                                            all                                       the steps                                                of the                                                     proof      the z-domain                                                                     able. Note that                                                                          with                                                                                                   the                                                                                                    length                                                                                                                                             is given                                                                                                     by                                                    Ms                                                                                                           of yn                                                        ≥4Mx,of  Theorem          1 remain                       valid except the                                     spark                                              properties                                                       of                                                           the                                                                             out                                                                                  of                                                                        which                                                                                                   are                                                                                                      sufﬁcient                                                                                                                      to identify                                                                                                                            the                           M                                                           3Mx                                     ≥5Mx −1resulting A matrix (see (25)).                                       ﬁlters.
+  With z-domain sampling, the matrix A is given as             In comparison, our results in Corollary 3, together with the
+                                                         time-domain results in Corollary 1, state that we can identify    1   z1   z21    . . .  z2Mx−11   
+                                                                 the ﬁlters with         time samples. As in [9], we too impose                                                 2Mx−1         1   z2   z22    . . .  z2Mx−12                                                                                      condition on the ﬁlters. However, we do not  A =                                      (13)   the coprimeness      ...                   ...                        ...     ...                               ...                              restrict the ﬁlter to have a longer support. In our approach,                     ∈CK×2Mx.
+         1  zK  z2K    . . .  z2Mx−1K                               the support of the source could be either larger or smaller
+                                                      compared with the support of the ﬁlters. Furthermore, our
+The matrix A in (13) need not have full spark for any arbitrary
+                                                                       results are valid for any source signal whose DTFT samples
+choice of zk. Here we show a particular choice of zks such
+                                                     do not vanish at a given frequency location. The source need
+that the matrix has full spark.
+                                                              not satisfy a linear complexity constraint.
+                                                            For example, let us assume that the source s has linear-  Let us assume that z0 ∈C such that z0̸ = 1. Let K ∈[2Mx]
+be a distinct set of integers such that |K| = K. Let zk = zpk0    complexity of one, that is, the samples of the source sequence
+for pk ∈K. Then the matrix A in (13) has full spark if K is a   are given as s[m] = c1rm1  for m           In addition, letuniversal set. To show the full spark property, let us consider a                             ∈[Ms].                                                           us assume that r1 =  ejω1. In this case, the DTFT of the
+submatrix of A which consists of K distinct columns indexed                                                             source sequence is given as S(ejω) = c1 1−ej(ω−ω1)Ms . The
+by m1, m2, . . . , mK. With zk = zpk0  , the submatrix is given                             2π               1−ej(ω−ω1)
+as                                          DTFT vanishes at ω = p Ms + ω1 where p ∈Z \ {0}. If                                             we                                                             chose                                                                     our sampling                                                                                                  set                                                                                                                       that the                                                                                ω0 such                                                  K and                                                                                                                                  set Kω0    zp1m10      zp1m20          . . .  zp1mK0                                                            does                                                                    not have                                                                              zeros of                                                                                              then                                                                                                our method                                                                                                                      identiﬁes                                                                                 S(ejω)
+       zp2m10      zp1m20          . . .  zp1mK0                          the ﬁlters. In particular, let the cardinality of the set    be                                    (14)                                K                                                                 given, that  is, the number of Fourier measurements to be                  ...                                          ...       ...                              ...                      ∈CK×K.                                                                         For                                                                                a given                                                                            ω1                                                                                    and Ms,                                                                                                                                                  if ω0 and      zpKm10     zpKm20          . . .  zpKmK0                             taken is known.
+                                                                                4π                                                                                       2π                                                 n                                                           o                                                                                 l                                                                                          m  K are                                                         chosen as min                and   ω1−2π/Ms +                                                                                                          ω0                                                                                                                                           [|K|],Since the choice of the columns is arbitrary, the matrix A                    Ms|K|, 2Mx−1
+                                                             then                does not vanish. Hence, our approachwill have full spark if the submatrix is invertible. Since  =                                                             {S(ejkω0)}k∈K                                                                                 z0̸                                                                 identiﬁes the ﬁlters for Lc = 1, whereas, the method by Xu                                                     with1, the submatrix is similar to matrix V in Section II-B
+                                                                         et al. [9] cannot identify the ﬁlters uniquely.
+         0seeds {zmk        }Kk=1. Since K is a universal set and pk ∈K, the     Recently, Xia and Li [18] considered MBD problem withsubmatrix has full spark and is invertible. Hence, the matrix
+                                                                     circular convolution in a deterministic setup where the sourceA with the particular choice of sampling grid in the z-domain
+                                                       and ﬁlters are real and deterministic, but not sparse. Similar tohas full spark which implies that the ﬁlters can be uniquely
+                                                           our assumption in the case of non-sparse circular MBD setup,identiﬁable            in the two-channel                             case                                       The                                              problem                                                if K ≥2L2.is not identiﬁable                                  Similarly,                              we can                                               extend                                                           the                         if K < 2L.                                                              they assumed that supp{xn} = [Mx] with Mx < M. They                                                    showed that by using all M time samples from each channelresults of Theorem 2 and Theorem 3 to the case where the
+                                                           almost all the sources and the ﬁlters are uniquely identiﬁablesamples are measured in the z-domain.
+                                                                                      iff N    M−1  . The authors used the conjugate symmetry A major difference between the identiﬁability results from     ≥ M−Mx                                                              property of the Fourier transform of real signals to restrict thethe Fourier measurements and from the measurements in the
+                                                                    feasible solution sets. The results show that there exist source
+z-domain is that the sampling grid in the former case depends
+                                                       and ﬁlters such that the identiﬁability results fail. However,on the support of the source and the ﬁlters. For example,
+                                                           our results hold for any source ﬁlter pairs, which satisfy thethe results in Theorem 3 assumes that the sampling interval
+                                                                desired conditions (cf. Corollary 5). We show that N   2M−4
+ω0  is selected such  that the  set                                     k=0                                     ≥ 2Mx−3                               {ejω0k}max{2Mx−2,Ms−1}has distinct elements. However, with z-domain sampling, the
+                                                                               1Mathematically, the linear complexity of a sequence s is deﬁned as the
+sampling grid can be designed independent of the support of    smallest integer Lc such that there exists a set of complex-valued amplitudes
+the source or the ﬁlters.                                         {cℓ}Lcℓ=1 and complex-valued roots {rℓ}Lcℓ=1 such that s[m] = PLℓ=1 cℓrmℓ.
+
+=== PAGE 9 ===
+DRAFT;                                                                                                                                           9
+
+
+channels are sufﬁcient for unique identiﬁcation of the source     4) In [22] and [21], the  total number of measurements
+and ﬁlters iff 2Mx −1 Fourier measurements per channel are           is on the order of O(M log M) and O(M log4 M),available. For Mx = M/2, both the results work for N = 2         respectively, whereas, in our setup, we need 2L2 mea-
+channels and require all the measurements. On the other hand,        surements from at least max n M−2L2 + 2, 2 o channels,
+                                                                                     L2−1when Mx       our result requires more number of channels     ≪M,                                             which results overall (M−2)2L2 measurements which is
+but with fewer measurements per channel than that by Xia and                            L2−1                                                          on the order of M.Li [18] with two channels.
+                                                                  5) Comparing the results in the case of known support,
+                                                                          in [19], all M samples are considered per channel and
+B. Comparison with Recent Results on Sparse MBD                  overall O(M) measurements are required. In our case,  All the results discussed in this section consider the MBD      we need only L2 measurements per channel with overall
+setup with circular convolution. Hence, we compare them with        measurements on the order M. We gain in terms of the
+our results in Theorem 4. The results in [19]–[22] consider       number of measurements per channel but we require
+identiﬁability of MBD problems with the assumption that the       more channels compared with [19].
+ﬁlters are random and sparse. Balzano and Nowak [19] con-
+sidered a BGPC problem with oversampled DFT matrix and   C. Relation to Blind CS
+showed that when L-sparse signals xns are generic and have    The proposed compressive MBD problem can be viewed
+common known support, it is necessary to have measurements   as a special case of blind compressive sensing (BCS) [37].
+from N ≥⌈(M −1)/(M −L)⌉channels for perfect recovery   In BCS, a set of signals that are sparse in an unknown bases
+of unknown gains. Li et  al. [22] studied the identiﬁability   are uniquely identiﬁed from their compressed measurements.
+conditions            for a general                BGPC                             problem                                       with                                            subspace                                                 and   Similarly,                                                                               in                                                                       compressive                                                           MBD,                                                                                                  the output                                                                                                   sequences                                                                 =                                                                                                   {ynsparsity constraints.                 The                         authors                            showed                                               that under                                                     generic                                                                             are                                                                               sparse in the                                                                        unknown                                                                                                        dictionary                                                                                                                            that is                                                                                                                 given                                                        s     n=1                                              ∗xn}Nsparsity constraints on the ﬁlters, the problem is identiﬁable  by                                                                    the convolution matrix corresponding to the sequence s,
+with high-probability up to acceptable ambiguities as long as   the ﬁlters denote the sparse vectors, and the objective is to
+N = O(M log M). In [20], [21], the authors considered a   identify them from compressive measurements in the Fourier
+sparse MBD problem with circular convolution by assuming   domain. However, the existing dictionary models in [37] do
+that the source is invertible and the ﬁlters are sparse with   not include convolutional dictionaries.
+randomly chosen support and amplitudes. Speciﬁcally, Wang
+and Chi [21] assumed that the sparsity of the ﬁlters follows                 VI. NUMERICAL RESULTS
+a Bernoulli-subgaussian model. With the assumption that the    The main goal of this section is to compare the identiﬁability
+source s is approximately ﬂat in the Fourier domain, the au-   results of Theorem 1 to empirical observations. While Theo-
+thors show that the problem could be efﬁciently solved through  rem 1 provides a set of necessary and sufﬁcient conditions for
+                                                                 the identiﬁability in the worst case, in practice, it is not feasiblean ℓ1-minimization approach, as long as N = O(M log4 M).
+Cosse [20] assumed  that the source  is  invertible and the   to test in the worst case scenario. Therefore, instead, we run a
+location of the non-zero values of the sparse ﬁlters are chosen   set of Monte Carlo simulations and observed conditions under
+uniformly at random over [M]. The recovery is guaranteed  which most cases are successful (We counted the frequency
+with high-probability as soon as the number of channels N and   of empirical successes). On the other hand, the identiﬁability
+the dimension of the ﬁlters M, satisfy N ≲M and N ≳L2   result by Theorem 1 implies the existence of a method that
+where the ﬁlters are assumed to be L-sparse.2                 uniquely determines the solution of compressive MBD, which
+  Our results  is distinguished from the previous results as  means one has to consider the optimal algorithm regardless of
+follows:                                                                         its computational cost. This is also infeasible in practice. For
+  1) The aforementioned recent results considered random   a set of small sized problems, we performed enumeration over
+      sparsity or subspace models on the ﬁlters, whereas, we    all possible supports, which provides an optimal reconstruction
+      consider a deterministic sparsity model for the ﬁlters.     algorithm. For larger scaled problems, we consider a few
+  2) In [19]–[22], sparsity is introduced to derive the identi-   selected heuristics described below. In the non-sparse case
+      ﬁability results but not with the goal of compressing the   with noisefree measurements, an optimal algorithm can be
+     measurements. The results are derived by assuming that   obtained by a standard eigenvalue decomposition. Thus, we
+       all M time samples yn are available in all the channels.   use it for the study of the identiﬁability.
+    We show that sparsity also helps in identiﬁability by us-
+      ing compressive measurements in the frequency domain.   A. Practical algorithms for compressive MBD
+      Instead of using M time samples, we show identiﬁability                                                     To describe the algorithms used in the experiments, we
+     by using 2L2 Fourier samples of yn.                      rewrite the measurements succinctly in a compact matrix form.
+  3) In [22] and [21], the number of channels required does
+                                                           Let yn ∈C|K| denote the compressible measurements from      not depend on the sparsity level of the ﬁlters. We show
+                                                                 the nth channel. Let s ∈C|K| denote the column vector whose      that the source and ﬁlters are identiﬁable from N                                                                     entries are              The measurements in (4) can then                               ≥                                                                   {S(ejkω0)}k∈K.    max       n M−2L2 + 2, 2 o channels.                                                        be compactly            L2−1                                                             written as
+                                      Y = [y1 y2] = diag(s)¯AX,            (15) 2M ≳N ⇔∃c ∈R s.t. M ≥cN.
+
+=== PAGE 10 ===
+DRAFT;                                                                                                                                          10
+
+
+where X =  [x1 x2]. Estimating s and X from Y  is a
+BGPC or BDC problem with partial Fourier matrix. Practical
+algorithms to solve the sparse MBD or BGPC/BDC problem
+were proposed in [21], [25], [29]. The algorithm proposed
+in [21] is based on ℓ1-norm minimization and requires the
+matrix ¯A to be a full DFT matrix. Hence, the algorithm is
+not applicable to compressive MBD. In [29] and [25], the
+authors proposed algorithms based on BDC and truncated-
+power iteration (TPI), respectively. We will use modiﬁcations
+of these two approaches to our setting in the simulation.          Fig. 2. Phase transition for the identiﬁcation of L-sparse ﬁlters by exhaustive
+                                                                              search (L = 4): K ≥2L is necessary and sufﬁcient.
+  The BDC problem is similar to a sparse dictionary learning
+(DL) problem [38]; however, there is a major difference. In the
+DL problem, the composite matrix diag(s)¯A is unknown and
+                                                                  solution to the following non-convex optimization problem:needs to be estimated along with the sparse vectors X. In con-
+trast, BDC requires to estimate only s with known ¯A. In [29],                            γ1                                                       minimize   γH1  γH2 BHB
+the authors proposed a convex optimization based solution to    γ1,γ2∈CMx                 γ2                      (17)
+the BDC problem. However, we experimentally observed that                                    γ1                                                            subject to                    = 1.for N = 2 solving the BDC problem in (15) by using an alter-              ∥γ1∥0 ≤L, ∥γ2∥0 ≤L,   γ2   2
+nate minimization approach provides desirable identiﬁability
+                                                       Problem (17) can be solved by adapting the truncated powerresults. Hence, we consider the alternate minimization-based
+                                                                       iteration (TPI) algorithm proposed in [40]. In  its originalBDC approach as one of the practical algorithms for assessing
+                                                                  version, TPI is developed to compute the largest sparse eigen-the results. In alternating minimization, ﬁrst, we estimate the
+                                                                vector of a positive semideﬁnite matrix. In [25], Li et al. adoptsparse vectors by assuming that s is known and then, in the
+                                                                 the TPI algorithm in [40] to solve the BGPC problem bydictionary update step, we estimate s by using the estimated X.
+                                                        assuming that measurement matrix is random Gaussian andWe apply orthogonal matching pursuit (OMP) [39] to estimate
+                                                                 the ﬁlters are jointly sparse. We present TPI to solve thethe sparse vectors. Then s is estimated as a minimizer of the
+                                                               optimization problem in (17).
+error ∥Y−diag(s)¯AX∥22. We present the proposed approach inAlgorithm 1. The solution of the optimization problem in Step    The TPI algorithm in [40] is developed for a single sparse
+                                                                     vector. In (17) the vector to be estimated is a concatenation of
+                                                     two sparse vectors. By adopting the original TPI algorithm,
+Algorithm 1 BDC for solving (15).                                                                 the sparsity constraints on γ  in (17) are imposed by the
+   Output: s and X                                                          composite sparse projector PL  : C2Mx           For any    Input: Y, ¯A L, and the initial estimate s(0)                  f       →C2Mx.                                                                vector γ          the output of the sparse projector,                                                f  1: Let i                                            ∈C2Mx,                         PL{γ},                                                                               is an 2L sparse vector computed by independently retaining     ←1  2: repeat                                                                 the L largest entries over the sets [Mx] and Mx + [Mx] from
+  3:     Estimate X(i) by applying OMP to diag(s(i−1))−1 Y   the support of γ and setting the rest of the entries to zero. The
+    columnwise                                                                truncated power iteration method is presented in Algorithm 2.
+                                               2  4:      s(i) ←argmins ∥Y −diag(s)¯AX(i)∥2
+  5:      i ←i + 1  6: until convergence criterion is reached                   Algorithm 2 Truncated Power Iteration to solve (17).
+                                                         Output: γ; Parameter: β
+                                                              Input: B, Mx, L, and the initial estimate γ(0)
+4 is given as s(i) = D{ ¯AX(i)YH}./D{(¯AX(i))(¯AX(i))H}.                                                                                       1: Set G ←βI2Mx −BHB
+Here the operator D acts on a square matrix to output a vector                                                                                       2: Let i ←1consisting of the diagonal elements of the matrix, and the sym-      3: repeat
+bol ./ denotes element-wise division. In our simulations, the      4:     γ(i) ←Gγ(i−1)/∥Gγ(i−1)∥2
+algorithm stops at the ith iteration if ∥X(i)−X(i−1)∥2 ≤10−3.                                                                                       5:     γ(i) ←fPL{γ(i)}/∥fPL{γ(i)}∥2
+  Next, we discuss an alternative method to identify the ﬁlters      6:      i ←i + 1
+from the measurements Y. By applying cross-correlation, as      7: until convergence criterion is reached
+in the proof of our main results (cf. Section VII), (15) can be
+rewritten as
+                                                                  In Step 2, we denote by I2Mx the identity matrix of size                                  x1
+           diag(y2)¯A  −diag(y1)¯A   x2 = 0.       (16)  2Mx × 2Mx. As was suggested in [25], a safe choice of the
+          |           {zB           }                       parameter β is    We initialize γ as the concatenation of                                    | {zγ }                            ∥B∥.
+                                                                 the outputs of the OMP algorithm to the inputs y1 and y2.
+In the sparse MBD framework, identifying the ﬁlters from the  The algorithm stops when the update in γ is not signiﬁcant in
+matrix B is equivalent to identifying a 2L-sparse null vector of   successive iterations. Speciﬁcally, we stop at the ith iteration
+B. The solution to the problem in (16) can be computed as the    if ∥γ(i) −γ(i−1)∥2 ≤10−3.
+
+=== PAGE 11 ===
+DRAFT;                                                                                                                                          11
+
+
+                                                             x2, whereas, the search reduces to two unknowns x1 and x2
+                                                                    in the latter case. Hence, we apply the exhaustive search to
+                                                                    identify the sparse ﬁlters from B and compare the results with
+                                                   Theorem 1.
+                                                                  In this experiment, the measurements are directly generated
+                                                     by using (15) upon setting Mx = 2L2, L = 4, and M = 2Mx.
+                                        We choose K as {1, 2, . . . , K}. We assume  that the  full                                                               Fourier measurements of the source consist of a sum of two
+                                                          Gaussian pulses with their amplitudes, means, and variances
+                                                            given by the  triplets: (4, M/2, 0.001) and (1, 2M/3, 0.01).
+                                        We choose the sum of Gaussian pulses to make sure that the
+Fig. 3. Phase transition for the identiﬁcation of L-sparse ﬁlters by NB-OMP,
+                                                             source spectrum is not ﬂat and non-vanishing. The experimentBDC, and TPI with known source (L = 4, Mx = 2L2); K ≥2L is
+necessary and K > 2L2 is sufﬁcient.                              can also be performed for any other choices of the source.
+                                                   The support and the coefﬁcients of the ﬁlters are generated
+                                                           randomly. Speciﬁcally, for each ﬁlter L non-zero values are
+                                                  1                                                          1      chosen uniformly  at random over the  set [Mx] and  their
+                                                            0.8                                                                    0.8     amplitudes are chosen uniformly at random between 1 and 2.
+                                                            0.6                                                                    0.6     Out of the available M Fourier measurements, we use K ≤M
+                                                            0.4                                                                    0.4      to identify the ﬁlters. If the ﬁlters are uniquely identiﬁable
+                                                     up to scaling and shift of the original ﬁlters, we consider
+                                                            0.2                                                                    0.2      the experiment to be successful or else we assume that the
+                                                  0                                                          0      experiment has failed for that particular K.
+              (a) NB-OMP                              (b) TPI                Figure 2 shows the success rate averaged over 200 indepen-
+                                                                               1                     dent experiments. Interestingly, we observe that 2L Fourier
+                                                         samples are necessary and sufﬁcient to identify the ﬁlters.
+                                                                                              0.8
+                                                                  2) TPI and BDC  to Solve Compressive MBD:  In  this
+                                                                                              0.6                       section, we compare the performance of the TPI and BDC
+                                                                                              0.4                    approaches  to solve compressive MBD. We compare  the
+                                                                                              0.2                   performance of these two algorithms to that by OMP in the
+                                                             non-blind case where the source s  is known. We call this
+                                                                               0
+                                                     method non-blind OMP (NB-OMP).
+                                          We use the same simulation settings as in the exhaus-
+                                      (c) BDC
+                                                                        tive search experiment. Let eX  is an estimate of X, then
+                                                                 the  ﬁlters are assumed to be identiﬁed  if the normalized
+Fig. 4.  Phase transition for the identiﬁcation of L sparse ﬁlters in the two-
+channel case: K > 2L is necessary and K > 2L2 is sufﬁcient.           mean-squared error (MSE) is less than −50 dB, that  is,  if
+                                                     20 log(∥X −eX∥2/∥X∥2) ≤−50. Figure 3 shows the average                                                              success rate computed over 200 independent realizations of the
+                                                     1                                                          1        sparse ﬁlters for L = 4. Performances of both TPI and BDC
+                                                               0.8                                                                    0.8      methods follow closely that of NB-OMP. We observe that the
+                                                               0.6                                                                    0.6       success rate gradually increases for K ≥2L up to K = 2L2.                                                               0.4                                                                    0.4       For K > 2L2, both BDC and TPI algorithms always identify
+                                                               0.2                                                                    0.2        the ﬁlters uniquely. The curve shows that 2L measurements
+                                                                 are necessary and 2L2 compressive MBD measurements are
+                                                     0                                                          0
+                                                                sufﬁcient to uniquely identify the sparse ﬁlters.
+    (a) Time-domain approach by Xu    (b) Frequency-domain compres-        Figure 4 shows the success rate for different values of
+    et al. [9]                             sive MBD
+                                                                    sparsity levels. We note that for L = 2, for some realizations
+                                                               of the ﬁlters, the algorithms are able to identify the ﬁlters for
+Fig. 5. Phase transition in the non-sparse FIR case: The success rate is plotted
+                               K = 2L. Except for the BDC method in the case of L > 8,as a function of the linear complexity Lc of the source and the number of
+measurements Ms −Mx. Compressive MBD identiﬁes the ﬁlter from at least  we observe that K > 2L2 measurements are sufﬁcient. The
+2Mx −1 measurements and is independent of Lc. The approach by Xu et   results also show that 2L measurements are necessary.
+al. [9] requires at least 3Mx measurements and Lc ≥2Mx −1.
+
+                                                          C. Comparison of Non-Sparse FIR MBD
+B. Comparison of Sparse MBD
+                                                               Next, we show simulation results for the non-sparse case.
+  1) Exhaustive Search for Compressive MBD: The exhaus-  As  the  present frequency-domain approach  to  derive  the
+tive search can be applied to either the measurement Y in   identiﬁability  results and the time-domain approach taken
+(15) or to B in (16) to identify the unknowns. In the former  by Xu et al. [9] are based on cross-correlation method we
+case, one needs to search over three unknowns, s, x1, and  compare these two techniques. In both approaches, the solution
+
+=== PAGE 12 ===
+DRAFT;                                                                                                                                          12
+
+
+is computed by solving a homogeneous equation. In our   Let Q(ejω0k) denote the sample of DTFT of
+frequency-domain settings, the solution is obtained by solving
+                                                                             q = x1                              (23)the homogeneous equation (16) via the optimization problem                             ∗ˆx2 −x2 ∗ˆx1
+(17) without imposing the sparsity assumption. The solution   at frequency kω0. Then by the convolution theorem and the
+is given as the eigenvector corresponding to the minimum   linearity of DTFT, the identity in (22) is equivalently rewritten
+eigenvalue of the matrix BHB. A similar technique is applied   as
+in Xu et al. by replacing the matrix B by a data matrix that
+                                                                          Q(ejω0k) = 0,  k                    (24)consists of time-domain samples (cf. equations (7) and (20)                                                               ∈K.
+in [9]). The identiﬁability results in the time-domain approach
+                                                              Let A               denote a Vandermonde matrix with itsstrongly depend on the linear complexity Lc of the source         ∈C|K|×2Mx−1                                                                 (k, m)th entry given as ej(k−1)(m−1)ω0. Then we can rewrite
+and on the length Mx of the source compared with the length                                                               (24) as
+of the ﬁlters Mx. We claim that our results do not depend on
+these parameters, but depend only on the number of frequency-                Aq = 0,                      (25)
+measurements and non-vanishing property of the source at
+                                                      where q = [q[0], q[1], . . . , q[2Mx                    Sincethose frequencies. To justify our claim, we compare the MSE                             −2]]T ∈C2Mx−1.
+                              A is a Vandermonde matrix constructed by 2Mx      distinctin estimating the ﬁlters by both approaches as a function of Lc                             −1                                                               generators                and     is a universal set, A hasand the number of measurements. To have a fair comparison,            {ejmω0}m∈[2Mx]   K                                                                            full spark. Therefore, if                   then (25) implieswe use the same number of measurements for each experiment                          |K| ≥|supp{q}|,                                           q = 0. Furthermore, since                              it follows thatin both the methods. In [9], the number of measurements                          supp{q} ⊂[2Mx],                                                           q = 0, that is,
+is given by Ms −Mx by assuming that Ms > Mx. In the
+proposed frequency-domain approach, we choose K as set of                     x1 ∗ˆx2 = x2 ∗ˆx1,                 (26)
+K = Ms −Mx consecutive integers. In the simulations, the  which implies via the z-transform thatsource sequence s of length Ms with a linear complexity Lc
+is generated using the following model:                                                                X1(z)/X2(z) = ˆX1(z)/ ˆX2(z).           (27)
+             Lc
+    s[m] = X cℓrmℓ    for m = 0, 1, . . . , Ms          (18)     For brevity, we introduce the following notation. For an FIR                                 −1.           sequence x, let    denote the set of the zeros of its z-transform            ℓ=1                                                       Zx                                                      X(z).
+In the simulations, both cℓand rℓas well as the ﬁlters are
+                                                              Since X1(z) and X2(z) do not share any common zeros,generated randomly.
+                                             we obtain  In both approaches, we assume that the ﬁlters are uniquely
+identiﬁable                if the normalized                 MSE                                           is less than                                −50 dB. Fig.                                                 5                      Zx1 ⊆Zˆx1.                    (28)shows the success                    rate over 200                             independent                                               realizations                                                       of the
+                                                        Hence, there is a polynomial H(z) that satisﬁessource and ﬁlers for Xu’s [9] and the proposed methods. We
+
+                                                = X1(z)H(z).observe that Xu’s method is successful if Lc ≥2Mx −1 and                      ˆX1(z)
+Ms ≥4Mx, whereas our approach identiﬁes the ﬁlters as long
+as K = Ms −Mx > 2Mx −1 and the results are independent  Then it follows from (27) that
+of the linear complexity of the source.                                            ˆX2(z) = X2(z)H(z).
+                VII. PROOF OF LEMMA 1                   Since ˆX1(z) and ˆX2(z) do not share any common zeros except
+                                                                         at z                                    = 0, we conclude                                                                                                that H(z)                                                    =                                                                           αzm0 for  Theorem          1               states                      that                                                    the                                                  unique                                       x1, x2) is                                                                                       some m0 ∈N                      ({S(ejω0k)}k∈K,                                                                                                              It remains                                                                                                  to show                                                                                                               that                                            α                                                           =solution         to             (9)             up to                       the                        fundamental ambiguity                                                     in                                                              (2).                                                      Let  and                                   ∈C \ {0}.                     ∥q∥0   |supp{q}| ≤
+                      ˆx1, ˆx2) be another solution to (9). Then there   2L2. Without any assumption on the support structure of the({  ˆS(ejω0k)}k∈K,exist       α̸ = 0 and m0 ∈Z such that                  Lﬁlters< √Mx,the supportwe haveof sequence q= depends only on L.HenceSince         S(ejω0k) = αejω0km0 ˆS(ejω0k),                 (19)                    ∥x1 ∗ˆx2∥0   ∥x2 ∗ˆx1∥0 ≤L2.                                 ∀k ∈K,                =                                     (29)and                                                                ∥q∥0   ∥x1 ∗ˆx2 −x2 ∗ˆx1∥0 ≤2L2.
+         Xn(z) = α−1z−m0 ˆXn(z),  n = 1, 2,       (20)     Necessity  part:  We show  that  if  |K| <  2L,  then
+                                                                  there  exist  distinct  solutions                  x1, x2) andif                                                                                     ({S(ejω0k)}k∈K,  |K| ≥2L2.                                                                                      ˆx1, ˆx2) to (9) such that (19) and (20) are not  Sufﬁciency part:  Since both                 x1, x2) and   ({ˆS(ejω0k)}k∈K,                             ({S(ejω0k)}k∈K,               satisﬁed for any α and n0. It sufﬁces to show that
+({ ˆS(ejω0k)}k∈K, ˆx1, ˆx2) are solutions to (9), we have                                                            q = x1        = 0,   but  Q(ejω0k) = 0,Yn(ejω0k) = S(ejω0k)Xn(ejω0k) = ˆS(ejω0k)ˆXn(ejω0k),  (21)          ∗ˆx2 −x2 ∗ˆx1̸                       ∀k ∈K.
+                                                            Before proceeding further, we deﬁne the following notations
+for   n =  1, 2, and k ∈  K. We have assumed  that   to prove the necessary part. Let ¯A denotes the     Mx              and                 are nonzero. Therefore it                                                  |K| ×{S(ejω0k)}k∈K    {ˆS(ejω0k)}k∈K                           matrix that consists of ﬁrst Mx columns of matrix A. Next,follows from (21) that
+                                                                               let x1, x2, ˆx1, and ˆx2 denote L-sparse vectors in CMx that
+ X1(ejω0k)ˆX2(ejω0k) = ˆX1(ejω0k)X2(ejω0k),  k ∈K.  (22)   are constructed by considering the ﬁrst Mx values of the
+
+=== PAGE 13 ===
+DRAFT;                                                                                                                                          13
+
+
+sequences x1, x2, ˆx1, ˆx2, respectively.                                [14] M. I. Gurelli and C. L. Nikias, “EVAM: An eigenvector-based algorithm
+  Since the matrix ¯A has full spark, there exist distinct pairs of          for multichannel blind deconvolution of input colored signals,” IEEE
+                                                                                   Tran. Signal Process., vol. 43, no. 1, pp. 134–149, 1995.
+L-sparse vectors (x1, ˆx1) and (x2, ˆx2) such that ¯Ax1 = ¯Aˆx1    [15] Y. Hua and M. Wax, “Strict identiﬁability of multiple FIR channels
+                                                                                    driven                                                                            by                                                                                    an                                                                             unknown                                                                                                                     arbitrary                                                                                                                 sequence,”                                                                                                  IEEE Tran. Signal Process.,and ¯Ax2 = ¯Aˆx2 as long as |K| < 2L. Hence, we have that            vol.                                                                                         44,                                                                                             no.                                                                                                            3,                                                                                                   pp. 756–759,                                                                                                     Mar.                                                                                                              1996.
+               ¯Ax1./¯Ax2 = ¯Aˆx1./¯Aˆx2,             (30)    [16] L. Tong and S. Perreau, “Multichannel blind identiﬁcation: From sub-
+                                                                               space to maximum likelihood methods,” Proc. IEEE, vol. 86, no. 10,
+which is equivalent to (22) or Q(ejω0k) = 0 for all k ∈K.    [17] pp.Y. C.1951–1968,Eldar, W. Oct.Liao,1998.and S. Tang, “Sensor calibration for of-the-grid
+                                                                                           spectral estimation,” Applied and Computational Harmonic Analysis,Since x1̸ = ˆx1 and x2̸ = ˆx2, we also have that correspondingsequence                          for                                      the problem                                                     in                                                        (9) does                 <                        2L                                                                        Aug.                                                                                    2018.                  q̸ = 0. Hence,                          |K|                                                                               [18]                                                                                    Y. Xia                                                                                and S. Li, “Identiﬁability of multichannel blind deconvolutionnot have unique                 solution                           for                                    all                                 the                                       ﬁlter                                            pairs (x1,                                                   x2).
+                                                                         and nonconvex regularization algorithm,” IEEE Trans. Signal Process.,
+                                                                                              vol. 66, no. 20, pp. 5299–5312, Oct. 2018.
+                   VIII. CONCLUSIONS                            [19] L. Balzano and R. Nowak, “Blind calibration of sensor networks,” in In
+                                                                                  Proc. Int. Sym. Info. Process. Sensor Net., Apr. 2007, pp. 79–88.
+  In  this  paper, we  derived  identiﬁability  conditions  for    [20] A. Cosse, “A note on the blind deconvolution of multiple sparse signals
+                                                                         from unknown subspaces,” Proc. SPIE, vol. 10394, 2017.
+multichannel blind deconvolution when the ﬁlters follow a    [21] L. Wang and Y. Chi, “Blind deconvolution from multiple sparse inputs,”
+fully deterministic sparsity model and the source has ﬁnite       IEEE Signal Processing Letters, vol. 23, no. 10, pp. 1384–1388, Oct.
+support. We showed that when there exist  at  least a pair        2016.
+                                                                               [22] Y. Li, K. Lee, and Y. Bresler, “Identiﬁability in bilinear inverse problems
+of two mutually coprime ﬁlters,  it is sufﬁcient to take 2L2         with applications to subspace or sparsity-constrained blind gain and
+Fourier measurements from those channels for the unique        phase calibration,” IEEE Trans. Info. Theory, vol. 63, no. 2, pp. 822–842,
+identiﬁcation of the ﬁlters. To identify the source uniquely, we         Feb. 2017.
+                                                                               [23] ——, “Optimal sample complexity for blind gain and phase calibration,”
+derive conditions on the number of measurements and number       IEEE Trans. Signal Process., vol. 64, no. 21, pp. 5549–5556, 2016.
+of channels in terms of the support of the source and sparsity    [24]  S. Ling and T. Strohmer, “Self-calibration and bilinear inverse problems
+of the ﬁlters. The results improve upon existing MBD results         via linear least squares,” SIAM J. Imaging Sci., vol. 11, no. 1, pp. 252–
+                                                                                 292, 2018.
+both in terms of the number of measurements and the number    [25] Y. Li, K. Lee, and Y. Bresler, “Blind gain and phase calibration via
+of channels required for unique identiﬁability and also apply         sparse spectral methods,” IEEE Trans. Info. Theory, vol. 65, no. 5, pp.
+to the non-sparse settings.                                              3097–3123, May 2019.
+                                                                               [26] K. Lee, F. Krahmer, and J. Romberg, “Spectral methods for passive
+                                                                               imaging: Non-asymptotic performance and robustness,” SIAM J. Imag.
+                                                                                                      Sci., vol. 11, no. 3, pp. 2110–2164, 2018.
+                 REFERENCES                                 [27] K. Lee, N. Tian, and J. Romberg, “Fast and guaranteed blind multichan-
+                                                                                       nel deconvolution under a bilinear system model,” IEEE Trans. Info.
+ [1] W. U. Bajwa, K. Gedalyahu, and Y. C. Eldar, “Identiﬁcation of paramet-         Theory, vol. 64, no. 7, pp. 4792–4818, Jul. 2018.
+       ric underspread linear systems and super-resolution radar,” IEEE Trans.    [28] A. Ahmed and L. Demanet, “Leveraging diversity and sparsity in blind
+     Signal Process., vol. 59, no. 6, pp. 2548–2561, Jun. 2011.                      deconvolution,” IEEE Trans. Info. Theory, vol. 64, no. 6, pp. 3975–4000,
+ [2] O. Bar-Ilan and Y. C. Eldar, “Sub-Nyquist radar via Doppler focusing,”         Jun. 2018.
+    IEEE Trans. Signal Process., vol. 62, no. 7, pp. 1796–1811, Apr. 2014.    [29] R.  Gribonval, G. Chardon, and  L. Daudet, “Blind  calibration  for
+ [3] K. Nose-Filho, A. K. Takahata, R. Lopes, and  J. M. T. Romano,        compressed sensing by convex optimization,” in Proc. IEEE Int. Conf.
+     “Improving sparse multichannel blind deconvolution with correlated         Acoust., Speech and Signal Process. (ICASSP), Mar. 2012, pp. 2713–
+     seismic data: Foundations and further results,” IEEE Signal Process.        2716.
+     Mag., vol. 35, no. 2, pp. 41–50, Mar. 2018.                               [30] Y. C. Eldar and G. Kutyniok, Compressed Sensing: Theory and Appli-
+ [4] C. Papayiannis, C. Evers, and P. A. Naylor, “Sparse parametric modeling          cations.  Cambridge University Press, 2012.
+      of the early part of acoustic impulse responses,” in proc. European Signal    [31]  T. Tao, “An uncertainty principle for cyclic groups of prime order,”
+     Process. Conf. (EUSIPCO), Aug. 2017, pp. 678–682.                       Math. Res. Lett., vol. 12, no. 1, pp. 121–127, 2005.
+ [5] G. Carter, “Time delay estimation for passive sonar signal processing,”    [32] M. Mishali and Y. C. Eldar, “Blind multiband signal reconstruction:
+    IEEE Trans. Acoust., Speech, Signal Process., vol. 29, no. 3, pp. 463–        Compressed sensing for analog signals,” IEEE Tran. Signal Process.,
+     470, Jun. 1981.                                                                       vol. 57, no. 3, pp. 993–1009, 2009.
+ [6] R. Tur, Y. C. Eldar, and Z. Friedman, “Innovation rate sampling of pulse    [33] B. Alexeev, J. Cahill, and D. G. Mixon, “Full spark frames,” J. Fourier
+     streams with application to ultrasound imaging,” IEEE Trans. Signal         Anal. and Appl., vol. 18, no. 6, pp. 1167–1194, Dec. 2012.
+      Process., vol. 59, no. 4, pp. 1827–1842, Apr. 2011.                       [34] H. Achanta, S. Biswas, B. N. Dasgupta, S. Dasgupta, M. Jacob, and
+ [7] N. Wagner, Y. C. Eldar, and Z. Friedman, “Compressed beamforming        R. Mudumbai, “The spark of Fourier matrices: Connections to vanishing
+      in ultrasound imaging,” IEEE Trans. Signal Process., vol. 60, no. 9, pp.       sums and coprimeness,” Digital Signal Process., vol. 61, pp. 76 – 85,
+     4643–4657, Sep. 2012.                                                                  Jul. 2016.
+ [8] A. Bhandari and T. Blu, “FRI sampling and time-varying pulses: Some    [35]  S. Mulleti and C. S. Seelamantula, “Paley–Wiener characterization
+     theory and four short stories,” in Proc. IEEE Int. Conf. Acoust., Speech         of kernels for ﬁnite-rate-of-innovation sampling,” IEEE Trans. Signal
+     and Signal Process. (ICASSP), Mar. 2017, pp. 3804–3808.                      Process., vol. 65, no. 22, pp. 5860–5872, Nov. 2017.
+ [9] G. Xu, H. Liu, L. Tong, and T. Kailath, “A least-squares approach    [36] R. H. Walden, “Performance trends for analog to digital converters,”
+      to blind channel identiﬁcation,” IEEE Trans. Signal Process., vol. 43,       IEEE Comm. Mag., vol. 37, no. 2, pp. 96–101, Feb. 1999.
+     no. 12, pp. 2982–2993, Dec. 1995.                                       [37]  S. Gleichman and Y. C. Eldar, “Blind compressed sensing,” IEEE Trans.
+[10] Y. C. Eldar, Sampling Theory: Beyond Bandlimited Systems. Cambridge          Info. Theory, vol. 57, no. 10, pp. 6958–6975, Oct. 2011.
+     University Press, 2015.                                                   [38] M. Aharon, M. Elad, and A. Bruckstein, “K-SVD: An algorithm for
+[11] L. Tong, G. Xu, B. Hassibi, and T. Kailath, “Blind channel identiﬁcation         designing overcomplete dictionaries for sparse representation,” IEEE
+     based on second-order statistics: A frequency-domain approach,” IEEE         Tran. Signal Process., vol. 54, no. 11, pp. 4311–4322, Nov. 2006.
+     Tran. Info. Theory, vol. 41, no. 1, pp. 329–334, Jan. 1995.                [39] Y. C. Pati, R. Rezaiifar, and P. S. Krishnaprasad, “Orthogonal matching
+[12] L. Tong, G. Xu, and T. Kailath, “Blind identiﬁcation and equalization          pursuit: Recursive function approximation with applications to wavelet
+     based on second-order statistics: A time domain approach,” IEEE Tran.         decomposition,” in Proceedings of 27th Asilomar conference on signals,
+      Info. Theory, vol. 40, no. 2, pp. 340–349, Mar. 1994.                         systems and computers.  IEEE, 1993, pp. 40–44.
+[13] E. Moulines, P. Duhamel, J. F. Cardoso, and S. Mayrargue, “Subspace    [40] X.-T. Yuan and T. Zhang, “Truncated power method for sparse eigen-
+     methods for the blind identiﬁcation of multichannel FIR ﬁlters,” IEEE         value problems,” J. Mach. Learn. Res., vol. 14, no. 1, pp. 899–925, Apr.
+     Tran. Signal Process., vol. 43, no. 2, pp. 516–525, Feb. 1995.                 2013.

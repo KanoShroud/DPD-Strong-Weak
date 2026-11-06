@@ -1,0 +1,1003 @@
+
+=== PDF PAGE 1 ===
+                                                                                            I. INTRODUCTION
+
+                                                              Distinguishing the direction of arrival (DOA) of each
+Joint Localization and Source       incidentprocessing,signaland isa largea keynumberresearchof algorithmstopic in arrayhavesignalbeen
+Association Sparse Bayesian        beamforming-basedproposed [1], [2], [3],methods[4], [5],[11],[6], [12],[7], [8],[13][9],are [10].the com-The
+Learning Under Multipath          monlythey cannotutilizedprovideapproacheshigh forspatialDOAresolutionestimation,estimationwhereas
+Propagation                                            results.Subspace-based methods, including the multiple signal
+                                                             classiﬁcation (MUSIC) [14] and the estimation of signal pa-
+                                                         rameters using rotational invariance techniques [15], [16],
+                                                            are the most popular high-resolution methods widely used
+                                                               for DOA estimation. These methods require the prior in-
+TAO TANG                                               formation on the number of signals, and their performance
+CHENGZHU YANG                                             will degrade when the estimation of source number is in-
+YUCHEN JIAO                                                accurate. To deal with this problem, several methods [17],
+DESHENG CHEN                                            [18] are proposed to enhance the robustness to the number
+LIJUN XU                                                  of sources. Besides, the ambient noise elimination MUSIC
+Beijing Institute of Technology, Beijing, China                      algorithm [19] is proposed to address the inappropriate
+                                                      assumption of scaled identity matrix for ambient noise
+                                                         covariance in the underwater scenarios, thereby improv-
+                                                          ing the DOA estimation performance. In the multipath
+   This article focuses on the topic of joint direction of arrival (DOA),
+                                                         propagation environment, the conventional subspace-basedsource association, and attenuation coefﬁcient estimation under mul-
+tipath environment. Most existing methods adopt the sequential three-  methods may suffer from rank deﬁciency when processing
+phase estimation, resulting in the nuisance dependency between the   coherent signals, making them unable to work properly.
+estimation accuracy of the current phase and the previous phase. Be-  To accurately estimate DOAs in multipath environment,
+sides, they also require some accurate prior information, including the   the decorrelation operation enables subspace methods to
+accurateDOAinitialization,andthenumberofincoherentsourcesand
+                                                           estimate DOAs of coherent signals. The spatial smoothingspatial paths, which is unrealistic in practice. To solve this problem,
+the joint localization and source association sparse Bayesian learning   (SS) [20], [21] decomposes the uniform linear array (ULA)
+(JLSA-SBL) algorithm is proposed to integrate the source association  and averaging the covariance matrix of each overlapped
+process, DOA, and attenuation coefﬁcient estimation into a uniﬁed   subarray, thereby realizing decorrelation. The SS method is
+parameter estimation framework. The proposed method exploits the   effective and can be easily integrated into subspace meth-
+underlying sparsity and coherent structure of the incident signals
+                                                            ods. However, the SS method is only applicable to ULA andto achieve more accurate joint parameter estimation. Compared to
+the previous methods, JLSA-SBL can directly estimate the latent   reduces the degrees of freedom, which limits its practical
+multipath propagation parameters even in the absence of prior in-   application.
+formation. Besides, the JLSA-SBL also has superior performance in     To overcome the aforementioned challenges, sparse
+distinguishing the closely spaced multipath signals belonging to differ-   representation methods, which have received a lot of at-
+ent sources. Numerical simulation experiments have been performed
+                                                              tention in recent years due to the superior characteris-to demonstrate the superior performance of the proposed method.
+                                                                       tics of high resolution and robustness to noise, transform
+Received 31 March 2024; revised 1 August 2024; accepted 25 August   the DOA estimation problem into sparse reconstruction
+2024. Date of publication 19 September 2024; date of current version 11  problem according to the inherent spatial sparsity of the
+February 2025.                                                 incident signals. Matching pursuit (MP) method [22], or-
+DOI. No. 10.1109/TAES.2024.3454564                           thogonal MP method [23], l1-singular value decomposi-
+                                                               tion (l1-SVD) method [24], and iterative soft thresholding
+Refereeing of this contribution was handled by H. Mir.
+                                                 method [25] can be used to solve the sparse reconstruction
+This work was supported in part by the National Key Research and   optimization problem. Different from the signal modeling
+Development Program of China under Grant 2022YFC2808002 and in  methods based on optimization theory mentioned above,
+part by the National Natural Science Foundation of China under Grant
+                                                            the sparse Bayesian learning (SBL) [26], [27] method
+62201046, Grant 62301037, Grant 62192711, and Grant 62192712.
+                                                     can assign different priors to the hidden parameters of
+Authors’ address: Tao Tang, Chengzhu Yang, Yuchen Jiao, Desheng Chen,   the constructed signal model and obtain the optimal so-
+and Lijun Xu are with the School of Information and Electronics, Beijing
+                                                               lution through the probabilistic inference methods, such as
+Institute of Technology, Beijing 100081, China, E-mail: (3220225119@
+bit.edu.cn;  ycz@bit.edu.cn;  jiaoyc23@bit.edu.cn;  6120210290@bit.   expectation–maximization algorithm [28] and variational
+edu.cn; 6120210061@bit.edu.cn). (Corresponding author: Chengzhu   Bayesian inference (VBI) algorithm [29]. The off-grid
+Yang).                                                      sparse Bayesian inference (OGSBI) [30] algorithm applies
+                                                            the SBL framework to the problem of DOA estimation
+0018-9251 © 2024 IEEE                                    based on the off-grid modeling, and performs better than the
+
+
+
+1104                    IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS  VOL. 61, NO. 1  FEBRUARY 2025
+
+       Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:15 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 2 ===
+l1-SVDmethod.Sincethen,theSBL-basedDOAestimation   estimation, the aforementioned framework adopts the three-
+framework has received widespread attention, and a large   phase framework, which sequentially realizes DOA initial-
+number of related algorithms have been proposed [31], [32],   ization, source association, and attenuation coefﬁcient esti-
+[33], [34], [35], [36], [37], [38]. Compared to the con-   mation. However, this framework inevitably introduces the
+ventional subspace methods, sparse representation methods   nuisance dependency between the estimation accuracy of
+are robust to the coherence of the target signals without   the current phase and the previous phase, thereby resulting
+additional decorrelation operation and the prior information   in overall performance degradation of the framework.
+about the number of incoherent sources. Besides, compared     To deal with the problems mentioned above, a novel
+to the SS method, sparse representation methods maintain  SBL-based joint parameter estimation method, namely,
+the degrees of freedom and can be easily extended to ar-   joint localization and source association sparse Bayesian
+bitrary array geometry. These superior characteristics indi-   learning (JLSA-SBL), is proposed to address the topic of
+cate that the sparse representation methods can be applied   joint DOA, source association, and attenuation coefﬁcient
+to accurate DOA estimation problem in multipath propa-   estimation without any multipath propagation prior infor-
+gation environment. The mean ﬁeld variational Bayesian   mation. Speciﬁcally, we propose a sparse signal model
+expectation–maximization (MFVBEM) algorithm [39] is  and its probabilistic representation for array received sig-
+a potential DOA estimation method based on SBL for   nals under the multipath propagation environment. This
+coherent multipath signals. However, this method only con-   signal model fully takes into account the scenario with-
+siders single source and its associated multipath signals.   out any prior information and utilizes two sparse matrix
+Therefore, the MFVBEM algorithm cannot be applied to   (one contains the latent multipath information, including
+the generalized multipath propagation environment with   the DOA, source association, and attenuation coefﬁcient
+multiple incoherent sources, which limits its applications   information, and another one presents the signal form of
+in real scenarios. In addition, a large number of signals,   the incoherent sources) to describe the latent coherent
+including the direct signals of multiple incoherent sources   structure between the incoherent sources and their asso-
+and their associated multipath signals, will impinge on the   ciated multipath signals. Furthermore, we derive the itera-
+array simultaneously. To identify and locate the incoherent   tive parameter estimation algorithm to obtain the optimal
+sources, source association operation and attenuation coef-   solution of the signal model. Compared to the previous
+ﬁcient estimation are required.                           methods, JLSA-SBL integrates the source association op-
+   For source association, the method in [40] measures   eration, DOA, and attenuation coefﬁcient estimation into a
+the coherence of the detected signals one by one via the   uniﬁedalgorithmframework,insteadofusingtheaforemen-
+threshold method based on the pre-estimated DOA ini-   tioned framework consisting in the combination of several
+tialization, thereby realizing the source association. Xie   approaches, thereby achieving more accurate parameter
+et al. [41] presented a rank reduction property to measure   estimation. Besides, the JLSA-SBL algorithm can adapt
+the coherence between incident signals, and realized the   well to the scenario that the prior information of multipath
+source association operation. The source association meth-   propagation is completely unknown. This superior charac-
+ods in [40] and [41] assume that all incident signals are   teristic indicates the potential of the JLSA-SBL in practical
+successfully detected by existing DOA estimation methods.   applications.
+In comparison, an iterative method with the constraints     The rest of this article is organized as follows. Sec-
+of sparsity and semiunitary [42] is proposed to obtain the   tion II formulates the mathematical model of the multipath
+DOA initialization and hence the source association results.   signals. The proposed JLSA-SBL approach is described in
+However, these source association methods require prior   Section III, including the probabilistic model of the multi-
+information about the number of both incoherent sources   path signals, the inference of the hidden parameters via VBI,
+and all spatial paths, which is difﬁcult to obtain in practice.   the off-grid implementation, and the uniqueness analysis
+An effective solution is to introduce additional estimation   of the parameter identiﬁability. Section IV describes the
+process to provide the required prior information. As an   numerical simulation experiments, including the experi-
+instance, the minimum description length (MDL) method   mental results and the corresponding discussions. Finally,
+and the Akaike information criterion (AIC) method [43]   Section V concludes this article.
+can appropriately estimate the number of both incoherent     The meanings of the notations are as follows. For the
+sources and spatial paths, and the OGSBI method [30] can   matrix X, the X−1, XH, X⊤, and X∗, respectively, indicate
+be applied to obtain DOA initialization. The main drawback   the inverse, conjugate transpose, transpose, and conjugate.
+of this framework, consisting in combination of several  The ith row, the ith column, and the (i, j)th element of
+approaches, is that the probability of success source associa-  X are denoted by Xi·, X·i, and X(i, j). The tr(X) and
+tion will limited by the accuracy of the additional estimation  ∥X∥F represent the trace and the F-norm, respectively. For
+methods and degrade signiﬁcantly in the low signal-to-noise   the vector x, the xi and ∥x∥2 denote the ith element and
+ratio (SNR) scenario. Based on the results of the source   the l2-norm, respectively. Besides, diag(x) is the diagonal
+association, the authors in [41], [42], and [44] address the   operation, and outputs a diagonal matrix whose diagonal
+attenuation coefﬁcient estimation problem by analyzing   elements consist of x. On the contrary, diag(X) represents
+the multipath signals contained in the same set. Further-   the inverse-diagonal operation when the input becomes a
+more, to realize the joint DOA and multipath parameter   matrix, and outputs a column vector containing the diagonal
+
+
+TANG ET AL.: JOINT LOCALIZATION AND SOURCE ASSOCIATION SPARSE BAYESIAN LEARNING                           1105
+
+    Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:15 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 3 ===
+elements of X. Finally, Re(X) extracts the real part of the
+complex matrix X, and ⊙is the Hadamard product.
+
+II. PROBLEM FORMULATION
+
+A.  Signal Modeling for Multipath Propagation
+
+  We consider the general multipath propagation with
+arbitrary number of incoherent sources. Assume that K
+far-ﬁeld incoherent sources impinge on the array with M
+elements from multiple paths. Denote sk(t) as the direct
+signal emitted by the kth incoherent source. The multipath
+signals associated with the kth incoherent source can be
+denoted by sk1(t), sk2(t), . . . , skPk(t), and the corresponding
+DOAs are θk1, θk2, . . . , θkPk. The Pk is the number of the
+multipath signals from the kth incoherent source. Under the
+assumption of narrowband signals with centering frequency
+f0, the relationship between the multipath signals and their      Fig. 1.  Visualization of multipath signal model (incoherent source
+                                                              number K = 2, the number of the multipath signals related to the ﬁrst
+related incoherent source can be formulated by
+                                                                        source is P1 = 2, and the number of the multipath signals related to the
+  ski(t) = akisk (t −τki) = akisk(t)e−j2π f0τki, i = 1, . . ., Pk      second source is P2 = 1). The green column in A indicates the direction
+                                                                               in which two multipath signals belonging to different sources are located
+                                                         (1)
+                                                                                                                 together.
+where aki and τki are the amplitude attenuation coefﬁcient
+and the delay of the ith multipath signal emitted by the
+kth source, respectively. For simplicity, (1) is equivalently  where s(t)=[s1(t), s2(t), . . . , sK(t)]⊤∈CK×1  consists of
+rewritten as                              K  incoherent  sources,  and Z = [z1, . . . , zk, . . . , zK] ∈
+                                            CN×K  is the attenuation coefﬁcient matrix, where zk =                 ski(t) = zkisk(t), i = 1, . . . , Pk            (2)
+                                                                     [zk1, zk2, . . . , zkN]⊤∈CN×1 indicates the attenuation coef-
+where zki = akie−j2π f0τki is the corresponding complex at-   ﬁcients of the kth source impinging on the array along N
+tenuation coefﬁcient. Therefore, the array received signal is   potential paths. Note that the number of incoherent sources
+represented as                            K is the crucial prior information required in the most of
+                    K                                    the existing approaches, which is not readily available in
+               y(t) =    Akzksk(t) + n(t).             (3)   practice. Therefore, we extend the signal model shown
+                      k=1                                     in (5) to the generalized situation where the number of
+                                                          incoherent sources is unknown. To accomplish this goal,
+The Ak = [a(θk0), a(θk1), . . . , a(θkPk )] indicates the array
+                                                    an upper bound Ku, where Ku ≥K, is introduced in ourmanifold matrix corresponding to the kth source, where
+                                                              signal model, and (5) can be extended to the followinga(θki) ∈CM×1 denotes the steering vector of the multipath
+                                                           sparse representation:signal from θki. The zk = [1, zk1, zk2, . . . , zkPk]⊤represents
+the attenuation coefﬁcient vector of the kth source prop-                                                                                 y(t) = AZs(t) + n(t).                (6)
+agating along different paths. (The DOA and attenuation
+coefﬁcient of the direct signal emitted by the kth source are   Sparse  vector   s(t) = [s1(t), s2(t), . . . , sKu(t)]⊤∈CKu×1
+set to θk0 and 1, respectively.) In addition, n(t) ∈CM×1 is   contains K nonzero elements, which corresponds to each
+the additive noise, which is generally assumed to obey the   element of s(t). And Z = [z1, . . . , zk, . . . , zKu] ∈CN×Ku is
+zero-mean complex Gaussian distribution with the covari-   sparse matrix with Kall =   Kk=1 (Pk + 1) nonzero elements.
+ance matrix σ 2IM, where σ 2 denotes the noise power.      The multiple snapshots version of signal model can be
+                                                        expressed as
+B.  Overcomplete Representation
+                                               Y = AZS + N.                   (7)  We exploit the underlying spatial sparse characteris-
+tics and coherent structure of the target signals to per-                                                              Fig. 1 shows the visualization of the signal model expressed
+form accurate DOA, attenuation coefﬁcient estimation, and                                                               in (7). The T denotes the number of snapshots. Two inco-
+source association operation. We deﬁne the discrete grid as                                                           herent sources (K = 2) with Ku = 5 are considered in this
+θ = [θ1, θ2, . . . , θN], and the number of grid points can be                                                                   situation. The incoherent source matrix S is the row-sparse
+denoted by N. Thus, the overcomplete dictionary containing                                                         matrix with K nonzero rows corresponding to K incoherent
+array steering vectors is established as below:                                                             sources. Matrix Z is the dot-sparse matrix with only K
+    A θ = a θ1  , . . . , a θn  , . . . , a θN    .     (4)   activated columns. Each column contains the direction,
+                                                         source association, and attenuation coefﬁcient information
+Therefore, the signal model can be extended to the over-
+                                                           of an incoherent source set (including the direct signal of
+complete representation
+                                                         source and its associated multipath signals). Through the
+                   y(t) = AZ s(t) + n(t)                (5)  above analysis, matrix Z contains the complete information
+
+
+1106                    IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS  VOL. 61, NO. 1  FEBRUARY 2025
+
+       Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:15 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 4 ===
+of the multipath propagation. Thus, the estimation process  complex Gaussian-gamma prior to promote the sparse char-
+of matrix Z is the key step of the proposed JLSA-SBL.       acteristic of Z
+   Through the modeling method mentioned above, the                 N  Ku              N  Ku
+upper bound Ku is the only required coarse parameter. This   P (Z |  Z) =     P  znk  αznk =    CN  0, α−1znk
+signal modeling method can adapt to the situation where the                  n=1 k=1              n=1 k=1
+number of incoherent sources is unknown. Theoretically,                                                       (12)
+Ku can be initialized to a large value while increasing the                 N  Ku           N  Ku
+computationalcomplexity.Thus,computationalcomplexity                                           P (  Z) =     P  αznk =      Gamma(e, h)
+needs to be considered when initializing Ku.                                n=1 k=1           n=1 k=1
+                                                                                                               (13)
+III.  JOINT LOCALIZATION AND SOURCE ASSOCIA-
+                                                  where znk indicates the (n, k)th element of Z. The   Z is   TION SBL
+                                                            the parameter matrix composed of the precision αznk, n =
+A.  Probabilistic Model                                                            1, . . . , N, k = 1, . . . , Ku. This hierarchical prior distribu-
+   This section introduces the probabilistic model of array   tion induces the student’s t marginal prior for znk, which
+received signals. In order to infer the hidden parameters of   can be regarded as the sparsity-promoting prior due to its
+the signal model more easily, we introduce an intermediate  heavy tails [45].
+parameter X to reduce the coupling relationship between      2) Prior Selection of S:  Row-sparse matrix S ∈CKu×T
+the hidden parameters. Thus, the signal model expressed in   contains K  nonzero  rows,  representing K  incoherent
+(7) can be decomposed into the following two steps:         sources. We assume that each row of S is independent
+                                                           of each other, and the following complex Gaussian prior
+             Y = AX + N                    (8)   distribution is assigned to S:
+             X = ZS + E                     (9)                     Ku                   Ku
+                                          P (S |  S ) =   P  Sk·  αsk =  CN  0, α−1sk IT    (14)where E is the ﬁtting error between X and ZS. We assume
+                                                                            k=1               k=1
+that the additive noise N and the ﬁtting error E follow the
+complex zero mean Gaussian distribution with precision α0   where   S =diag(αs), and αs =[αs1, · · · , αsk, · · · , αsKu ]⊤in-
+and αx, respectively. Thus, the probabilistic representation   dicates the precision vector, following the multivariate
+of (8) and (9) are formulated as                    gamma prior as:
+
+                          T                                                             Ku              Ku
+      P (Y |X, α0 ) =   P (y(t) |x(t), α0 )                P (αs) =   P  αsk =   Gamma(c, d).    (15)
+                                                                              k=1           k=1                          t=1
+                          T                                  Precision vector αs controls the row-sparse characteristic of
+            =  CN  Ax(t), α−10 IM       (10)   the matrix S. Speciﬁcally, when the kth element of the αs,
+                          t=1                              denoted by αsk, has a small value, parameter Sk·(the kth row
+                      N                                 of S) is activated to represent an incoherent source. Ideally,
+    P (X |Z, S, αx ) =   P (Xn· |Zn·, S, αx )              only K rows are activated, corresponding to K incoherent
+                        n=1                                 sources, while the other rows of S become zero vectors.
+                      N
+            =  CN  Zn·S, α−1x  IT         (11)   B.  Parameter Inference for Probabilistic Model
+                        n=1                                      Fig. 2 illustrates the probabilistic graph model of the
+where IM and IT are the identity matrices with dimension  JLSA-SBL, and  = {X, Z, S, α0, αx,  S,  Z} is the pa-
+M and T , respectively. Precision αx and α0 are assumed to   rameter set to be estimated. As illustrated in Fig. 2, the joint
+obey the Gamma prior: P(αx) = Gamma(i, j) and P(α0) =   probability density function (PDF) can be written as
+Gamma(a, b). It should be noted that the spatial sparsity                                         P (Y,   ) = P (Y |X, α0) P (X |Z, S, αx) P (α0) P (αx)
+of X is expected to be induced by the mean ZS, thereby
+                                                                             Ku                   N
+implementing the source association and attenuation co-
+                                 ×    P  Sk·  αsk P  αsk    P  znk  αznk P  αznk      .efﬁcient estimation for the incident signals. Therefore, it is
+appropriate to assume that the ﬁtting error E shares the same        k=1                     n=1
+                                                                                                               (16)
+precision parameter αx across the discrete grid θ, and will
+not destroy the spatial sparsity of X.                            In  this  article, VBI  method  [29]  is  applied  to
+    1) Prior Selection of Z:  Matrix Z ∈CN×Ku contains   obtain  the  optimal  solutions  of  the  parameters  =
+the complete information of multipath propagation envi-  {X, Z, S, α0, αx,  S,  Z}. VBI method estimates an ap-
+ronment, including the DOA, attenuation coefﬁcient, and   proximate variational posterior of parameters     , denoted
+source association information of the incoherent sources   as q(   ), by minimizing the Kullback–Leibler divergence
+propagating along multiple paths. The elements of Z are  between q(   ) and the real posterior distribution P(  |Y).
+assumed to be independent of each other, and we utilize  Assuming that the parameter set    can be decomposed
+
+
+TANG ET AL.: JOINT LOCALIZATION AND SOURCE ASSOCIATION SPARSE BAYESIAN LEARNING                           1107
+
+    Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:15 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 5 ===
+                                                               2) Update of αx:  For q(αx)
+
+                                                                    ln q (αx) ∝⟨ln P (Y, S,  S,  Z, αx, α0, Z, X)⟩q(  /αx)
+                                                      ∝⟨ln P (X |Z, S , αx) P (αx)⟩q(Z)q(S)q(X).
+
+                                                             Substituting (11) and the Gamma prior of αx into the above
+                                                            equation, and neglecting the irrelevant terms, we have
+
+                                                                   ln q (αx) ∝(NT + i −1) ln αx
+
+                                                               N
+                                   −      ∥Xn· −Zn·S∥22 q(Zn·)q(S)q(Xn·) + j  αx.  (22)
+                                                                       n=1
+
+                                                      Equation (22) shows that the optimal variational posterior
+                                                           of αx obeys the Gamma distribution. Thus, the expectation
+                                                           of αx can be calculated by
+
+                                                     NT + i
+                                                            αx =   N                                      (23)
+                                                                         n=1 ∥Xn· −Zn·S∥22 q(S)q(Xn·)q(Zn·) + j
+                Fig. 2.  Graph model of the JLSA-SBL.             where ∥Xn· −Zn·S∥22 q(Zn·)q(S)q(Xn·) represents the expecta-
+                                                               tion of ∥Xn· −Zn·S∥22 with respect to q(Zn·), q(S), and
+into J groups, the approximate                               posterior distribution can be   q(Xn·). The expression of  ∥Xn· −Zn·S∥22 q(Zn·)q(S)q(Xn·) is                               J
+expressed as q(   ) =    j=1 qj(   j) based on the mean-ﬁeld  shown as below, and the detailed derivation process is
+theory. According to [29], the optimal solution of q(   j) is   presented in Appendix A:
+shown as below:
+                                                                                           2
+                                                               Xn· −Zn·S             ln q∗        j ∝⟨ln P (Y,   )⟩q(  /  j)        (17)                      2 q(Zn·)q(S)q(Xn·)
+where q(  /   j) represents the approximate posterior dis-   = Uxn·UHxn· + T  x(n, n) −Uxn·UHS ZHn· − Zn·USUHxn·
+                                        ⎡
+tribution of parameter set    without     j, and ⟨·⟩q(  /    j )            Ku
+represents the expectation with respect to q(  /   j).                                   +  ⎣ znk zHnk +  Z(n, k)  USk·UHSk· + T  S(k, k)
+  We use (17) to derive the optimal distribution and infer
+                                                                    k=1
+each parameters. The updating process of JLSA-SBL is as                 ⎤
+follows.
+    1) Update of X:  According to (17), we have the fol-    +znkUSk·      ( znlUSl·)H ⎦
+lowing expression:                                                                                   l̸=k
+                                                                                                               (24)
+    ln q (X) ∝⟨ln P (Y, S,  S,  Z, αx, α0, Z, X)⟩q(  /X)      where Uxn· and USn· correspond to the nth row of the matri-
+    ∝⟨ln P (Y |X, α0 ) P (X |Z, S , αx)⟩q(Z)q(S)q(α0)q(αx).      ces Ux and US, respectively. The znk and  Z(n, k) denote the
+                                                           expectation and variance of znk, respectively. The   S(k, k)
+Substituting (10) and (11) into the above equation, and
+                                                        corresponds to the variance of the parameter Sk·, and its
+neglecting the irrelevant terms, yields
+                                                        speciﬁc expression will be derived subsequently.
+                  T                                             3) Update of Sk·:  According to (17), the variational
+    ln q (x(t)) ∝   −α0 ∥y(t) −Ax(t)∥22                   posterior q(Sk·) is given by
+                  t=1
+                                                                    ln q (Sk·) ∝⟨ln P (Y, S,  S,  Z, αx, α0, Z, X)⟩q(  /Sk·)   − αx  xH(t)x(t) −xH(t) Zus(t) −uHs (t) ZHx(t)    .
+                                                    (18)    ∝⟨ln P (X |Z, S, αx) P (S |  S )⟩q(Z)q(  S)q(X)q(αx)q(S−k·).
+Equation (18) indicates that x(t) follows the complex Gaus-
+                                                           In this section, we only focus on the derivation process
+sian distribution with the following covariance matrix and
+                                                           of Sk·, which can be easily extended to other rows of S.
+mean:
+                                                             Substituting (11) and (14) into the above equation, we have
+                                  −1
+                    x = α0AHA + αxIN                  (19)               N
+            ux(t) =   x α0AHy(t) + αx Zus(t)        (20)     ln q (Sk·) ∝   − αx ∥Xn·−Zn·S∥22 q(Zn·)q(Xn·)q(S−k·)
+                                                                         n=1
+where α0, αx, Z, and us(t) are the expectation of α0, αx, Z,
+                                      − αskSk·SHk·                             (25)and s(t), and their mathematical derivations will be given
+                                                                                                                       is the expectation oflater. We introduce parameters Ux = [ux(1), . . . , ux(T )]  where ∥Xn· −Zn·S∥22 q(Zn·)q(Xn·)q(S−k·)
+and US = [us(1), . . . , us(T )], and the multisnapshots ex-                                                        ∥Xn· −Zn·S∥22 with respect to the approximate posteriorpression of (20) can be rewritten as
+                                                                distribution q(Zn·), q(Xn·), and q(S−k·), where q(S−k·) =
+           Ux =   x α0AHY + αx ZUS  .          (21)        l̸=k q(Sl·). The expression of (25) is shown as below, and
+
+
+1108                    IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS  VOL. 61, NO. 1  FEBRUARY 2025
+
+       Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:15 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 6 ===
+the detailed derivation process is presented in Appendix B:   of q(Z) is given by
+                                               ⎧
+                  ⎧                            ⎨
+                          N  ⎨                           ln q (znk) ∝−αznkzHnkznk + αx ⎩Uxn·(znkUSk·)H
+    ln q (Sk·) ∝−αskSk·SHk· +    αx ⎩Uxn·( znkSk·)H
+                             n=1
+            ⎛     ⎞                      −znkzHnk USk·UHSk· + T  S(k, k) + (znkUSk·) UHxn·
+                                 ⎛     ⎞        ⎛     ⎞H⎫
+   + ( znkSk·) UHxn· − ⎝    znlUSl· ⎠ zHnkSHk·                                  ⎬
+                                     l̸=k                                − ⎝    znlUSl· ⎠zHnkUHSk·−znkUSk· ⎝    znlUSl·⎠ ⎭. (30)
+     ⎛     ⎞H             ⎫                    l̸=k                                          l̸=k
+                          ⎬
+  −znkSk·⎝    znlUSl· ⎠ − znk zHnk+  z(n, k) Sk·SHk·         In the derivation of (30), we assume that the elements                                  ⎭.      of matrix Z are independent with each other, thereby                  l̸=k
+                                                    (26)   znkzHnl q(znl ) = znk zHnl, when  k̸ = l. Equation (30) indicates
+In the derivation of (26), we assume that each row of matrix   that znk follows the complex Gaussian distribution with the
+S is independent of each other. Thus, we have Sk·SHl· q(Sl·) =   following covariance and mean:
+Sk·UHSl· (when k̸ = l), and the related approximate posterior                                                                   z(n, k) =  αx USk·UHSk· + T  S(k, k) + αznk −1     (31)
+covariance matrix   S becomes a diagonal matrix. In fact,             ⎡ ⎛    ⎛     ⎞ ⎞  ⎤
+each row of S represents a potential incoherent source in
+the proposed signal model. Therefore, the assumption of          znk =   z(n, k) ⎣αx ⎝Uxn· − ⎝    znlUSl· ⎠ ⎠UHSk· ⎦.
+the row independence is reasonable. Equation (26) indicates                                                          l̸=k
+that q(Sk·) follows the complex Gaussian distribution with                                                       (32)
+the covariance  S(k, k):
+                                                               5) Update of α0:  Similar as the inference process of
+                                                            other parameters, the derivation of q(α0) can be organized
+         (               N                        )−1          as
+     S(k, k) =      αx  znk zHnk +   z(n, k) + αsk       (27)
+                                                                    ln q (α0) ∝⟨ln P (Y, S,  S,  Z, αx, α0, Z, X)⟩q(  /α0)                n=1
+                                                      ∝⟨ln P (Y |X, α0 ) P (α0)⟩q(X).
+and the mean of Sk· is given by                                                             Substituting (10) and the Gamma prior of α0 into the above
+                                                            equation. Then, we can obtain the following expression
+         ⎡⎛   ⎛     ⎞⎞  ⎤
+         N                                                   related to q(α0):
+   USk· =    αx ⎣⎝Uxn·− ⎝    znlUSl· ⎠⎠ zHnk ⎦ S(k, k).         ln q (α0) ∝(MT + a −1) ln α0
+          n=1                      l̸=k
+                                                    (28)         −α0 ∥Y −AUx∥2F + T tr AHA  x  −bα0.
+    4) Update of znk:  According to (17), we have                                                               (33)
+                                                      Equation (33) shows that the approximate posterior q(α0)
+                                                          follows the Gamma distribution, and the update rule of α0
+   ln q (znk)∝⟨ln P (Y, S,  S,  Z, αx, α0, Z, X)⟩q(  /znk)        is given by the following:
+  ∝ ln P (X |Z, S, αx) P Z |   z                                          q(S)q(X)q(αx)q(  z)q(Z−nk).                  MT + a
+                                                              α0 =                                       (34)                                                   ∥Y −AUx∥2F + T tr AHA  x + b.
+    In this section, we only focus on the solution of znk,
+                                                               6) Update of αs:  For q(αs), we havewhich can be easily extended to other elements of Z. Substi-
+tuting (11) and (12) into the above equation, and neglecting      ln q (αs) ∝⟨ln P (Y, S,  S,  Z, αx, α0, Z, X)⟩q(  /αs)
+the irrelevant terms, we have
+                                                      ∝⟨ln P (S |αs ) P (αs)⟩q(S).
+
+              N *                         +      Substituting (14) and (15) into the above equation yields
+   ln q (znk) ∝   −αx ∥Xn· −Zn·S∥22 q(Xn·)q(S)q(Z−nk)                        Ku
+               n=1                                               ln q (αs) ∝    (T + c −1) ln αsk
+        − αznkzHnkznk                                               k=1
+                                                    (29)             Ku         T
+where ∥Xn· −Zn·S∥22 q(Xn·)q(S)q(Z−nk) represents the expec-    −     d +    uHs,k(t)us,k(t) +  S(k, k)    αsk  (35)
+                                                                     k=1        t=1tation  of ∥Xn· −Zn·S∥22  with  respect  to  q(S),  q(Xn·),
+and q(Z−nk), where q(Z−nk) = q(Z)/q(znk). The deriva-                                                  where us,k(t) and αsk denote the kth element of us(t) and αs,
+tion process of ∥Xn· −Zn·S∥22 q(Xn·)q(S)q(Z−nk) is similar to   respectively. According to (35), the approximate posterior
+ ∥Xn· −Zn·S∥22 q(Zn·)q(Xn·)q(S−k·), and the optimal distribution   distribution of the αsk follows the Gamma distribution, and
+
+
+TANG ET AL.: JOINT LOCALIZATION AND SOURCE ASSOCIATION SPARSE BAYESIAN LEARNING                           1109
+
+    Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:15 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 7 ===
+ Algorithm 1: Implementation Scheme of the JLSA-        is guaranteed by the convergence characteristics of the
+ SBL.                                      VBI algorithm. We deﬁne the normalized error Eerr as
+   Input: hyper-parameters {a, b, c, d, e, h, i, j},              ∥U(iter)x   −U(iter−1)x     ∥F/∥U(iter−1)x     ∥F. When the normalized er-
+     Nmaxiter, thr, Ku. Set iter = 0.                            ror is less than the predeﬁned threshold thr or the number of
+       while Eerr ≥thr and iter ≤Nmaxiter do               iterations exceeds the maximum iterations Nmaxiter, the al-
+           iter = iter + 1;                               gorithm converges and stops iterative updating parameters.
+        Update   x and Ux using (19) and (21);               After convergence, Ux can be regarded as the optimal
+        For n = 1, . . ., N do                             sparse solution of the JLSA-SBL, and can be applied to
+          For k = 1, . . ., Ku do                           calculate the spatial spectrum via the l2-norm procedure.
+             Update   z(n, k) and znk using (31) and      Besides, Z is the estimated attenuation coefﬁcient matrix,
+             (32);                                          containing the complete information of multipath propaga-
+          end For                                             tion. Thus, the attenuation coefﬁcients and source associa-
+        end For                                            tion information can be obtained by analyzing Z. It should
+        For n = 1, . . ., N do                         be noted that the estimated attenuation coefﬁcient of the di-
+          For k = 1, . . ., Ku do                        rectsignalofeachincoherentsourceisgenerallyexpectedto
+             Update αznk using (38);                   be 1. Thus, we further normalize the activated columns of Z
+          end For                                          to obtain the normalized attenuation coefﬁcient estimation
+        end For                                         of each incoherent source set.
+        For k = 1, . . ., Ku do                               Besides, since we do not impose additional constraints
+          Update  S(k, k) and USk· using (27) and       on the row-sparse structure of matrix S, the JLSA-SBL
+           (28);                                           algorithm will randomly activate K nonzero rows in the
+        end For                                            S. Although we cannot predict the speciﬁc locations of the
+        For k = 1, . . ., Ku do                              activated rows in advance, the number of incoherent sources
+          Update αsk using (36);                       can still be estimated by counting the number of the nonzero
+        end For                                    rows in the S.
+        Update αx using (23);
+                                                      C.  Extension to Off-Grid Problem        Update α0 using (34);
+          Calculate                                       Algorithm1,assumingthattheDOAsofincidentsignals
+               Eerr =∥U(iter)x   −U(iter−1)x      ∥F/∥U(iter−1)x     ∥F.       are located at the discrete grids, is the on-grid implementa-
+     end while                                              tion of the proposed JLSA-SBL. Thus, the grid mismatch
+   Output: Ux, Z, and US.                             problem will inevitably occur in practice. To solve the grid
+                                                   mismatch problem, we extend Algorithm 1 to the off-grid
+                                                     method. Taylor expansion is usually utilized to establish an
+its expectation can be calculated by:                       approximation to the true array manifold dictionary [30],
+                     T + c                            [34]. This section introduces the off-grid implementation
+              αsk =                                        .        (36)   of the JLSA-SBL.                USk·UHSk· + T  S(k, k) + d
+                                                               1) Off-Grid Implementation:  Suppose that the grid
+    7) Update of   Z:  According to (17), we have the   point closest to a signal impinging from θk is θnk. Thus, the
+following expression:                                    corresponding steering vector can be approximated [30],
+  ln q (  Z) ∝⟨ln P (Y, S,  S,  Z, αx, α0, Z, X)⟩q(  /  Z )      [34] by
+         ∝⟨ln P (Z |  Z ) P (  Z)⟩q(Z).                          a (θk) ≈a  θnk + b  θnk   θk −θnk        (39)
+Substituting (12) and (13) into the above equation. Then,  where b(θnk ) is the derivative of a(θnk ) with respect to
+we can derive the following expression:                       θnk. Denoting B = [b(θ1), b(θ2), . . . , b(θN )]. Thus, signal
+             N   Ku                                 model can be expressed as
+ ln q (  Z) ∝         −αznk  zHnk znk +  Z(n, k) + h                Y = (A + B   ) X + N
+              n=1 k=1
+                                           = X + N                      (40)
+       + e ln αznk   .                           (37)
+                                                  where  = diag(δ), and δ = [δ1, . . . , δn, . . . , δN]⊤is theEquation (37) indicates that αznk follows the Gamma distri-
+                                                                off-grid deviation vector to be estimated, withbution, and can be updated as:
+                                                     ,
+                             e                                                     θk −θnk,  n = nk                  αznk =                                (38)                  δn =                                                                                 0,         otherwise.                   zHnk znk +   z(n, k) + h.
+   The implementation scheme  of  the JLSA-SBL  is  According to the above description, the off-grid implemen-
+shown in Algorithm 1. By iteratively estimating parameters   tation of the JLSA-SBL algorithm will be constructed in
+ = {X, Z, S, α0, αx,  S,  Z}, the proposed algorithm will   this section. By introducing the intermediate variable X,
+eventually converge and obtain a sparse solution, which   the estimation of δ is only related to the latent parameters
+
+
+1110                    IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS  VOL. 61, NO. 1  FEBRUARY 2025
+
+       Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:15 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 8 ===
+X and α0, greatly simplifying the inference procedure. The                    T
+probabilistic model of (40) can be expressed as                v = Re      diag  (ux(t))∗ BH (y(t) −Aux(t))
+                                                                                 t=1
+                           T
+                                                                                                                  x    .      P (Y |X, α0 ) =  CN    x(t), α−10 IM  .     (41)        −T diag BHA
+                           t=1                                Besides, the following operation should be implemented
+    2)  Parameter  Inference  for  Off-Grid  Implementa-  due to the constraint δn ∈[−r2, 2]:r
+tion:  According  to  the aforementioned  off-grid mod-                , r
+                                                                                      2,      if δn ≥r2                                                                                                               (50)eling, the parameters to be estimated updates to  =                    δn =
+                                                         −r2,   if δn ≤−r2{X, Z, S, α0, αx,  S,  Z,   }. And the joint PDF is rewritten
+as below:                                           where δn is the nth element of vector δ. The off-grid imple-
+ P (Y,   )                                              mentation of JLSA-SBL requires some modiﬁcations based
+                                                 on the framework of Algorithm 1. The inference process of = P (α0) P (αx) P (Y |X , α0,   ) P (   ) P (X |Z, S , αx)
+                                                   X, including the update rule of covariance matrix   x and
+      Ku                   N
+                                             mean Ux, is replaced by (44) and (45), the inference of α0 is
+ ×    P  Sk·  αsk P  αsk    P  znk  αznk P  αznk      .                                                          replaced by (47), and the inference of δ, shown in (49) and
+     k=1                     n=1                               (50), is added as the last step in Algorithm 1.                                                    (42)
+We assume that each element contained in   obeys the uni-
+                                     r                              D.  Uniqueness Analysis of the Parameter Identiﬁability
+form distribution U[−r2, 2], where r is the resolution of the
+discretegrids. Here, weonlyintroducetheinferenceprocess      In this section, we analyze the sufﬁcient condition of
+of {X, α0,   }, and the update rules of other parameters have   the parameter identiﬁability for the proposed JLSA-SBL
+been derived in Section III-B.                               algorithm. In the problem of DOA estimation under mul-
+    3) Update of X:  According to (17) and (42), the ex-   tipath propagation, this condition can be interpreted as the
+pression of q(x(t)) can be written as below:                upper bound on the number of incoherent sources and the
+                                                        corresponding multipath signals when their DOAs can be
+                 T
+                                                        uniquely identiﬁed.
+   ln q (x(t)) ∝   −α0 ∥y(t) −  x(t)∥22                                                               In the noiseless case, the corresponding expression of
+                 t=1
+                                                               (7) is Y = AX, where X = ZS. Herein, we utilize the X to
+  − αx  xH(t)x(t) −xH(t) Zus(t) −uHs (t) ZHx(t)    .  (43)   simplify the expression. Following Davies and Eldar [46],
+                                                                                 if the solution of X can be uniquely determined, a sufﬁcientThe above equation indicates that the approximate posterior
+                                                           condition is derived as below:of X obeys the complex Gaussian distribution with the
+following covariance matrix   x and mean Ux:                                  spark (A) −1 + rank X
+                                          X  <                                (51)
+                    H          −1                                                2,0             2                     x = α0   + αxIN                 (44)
+           Ux =   x α0 HY + αx ZUS  .          (45)  where ∥X∥2,0 counts the non-zero rows of the X, which can
+                                                    be regarded as the sum of the number of the incoherent
+    4) Update of α0:  For q(α0), we have                   sources and their multipath signals. Thus, ∥X∥2,0 = K +
+                                                       K
+                                                                      Pk, where K indicates the number of the incoherent  ln q (α0) ∝−α0 ∥Y −  Ux∥2F + T tr   H     x              k=1
+                                                             sources, and Pk  is the number of the multipath signals
+        + (MT + a −1) ln α0 −bα0.          (46)                                                     relatedtothekthsource.Thespark(A)denotestheminimum
+Therefore, α0 follows the Gamma distribution and can be  number of linearly dependent columns in matrix A. Besides,
+updated as:                                            rank(X) indicates the rank of X, and is determined by Z and
+                                                              S.
+               MT + a
+       α0 =                   H               (47)       Ideally, the ranks of Z and S are equal to K, and the          ∥Y −  Ux∥2F + Ttr           x + b.           activated rows of S are one-to-one associated with the
+                                                              activated columns of Z. Thus, the matrix multiplication
+    5) Update of   :  According to (17) and (42), we have
+                                                           operation of Z and S will not reduce the matrix rank, thereby
+              T                                         rank(X) = K. By substituting the relevant terms into (51),
+  ln q ( )∝   −α0 ∥y(t)−  ux(t)∥22+tr   H     x     .     the condition for unique sparse recovery can be derived as
+             t=1                                         below:
+                                                    (48)
+                                                                       K
+Similar to the derivation process in [30], the update rule of
+                                             K + 2    Pk < spark (A) −1.         (52)δ is given by
+                                                                                 k=1
+                      δ = P−1v                    (49)                                               The above equation indicates the upper bound on the num-
+where                                                    ber of incident signals (including the direct signals of the in-
+          *                   +                 coherent sources and their corresponding multipath signals)
+    P = Re  BHB ∗⊙ UxUHx + T   x                       that can be uniquely identiﬁed. Although this theoretical
+
+
+TANG ET AL.: JOINT LOCALIZATION AND SOURCE ASSOCIATION SPARSE BAYESIAN LEARNING                           1111
+
+    Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:15 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 9 ===
+upper bound is difﬁcult to perfectly achieve in practice, it   the well-separated DOAs. Case 2 takes into account a more
+still has important guiding signiﬁcance for predicting and   general situation, where the multipath signals associated
+evaluating the performance of algorithms.                  with different sources may have closely overlapped DOAs.
+   Besides, the value of spark(A) is determined by the  The detailed experimental setup will be introduced in Sec-
+speciﬁc array geometry. As an instance, when ULA is   tions IV-A and IV-B.
+utilized to receive signals, spark(A) = M + 1 due to the fact      This article considers the general scenario that the prior
+that any M columns of A are linearly independent. Thus, the   information about the multipath propagation environment
+sufﬁcient condition expressed in (52) can be reformulated    is completely unknown. The following three performance
+as below in the case of ULA:                               metrics are considered in the experiment.
+
+                        K
+            K + 2    Pk < M.               (53)      1) RMSE of DOA estimation.
+                          k=1                                  2) RMSE of attenuation coefﬁcient estimation.
+                                                               3) The probability of correct source association.
+IV.  SIMULATION EXPERIMENT
+    In this section, we perform numerical simulations to      Several sparse representation algorithms, including l1-
+conﬁrm the superiority of the JLSA-SBL. The underwater  SVD [24], OGSBI [30], sparse Bayesian learning-based
+scenario is considered in this article. We consider the ULA   relevance vector machine (SBLRVM) [34], root-SBL [38],
+consisting of 40 elements, and the half-wavelength array  and MFVBEM [39], are utilized to evaluate the DOA es-
+spacing is utilized in the simulation experiments. A prede-   timation accuracy of the JLSA-SBL. The performance in
+ﬁnedgridofdirectionsfrom[0◦, 180◦]withtheintervalof2◦   terms of source association is compared between the JLSA-
+is utilized for the proposed algorithm, and the underwater  SBL and the methods in [40] and [41]. Among the several
+sound velocity is set to c = 1500 m/s. We consider two   algorithms proposed in [41], we utilize the Algorithm 3
+incoherent source sets in this experiment. Each set contains  due to its applicability for both well-separated case and
+a direct signal of source and two related multipath signals,   generalized case. For the prior information required by the
+resulting in six incident signals impinging on the array. All  methods in [40] and [41], we utilize the OGSBI [30] method
+incident signals follow the complex Gaussian distribution.   to provide the coarse DOA initialization, and utilize the
+The number of snapshots T is initialized as 200. For JLSA-  AIC method [43] appropriately combining SS operation to
+SBL, we set a = b = c = d = i =  j = 10−4 to represent   estimate the number of both incoherent sources and spatial
+the noninformation prior. And we set e = 1 and h = 10−2.   paths. Besides, the performance in terms of attenuation
+Furthermore, we initialize the upper bound Ku, which is   coefﬁcient estimation is compared between JLSA-SBL, the
+related to the number of the incoherent sources, as 10.      method in [41], and the method in [44]. Zhang et al. [44]
+   For the simulation experiments performed in this article,   only focused on the estimation of attenuation coefﬁcients,
+we deﬁne the SNR as 10lg(   k σ s,k/σ2    n2 ), where σ n2 and σ s,k2    thus the source association prior information and DOA
+denote the noise power and the signal power of the kth   initialization are provided by the methods in [41] and [30],
+target signal, respectively. The average root-mean-square   respectively. Noting that the number of both incoherent
+error (RMSE) of estimated DOA is deﬁned as               sources and spatial paths is critical prior information for
+           -                                   the existing methods, including [40], [41], and [44]. Thus,
+                      Q        Kall             2                            q=1   k=1 θqk −θk          we further conduct the experiments under the condition of
+      RMSEDOA =                              (54)   providing the aforementioned prior information for [40],                                 QKall
+                                                                [41], and [44].
+where θqk  is the estimated DOA corresponding to the kth
+incident signal in the qth Monte Carlo trial. The Kall denotes                                                        A.  Case 1: Well-Separated DOAs
+the number of the incident signals, and Q is the number of
+Monte Carlo trials. The θk denotes the real DOA of the      In Case  1, we assume  that  all  incident  signals
+kth incident signal. Besides, the RMSE of the estimated   are well separated, which  is the basic assumption for
+attenuation coefﬁcients can be expressed as                 conventional  algorithms. The DOAs  of two  incoher-
+           -                                    ent source sets are set to {58.77◦, 86.45◦, 121.33◦} and
+                      Q                                                         Kall
+                           q=1                                 k=1  zqk −zk  22             {101.24◦, 70.76◦, 131.37◦}, respectively. The attenuation
+       RMSEAC =                               (55)   coefﬁcients are set to {1, 0.5e−j2π1055/λ , 0.42e−j2π553/λ }
+                                 QKall                                                   and {1, 0.53e−j2π937/λ , 0.45e−j2π631/λ } for two incoherent
+where zqk is the attenuation coefﬁcient estimation result of   source sets, where λ is the wavelength. The ﬁrst term of each
+the kth incident signal in the qth Monte Carlo trial. In   set indicates the direct signal of source and the remaining
+this paper, 100 Monte Carlo trials are performed for each   terms indicate the multipath signals. Fig. 3 illustrates the
+simulation experiment.                                    process of joint DOA, source association, and attenuation
+    In this section, we consider two experimental cases:   coefﬁcient estimation of the JLSA-SBL algorithm with
+1) well-separated case and 2) generalized case. In case  SNR = −2 dB. Fig. 3(a) indicates that the JLSA-SBL
+1, all incident signals, including the direct signals of the   algorithm can correctly detect peaks from the spatial spec-
+incoherent sources and their related multipath signals, have  trum and realize accurate DOA estimation. Fig. 3(b)–(d)
+
+
+1112                    IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS  VOL. 61, NO. 1  FEBRUARY 2025
+
+       Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:15 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 10 ===
+Fig. 3. DOA estimation spectrum and source association of JLSA-SBL in the case of well-separated DOAs with SNR= −2 dB. (a) Spatial spectrum,
+     (b) amplitude visualization of the estimated Z, (c) spatial spectrum of the incoherent source set 1, and (d) spatial spectrum of the incoherent
+                                                               source set 2.
+
+
+illustrates the process of the JLSA-SBL algorithm in terms   performance of JLSA-SBL still maintains high level. The
+of attenuation coefﬁcient estimation and source association.  JLSA-SBL algorithm explores the underlying coherent
+    Fig. 3(b) shows the amplitude visualization of the esti-   structure of incident signals, thereby achieving more accu-
+mated Z. Since the preset number of the incoherent sources   rate DOA estimation in low SNR environment. Compared
+Ku is initialized as 10, resulting in ten columns of Z cor-   to the JLSA-SBL algorithm, the mainstream sparse rep-
+responding to ten potential incoherent source sets. In this   resentation methods, such as OGSBI, root-SBL, l1-SVD,
+experiment, the ﬁrst column Z·1 and the ninth column Z·9 of  and SBLRVM algorithm, suffer the difﬁculties in signal
+matrix Z are randomly activated, corresponding to the two   detection and high RMSE in DOA estimation when SNR
+incoherent source sets. The Z·1 and Z·9 contain the source ≤−4 dB. The root-SBL algorithm adopts a discrete grid
+association information, estimated DOAs, and attenuation   re-estimation operation to replace the off-grid estimation
+coefﬁcients of the incoherent sources and their associated   strategy [30] utilized in both OGSBI, SBLRVM, and JLSA-
+multipath signals.  It should be noted that the direction  SBL, thereby exhibiting the better performance in high SNR
+with the highest amplitude in each activated column of Z   scenario (when SNR ≥4 dB). The MFVBEM algorithm
+represents the direct signal of each source. Fig. 3(c) and (d)   achieves the poor performance in our experiment, possibly
+illustrates the normalized spatial spectrum of each set cal-  due to its inappropriate single incoherent source assump-
+culated by Z·1 and Z·9, respectively. As revealed in Fig. 3(c)   tion.
+and (d), the multipath signals are correctly associated with      Fig.4(b) showsthecorrectassociationprobabilitycurve
+their corresponding sources, and the estimated DOAs of   of each algorithm. As illustrated in Fig. 4(b), the JLSA-
+two incoherent source sets are {101.17◦, 70.52◦, 131.44◦}  SBL method achieves the 100% correct source association
+and {58.98◦, 86.53◦, 121.24◦}.                               probability when SNR > −4 dB, and still maintains a high-
+    Fig. 4(a) shows the RMSE curves of DOA estimation   level performance when SNR ≤−4 dB. For the methods
+for JLSA-SBL algorithm and other algorithms in the case   in [40] and [41], when the prior information (including
+of well separated. Along with the decrease of SNR, the   the number of both incoherent sources and spatial paths)
+
+
+TANG ET AL.: JOINT LOCALIZATION AND SOURCE ASSOCIATION SPARSE BAYESIAN LEARNING                           1113
+
+    Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:15 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 11 ===
+ Fig. 4.  Performance of several algorithms with different SNRs for well-separated multipath signals in terms of: (a) RMSEs of the estimated DOAs,
+                       (b) the probability of success source association, and (c) RMSEs of the estimated attenuation coefﬁcients.
+
+
+
+
+
+      Fig. 5. DOA estimation spectrum and source association of JLSA-SBL in the generalized case with SNR = −2 dB. (a) Spatial spectrum,
+(b) amplitude visualization of the estimated Z, (c) spatial spectrum of the incoherent source set 1, and (d) spatial spectrum of the incoherent source set
+                                                                               2.
+
+
+is unknown, the correct source association probability of   the general scenario without any prior information, thereby
+the methods in [40] and [41] begins to decline when SNR   achieving more accurate source association.
+< −2 dB. When the aforementioned prior information is       Fig. 4(c) illustrates the RMSE in terms of attenuation
+provided, the performance of the methods in [40] and [41]   coefﬁcient estimation of each algorithm. The attenuation
+improves signiﬁcantly. This result reveals that the methods   coefﬁcient estimation performance of the methods in [41]
+in [40] and [41] suffer limited performance in the absence  and [44] is also limited by the unknown prior information
+of the prior information about the multipath propagation.  when the SNR is low. On the contrary, the JLSA-SBL algo-
+In comparison, the JLSA-SBL algorithm takes into account   rithm integrates source association, DOA estimation, and
+
+
+
+1114                    IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS  VOL. 61, NO. 1  FEBRUARY 2025
+
+       Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:15 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 12 ===
+Fig. 6.  Performance of several algorithms with different SNRs for generalized case in terms of: (a) probability of success source association and (b)
+                                 RMSEs of the estimated attenuation coefﬁcients.
+
+
+
+                                                              Fortunately, the JLSA-SBL algorithm can utilize the under-
+                                                            lying coherent structure of the incident signals, thereby dis-
+                                                            tinguishing two closely spaced multipath signals belonging
+                                                               to different incoherent source sets. Fig. 5(b)–(d) illustrates
+                                                            the process of the JLSA-SBL algorithm in terms of source
+                                                             association and attenuation coefﬁcient estimation. Fig. 5(b)
+                                                  shows the amplitude visualization of the estimated Z. In this
+                                                         experiment, the ﬁrst column Z·1 and the third column Z·3 of
+                                                        matrix Z are randomly activated, containing the multipath
+                                                         information of two incoherent source sets, respectively.
+                                                    Although two closely spaced multipath signals are located
+                                                                    at the same grid point, JLSA-SBL still assigns them to the
+                                                        corresponding incoherent sources, successfully achieving
+                                                            the accurate source association operation. Fig. 5(c) and (d)
+   Fig. 7.  Univariate PDF of GGD with different shape parameter γ .    shows the normalized spatial spectrum of two incoherent
+                                                         source sets calculated by Z·3 and Z·1, respectively.
+                                                                  Fig. 6 shows the performance of several algorithms
+attenuation coefﬁcient estimation into a uniﬁed framework   with different SNRs for the generalized case. Since the
+and outperforms the methods in [41] and [44]. Besides,   conventional sparse representation-based DOA estimation
+the attenuation coefﬁcient estimation performance of the  methods cannot distinguish the incident signals located at
+methods in [41] and [44] is still worse than JLSA-SBL   the same grid point, we only consider two performance
+even when the accurate prior information is provided to [41]   metrics, including the RMSE of attenuation coefﬁcient
+and [44], which further veriﬁes the superiority of the JLSA-   estimation and the probability of correct source associa-
+SBL algorithm.                                                   tion. Table I illustrates the DOA estimation RMSEs of the
+                                            JLSA-SBL algorithm in the generalized case. Since the
+                                            JLSA-SBL algorithm requires the source association results
+B.  Case 2: Generalized Case                                                               to distinguish two multipath signals located at the same grid
+    In  this  section,  the  real DOAs  of two  incoher-   point,thosetrialswithcorrectsourceassociationareutilized
+ent source sets are set to {58.77◦, 86.45◦, 121.33◦} and   to calculate the RMSEs of the estimated DOAs.
+{101.24◦, 70.76◦, 121.35◦}. The third multipath signal of       Fig. 6(a) illustrates the source association performance
+each set has close DOA. The attenuation coefﬁcients of two  between each algorithm in the generalized case. For the
+sets are same to Case 1. Fig. 5 illustrates the result of source  methods in [40] and [41], we also consider the scenarios
+association, DOA, and attenuation coefﬁcient estimation   of known prior information and unknown prior informa-
+in the generalized case when SNR = −2 dB. Fig. 5(a)   tion, same as the Case 1. As illustrated in Fig. 6(a), the
+illustrates the estimated spatial spectrum of the JLSA-SBL   source association performance of the method in [40] has a
+algorithm in this case. It can be seen that there are two   upper bound in both scenarios of known prior information
+closely spaced multipath signals locating at the same grid  and unknown prior information, indicating that the method
+point. Therefore, it is difﬁcult to distinguish them based   in [40] cannot effectively distinguish the closely spaced
+on the spatial energy spectrum calculated by parameter X.   multipath signals even when SNR is high. The method
+
+
+TANG ET AL.: JOINT LOCALIZATION AND SOURCE ASSOCIATION SPARSE BAYESIAN LEARNING                           1115
+
+    Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:15 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 13 ===
+                                             TABLE I
+                    DOA Estimation RMSEs of the JLSA-SBL Algorithm in the Generalized Case
+
+
+
+
+
+Fig. 8.  Performance of the JLSA-SBL algorithm versus non-Gaussian sources with different shape parameter γ . (a) RMSEs of the estimated DOAs
+in the well-separated case. (b) Probability of success source association in the well-separated case. (c) RMSEs of the estimated attenuation coefﬁcients
+in the well-separated case. (d) RMSEs of the estimated DOAs in the generalized case. (e) Probability of success source association in the generalized
+                                   case. (f) RMSEs of the estimated attenuation coefﬁcients in the generalized case.
+
+
+in [41] achieves the 100% source association probability   distribution (GGD) can be applied to generate a large family
+when SNR ≥2 dB, which demonstrates the potential appli-   of non-Gaussiandistributionbychangingtheshape parame-
+cation in distinguishing closely spaced multipath signals.   terγ .Inthissection,thenon-Gaussiansourcesfollowingthe
+However, the performance of the method in [41] degrades  complex generalized Gaussian distribution (CGGD), which
+signiﬁcantly when prior information is unknown. On the    is the complex-valued model of GGD, are considered to test
+contrary, the proposed JLSA-SBL algorithm achieves the   the robustness of the JLSA-SBL.
+superior source association performance without any prior       Fig. 8 shows the performance of the JLSA-SBL al-
+information about multipath propagation.                  gorithm when sources follow the CGGD with different
+    Fig. 6(b) compares the performance in terms of the   shape parameter γ in both the well-separated case and the
+attenuation coefﬁcient estimation between each algorithm   generalized case. In the generalized case, we only utilize
+in the generalized case. Experimental result indicates that   the trials with successful source association to calculate
+the JLSA-SBL algorithm achieves superior performance   the RMSEs of the estimated DOAs, which is explained in
+and outperforms the methods in [41] and [44] under the   Section IV-B. The CGGD sources can be generated accord-
+same SNR condition. These results demonstrate that the   ing to [47]. As illustrated in Fig. 8, the JLSA-SBL maintains
+JLSA-SBL is not affected by the nearly spaced multipath   the similar estimation performance when the shape param-
+signals, thereby achieving more accurate joint parameter   eter γ varies. This phenomenon reveals the robustness of
+estimation.                                                  the proposed JLSA-SBL algorithm against non-Gaussian
+                                                             sources, although the derivation of JLSA-SBL follows the
+                                                      Gaussian source assumption.C.  Non-Gaussian Sources Case
+
+    In the derivation of the JLSA-SBL algorithm, the inco-
+                                                   D.  Maximum Number of Recoverable Signalsherent sources are assumed to follow the complex Gaussian
+distribution. Thus, it is necessary to evaluate the robustness      In this section, we test the signal recovery performance
+of the JLSA-SBL when sources follow the non-Gaussian   of the proposed JLSA-SBL algorithm as the number of mul-
+distribution. As shown in Fig. 7, the generalized Gaussian   tipath signals gradually increases. In order to eliminate the
+
+
+1116                    IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS  VOL. 61, NO. 1  FEBRUARY 2025
+
+       Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:15 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 14 ===
+                                                        accuracy of the multipath propagation parameters. Be-
+                                                                  sides, the proposed JLSA-SBL algorithm can still achieve
+                                                            the superior performance without any prior information
+                                                       about multipath propagation, including the DOA initial-
+                                                                  ization, the number of both incoherent sources and spa-
+                                                                             tial paths, which are required in other existing methods.
+                                                       Experimental results verify the superiority of the proposed
+                                               JLSA-SBL.
+
+
+                                            APPENDIX A
+
+                                                        Proof of (24)
+                                                         For ∥Xn· −Zn·S∥22 q(Zn·)q(S)q(Xn·), we can express it as
+
+  Fig. 9.  Signal recovery results of the proposed JLSA-SBL algorithm
+   with the increase of the total number of multipath signals. K is the
+                                                          ∥Xn· −Zn·S∥22 q(Zn·)q(S)q(Xn·)               number of the incoherent sources.
+                                  = Xn·XHn· −Xn·SHZHn· −Zn·SXHn·
+adverse effect of coarse grid on effectively distinguishing    + Zn·SSHZHn· q(Zn·)q(S)q(Xn·)
+the incident signals with dense DOAs, we utilize a ﬁner grid
+with the interval of 0.5◦.                     = Uxn·UHxn· + T  x(n, n) −Uxn·UHS ZHn· − Zn·USUHxn·
+    In this experiment, the array conﬁguration is consis-    + Zn·SSHZHn· q(Zn·)q(S).                          (56)
+tent with the previous experiments. The DOAs of the in-
+cident signals (including the direct signals of incoherent
+sources and the corresponding multipath signals) with 10  The    problem     is    transformed    into    solving
+dB SNR are uniformly located in the direction region of   Zn·SSHZHn· q(Zn·)q(S). Here, we introduce the independent
+[30◦, 150◦]. To simplify the description, the attenuation   assumption of S and Z, describing in Section III-B, thereby
+coefﬁcient of each multipath signal is denoted as ae−j 2πλ d .   Sk·SHl· q(Sl·) = Sk·UHSl· and znkzHnl q(znl ) = znk zHnl when k̸ = l,
+For each multipath signal, the amplitude parameter a is   yields
+randomly sampled from the region of [0.4, 0.9], and the
+distance parameter d  is randomly sampled from the re-
+                                                    Zn·SSHZHn· q(Zn·)q(S)gion of [500, 1100]. Besides, a signal is considered to be
+                                                 .                                        ⎡   ⎛         ⎞H⎤/correctly identiﬁed if the absolute error of its estimated              Ku
+DOA is less than 2r,3  where r = 0.5◦is the interval of the    =      ⎣znkSk· ⎝     znlSl· + znkSk· ⎠ ⎦
+angle grid. In each Monte Carlo trial, we strive to assign           k=1               l̸=k
+                                                                                                                                               q(Zn·)q(S)
+the same number of multipath signals to each incoherent       .  ⎡                ⎤/
+source.                                                                        Ku
+                                   =     ⎣znkzHnkSk·SHk· + znkSk·    zHnlSHl· ⎦    Fig. 9 indicates the signal recovery results with the
+increase of the total number of multipath signals. It can           k=1                                  l̸=k             q(Zn·)q(S)
+be observed that the probability of success signal recovery            Ku
+gradually decreases with the increase of the total number    =        znk zHnk +   z(n, k)  USk·UHSk· + T  S(k, k)
+of multipath signals, especially when the total number of          k=1
+                                                 ⎤
+multipath signals exceeds 20 (half the number of sensors
+in the used ULA). The experimental results verify the      +znkUSk·    zHnlUHSl· ⎦                        (57)
+sufﬁcient condition for unique signal recovery introduced                               l̸=k
+in Section III-D.
+
+V. CONCLUSION                                            thus, (24) is proofed.
+
+    In this article, we propose the JLSA-SBL algorithm to
+realize joint source association, off-grid DOA, and atten-
+                                            APPENDIX B
+uation coefﬁcient estimation in complex multipath prop-
+agation environment. Different from other existing three-   Proof of (26)
+phase algorithms, the JLSA-SBL algorithm integrates the                                                  The  key   step   of  prooﬁng   (26)   is   solving
+source association operation, DOA estimation, and attenu-
+                                                         ∥Xn· −Zn·S∥22 q(Zn·)q(Xn·)q(S−k·).  It should be noted  thatation coefﬁcient estimation into a uniﬁed estimation frame-
+                                                            the solution of  ∥Xn· −Zn·S∥22 q(Zn·)q(Xn·)q(S−k·) is differentwork, and exploits the underlying coherent structure be-
+tween the target signals to improve the joint estimation  from ∥Xn· −Zn·S∥22 q(Zn·)q(S)q(Xn·) in Appendix A. We can
+
+
+TANG ET AL.: JOINT LOCALIZATION AND SOURCE ASSOCIATION SPARSE BAYESIAN LEARNING                           1117
+
+    Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:15 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 15 ===
+express the target term as                                                [6] Q. Wang, H. Yu, J. Li, F. Ji, and F. Chen, “Adaptive grid reﬁnement
+                                                                  method for DOA estimation via sparse Bayesian learning,” IEEE J.
+                                                                     Ocean. Eng., vol. 48, no. 3, pp. 806–819, Jul. 2023.  ∥Xn· −Zn·S∥22 q(Zn·)q(Xn·)q(S−k·)
+                                                                                [7] H. Huang, J. Yang, H. Huang, Y. Song, and G. Gui, “Deep learning
+                                                                                     for super-resolution channel estimation and DOA estimation based = −Xn·SHZHn·−Zn·SXHn·+Zn·SSHZHn· q(Zn·)q(Xn·)q(S−k·)
+                                                                         massive MIMO system,” IEEE Trans. Veh. Technol., vol. 67, no. 9,
+               Ku       H       Ku                                        pp. 8549–8560, Sep. 2018.
+ = −Uxn·      znkSk·  −       znkSk· UHxn·                     [8]  Y.-S. Yoon, L. M. Kaplan, and  J. H. McClellan, “TOPS: New
+             k=1              k=1                       DOA estimator for wideband signals,” IEEE Trans. Signal Process.,
+                                                                                        vol. 54, no. 6, pp. 1977–1989, Jun. 2006.
+  + Zn·SSHZHn· q(Zn·)q(Xn·)q(S−k·).                   (58)     [9] N. Hu, B. Sun, Y. Zhang, J. Dai, J. Wang, and C. Chang, “Underde-
+                                                                          termined DOA estimation method for wideband signals using joint
+Similar to the relevant derivation process in Section III-B,         nonnegative sparse Bayesian learning,” IEEE Signal Process. Lett.,
+this section only focuses on the solution of the kth row Sk·.          vol. 24, no. 5, pp. 535–539, May 2017.
+Thus, we neglect the irrelevant terms about Sk· and obtain    [10] C. Liu and H. Zhao, “Efﬁcient DOA estimation method using bias-
+the following expression:                                           compensated adaptive ﬁltering,” IEEE Trans. Veh. Technol., vol. 69,
+                                                                               no. 11, pp. 13087–13097, Nov. 2020.
+           ∥Xn· −Zn·S∥22 q(Zn·)q(Xn·)q(S−k·)                        [11]  J.sis,”Capon,Proc.“High-resolutionIEEE, vol. 57, no.frequency8, pp. 1408–1418,wavenumberAug.spectrum1969.  analy-
+        = −Uxn·( znkSk·)H −( znkSk·) UHxn·                  [12]  F. Chen et al., “A novel method to design steerable differential
+                                                                    beamformer using linear acoustics vector sensor array,” IEEE/ACM
+                                                                               Trans. Audio, Speech, Lang. Process., vol. 31, pp. 2836–2849, Jul.         + Zn·SSHZHn· q(Zn·)q(Xn·)q(S−k·).        (59)
+                                                                         2023.
+The    problem      is     transformed     to     solve    [13] C. Zhou, Y. Gu, S. He, and Z. Shi, “A robust and efﬁcient algorithm
+ Zn·SSHZHn· q(Zn·)q(Xn·)q(S−k·).  For  simplicity,  we  deﬁne        forcoprimearrayadaptivebeamforming,”IEEETrans.Veh.Technol.,vol. 67, no. 2, pp. 1099–1112, Feb. 2018.
+q(  1) = q(Zn·)q(Xn·)q(S−k·), yields                              [14] R. Schmidt, “Multiple emitter location and signal parameter es-
+                                                                                   timation,” IEEE Trans. Antennas Propag., vol. AP- 34, no. 3,
+  ⟨Zn·SSHZHn·⟩q(Zn·)q(Xn·)q(S−k·)                                             pp. 276–280, Mar. 1986.
+   .⎛         ⎞ ⎛         ⎞ H/           [15] R. Roy and T. Kailath, “ESPRIT-estimation of signal parameters
+                                                                                 via rotational invariance techniques,” IEEE Trans. Acoust., Speech,
+ = ⎝    znlSl·+ znkSk· ⎠ ⎝    znlSl·+ znkSk· ⎠                   Signal Process., vol. 37, no. 7, pp. 984–995, Jul. 1989.
+             l̸=k                            l̸=k                                  [16] B. Ottersten and T. Kailath, “Direction-of-arrival estimation for
+                                                                     q(  1)          wide-band signals using the ESPRIT algorithm,” IEEE Trans.
+   .⎛     ⎞       ⎛     ⎞H                      Acoust., Speech, Signal Process., vol. 38, no.  2, pp. 317–327,
+ = ⎝     znlSl· ⎠zHnkSHk· + znkSk· ⎝     znlSl· ⎠                 [17]  F.Feb.Chen1990.et al., “A method for estimating the direction of arrival
+             l̸=k                                     l̸=k                               without knowing the source number using acoustic vector sensor
+              /                                                           arrays,” IEEE Trans. Geosci. Remote Sens., vol. 62, Apr. 2024,
+                                                                                   Art. no. 1001016.
+      +znkSk·SHk·zHnk         + const                     [18]  F. Chen, D. Yang, and S. Mo, “A DOA estimation algorithm based on
+                                                                              eigenvalues ranking problem,” IEEE Trans. Instrum. Meas., vol. 72,
+                           q(Zn·)q(Xn·)q(S−k·)
+  ⎛     ⎞       ⎛     ⎞ H                    Jan. 2023, Art. no. 9501315.
+                                                                          [19] A. Liu, S. Shi, and X. Wang, “Robust DOA estimation method
+ = ⎝    znlUSl· ⎠ zHnkSHk· + znkSk· ⎝    znlUSl· ⎠                      for underwater acoustic vector sensor array in presence of ambi-                                                                                 ent noise,” IEEE Trans. Geosci. Remote Sens., vol. 61, Jul. 2023,
+          l̸=k                                       l̸=k
+                                                                                   Art. no. 4206014.
+   +  znk zHnk +   z(n, k) Sk·SHk· + const.                      [20]  T.-J. Shan, M. Wax, and T. Kailath, “On spatial smoothing for
+                                                                                       direction-of-arrival estimation of coherent signals,” IEEE Trans.
+                                                    (60)
+                                                                                  Acoust., Speech, Signal Process., vol. 33, no.  4, pp. 806–811,
+Thus, the proof of (26) is completed.                              Aug. 1985.
+                                                                          [21]  S. U. Pillai and B. H. Kwon, “Forward/backward spatial smoothing
+REFERENCES                                                              techniques for coherent signal identiﬁcation,” IEEE Trans. Acoust.,
+ [1]  F. M. Han and X.-D. Zhang, “An ESPRIT-like algorithm for coherent         Speech, Signal Process., vol. 37, no. 1, pp. 8–15, Jan. 1989.
+   DOA estimation,” IEEE Antennas Wireless Propag. Lett., vol. 4,    [22]  S. G.  Mallat and  Z. Zhang, “Matching  pursuits  with  time-
+     pp. 443–446, Dec. 2005.                                               frequency dictionaries,” IEEE Trans. Signal Process., vol. 41, no. 12,
+ [2] C. E. Chen, F. Lorenzelli, R. E. Hudson, and K. Yao, “Stochastic         pp. 3397–3415, Dec. 1993.
+     maximum-likelihood DOA estimation in the presence of unknown    [23] L.Rebollo-NeiraandD.Lowe,“Optimizedorthogonalmatchingpur-
+     nonuniform noise,” IEEE Trans. Signal Process., vol. 56, no. 7,          suit approach,” IEEE Signal Process. Lett., vol. 9, no. 4, pp. 137–140,
+     pp. 3038–3044, Jul. 2008.                                              Apr. 2002.
+ [3] G. Ning, S. Yuan, and S. Zhang, “Velocity-independent 1-D DOA    [24] D. Malioutov, M. Cetin, and A. S. Willsky, “A sparse signal re-
+     estimation method using double parallel linear arrays,” IEEE Sens.         construction perspective for source localization with sensor ar-
+       Lett., vol. 7, no. 3, Mar. 2023, Art. no. 7001004.                              rays,” IEEE Trans. Signal Process., vol. 53, no. 8, pp. 3010–3022,
+ [4]  J. Li, D. Li, D. Jiang, and X. Zhang, “Extended-aperture unitary root        Aug. 2005.
+    MUSIC-Based DOA estimation for coprime array,” IEEE Commun.    [25] A. Beck and M. Teboulle, “A fast iterative shrinkage-thresholding
+       Lett., vol. 22, no. 4, pp. 752–755, Apr. 2018.                              algorithm for linear inverse problems,” SIAM J. Imag. Sci., vol. 2,
+ [5]  J. Li, D. Jiang, and X. Zhang, “DOA estimation based on combined         no. 1, pp. 183–202, 2009.
+      unitary ESPRIT for coprime MIMO radar,” IEEE Commun. Lett.,    [26] M. E. Tipping, “Sparse Bayesian learning and the relevance vector
+      vol. 21, no. 1, pp. 96–99, Jan. 2017.                                     machine,” J. Mach. Learn. Res., vol. 1, no. 3, pp. 211–244, 2001.
+
+
+
+1118                    IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS  VOL. 61, NO. 1  FEBRUARY 2025
+
+       Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:15 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 16 ===
+[27] D. P. Wipf and B. D. Rao, “An empirical Bayesian strategy for solv-    [47] M. Novey, T. Adali, and A. Roy, “A complex generalized Gaussian
+     ing the simultaneous sparse approximation problem,” IEEE Trans.         distribution—characterization, generation, and estimation,” IEEE
+     Signal Process., vol. 55, no. 7, pp. 3704–3716, Jul. 2007.                   Trans. Signal Process., vol. 58, no. 3, pp. 1427–1433, Mar. 2010.
+[28] A. P. Dempster, N. M. Laird, and D. B. Rubin, “Maximum likelihood
+     from incomplete data via the EM algorithm,” J. Roy. Stat. Soc.: Ser.
+     B. (Methodological), vol. 39, no. 1, pp. 1–22, 1977.                                                                              Tao Tang received the B.E. degree in electronic
+[29] D. G. Tzikas, A. C. Likas, and N. P. Galatsanos, “The variational                           engineering from Harbin Engineering Univer-
+     approximation for Bayesian inference,” IEEE Signal Process. Mag.,                                    sity, Harbin, China, in 2019, and the M.S. de-
+      vol. 25, no. 6, pp. 131–146, Nov. 2008.                                                      gree in electronic engineering in 2022 from the
+[30] Z. Yang, L. Xie, and C. Zhang, “Off-grid direction of arrival estima-                            Beijing Institute of Technology, Beijing, China,
+      tion using sparse Bayesian inference,” IEEE Trans. Signal Process.,                        where he is currently working toward the Ph.D.
+      vol. 61, no. 1, pp. 38–43, Jan. 2013.                                                       degree in electronic engineering with the School
+[31] Q. Wang, H. Yu, J. Li, F. Ji, and F. Chen, “Sparse Bayesian learning                            of Information and Electronics.
+                                                                                           His current research interests include array     using generalized double Pareto prior for DOA estimation,” IEEE
+                                                                                                       signal processing, Bayesian inference, and DOA
+     Signal Process. Lett., vol. 28, pp. 1744–1748, Aug. 2021.                                                                                                      estimation.
+[32] Z.-M.Liu,Z.-T.Huang,andY.-Y.Zhou,“Anefﬁcientmaximumlike-
+     lihood method for direction-of-arrival estimation via sparse Bayesian
+      learning,” IEEE Trans. Wireless Commun., vol. 11, no. 10, pp. 1–11,
+     Oct. 2012.                                                                Chengzhu Yang received the B.E. and M.S.
+[33]  J. C. Ye, J. M. Kim, and Y. Bresler, “Improving M-SBL for joint                           degrees in electronic engineering from the Col-
+                                                                                                   lege of Electronics and Information Engineer-     sparse recovery using a subspace penalty,” IEEE Trans. Signal
+                                                                                                           ing, Sichuan University, Chengdu, China, in
+      Process., vol. 63, no. 24, pp. 6595–6605, Dec. 2015.                                                                                  2013 and 2016, respectively, and the Ph.D. de-
+[34] A. Das and T. J. Sejnowski, “Narrowband and wideband off-grid                           gree in electronic engineering from Tsinghua
+      direction-of-arrival estimation via sparse Bayesian learning,” IEEE                             University, Beijing, China, in 2021.
+       J. Ocean. Eng., vol. 43, no. 1, pp. 108–118, Jan. 2018.                               He is currently an Assistant Professor with
+[35]  J. Zhang, M. Bao, X.-P. Zhang, Z. Chen, and  J. Yang, “DOA                             the School of Information and Electronics, Bei-
+     estimation for heterogeneous wideband sources based on adaptive                              jing Institute of Technology, Beijing. His current
+     space-frequency joint processing,” IEEE Trans. Signal Process.,                            research interests include underwater acoustic
+      vol. 70, pp. 1657–1672, Mar. 2022.                                    signal processing, compressed sensing, nonconvex optimization, and deep
+                                                                              learning.[36] L. Wang, L. Zhao, G. Bi, C. Wan, L. Zhang, and H. Zhang, “Novel
+     wideband DOA estimation based on sparse Bayesian learning with
+      Dirichlet process priors,” IEEE Trans. Signal Process., vol. 64, no. 2,
+     pp. 275–289, Jan. 2016.                                                       Yuchen Jiao received the B.E. (Hons.) and
+[37] Z.-M. Liu and Y.-Y. Zhou, “A uniﬁed framework and sparse Bayesian                          Ph.D. degrees in electronic engineering from
+      perspective for direction-of-arrival estimation in the presence of                          TsinghuaUniversity,Beijing,China,in2018and
+      array imperfections,” IEEE Trans. Signal Process., vol. 61, no. 15,                          2023, respectively.
+                                                                                    She is currently a Postdoctor with the School     pp. 3786–3798, Aug. 2013.
+                                                                                                  of Information and  Electronics, Beijing  In-
+[38]  J. Dai, X. Bao, W. Xu, and C. Chang, “Root sparse Bayesian learning                                                                                                                     stitute  of Technology,  Beijing. Her  current
+      for off-grid DOA estimation,” IEEE Signal Process. Lett., vol. 24,                            research  interests include underwater acous-
+     no. 1, pp. 46–50, Jan. 2017.                                                                                   tic signal processing, nonconvex optimization,
+[39] A. Das, “Deterministic and Bayesian sparse signal processing algo-                        and many other theoretical topics in machine
+     rithms for coherent multipath directions-of-arrival (DOAs) estima-                              learning.
+      tion,” IEEE J. Ocean. Eng., vol. 44, no. 4, pp. 1150–1164, Oct. 2019.
+[40] H. Yan and H. H. Fan, “On source association of DOA estimation
+     under multipath propagation,” IEEE Signal Process. Lett., vol. 12,                       Desheng Chen received the B.S. degree in op-
+     no. 10, pp. 717–720, Oct. 2005.                                                                           tics from Shandong University, Jinan, China, in
+[41] W. Xie, F. Wen, J. Liu, and Q. Wan, “Source association, DOA, and                          1999, the M.E. degree in optical engineering
+     fading coefﬁcients estimation for multipath signals,” IEEE Trans.                        from Nankai University, Tianjin, China, in 2003,
+     Signal Process., vol. 65, no. 11, pp. 2773–2786, Jun. 2017.                               and the Ph.D. degree in acoustics from the Chi-
+                                                                                            nese Academy of Sciences, Beijing, China, in[42] Y. Liu, Z.-W. Tan, A. W. H. Khong, and H. Liu, “An iterative
+                                                                                           2006.     implementation-based approach for joint source localization and
+                                                                                                     In 2006, he joined the Institute of Acoustics,
+      association under multipath propagation environments,” IEEE Trans.                                                                                      China Academy of Sciences. In 2021, he joined
+     Signal Process., vol. 71, pp. 121–135, Feb. 2023.                                               the School of Information and Electronics, Bei-
+[43] Q.-T. Zhang, K. M. Wong, P. C. Yip, and J. P. Reilly, “Statistical                              jing Institute of Technology, where he is cur-
+      analysis of the performance of information theoretic criteria in the    rently a Full Professor. His current research interests include optical ﬁber
+      detection of the number of signals in array processing,” IEEE Trans.   sensing and optical ﬁber components.
+      Acoust., Speech, Signal Process., vol. 37, no. 10, pp. 1557–1567,
+     Oct. 1989.
+[44] Y. Zhang, Z. Ye, and C. Liu, “Estimation of fading coefﬁcients in the
+                                                                                      Lijun Xu received the M.S. and Ph.D. degrees     presence of multipath propagation,” IEEE Trans. Antennas Propag.,
+                                                                                                         in electronic engineering from the University of
+      vol. 57, no. 7, pp. 2220–2224, Jul. 2009.                                                                                         Chinese Academy of Science, Beijing, China, in
+[45] L. Cheng, F. Yin, S. Theodoridis, S. Chatzis, and T.-H. Chang,                       2004 and 2018, respectively.
+     “Rethinking Bayesian learning for data analysis: The art of prior and                      He is currently a Director with Ocean In-
+      inference in sparsity-aware modeling,” IEEE Signal Process. Mag.,                           formation Technology Institute, School of In-
+      vol. 39, no. 6, pp. 18–52, Nov. 2022.                                                       formation and Electronics, Beijing Institute of
+[46] M. E. Davies and Y. C. Eldar, “Rank awareness in joint sparse                          Technology, Beijing. His research focuses on
+      recovery,” IEEE Trans. Inf. Theory, vol. 58, no. 2, pp. 1135–1146,                          underwater acoustic signal processing.
+     Feb. 2012.
+
+
+
+
+TANG ET AL.: JOINT LOCALIZATION AND SOURCE ASSOCIATION SPARSE BAYESIAN LEARNING                           1119
+
+    Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:15 UTC from IEEE Xplore. Restrictions apply.

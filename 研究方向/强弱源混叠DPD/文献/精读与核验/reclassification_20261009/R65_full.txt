@@ -1,0 +1,1734 @@
+--- PDF PAGE 1 ---
+5024
+IEEE/ACM TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING, VOL. 32, 2024
+Scalable-Complexity Steered Response Power Based
+on Low-Rank and Sparse Interpolation
+Thomas Dietzen
+, Member, IEEE, Enzo De Sena
+, Senior Member, IEEE, and Toon van
+Waterschoot
+, Member, IEEE
+Abstract—The steered response power (SRP) is a popular ap-
+proach to compute a map of the acoustic scene, typically used
+for acoustic source localization. The SRP map is obtained as the
+frequency-weighted output power of a beamformer steered to-
+wards a grid of candidate locations. Due to the exhaustive search
+over a ﬁne grid at all frequency bins, conventional frequency
+domain-based SRP (conv. FD-SRP) results in a high computational
+complexity. Time domain-based SRP (conv. TD-SRP) implemen-
+tations reduce computational complexity at the cost of accuracy
+using the inverse fast Fourier transform (iFFT). In this paper,
+to enable a more favourable complexity-performance trade-off as
+compared to conv. FD-SRP and conv. TD-SRP, we consider the
+problem of constructing a ﬁne SRP map over the entire search
+space at scalable computational cost. We propose two approaches
+to this problem. Expressing the conv. FD-SRP map as a matrix
+transform of frequency-domain GCCs, we decompose the SRP
+matrix into a sampling matrix and an interpolation matrix. While
+sampling can be implemented by the iFFT, we propose to use
+optimal low-rank or sparse approximations of the interpolation
+matrix for complexity reduction. The proposed approaches, refered
+to as sampling + low-rank interpolation-based SRP (SLRI-SRP)
+and sampling + sparse interpolation-based SRP (SSPI-SRP), are
+evaluated in various localization scenarios with speech as source
+signals and compared to the state-of-the-art. The results indicate
+that SSPI-SRP performs better if large array apertures are used,
+while SLRI-SRP performs better at small array apertures or a large
+number of microphones. In comparison to conv. FD-SRP, two to
+three orders of magnitude of complexity reduction can achieved,
+often times enabling a more favourable complexity-performance
+trade-off as compared to conv. TD-SRP. A MATLAB implementa-
+tion is available online.
+Received 11 May 2023; revised 22 December 2023, 21 May 2024, and 7
+October 2024; accepted 26 October 2024. Date of publication 11 November
+2024; date of current version 27 November 2024. This work was supported
+in part by the KU Leuven internal funds C14/21/075 “A holistic approach to
+the design of integrated and distributed digital signal processing algorithms for
+audio and speech communication devices”, C24/16/019 “Distributed Digital
+Signal Processing for Ad-hoc Wireless Local Area Audio Networking” and
+VES/19/004, in part by the FWO Large-scale research infrastructure “The Li-
+brary of Voices - Unlocking the Alamire Foundation’s Music Heritage Resources
+CollectionthroughVisualandSoundTechnology”(I013218N),andinpartbythe
+European Research Council under the European Union’s Horizon 2020 research
+and innovation program / ERC Consolidator Grant: SONORA (773268). The
+associate editor coordinating the review of this article and approving it for
+publication was Prof. Wenwu Wang. (Corresponding author: Thomas Dietzen.)
+Thomas Dietzen is with the Department of Electrical Engineering (ESAT),
+Processing Speech and Images, KU Leuven, 2860 Sint-Katelijne-Waver, Bel-
+gium (e-mail: thomas.dietzen@kuleuven.be).
+Enzo De Sena is with the Institute of Sound Recording, University of Surrey,
+GU2 7XH Guildford, U.K.
+Toon van Waterschoot is with the Department of Electrical Engineering
+(ESAT), STADIUS Center for Dynamical Systems, Signal Processing and Data
+Analytics, KU Leuven, 3000 Leuven, Belgium.
+Digital Object Identiﬁer 10.1109/TASLP.2024.3496317
+Index Terms—Acoustic source localization, complexity reduc-
+tion, low-rank interpolation, sparse interpolation, steered response
+power.
+I. INTRODUCTION
+A
+COUSTIC source localization [1], [2], [3] in noisy and
+reverberant environments remains an essential task in
+many multi-microphone signal processing [2], [4], [5] applica-
+tions. Classical approaches use explicit models exploiting time
+differences of arrival (TDOAs). This includes approaches based
+on the generalized cross-correlation (GCC) [6], subspace-based
+approaches like MUSIC [7] or ESPRIT [8], sparse estimation
+approaches like SPICE [9], and steered response power (SRP)
+mapping [10], [11], [12], [13], [14], [15], [16], [17], [18], [19],
+[20], [21], [22], [23], [24], [25], [26], [27], [28], [29], [30], [31],
+[32].Inaddition,learning-basedapproaches[28],[32],[33]have
+been proposed recently.
+In SRP, a map of the acoustic scene is computed from the
+frequency-weighted output power of a delay-and-sum (DSB)
+beamformer steered towards a set of candidate locations. Given
+this map, the location of a single source may be inferred from
+its maximum. The major disadvantage of this conventional
+frequency-domain based formulation of SRP (conv. FD-SRP)
+is posed by its high computational complexity due to the ﬁne
+grid of candidate locations evaluated at every frequency bin. It
+is well known [11], [12], [14], [24] that SRP may equivalently
+be expressed in terms of time-domain GCCs (TD GCCs) [6] of
+the microphone signals at lags equal to the candidate locations’
+TDOAs. This is exploited in computationally more efﬁcient
+conventional time-domain SRP (conv. TD-SRP) implementa-
+tions [11], [12], [14] which make us of the inverse fast Fourier
+Transform (iFFT). Here, the TDOAs are commonly rounded
+towards the nearest time-domain sample at the cost of accuracy
+in particular for small microphone array apertures.
+Intheliterature,severallow-complexitySRPapproaches[13],
+[15], [16], [17], [19], [20], [21], [22], [23], [26], [27], [30] have
+been proposed. The majority of these approaches [13], [16],
+[17], [19], [20], [21], [22], [23], [26] essentially performs a
+non-exhaustive search as a strategy to reduce computational cost
+of TD-SRP: In stochastic region contraction [16], [19] or coarse-
+to-ﬁne search strategies [13], [17], the search space is iteratively
+contracted based on the SRP map obtained in the previous
+iteration. Volumetric [20], [21], [22], [23] or density-based [26]
+approaches accumulate the SRP function corresponding to the
+volume surrounding the candidate locations [20], [21], [22], [23]
+2329-9290 © 2024 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.
+See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 2 ---
+DIETZEN et al.: SCALABLE-COMPLEXITY STEERED RESPONSE POWER BASED ON LOW-RANK AND SPARSE INTERPOLATION
+5025
+orasurfaceelementinthesphericalharmonicsdomain[26].This
+allows for a coarser spatial grid [20], [21], [22] and (similarly
+to [13], [16], [17], [19]) enables iterative or hierarchical [21],
+[22], [26] search approaches. In [15], instead of searching over
+space, the search is performed over TDOAs, at each of which the
+SRP map is updated for all corresponding candidate locations.
+Recent advances in acoustic mapping and localization using
+distributed processing [31], [32] or deep learning [28], [32]
+require a ﬁne SRP map over the entire search space, where
+the non-exhaustive search approaches described above are not
+immediately applicable. In this work, we therefore consider the
+problem of constructing a ﬁne SRP map at a scalable com-
+putational cost to enable a more favourable trade-off between
+complexity and performance as compared to conv. FD-SRP and
+conv. TD-SRP. This problem has previously been addressed
+in [27], [30]. In [27], a low-rank approximation of the SRP ma-
+trix is proposed. In our previous work [30], we have introduced
+a low-complexity SRP approach based on Nyquist-Shannon
+sampling and interpolation. In this approach, the bottleneck
+for complexity reduction is typically posed by the interpolation
+operation.
+In this paper, we propose two extensions to our previous
+work [30]. The contributions of this paper to the problem of
+constructing a ﬁne SRP map at a reduced computational cost
+are as follows.
+r As compared to other SRP approaches using interpola-
+tion [14], [18], we derive scalable, low-complexity in-
+terpolation schemes based on global optimality crite-
+ria. Expressing the SRP map as a matrix transform of
+frequency-domain GCCs, we decompose the SRP matrix
+into a sampling matrix and an interpolation matrix. While
+sampling can be implemented efﬁciently by the iFFT,
+we propose to use low-rank or sparse approximations of
+the interpolation matrix for further complexity reduction.
+These approximations are obtained as the solution to a
+quadratic optimization problem with low-rank and sparsity
+constraints, respectively, and are therefore optimal in the
+squared-error sense.
+r The trade-off between complexity and performance is
+thoroughly investigated. The proposed approaches, ref-
+ered to as sampling + low-rank interpolation-based SRP
+(SLRI-SRP) and sampling + sparse interpolation-based
+SRP (SSPI-SRP), are evaluated in various localization
+scenarioswithspeechassourcesignalsandcomparedtothe
+low-rank-based SRP approach (LR-SRP) in [27] and the
+non-exhaustive spatial search approach in [21]. The results
+indicate that among the ﬁne SRP mapping approaches,
+SSPI-SRP outperforms both SLRI-SRP and LR-SRP over
+a wide complexity range if a low number of microphones
+and large array apertures are used, while SLRI-SRP per-
+forms better for small array apertures, and both SLRI-SRP
+and LR-SRP perform better at a larger number of mi-
+crophones. In comparison to conv. FD-SRP, two to three
+orders of magnitude of complexity reduction can achieved,
+often times yielding a more favourable trade-off be-
+tween complexity and performance in comparison to conv.
+TD-SRP.
+TABLE I
+NOTATION
+r A MATLAB implementation of the proposed approaches
+is available online [34].
+The paper is organized as follows. Section II introduces conv.
+FD-SRP and conv. TD-SRP. In Section III, we review [27] and
+our previous work [30]. The proposed low-rank and sparse inter-
+polation approaches are introduced in Section IV and evaluated
+in Section V. Section VI concludes the paper.
+II. STEERED RESPONSE POWER MAPPING
+We deﬁne the signal and propagation model in Section II-A,
+revisit SRP in Section II-B, outline its relation to the TD GCC
+in Section II-C, deﬁne a matrix-vector representation in Sec-
+tionII-D,anddiscussitscomplexityinSectionII-F. Thenotation
+is deﬁned in Table I.
+A. Signal and Propagation Model
+Let the microphone signals be critically sampled with period
+T, let ω denote the radial frequency and M the number of mi-
+crophones, and let ym(ω) with m ∈{1, . . . , M} denote the mth
+microphone signal in the frequency domain. Critical sampling
+implies that the microphone signals are bandlimited by
+ωb = π/T,
+(1)
+that is ym(ω) = 0 for ω ≥ωb.
+In SRP, the DSB is usually not directly applied to the micro-
+phone signals, but to a frequency-weighted version thereof in
+order to improve spatial resolution [6], [11], [12], [24], [35]. To
+this end, the deterministic frequency-domain GCC (FD GCC)
+matrix Ψ(ω) ∈CM×M is deﬁned as
+[Ψ(ω)]m,m′ = ψm,m′(ω)
+= γm,m′(ω)ym(ω)y∗
+m′(ω),
+(2)
+where γm,m′(ω) denotes the weighting function. A common,
+heuristically motivated weighting approach is the so-called
+phase transform (PHAT) [6], [11], [12], [13], [14], [15],
+[16], [17], [18], [19], [20], [21], [22], [23], [24], [25], [26],
+[27], [28], [29], [30], [31], [32], [35] given by γm,m′(ω) =
+1/|ym(ω)y∗
+m′(ω)|, in which case only phase information re-
+mains on the right-hand side of (2). The remainder of this paper
+holds regardless of the actual weighting approach.
+We consider both near- and far-ﬁeld (NF and FF) sound
+propagation. Let the Cartesian coordinate vectors of the M
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 3 ---
+5026
+IEEE/ACM TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING, VOL. 32, 2024
+microphone locations be denoted as rm ∈R3. In case of NF
+propagation, let qi ∈R3 with i ∈{1, . . . , J} be the Cartesian
+coordinate vectors of the J candidate locations. In case of
+FF propagation, let qi instead denote the unit-length incident
+direction vectors of the J candidate locations. The TDOA
+Δtm,m′(i) of a sound wave originating from qi as observed
+at the microphone pair (m, m′) is then given by
+Δtm,m′(i)
+= 1
+c
+∥rm −qi∥−∥rm′ −qi∥
+for NF propagation,
+(rm −rm′)Tqi
+for FF propagation,
+(3)
+where c is the speed of sound. Note that with dm,m′ = ∥rm −
+rm′∥the inter-microphone distance, we ﬁnd that
+Δtm,m′(i) ∈[−Δtm,m′|0, Δtm,m′|0]
+(4)
+with Δtm,m′|0 = dm,m′/c,
+(5)
+where the limits of the interval are obtained if rm, rm′, and qi
+lie on the same line in the NF case or if rm −rm′ and qi are
+colinear in the FF case. The number of different microphone
+pairs (m, m′) is given by
+P = M(M −1)/2.
+(6)
+For convenience, we introduce the microphone pair index
+p ∈{1, . . . , P} and admit the alternative notation ψp(ω) =
+ψm,m′(ω) and Δtp(i) = Δtm,m′(i) for m > m′.
+B. Steered Response Power
+The DSB steering vector h(ω, i) ∈CM [2], [4], [5] towards
+the ith candidate location relative to the ﬁrst microphone is solely
+deﬁned by Δtm,1(i) as
+[h(ω, i)]m = e−jωΔtm,1(i).
+(7)
+With Ψ(ω) in (2) and h(ω, i) in (7), we can deﬁne the frequency-
+dependent SRP map
+z(ω, i) = hH(ω, i)Ψ(ω)h(ω, i) −tr[Ψ(ω)]
+= 2
+M
+
+m′=1
+M
+
+m=m′+1
+ℜ
+
+ψm,m′(ω)ejωΔtm,m′(i)
+= 2
+P
+
+p=1
+ℜ
+
+ψp(ω)ejωΔtp(i)
+,
+(8)
+where tr[Ψ(ω)] is commonly subtracted [11], [12], [13], [14],
+[15], [16], [17], [18], [19], [20], [21], [22], [23], [24], [25],
+[26], [27], [28], [29], [30], [31], [32] as it constitutes an offset
+independent of i and hence does not contribute to the objective
+of spatial mapping. The second transition in (8) is obtained
+from the relation Δtm,1(i) −Δtm′,1(i) = Δtm,m′(i) and the
+Hermitian structure of Ψ(ω). Here, the sum is to be taken over all
+combinations (m, m′) with m > m′, i.e. over all P microphone
+pairs. From (8), the broadband SRP value z(i) is obtained by
+integrating z(ω, i) over frequency,
+z(i) =
+ ωb
+0
+z(ω, i) dω,
+(9)
+where the upper integration limit coincides with the assumed
+bandlimit.
+The NF or FF location qs of a single source can be estimated
+from the candidate location index i that maximizes z(i), i.e.
+ˆqs = qimax
+(10)
+with imax = arg max
+i
+z(i).
+(11)
+C. Relation to TD GCC
+The integral in (9) may be reformulated into a simple relation
+between z(i) and the TD GCCs of the P microphone pairs [11],
+[12], [24]. Let ξp(τ) denote the TD GCC deﬁned by the inverse
+Fourier transform of the FD GCC ψp(ω), i.e.
+ξp(τ) =
+ ωb
+−ωb
+ψp(ω)ejωτ dω
+= 2
+ ωb
+0
+ℜ[ψp(ω)ejωτ] dω,
+(12)
+where the second transition is valid because ψp(ω) is complex
+symmetric over ω. Then, using (8) in (9) and comparing to (12)
+one ﬁnds that z(i) becomes
+z(i) =
+P
+
+p=1
+ξp(Δtp(i)),
+(13)
+i.e. a summation of TD GCCs ξp(τ) at lags τ corresponding to
+the candidate-location TDOAs Δtp(i). Regarding (12) and (13),
+recall that Δtp(i) ∈[−Δtp|0, Δtp|0] according to (4), while
+ξp(τ) itself has unlimited support in τ.
+D. Matrix-Vector Form of Conventional FD-Based SRP
+In the following, we represent the computation of the SRP
+map as a matrix-vector product using discrete frequencies. The
+formulation is based on the TD GCC formulation in SectionII-C.
+We assume that the discrete version of the FD GCC is computed
+from a discrete Fourier transform (DFT) of the original signals.
+If the DFT is of length 2K, we obtain discrete frequencies
+ωk = kωb/K
+(14)
+with the two-sided frequency bin index k ∈{−K + 1, . . . , K}.
+Noting that ψp(±ωb) = 0 due to the bandlimit in (1), the integral
+in (12) can then be replaced1 by
+ξp(τ) =
+K−1
+
+k=−K+1
+ψp(ωk)ejωkτ
+= 2
+K−1
+
+k=1
+ℜ
+
+ψp(ωk)ejωkτ
+,
+(15)
+where the second transition is valid because ψp(ω) is complex
+symmetric and ψp(0) is assumed to be negligible.
+Based on (13) and the second, single-sided equality in (15),
+with the single-sided frequency bin index k ∈{1, . . . , K −1},
+we deﬁne the SRP map vector z ∈RJ, the TD GCC vector
+ξΔtp ∈RJ, the single-sided FD GCC vector ψp ∈CK−1, and
+1Please note that although ωk is discrete, τ in (15) is still continuous.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 4 ---
+DIETZEN et al.: SCALABLE-COMPLEXITY STEERED RESPONSE POWER BASED ON LOW-RANK AND SPARSE INTERPOLATION
+5027
+the single-sided SRP matrix Hp ∈CJ×K−1 as
+[z]i = z(i),
+(16)
+
+ξΔtp
+
+i = ξp(Δtp(i)),
+(17)
+[ψp]k = ψp(ωk),
+(18)
+[Hp]i,k = ejωkΔtp(i).
+(19)
+Stacking over microphone pairs, we further deﬁne ψ ∈
+CP (K−1) and H ∈CJ×P (K−1) as
+ψ = (ψT
+1 · · · ψT
+P )T,
+(20)
+H = (H1 · · · HP ).
+(21)
+Using the deﬁnitions in (16)–(21), z can be expressed as
+z =
+P
+
+p=1
+ξΔtp
+= 2
+P
+
+p=1
+ℜ[Hpψp]
+= 2ℜ[Hψ].
+(22)
+In the remainder, we refer to (22) as conventional FD-based SRP
+(conv. FD-SRP) and denote the corresponding source-location
+estimate by ˆqs.
+E. Discrete-Time Approximation in Conventional TD-SRP
+As an alternative to (22), SRP is commonly computed using
+discrete samples [11], [12], [14], [18] of ξp(τ) at τ = nT with
+n ∈Z, which can be obtained from the iFFT of ψp(ωk). Here,
+the term Δtp(i) in (13) is often rounded to the nearest nT, i.e.
+(13) is approximated by
+ztd(i) =
+P
+p=1
+ξp(⌊Δtp(i)/T⌉T).
+(23)
+In the remainder, we refer to (23) as conventional TD-based
+SRP (conv. TD-SRP), deﬁne ztd as [ztd]i = ztd(i), and de-
+note the corresponding source-location estimate by ˆqs|td. While
+conv. TD-SRP is computationally signiﬁcantly more efﬁcient as
+compared to conv. FD-SRP as will be shown in Section II-F,
+the approximation due to rounding can potentially reduce the
+localizationperformanceinscenarioswithsmallerrortolerances
+or small microphone array apertures, which is veriﬁed in the
+simulations in Section V-B-2-c.
+F. Computational Complexity
+We deﬁne computational complexity as the number of real
+multiply-accumulate (MAC) operations required during runtime
+to compute an SRP map given the FD GCC ψ2.
+2The complexity of computing ψ using the FFT is in the order of
+MK log2[2K] [36], which can be veriﬁed to be at least two or three orders
+of magnitude below the complexity of the matrix-vector product in (22) in usual
+setups, cf. also the parameters in Table II. As this step is common to all presented
+approaches, it is therefore neglected in the deﬁnition of complexity.
+For a matrix-vector product, the number of MAC operations
+can be easily veriﬁed to be the number of (non-zero) elements
+of the matrix [36], [37]. The computation of the conv. FD-SRP
+map z in (22) requires the real part of one complex matrix-vector
+product, namely H · ψ. Since H ∈CJ×P (K−1) has non-zero
+elements only, the number of complex MAC operations is deter-
+mined by the product of the matrix dimensions, i.e. JP(K −1).
+As the real part of one complex product is equivalent to two real
+products, we assume an additional factor 2. The operation in
+(22) therefore requires
+C = 2JP(K −1)
+(24)
+MAC operations. Both J and K are design parameters and
+commonly chosen in the order of hundreds or thousands, while
+P grows quadratically with M, making conv. FD-SRP rather
+complex. For an example, consider the parameters in Table II
+chosen for the NF and FF scenario used in Section V.
+The computation of the conv. TD-SRP map ztd in (23) re-
+quires ﬁrst P iFFTs of size 2K to obtain the samples ξp(nT)
+from ψp(ωk), and second the accumulation of the P samples
+ξp(⌊Δtp(i)/T⌉T) for each of the J candidate locations. One
+iFFT of size 2K requires 2K log2[2K] complex MAC opera-
+tions [36], where we assume an additional factor 4. The accu-
+mulation of all ξp(⌊Δtp(i)/T⌉T) requires JP MAC operations.
+The operation in (23) therefore requires
+Ctd = JP + 8K log2[2K]
+(25)
+MAC operations, which is less than (24) in usual setups, cf. the
+parameters in Table II.
+III. REVIEW OF THE STATE OF THE ART
+We review two low-complexity approximations of conv. FD-
+SRP yielding ﬁne SRP maps. A low-rank SRP approach referred
+to as SVD-PHAT [27] is discussed in Section III-A, and the
+approach based on Nyquist-Shannon sampling and interpolation
+introduced in our prior work [30] is discussed in Section III-B.
+A. Low-Rank SRP
+We discuss the low-rank approximation of FD-SRP in Sec-
+tion III-A-1 and the computational complexity of the approach
+in Section III-A-2.
+1) Low-Rank Approximation: SVD-PHAT [27] can be de-
+ﬁned based on the cost function
+f(Hvar) = ∥Hvar −H∥2
+F
+(26)
+where Hvar is the optimization variable. In order to obtain a
+computationally less demanding approximation Hlr of H, (26)
+is minimized subject to a low-rank constraint, i.e.
+Hlr = arg min
+Hvar ∥Hvar −H∥2
+F s. t. rank[Hvar] ≤RH,
+(27)
+where the choice of the design parameter RH < min[J, P(K −
+1)] determines the computational complexity, cf. Section II-
+I-A-2. The solution to (27) is based on the singular value
+decomposition (SVD) of H [37] and can be written as an
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 5 ---
+5028
+IEEE/ACM TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING, VOL. 32, 2024
+outer product of a tall matrix Htall ∈CJ×RH and a fat matrix
+Hfat ∈CRH×P (K−1), i.e.
+Hlr = HtallHfat,
+(28)
+with for instance Htall = U ˜Σ and Hfat = VH, where the diag-
+onal of ˜Σ ∈RRH×RH contains the RH largest singular values
+of H, and the columns of U ∈CJ×RH and V ∈CP (K−1)×RH
+are given by the corresponding left and right singular vectors,
+respectively.
+The corresponding SRP map is deﬁned similarly to (22) as
+zlr = 2ℜ[Hlrψ]
+= 2ℜ[HtallHfatψ].
+(29)
+In the remainder, we refer to (29) as low-rank SRP (LR-SRP)
+and denote the corresponding source-location estimate by ˆqs|lr.
+2) Computational Complexity: The decomposition of Hlr in
+(28) can be computed upfront and hence does not require compu-
+tations during run time. The computation of the LR-SRP map zlr
+in (29) requires two matrix-vector products, namely ﬁrst Hfat · ψ
+resulting in the vector Hfatψ, and second Htall · Hfatψ. The
+computational complexity thereof is determined by the number
+of (non-zero) elements in Hfat and Htall, given by RHP(K −1)
+and JRH, respectively. Both products are complex, but of the
+secondproductonlytherealpartisrequired,suchthatweassume
+additional factors of 4 and 2, respectively. The operation in (29)
+therefore requires
+Clr = 2JRH + 4RHP(K −1)
+(30)
+MAC operations. If RH is chosen small enough, Clr will be well
+below C in (24).
+B. Sampling and Interpolation-Based SRP
+We discuss sampling and interpolation according to [30] in
+Section III-B-1, a corresponding matrix-vector form in Sec-
+tion III-B-2, and the computational complexity of the approach
+in Section III-B-3.
+1) Sampling and Interpolation: Recall that ξp(τ) is bandlim-
+ited by ωb, as can be seen from (12). We can therefore invoke
+the Nyquist-Shannon sampling theorem [38]. Let ξp(τ) be criti-
+cally sampled at τ = nT with n ∈Z. Using Whittaker-Shannon
+interpolation [38], we can then express ξp(τ) as a function of its
+samples ξp(nT),
+ξp(τ) =
+∞
+
+n=−∞
+ξp(nT) sinc(τ/T −n),
+(31)
+permitting perfect reconstruction. As ξp(τ) is bandlimited in ω,
+it has unlimited support in τ [38] and thus, as stated by (31),
+one indeed needs inﬁnitely many samples ξp(nT) in order to
+exactly reconstruct ξp(τ). Nonetheless, we may approximate
+ξp(τ) based on (31) and the following arguments.
+In the SRP use case, the approximation needs to be accurate
+only within the interval τ ∈[−Δtp|0, Δtp|0], cf. (3) and (4),
+where τ may be interpreted as the TDOA from a physical source
+location. Samples ξp(nT) sufﬁciently far outside this interval,
+i.e.at|n| ≫Δtp|0/T,havelittleeffectwithintheintervalfortwo
+reasons. First, their effect is limited by nature of the interpolating
+sinc-function, whose envelope decays with the inverse of its
+argument. Second, also the samples ξp(nT) themselves decay as
+the TD GCC lag nT does not correspond to a TDOA anymore.3
+In [30], we have therefore proposed to approximate ξp(τ) by
+ξp|si(τ) by truncating (31) as
+ξp|si(τ) =
+Np
+
+n=−Np
+ξp(nT)sinc(τ/T −n),
+(32)
+with
+Np = ⌊Δtp|0/T⌋+ Naux,
+(33)
+where Naux is a design parameter deﬁning the number of aux-
+iliary sample points beyond [−Δtp|0, Δtp|0]. In practice, few
+auxiliary samples are sufﬁcient, cf. also Section V and [30].
+Based on the above, the Nyquist-Shannon approximation of the
+SRP map is obtained by ﬁrst computing the required samples
+ξp(nT) based on (15), then interpolating ξp|si(τ) at τ = Δtp(i)
+according to (32), and ﬁnally accumulating over p according to
+(13). This procedure will become more apparent in the following
+Section III-B-2.
+2) Matrix-Vector Form: In the following, we represent the
+computation of the sampling and interpolation-based SRP map
+as a matrix-vector product. This respresentation has not been
+included in our previous work [30], but is essential to the
+approaches proposed in Section IV.4
+With n ∈{−Np, . . . , Np}, let the column or row index nmod
+be deﬁned as
+nmod = mod[n, 2Np + 1] + 1,
+(34)
+yielding nmod ∈{1, . . . , 2Np + 1}. Further, let N denote the
+average number of required samples per microphone pair, i.e.
+N = 1 + 2
+P
+P
+
+p=1
+Np.
+(35)
+Based on (15), we deﬁne the TD GCC sample vector
+ξp ∈R2Np+1 and the single-sided sampling matrix Sp ∈
+C2Np+1×K−1 by
+[ξp]nmod = ξp(nT),
+(36)
+[Sp]nmod,k = ejπkn/K,
+(37)
+which can be compared to (17) and (19). In (37), we have
+used ωknT = πkn/K from (1) and (14). Note that Sp is a
+submatrix of the 2K inverse DFT (iDFT) matrix corresponding
+toasubsetofsamplesandonesideofthespectrum.Stackingover
+microphone pairs, we deﬁne ξ ∈RP N and S ∈CP N×P (K−1)
+as
+ξ = (ξT
+1 · · · ξT
+P )T
+(38)
+3Exceptions due to, e.g., strong reﬂections or source-signal periodicities are
+possible, but irrelevant to the source localization problem.
+4Despite its novel aspect, we introduce the matrix-vector form in the state-of-
+the-art section to ensure a coherent outline and facilitate the complexity analysis
+in the following section.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 6 ---
+DIETZEN et al.: SCALABLE-COMPLEXITY STEERED RESPONSE POWER BASED ON LOW-RANK AND SPARSE INTERPOLATION
+5029
+S = blkdiag
+
+S1, . . . , SP
+
+,
+(39)
+Using (36) to (39), with ψ deﬁned in (20), we ﬁnd that ξp =
+2ℜ[Spψp] and accordingly
+ξ = 2ℜ[Sψ].
+(40)
+Based on (32), we deﬁne the interpolated TD GCC vector
+ξΔtp|si ∈RJ and the interpolation matrix Λp ∈RJ×(2Np+1) as
+
+ξΔtp|si
+	
+i = ξp|si(Δtp(i)),
+(41)
+[Λp]i,nmod = sinc(Δtp(i)/T −n).
+(42)
+Stacking over microphone pairs, we deﬁne Λ ∈RJ×P N as
+Λ = (Λ1 · · · ΛP ).
+(43)
+Using (41) to (43), with ξp and ξ deﬁned in (36) and (38), we ﬁnd
+that ξΔtp|si = Λpξp and accordingly deﬁne the corresponding
+SRP map zsi based on (13) as
+zsi =
+P
+
+p=1
+ξΔtp|si
+=
+P
+
+p=1
+Λpξp
+= Λξ.
+(44)
+With (40) and (44), we have approximated the conv. FD-SRP
+matrix H in (22) by
+Hsi = ΛS.
+(45)
+Note that like (28), we can under most cases of practical in-
+terest interpret (45) as low-rank: with Λ ∈RJ×P N and S ∈
+CP N×P (K−1) we typically ﬁnd that Λ is tall and S is fat
+since in usual setups J > NP and N < K −1,5 respectively,
+cf. also the parameters in Table II. The approach in (28) can
+also be compared to conv. TD-SRP in (23), which is obtained
+if (42) is replaced by [Λp]i,nmod = 1 if ⌊Δtp(i)/T⌉= n and
+[Λp]i,nmod = 0 otherwise.
+In the remainder, we refer to (44) as sampling + interpolation-
+based SRP (SI-SRP) and denote the corresponding source-
+location estimate by ˆqs|si.
+3) Computational Complexity: The components of Hsi in
+(45) can be deﬁned upfront and hence do not require compu-
+tations during run time. The computation of the SI-SRP map
+zsi in (44) requires sampling and interpolation. The sampling
+operation, i.e. the computation of ξ, can be performed in two
+different ways. We may either use the matrix vector product
+S · ψ in (40), whereof the complexity is determined by the
+number of non-zero elementsin the block-diagonal matrix S,
+i.e. PN(K −1). Since the product is complex, but only its real
+5In order to ensure a good TD GCC estimate within the TDOA range and
+limit the effects of windowing and circular convolution, the frame length 2K
+should well exceed twice the largest possible TDOA Δtp|0, which implies that
+N ≪2K, cf. (35) and (33).
+part is required, we assume an additional factor 2. Alternatively,
+noting that Sp is a submatrix of the 2K-iDFT matrix, we may
+use the iFFT as in conv. TD-SRP.6 Let ¯ψp be a two-sided version
+of ψp as deﬁned in the Appendix. Then, ξp can be obtained by
+performing the iFFT on ¯ψp and selecting the required 2Np + 1
+samples according to
+¯ξp = iFFT[¯ψp],
+(46)
+[ξp]nmod = [¯ξp]n′
+mod,
+(47)
+with nmod in (34) and the sample selection index n′
+mod deﬁned
+by
+n′
+mod = mod[n, 2K] + 1,
+(48)
+yielding n′
+mod ∈{1, . . . , Np + 1} ∪{2K −Np + 1, . . . , 2K}
+for n ∈{−Np, . . . , Np}. From ξp in (47), we obtain the stacked
+TD GCC vector ξ using (38). One iFFT of size 2K requires
+2K log2[2K] complex MAC operations, where we assume an
+additional factor 4. Computing ξ therefore requires Csamp MAC
+operations with
+Csamp
+=
+2PN(K −1)
+when using (40),
+8PK log2[2K]
+when using (46), (47); (38).
+(49)
+The iFFT-based computation of ξ is less complex if N >
+4
+K
+K−1 log2[2K], which is often the case in usual setups, cf. the
+parameters in Table II.
+The interpolation operation requires one real matrix-vector
+product, namely Λ · ξ in (44). The computational complexity
+thereofisdeterminedbythenumberof(non-zero)elementsinΛ,
+given by JPN. In total, the operation in (44) therefore requires
+Csi = JPN + Csamp
+(50)
+MAC operations. For usual setups, we typically ﬁnd that Csi
+will be well below C of conv. FD-SRP in (24), cf. also the
+low-rank interpretation of (45) and Table II. In comparison to
+Ctd of conv. TD-SRP in (25), however, we observe that the
+interpolation operation of SI-SRP is N times more complex
+than the corresponding sample selection of conv. TD-SRP.
+IV. LOW-RANK AND SPARSE INTERPOLATION
+The SI-SRP approach presented in Section III-B reduces com-
+putational complexity depending on the acoustic scenario and
+algorithmic parameter choices, but is hardly scalable in the sense
+of trading-off complexity against performance. In this section,
+we therefore propose two scalable extensions of the SI-SRP
+approach. While the sampling operation of the SI-SRP approach
+can already be carried out in a computationally efﬁcient manner
+using the iFFT, the complexity of the interpolation operation
+is N times larger than the corresponding sample selection of
+conv. TD-SRP. We therefore further reduce complexity based on
+low-rank and sparse approximations of the interpolation matrix.
+In Section IV-A, we derive the proposed approaches, and in
+Section IV-B discuss the complexity of the resulting algorithms.
+6The use of the iFFT has not been considered in our previous work [30].
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 7 ---
+5030
+IEEE/ACM TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING, VOL. 32, 2024
+A. Low-Rank and Sparse Interpolation-Based SRP
+We deﬁne the cost function
+f(Λvar) = ∥ΛvarS −H∥2
+F
+(51)
+where Λvar ∈RJ×P N is the optimization variable. Similarly to
+(26), the cost function in (51) penalizes the approximation error
+with respect to H.
+To reduce complexity, (51) could be minimized subject to
+low-rank or sparsity constraints on Λvar.7 Such a problem could
+for instance be solved iteratively by means of the proximal
+gradient method [39], that is by alternatingly performing a
+gradient-descent step based on the convex cost function in (51)
+and applying a proximal operator based on the constraints.
+Instead however, we propose to simplify the cost function in
+order to obtain a simpler minimization problem that can be
+solved without requiring alternations.
+To this end, we ﬁrst approximate (51) by replacing H by Hsi
+yielding
+f(Λvar) ≈∥ΛvarS −Hsi∥2
+F,
+(52)
+and then exploit the properties of S as outlined in the following.
+With Hsi = ΛS from (45), we ﬁnd that the right-hand side of
+(52) becomes
+∥ΛvarS −Hsi∥2
+F = ∥(Λvar −Λ)S∥2
+F
+≈1
+2∥(Λvar −Λ)¯S∥2
+F
+= K∥Λvar −Λ∥2
+F,
+(53)
+where ¯S is a two-sided version of S as deﬁned in the Appendix
+and the second transition holds for Λvar −Λ being real. The
+error in this transition is solely due to the columns of ¯S relating
+toωk = 0andωk = ±ωb,whicharedisregardedinthedeﬁnition
+of S, cf. (37) and (39), and is considered negligible. The third
+transition holds because ∥A∥2
+F = tr[AAH] for any matrix A
+and the rows of ¯S are orthogonal with ¯S¯SH = 2KI.
+Hence, the last equality in (53) is nearly equivalent to (51)
+and can be used as a cost function instead. In order to obtain
+computationally less demanding approximations Λlr and Λsp of
+Λ, we propose to minimize this cost function subject to low-rank
+or sparsity constraints, respectively, i.e.
+Λlr = arg min
+Λvar ∥Λvar −Λ∥2
+F s. t. rank[Λvar] ≤RΛ,
+(54)
+Λsp = arg min
+Λvar ∥Λvar −Λ∥2
+F s. t. ∥vec[Λvar]∥0 ≤QΛ,
+(55)
+where the choices of the design parameters RΛ < min[J, PN]
+and QΛ < JPN determine the computational complexity, cf.
+Section IV-B.
+The solution to (54) is based on the SVD of Λ [37] and can be
+written as an outer product of a tall matrix Λtall ∈RJ×RΛ and a
+fat matrix Λfat ∈RRΛ×P N, i.e.
+Λlr = ΛtallΛfat,
+(56)
+7In addition, one would either require a realness constraint on Λvar or
+alternativelyuseatwo-sidedversionof(51),cf.alsothecorrespondingtwo-sided
+deﬁnitions ¯H and ¯S in the Appendix.
+where Λtall and Λfat can be deﬁned similarly to Htall and Hfat
+in Section III-A-1. The solution to (55) is obtained from Λ by
+keeping the QΛ largest elements and discarding all others.
+Using (54) to (56), with ξ deﬁned in (38), we deﬁne the
+corresponding SRP maps zslri and zsspi similarly to (44) as
+zslri = Λlrξ
+= ΛtallΛfatξ,
+zsspi = Λspξ.
+(57)
+(58)
+With (40) and (57) or (58), we have approximated H in (22) by
+Hslri = ΛlrS,
+(59)
+Hsspi = ΛspS,
+(60)
+respectively. In the remainder, we refer to (57) and (58) as
+sampling + low-rank interpolation-based SRP (SLRI-SRP) and
+sampling + sparse interpolation-based SRP (SSPI-SRP) and de-
+note the corresponding source-location estimate by ˆqs|slri and
+ˆqs|sspi, respectively.
+B. Computational Complexity
+Because H in (19)–(21) depends only the geometries of
+the microphone array and the search grid and the frequency
+resolution, the decompositions of Λlr, Hslri, and Hsspi in (56),
+(59), and (60) can be computed upfront and hence do not require
+computations during run time. The complexity of solving the op-
+timization problems in (54) and (55) is therefore not considered
+in our complexity analysis.
+The computation of the SLRI-SRP map zslri and the SSPI-
+SRP zsspi in (57) and (58) requires sampling and interpolation,
+where the complexity of the sampling operation Csamp remains
+unaltered and is given by (49). The interpolation operation in
+(57) requires two real matrix-vector products, namely ﬁrst Λfat ·
+ξ resulting in the vector Λfatξ, and second Λtall · Λfatξ. The
+computational complexity thereof is determined by the number
+of (non-zero) elements in Λfat and Λtall, given by RΛPN and
+JRΛ, respectively. The interpolation operation in (58) requires
+one real matrix-vector product, namely Λsspi · ξ, whereof the
+computational complexity is determined by the number of (non-
+zero) elements in Λsp, i.e. QΛ. In total, the operations in (57) or
+(58) therefore require
+Cslri = JRΛ + RΛPN + Csamp
+Csspi = QΛ + Csamp
+(61)
+(62)
+MAC operations. If RΛ or QΛ are chosen small enough, Cslri
+and Csspi will be well below C in (24), respectively.
+V. SIMULATIONS
+We discuss the performance measures in Section V-A and
+perform simulations using simulated room impulse responses
+(RIRs) in Section V-B and measured RIRs in Section V-C.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 8 ---
+DIETZEN et al.: SCALABLE-COMPLEXITY STEERED RESPONSE POWER BASED ON LOW-RANK AND SPARSE INTERPOLATION
+5031
+A. Algorithms and Performance Measures
+Next
+to
+the
+various
+SRP
+approaches
+discussed
+in
+Sections II–IV yielding a ﬁne SRP map, we also evaluate the
+localization accuracy of the non-exhaustive spatial search ap-
+proach in [21], which iteratively reﬁnes the search space based
+on a accumulating TD GCC samples over volumes of decreasing
+dimensions. In the remainder, we refer to this volumetric ap-
+proach as iterative reﬁnement-based SRP (IR-SRP) and denote
+it by the subscript ir. The complexity of IR-SRP is deﬁned as
+the sum of Csamp and the number of MAC operations required
+for accumulating the TD GCC samples over all reﬁnement
+steps [21].
+We deﬁne the following performance measures. For Ctype ∈
+{Ctd, Clr, Csi, Cslri, Csspi, Cir}, we deﬁne the relative complex-
+ity with respect to C as
+Crel = Ctype/C.
+(63)
+The SRP matrix error εH(Htype) with respect to H
+for Htype ∈{Hlr, Hsi, Hslri, Hsspi} and the SRP map error
+εz(ztype) with respect to z for ztype ∈{zlr, zsi, zslri, zsspi} are
+deﬁned as
+εH = 10 log10
+∥Htype −H∥2
+F
+∥H∥2
+F
+dB,
+(64)
+εz = 10 log10
+∥ztype −z∥2
+∥z∥2
+dB.
+(65)
+The performance in terms of εH(Htype) and εz(ztype) versus
+Crel is evaluated in Section V-B-2-b.
+Further, for the NF or FF source-location estimates ˆqs| type ∈
+{ˆqs, ˆqs|td, ˆqs|lr, ˆqs|si, ˆqs|slri, ˆqs|sspi , ˆqs|ir}, we deﬁne the local-
+ization error εs as the distance between the estimated and the
+true source location and the angle between the estimated and
+the true incident direction, respectively, i.e.
+εs =
+
+∥ˆqs| type −qs∥
+for NF localization,
+acos[ˆqT
+s| typeqs] for FF localization.
+(66)
+As the distributions of εs were observed to have a nearly uniform
+tail, suggesting that erroneous location estimates are uniformly
+distributed over the search grid, cf. also Section V-B-2-a, we
+further deﬁne the localization accuracy ρs as a function of εs
+by
+ρs =
+
+1
+for εs ≤εth
+0
+for εs > εth ,
+(67)
+where we use the NF and FF error tolerances εth =
+{4, 8, 16} cm and εth = 3◦, respectively. The performance in
+terms of ρs versus Crel is evaluated for varying values of εth
+in the NF case and different array apertures in the FF case in
+Section V-B-2-c, for for varying noise and reverberation values
+in Section V-B-2-d, and for varying number of microphones in
+Section V-C-2-a.
+Finally, we deﬁne D as the computation time of conv. FD
+SRP, and Dtype ∈{Dtd, Dlr, Dsi, Dslri, Dsspi, Dir} as the com-
+putation time of the other considered SRP approaches. Based on
+this, we deﬁne the relative computation times with respect to D
+Fig. 1.
+Microphone [◦] and candidate locations [·] in the NF scenario. The
+three-dimensional search grid samples a volume of (4 × 5 × 0.1) m. For better
+visibility, the search grid is shown with a reduced resolution of 10 cm instead
+of the simulated resolution of 3.33 cm per spatial dimension. The axes limits
+correspond to the room dimensions.
+TABLE II
+PARAMETERS RELEVANT TO COMPUTATIONAL COMPLEXITY IN THE NF AND FF
+SCENARIO
+as
+Drel = Dtype/D.
+(68)
+The computation time of the iFFTs will be denoted as Dsamp.
+All computation times are obtained for the implementation in
+MATLAB [34] on a MacBook Pro model with an Intel Core
+i7 processor. The performance in terms of Drel versus Crel is
+evaluated in Section V-C-2-b.
+B. Simulations Based on Simulated RIRs
+To be able to randomize the source location and study the
+effect of different reverberation times and array apertures, we
+ﬁrst perform simulations based on simulated RIRs.
+1) Simulation Setup: To demonstrate the performance of the
+proposed approaches for both small and large array sizes, we
+simulate an NF and an FF scenario within shoe-box shaped
+rooms, respectively. The geometries of the simulated scenarios
+are illustrated in Figs. 1 and 2, and the parameters relevant to
+computational complexity are summarized in Table II.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 9 ---
+5032
+IEEE/ACM TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING, VOL. 32, 2024
+Fig. 2.
+Microphone [◦] and candidate locations [·] in the FF scenario with
+array diameter ∅= 30 cm. The two-dimensional search grid samples the lower
+half-sphere of incident directions, indicated at 2 m distance from the center of
+the microphone array beyond which the FF assumption is assumed to be valid.
+For better visibility, the search grid is shown with a reduced resolution of 4◦
+instead of the simulated resolution of 2◦per angular dimension. The axes limits
+correspond to the room dimensions.
+In the NF scenario, M = 4 microphones are placed near the
+corners of a room with dimensions (4.9 × 5.9 × 3.5)m at a
+height of 3 m and in a distance of 0.4 m to 0.5 m to the walls.
+Thethree-dimensionalsearchgridsamplesavolumeof(4 × 5 ×
+0.1)m and lies below the microphones around a height of 1.5 m.
+Its spatial resolution is 3.33 cm, yielding J = 73084 candidate
+locations. Note that while a wider height range will commonly
+be required in practical applications, we here limit the range to
+keep simulations more tractable. In the FF scenario, a circular
+microphone array with diameter ∅= {10, 20, 30, 40}cm and
+M = 6 microphones is placed in the horizontal plane 10 cm
+below the ceiling and near the center of a room with dimensions
+(6.5 × 9 × 4.5)m. The two-dimensional search grid samples the
+polar and azimuth angle of the candidate locations and covers
+the lower half-sphere with zenith and azimuth direction along
+the third (i.e., the vertical) and the second room dimension. The
+angular resolution is 2◦, yielding J = 8101 candidate locations.
+In both scenarios, a single source is placed in 512 randomly
+selected locations, which are not restricted to be on the search
+grid. In the NF scenario, the random locations are restricted to be
+inside the volume spanned by the search grid. In the FF scenario,
+the distance of the source to the center of the microphone array
+is restricted to be at least 2 m.
+In each source location, speech of 3 female and 3 male
+speakers [40] of in total 241s is used as a source signal. Diffuse
+babble noise [41], [42] is added at varying SNRs of SNR =
+{12, 6, 0, −6, −12}dB. The shoe-box rooms are simulated us-
+ing the randomized image method [43] at varying reverberation
+times T60 = {0, 0.2, 0.6}s. Note that due to different geome-
+tries, the same reverberation time results in different direct-
+to-reverberant ratios (DRRs) and critical distances [44] across
+the two scenarios, with the NF scenario being more adversely
+affected as shown in Table III.
+The speed of sound is set to c = 340 m/s, and the sampling
+rates of the NF and the FF scenario are respectively set to
+TABLE III
+DRR AND CRITICAL DISTANCE FOR THE SIMULATED NF AND FF SCENARIO AT
+GIVEN REVERBERATION TIMES
+4 kHz and 16 kHz, implying the bandlimits ωb/2π = 2 kHz8 and
+ωb/2π = 8 kHz.
+The microphone signals are processed by a short-time Fourier
+transform (STFT) using square-root Hann windows of 2K =
+512 samples in the NF scenario and 2K = 1024 in the FF
+scenario,correspondingto128 ms and64 ms andwellexceeding
+the possible TDOA range, cf. Table II. For each random source
+location, SRP maps are computed for 32 different frames of
+microphone data.
+As shown in Table II, the computational complexity of conv.
+FD-SRP in the NF and FF scenario is C = 111.8 · 106 and
+C = 62.1 · 106, respectively. In conv. TD-SRP, SI-SRP, SLRI-
+SRP, SSPI-SRP, and IR-SRP, ξ is computed using the iFFT.
+We set Naux in (33) to Naux = 2, resulting in N = 125 and
+N = {11.4, 18.2, 25.8, 32.2} cm samples per microphone pair
+in the NF and FF scenario, where in the FF scenario larger values
+correspond to larger array diameters. For SI-SRP, we obtain the
+relativecomplexitiesCrel = 0.25andCrel = {1.6, 2.3, 3, 3.7} ·
+10−2. In LR-SRP, SLRI-SRP, and SSPI-SRP, Crel is scalable
+and varied by means of the low-rank or sparsity constraint. In
+IR-SRP, the spatial resolution is iteratively increased from 40 cm
+to 13.33 cm to 3.33 cm in the NF scenario, and from 12◦to 6◦
+to 2◦in the FF scenario.
+2) Simulation Results: We ﬁrst discuss the appearance of
+SRP maps for the studied approaches in Section V-B-2-a, and
+compare the matrix and map error in Section V-B-2-b and the
+localization accuracy in Section V-B-2-d.
+a) Appearance of SRP maps: In an ideal acoustic map, the
+power in each candidate location would be inﬂuenced only by
+a source in its close vicinity. The appearance of SRP maps by
+contrast is dominated by hyperboloids of constant TDOAs [25],
+with one hyperboloid per microphone pair and (image) source.
+The P hyperboloids due to the source intersect at the source
+location, yielding a large SRP value. This justiﬁes the commonly
+used peak picking-based location estimation in (10) and (11).
+The intersections of the hyperboloids due to image sources
+cause a multitude of more or less uniformly distributed local
+maxima, which can result in localization errors in particular if
+additional noise is present. For non-stationary source signals, the
+strength of individual hyperboloids varies over frames, causing
+ﬂuctuations in the SRP map.
+8Note that the required spatial resolution of the search grid depends on the
+bandlimit of the signal [25], [29]. In our simulations, we have chosen the spatial
+resolution and the bandlimit such that the main lobes of the resulting TD GCCs
+ξp(τ) are sampled by at least one candidate location TDOA Δtp(i), cf. (13).
+While the bandlimit of speech signals is larger than 2 kHz, we low-pass ﬁlter
+the signals accordingly in the NF scenario.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 10 ---
+DIETZEN et al.: SCALABLE-COMPLEXITY STEERED RESPONSE POWER BASED ON LOW-RANK AND SPARSE INTERPOLATION
+5033
+Fig. 3.
+Example map of conv. FD-SRP and corresponding maps of LR-SRP, SLRI-SRP (proposed), and SSPI-SRP (proposed) with relative complexity Crel ≈
+2 · 10−2 (i.e. nearly two orders of magnitude less than conv. FD-SRP) in the NF scenario at SNR = 0 dB and reverberation time T60 = 0.2 s. The maps represent
+the horizontal slice of the (three-dimensional) search grid closest to the true source location. The (projected) microphone locations, the true source location, and
+the estimated source location are marked by [◦], [▽], and [△], respectively. The corresponding SI-SRP map with Crel ≈0.25 is visually indistinguishable from
+the conv. SPR map (cf. also the map error in Fig. 5) and is left out for brevity.
+Fig. 3 shows an NF example of a conv. FD-SRP map as
+well as the corresponding LR-SRP, SLRI-SRP, and SSPI-SRP
+mapswithrelativecomplexityCrel ≈2 · 10−2.Thehyperboloid-
+based appearance described above can be veriﬁed in the conv.
+FD-SRP map in Fig. 3. We observe that conv. FD-SRP correctly
+localizesthesource(i.e.theestimated[△]coincideswiththetrue
+[▽] source location). The LR-SRP and the SLRI-SRP maps are
+less spatially variant and appear to be deﬁned by only a subset
+of the hyperboloids apparent in the conv. FD-SRP map. Most
+of the P = 6 hyperboloids due to the source cannot be visually
+identiﬁed anymore and seem to be lost through the low-rank
+approximation. As a consequence, the maximum of the SRP
+maps does not correspond to the source location, resulting in er-
+roneous localization. The SSPI-SRP map in contrast agrees very
+well with the conv. FD-SRP map, resulting in equally accurate
+localization.
+Fig. 4 shows an FF example of a conv. FD-SRP map as
+well as the corresponding LR-SRP, SLRI-SRP, and SSPI-SRP
+maps with relative complexity Crel ≈1 · 10−2. The FF maps are
+determined by the asymptotic behaviour of the hyperboloids of
+constant TDOAs, which are transformed to angular coordinates.
+Again, we observe that conv. FD-SRP and SSPI-SRP localize the
+source nearly correctly, and that the LR-SRP and the SLRI-SRP
+maps appear to be deﬁned by only a subset of the hyperboloids
+apparent in the conv. FD-SRP map. While LR-SRP fails to
+localize the source, the SLRI-SRP map preserves a few more
+features of the conv. FD-SRP map and achieves nearly accurate
+localization, although the maximum of the map is much less
+pronounced.
+The appearance of the LR-SRP, SLRI-SRP, and SSPI-SRP
+maps can be interpreted as follows. Due to the nature of low-rank
+approximations, which approximate matrices by a truncated sum
+of outer products, LR-SRP and SLRI-SRP introduce additional
+dependencies between the SRP values across different candidate
+locations. More precisely, we note that the SRP vectors zlr and
+zslri are forced to lie in the (real part of the) subspace spanned by
+the columns of Htall ∈CJ×RH and Λtall ∈RJ×RΛ, respectively,
+Fig. 4.
+Example map of conv. FD-SRP and corresponding maps of LR-SRP,
+SLRI-SRP (proposed), and SSPI-SRP (proposed) with relative complexity
+Crel ≈1 · 10−2 (i.e. two orders of magnitude less than conv. FD-SRP) in the
+FF scenario with array diameter ∅= 30 cm at SNR = 0 dB and reverberation
+time T60 = 0.6 s. The microphone locations, the true source location, and the
+estimated source location are marked by [◦], [▽], and [△], respectively. The
+corresponding SI-SRP map with Crel ≈3 · 10−2 is visually indistinguishable
+from the conv. SPR map (cf. also the map error in Fig. 6) and is left out for
+brevity.
+cf. (29) and (57). However, restricting the subspace wherein
+the SRP vector resides conﬂicts with the ideal of a spatial
+map wherein the power in each candidate location would be
+inﬂuenced by a source in its close vicinity only, that is where
+each source location is represented by a standard basis vector
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 11 ---
+5034
+IEEE/ACM TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING, VOL. 32, 2024
+Fig. 5.
+Matrix error εH (top) and median map error εz (bottom) vs. relative
+complexity Crel for LR-SRP [
+], SI-SRP (single point) [ ], SLRI-SRP
+(proposed) [
+], and SSPI-SRP (proposed) [
+] in the NF scenario. The
+shaded areas in the map error indicate the range from the 10th to the 90th
+percentile. The gray area indicates the range where Crel < Csamp, which cannot
+be reached by SLRI-SRP and SSPI-SRP.
+in a J-dimensional vector space. We can therefore argue that
+the low-rank approximations in LR-SRP and SLRI-SRP are
+potentially useful to the extent that the TDOA-based nature of
+power computation itself forces dependencies across candidate
+locations for a given geometry, but are likely to have a deteri-
+orating effect beyond. As will be shown in the experiment in
+Sections V-B-2-c and V-C-2, low-rank approximations tend to
+become more efﬁcient with decreasing array apertures and and
+an increasing number of microphones, respectively. SSPI-SRP
+on the other hand does not restrict the subspace wherein the
+SRP vector resides. Moreover, due to the decaying nature of
+sinc-functions, we can expect many elements of the interpolation
+matrix Λ in (42)–(43) to be negligible if the TDOA interval is
+sufﬁciently large with respect to the sampling period T, which
+lends it to sparse approximation.
+b) Matrix and map error: Figs. 5 and 6 show the matrix
+error εH and the map error εz vs. relative complexity Crel for
+LR-SRP [
+], SI-SRP
+, SLRI-SRP [
+], and SSPI-SRP
+[
+] in the NF and FF scenario, respectively. While εH can
+be computed before run time and is therefore deterministic,
+εz is averaged over all 512 source locations, 32 frames, and
+16 combinations of SNR and T60. In both the NF and the FF
+scenario, the characteristics of εH and εz widely agree across the
+different algorithms, such that in practice it sufﬁces to compute
+εH in order to judge εz.
+In both scenarios, LR-SRP can save a bit more or less than one
+order of magnitude of computational complexity without intro-
+ducing signiﬁcant errors. However, the errors increase rapidly
+at lower relative complexities. Unlike LR-SRP, the complexity
+of SLRI-SRP and SSPI-SRP is restricted to the range between
+Csamp and Crel of SI-SRP, which spans almost three decades in
+the NF scenario and one decade in the FF scenario. As compared
+to LR-SRP, SLRI-SRP performs similarly in the NF scenario and
+Fig. 6.
+Matrix error εH (top) and median map error εz (bottom) vs. relative
+complexity Crel for LR-SRP [
+], SI-SRP (single point) [ ], SLRI-SRP
+(proposed) [
+], and SSPI-SRP (proposed) [
+] in the FF scenario in the
+FF scenario with array diameter ∅= 30 cm. The shaded areas in the map error
+indicate the range from the 10th to the 90th percentile. The gray area indicates
+the range where Crel < Csamp, which cannot be reached by SLRI-SRP and
+SSPI-SRP.
+somewhat better in the FF scenario. The better performance of
+SLRI-SRP in the FF scenario may be due to the more effective
+SI-SRP approximation as compared to the NF scenario, which
+leaves room for a less aggressive low-rank approximation of the
+interpolation matrix. However, in both scenarios, LR-SRP and
+SLRI-SRP are signiﬁcantly outperformed by SSPI-SRP over a
+large range of Crel.
+c) Localization accuracy for varying error tolerances and
+array aperture: Fig. 7 shows the localization accuracy ρs vs.
+relative complexity Crel of conv. TD-SRP [▼], LR-SRP [
+],
+SI-SRP [ ], SLRI-SRP [
+], SSPI-SRP [
+], and IR-SRP
+[♦] as compared to ρs of conv. FD-SRP [
+] for different
+error tolerances εth and diameters ∅in the NF and FF sce-
+nario, respectively, at SNR = 12 dB and T60 = 0 s. In each
+subplot, the mean of ρs is taken over all 512 source locations
+and 32 frames. In both scenarios, the absolute performance of
+the different SRP algorithms largely depends on εth and ρs
+with better performance for larger values, while their relative
+performance indicates characteristic differences between the
+algorithms.
+In the NF scenario, LR-SRP and SLRI-SRP perform very
+similarly. We observe that their perfomance quickly declines
+for Crel < 2 · 10−1 for all choices of εth. For SSPI-SRP, in
+contrast, we generally observe signiﬁcantly better performance
+and a stronger dependency on εth, with the point of decline
+between Crel ≈5 · 10−3 at εth = 4 cm and Crel = 1.3 · 10−3 at
+εth = 16 cm. These complexities correspond to somewhat less
+and more than QΛ = JP, i.e. using on average one sample per
+candidate location and microphone pair for interpolation as in
+conv. TD-SRP. While the complexity of SSPI-SRP is scalable
+and allows to trade off complexity and performance, this is not
+the case for conv. TD-SRP. Relative to conv. FD-SRP, conv.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 12 ---
+DIETZEN et al.: SCALABLE-COMPLEXITY STEERED RESPONSE POWER BASED ON LOW-RANK AND SPARSE INTERPOLATION
+5035
+Fig. 7.
+Mean localization accuracy ρs vs. relative complexity Crel of conv. TD-SRP (single point) [▼], LR-SRP [
+], SI-SRP (single point) [ ], SLRI-SRP
+(proposed) [
+], SSPI-SRP (proposed) [
+], and IR-SRP (single point) [♦] as compared to ρs of conv. FD-SRP [– – –] for different error tolerances εth and
+diameters ∅in the NF and FF scenario, respectively, at SNR = 12 dB and T60 = 0 s. From left to right, the top and the bottom row, respectively, illustrate the
+effect of increasing εth and ∅in the NF and the FF scenario, respectively. The gray area indicates the range where Crel < Csamp, which cannot be reached by conv.
+TD-SRP, SLRI-SRP, SSPI-SRP, and IR-SRP. In the top and the bottom row, the vertical dotted grid line indicates Crel of SSPI-SRP for QΛ = JP and QΛ = 5JP,
+respectively, i.e. using on average one and ﬁve sample(s) per candidate location and microphone pair for interpolation.
+Fig. 8.
+Mean localization accuracy ρs vs. relative complexity Crel of conv. TD-SRP (single point) [▼], LR-SRP [
+], SI-SRP (single point) [
+], SLRI-SRP
+(proposed) [
+], SSPI-SRP (proposed) [
+], and IR-SRP (single point) [♦] as compared to ρs of conv. FD-SRP [
+] for different SNR values and
+reverberation times T60 in the NF scenario with error tolerance εth = 16 cm. From left to right, the top and the bottom row respectively illustrate the effect of
+decreasing SNR and increasing T60. The gray area indicates the range where Crel < Csamp, which cannot be reached by conv. TD-SRP, SLRI-SRP, SSPI-SRP,
+and IR-SRP. The vertical dotted grid line indicates Crel of SSPI-SRP for QΛ = JP, i.e. using on average one sample per candidate location and microphone pair
+for interpolation and corresponding to Crel of conv. TD-SRP.
+TD-SRP performs the worse the smaller εth, which can be
+attributed to spatial quantization effects in the SRP map due
+to the rounding operation in (23). The non-exhaustive search
+approach IR-SRP is particulaly effective in the NF scenario, with
+the performance close to FD-SRP and the complexity very close
+to Csamp due to the cost-efﬁcient iterative reﬁnement approach.
+In the FF scenario, we note that SI-SRP becomes more efﬁ-
+cient the smaller the diameter ∅, which is due to N decreasing
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 13 ---
+5036
+IEEE/ACM TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING, VOL. 32, 2024
+Fig. 9.
+Mean localization accuracy ρs vs. relative complexity Crel of conv. TD-SRP (single point) [▼], LR-SRP [
+], SI-SRP (single point) [ ], SLRI-SRP
+(proposed) [
+], SSPI-SRP (proposed) [
+], and IR-SRP (single point) [♦] as compared to ρs of conv. FD-SRP [
+] for different SNR values and
+reverberation times T60 in the FF scenario with array diameter ∅= 30 cm. From left to right, the top and the bottom row, respectively, illustrate the effect of
+decreasing SNR and increasing T60. The gray area indicates the range where Crel < Csamp, which cannot be reached by conv. TD-SRP, SLRI-SRP, SSPI-SRP,
+and IR-SRP. The vertical dotted grid line indicates Crel of SSPI-SRP for QΛ = 5JP, i.e. using on average one sample per candidate location and microphone pair
+for interpolation.
+Fig. 10.
+Microphone locations [⃝] and microphone indeces m in the NF
+scenario with measured RIRs.
+with microphone distances. We further observe a key difference
+between the sparse approaches approaches conv. TD-SRP, SSPI-
+SRP, and IR-SRP on the one hand and the low-rank approaches
+LR-SRP and SLRI-SRP on the other hand. The smaller the
+array diameter ∅, the worse perform both TD-SRP and IR-
+SRP relative to conv. FD-SRP, and the larger the complexity
+required by SSPI-SRP to reach the same performance. This
+complexity ranges from Crel ≈1.3 · 10−2 at ∅= 10 cm and
+Crel ≈0.8 · 10−2 at ∅= 40 cm, where the letter corresponds
+to QΛ = 5JP, i.e. using on average ﬁve samples per candidate
+location and microphone pair for interpolation. The difference
+in required interpolation accuracy between the NF and the FF
+scenario may be due to the scenario-dependent relations between
+candidate location, TDOA, and error metric, cf. (3) and (66).
+For LR-SRP and SLRI-SRP we observe the opposite relation:
+the smaller the array diameter ∅, the lower complexities can be
+reachedwhilemaintainingthesamecomplexityasFD-SRP,with
+SLRI-SRP (Crel ≈1 · 10−2 at ∅= 10 cm and Crel ≈2.3 · 10−2
+at ∅= 40 cm) outperforming LR-SRP. The better performance
+of SLRI-SRP in the FF scenario may be due to the more
+effective SI approximation as compared to the NF scenario.
+In any of the considered cases, either SSPI-SRP or SLRI-SRP
+allows for a better trade-off between complexity and perfor-
+mance as compared to TD-SRP and IR-SRP. At larger array
+apertures or error tolerances, however, improvements may not be
+signiﬁcant.
+d) Localization accuracy for varying noise and reverber-
+ation levels: For the NF and the FF scenario, Figs. 8 and 9
+respectively illustrate the localization accuracy ρs vs. rela-
+tive complexity Crel of conv. TD-SRP [▼], LR-SRP [
+],
+SI-SRP
+, SLRI-SRP [
+], and SSPI-SRP [
+], and IR-
+SRP [♦] as compared to ρs of conv. FD-SRP [
+] for dif-
+ferent SNR values and reverberation times T60. While the
+absolute performance of the different SRP algorithms largely
+depends on the SNR and T60, their relative performance ex-
+hibits the same trends across different conditions. As can
+be seen, the NF scenario is more sensitive to T60, cf. also
+Table III.
+In the NF scenario, we further observe that SSPI-SRP slightly
+outperforms conv. FD-SRP at around Crel = 4 · 10−3 (corre-
+spondingtoQΛ = 2JP),indicatingthatsparseinterpolationcan
+even be beneﬁcial to localization performance. As compared to
+the NF case without reverberation and little noise in Fig. 7, we
+note that the performance of IR-SRP is somewhat more reduced
+as compared to conv. FD-SRP.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 14 ---
+DIETZEN et al.: SCALABLE-COMPLEXITY STEERED RESPONSE POWER BASED ON LOW-RANK AND SPARSE INTERPOLATION
+5037
+Fig. 11.
+Mean localization accuracy ρs vs. relative complexity Crel of conv. TD-SRP (single point) [▼], LR-SRP [
+], SI-SRP (single point)
+, SLRI-SRP
+(proposed) [
+], SSPI-SRP (proposed) [
+], and IR-SRP (single point) [♦] as compared to ρs of conv. FD-SRP [
+] for increasing number of microphones
+M from left to right at SNR = 0 dB in the NF scenario with measured RIRs and error tolerance εth = 16 cm. The gray area indicates the range where Crel < Csamp,
+which cannot be reached by conv. TD-SRP, SLRI-SRP, SSPI-SRP, and IR-SRP. The vertical dotted grid line indicates Crel of SSPI-SRP for QΛ = JP, i.e. using
+on average one samples per candidate location and microphone pair for interpolation and corresponding to Crel of conv. TD-SRP.
+C. Simulations Based on Measured RIRs
+In addition to simulated RIRs, we perform simulations based
+on measured RIRs and study the effect of a varying number of
+microphones.
+1) Simulation Setup: The simulation setup is largely com-
+parable to the NF scenario in Section V-B-1, such that we
+limit the discussion to the relevant differences. The RIRs with
+T60 = 0.2 s are taken from the MeshRIR database [45] and the
+geometry of the microphone array and the search grid are chosen
+accordingly. We use up to M = 13 microphones lying in a planar
+grid of (1 × 1) m as shown in Fig. 10 at height 0 m. More
+speciﬁcally, we perform simulations using M = {3, 5, 9, 13}
+with the microphones selected according to the indeces m =
+1, .., M in Fig. 10, yielding P = {3, 10, 36, 78} microphone
+pairs. The three-dimensional search grid samples a volume of
+(2.4 × 2.4 × 0.1) m centered at [0, 0, −0.1] m. Its spatial reso-
+lution is 3.33 cm, yielding J = 21316 candidate locations. The
+32 sources are regularly distributed around the microphone array
+with the horizontal coordinates describing a square of (2 × 2) m
+and the height being either −0.1 m or 0.1 m. As the theoretical
+TDOAs are the same for positive and negative heights due to the
+symmetry of the setup, we treat the sources at height 0.1 m as if
+they were located at −0.1 m in order to use all 32 sources avail-
+able from the database. The frame length is 2K = 256 samples
+at 4 kHz, corresponding to 64 ms. For each source location, SRP
+maps are computed for 128 different frames of microphone data.
+The computational complexity of conv. FD-SRP in this scenario
+is given by C = {5.5, 24.6, 95.5, 210.1} · 106.
+2) Simulation Results:
+a) Localization accuracy for varying number of micro-
+phones: Fig. 11 illustrates the localization accuracy ρs vs. rela-
+tive complexity Crel of conv. TD-SRP [▼], LR-SRP [
+], SI-
+SRP (single point) [ ], SLRI-SRP (proposed) [
+], SSPI-SRP
+(proposed) [
+], and IR-SRP (single point) [♦] as compared to
+ρs of conv. FD-SRP [
+] for varying number of microphones
+M in the NF scenario with measured RIRs. In each subplot, the
+mean of ρs is taken over all 32 source locations and 128 frames.
+The peak performance of the different SRP algorithms largely
+depends on M and begins to saturate for M > 5. The curves for
+SSPI-SRP exhibits the same trends across different M and drops
+Fig. 12.
+Relative computation time Drel vs. relative complexity Crel of conv.
+TD-SRP [▼, symbol partially covered], LR-SRP
+, SI-SRP
+, SLRI-SRP
+(proposed)
+, SSPI-SRP (proposed)
+, and IR-SRP [♦] for M = 9 microphones
+in the NF scenario with measured RIRs, where Crel of the scalable approaches
+SL-SRP, SLRI-SRP, and SSPI-SRP is set to Crel ≈5.3 · 10−3, corresponding
+to Crel of conv. TD-SRP. The gray area indicates the range where Crel < Csamp
+or Drel < Dsamp. The dotted line indicates Drel = Crel.
+off below Crel = 7 · 10−3 corresponding to using on average a
+bit more than one sample per candidate location and microphone
+pair for interpolation. LR-SRP and SLRI-SRP however show a
+different behavior. While their performance begins to drop at
+Crel < 7 · 10−2 for M = 3, it drops only at Crel < 3 · 10−3 for
+M = 9 and M = 13, eventually outperforming SSPI-SRP. This
+result seems to suggest that above a certain threshold of micro-
+phone pairs P, additional pairs add redundant information only
+to the column space of the matrices H and Λ, such that low-rank
+approximations become relatively more efﬁcient. We further
+observe that at a large number of microphones, LR-SRP and
+SLRI-SRP outperform conv. FD-SRP around Crel = 5 · 10−3,
+indicating that low-rank approximations may even be beneﬁcial
+for source localization. As in the previous simulations, IR-SRP
+achieves complexities very close to Csamp at a somewhat reduced
+performance as compared to conv. FD-SRP.
+b) Relative computation time versus relative complexity:
+Fig. 12 illustrates the mean relative computation time Drel
+vs. relative complexity Crel of conv. TD-SRP [▼], LR-SRP
+,
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 15 ---
+5038
+IEEE/ACM TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING, VOL. 32, 2024
+SI-SRP [ ], SLRI-SRP (proposed) , SSPI-SRP (proposed) [•],
+and IR-SRP [♦] for M = 9 microphones in the NF scenario
+with measured RIRs. Here, Crel of the scalable approaches
+SL-SRP, SLRI-SRP, and SSPI-SRP is set to Crel ≈5.3 · 10−3,
+corresponding to Crel of conv. TD-SRP. The gray area indicates
+the range where Crel < Csamp or Drel < Dsamp. The dotted line
+indicatesDrel = Crel.ThemeanofDrel istakenoverall32source
+locations and 128 frames. The mean reference duration of conv.
+FD-SRP is D = 66.5 ms.
+We observe that Crel is generally a good predictor of Drel,
+with all algorithms relatively close to the line Drel = Crel in
+comparison to the range of Crel (3 orders of magnitude). The
+largest deviations with Drel ≈2.5Crel is observed for TD-SRP
+and SSPI-SRP, which can most likely be attributed to an al-
+gorithmic overhead needed for indexing the required TD-GCC
+samples in TD-SRP (and similarly IR-SRP) and indexing the
+non-zero elements in Λsp for SSPI-SRP. Hardware solutions to
+reduce this overhead are available in the literature [46]. Further
+deviations may be due to the abstraction from the computer’s
+hardware in the software architecture of MATLAB, which is de-
+signed as high-level programming language primarily intended
+for prototyping.
+VI. CONCLUSION
+We proposed two approaches to construct a ﬁne SRP map
+at scalable computational cost, referred to as SLRI-SRP and
+SSPI-SRP. Unlike non-exhaustive spatial search approaches, the
+proposed approaches rely on a ﬁne grid of candidate locations.
+The proposed approaches are based on a decomposition of the
+conv.FD-SRPmatrixintoasamplingandaninterpolationmatrix
+and optimal low-rank or sparse approximations of the latter.
+In simulations, the proposed approaches are compared to conv.
+FD-SRP, conv. TD-SRP, SI-SRP, LR-SRP in [27] and the non-
+exhaustive spatial search approach IR-SRP in [21] in various
+speech source localization scenarios including large and small
+array sizes. The results indicate that SSPI-SRP performs better
+if large array apertures are used, while SLRI-SRP performs
+better at small array apertures or a large number of micro-
+phones. In comparison to conv. FD-SRP, two to three orders
+of magnitude of complexity reduction can achieved, often times
+enabling a more favourable complexity-performance trade-off
+as compared to conv. TD-SRP. The results indicate that among
+the ﬁne SRP mapping approaches, SSPI-SRP outperforms both
+SLRI-SRP and LR-SRP over a wide complexity range if a low
+number of microphones and large array apertures are used, while
+SLRI-SRP performs better for small array apertures, and both
+SLRI-SRP and LR-SRP perform better at a larger number of
+microphones. In comparison to conv. FD-SRP, two to three
+orders of magnitude of complexity reduction can achieved, often
+times yielding a more favourable trade-off between complexity
+and performance in comparison to conv. TD-SRP. A further
+exploration of the dependency of the proposed approaches on
+the geometry of the array and the search grid as well as the
+relation between the number of microphones and the perfor-
+mance of the low-rank approaches SLRI-SRP and LR-SRP is
+subject to further research. Further, potential applications of
+low-rank decompositions to the problem of microphone-pair
+subset selection will be investigated.
+APPENDIX
+TWO-SIDED MATRIX-VECTOR FORMULATIONS
+In the Appendix, we introduce two-sided matrix-vector for-
+mulations. For the two-sided frequency bin index k ∈{−K +
+1, . . . , K}, let the index kmod be deﬁned by
+kmod = mod[k, 2K] + 1,
+(69)
+yielding kmod ∈{1, . . . , 2K}. As two-sided counterparts of ψp,
+Hp, and Sp in (18), (19), and (37), respectively, we deﬁne ¯ψp ∈
+C2K, ¯Hp ∈CJ×2K, and ¯Sp ∈CNp×2K as
+[¯ψp]kmod = ψp(ωk),
+(70)
+[ ¯Hp]i,kmod = ejωkΔtp(i),
+(71)
+[¯Sp]nmod,kmod = ejπkn/K,
+(72)
+Stacking over microphone pairs, as the two-sided counterparts of
+ψ,H,andSin(20),(21),and(39),wefurtherdeﬁne ¯ψ ∈C2P K,
+¯H ∈CJ×2P K, and ¯S ∈CP N×2P K as
+¯ψ = (¯ψ
+T
+1 · · · ¯ψ
+T
+P )T,
+(73)
+¯H = ( ¯H1 · · · ¯HP ),
+(74)
+¯S = blkdiag
+¯S1, . . . , ¯SP
+
+,
+(75)
+With these two-sided deﬁnitions, z in (22) can alternatively be
+expressed by
+z =
+P
+
+p=1
+ξΔtp
+=
+P
+
+p=1
+¯Hp ¯ψp
+= ¯H¯ψ.
+(76)
+Similarly, we can alternatively write ξp = ¯Sp ¯ψp and accord-
+ingly express ξ in (40) as
+ξ = ¯S¯ψ.
+(77)
+The correspondence between the two-sided formulations (76)
+and (77) and the singe-sided formulations (22) and (40) is exact
+if ψp(0) = 0 and ψp(±ωb) = 0, cf. Section II-D. Note that it
+can easily be veriﬁed that the rows of ¯Sp correspond to the rows
+of the 2K-iDFT matrix at indeces n′
+mod, with n′
+mod as deﬁned
+in (48). This allows the use of the iFFT in (46) and (47). From
+this relation to the 2K-iDFT matrix, we further observe that the
+rows of ¯Sp are orthogonal such that
+¯S¯SH = 2KI,
+(78)
+which is exploited in (53).
+ACKNOWLEDGMENT
+Thispaperreﬂectsonlytheauthors’viewsandtheUnionisnot
+liable for any use that may be made of the contained information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 16 ---
+DIETZEN et al.: SCALABLE-COMPLEXITY STEERED RESPONSE POWER BASED ON LOW-RANK AND SPARSE INTERPOLATION
+5039
+REFERENCES
+[1] Z. Chen, G. Gokeda, and Y. Yu, Introduction to Direction-of-Arrival
+Estimation. Norwood, MA, USA: Artech House, 2010.
+[2] M. Brandstein and D. Ward, Microphone Arrays: Signal Processing Tech-
+niques and Applications. Berlin, Germany: Springer, 2013.
+[3] C. Evers et al., “The LOCATA challenge: Acoustic source localization
+and tracking,” IEEE/ACM Trans. Audio, Speech, Lang. Process., vol. 28,
+pp. 1620–1643, 2020.
+[4] S. Gannot, E. Vincent, S. Markovich-Golan, and A. Ozerov, “A consol-
+idated perspective on multimicrophone speech enhancement and source
+separation,” IEEE/ACM Trans. Audio, Speech, Lang. Process., vol. 25,
+no. 4, pp. 692–730, Apr. 2017.
+[5] E. Vincent, T. Virtanen, and S. Gannot, Audio Source Separation and
+Speech Enhancement. Hoboken, NJ, USA: Wiley, 2018.
+[6] C. Knapp and G. Carter, “The generalized correlation method for estima-
+tion of time delay,” IEEE Trans. Acoust., Speech, Signal Process., vol. 24,
+no. 4, pp. 320–327, Aug. 1976.
+[7] R. Schmidt, “Multiple emitter location and signal parameter estimation,”
+IEEE Trans. Antennas Propag., vol. 34, no. 3, pp. 276–280, Mar. 1986.
+[8] R. Roy and T. Kailath, “ESPRIT–estimation of signal parameters via
+rotational invariance techniques,” IEEE Trans. Acoust., Speech, Signal
+Process., vol. 37, no. 7, pp. 984–995, Jul. 1989.
+[9] P. Stoica, P. Babu, and J. Li, “SPICE: A sparse covariance-based estimation
+method for array processing,” IEEE Trans. Signal Process., vol. 59, no. 2,
+pp. 629–638, Feb. 2011.
+[10] E. Grinstein et al., “Steered response power for sound source localization:
+A tutorial review,” EURASIP J. Audio Speech Music Process., vo. 2024,
+Nov. 2024, Ar. no. 59.
+[11] J. H. DiBiase, “A high-accuracy, low-latency technique for talker lo-
+calization in reverberant environments using microphone arrays,” Ph.D.
+dissertation, Brown University, Providence, RI, USA, 2000.
+[12] J. H. DiBiase, H. F. Silverman, and M. S. Brandstein, “Robust lo-
+calization in reverberant rooms,” in Microphone Arrays: Signal Pro-
+cessing Techniques and Applications, Berlin, Germany: Springer, 2001,
+pp. 157–180.
+[13] D. N. Zotkin and R. Duraiswami, “Accelerated speech source localization
+via a hierarchical search of steered response power,” IEEE Trans. Speech
+Audio Process., vol. 12, no. 5, pp. 499–508, Sep. 2004.
+[14] H. F. Silverman, Y. Yu, J. M. Sachar, and W. R. Patterson, “Performance
+of real-time source-location estimators for a large-aperture microphone
+array,” IEEE Trans. Speech Audio Process., vol. 13, no. 4, pp. 593–606,
+Jul. 2005.
+[15] J. P. Dmochowski, J. Benesty, and S. Affes, “A generalized steered
+response power method for computationally viable source localization,”
+IEEE Trans. Audio, Speech, Lang. Process., vol. 15, no. 8, pp. 2510–2526,
+Nov. 2007.
+[16] H. Do, H. F. Silverman, and Y. Yu, “A real-time SRP-PHAT source
+location implementation using stochastic region contraction (SRC) on
+a large-aperture microphone array,” in Proc. 2007 IEEE Int. Conf.
+Acoust., Speech, Signal Process., Honolulu, HI, USA, Apr. 2007,
+pp. I-121–I-124.
+[17] H. Do and H. F. Silverman, “A fast microphone array SRP-PHAT source
+location implementation using coarse-to-ﬁne region contraction (CFRC),”
+in Proc. 2007 IEEE Workshop Appl. Signal Process. Audio, Acoust., New
+Paltz, NY, USA, Oct. 2007, pp. 295–298.
+[18] S. Tervo and T. Lokki, “Interpolation methods for the SRP-PHAT algo-
+rithm,” in Proc. 2008 Int. Workshop Acoustic Echo Noise Control, Seattle,
+WA, USA, Sep. 2008, pp. 14–17.
+[19] H. Do and H. F. Silverman, “Stochastic particle ﬁltering: A fast SRP-PHAT
+single source localization algorithm,” in Proc. 2009 IEEE Workshop Appl.
+Signal Process. Audio, Acoust., New Paltz, NY, USA, Oct. 2009, pp. 213–
+216.
+[20] M.Cobos,A.Marti,andJ.J.Lopez,“AmodiﬁedSRP-PHATfunctionalfor
+robust real-time sound source localization with scalable spatial sampling,”
+IEEE Signal Process. Lett., vol. 18, no. 1, pp. 71–74, Jan. 2011.
+[21] A. Marti, M. Cobos, J. J. Lopez, and J. Escolano, “A steered response
+power iterative method for high-accuracy acoustic source localization,” J.
+Acoust. Soc. Amer., vol. 134, no. 4, pp. 2627–2630, Oct. 2013.
+[22] L. O. Nunes et al., “A steered-response power algorithm employing hier-
+archical search for acoustic source localization using microphone arrays,”
+IEEE Trans. Signal Process., vol. 62, no. 19, pp. 5171–5183, Oct. 2014.
+[23] M. V. S. Lima et al., “A volumetric SRP with reﬁnement step for
+sound source localization,” IEEE Signal Process. Lett., vol. 22, no. 8,
+pp. 1098–1102, Aug. 2015.
+[24] J. Velasco, C. J. Martín-Arguedas, J. Macias-Guarasa, D. Pizarro, and M.
+Mazo, “Proposal and validation of an analytical generative model of SRP-
+PHAT power maps in reverberant scenarios,” Signal Process., vol. 119,
+pp. 209–228, Feb. 2016.
+[25] D. Salvati, C. Drioli, and G. L. Foresti, “Exploiting a geometrically
+sampled grid in the steered response power algorithm for localization
+improvement,” J. Acoust. Soc. Amer., vol. 141, no. 1, pp. 586–601, 2017.
+[26] M. B. Çöteli, O. Olgun, and H. Hacihabibo˘glu, “Multiple sound source
+localization with steered response power density and hierarchical grid
+reﬁnement,” IEEE/ACM Trans. Audio, Speech, Lang. Process., vol. 26,
+no. 11, pp. 2215–2229, Nov. 2018.
+[27] F. Grondin and J. Glass, “SVD-PHAT: A fast sound source localization
+method,” in Proc. 2019 IEEE Int. Conf. Acoust., Speech, Signal Process.,
+Brighton, U.K., May 2019, pp. 4140–4144.
+[28] D. Diaz-Guerra, A. Miguel, and J. R. Beltran, “Robust sound source track-
+ing using SRP-PHAT and 3D convolutional neural networks,” IEEE/ACM
+Trans. Audio, Speech, Lang. Process., vol. 29, pp. 300–311, 2021.
+[29] G. García-Barrios, J. M. Gutiérrez-Arriola, N. Sáenz-Lechón, V. J. Osma-
+Ruiz, and R. Fraile, “Analytical model for the relation between signal
+bandwidth and spatial resolution in steered-response power phase trans-
+form (SRP-PHAT) maps,” IEEE Access, vol. 9, pp. 121549–121560, 2021.
+[30] T. Dietzen, E. D. Sena, and T. v. Waterschoot, “Low-complexity steered
+response power mapping based on Nyquist-Shannon sampling,” in Proc.
+2021 IEEE Workshop Appl. Signal Process. Audio, Acoust., New Paltz,
+NY, USA, Oct. 2021, pp. 206–210.
+[31] B. Çakmak, T. Dietzen, R. Ali, P. A. Naylor, and T. v. Waterschoot,
+“A distributed steered response power approach to source localization in
+wireless acoustic sensor networks,” in Proc. 2022 Int. Workshop Acoustic
+Signal Enhancement, Sep. 2022, pp. 1–5.
+[32] E. Grinstein, M. Brookes, and P. A. Naylor, “Graph neural networks for
+sound source localization on distributed microphone networks,” in Proc.
+2023 IEEE Int. Conf. Acoust., Speech, Signal Process., Rhodes Island,
+Greece, Jun. 2023, pp. 1–5.
+[33] P.-A. Grumiaux, S. Kiti´c, L. Girin, and A. Guérin, “A survey of sound
+source localization with deep learning methods,” J. Acoust. Soc. Amer.,
+vol. 152, no. 1, pp. 107–151, 2022.
+[34] T. Dietzen, “GitHub repository: Low-complexity steered response power
+mapping based on low-rank and sparse interpolation,” Jun. 2023. [Online].
+Available: https://github.com/tdietzen/LR-SP-INT-SRP
+[35] C. Zhang, D. Florêncio, and Z. Zhang, “Why does PHAT work well in low
+noise,reverberativeenvironments?,”inProc.2008IEEEInt.Conf.Acoust.,
+Speech, Signal Process., Las Vegas, NV, USA, Mar. 2008, pp. 2565–2568.
+[36] T. H. Cormen, C. E. Leiserson, R. L. Rivest, and C. Stein, Introduction to
+Algorithms. Cambridge, MA, USA: MIT Press, 2022.
+[37] C. D. Meyer, Ed., Matrix Analysis and Applied Linear Algebra. Philadel-
+phia, PA, USA: Soc. Ind. Appl. Math., 2000.
+[38] R. J. I. Marks, Introduction to Shannon Sampling and Interpolation
+Theory. Berlin, Germany: Springer, 2012.
+[39] N. Antonello, L. Stella, P. Patrinos, and T. v. Waterschoot, “Proxi-
+mal gradient algorithms: Applications in signal processing,”, Jan. 2020,
+arXiv:1803.01621.
+[40] C. Veaux, J. Yamagishi, and K. MacDonald, “CSTR VCTK corpus:
+English multi-speaker corpus for CSTR voice cloning toolkit,” 2016. [On-
+line]. Available: http://homepages.inf.ed.ac.uk/jyamagis/page3/page58/
+page58.html
+[41] E. A. P. Habets, I. Cohen, and S. Gannot, “Generating nonstationary
+multisensor signals under a spatial coherence constraint,” J. Acoust. Soc.
+Amer., vol. 124, no. 5, pp. 2911–2917, Nov. 2008.
+[42] T. Dietzen, R. Ali, M. Taseska, and T. v. Waterschoot, “MYRiAD: A
+multi-array room acoustic database,” EURASIP J. Audio Speech Music
+Process., vol. 2023, no. 17, pp. 1–14, Apr. 2023.
+[43] E. D. Sena, N. Antonello, M. Moonen, and T. v. Waterschoot, “On
+the modeling of rectangular geometries in room acoustic simulations,”
+IEEE Trans. Audio, Speech, Lang. Process., vol. 23, no. 4, pp. 774–786,
+Apr. 2015.
+[44] H. Kuttruff, Room Acoustics, 5th ed. London, U.K.: SPON Press,
+Apr. 2014.
+[45] S. Koyama, T. Nishida, K. Kimura, T. Abe, N. Natsuki, and J. Brunnström,
+“MESHRIR: A dataset of room impulse responses on meshed grid points
+for evaluating sound ﬁeld analysis and synthesis methods,” in Proc. 2021
+IEEE Workshop Appl. Signal Process. Audio, Acoust., New Paltz, NY,
+USA, Oct. 2021, pp. 151–155.
+[46] Z.Zhang,H.Wang,S.Han,andW.J.Dally,“SpArch:Efﬁcientarchitecture
+for sparse matrix multiplication,” in Proc. 2020 IEEE Int. Symp. High-
+Perform. Comput. Architecture, San Diego, CA, USA, 2020, pp. 261–274.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:48 UTC from IEEE Xplore.  Restrictions apply. 

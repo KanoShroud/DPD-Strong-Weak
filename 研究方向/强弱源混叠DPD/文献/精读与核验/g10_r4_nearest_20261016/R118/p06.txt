@@ -1,0 +1,68 @@
+Y. Zeng et al.: QNOMP: A Quasi-Newton-Based Joint Multipath Optimization Method
+
+
+
+Algorithm 2 Off-Grid BFGS Refinement                   Algorithm 3 QNOMP Algorithm
+  1: Input: CSI h′, OMP estimates ˆτ, ˆθ ∈Rk, maximum        1: Input: CSI h′, noise level σ, maximum iterations for
+     iterations nin                                                      local refinement nLR, maximum iterations for BFGS
+  2: Output: Refined estimates τ, θ                                     nin and nout, the refinement rates k1, k2, false alarm
+  3: Initialize: τ = ˆτ, θ = ˆθ, ˆβ = A†(τ, θ)h′, n = 1                 probability Pfa
+  4: while n ≤nin do                                                           2: Output: Channel parameter estimates τ, θ and β
+  5:    Compute gradient gn using (13)                                  3: Initialize: r = h′, τ = θ = ∅, k = 1, n = 1
+  6:     Determine step size αn via the Armijo line search        4: do
+    rule                                                                            5:  Applying Algorithm 1 nLR steps to obtain (ˆτ, ˆθ)
+  7:     Update τ and θ using scheme (12).                              6:  Applying Algorithm 2 nin steps to obtain (τ, θ, β)
+  8:     Update gains: ˆβ = A†(τ, θ)h′                                    7:  Update r = h′ −A(τ, θ)β
+  9:    n ←n + 1                                                              8: k ←k + 1
+ 10: end while                                                                   9: do while∥F−1(r)∥2∞> Tv as in (14)
+ 11: return τ, θ                                                           10:  Set Np = k and the regularizer E
+                                                                             11: while n ≤nout
+                                                                             12: Compute ˆβ = (AHA + σ 2E−1)−1AHh′
+                                                                             13:  Update τ, θ using (12), (13) with ˆβ from (16)
+C. THE STOPPING CRITERION OF OMP ITERATION
+                                                                             14: n ←n + 1
+The OMP iteration continues until the residual vector r                                                                             15: end while
+falls to the noise level. We adopt the constant false alarm                                                                             16: return (τ, θ, β)
+rate (CFAR) stopping criterion [34] to determine whether
+the residual conforms to the noise characteristics. Assuming
+accurate estimates of the channel parameters τ, θ, and β,
+the residual of the reconstructed signal satisfies F−1(r) =     D. THE JOINT BFGS STAGE
+A(τ 0, θ0)Hw′/MN. Due  to  the orthogonality√            of A,  the    The modified OMP iteration described in Sections III-A
+transformed noise  ˜w =  AHw′/ MN remains complex    and III-B determines the number of propagation paths Np and
+AWGN with covariance σ 2IMN. It is straightforward to show     yields iterative estimates of the channel parameters.
+that                                                             After Np  is  finalized, the dimensions of τ, θ and β
+                                                                are fixed. The problem thus reduces to an unconstrained
+                  2
+  P   F−1(r)                    Tv τ, θ, β = P n∥˜w∥2∞< MNTv o        optimization over the continuous parameter space. We further       ∞<
+                                                                   refine all delays and angles using the BFGS algorithm by
+                                 MN
+                  MN                                   solving the following regularized problem:
+                                                σ2        ,  = P  |˜w1|2 < MNTv   =  1 −e−MNTv
+                                                                    1
+                                                     min                                                            L(τ, θ) =                                                                                   ∥h′ −A(τ, θ) ˆβ∥22 + ˆβ HE−1 ˆβ,   (15)where Tv is the detection threshold we are going to determine.                                                                                τ,θ                                                               σ 2
+Let Tv =  σ 2(log(MN) + Z)/MN. Then we have (1 −
+e−MNTv/σ 2)MN = 1 −(MN)−1e−Z MN ≈exp (−exp(−Z))    where the optimal β given the delays and angles is derived
+for sufficiently large MN. Consequently, the false alarm    from the least-squares estimate:
+probability can be approximated as:
+                                                                                 ˆβ(τ, θ) = (AHA + σ 2E−1)−1AHh′.        (16)
+                2
+                   Tv τ, θ, β ≈1 −exp −exp(−Z) . P   F−1(r) ∞>                                                    The quadratic regularization term in (15) improves numer-
+                                                                         ical stability by reducing the condition number of the system
+Given a small false alarm probability Pfa, we can ensure         matrix. A convenient choice for the regularization matrix is
+                           2                        E = λI, where λ > 0 is a small positive constant.
+                           Tv τ, θ, β < Pfa                 This formulation admits a Bayesian interpretation, where        P   F−1(r) ∞>
+                                       E functions as the covariance matrix of a Gaussian prior
+by choosing Z = log(MN) −log(−log(1 −Pfa)), namely        distribution. Specifically, assuming the complex gains follow
+                                             β ∼  CN(0, E) and the observations are corrupted by
+   Tv = (MN)−1σ 2(log(MN) −log(−log(1 −Pfa))).   (14)    complex AWGN such that h′ = A(τ, θ)β + w′ with w′ ∼
+                                               CN(0, σ 2INM), the maximum a posteriori (MAP) estimate
+                        2
+Therefore, if  F−1(r) ∞> Tv, the null hypothesis—that the     corresponds to the solution of (15). the selection of E is
+residual consists solely of noise, implying correct channel     discussed in detail in the subsequent section.
+parameter estimation—can be rejected. This indicates that      The BFGS scheme for solving (15) follows the same
+the residual power exceeds the expected noise level, and     formulation as (12), with ˆβ given by (16) and the number
+additional OMP iterations are needed to further reduce the     of paths set to k = Np. For clarity, the complete two-stage
+reconstruction error.                         QNOMP algorithm is summarized in Algorithm 3.
+
+
+VOLUME 13, 2025                                                                                                         212657

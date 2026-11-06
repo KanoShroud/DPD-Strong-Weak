@@ -1,0 +1,61 @@
+                                                                                                                                                  2
+
+
+of NOMP, which consists of an on-grid sparsity selection   [τ1, τ2, . . . , τK]T (or θ = [θ1, θ2, . . . , θL]T). The dictionary
+stage and an off-grid joint optimization stage. Specially, we   matrix corresponding to a pair of delay and angle vector (τ, θ)
+apply the Broyden-Fletcher-Goldfarb-Shanno (BFGS) quasi-    is denoted as A(τ, θ) = [aτ(τi) ⊗aθ(θj)] for i = 1 : K; j =
+Newton optimization in the off-grid stage, which achieves  1 : L, where 1 : K = {1, 2, . . . , K} and same rule applies to
+rapid convergence and high accuracy with low computational   similar notations.
+cost. These QNOMP results are further utilized in the optimal
+extrapolation of CSI in a seamless manner.                                         II. THE MIMO CHANNEL MODEL
+  Our major contributions are as follows:                                          We consider a frequency-selective TDD MIMO channel.
+  •  Efficient quasi-Newton  optimization  in  off-grid  stage  Suppose the BS is equipped with a uniform linear array (ULA)
+     with high efficiency and accuracy. We resolve the grid-   with N antennas. The user sends M pilots xi ∈C, i = 1 : M
+    mismatch issue through the off-grid optimization. In this  on M subcarriers with subcarrier frequency spacing ∆f. The
+     stage, we apply the BFGS type quasi-Newton method,  BS receives signal yk ∈CN as
+    which  is matrix inverse free with super-linear conver-
+                                                               yk = hkxk + wk,  k = 1 : M,             (1)    gence rate. This high efficiency allows the joint opti-
+     mization of  all the channel parameters instead of the  where hk denotes the CSI in space domain and {wk}k are
+     optimization of single path in each step of NOMP, which   independent additive Gaussian white noise (AGWN). The CSI
+     significantly improves the estimation speed and accuracy.  hk can be expressed through a multipath model
+  • Linear optimal extrapolation. We derive the linear op-
+                                                            L
+     timal extrapolation for multipath model with the linear                                                        hk = X βie−j2πτik∆faθ (θi) ,  k = 1 : M,      (2)
+    minimum mean squared estimator (LMMSE) criterion.
+                                                                           i=1
+    Using Gaussian approximation, we can compute  this
+                                                      where L is the number of signal paths, βi the complex gain,     extrapolation efficiently by taking advantage of QNOMP
+     optimization results. This technique further improves the   τi the time delay, and θi ∝cos ϕi the directional cosine of the
+                                                                    angle-of-arrival (AoA) ϕi of the i-th path, respectively. More     extrapolation performance.
+                                                                      precisely, aθ(θ) is the steering vector  • Block sparsity structure exploitation. We propose a block
+     reweighting technique, which can identify the block spar-                                                                         h                                                                   aθ(θ) =  1, e−j2πθ, · · · , e−j2π(N−1)θiT ,        (3)      sity structure of TDD MIMO channel in the angular
+    domain and achieve more accurate channel estimation and                                                      where θ = d/λ · cos ϕ, d is the antenna spacing, λ is the
+     extrapolation. Numerical experiments on the simulated                                                                  subcarrier wavelength, and ϕ is the AoA. We simply take d =
+    models and CDL-C channels validate the high perfor-                                                  λ/2 in this paper, then θ ∈[−1/2, 1/2] and we take ϕ ∈[0, π].
+    mance and low computational complexity of QNOMP.                                                           Define the frequency response vector
+  The rest of this paper is organized as follows. In Section II,
+                                                                      hwe introduce the setup of TDD MIMO system and the mul-         aτ(τ) =  1, e−j2πτ∆f, . . . , e−j2πτ(M−1)∆fiT .
+tipath channel model. In Section III, we introduce our super-
+                                                   The frequency-antenna impulse response can be expressed byresolution algorithm QNOMP in  detail. In Section IV, we
+                                                        combining the steering vector and frequency response vectorformulate the extrapolation problem in Bayesian framework
+and derive the linear optimal extrapolation and its low rank                a(τi, θi) = aτ(τi) ⊗aθ(θi) ∈CNM.
+approximation. Moreover, a block reweighting technique for
+CSI with block sparsity in the angular domain is also proposed.  Denote β =  [β1, . . . , βL] ∈CL. The channel response
+Numerical experiments and related discussions are presented  h = [hT1 , hT2 , . . . , hTM]T ∈CNM can be expressed in a matrix
+in Section V. Finally we make the conclusion.                 form:                                                               L
+  Notations: We denote the matrices and vectors by bold                                                  h = X βia(τi, θi) = A(τ, θ)β,            (4)
+uppercase and  lowercase  letters,  respectively.  Scalars  are                     i=1
+in normal  font, and the  italic  i, j, k  are  utilized as sub-
+                                                      where τ = [τ1, · · · , τL]T, θ = [θ1, · · · , θL]T in RL. The sens-scripts. The  superscripts  (·)H and  (·)T  denote  conjugate
+                                                              ing matrix A(τ, θ) = [a(τ1, θ1), · · · , a(τL, θL)] ∈CNM×L.transpose and transpose, respectively.  | · | means the abso-
+                                                              Let x = [x1, x2, . . . , xM] ∈CM denote the collection of pi-lute value or modulus of a real/complex number. ℜ(z)  is
+                                                                              lots. We can rewrite the received signal y = [yT1 , . . . , yTm]T ∈the  real part of z. The Kronecker product  is denoted by
+                                    CNM into a matrix form⊗. diag(x) means a diagonal matrix with vector x on  its
+diagonal. CN(µ, Σ) denotes complex Gaussian distribution              y = diag(x ⊗1N)h + w,                (5)
+with mean µ and covariance Σ. For a given delay τ  or
+angle  θ, we denote  its corresponding frequency atom as  where w ∼CN(0, σ2INM) is AGWN.
+aτ(τ) := [1, e−j2πτ∆f, · · · , e−j2π(M−1)τ∆f]T and aθ(θ) :=    Assuming |xi| = 1, the least squares estimation of h based
+[1, e−j2πθ, · · · , e−j2π(M−1)θ]T, where j2 = −1 is the imagi-  on the observation y is
+nary unit. Given a set of delay (or angle) Ω= {τ1, τ2, . . . , τK}                                                                  h′ = diag(x ⊗1N)−1y = h + diag(x ⊗1N)−1w   (6)
+(or Θ =  {θ1, θ2, . . . , θL}), we always assume  they  are
+                                      = h + w′, w′ ∼CN(0, σ2INM).sorted in a proper order and write them in a vector τ =

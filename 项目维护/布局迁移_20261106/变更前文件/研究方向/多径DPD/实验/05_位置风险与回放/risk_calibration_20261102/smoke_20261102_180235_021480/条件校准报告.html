@@ -1,0 +1,41 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>位置风险条件校准</title><style>body{background:#f5f3ed;color:#183137;font:16px/1.8 "Microsoft YaHei",sans-serif;margin:0}main{max-width:1000px;margin:auto;padding:30px 22px}section{background:white;border:1px solid #d5dfdc;border-radius:12px;padding:22px;margin:20px 0}.scroll{overflow:auto}table{width:100%;border-collapse:collapse;white-space:nowrap}td,th{padding:10px;text-align:left;border-bottom:1px solid #ddd}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.8 "Microsoft YaHei",sans-serif}a{color:#087f79}</style><main><h1>开发联调</h1><p>已完成 1/1。全部记录完成，请回读判断。 记录完成不等于风险校准通过。</p><section><h2>定位误差与风险覆盖</h2><div class="scroll"><table><tr><th>条件</th><th>完成</th><th>LOS RMSE</th><th>多径RMSE</th><th>风险覆盖</th></tr><tr><td>L0</td><td>1/1</td><td>0.163323</td><td>0.163323</td><td>1/1</td></tr></table></div><p>RMSE单位米；缺失输出见完整报告。仅一个构型的条件重复，不声称泛化。</p></section><p><a href="file:///F:/DPD_Strong_Weak/outputs_e2e/mp_dpd/history/04_位置风险与回放/risk_calibration_20261102/smoke_20261102_180235_021480/条件校准报告.md">完整报告</a> · <a href="file:///F:/DPD_Strong_Weak/outputs_e2e/mp_dpd/history/04_位置风险与回放/risk_calibration_20261102/smoke_20261102_180235_021480/summary.json">统计JSON</a> · <a href="file:///F:/DPD_Strong_Weak/outputs_e2e/mp_dpd/history/04_位置风险与回放/risk_calibration_20261102/smoke_20261102_180235_021480/records.csv">逐例CSV</a></p><details open><summary>校准、偏移—波动与失败记录</summary><pre># 位置风险32条条件校准报告
+
+**开发联调：不属于正式32条。**
+
+完成 1/1 条。全部记录完成（包括失败记录）。
+已登记执行耗时 0.002 h；重复/中断成本 0.00 s。
+
+## 定位结果：有限输出与覆盖率一起报告
+
+|条件|完成/计划|LOS有效输出数|LOS RMSE / m|多径有效输出数|多径RMSE / m|风险适用数|
+|---|---:|---:|---:|---:|---:|---:|
+|L0|1/1|1|0.163323|1|0.163323|1/1|
+
+缺失输出不填零、不删记录。RMSE按全部有限输出计算，数值异常终态仍保留并另报停止原因；有缺失时不是全样本RMSE。
+
+## 风险差校准：只使用双方适用的共同子集
+
+比较 (预测LOS风险−预测多径风险) − (实际LOS损失−实际多径损失)，平均应接近0才支持校准；单条符号不作为有效性判断。
+
+|条件|共同子集数|平均风险差校准误差 / m²|描述性95%区间|
+|---|---:|---:|---|
+|L0|1|0.000000|不足2条，不计算|
+
+每条件只有8个噪声实现；区间是配对描述性t区间，未作多重比较的整体控制。风险不适用可能有选择性，不能把共同子集结论外推到所有样本；区间含零不等于证明无偏。
+
+## 均方误差分解及失败原因
+
+### L0
+- LOS: MSE=0.026674 = 平均偏移平方 0.026674 + 中心波动 0.000000 m²；中心波动使用分母n，确保样本恒等分解，不冒称无偏总体方差。
+- WIDE: MSE=0.026674 = 平均偏移平方 0.026674 + 中心波动 0.000000 m²；中心波动使用分母n，确保样本恒等分解，不冒称无偏总体方差。
+- 停止原因：{&#x27;no_detected_increment&#x27;: 1}
+- 风险不适用：{}
+
+## 解释边界
+
+- 同一L20几何；每条件固定原波形、信道，只改变噪声。L3使用原未见阶数批的波形/信道，不把跨条件差异全归于路径数。
+- 未改变初始化、候选数、约束、停止阈值或求解预算；真实位置只用于末端评价。
+- 风险评分不参与本批增径或输出选择，没有检验完整风险选择器，也没有证明新理论或比强近邻更优。
+- 完整参照偏差、同数据选支持及非线性影响均可能造成校准误差；结果须回读判断，不自动判定创新通过。
+- 未运行640条。所有异常、阶段产物、尝试和耗时在cases与events.jsonl保留。
+</pre></details></main></html>

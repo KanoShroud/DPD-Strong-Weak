@@ -1,0 +1,61 @@
+                                                                                                                                                  7
+
+
+We can approximate the expectation by Gaussian quadrature.   We point out that the optimal basis for low rank LOX is
+To be specific, we have                                         closely related to the discrete prolate spheroidal sequences
+                           S                         (DPSS) or discrete Slepian basis [39]. In fact, we show that
+        Eτi|h′a0(τi)a0(τi)H ≈ X a0(τ ik )aH0 (τ ik )wk,        when Np = 1, the eigenvectors {u1, u2, . . . , ur} are exactly
+                           k=1                       DPSS. Details are discussed in Appendix B.
+                           S
+        Eτi|h′ae(τi)a0(τi)H ≈ X ae(τ ik )aH0 (τ ik )wk,          C. The Block Reweighting Technique
+                           k=1
+                                                                  In realistic communications, the propagation paths are not
+where S is the order of Gaussian quadrature, τ ik = τ iMAP +   distributed completely in random, but rather has a clustered√2δixk, δi = 1/(Hn)ii, xk are Gaussian quadrature points                                                                    structure [33]. The multipath model hk in (4) can be rear-
+and wk the corresponding quadrature weights, which can be                                                          ranged as
+pre-computed. Thus the covariance can be approximated by
+                                                                       Nc            Ni
+                     Np                         S                                                                               e−j2πτik∆f X                                                                                                      βi,jaθ (θi,j) ,                                                           hk = X        X    Cov(A0β, A0β) ≈ X                           Eiwia0(τ ik )aH0 (τ ik )                                                                                       j=1                                                                              i=1
+                        i=1 k=1
+            = B0(τs)DBH0 (τs),                  where Nc  is the number of scattering  clusters, Ni  is the
+                                                         (28)  number of sub-paths in the i-th scattering cluster. Multiple
+                     Np  S
+    Cov(Aeβ, A0β) ≈ X X Eiwiae(τ ik )aH0 (τ ik )           sub-paths in a path cluster have the same or very close time                                                                  delays, yet the spatial angles of the sub-paths concentrate in
+                        i=1 k=1
+                                                           a certain extended range, which is referred to as the angular
+            = Be(τs)DBH0 (τs),                                                             spread of the path cluster. We denote the angular blocks as
+where τs =  [τ 11 , . . . , τ1S , . . . τNp,1    . . . , τNp]S  ∈RSNp, B0 =  Ci = {θi,j|j = 1, 2, . . . , Ni}, i = 1, 2, . . . , Nc. Each angular
+A0(τs) ∈CM×SNp, Be = Ae(τs) ∈CK×SNp, D =   block is assumed to be concentrated with an angular spread:
+diag{[Eb1 . . . EbNp] ⊗w}, and w = [w1, . . . , wS]. Thus the                                                                Ci ⊂Bi = (θi,0 −∆i, θi,0 + ∆i).         (33)
+LOX has the form
+                ˜h ≈BeDBH0 (B0DBH0 + σ2I)−1h′                Taking advantage of this block sparsity structure of channel,
+                                                         (29)  we can improve QNOMP to get a more accurate result. After
+        = Be(BH0 B0 + σ2D−1)−1BH0 h′.                                                                 the QNOMP, we have got the estimated parameters (τ, θ, β)
+Since Gaussian quadrature is very accurate, the order S needs   for major propagation paths. These paths can be viewed as the
+not to be large. In practice, we find that three points are   centers of the angular blocks Bi in (33). The path parameter
+already enough. The corresponding Gauss points are x1,2,3 =   τi is the delay of the cluster, θi the center of the angular block,
+−p3/2, 0, p 3/2, and weights w1,2,3 = 1/4, 1/2, 1/4.        and |βi|2 approximately the total energy of the angular block.
+                                                      Here we propose a simple algorithm to adaptively reconstruct
+B. Optimal Low Rank Approximation of LOX                   the angular blocks and calculate the final channel parameters
+                                                          based on this prior structure.  The direct computation of LOX involves the covariance
+                                                         Given (τ, θ, β), for every (τi, θi, βi), we expand  it as ancomputation and matrix  inverse, which  is  expensive. We
+                                                              angular block {(τi, θi)|i = 1, · · · , Np} with ∆= γ∆θ as theformulate a low rank approximation of LOX with the form
+                                              maximum width. ∆θ is a unit width, γ ≥1. To be specific,                          2
+   min E  ˜h −Ae(τ)β    ,   s.t.   ˜h = U(A0h′ + b),   (30)   the block has 2γ + 1 sub-paths
+     U,b                   2
+                                                             Bi = {(τi, θi + j∆θ)|j = −γ : γ}.         (34)where the columns of matrix U = [u1, u2, . . . , ur] ∈CM×r
+is a set of basis, r is the rank. The solution of (30) is        The 2γ + 1 paths have a total energy Ei = |βi|2. We assume
+                                                                 the energy is uniformly distributed on sub-paths with non-    Z = PU · Cov(Ae(τ)β, h′)Cov(h′, h′)−1h′.      (31)
+                                                               informative  prior. Namely, the path  (τi, θi + j∆θ) carries
+where PU := U(U HU)−1U H. This is actually the orthogonal   energy
+projection of LOX (23) onto the column space of U. Without                                      |βi|2
+                                                                                Eij =                            (35)loss of generality, we can assume the basis are orthogonal,                           2γ + 1.
+which means U HU = I. The MSE of estimator Z is EZHZ,
+                                          We denote all the sub-paths in blocks as (τ b, θb, Eb) =which has the form
+                                                              V{(τij, θij, Eij) = (τi, θi + j∆θ, Eij) i = 1 : Np, j = −γ  :
+    Tr[U HCov(Z, h′)Cov(h′, h′)−1Cov(h′, Z)U].     (32)   γ}. Then a regularized LMMSE is utilized to estimate the
+                                                           energy of each sub-path:Thus, we  can  choose  orthogonal  basis U  properly  to
+minimize  the  MSE.   It   is  well  known  that  the  ba-           h(Eb) = (AHb Ab + σ2(Eb)−1)−1AHb h′,      (36)
+sis  that minimizing MSE  is  the  first  r  eigenvectors  of
+Cov(Z, h′)Cov(h′, h′)−1Cov(h′, Z). Moreover, if Z −h′ ∼  where Ab = A(τ b, θb). Thus h(Eb) is the channel gains
+CN(0, σ2I), {u1, . . . , ur} can be chosen to be the  first r   for each sub-path under the uniform energy Eb and Gaussian
+eigenvectors of Cov(h′, h′) = Cov(A0β, A0β) + σ2I.          prior. The energy of the i-th sub-path is hi(Eb) 2. So we can

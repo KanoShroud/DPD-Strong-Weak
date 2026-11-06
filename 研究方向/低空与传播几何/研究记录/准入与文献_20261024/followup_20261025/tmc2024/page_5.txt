@@ -1,0 +1,61 @@
+AKBARI AND VALAEE: BINARY STRUCTURED SPARSITY APPROACH FOR MULTI-ANCHOR DIRECT LOCALIZATION                                    14059
+
+
+
+
+
+Fig. 2.  An overview of the methodology.
+
+
+   r    However, the presence of reﬂections, originating from var-   feasibleapproachtosolvingtheproblembyemployingadvanced
+     ious random points within the environment, poses a signif-   available solvers. Through this methodology, our approach lo-
+     icant challenge. These reﬂections can create uncertainties,   cates the signal source with a high accuracy compared to the
+     potentially compromising the accuracy of our localization   existing benchmarks.
+     estimates.
+  By focusing on these observations, we aim to enhance the   B. Dictionary and Signal Model
+precision of determining the location of the signal source within
+                                                                  In this section, we elaborate on the dictionary deﬁnition. Wethe multipath environment.
+                                                                    ﬁrst describe the construction of an over-complete dictionary
+                                                            followed by the signal model.
+                      IV. METHODOLOGY
+                                                     Our localization approach initiates by deﬁning a grid of size N
+A. Overview                                                      in the environment, symbolized as S = {ˆp1, ˆp2, . . . , ˆpN}. Each
+                                                                  grid point, denoted by ˆpi = [ˆx(i), ˆy(i)]T , signiﬁes a candidate  In this section, we provide an overview of our approach as
+                                                                  location for the source. To ﬁnd out the location of the source, we
+given in Fig. 2. The ﬁgure outlines a two-phase process for
+                                                                 assess the angles of arrival and distances of the incoming signal
+signal processing and localization. In Phase 1 (Setup), signals
+                                                                       relative to these grid points at each anchor.
+are received, a spatial grid is deﬁned, and a dictionary of signal
+                                                            For a given anchor a, the angle of arrival θ(i)a  and the corre-patterns is constructed. In Phase 2 (Processing and Localiza-
+tion), the received signals are processed to enhance quality,   sponding distance r(i)a from a source at grid point i are computed
+sparse recovery techniques are applied to reconstruct the signal,   as follows:
+and the source of the signal is localized within the grid. Our                                    ˆy(i) −˜ya    π                                                    +                                                                                               −πI(ˆx(i) < ˜xa)   (3)methodology for accurately locating a signal source in a 2-D          θ(i)a = arctan                                                                                   2                                                                                                                        ˆx(i) −˜xa
+multipath environment includes joint processing of the signal
+received at all anchors. This processing utilizes the principles of          r(i)a =    (ˆy(i) −˜ya)2 + (ˆx(i) −˜xa)2                 (4)
+Compressed Sensing, focusing on direct estimation of the loca-
+tion of the source by deﬁning a grid over the two-dimensional                                                            Here, ˜xa and ˜ya represent the coordinates of anchor a, and ˆx(i)
+space and using these grids in our estimator.                                                       and ˆy(i) those of grid point i. I addition, to address the ambiguity
+  The foundation of this methodology lies in using the sparse                                                                    arising from the angles produced by the arctan(.) function, which
+nature of the received signals. As mentioned before, in a multi-                                                         can correspond to any of the four quadrants of the unit circle, the
+path environment, the LoS components are notable for their con-                                                          term −πI(ˆx(i) < ˜xa) is incorporated where I(.) is the identity
+sistency among all the anchors, as they originate directly from                                                                  function.
+the signal source. In contrast, NLoS components, which result                                                         Using this grid framework, we construct a unique over-
+from signal reﬂections of various objects in the environment,                                                          complete dictionary Φa  for each anchor a, of dimensions
+add a layer of randomness to the overall signal. This distinction                                             Ne × N:
+between the consistent characteristic of LoS paths and the more
+random nature of NLoS paths of the received signal across all    Φa = [a(θ(1)a  , r(1)a  ), a(θ(2)a  , r(2)a  ), . . . , a(θ(N)a    , r(N)a   )],   (5)
+anchors is crucial for effective co-processing of the signal in our
+                                                      where the function a(θ, r) is deﬁned as per (2).localization approach.
+                                                             Leveraging the over-complete dictionary, we model the Ne ×  In this approach, the initial step is to deﬁne a grid over the
+                                                     1 received signal at anchor a, denoted by ya, in the following2-D environment. Then, utilizing the positional data from these
+                                                        manner:grid points, we construct an over-complete array manifold. This
+manifold is essential for leveraging compressed sensing in our                                                                    ya = Φasa + na                     (6)
+approach, providing a robust framework to handle our problem
+which translates into sparse recovery of the signal.               In this model, sa ∈CN×1 signiﬁes the complex signal vec-
+  The sparse recovery problem is inherently NP-hard. To effec-    tor, and na ∼CNNe×1 is the complex white Gaussian noise
+tively address this challenge, we transform the problem into an   vector. The support set of sa contains at most L elements.
+Ising model [38], [39]. This transformation allows for a more  To estimate L, we can employ source enumeration methods
+
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:02:23 UTC from IEEE Xplore. Restrictions apply.

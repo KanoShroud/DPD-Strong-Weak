@@ -1,0 +1,65 @@
+Y. Yang et al.                                                                                                   Journal of Sound and Vibration 517 (2022) 116549
+
+performance and does not need to use the DAS beamforming output as a starting point like the deconvolution methods. When the
+sources are coherent and the data snapshots are insufficient, the source identification performance of the above methods will degrade.
+Two-dimensional (2D) compressive beamforming utilizing planar microphone arrays and compressive sensing theory [18,19] has
+attracted much attention due to its wide source identification space, applicability to both coherent and incoherent sources, and clear
+imaging [20–24]. Conventional compressive beamforming discretizes the target source area, establishes underdetermined equations
+between the unknown source strength distribution and the measured sound pressure of array microphones, and solves them to obtain
+the coordinate and strength estimates of the sources. However, it suffers from the basis mismatch issue [25] and performance
+degradation under small source spacings (much less than the Rayleigh criterion distance) or low signal to noise ratios (SNRs) [21,26].
+The basis mismatch issue is that when the source lies off the discretized grid point, the performance of compressive beamforming
+degrades. Dense grids can only alleviate this problem to a certain extent, but at the expense of increased computational cost. Moreover,
+the over-dense grids lead to excessive coherence of the sensing matrix columns (steering vectors), which causes algebraic aliasing and
+deteriorates the source identification performance [26,27]. Besides, the poor source identification performance under small source
+spacings or low SNRs is also related to the coherence of the sensing matrix columns.
+   To solve the basis mismatch issue, many scholars have made efforts and proposed three types of improved compressive beam­
+forming methods: grid-free/gridless methods [24,28-30], dynamic grid methods [31–33], and off-grid methods [23,34-36]. The
+grid-free method deals the target source area as a continuum, establishes the atomic norm minimization model of microphone sound
+pressure induced by the acoustic sources, and solves it to obtain the source distribution. It can fundamentally circumvent basis
+mismatch but is only compatible with rectangular arrays with uniformly distributed microphones and sparse rectangular arrays. The
+dynamic grid method constructs an objective function with the grid coordinates and the source strength distribution as variables,
+establishes its replacement function utilizing an optimized minimization framework to reduce the computational complexity, and
+iteratively solves it by the gradient descent method to make the initial grid coordinates and source strength distribution gradually
+approximate the true values. It is compatible with arbitrary geometry planar array, but its computational efficiency is low, and its
+performance and computational efficiency are affected by the iteration step size. Off-grid methods mainly include the off-grid
+compressive beamforming that utilizes Taylor expansion to compensate for off-grid deviations [23] and Newtonized orthogonal
+matching pursuit (NOMP) [37] compressive beamforming that uses Newtonian optimization to search for the true acoustic source
+position [36]. The former regards the grid-based DOA estimates and the 2D off-grid DOA compensations as blocks to establish a
+block-sparse [38] off-grid compressive beamforming model and solves it to obtain the source coordinate estimates. The latter es­
+tablishes a maximum likelihood estimate with the source coordinates and source strengths as parameters, and utilizes on-grid initial
+estimate and subsequent Newtonian optimization to obtain the accurate source coordinates and source strengths estimate. It is
+compatible with arbitrary geometry planar array, has high computational efficiency, and does not require the prior knowledge of SNR.
+Besides, it enjoys a high spatial resolution due to the cyclic feedback Newtonian optimization.
+   To improve the sound source identification performance under small source spacings or low SNRs, many scholars have tried multi-
+snapshot compressive beamforming [26,36,39-43]. Based on a time-invariant signal assumption, the multi-snapshot methods process
+synchronously multiple data blocks (snapshots) of the array signal that share the same source sparsity by joint sparse recovery al­
+gorithm to obtain the source strength distribution. The joint processing can promote spatio-temporal common sparsity and enhance the
+anti-interference ability. The increased rank of microphone sound pressure matrix brings improved spatial resolution and source
+localization and quantification accuracy. Multi-snapshot versions of conventional grid-based compressive beamforming, grid-free
+compressive beamforming, and off-grid compressive beamforming have been developed. The authors in this paper also developed a
+2D multi-snapshot off-grid compressive beamforming based on NOMP. It enhanced anti-interference ability and had better identifi­
+cation performance for closely-spaced sources than the single-snapshot version [36]. However, limited by the time-invariant signal
+assumption [26], multi-snapshot methods are only applicable to stationary sources. Recently, Park et al. [44] and Ang et al. [45]
+proposed the multi-frequency synchronous methods with similar ideas and performance to the multi-snapshot methods. These
+multi-frequency methods do not require the time-invariant signal assumption and are applicable to both stationary and nonstationary
+acoustic sources. The method of Park et al. is grid-based and compatible with arbitrary geometry planar array, but it cannot overcome
+the basis mismatch issue. The method of Ang et al. is grid-free, which can solve basis mismatch issue, but it is only suitable for
+one-dimensional uniform linear arrays and can only identify sources in a locally limited area in front of and co-planar with the array.
+Hitherto, no method can solve the two aforementioned problems (the basis mismatch problem and the performance degradation under
+small sources spacings or low SNRs) while being compatible with arbitrary geometry planar arrays and both stationary and nonsta­
+tionary acoustic sources.
+   In this paper, we proposed a multi-frequency synchronous 2D off-grid compressive beamforming. This method first formulates the
+acoustic source identification in a 2D continuous plane as a maximum likelihood estimation model with source coordinates and the
+source strengths of all frequencies as parameters. Then, a block-NOMP algorithm (BNOMP) that processes multiple frequencies
+synchronously is developed to solve the model. The proposed method can overcome the basis mismatch issue, improve the identifi­
+cation performance under small source spacings or low SNRs, and it is compatible with arbitrary geometry planar arrays and applicable
+to both stationary and nonstationary acoustic sources.
+   The rest of the paper is organized as follows. Section 2 introduces the multi-frequency measurement model based on planar
+microphone arrays. Section 3 and Section 4 establish the multi-frequency synchronous on-grid and off-grid compressive beamforming,
+respectively. The former is the basis for the latter. Section 5 demonstrates the performance of the proposed method through the
+identification simulations for stationary and impulsive acoustic sources. Section 6 discusses the experiments performed and Section 7
+gathers the conclusions.
+
+
+                                                                2

@@ -1,0 +1,61 @@
+                                                                                                                                                  8
+
+
+change the prior Eb to Eh = diag{|h1(E)|2 , |h2(E)|2 , . . . }   to extrapolate are f0 + ∆f · [kM, kM + 1, · · · , (k + 1)M −1]
+and re-estimate the channel gains by                             for k = 1 : K. This is actually a one-sided extrapolation.
+                                                            For  the same  fixed ground  truth h,  let AWGN w ∼
+           hb = (AHb Ab + σ2E−1h )−1AHb h′.          (37)  CN(0, σ2INM), h′ = h + w as the noisy channel. The SNR
+Finally (τ b, θb, hb) gives the parameters for all sub-paths. Al-    is defined as SNR := ∥h∥22/(σ2NM). Under different noise
+though this reweighting technique can be applied recurrently,   level σ, 100 simulations are carried out, and the parameters
+we find practically it is enough to reweight only once.         (τ, θ) are sampled from corresponding uniform distributions
+  The total number of sub-paths can reach (2K + 1)Np. The   in each simulation. The accuracy of the estimated ˆh is mea-
+main cost of block reweighting lies in (36) and (37), which   sured by the average error for the 100 simulations, i.e.,
+is O(((2k + 1)Np)3 + ((2k + 1)Np)2(M + N) + NpMN).                                  100
+                                                                           1                                                                                     ∥hi −ˆhi∥22                           X                                                                                                                                                                  .In practice, the block reweighting introduces a slightly larger           NMSE =
+                                                                          100                                                                                       ∥hi∥22computational  cost. However, by making use of the prior                                                                                          i=1
+knowledge of the channel structure, this procedure can further                                                   The SNR is also averaged over simulations.
+identity low energy sub-paths that are closely distributed near                                                            For simulated channel models, we also measure the super-
+the major paths, which increases the overall accuracy. We                                                                  resolution error for the channel parameters in virtual domain.
+summarize the block reweighting technique in Algorithm 4.                                                         Without loss of generality, we only consider the delay τ. The
+                                                            average estimation error is measured by
+Algorithm 4 Block Reweighting Technique                                                    100
+                                                                           1                                                                                             ∥τi −ˆτi∥22                           X                                                                                                                                                                  ,  1: Input: Block center and energy (τ, θ, β) obtained by           NMSE =
+                                                                          100                                                                        L(∆τdft)2                                                                                          i=1   QNOMP, CSI h′, angle spread γ∆θ, threshold ϵ, ϵ1, ϵ2,
+    noise level σ,                                       where the k-th component of the estimated delay  ˆτi  is the
+  2: Output: Sub-path parameters (τ b, θb, hb)               one that closest to the true delay τi,k. The estimation error is
+  3: Divide |βi|2, i ∈[Np] into two parts [Np] = IH ∪IL   also compared with the Cramer-Rao lower bound [38] (CRB).
+   by selecting the first few paths that Pi∈IH |βi|2 > (1 −   All experiments are carried out in Matlab R2022b, on a i5-
+    ϵ) ∥β∥2                                        13500H PC. The algorithm’s time consumption is measured
+  4: Construct angular blocks Bi for  i ∈IH by (34) and   in CPU time.
+     initialize a uniform energy distribution (35)
+  5: The total sub-paths are (τ b, θb, Eb) = ∪i(Bi, Ei) ∪i∈IL                                                             A. Simulated Multipath Propagation Scenario
+     (τi, θi, |βi|2)
+                                          We construct a simple sparse multipath propagation model  6: Apply LMMSE (36) to re-estimate Eh
+  7: Apply LMMSE (37) to have the estimation hb              to test the performance of different algorithms. In this model,
+  8: return (τ b, θb, hb)                                          there are 7 paths with corresponding delays and angles (τk, θk)
+                                                                    for k = 1  : 7. These delays are set to be equally spaced
+                                                        τk+1 −τk = C1∆τdft, θk+1 −θk = C2∆θdft. The constants C1,2
+                                                                   indicates the proximity of paths. The smaller the constants
+                V. NUMERICAL RESULTS                       are, the closer the paths lie. The channel gains β = ej2πϕ with
+                                                                                                                                    i.i.d.
+  We conduct various numerical tests of QNOMP on both  ϕk ∼Uniform[0, 1]. The average NMSEs for 100 simulations
+simulated models and CDL-C models. We compare the ex-   are calculated under SNR ≈8.5 dB.
+trapolation accuracy and the computational cost for different    The local refinement rates of QNOMP is set to be k1 =
+related methods in numerical experiments. All the tested cases   k2 = 10 and refinement times nLR =  1. The number of
+are TDD MIMO channels. The pilots are carried on M = 24  BFGS iterations are set as nin = 3 and nout undetermined until
+subcarriers with spacing ∆f = 240KHz. The BS is equipped   convergence. The iteration parameters in NOMP are set as
+with a ULA with N = 64 antenna elements, while the user  Rs = 1, Rc = 3 and we add an nout times cyclic optimization
+has one antenna.                                               as in QNOMP. The grid size of conventional OMP and NOMP
+  We take the conventional OMP method, NOMP and a    is 0.1∆τ,θdft .
+dynamic off-grid ISTA method (OG-ISTA) [36] with gradient    The numerical experiments are carried out under two dif-
+descent based updating to make the comparison. In OG-ISTA,   ferent scenarios which have different path distributions. In
+a compressing grid technique [40] is also applied to reduce   Scenario 1, we set C1 = 2, C2 = 0.5, which has a relatively
+the computational  cost. QNOMP and LOX are compared   sparse path-delay distribution. In Scenario 2, parameters are
+with them. The QNOMP with block reweighting technique   set as C1 = 1, C2 = 0.5, which has a dense path-delay distri-
+is also tested in the clustered channel scenario. To make a   bution. We present the NMSE of CSI and delay for different
+fair comparison, the grid of OMP and NOMP is set to be   algorithms under different scenarios in Fig. 1. The bandwidth
+the same as the finest resolution of local refinement (i.e., the   with the label 24 is actually the result of CSI estimation, and
+multi-resolution OMP) module in QNOMP.                      larger label numbers correspond to the CSI extrapolation. It
+  We set a K-times frequency bandwidth to test the perfor-   can be observed in Fig. 1(a)(c) that the QNOMP and the LOX
+mance of extrapolation. More specifically, the pilot band fre-   based on QNOMP perform similarly and better than the others.
+quencies are f0 +∆f ·[0, 1, . . . , M −1]. The band frequencies  As the extrapolated bandwidth is wider, the extrapolation error

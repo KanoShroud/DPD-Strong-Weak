@@ -1,0 +1,67 @@
+                                                                                          Y. Zeng et al.: QNOMP: A Quasi-Newton-Based Joint Multipath Optimization Method
+
+
+where Ab = A(τ b, θb). Here, β(Eb) represents the channel     local refinement module in QNOMP, with default refinement
+gains for each sub-path under the uniform energy Eb and     rates k1 = k2 = 10. For OG-ISTA, EM-IF-SBL, and SS-
+Gaussian prior. The energy of the k-th sub-path is given    Turbo-IF-VBI, the global refinement rates is set to k1 =
+by  βk(Eb) 2. We then update the prior energy to Eβ =     k2 =  2. A compressing grid technique [63] is applied in
+diag{ β1(Eb) 2 , β2(Eb) 2 , . . . } and re-estimate the channel    OG-ISTA and EM-IF-SBL to reduce computational cost,
+                                                           while parameters are constrained to a grid structure togains by
+                                                                    effectively capture potential delay clusters. SS-Turbo-IF-
+           βb = (AHb Ab + σ 2E−1β )−1AHb h′.         (34)   VBI does not employ grid compression. The performance
+                                                               of QNOMP, both with and without block reweighting,
+The  final  set  of parameters  for  all sub-paths  is given
+                                                                               is evaluated, particularly in clustered channel scenarios.
+by (τ b, θb, βb). While this reweighting technique can be
+                                                     To evaluate the extrapolation performance, we consider
+implemented iteratively, empirical results demonstrate that a
+                                                           a frequency bandwidth  that  is K  times wider than the
+single reweighting iteration is sufficient to achieve practical
+                                                                       pilot band. Specifically, the pilot subcarriers are located at
+estimation accuracy.                                                               frequencies f0+1f ·[0, 1, . . . , M−1], while the extrapolation
+  The total number of sub-paths in the block reweighting                                                        bands correspond to f0+1f ·[kM, kM +1, . . . , (k +1)M −1]
+procedure can reach (2γ + 1)Np. The primary computational                                                                   for k = 1, 2, . . . , K, forming a one-sided extrapolation setup.
+cost arises from solving the regularized LMMSE problems
+                                                           For a fixed ground-truth channel vector h, we generate
+in  (33) and  (34), which  requires O(((2γ + 1)Np)3 +                                                            noisy observations h′ = h + w′, where w′ ∼CN(0, σ 2INM)
+((2γ + 1)Np)2(M + N) + (2γ + 1)NpMN). Although this                                                                 represents complex AWGN. The signal-to-noise  ratio  is
+introduces moderate computational overhead, the method
+                                                             defined as SNR  :=  |h|22/(σ 2NM). For each noise leveleffectively leverages the channel’s block-sparsity structure                                                         σ, we perform 100 independent Monte Carlo trials, with
+to identify low-energy sub-paths concentrated near dominant                                                                the  parameters  (τ, θ) randomly sampled from uniform
+paths, thereby enhancing estimation accuracy. Empirical
+                                                                    distributions in each realization. The estimation accuracy is
+results demonstrate that the additional computational cost
+                                                                 quantified by the normalized mean squared error (NMSE),
+is justified by substantial performance gains in practical
+                                                          averaged over all trials:
+channel scenarios.
+                                                                                                                                                          Ntrials  We summarize the complete workflow of the QNOMP                                                                        1                                                                                                      ∥h(n) −ˆh(n)∥22                           X                                                                                                                                                                     .                                            NMSE =algorithm incorporating the block reweighting technique in                                                                                                                Ntrials                                                                                                    ∥h(n)∥22                                                                                    n=1Fig. 1 below.
+                                                   The reported SNR values are also averaged across simula-
+V. NUMERICAL RESULTS                                           tions.
+We evaluate the performance of QNOMP through extensive
+numerical experiments on both simulated and standardized     TABLE 2. Simulation parameters for different scenarios.
+3GPP Channel Model (CDL) channels. The experiments
+compare the frequency extrapolation accuracy and com-
+putational cost of various state-of-the-art algorithms in a
+TDD massive MIMO setting. All scenarios consider a base
+station (BS) equipped with a uniform linear array (ULA)
+of N antennas and a single-antenna user. Pilot signals are
+transmitted over M subcarriers with spacing 1f .
+  The following algorithms are included in the comparison:
+   • Conventional OMP, NOMP.
+   • A dynamic off-grid ISTA method (OG-ISTA) [46] with
+     gradient-descent updates, EM-based inverse-free sparse
+    Bayesian learning (EM-IF-SBL) [22].
+   • MUSIC  [31], ESPRIT  [33], and atomic norm  soft
+     thresholding (AST) [28], which are applied in one-       For simulated channel models, we  also  evaluate  the
+    dimensional (frequency-domain) scenarios, along with     super-resolution accuracy of the estimated parameters in the
+   TST-MUSIC  [32]—employed   in  two-dimensional     virtual domain. Without loss of generality, we focus on the
+     (frequency–spatial domain) settings—using the mini-     delay vector τ. The average estimation error is quantified by
+   mum description length (MDL) criterion;                   the NMSE defined as
+                                                                                                                                                          Ntrials   • For         channels                  with                        angular                               block sparsity,                                                   structured                                                                                 ∥τ (n) −ˆτ (n)∥2                                                                        1                           X                                                                                                                      2 ,     sparsity             turbo                     inverse-free                                  variational                                       Bayesian                                                            infer-          NMSE =
+                                                                                                                Ntrials                                                                            L(1τdft)2                                                                                    n=1    ence (SS-Turbo-IF-VBI) [61], [62] is also evaluated.
+  To ensure fairness in comparison, the grid size used in    where L denotes the number of paths. To properly align the
+OMP and NOMP is set to match the finest resolution of the     estimated delays ˆτ with the true delays τ, the k-th component
+
+
+212662                                                                                                              VOLUME 13, 2025

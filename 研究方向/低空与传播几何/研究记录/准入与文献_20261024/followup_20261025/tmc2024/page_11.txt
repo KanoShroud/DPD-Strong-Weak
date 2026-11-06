@@ -1,0 +1,65 @@
+AKBARI AND VALAEE: BINARY STRUCTURED SPARSITY APPROACH FOR MULTI-ANCHOR DIRECT LOCALIZATION                                    14065
+
+
+  Proof: By  assuming   ri∗a ≫1  and  noting  that −1 ≤     4) 3LHS-VBI [45]: The 3LHS-VBI (Three-Layer Hierarchi-
+sin θi∗a , cos θi∗a ≤1 we can simplify these terms as follows:              cal Structured Variational Bayesian Inference) algorithm
+                                                                                      is an approach designed to enhance user localization accu-
+               Δf  2         Na                          racy in 5 G networks. This method leverages a three-layer      J˜xu˜xu ≈4π2             Ne                           (ns −1)2     sin2 θi∗a ,     (39)         hierarchical structured sparse prior model to effectively            σ2              C
+                                  a=1                            integrate both the structured sparsity of the channel and
+and                                                         any available statistical location information (SLI).
+                                                                  5) ℓ0-norm-CS-DLE [18]: This approach also utilizes com-                              2         Na
+                                                                       pressive sensing to jointly process data captured from      J˜yu ˜yu ≈4π2 Ne Δf   (ns −1)2    cos2 θi∗a ,     (40)            σ2    C                                  a=1                          various anchors over a grid. However, it uses an ℓ0-pseudo
+                                                       norm approximation to the NP-hard compressed sensing
+and                                                             problem.
+                 Δf  2         NaJ˜xu ˜yu =J˜yu˜xu ≈4π2 Ne        (ns −1)2    sin θi∗a                                                  cos θi∗a .   B. Simulation Setup               σ2    C
+                                     a=1
+                                                               Simulations are conducted using the WIM2 simulator [46]                                                         (41)
+                                                           with the WINNER II channel model to generate received sig-Substituting (31), (32), and (33) in (34), we can ﬁnd (37).
+                                                                       nals. WINNER II channel model is a geometry-based stochastic  Equation (37) shows that the CRB for localization error is in-
+                                                     model for simulating communication channels between sourceversely proportional to the number of antenna elements, anchors,
+                                                       and anchors. It is particularly effective in representing variousand SNR. This implies that increasing the number of antenna
+                                                              multipath conditions. In these simulations, all the anchors op-elements reduces the variance of localization error. Similarly,
+                                                                    erate at a frequency of 5.25 GHz and feature a Uniform Linearincreasing the number of anchors helps to reduce this variance.
+                                                         Array (ULA) with 10 elements each. A transmitter is positionedFurthermore, an increase in SNR, which indicates a stronger
+                                                                         at [7 m, 8 m] within this area, and a total of 800 snapshots aresignal relative to background noise, reduces the variance of
+                                                             gathered for this analysis. The dictionary used in this study islocalization error, resulting in a more accurate and reliable
+                                                               constructed using a non-uniform grid of size G = 400. Twoestimate.
+                                                                scenarios are examined in our simulations:
+                                                                             r                                                                Scenario 1: We placed three anchors in a 20 m × 20 m
+              VI. PERFORMANCE EVALUATION
+                                                                  room,situatedatcoordinates[0 m, 20 m],[20 m, 15 m],and
+  In this section, the performance of the proposed localization        [12 m, 0 m]. These anchors are oriented at angles [0, 0, 2π3 ],
+method is thoroughly assessed by comparing it with established         [0, 0, 5π4 ], and [0, 0, 5π3 ] relative to the global coordinate
+benchmarks in the literature. Our method presents a binary struc-       system (GCS).
+tured sparsity (BSS) formulation in the context of multi-anchor       r Scenario 2: This setup involves four anchors in the same-
+localization problems, particularly focusing on its ability to        sized room. In  this scenario, the anchors are located
+address multipath effects. The key innovation of the BSS method         at coordinates [0 m, 20 m], [20 m, 20 m], [20 m, 0 m] and
+lies in the structured sparsity constraint, which ensures that the        [0 m, 0 m]. These anchors are oriented at angles [0, 0, 3π4 ],
+LoS components of signals from all anchors originate from a         [0, 0, 5π4 ], [0, 0, −π4  ], and [0, 0, π4 ] relative to the global
+consistent grid point.                                                coordinate system (GCS).
+                                                                All experiments are conducted using the DA environment
+A. Benchmarks for Comparison                               prepared for the research use which is an efﬁcient solver for
+                                                              binary programming problems. In situations where DA is not
+  Our evaluation includes a comparison with four benchmark
+                                                                   accessible, alternative commercial optimization software such
+methods from the existing literature:
+                                                               as Gurobi or CPlex can be used instead.
+  1) SpotFi [8]: SpotFi leverages super-resolution algorithms
+      for precise AoA calculation of multipath components,
+                                                          C. Simulation Results
+      functioning effectively even with limited antennas. It dis-
+      tinguishes the direct path through advanced ﬁltering and    To rigorously assess the effectiveness of our localization
+      estimation techniques.                                 methods, we employ the Empirical Cumulative Distribution
+  2) RoArray [14]: RoArray employs sparse recovery and  Function(ECDF)asakeyevaluationmetric.ECDFmeasuresthe
+      coherent processing across time, frequency, and spatial   proportion of observations below a certain threshold, providing
+     domains, enhancing localization accuracy. By utilizing a   a detailed non-parametric view of the distribution of localization
+      sparse grid in the spatial domain, it generates precise AoA   errors across trials. This metric is particularly useful in our
+      spectrums.                                              study for visualizing and quantifying the range and frequency
+  3) DiSouL [16]: This method applies compressive sensing   of localization errors, allowing us to evaluate the robustness
+      for joint processing of data from distributed arrays. It  and precision of our methods under various conditions. By
+      accurately estimates source locations without explicitly   integrating ECDF in our analysis, we can directly assess what
+     determining LoS AoAs, thereby circumventing data asso-   percentage of localization attempts fall within speciﬁc error
+      ciation challenges.                                          thresholds, enhancing the interpretability of our results and
+
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:02:23 UTC from IEEE Xplore. Restrictions apply.

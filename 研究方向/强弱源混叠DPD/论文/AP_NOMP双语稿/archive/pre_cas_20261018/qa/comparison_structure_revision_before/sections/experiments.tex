@@ -1,0 +1,153 @@
+\section{仿真实验}\label{sec:experiments}
+\subsection{场景、比较方法与评价设置}\label{sec:baselines}
+四站坐标分别为$(500,0)$、$(0,500)$、$(-500,0)$和$(0,-500)$\,m。以最大站间距离定义基线$R=\max_{l,v}\|\bm r_l-\bm r_v\|_2=1000$\,m。搜索区域为$[-1000,1000]^2$\,m$^2$，真实源位置为连续坐标，不要求落在初始网格上。两源采用独立BPSK符号，经根升余弦（RRC）脉冲成形；符号率$R_s=10$\,MHz、滚降系数$\alpha_{\mathrm{RRC}}=0.25$，对应名义带宽$B=(1+\alpha_{\mathrm{RRC}})R_s=12.5$\,MHz。表\ref{tab:scenario}汇总公共设置。
+
+\begin{table}[H]\centering\small
+\caption{公共仿真参数。}\label{tab:scenario}
+\begin{tabularx}{.96\linewidth}{@{}lX@{}}\toprule
+参数 & 设置\\\midrule
+接收站／源数 & 四个同步单天线站；已知$K=2$\\
+传播 & 自由空间相对幅度$1/d$与基带时延；$c_0=299792458$\,m/s\\
+波形 & 独立BPSK；RRC成形，符号率10\,MHz，滚降0.25\\
+中心与名义带宽 & 两源中心均为0；带宽均为12.5\,MHz\\
+采样与记录 & 50\,MHz；8192点；163.84\,$\mu$s\\
+处理频带 & $[-7,7]$\,MHz；完整记录DFT保留2293个频点\\
+噪声与信噪比 & 时域复噪声方差1；源B四站平均带内SNR为6\,dB\\
+平均接收功率差 & 0、3、6、9、12、15\,dB；固定源B与噪声，仅缩放源A\\
+初始网格 & 各方法统一20\,m，$101\times101=10201$点\\
+候选间距 & 30\,m；AP联合版本分别保留1、2、5个候选\\
+正式规模 & 20布局$\times$20随机实现$\times$6档功率差，共2400条\\
+共同子集 & 各布局预先固定2次实现，保留全部功率差，共240条\\\bottomrule
+\end{tabularx}
+\end{table}
+
+两源的符号、波形初相和定时独立。同一布局与随机实现的六档功率差共用波形和噪声，因而可以直接观察另一源增强带来的变化。源A为功率扫描源，源B为固定源；在正功率差下分别称强源和弱源，0\,dB时采用A／B标记。各方法只处理预先指定的公共频带$[-7,7]$\,MHz，在名义带宽两侧各留0.75\,MHz保护带，不提供逐源波形或频谱。筛选频点不重新缩放DFT，也不作逐站混合功率归一化。
+
+正式比较采用20个布局，覆盖双源均在站内、A外B内、A内B外和双源均在站外四类构型，每类5个。站内指四站凸包内部，站外仍位于搜索区域内。几何生成排除距任一站小于150\,m、距中心小于100\,m、距站点对连线小于50\,m的位置，两源间距至少300\,m。位置按预定几何约束生成，不按定位结果筛选。图\ref{fig:formalgeometry}展示全部布局。核心方法使用全部2400条观测；八类方法使用其中预先固定的共同240条，不将子集与主批重复计数。
+\begin{figure}[htbp]\centering
+\includegraphics[width=.88\linewidth]{figures/formal_geometry.pdf}
+\caption{20个源站布局，每类5个。黑色三角形为接收站，灰色菱形边界为站点凸包；同一面板内，相同形状的两个标记为一对源，红色为源A、蓝色为源B。0\,dB时两源平均接收功率相同。}\label{fig:formalgeometry}
+\end{figure}
+\FloatBarrier
+图\ref{fig:formalgeometry}覆盖站内与站外的四类组合，使方法比较同时包含不同的源站位置关系。同一面板用五种形状区分五对源，颜色只区分源A与源B；各功率条件保持对应位置不变。
+
+所有方法共享IQ观测、已知传播信息、搜索区域和20\,m初始网格，保留各自的连续精修。LS谱、MUSIC、MVDR、AP、块NOMP、SBL、多初值联合ML和GA联合ML的本场景准则列于附录\ref{app:baselines}；具体参数见表\ref{tab:parameters}。多初值ML采用去重的谱峰组合与Sobol空间覆盖起点，GA采用128个体，避免因重复初始化削弱搜索覆盖。MUSIC以同一记录的四个片段估计协方差，按扣除噪声后的观测功率加权；MVDR-known使用八个片段，相对对角加载为0.01。两者均只分析公共处理带内的频点，不将MVDR-known称为原版DPD-HR。
+\par\input{sections/generated_parameters}\par
+表\ref{tab:parameters}区分每种方法的搜索、精修和停止设置。各方法共享初始网格，但不强求相同迭代次数；AP按共同梯度精度比较，固定系数与消元块NOMP则保留相同原生循环停止规则。
+\input{sections/generated_environment}\par
+
+\FloatBarrier
+\paragraph{定位评价}
+设真实与估计集合分别为$X=\{\bm p_k\}$、$Y=\{\widehat{\bm p}_j\}$。容许误差预先设为基线的2\%，即$r=0.02R=20$\,m，与初始网格步长分别定义。成功评价在距离不超过$r$的关联中先最大化一对一匹配数，再最小化平方距离和；双源成功要求两源同时匹配，单个估计不能重复对应两个真源。位置误差则使用最小平方距离指派\cite{Kuhn1955}：
+\begin{equation}
+ \pi^*=\arg\min_{\pi}\sum_{k=1}^{K}\|\bm p_k-\widehat{\bm p}_{\pi(k)}\|_2^2,
+ \qquad e_{ik}=\|\bm p_{ik}-\widehat{\bm p}_{i,\pi^*(k)}\|_2 .\label{eq:assignment}
+\end{equation}
+其中$i$为观测编号，$k$为源编号，$\pi$为估计编号的排列，$e_{ik}$单位为m。对$n$条观测，RMSE和经验累计分布函数（CDF）为
+\begin{equation}
+ \operatorname{RMSE}_k=\sqrt{\frac1n\sum_{i=1}^{n}e_{ik}^2},\qquad
+ \widehat F_k(t)=\frac1n\sum_{i=1}^{n}\mathbf 1(e_{ik}\le t).\label{eq:rmseCDF}
+\end{equation}
+式中$\mathbf 1$为示性函数，P95为误差的第95百分位数。RMSE和CDF使用全部样本，包括未达到成功门槛的样本。GOSPA\cite{Rahmathullah2017}保留为辅助集合指标，取$p=2$、$c=100$\,m、$\alpha=2$，其定义为
+\begin{equation}
+ d_{\mathrm G}(X,Y)^2=\min_{\gamma}\left[
+ \sum_{(k,j)\in\gamma}\|\bm p_k-\widehat{\bm p}_j\|^2
+ +\frac{c^2}{2}\left(|X|+|Y|-2|\gamma|\right)\right].\label{eq:gospa}
+\end{equation}
+这里$\gamma$为一对一部分关联，$|\cdot|$表示集合基数。正文以成功率、RMSE、CDF和耗时为主要比较依据。
+
+\paragraph{成本与统计}
+完整算法时间包含IQ输入后的DFT、频带筛选、传输、搜索、系数重估和精修，GPU计时同步，公共预热单列。在线轨迹记录计入登记墙钟，磁盘持久化及事后精度证书不计入求解时间；各方法独立承担搜索与初始化成本。目标、梯度、响应及循环调用分别统计，包含梯度计算的目标请求不与梯度次数相加。布局内同一实现的六档功率差保持配对；不确定性按构型类别、布局及随机实现分层重采样。核心比较和共同子集比较分别统计。
+
+\subsection{核心方法的总体定位表现}\label{sec:coreformal}
+多候选的主要收益是恢复单一起点遗漏的弱源。表\ref{tab:formalcore}汇总全部2400条观测，VP-BNOMP采用第\ref{sec:vpnomp}节的消元Newton实现。
+\input{sections/generated_formal_core}
+五候选MCJ-AP成功2376条，将单候选的95\%成功率提高至99\%，平均耗时为0.718\,s。两者的强源RMSE均约0.897\,m，说明弱源恢复没有以降低强源精度为代价。VP-BNOMP成功2278条，成功率为94.92\%，平均耗时0.586\,s：其优势是较低的逐源计算成本，MCJ-AP则具有更高的困难样本恢复率。主批VP-BNOMP由单独完成的同输入验证计时，表中不据跨批墙钟计算配对加速比例。
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{figures/formal_core.pdf}
+\caption{按构型分组观察功率差的影响。三列依次为全部20布局、诊断发现的困难布局4、其余19布局；每档分别400、20和380条。上行为双源成功率，下行为弱源RMSE，均计入对应组的全部失败。分组用于解释本批统计，不改变总体样本。}\label{fig:formalcore}
+\end{figure}
+\FloatBarrier
+图\ref{fig:formalcore}将两种影响分开：困难布局中的候选选择决定是否发生远距离错误，其余布局的误差变化更接近连续定位精度的变化。MCJ-AP在困难布局的120条观测中恢复96条，其余19布局均成功。困难布局是本批结果诊断识别出的布局4，而不是按每条观测的成败分组；因此，其全部成功与失败都保留在同一组内。
+
+图\ref{fig:formallayouts}进一步给出全部20个布局的失败分布。
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{figures/formal_layouts.pdf}
+\caption{各布局的双源失败数，每布局120条。四个面板对应四类构型，零表示该布局全部成功；不同标记在纵向稍作错开，便于辨认重合结果。}\label{fig:formallayouts}
+\end{figure}
+\FloatBarrier
+
+单候选在布局4的120条观测上全部失败，五候选恢复其中96条；其余布局原已成功，增加候选没有造成成功转失败。VP-BNOMP在布局4全部失败，其余19布局还有两条失败，均发生在15\,dB条件。这两条长尾也拉高了图\ref{fig:formalcore}右下角的RMSE，说明分组分析仍需结合失败分布理解，而不能只读一条平均曲线。
+
+五候选弱源P95为3.85\,m，RMSE为46.98\,m：大多数观测已有米级精度，少量远距离误差则拉高了RMSE。每档400条中有3--6条失败，均来自布局4，并贡献各档超过99.7\%的弱源平方误差。分组后，其余19布局的弱源RMSE随功率差从1.31\,m增至1.93\,m；总体折线的非单调变化则主要来自困难布局中失败数量与误差距离的变化。构型分组使功率差的影响更容易辨认，但不要求有限样本曲线严格单调，也不从总体结果中删除困难布局。
+
+\FloatBarrier
+\subsection{八类方法的共同观测比较}\label{sec:commonformal}
+表\ref{tab:formalcommon}使用各布局两次固定实现及全部六档功率差，共240条；表内VP-BNOMP采用这批正式比较中已经运行的相同消元实现，使各方法成本来自同批共同观测。
+\input{sections/generated_formal_common}
+在相同观测上，MCJ-AP以更低成本达到了充分AP和SBL的恢复水平。三者均全部成功，平均完整耗时分别为0.708\,s、8.908\,s和44.130\,s。固定系数BNOMP与VP-BNOMP均成功228条；消元版本的平均耗时由2.942\,s降至0.591\,s。两者保留相同发现和循环后共同LS结构，局部系数处理的差别在第\ref{sec:mechanismresults}节分析。
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{figures/formal_common.pdf}
+\caption{共同240条观测的功率差扫描，每档40条。左侧比较谱方法，右侧比较逐源与联合求解方法；两个面板使用同一五候选AP参照。}\label{fig:formalcommon}
+\end{figure}
+\FloatBarrier
+
+\begin{samepage}
+图\ref{fig:formalcommon}显示，MUSIC与MVDR-known在功率差增大后明显退化，整体成功率分别为62.92\%和31.25\%；LS谱取峰为15.83\%。逐源或联合拟合能够更好地处理本组混合观测。多初值ML成功率为18.75\%，充分AP则达到100\%；二者使用同一联合目标，结果差别体现了初始化与搜索路径的重要性。GA成功率为77.08\%，平均耗时为8.070\,s。
+\end{samepage}
+
+上述八类比较均使用共同240条，核心方法表则使用全部2400条。SBL有226条按原生稳定条件停止、14条达到300轮上限；最终VP-BNOMP的2400条均按原生能量稳定条件停止，未触及安全上限。辅助GOSPA、耗时P95与共同子集停止状态见表\ref{tab:auxiliary}。
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{figures/formal_cdf_cost.pdf}
+\caption{误差分布与可靠性--成本取舍。左：全部2400条核心观测的弱源CDF，虚线标出20\,m；右：同一240条共同子集的双源成功率与平均完整耗时。两个面板的样本范围分别标明，不跨样本范围排名。}\label{fig:formalcdfcost}
+\end{figure}
+\FloatBarrier
+图\ref{fig:formalcdfcost}将精度分布与计算成本放在一起比较。MCJ-AP在大多数观测中的弱源误差较小，长尾主要来自前述困难布局。共同子集的成本图显示，VP-BNOMP用较少计算获得较高成功率，MCJ-AP则通过额外候选处理恢复更多观测。两种流程的取舍应结合成功率、误差分布和耗时判断。
+
+\FloatBarrier
+\subsection{候选保留提高可靠性，联合精修减少计算}\label{sec:apresults}
+图\ref{fig:formalablation}将候选保留与联合精修的作用分别展示，避免把增加候选带来的额外成本与精修本身的节省混在一起。
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{figures/formal_ablation.pdf}
+\caption{AP的候选与精修消融，四面板单行排列。左两图为原2400条主批的成功率与耗时，右两图为同一2400条输入上的五候选配对耗时与梯度计算。ALT为交替精修，joint为联合精修；左、右两批分别计时，不跨批计算加速比。}\label{fig:formalablation}
+\end{figure}
+\FloatBarrier
+左两图显示，候选数为1和2的联合AP均成功2280条，五候选增至2376条。第二候选尚未覆盖本批困难区域，保留更多有效起点才带来恢复。右两图显示，在候选数相同的条件下，联合精修同时减少实际耗时和梯度计算。
+
+单候选配对先说明了联合精修的省时作用：相同成功数和接近的RMSE下，平均耗时从0.439\,s降至0.396\,s，减少9.84\%。平均耗时差（联合减交替）的95\%分层配对区间为$[-0.0496,-0.0367]$\,s；目标计算从39.76次降至28.69次，梯度计算从37.76次降至26.69次。
+
+为确认省时不是降低求解精度造成的，表\ref{tab:fivepair}单独列出五候选配对的精度和尾部指标。两种版本对每条观测使用相同的五个初始候选，在同一完整目标和投影梯度阈值下停止；运行顺序交错，共2400对、4800次求解。
+\input{sections/generated_formal_pair}
+表\ref{tab:fivepair}中，两者均成功2376条，成功／失败身份逐例一致；强源RMSE约0.896\,m，弱源P95约3.85\,m，弱源RMSE和GOSPA也几乎相同。这说明联合更新保留了交替更新的定位质量，效率改善并非以更早放弃困难样本为代价。与表中精度结果对应，图\ref{fig:formalablation}右两图显示平均完整耗时从1.0840\,s降至0.7441\,s，减少31.36\%；耗时差的95\%分层配对区间为$[-0.3691,-0.3121]$\,s。
+
+省时与计算量减少一致：平均联合目标计算从204.21次降至120.36次，梯度计算从198.21次降至114.36次，后者减少约42.30\%。两种版本选中分支均满足共同梯度条件，全部候选中有两次交替精修触及安全迭代上限，其结果仍计入统计。由此，多候选保留了困难弱源的有效起点，联合精修则以更少局部计算处理这些候选，两者共同构成MCJ-AP的可靠性与效率收益。
+
+\FloatBarrier
+\subsection{波形消元更新的机制与效率}\label{sec:mechanismresults}
+式\eqref{eq:schur}给出了固定系数与消元曲率之间的关系。位置改变时，波形系数可以补偿一部分响应变化，固定系数曲率没有扣除这部分耦合，可能产生反复的小步。局部消元同时改变更新方向和试探位置的目标计算，因此应与保留相同外层时序的参照配对，区分局部更新收益与整套实现差别。
+
+在同批共同240条上，固定系数与消元版本都成功228条，平均完整耗时分别为2.9416\,s和0.5907\,s，消元版本减少约79.92\%的计算时间，见表\ref{tab:formalcommon}。这一对照保持残差发现、逐源循环和循环后共同LS的时序，局部更新将固定系数Newton及其回溯目标改为式\eqref{eq:localprofile}的消元形式。结合式\eqref{eq:schur}，它直接检验了位置--波形耦合处理对计算效率的作用。
+
+全部2400条验证进一步确认了这一实现的整体表现：成功2278条，强源RMSE为0.892\,m，弱源RMSE为74.19\,m，平均耗时0.586\,s，见表\ref{tab:formalcore}。其成功集合与早期NOMP逐例一致，保持了相同的恢复能力；共同成功观测中的弱源RMSE约1.52\,m，主要长尾仍来自错误候选区域。它与MCJ-AP形成两种取舍：VP-BNOMP优先减少逐源更新成本，多候选AP则进一步覆盖困难区域。
+
+VP-BNOMP全部观测均按相邻循环的归一化残差能量变化不超过$10^{-8}$停止，平均记录约51.03轮，没有达到10000轮安全上限。该上限仅防止异常长循环，不代表实际需要接近此数量的迭代。每次局部Newton最多5步，位置试探上限50\,m，接受小步小于0.01\,m时结束本次局部调用。推导、伪代码、参数表及上述统计均对应同一消元实现。
+
+\subsection{时间轨迹与候选机制解释}\label{sec:timecases}
+图\ref{fig:formaltime}重放共同240条观测上已经保存的输出。尚无双源输出的观测按未成功计；RMSE仅在全部观测有输出后显示。
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{figures/formal_time.pdf}
+\caption{共同240条观测的保存输出轨迹。上行使用0.25--300\,s对数时间轴，下行以线性时间轴放大0--3\,s；三列依次为双源成功率、完整输出比例和位置RMSE。正常停止后保持最终值，RMSE纵轴仍用对数刻度。连接线表示保存点之间的变化，不额外规定算法停止时刻。}\label{fig:formaltime}
+\end{figure}
+\FloatBarrier
+
+五候选联合AP在0.75\,s保存点达到全部成功，充分AP在2\,s达到相同成功数，SBL在30\,s达到相同成功数。因此，取得高质量结果的时间与完成全部计算的时间需要分别观察。上行对数轴便于比较亚秒至数百秒的差异，下行则分辨早期输出。VP-BNOMP在本次登记轨迹中只发布最终完整双源结果，其曲线不代表内部每次循环均已有对外输出。
+
+图\ref{fig:formalcandidates}给出同一困难布局的恢复与未恢复案例，以对照候选覆盖和最终选择。
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{figures/formal_candidates.pdf}
+\caption{同一困难构型的两个0\,dB事后机制案例。左列为单源LS谱，中列为条件谱，右列为候选精修前后残差；上行为恢复案例，下行为未恢复案例。红色和白色星号分别标示源A、源B，空心圆为条件候选。谱图采用对数色标，右列连接线仅连接候选编号，不表示实际迭代路径。}\label{fig:formalcandidates}
+\end{figure}
+\FloatBarrier
+上行中，前四个候选都进入远端错误区域，第五候选则接近真实源B。联合精修后，第五分支得到更低残差，源B误差约0.09\,m。下行的五个候选均落在远端高分带，最近起点仍距源B约397\,m，局部精修未能恢复。这表明粗谱最高分与精修后的最佳位置并不等价；多候选增加有效起点，最终拟合负责择优，两者共同提高恢复能力。若候选全部落在错误区域，局部精修本身不能补足全域覆盖。
+
+第\ref{sec:complexity}节的复杂度分析与实际调用量相对应：单／五候选AP均只作两次全域网格扫描，增加分支主要增加连续目标和梯度计算；固定系数与消元NOMP则需比较局部导数调用和循环成本。这些计数用于解释候选覆盖与局部更新各自带来的开销和收益。

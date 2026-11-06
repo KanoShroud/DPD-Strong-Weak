@@ -1,0 +1,430 @@
+
+=== PDF PAGE 1 ===
+   Direct Localization of Emitters Using Widely
+    Spaced Sensors in Multipath Environments
+
+        Nil Garcia*†, Alexander M. Haimovich*, Jason A. Dabin**, Martial Coulon†, and Marco Lops‡
+   *CWCSPR, New Jersey Institute of Technology, USA, nil.garcia@njit.edu, haimovich@njit.edu
+                      ** SPAWAR Systems Center Paciﬁc, San Diego (CA), USA
+          †IRIT/INP-ENSEEIHT, University of Toulouse, France, martial.coulon@enseeiht.fr
+                 ‡DAEIMI, Universit`a degli Studi di Cassino, Italy, lops@unicas.it
+
+
+
+  Abstract—We address the localization of sources with known  The concept of direct localization was ﬁrst introduced by Wax
+waveforms in frequency-selective channels. Conventional localiza-  and Kailath [6], but little work was done until the more recent
+tion by multilateration is an indirect approach that is suboptimal                                                              Direct Position Determination (DPD) technique [7]. DPD is
+at lower SNR, and breaks down in the presence of multipath.
+Here, we propose a  direct  localization method (DLM)  that   designed for multipath-free environments, and outperforms
+exploits the sparsity of the emitters, as well as diﬀerences in the   standard indirect localization because it takes into account the
+properties of the line of sight (LOS) versus multipath components   fact that signals arriving at diﬀerent sensors originate from the
+of the signals received at the sensors.  It  is shown that the  same location. The improvement in performance is particularly
+proposed method has superior performance relative to other                                                                 evident at low signal-to-noise ratio (SNR), while at high SNR,
+known localization techniques and  is robust to sensors with
+                                        DPD and indirect techniques perform similarly. The literatureblocked LOS.
+                                                      on direct localization in the presence of multipath is scarce. In
+                                I. Introduction                              [8], a maximum likelihood (ML) estimator has been developed
+                                                                   for localizing a single emitter assuming a ﬁxed and known
+   Traditional time-of-arrival (TOA)-based localization is ac-
+                                                     number of multipaths, but without providing an eﬃcient way to
+complished through a two-step process. In the ﬁrst step, sensors
+                                                      compute the estimator. In [9], a Direct Positioning Estimation
+measure TOA’s from  all incoming signals; in the second
+                                                    (DPE) technique is proposed for operating in dense multipath
+step, such measurements are transmitted to a central node,
+                                                            environments, but it requires knowledge of the power delay
+that subsequently estimates the location of each emitter by
+                                                                 proﬁle, and is limited to localization of a single emitter.
+multilateration [1]. In a multipath environment, each sensor
+                                                                 In  this paper, we introduce a technique dubbed direct
+receives, in addition to a line-of-sight (LOS) signal, multiple
+                                                                     localization in multipath (DLM) for localizing multiple emitters
+(possibly overlapping) replicas due to non-line-of-sight (NLOS)
+                                                                        that transmit assumed known waveforms. No prior knowledge
+paths. Due to these multiple arrivals, it is, in general, more
+                                                                              is assumed of the  statistics of the NLOS paths. Without
+challenging to obtain accurate TOA estimates of the LOS
+                                                                   prior knowledge, NLOS components carry no information,
+components at the sensors. Matched ﬁltering is the most simple
+                                                      and the best performance  is obtained by using only the
+and known technique for time delay estimation. However, its
+                                         LOS components [4]. By setting up the problem in a sparse
+performance degrades greatly in the presence of multipath that
+                                                           framework, DLM estimates the emitter locations, while treating
+falls within time resolution equal to the inverse bandwidth of
+                                                                the NLOS components as interference. Numerical evidence
+the signal. Moreover, in the case of blockage of the LOS path,
+                                                    shows that DLM works well in a wide range of multipath
+the TOA of the ﬁrst arrival does not correspond to a LOS
+                                                                 scenarios, including sensors with blocked LOS. Moreover
+component anymore, and will corrupt localization. In such a
+                                    DLM requires no channel state information such as number of
+case it is customary to apply various techniques (e.g. [3]) to
+                                                                 multipath, sensors with LOS blockage, signal strengths or the
+mitigate the eﬀect of NLOS on the geolocation estimate. An
+                                                     power delay proﬁle.
+application example of TOA-based localization is found in [5].
+                                                                 In Section II, we introduce the signal model. Section III
+   Localization in the presence of multipath has received a great
+                                                               presents the DLM. Section IV compares DLM to previous
+deal of attention. However, past and current literature is mostly
+                                                                    existing techniques. Finally, Section V reports our conclusions.
+based on techniques that require ﬁrst estimating TOA’s, and
+subsequently using these estimates to determine the location of                                  II. Signal Model
+the emitter(s). We refer to these classical localization techniques
+                                                             Consider a network composed of L sensors and Q emitters
+as indirect localization. A better approach than indirect local-
+                                                                located in a plane. The location of the q-th emitter is deﬁned
+ization is to infer the emitter locations directly from the signal
+                                                     by two coordinates stacked in a vector pq. All emitters share
+measurements, without estimating the propagation delays ﬁrst.
+                                                                  the same bandwidth B, and transmit their own signals {sq(t)}Qq=1.
+  * The work of A. M. Haimovich was partially supported by the U.S. Air  The number of emitters Q and their waveforms are known.
+Force Oﬃce of Scientiﬁc Research under agreement No. FA9550-12-1-0409.  The observation time is T, assumed to be shorter than the
+
+
+
+                    ,(((                                                          $VLORPDU
+     Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:49:21 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 2 ===
+time coherence of the channel, therefore, the channel is time-  information on the emitter locations is carried only by the
+invariant. The complex-valued baseband signal at the l-th sensor  LOS components (2). This claim is supported by the analysis
+is                                                                 in [4], which showed that the CRB increases when NLOS
+          rl(t) = rLOSl    (t) + rNLOSl     (t) + nl(t)    0 ≤t ≤T,     (1)   components are present. Thus, without a priori knowledge, the
+                                                           optimal strategy is to reject NLOS components as much as
+where nl(t) is white Gaussian noise with known variance σ2n.                                                                     possible, and rely on the LOS components to infer the emitters’
+The term rLOSl    (t) is the sum of all LOS components:            locations.
+                     Q                                      In the case of indirect techniques, the TOA’s of the LOS
+               rLOSl    (t) =     alqsq  t −τl(pq)  ,             (2)   components are estimated, and then used to localize the emitters
+                           q=1                              by multilateration. However, indirect techniques are suboptimal
+where alq  is an unknown complex scalar representing the   because they estimate TOA’s independently at each sensor,
+amplitude of the LOS path between the q-th emitter and l-th   instead of taking into account that all the LOS components
+sensor, and τl(p) is the delay of a signal originating at p and   originate from a single emitter location. In this section, we
+reaching the l-th sensor:                                    propose a direct localization technique that relies on the fact
+                                                                        that all LOS components must originate from the same location.
+                       τl(p) = p −p′l  /c.                   (3)  Under the Gaussian assumption, the maximum likelihood
+                                                                 estimator (MLE) is the solution to the following ﬁtting problemIn (3), p′l is the location of the l-th sensor, c is the speed of
+light and ∥· ∥denotes the standard Euclidean norm. The term                L      Q              Q  Mlq                2
+rNLOSl     (t) in (1) aggregates all NLOS arrivals:                                                       min          rl −      ˜alqsq τl(pq) −           ˜a(m)lq sq  τ(m)lq                                                                                                            p1,...,pQ
+                     Q  Mlq                                                                      ˜a11,...,˜aLQ  l=1       q=1                 q=1 m=1
+
+                                                                                                   (MLQ)             rNLOSl     (t) =         a(m)lq sq  t −τ(m)lq    ,           (4)         τ(1)M11,...,MLQ11 ,...,τ
+                           q=1 m=1                                                   LQMLQ
+                                                                                                                                         ˜a111,...,˜a LQ
+where Mlq denotes an unknown number of NLOS paths between                                                                 (7)
+the q-th emitter and the l-th sensor, a(m)lq  is an unknown complex   subject to τ(m)lq > τl(pq) for all l, q and m. The parameters of
+scalar representing the amplitude of the m-th NLOS path   interest are the emitter locations {pq}Qq=1, while the rest act as
+between the q-th emitter and l-th sensor, and τ(m)lq   is the delay   nuisance parameters. Besides the fact that it is an enormous
+of the NLOS component. Note that NLOS components have   challenge to ﬁnd an eﬃcient technique for minimizing this
+delays that are speciﬁc to the sensor and the emitter. The   objective function, the ML criterion does not even lead to a
+received signal (1) is sampled at a frequency  fs satisfying the   satisfactory solution. The reason is that Mlq, for all l and q, are
+Nyquist sampling criterion:  fs ≥B, where B is the passband   hyperparameters that control the number of NLOS paths in our
+bandwidth. Let N be the number of time samples collected at   model. It is known that increasing the values of hyperparameters
+each sensor. By stacking the N acquired samples, the received   always leads to a better ﬁtting error [10], and in our case it
+signal rl = [rl(0), . . . , rl((N −1)/fs)]T at the l-th sensor can be  would lead to the erroneous conclusion that there are an inﬁnite
+written in the following vector form                       number of NLOS arrivals. Instead, we assume that the number
+           Q                       Mlq                            of NLOS arrivals and the number of emitters are low. This
+                                                              (5)   assumption enables the formulation of a feasible solution to                    +      ˜a(m)lq sq  τ(m)lq      ⎞⎟⎟⎟⎟⎟⎟⎠+ nl,          rl =           ⎛⎜⎜⎜⎜⎜⎜⎝˜alqsq τl(pq)
+              q=1                m=1                             the ML multipath estimation problem by means of a sparse
+                                                             recovery technique.where sq(τ) is a normalized vector of the N received samples
+                                                      Our technique is divided in two phases which are explainedfrom the q-th emitter waveform with delay τ:
+                                                                   in detail below. In the ﬁrst phase, NLOS components are
+                                         sq(0 −τ)              canceled out from the received signals by exploiting the fact
+                   1
+                                                                      that NLOS components arrive with a longer delay than LOS      sq(τ) =                                                                                                                                                           ...                 ,   (6)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ⎡⎢⎢⎢⎢⎢⎢⎢⎢⎢⎢⎣                                                                                                                                                                                                                                                            ⎤⎥⎥⎥⎥⎥⎥⎥⎥⎥⎥⎦         components. In the second phase, we use the cleaned version               N−1               2
+                     sq(n/fs −τ)    sq((N −1)/fs −τ)
+                  n=0                                            of the received signals to localize the emitters. It is in this
+                                                         phase that the emitter locations are estimated by solving an
+and ˜alq and ˜a(m)lq  are unknown complex constants.              optimization problem. The key idea is a solution designed to
+  In the next section, we introduce DLM.                       exploit the fact that LOS components must originate from the
+                                                   same location.                III. Proposed Localization Technique
+   In order to develop a localization technique, it is necessary   A. First Phase: NLOS Interference Mitigation
+to understand what parameters of the received signals depend      First, the multipath arrivals are detected at each sensor and
+on the emitters’ locations. In the signal model introduced in   their TOA is estimated using a technique like the one in [2].
+the previous section, we deﬁned the propagation delays of   Obviously, more accurate delay estimation techniques will
+NLOS components (4) as unknown and arbitrary because we   result in more accurate NLOS interference mitigation. The
+assumed no prior statistical knowledge of the channel. Thus,   goal in this phase is not to precisely estimate the LOS TOA’s,
+
+
+
+
+
+     Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:49:21 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 3 ===
+but to estimate the NLOS TOA’s and cancel them out. Assume  and the d-th component of the sparse vector xlq is
+Plq arrivals are detected at sensor l for waveform q and the
+corresponding TOA measurements are Tlq =   ˆτ1lq, . . . , ˆτ lqPlq  .                                      ˜alq     if (d −1)τres ≈τl pq
+Then, the amplitudes of such arrivals can also be estimated by                   xlq d =   ˜a(m)lq     if (d −1)τres ≈τ(m)lq            (13)solving a least squares ﬁt (see [2])                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ⎧⎪⎪⎪⎪⎪⎨⎪⎪⎪⎪⎪⎩0      else.
+                       Q   Plq             2                                                           Vector  xlq stacks the amplitudes of  all multipath arrivals
+              arg min  rl −       aplqsq  ˆτplq      .            (8)   between emitter q and sensor l. Vector xlq is considered sparse
+                      aplq          q=1 p=1                           because the number of possible propagation delays is much
+Assuming the set of TOA measurements are ranked in increas-   larger than the actual number of paths: D >> Mlq for any l
+ing order, i.e. ˆτ1lq < . . . < ˆτ lqPlq for any l, q, we cancel all arrivals  and q. Vectors xlq could be recovered by a sparse recovery
+from the received signals except the ﬁrst one:                  technique, and the TOA’s recovered from the locations of the
+                                                              non-zeros. However, contrary to indirect techniques, we are
+                      Q   Plq
+                                                                   interested in retrieving emitter locations, not in estimating
+                                  ˆrl = rl −           ˆaplqsq  ˆτplq  ,               (9)  TOA’s. Thus we need to ﬁnd a sparse representation of the
+                             q=1 p=2
+                                                              received signals (11) that depends on the emitter locations
+where ˆaplq are the amplitude estimates. If all NLOS arrivals were   instead of TOA’s. To this purpose, discretize the plane where
+removed, we could simply use a direct localization technique   the emitters are to be located into a grid of G squared cells
+in the absence of multipath, like DPD. However, the NLOS   with center points
+interference mitigation is not guaranteed to remove all NLOS
+                                                   G = {θ1, . . . , θG}.                  (14)components for two reasons. First, if the LOS path between a
+sensor and emitter is blocked, then the ﬁrst arrival corresponds                                         Now we can decompose xlq into
+to a NLOS component, which will not be removed. Also, it
+is possible that the chosen delay estimation technique misses                     xlq  =                ylq  +  zlq    ,         (15)
+                                                                                                 d                       g        d
+some arrivals or detects some false ones, resulting in errors in                               g such that
+the interference mitigation process. In next section, we present                                     ˜τl(θg)=(d−1)τres
+a localization technique designed to work in the presence of                                                       where vectors ylq ∈CG and zlq ∈CD are sparse representations
+LOS and NLOS components. In short, this phase reduces the                                                              of the LOS and NLOS components between emitter q and
+multipath components but does not necessarily remove them                                                              sensor l respectively, and are deﬁned as
+completely.
+                                                                                                                                         ˜alq   if θg ≈pq
+B. Second Phase: Sparsity-based Direct Localization                              ylq  =                                  (16a)                                                                                                g                ⎧⎪⎪⎨⎪⎪⎩ 0    else.
+   In this phase, we ﬁnd a sparse representation of the received
+signal provided by the NLOS interference mitigation phase,                                   ˜a(m)lq     if (d −1)τres ≈τ(m)lq                                                                                                  zlq  =                                 (16b)and show how a variation of the Group Lasso with Overlaps                        d                ⎧⎪⎪⎨⎪⎪⎩ 0      else,
+technique proposed in [11] may solve problem (7). In order to
+                                                        and ˜τl(θ) is a function that approximates τl(θ) with the closestﬁnd a sparse representation, we ﬁrst discretize the continuous
+                                                                    discrete delay from D:set of all possible signal propagation TOA’s [0, τmax], where
+τmax is the largest signal propagation delay allowed at any                                                                                                         ˜τl(θ) = arg min |τl(θ) −τ|.              (17)
+sensor, into a discrete, ﬁnite list                                                         τ∈D
+        D = {0, τres, . . . , (D −1)τres}.            (10)  Thus we moved from a sparse representation based on delays
+                                                               (13) to one based on locations on a grid (16a) and NLOS
+Parameter τres deﬁnes the resolution of the delay grid, and D   delays (16b). The locations of the emitters are the parameters of
+is the number of discrete TOA’s computed as D = ⌊τmax/τres⌋,   interest, while the NLOS components are nuisance parameters.
+where operator ⌊·⌋denotes the ‘nearest integer’. The NLOS  There is a one-to-one mapping between entries in vectors
+interference mitigation phase is not perfect, thus the expression   (16a) and grid locations, and also, between entries in vectors
+for rl in (5), which includes LOS and NLOS components is still   (16b) and discrete delays. The complex values in such vectors
+valid for ˆrl. Given these deﬁnitions, the received signal at sensor   represent the complex signal amplitudes. In order to distinguish
+l (5) results in the following alternative sparse representation:  LOS from NLOS components, we use the fact that LOS
+                      Q                              components originate from the same location. Due to this
+                                         ˆrl ≈    Aqxlq + nl,                 (11)   property, vectors ylq, for all l and ﬁxed q, have at most one
+                            q=1                                non-zero at the entry associated with position pq, or in other
+                                                            words, they are jointly sparse. Thus we need a sparse recoverywhere matrix Aq is a basis of emitter q’s waveforms for all
+                                                              technique that induces joint sparsity among vectors y1q, . . . , yLqTOA’s in D
+                                                                   for each q, and sparsity of the vectors zlq for all  l and q.
+          Aq =  sq (0)    · · ·   sq ((D −1)τres)  ,         (12)  According to Obozinsky and Bach [11], these two diﬀerent
+
+
+
+
+
+     Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:49:21 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 4 ===
+types of sparsity can be induced jointly by minimizing the     Next, we discuss what is the purpose of the weights {wq}Qq=1
+following convex optimization problem                     and how to tune them. Denote S q the number of sensors that
+        Q            Q   L                                  receive a LOS path from emitter q, and assume it is known. In
+                                                                                                      q LOS components whose propagation   min     wq Yq  2,1 +           zlq 1                 (18a)   such case, there are S   {ylq},{zlq}          q=1               q=1 l=1                                delays are described by (3). We can show theoretically that wq
+                                 2                              must satisfy
+           L      Q                                             !
+        s.t.       rl −    Aqxlq  ≤ϵ                      (18b)                    S q −1 < wq <  S q.               (23)
+            l=1       q=1        2
+                                               Due to space limitations the proof of (23) will appear in a
+                                                for all l and q            xlq          =                ylq                       +  zlq                                                                 future publication. We found empirically that a reasonable                d                                        g                                                 d
+                       g such that                                    value satisfying (23) is wq = !S q −0.2. Since S q is unknown                          ˜τl(θg)=(d−1)τres
+                                                       (18c)   a priori, we propose to solve (18) multiple times for diﬀerent
+                                                               values of S q. The idea is to start by assuming all sensors are
+where Yq =   y1q    · · ·  yLq    , the operators in the objective  LOS with all emitters: ˆS q = L for all q. Then problem (18)
+function are the ℓ2/ℓ1-norm of a matrix deﬁned as                 is solved. For all emitters with no location estimate,  ˆS q is
+                       G      L                          decreased by one, and problem (18) is solved again. This
+                                                   2                   process is repeated until problem (18) outputs location estimates
+              Yq  2,1 =              ylq g              (19)
+                              g=1     l=1                             for all emitters. These steps are explained in more detail in
+                                                              Section III-C.
+and the ℓ1-norm of a vector deﬁned as                                                                   In Section III-B, a grid of delays D and a grid of locations
+                         D                   G were introduced that enabled sparse representations of the
+                            zlq 1 =       zlq d  .                (20)  NLOS and LOS components (16).  It  is expected that, by
+                                d=1                              decreasing the resolution of the grids, the estimation errors
+In (18a), {wq}Qq=1 are weights, and ϵ sets the maximum allowed  due to oﬀ-grid delays and locations become small compared
+error between the measurements and the solution. The inputs to   to the signal noise. Denote τres the time diﬀerence between
+this optimization process are the signals {rl}Ll=1, and the outputs  two subsequent discrete delays, and recall dres is the distance
+are the matrices  { ˆYq}Qq=1. The estimate of the q-th emitter   between the center points of two adjacent cells in G. We found
+location is obtained from the non-zero row of ˆYq. The intuitive   empirically that a reasonable ratio between both grids is of the
+idea behind problem (18) is to combine the minimization of the   order of 2dres = cτres where c is the speed of light.
+ℓ2/ℓ1-norm which is known to induce row sparsity of matrix Yq,
+                                                          C. Algorithm
+and the minimization of the ℓ1-norm which is well known to
+induce sparsity on vectors zlq. Problem (18) falls into the class    The inputs to the DLM algorithm are the received signals
+of second-order cone programming (SOCP) [12], a subfamily   {rl}Ll=1, where L is the number of sensors. The outputs are the
+of convex problems, for which more eﬃcient methods exist   emitter locations estimates {ˆpq}Qq=1, where Q is the number of
+than those used for solving generic convex problems.            emitters. The summary of DLM is as follows:
+  Let ˆylq and ˆzlq, for all l and q, be the solutions to problem   Input: Received signals {r}Ll=1, noise variance σ2n, the grid of
+(11). Parameter ϵ in optimization problem (18) bounds the       delays D (10), and the grid of locations G (14).
+ﬁtting error between the solution and the received signals. In  Output: Emitter locations estimates {ˆpq}Qq=1.
+the absence of noise, the solution should match exactly the      1: For sensor l do
+received signals, and therefore, we would set ϵ = 0. However,     2:    Estimate multipath TOAs using [2], or any other delay
+in the presence of noise, from (1) we require                          estimation technique of choice.
+                                      2                                           3:    Estimate multipath amplitudes by (8).
+               L      Q              L
+                                                                                       4:    For emitter q do                                  ˆrl −    Aqxlq  =     ∥nl∥22 ≤ϵ.        (21)
+                                                                                       5:       Cancel out all arrivals associated to the q-th emit-
+                 l=1       q=1        2    l=1
+                                                                                         ter waveform, except the ﬁrst one, using (9).
+If ϵ is chosen too small, then    l=1L  ∥nl∥22 ≮ϵ, thus making the      6: Initialize noise threshold ϵ by (22), ˆpq = ∅and  ˆS q = L
+correct solution infeasible. Because the noise vectors {nl}Ll=1        for q = 1, . . . , Q.
+are random independent complex Gaussian vectors of length                                                                                       7: While ˆpq = ∅for any q do
+N, it follows that the error normalized by the noise variance
+                                                                                                                  q −0.2 for all q.2σ−2n    l=1L  ∥nl∥22  is a Chi-square random variable with 2NL      8:     Set weights to wq =     ˆS
+degrees of freedom. Thus parameter ϵ must be set to a large      9:    Solve problem (18) numerically. Output: ˆYq for all q.
+enough value so that    l=1L  ∥nl∥22 ≤ϵ  is satisﬁed with high    10:    For emitter q do
+probability, e.g.                                                           11:          If ˆYq = 0 then
+                         L                                                 12:                 ˆpq = ∅and ˆS q ←ˆS q −1
+                                                                              13:         else                 Pr   ⎛⎜⎜⎜⎜⎜⎝    ∥nl∥22 ≤ϵ ⎞⎟⎟⎟⎟⎟⎠= 0.99.              (22)
+                            l=1                                                14:                 ˆpq = θs, where s is the index of the non-zero
+
+
+
+
+     Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:49:21 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 5 ===
+             row in ˆYq, and θs the location mapped to such   recovery for the case of a single emitter as
+               index.                                                                        Z    "              #
+                                                                       1                    r
+                                                                        Pc =     1 |p −ˆp(z)| <      ,            (26)
+                                                                Z               3                    IV. Numerical Results                                                      z=1
+
+                                                       where p is the true emitter’s location, Z is the number of times   In this section, we illustrate the performance of the DLM by
+                                                                     that the experiment is repeated, ˆp(z) is the emitter’s locationnumerical examples, and compare it to other existing techniques
+                                                                 estimate for the z-th repetition and 1(·) is the indicator function.via Monte Carlo simulations. In all examples, the emitters and
+sensors are positioned within a square area of 2 km × 2 km,  For some of our tests we plot the normalized root mean square
+which is divided into a grid of 10 m × 10 m cells, thus resulting   error (rMSE) deﬁned as
+in 40000 cells. The emitters transmit signals that occupy a                                     Z
+                                                                         1   1bandwidth of 1 MHz and are each drawn from a frequency-ﬂat                                                       rMSE =          $p −ˆp(z)%2.            (27)
+Gaussian stochastic process. All sensors are time-synchronized                             r   Z z=1
+and sample the received signal at a frequency of 2 MHz for
+                                                              All experiments are repeated 1000 times, i.e. Z = 1000.50 μs, thus each sensor observes 100 samples. For each emitter,
+we deﬁne the SNR per observation time as                                                             A. Performance in Multipath Environments
+                     N   l=1L  Pl                     For this experiment we position four sensors at coordi-          SNR = 10 log10   ⎛⎜⎜⎜⎜⎝                                   ⎞⎟⎟⎟⎟⎠,            (24)   nates (500 m,500 m), (500 m,−500 m), (−500 m,500 m) and
+                                            σ2n
+                                                     (−500 m,−500 m) and a single emitter  at the origin  (0,0).
+where N is the number of observations per sensor, Pl is the tap   All paths have the same power. All sensors receive a LOS
+power of the LOS component between the emitter and sensor l,  component, except for sensor 4 whose LOS path is blocked.
+and σ2n the variance of the noise after sampling. According to   Sensor 3, in addition to the LOS component, also receives a
+[13], in urban and suburban areas, the signal strengths of LOS   single NLOS component with an excess path length of 200 m.
+and NLOS paths may be modeled as random variables with   Sensor 4 receives a single NLOS component with an excess
+log-normal distributions. Thus it follows that the tap powers   path length of 400 m. Fig. 1 plots the probability of correct
+expressed in dB are random variables with normal distribution.  recovery versus SNR. DLM outperforms all other techniques.
+For our simulations, we set the standard deviation of the tap  Comparing DLM with the indirect technique with super-
+powers to 5 dB. Furthermore, we deﬁne the path length as   resolution TOA, it shows how the performance gain is 2 dB at
+the propagation delay of a LOS or NLOS component divided  SNR = 20 dB. Fig. 2 plots the rMSE versus SNR. Interestingly,
+by the speed of light. The excess delays/paths lengths are   for an SNR in the range 20 dB – 30 dB, DLM shows an rMSE
+deﬁned as the diﬀerence of propagation delays/path lengths   slightly worse than that of the indirect technique with super-
+between the NLOS component and LOS component of an   resolution TOA. It turns out that in the presence of multipath,
+emitter-sensor path. All ﬁgures compare the performance of  DLM can precisely localize emitters with high probability, but
+two direct localization techniques. The ﬁrst direct technique  when it fails, it can result in arbitrary large errors due to the
+is DPD [7], which outputs the maximum likelihood estimate   nature of sparse recovery techniques. Thus in the subsequent
+of the locations in absence of frequency-selective multipath.  experiment, we plot the probability of correct recovery rather
+The second one is our proposed method DLM. For reference,  than the rMSE, as it is a more representative metric.
+performance of two indirect techniques is also shown. Indirect
+                                                             B. Probability of Correct Recovery vs. Delay Spreadlocalization comprises a two-step process. For the ﬁrst step, one
+indirect technique estimates the TOA’s by simple matched ﬁlter,    For  this experiment, we simulate  Turin’s urban chan-
+and the other, by the super-resolution method in [2] which is   nel model [13]. We position 5 sensors  at coordinates  at
+speciﬁcally designed to work in the presence of multipath. In   coordinates (500 m,500 m), (500 m,−500 m), (−500 m,500 m),
+a second step, both indirect techniques perform multilateration  (−500 m,−500 m)  and   (0,0),  and  a  single  emitter   at
+using Chen’s method [3] to mitigate the problem of potential   (160 m,130 m). All sensors, except for the one on the origin,
+LOS blockage on sensors.                                       receive a LOS component. Moreover, all sensors receive NLOS
+  The bandwidth of the emitted signals limits the localization  components whose arrival times are modelled by a Poisson
+accuracy, and  it  is known  that the ranging resolution  is   process. The mean inter-arrival time is set to 1 μs. The average
+approximately                                         power ¯P of an arrival at sensor l is governed by the power
+                              c                             delay proﬁle (PDP)
+                             r =                          (25)
+                      B
+                                                                                                                                                 t −t(0)l                                                                                                                  ¯Pl(t) = exp ⎛⎜⎜⎜⎜⎜⎝−                                                 ⎞⎟⎟⎟⎟⎟⎠                (28)where c is the speed of light and B is the signal bandwidth.                                                                                                                       trms
+For the particular case of a 1 MHz bandwidth, the waveform
+ranging resolution is then 300 m. In the following experiments,  where t is the arrival time, t(0)l   is the arrival time of the LOS path
+the excess path length of a NLOS path is referenced to the  and trms is the RMS delay spread. Such PDP assigns smaller
+signal resolution r. Also we deﬁne the probability of correct  power to later arrivals. Fig. 3 shows how the localization
+
+
+
+
+
+     Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:49:21 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 6 ===
+                                                                          1
+                                                                                     DPD
+                                                                                     DLM
+                                                                                       0.9
+                                                                                                                                                          indirect, super−resolution TOA
+                                                                                                                                                          indirect, match filter
+                                                                                                                                                                                                                                                                                                                                recovery 0.80.7
+                                                                                                                                                                                                                                                                                        correct 0.6
+                                                                                of
+
+                                                                                       0.5
+                                                                                                                                                                                                                                                                                                                                                                                                                                                        Probability 0.4
+
+
+                                                                                       0.3
+
+
+                                                                                       0.2
+                                                                           0          0.5         1          1.5         2          2.5
+                                                                         RMS delay [us]
+
+
+Fig. 1.   Probability of correct recovery vs. SNR. The layout consists of four    Fig. 3.   Probability of correct recovery vs. delay spread for an SNR of
+equally spaced sensors and a single emitter in the middle. Sensors 1 and 2   20 dB. The layout consists of ﬁve sensors at coordinates (500 m,500 m),
+receive a LOS path. Sensors 3 receives a LOS and NLOS path. Sensor 4   (500 m,−500 m), (−500 m,500 m), (−500 m,−500 m) and (0,0), and a single
+received only a NLOS path.                                                     emitter at (160 m,130 m). The sensor on the origin has its LOS blocked. All
+                                                                                sensors receive NLOS paths with arrival times following a Poisson distribution.
+                                                                The mean arrival rate is set equal to the bandwidth of the signal.
+    3.5
+                               DPD
+                               DLM
+     3                                                indirect,                                                        super−resolution                                                 TOA   DLM requires no prior channel knowledge like delay spread                                                         indirect,                                               match filter
+                                                                 or power delay proﬁle of the multipath. The performance gain
+    2.5
+                                                           does not come for free, as DLM requires larger computational
+  rMSE  2                                                          resources than other techniques.
+                                                                                References
+    1.5                                                                               [1]  I. G¨uvenc and C. C. Chong, “A survey on TOA based wireless localization     Normalized                                                                     and NLOS mitigation techniques,” IEEE Communications Surveys &
+     1                                                                                     Tutorials, vol. 11, pp. 107–124, 2009.
+                                                                                      [2]  J. J. Fuchs, “Multipath time-delay detection and estimation,” IEEE Trans.
+                                                                       on Signal Processing, vol. 47, pp. 237–243, January 1999.
+    0.5                                                                               [3]  P. C. Chen, “A non-line-of-sight error mitigation algorithm in location
+                                                                                       estimation,” 1999 IEEE Wireless Communications and Networking
+                                                                                 Conference, vol. 1, pp. 316–320, September 1999.
+     0
+      5          10          15          20          25          30       [4]  S. Gezici, “Localization via ultrawideband radios,” IEEE Signal Process-
+                         SNR [dB]                                       ing Magazine, pp. 70–84, June 2005.
+                                                                                      [5] C. M. De Dominicis et al., “Timestamping of IEEE 802.15.4a CSS
+Fig. 2.  Root mean square error vs. SNR. The layout consists of four equally         Signals for wireless ranging and time synchronization,” IEEE Trans. on
+spaced sensors and a single emitter in the middle. Sensors 1 and 2 receive a         Instrumentation and Measurement, vol. 62, pp. 2286–2296, 2013.
+LOS path. Sensors 3 receives a LOS and NLOS path. Sensor 4 received only     [6] M. Wax and T. Kailath, “Optimum localization of multiple sources by
+a NLOS path.                                                                         passive arrays,” IEEE Trans. on Acoustics, Speech and Signal Processing,
+                                                                                              vol. 31, pp. 1210–1217, October 1983.
+                                                                                      [7] A. J. Weiss and A. Amar, “Direct position determination of multiple radio
+                                                                                            signals,” EURASIP Journal on Applied Signal Processing, vol. 2005,
+performance of all techniques decreases as the RMS delay         pp. 37–49 , January 2005.
+spread increases. Again, DLM outperforms all other methods.     [8] K. Papakonstantinou and D. Slock, “Direct location estimation using
+                                                                                    single-bounce NLOS time-varying channel models,” IEEE 68th Vehicular
+For RMS delays approaching zero, the NLOS paths are almost        Technology Conference, pp. 1–5, September 2008.
+non-existent, and therefore; DPD and DLM perform equally.     [9] O. Bialer, D. Raphaeli and A. J. Weiss, “Maximum-likelihood direct
+However, as the delay spread starts increasing, DPD drops         position estimation in dense multipath,” IEEE Trans. on Vehicular
+                                                                                 Technology, vol. 62, pp. 2069–2079, June 2013.
+below the performance of indirect techniques because it is not    [10] D. Koller and N. Friedman, Probabilistic Graphical Models, The MIT
+designed for multipath environments.                                         Press, 2009.
+                                                                               [11] G. Obozinski, L. Jacob and J. P. Vert, “Group Lasso with Overlaps:
+                      V. Conclusions                                      the Latent Group Lasso approach,” preprint arXiv: 1110.0413, October
+                                                                               2011.
+ A novel technique for direct localization of mutliple emitters    [12]  F. Alizadeh and D. Goldfarb, Second-Order Cone Programming, Mathe-
+                                                                                    matical Programming, pp. 3–51, 2003.
+in the presence of multipath in a sparse framework has been                                                                               [13] G. Turin, F. D. Clapp, T. L.  Johnston, S. B. Fine and D. Lavry, “A
+proposed. DLM can precisely recover the emitter locations          Statistical Model of Urban Multipath Propagation,” IEEE Trans. on
+with higher probability than traditional indirect localization         Vehicular Technology, vol. 21, pp. 1–9, February 1972.
+techniques, and also, it is robust to sensors with LOS blockage.
+
+
+
+
+
+     Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:49:21 UTC from IEEE Xplore. Restrictions apply.

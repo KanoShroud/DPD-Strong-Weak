@@ -1,0 +1,131 @@
+
+--- PDF PAGE 2 ---
+38                                                      EURASIP Journal on Applied Signal Processing
+
+
+The results indicate that pairwise processing may be used    2.  PROBLEM FORMULATION
+at high signal-to-noise ratio (SNR) without signiﬁcant loss
+                                                         Consider Q transmitters and L base stations intercepting theof performance. Recently, Kozick and Sadler [15] presented
+                                                             transmitted signals. Each base station is equipped with an an-performance analysis for localization of a single wideband
+                                                          tenna array consisting of M elements. The bandwidth of thesource using multiple distributed arrays. They assume per-
+                                                                   signal is small compared to the inverse of the propagationfect spatial coherence over each array and frequency-selective
+                                                         time over the array aperture. Denote the qth transmitter’scoherence between arrays. The proposed method is based on
+                                                               position by the D ×1 vector of coordinates pq (obviously, forbearing estimation at each array and delay estimation using
+                                                             planar geometry D = 2 and for the general case D = 3). Thethe signal observed by a single element at each array.
+                                                     complex envelopes of the signals observed by the ℓth base   As indicated in [16], it is rather obvious that measuring
+                                                                  station array are given byAOA/TOA at each base station separately and independently
+is suboptimal since this approach ignores the constraint that          Q
+the measurements must correspond to the same source po-     rℓ(t) =    bℓqaℓ pq sq t−τℓ pq −t(0)q   +nℓ(t),  0 ≤t ≤T,
+sition. Moreover, the base stations are geographically sepa-            q=1
+rated, and therefore the desired signal often appears weak or                                                             (1)
+absent in some of the base stations. Thus, the system must    where rℓ(t) is a time-dependent M × 1 vector, bℓq is an un-
+somehow ensure that all AOA/TOA measurements used to   known complex scalar representing the channel attenuation
+locate a speciﬁc source correspond to the same source. In the    between the qth transmitter and the ℓth base station, aℓ(pq)
+case of cochannel simultaneous sources, the localization sys-      is the ℓth array response to a signal transmitted from posi-
+tem confronts an association problem of deciding which of                                                               tion pq, and sq(t −τℓ(pq) −t(0)q  ) is the qth signal waveform,
+the multiple AOA/TOA estimates reported by the base sta-                                                             transmitted at time t(0)q  and delayed by τℓ(pq). The vector
+tions correspond to which source.                                                                 nℓ(t) represents noise and interference observed by the ar-
+   The direct position determination (DPD) method that                                                                         ray. The observed signal can be partitioned into K sections,
+we propose takes advantage of the rather simple propaga-                                                          each of length T/K ≫max{τℓ(pq)}. The maximum propa-
+tion assumptions that are usually used for radio frequency
+                                                             gation time of interest is the propagation time between the
+(RF) signals. We assume a line of sight propagation with un-
+                                                            base stations. For example, if the largest separation between
+known complex attenuation at each base station. We also as-                                                              the base stations is 10 Km then T/K ≫34 microseconds and
+sume that all base stations are time synchronized to the level                                               T/K of about 7 milliseconds will satisfy the requirement (see
+provided by GPS (approximately 50 nanoseconds). The pro-
+                                                  Van Trees [5, chapter 5] and Appendix D for further discus-
+posed method may implicitly use both the array response                                                              sion of this model). When the total observation time T is
+at each station and the TOA at each station. We derive the
+                                                                long, the sources are assumed to be stationary. Otherwise,
+maximum likelihood estimate (MLE) of the sources position.
+                                                              the location accuracy might be degraded. Each section can
+However, the cost function associated with MLE requires a
+                                                       be Fourier transformed and the result of this process is given
+multidimensional search in the multiple sources case. Thus,
+                                                      by the following equation:
+for multiple signals with unknown waveforms we resort to a
+method based on the ideas of Schmidt [17] also known as              Q
+the MUSIC (multiple signals classiﬁcation) algorithm. For       rℓ(j, k) =    bℓqaℓ pq sq(j, k)e−iωj[τℓ(pq)+t(0)q  ] + nℓ(j, k),
+multiple signals with known waveforms, we use the ideas of                q=1                                          (2)
+[18] to simplify the cost function. We show that for a planar                                            j = 1, 2, ..., J; k = 1, 2,...,K,
+geometry of sources and base stations, a two-dimensional
+search is suﬃcient to localize all sources. For a general ge-                                                      where rℓ(j,k) is the Fourier coeﬃcient of the kth section of
+ometry, only a three-dimensional search is needed. A side                                                              the observed signal corresponding to frequency ωj, s(j, k) is
+beneﬁt of the DPD is its ability to determine the positions of                                                              the jth Fourier coeﬃcient of the kth section of the signal,
+more sources than the number of sensors at each base station                                                   and nℓ(j,k) represents the jth Fourier coeﬃcient of the kth
+in contrast to AOA. The DPD technique requires the trans-                                                                section of the noise waveform.
+mission of the received signals (possibly sampled) to a central                                                            For easy exhibition, we deﬁne the following vectors and
+processing location, in contrast to AOA and TOA that require                                                                         scalars:
+only the transmission of the measured parameters to the cen-
+tral processing location. This is the cost of employing DPD.                              ¯sq(j, k) ≜sq(j, k)e−iωjt(0)q  ,
+The paper focuses on the multiple signals case.                                                                          (3)
+                                                                                                                             ¯aℓ  j, pq,bℓq  ≜bℓqaℓ pq  e−iωjτℓ(pq).   In Section 2, we deﬁne the models that we use, Section 3
+describes potential algorithms for known and unknown
+                                         We observe that all information about the transmitter’s posi-
+waveforms, Section 4 includes some numerical examples that                                                               tion is embedded in the vector ¯aℓ(j, pq, bℓq). This leads to the
+demonstrate the potential of the advocated approach, and
+                                                              following representation of (2):
+Section 5 contains our conclusions. The appendices include
+derivations of the Cram´er-Rao bounds, the performance                   Q
+analysis of the algorithms, and a discussion of the frequency-              rℓ(j, k) =      ¯aℓ  j, pq, bℓq  ¯sq(j, k) + nℓ(j, k).     (4)
+domain model.                                                                    q=1
+--- PDF PAGE 3 ---
+Direct Position Determination of Multiple Radio Signals                                                       39
+
+In matrix notation, (4) becomes                            The unknown parameters include the QJK snapshots of
+                                                              the complex signals {¯s(j, k)}, the (L −1)Q complex attenu-
+                 rℓ(j, k) = Aℓ¯s(j, k) + nℓ(j, k),                   ation factors of the signals at the base stations {bℓq}, and the
+                                                         two-dimensional real-valued location vector of each trans-
+        Aℓ(j) ≜   ¯aℓ  j, p1, bℓ1  , ..., ¯aℓ  j, pQ, bℓQ    ,      (5)    mitter {pq} overall 2QJK + 2(L −1)Q + 2Q real parameters.
+                                                  The MLE will therefore require a complex multidimensional
+                    ¯s(j, k) ≜  ¯s1(j, k), ..., ¯sQ(j, k) T.                 search over the parameter space.
+                                                            For a single source an MLE was presented in [19], where
+Since the vector ¯s(j, k) is the same at all base stations, we can    the multidimensional search is replaced by a D-dimensional
+concatenate the observed vectors at all base stations and form     search. In order to avoid the multidimensional search for the
+the following equation that encompasses all the data and all    multisource case, we can follow the steps leading to the MU-
+the information of the location system at hand:              SIC algorithm [17]. First note that
+
+               r(j, k) = A(j)¯s(j, k) + n(j, k),                       R(j) ≜E r(j, k)rH(j,k) = A(j)Λ(j)AH(j) + ηI,
+
+                                                                                                                                                                                 ,               (7)               r(j, k) ≜  rT1(j, k), ..., rTL(j, k) T,                             Λ(j) ≜E  ¯s(j, k)¯sH(j, k)
+                                                        (6)                                                          E n(j, k)nH(j, k) = ηI,             n(j, k) ≜ nT1(j, k), ..., nTL(j, k) T,
+             A(j) ≜ AT1(j), ..., ATL(j) T.                  where we assumed that the noise is temporally and spatially
+                                                                white, uncorrelated between sensors and between frequen-
+Remarks                                                                  cies, uncorrelated with the signals and is zero-mean with
+                                                              variance η. The column vectors of A are orthogonal to the(1) Note in passing that (6) is based on the assumption that
+                                                              noise subspace of R(j) and contained in the signal sub-the envelopes of the signals are the same at all base stations,
+                                                                 space.up to delay and amplitude caused by the propagation chan-
+                                                              Following the MUSIC algorithm, we propose the costnel. Although this assumption is realistic in most cases of in-
+terest, we can solve the L sets of equations represented by (5)    function
+without relying on this assumption, and still get improved
+localization with respect to (w.r.t.) traditional AOA. We do           F(p, b) ≜    ¯aH(j, p, b)Us(j)UHs (j)¯a(j, p, b),
+not proceed along this line in this work. This approach was                                                   j
+adopted in [12].                                                                                                        (8)                                                                                                 ¯a(j, p, b) ≜  ¯aT1  j, p, b1  , ..., ¯aTL  j, p, bL  T,    (2) If we assume that the signals’ waveforms are un-
+known, then it is impossible to uniquely determine the com-                                                                b ≜  b1,..., bL T,
+plex attenuation coeﬃcients at all base stations and the signal
+waveforms. We therefore assume that the attenuation coeﬃ-
+cients at one of the arrays (e.g., the ﬁrst array) are all real and    where Us(j) is an ML × Q matrix consisting of the eigen-
+  L                                                             vectors of R(j) corresponding to the Q largest eigenval-  ℓ=1 |bℓq|2 = 1.
+                                                                   ues. Here, p and b are variable vectors representing the   The problem that we address now is how to eﬃciently
+                                               unknown position and unknown attenuations. Recall that
+estimate the locations of the emitters under various assump-
+                                                              the vectors ¯a(j,p, b) contain the L unknown complex at-
+tions.
+                                                            tenuation coeﬃcients in addition to the unknown loca-
+                                                                     tion. The minimum points of F(p,b) depend on all un-
+3.  LOCATION ALGORITHMS                         knowns and therefore require a 2(L −1) + D dimensional
+                                                                  search.
+In this section, we discuss potential location algorithms for        In order to reduce this search, we propose to represent
+the common case of signals with unknown waveforms and      ¯a(j, p, b) as follows:
+for the less common case of signals with known waveforms.
+We make use of results presented in the literature for the AOA                                                                                                              ¯a(j, p, b) = Γ(j)Hb,
+case by introducing modiﬁcations as necessary.
+                                                                Γ(j) ≜diag  aT1(p)e−iωjτ1(p), ..., aTL(p)e−iωjτL(p)  ,    (9)
+3.1.  Signals with unknown waveforms
+                                             H ≜IL ⊗1M,In this section, we assume that the receivers do not know
+the waveforms a priori. This is the case in most of the ap-
+plications. It is straightforward to write the probability den-    where Γ(j) is a diagonal matrix whose elements are the ele-
+sity function, under appropriate assumptions, of the obser-    ments of the response vectors of the arrays at all base stations,
+vations presented in (6), as a function of the unknown pa-     IL stands for the L×L identity matrix, 1M stands for an M ×1
+rameters.                                           column vector of ones, and ﬁnally ⊗stands for the Kronecker

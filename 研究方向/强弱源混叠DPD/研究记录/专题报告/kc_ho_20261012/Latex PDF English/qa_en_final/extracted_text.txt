@@ -1,0 +1,1700 @@
+Passive localization of spectrally overlapping strong
+and weak sources from short observations
+Abstract
+Spectral overlap and unequal received powers complicate weak-source delay estimation and
+association across receivers in passive localization. This report studies weak-source localization
+and computational cost using direct position determination (DPD), with four synchronized
+single-antenna receivers and two sources under line-of-sight propagation.
+The source count
+is assumed known.
+Eliminating the unknown source coeﬀicients at each frequency gives a
+concentrated least-squares objective, from which projection loss, strong-source position errors,
+and missed candidates are examined. With a 20 m success radius, the isolated weak source is
+localized successfully in 90.63% and 95.31% of the 4096- and 16384-sample records, respectively.
+Adding a strong source reduces these rates to 33.98% and 38.28% for the standard regional
+search. Across 48 conditions in six new layouts, supplementary global search on a 5 m grid
+followed by joint updates increases the success count from 8 to 40, while mean total processing
+time rises from 8.04 s to 31.10 s.
+A regional score upper bound is derived from response
+perturbations to reduce search cost. On 24 fixed diagnostic records, subdivision prioritized by
+this bound recovers 9 of 16 previously failed cases, compared with 15 for the 5 m scan, and
+prunes no cells. Broader candidate coverage improves recovery, but the current bound does not
+yet provide comparable recovery at lower cost.
+1
+Introduction
+1.1
+Application context and overlapping sources
+In distributed spectrum monitoring and localization of noncooperative emitters, the transmitted
+waveforms and transmission times are usually unavailable. Positions must therefore be inferred
+from observations at multiple receivers. Several emitters may occupy the same reception band,
+so each record contains a mixture of sources. Differences in transmit power and propagation dis-
+tance produce unequal received powers. Here, spectral overlap means overlap between frequency
+supports; it does not refer to aliasing caused by undersampling.
+The setting of interest is a weak source that can be localized in isolation but is often mislo-
+calized when a strong source is present. Strong and weak are defined by received power averaged
+across the receiver network; the same source need not be stronger at every receiver. With short
+observations, fluctuations in sample correlations and cross terms between sources also affect
+estimation. Both sources must be localized within a limited processing time, so strong-source
+accuracy alone is insuﬀicient to assess performance.
+1.2
+Diﬀiculties in two-step localization and the DPD approach
+Conventional two-step localization first estimates time differences of arrival (TDOAs) from re-
+ceiver pairs, then solves for position using the resulting geometric constraints.
+Generalized
+1
+
+
+cross-correlation provides a basic framework for delay estimation [1]. The hyperbolic estima-
+tor of Chan and Ho and subsequent bias analysis address the position solution given delay
+measurements [2], [3].
+For a mixture of strong and weak sources, cross-correlation between receivers contains shifted
+autocorrelation terms from each source, finite-sample cross terms, and noise. Strong-source
+terms may mask the weak-source peak. Even if several peaks are retained, the delays from
+different receiver pairs must still be associated with the same source. Selecting the largest peak
+independently for each pair can produce delays that are inconsistent with any single position.
+These diﬀiculties arise in measurement extraction and association, before the geometric position
+solution.
+DPD constructs an estimation objective directly from the received signals and the propaga-
+tion responses of candidate positions. The observations thus constrain position jointly across
+receivers. Weiss and Amar discuss the distinction between direct and two-step localization, in-
+cluding the association problem for multiple sources [4]. DPD is used here to avoid committing
+prematurely to a single delay peak at the front end. Coupling between sources and the search
+over a multimodal objective remain.
+1.3
+Related work and research objective
+Chen et al. formulate maximum-likelihood localization for wideband near-field observations and
+handle multiple sources by eliminating unknown source spectra and alternating position updates
+[5]. Their formulation supports the joint fitting of unknown frequency-domain coeﬀicients used
+here. High-resolution DPD (DPD-HR) uses statistics from segmented observations to construct
+a localization score [6]; the observation duration and number of segments required for those
+statistics must be compatible with short records.
+Sequential suppression and cyclic updates are one approach to interference from unequal
+source powers. In acoustic matched-field localization, the round-robin method of Mantzel et al.
+projects out estimated sources and uses position revisits and rank-constrained regional suppres-
+sion to reduce the effects of estimation errors [7]. This report adopts the projection and revisit
+ideas with a line-of-sight radio-frequency response; the acoustic performance results are not
+transferred to the present setting. Newtonized orthogonal matching pursuit (NOMP) combines
+component detection, continuous refinement, and cyclic updates [8]. Its sinusoidal model differs
+from the two-dimensional position model with unknown coeﬀicients at each frequency consid-
+ered here.
+Multiple-candidate representations also appear in steered response power (SRP)
+and group-sparse direction estimation [9], although their dictionaries and geometric constraints
+differ from those of localization with distributed receivers.
+Joint estimation, projection, and continuous optimization provide a basis for multisource
+localization, yet the weak source may still be missed in a short mixed observation. This re-
+port uses conditional scores to examine missed candidates and position coupling, compares the
+recovery and cost of denser global search, and tests whether a response-based regional upper
+bound can reduce score evaluations. The objective is to retain candidates near narrow weak-
+source peaks at lower cost and to reduce the effect of strong-source position errors through joint
+updates.
+2
+
+
+2
+Problem formulation
+2.1
+Geometry, notation, and assumptions
+Consider L synchronized receivers at known positions and K stationary sources. The simulations
+use L = 4 and K = 2. Receiver and source positions are rℓ∈R2 and pk ∈R2, respectively. The
+unknown position vector is
+θ = [pT
+1 , . . . , pT
+K]T ∈R2K.
+(2.1)
+Propagation is assumed to be line of sight. Receiver noises are mutually independent, white,
+circularly symmetric complex Gaussian processes.
+Source waveforms, transmit powers, and
+common initial phases are unknown and absorbed into the source signals.
+The simulations
+and concentrated least-squares estimators use the same 1/d attenuation and baseband delay
+phase, without receiver-specific gain or phase offsets. Figure 2.1 shows one two-source geometry;
+simulation parameters are listed in Table 3.1.
+-600
+-400
+-200
+0
+200
+400
+600
+x / m
+-600
+-400
+-200
+0
+200
+400
+600
+y / m
+Strong source
+Weak source
+Rx 1
+Rx 2
+Rx 3
+Rx 4
+(a) Four-receiver geometry
+Receiver
+Strong source
+Weak source
+-10.0
+-7.5
+-5.0
+-2.5
+0.0
+2.5
+5.0
+7.5
+10.0
+Relative frequency / MHz
+-60
+-50
+-40
+-30
+-20
+-10
+0
+PSD / (dBm/MHz)
+Intersection: 8.333 MHz
+Union: 16.667 MHz
+(b) Ideal spectra, IoU = 0.5
+Strong: 6 dBm
+Weak: 0 dBm
+-10.0
+-7.5
+-5.0
+-2.5
+0.0
+2.5
+5.0
+7.5
+10.0
+Relative frequency / MHz
+-60
+-50
+-40
+-30
+-20
+-10
+0
+PSD / (dBm/MHz)
+Intersection: 12.500 MHz
+Union: 12.500 MHz
+(c) Ideal spectra, IoU = 1
+Figure 2.1
+Four single-antenna receivers and two spectral-overlap conditions.
+(a) Four receivers lie on a circle of radius 500 m. The strong and weak sources are at (215.85, 483.29)
+m and (72.77, −270.30) m, respectively, from one simulated scene. (b), (c) Ideal power spectra of root-
+raised-cosine (RRC) signals with a 10 MHz symbol rate, roll-off 0.25, and 12.5 MHz support width per
+source. The illustrative powers of 6 dBm and 0 dBm show a 6 dB difference; the ordinate is power spectral
+density in dBm/MHz. Intersection-over-union (IoU) is the intersection width divided by the union width
+of the frequency supports, not the area between spectral curves. A center-frequency separation of 12.5/3
+MHz gives intersection and union widths of 25/3 and 50/3 MHz, hence IoU = 0.5; coincident centers
+give IoU = 1. Position ranges and power definitions are given in Table 3.1.
+3
+
+
+Table 2.1
+Principal symbols and dimensions.
+Symbol
+Meaning
+Dimension or unit
+rℓ, pk
+Receiver and source positions
+2 × 1, m
+dℓk, τℓk
+Propagation distance and delay
+m, s
+Fs, Ts, T
+Sampling rate, sampling interval, and
+observation duration
+Hz, s, s
+xm, sm
+Receiver observations and source
+coeﬀicients at frequency m
+L × 1, K × 1
+Am
+Response matrix parameterized by position
+L × K
+Π⊥
+m
+Orthogonal projector onto the complement
+of the response column space
+L × L
+Dm
+Derivative of the mean with respect to real
+position parameters
+L × 2K
+Jeff
+θ
+Position information after eliminating
+unknown waveforms
+2K × 2K, m−2
+Superscripts T, H, and † denote transpose, conjugate transpose, and the Moore–Penrose
+pseudoinverse, respectively; ∥· ∥denotes the Euclidean norm.
+2.2
+Received-signal model
+Following the wideband joint-localization model in [5], let sk(t) be the continuous complex
+baseband signal of source k. The propagation distance, delay, and amplitude attenuation are
+dℓk = ∥pk −rℓ∥,
+τℓk = dℓk
+c ,
+gℓk = 1
+dℓk
+.
+(2.2)
+A common attenuation constant is absorbed into sk(t). With N samples per receiver, the
+observation model is
+xℓ[n] =
+K
+X
+k=1
+gℓksk(nTs −τℓk) + wℓ[n],
+n = 0, . . . , N −1,
+wℓ[n] ∼CN(0, σ2
+t ).
+(2.3)
+Here, Ts = 1/Fs, T = NTs is the observation duration, and c is the propagation speed.
+The complex noise satisfies E|wℓ[n]|2 = σ2
+t , with variance σ2
+t /2 in each real and imaginary
+component. The two simulated sources use independent binary phase-shift keying (BPSK) data,
+symbol timing, and initial phase, followed by RRC pulse shaping. The localization algorithms
+do not use the transmitted bits or true individual source spectra. Statistical independence of
+the sources does not make their finite-record cross terms identically zero.
+The discrete Fourier transform (DFT) is normalized by N:
+Xℓm = 1
+N
+N−1
+X
+n=0
+xℓ[n]e−j2πmn/N,
+σ2
+f = σ2
+t
+N .
+(2.4)
+4
+
+
+Both positive and negative frequencies are retained, with fm denoting signed baseband
+frequency. Under a frequency-domain approximation that neglects observation-window edge
+effects [4], [5], stacking the receiver observations at each frequency gives
+xm = Am(θ)sm + nm,
+nm ∼CN(0, σ2
+fIL),
+(2.5)
+[am(pk)]ℓ= e−j2πfmdℓk/c
+dℓk
+,
+Am = [am(p1), . . . , am(pK)].
+(2.6)
+The carrier-phase convention is fc = 0. The likelihood and information analysis below refer
+to the frequency-domain model in (2.5).
+The source coeﬀicients sm are fitted separately at each frequency, while positions are shared
+across frequencies. The unknown-waveform model does not include an arbitrary complex gain
+at each receiver: such gains could absorb position-dependent phase changes and remove the
+corresponding localization constraints.
+2.3
+Waveform elimination and the multisource DPD objective
+Under this frequency-domain model and equal-variance white noise, the negative log-likelihood
+is proportional to the total squared fitting residual after parameter-independent terms are re-
+moved. The concentrated least-squares position estimate is
+bθ = arg min
+θ∈ΩK min
+{sm}
+X
+m
+∥xm −Am(θ)sm∥2,
+Ω= [−1000, 1000]2 m2.
+(2.7)
+For fixed positions, the minimum-norm least-squares (LS) estimate of the source coeﬀicients
+is
+bsm = A†
+mxm.
+(2.8)
+Define the projectors onto the response column space and its orthogonal complement as
+Πm = AmA†
+m,
+Π⊥
+m = IL −Πm.
+(2.9)
+Substituting the coeﬀicient estimate gives a concentrated objective containing only position
+parameters [5]:
+J(θ) =
+X
+m
+∥Π⊥
+mxm∥2.
+(2.10)
+Exchanging source labels leaves this objective unchanged, so the estimated positions are
+evaluated as an unordered set. The objective uses propagation relations across all receivers and
+all frequencies included in the fit, without requiring a separate TDOA estimate for each source.
+A finite search need not attain its global minimum.
+2.4
+Sequential search and joint updates
+Enumerating combinations of K two-dimensional positions becomes costly as the source count
+increases. The solver initializes sources sequentially, alternates position updates, and periodi-
+cally searches again for previously estimated sources. When one position is updated, the other
+positions are fixed. Writing their responses as Bm, define
+Π⊥
+B,m = I −BmB†
+m,
+rm = Π⊥
+B,mxm,
+um(p) = Π⊥
+B,mam(p).
+(2.11)
+5
+
+
+Both the new source coeﬀicient and the coeﬀicients of the existing sources are refitted.
+Eliminating these linear LS variables gives the residual reduction associated with a candidate
+position:
+Q(p | B) =
+X
+m
+|am(p)HΠ⊥
+B,mxm|2
+am(p)HΠ⊥
+B,mam(p).
+(2.12)
+The denominator is the energy of the projected candidate response, so the score equals the
+improvement in the joint LS fit. Projection and candidate-response normalization also appear
+in round-robin localization [7]. When um = 0, the candidate adds no new direction to the
+column space and its increment at that frequency is defined as zero. Otherwise,
+0 ≤|uH
+mrm|2
+∥um∥2 ≤∥rm∥2.
+(2.13)
+The implementation checks numerical scales at degenerate frequencies and normalizes scores
+by the total observation energy Ex = P
+m ∥xm∥2.
+This normalization preserves candidate
+ordering within a record.
+The complete localization methods are defined in Table 2.2.
+Conventional DPD selects
+spatial-spectrum peaks directly. Methods A, B, C, and D use the concentrated LS objective
+and differ mainly in candidate search. AP denotes alternating projection.
+Table 2.2
+Localization methods and candidate-search strategies.
+Method
+Candidate search
+Objective and position updates
+Conventional DPD
+Largest eigenvalue of the
+delay-compensated correlation
+matrix; coarse-to-fine search
+Two peaks selected and refined
+separately, without sequential
+projection
+A: Multistart AP
+Coarse grid and multiple
+initializations
+Concentrated LS, L-BFGS-B,
+alternating updates, and cyclic
+search
+B: Standard regional search
+Subdivision by current score, with
+global exploration
+Same as A
+C: Response-guided search
+B with additional ranking by
+response variation
+Same as A
+D: Supplementary global
+search
+Complete B, then a 5 m scan and
+refinement of the top 5 candidates
+for each source
+Same concentrated LS objective,
+followed by 2 local
+alternating-update rounds
+Conventional DPD scores positions using the largest eigenvalue of a delay-compensated
+correlation matrix normalized by receiver energies. Coarse-to-fine peak selection and separate
+refinement produce the position estimates. Its comparison with A, B, and C therefore concerns
+complete solution procedures.
+Methods A, B, and C use the same initial candidate search based on conventional DPD,
+whose cost is included in total processing time. They use 5 initializations, at most 5 alternating-
+update rounds, and at most 30 iterations per local optimization. Previously estimated sources
+are searched again in rounds 3 and 5. B and C subdivide at most 48 cells at a time and reserve
+one in every 4 search steps for global exploration. C uses the response-variation measure defined
+in Section 2.5.3, with ranking weight fixed at 0.25.
+6
+
+
+Mixed IQ
+Joint model at
+each frequency
+Candidate search
+Initial 2-D
+positions
+Continuous
+refinement
+Update one position
+Joint fitting
+Refit all source
+coefficients
+Revisit other sources;
+recompute the conditional projection
+Common objective: minimize the joint residual of the original mixture
+Figure 2.2
+Common solution procedure for the joint objective.
+Candidate search supplies initial positions, continuous optimization refines positions, and all frequency-
+domain source coeﬀicients are refitted. The conditional projector is recomputed on each revisit. A, B,
+C, and D share the concentrated LS objective but differ in candidate coverage and cost.
+After an accepted position update, all source coeﬀicients are refitted before another position
+is updated. Retaining the solution with the smaller joint residual makes accepted residuals
+nonincreasing, but does not ensure convergence to a basin near the true positions.
+To assess insuﬀicient candidate coverage, method D adds one global-update sweep to the
+output of the complete method B. For each source in turn, it fixes the other position, evaluates
+(2.12) on a 5 m grid over the entire search region, and continuously refines the top 5 candidates.
+After both positions have been updated, it performs two local alternating-update rounds. Each
+step retains the solution with the smaller joint residual. Only observations and current estimates
+are used; true positions are reserved for evaluation.
+2.5
+Theoretical and algorithmic diﬀiculties
+2.5.1
+Local identifiability and global search
+If K ≥L and the response matrix has full row rank, freely fitted coeﬀicients at each frequency
+can reproduce any observation, making the concentrated objective degenerate. With L = 4
+and K = 2, a full-column-rank response leaves two complex residual dimensions per frequency.
+Local position identifiability still depends on the response derivatives.
+Let Dm = ∂(Amsm)/∂θT , with source coeﬀicients held fixed during differentiation. If the
+response has full column rank locally and the noise covariance is known and parameter inde-
+pendent, eliminating the unknown complex waveforms gives the equivalent position informa-
+tion [5], [10]
+Jeff
+θ = 2
+σ2
+f
+Re
+X
+m
+DH
+mΠ⊥
+mDm .
+(2.14)
+When this matrix is positive definite, its inverse gives the Cramér–Rao lower bound (CRLB)
+for regular, locally unbiased position estimation. The bound describes accuracy near the true
+positions, not whether a solver reaches that neighborhood. Distant local optima and threshold
+effects require separate analysis [11].
+7
+
+
+2.5.2
+Projection loss and strong-source position error
+At one frequency, let as and aw be the strong- and weak-source responses. With the true strong-
+source response fixed, define Π⊥
+s = I −asaH
+s /∥as∥2.
+The response correlation and retained
+weak-source energy fraction are
+ρ =
+aH
+s aw
+∥as∥∥aw∥,
+η = ∥Π⊥
+s aw∥2
+∥aw∥2
+= 1 −|ρ|2.
+(2.15)
+When the responses are similar, removing the strong source also removes some weak-source
+energy. Broadband retention must be weighted by the actual weak-source energy at each fre-
+quency; one frequency cannot represent the entire observation. For a fixed projector, the noise
+covariance is σ2
+fΠ⊥
+s . In an orthonormal basis of the retained subspace, equal-variance LS remains
+applicable.
+Let δps be the strong-source position error, Hs,m = ∂am(ps)/∂pT
+s , and ssm the source
+coeﬀicient at frequency m. For small position errors, the leading term of residual strong-source
+energy is
+Eleak ≈
+X
+m
+|ssm|2∥Π⊥
+s,mHs,mδps∥2.
+(2.16)
+Leakage depends on strong-source power and the direction of the position error. A strong-
+source estimate can therefore satisfy the localization success criterion while still distorting the
+weak-source score. Because the projection position is usually estimated from the same observa-
+tions, its error and the residual are statistically dependent.
+2.5.3
+Sampling narrow peaks and retaining candidates
+Equation (2.13) bounds the incremental score, but the normalized projected-response direction
+can still change rapidly with position when its norm is small. Hold the other positions fixed
+and let δ be a two-dimensional displacement. Near a smooth local maximum p⋆, with H⋆=
+−∇2Q(p⋆) ≻0,
+Q(p⋆+ δ) = Q(p⋆) −1
+2δT H⋆δ + O(∥δ∥3).
+(2.17)
+For a square grid with spacing h, the nearest grid point satisfies ∥δ∥2 ≤h2/2. Where the
+local expansion is valid,
+Q(p⋆) −Q(pgrid) ≤λmax(H⋆)h2
+4
++ O(h3).
+(2.18)
+Even when a high peak exists near the true position, sampling loss can rank its nearest grid
+point below distant candidates. Uniformly reducing grid spacing limits this loss, but the number
+of evaluations in two dimensions grows as h−2. The search must determine which regions merit
+further evaluations within the available budget.
+One regional selection rule considered here uses spatial variation of the projected response.
+Let M be the number of frequencies used for scoring, and let ∂i denote differentiation with
+respect to coordinate pi. With the other positions fixed, define
+ζ(p) = 1
+M
+M
+X
+m=1
+X
+i∈{x,y}
+∥∂ium∥2
+∥um∥2 −|uH
+m∂ium|2
+∥um∥4
+
+.
+(2.19)
+8
+
+
+This measure quantifies local sensitivity of the response direction after removing changes in
+overall amplitude and phase. Method C multiplies it by the squared cell half-width, converts
+it to a rank, and combines this rank with the score rank. It does not directly use the observed
+residual, so rapid response variation need not indicate a high-scoring candidate. Its benefit is
+assessed under matched time budgets.
+2.5.4
+Regional score upper bound and pruning
+To determine whether an incompletely sampled region may contain a higher score, consider a
+conditional upper bound with all other sources fixed. A square cell C has center pc and half-
+width h, so every point in it lies within ∆C =
+√
+2h of the center. The numerical search floors
+receiver distances at d0 = 1 m to avoid the 1/d singularity; the bound uses the same response.
+Write dc
+ℓ= max(∥pc −rℓ∥, d0) and dℓ,−= max(dc
+ℓ−∆C, d0). Bounds on distance changes and
+complex-exponential phase differences give the following bound on the response change at one
+receiver:
+εℓm =
+∆C
+dc
+ℓdℓ,−
++ 2
+dc
+ℓ
+sin
+1
+2 min
+
+π, 2π|fm|∆C
+c
+
+,
+εm =
+ L
+X
+ℓ=1
+ε2
+ℓm
+!1/2
+.
+(2.20)
+Orthogonal projection cannot increase a vector norm, so ∥um(p) −um(pc)∥≤εm. Denote
+the projected center response by uc
+m = um(pc) and define
+tm = min
+
+1,
+εm
+∥ucm∥
+
+,
+vm = |(uc
+m)Hrm|
+∥ucm∥∥rm∥.
+(2.21)
+For tm < 1, the response direction deviates by at most arcsin tm. Bounding its angle with
+the residual gives the following regional upper bound on the normalized score:
+Q(p | B)
+Ex
+≤U(C) = 1
+Ex
+X
+m
+∥rm∥2H(vm, tm),
+p ∈C,
+H(v, t) =
+
+
+
+ v
+√
+1 −t2 + t
+√
+1 −v22,
+t <
+√
+1 −v2,
+1,
+t ≥
+√
+1 −v2.
+(2.22)
+A zero residual contributes zero. At a degenerate projected center response, the residual
+energy at that frequency is used as the upper bound.
+A cell can be pruned when U(C) is
+below the best score already found; otherwise, cells with larger upper bounds can be subdivided
+first. Whether this bound is tight enough, and whether its evaluation is cheaper than sampling
+additional positions, are empirical questions. Section 3.10 compares it with score-prioritized
+subdivision and uniform and shifted grids.
+The objective is to detect weak-source candidates missed by coarse search within a fixed
+observation and computational budget, while reducing the effects of strong-source errors through
+joint position updates.
+9
+
+
+3
+Simulation results and analysis
+3.1
+Simulation setup
+Methods A, B, and C are first compared on 32 independent layouts, followed by analysis of
+their failures. Complete methods B and D are then compared on six new layouts. The regional-
+bound comparison uses 24 fixed diagnostic records and updates only the weak-source position.
+These three sets are analyzed separately. Section 3.7 provides an additional frequency-domain
+illustration of the projection mechanism.
+Table 3.1
+Simulation parameters and settings for the first method comparison.
+Parameter
+Setting
+Receiver geometry
+Four receivers at approximately
+(500, 0), (0, 500), (−500, 0), (0, −500) m
+Search region
+[−1000, 1000]2 m2; continuous source positions
+Source count and separation
+Known K = 2; source separation at least 300 m; source-to-receiver
+distance at least 150 m
+Waveforms
+Two independent BPSK/RRC sources; symbol rate 10 MHz;
+roll-off 0.25
+Sampling and record length
+Fs = 100 MHz; N = 4096, 16384
+Nominal bandwidth and overlap
+12.5 MHz; spectral-support IoU of 0.5 or 1
+Weak-source power
+Network-averaged in-band signal-to-noise ratio (SNR) of 3 dB
+Power difference
+Network-averaged received-power difference of 6 or 12 dB
+Independent layouts and
+realizations
+32 layouts, with 2 waveform/noise realizations per layout
+Mixed-source conditions
+32 × 2 × 2 × 2 × 2 = 512 records
+Isolated-source controls
+128 isolated weak-source and 128 isolated strong-source records per
+length
+Main budget T0
+3.7216 s for 4096 samples; 11.5376 s for 16384 samples
+Budget comparison
+0.5T0, T0, 2T0, using the output completed by each deadline
+Short and long records are prefixes of the same continuous waveform and noise streams.
+Across the two power differences, the weak signal and noise are identical sample by sample;
+only the strong-source amplitude changes. Layouts are the independent sampling units, and
+confidence intervals use paired resampling of layout clusters.
+Method parameters are fixed before each comparison. Failure diagnostics from the first set
+are used to select the supplementary search configuration. The 5 m grid, candidate count, and
+update rounds for D are fixed before evaluating the six new layouts. Isolated/mixed comparisons
+preserve the weak signal and noise to measure the additional loss caused by the strong source.
+The comparison involving D uses complete executions of B as the baseline, rather than
+the deadline outputs from the first set. B and D use the same batched double-precision score
+implementation. The total time for D includes B and the supplementary search. Computation
+uses an NVIDIA RTX 4070 Ti SUPER, PyTorch 2.8.0, and 4 CPU threads.
+10
+
+
+3.2
+Evaluation metrics
+Let P and bP denote the true and estimated position sets. For a success radius r, matching first
+maximizes the number of source pairs within that radius, then breaks ties by squared distance
+and a fixed deterministic rule. Let Iw,j(r) and Is,j(r) indicate successful matches for the weak
+and strong sources in record j. The weak-source and simultaneous two-source success rates are
+Rw(r) =
+1
+nrec
+nrec
+X
+j=1
+Iw,j(r),
+Rboth(r) =
+1
+nrec
+nrec
+X
+j=1
+Is,j(r)Iw,j(r).
+(3.1)
+Here, nrec is the number of records. The success radius is 2% of the largest receiver baseline,
+namely r = 0.02 maxℓ,q ∥rℓ−rq∥= 20 m. Root-mean-square error (RMSE), the 95th percentile
+(P95), and the error cumulative distribution function (CDF) use a separate minimum-squared-
+distance assignment and retain all matched errors. The two assignments serve success counting
+and distance-error statistics, respectively.
+Set error is measured by the generalized optimal sub-pattern assignment (GOSPA) distance
+[12], with p = 2, α = 2, κ = 100 m. Its partial-assignment form is
+d2
+G(P, bP) = min
+γ
+
+X
+(i,j)∈γ
+∥pi −bpj∥2 + κ2
+2 (K + bK −2|γ|)
+
+,
+(3.2)
+Here, γ is a one-to-one partial assignment. The GOSPA cutoff κ is distinct from the 20 m
+success radius. Reported GOSPA values are means of the per-record distance dG; RMSE is the
+square root of the mean untruncated squared distance error.
+Total online processing time includes the shared candidate front end, propagation-model
+scoring, projection, search, and continuous refinement. The three budget snapshots come from
+the same run trajectory and retain the original layout grouping in the analysis.
+3.3
+The weak source in isolation and in a mixture
+4096 samples / 40.96 μs
+16384 samples / 163.84 μs
+0
+20
+40
+60
+80
+100
+Weak-source success (20 m) / %
+90.63
+95.31
+33.98
+38.28
+34.38
+37.11
+Isolated weak source
+Mixture: B
+Mixture: C
+Figure 3.1
+Isolated and mixed observations with the same weak signal and noise.
+Each length has 128 isolated weak-source records and 256 mixed conditions. The two power differences
+in the mixtures share the corresponding weak signal. Mixed-source results use the main budget T0 and
+a 20 m success radius.
+11
+
+
+Table 3.2
+Weak-source success counts in isolated and mixed observations.
+Samples
+Isolated weak source (shared
+reference)
+Mixed, B
+Mixed, C
+4096
+116/128 (90.625%)
+87/256 (33.984%)
+88/256 (34.375%)
+16384
+122/128 (95.313%)
+98/256 (38.281%)
+95/256 (37.109%)
+Isolated weak-source success rates are 90.63% and 95.31% for the two lengths.
+Adding the
+strong source reduces the rates of B and C to approximately 34% to 38%. Because the weak
+signal and noise are unchanged, this difference measures the additional loss from the strong
+source. Increasing the record length from 4096 to 16384 samples improves weak-source success
+in the mixture, but a substantial gap from isolated-source performance remains.
+Relative source strengths at individual receivers depend on geometry and transmit power.
+The network-average definition does not require one source to dominate at every receiver. Source
+competition must therefore be examined through the actual responses; a single global power
+ratio cannot predict success or failure.
+3.4
+Sequential processing and candidate ranking
+Conventional DPD
+A
+B
+C
+0
+20
+40
+60
+80
+100
+Success rate (20 m) / %
+93.75
+94.92
+94.92
+95.51
+0.00
+31.25
+36.13
+35.74
+0.00
+31.05
+35.74
+35.35
+Strong source
+Weak source
+Both sources
+Figure 3.2
+Complete-method comparison at the main budget.
+Results combine both record lengths, giving 512 mixed conditions per method, with a 20 m success
+radius. A, B, and C share sequential projection and joint updates. Method D is evaluated separately on
+new layouts in Section 3.9.
+12
+
+
+Table 3.3
+Aggregate results at the main budget T0.
+Method
+Weak
+success
+Both
+sources
+successful
+Strong
+success
+Mean
+GOSPA /
+m
+RMSE /
+m
+P95 / m
+Conventional
+DPD
+0.00%
+0.00%
+93.75%
+101.73
+807.21
+1684.03
+A
+31.25%
+31.05%
+94.92%
+64.16
+259.85
+616.25
+B
+36.13%
+35.74%
+94.92%
+60.46
+256.71
+612.58
+C
+35.74%
+35.35%
+95.51%
+61.36
+242.01
+579.53
+Conventional DPD usually localizes the strong source, but none of its weak-source estimates
+meets the 20 m criterion. With sequential projection and joint updates, A, B, and C achieve
+weak-source success rates from 31.25% to 36.13%. C exceeds A by 4.49 percentage points, with
+a 95% paired interval of [0.59, 8.79] percentage points from resampling the 32 layouts. Relative
+to B, C is lower by 0.39 percentage points, with an interval of [−5.27, 3.91] percentage points.
+In paired comparisons, C recovers 22 weak-source failures of B but fails on 24 records where
+B succeeds, giving a net loss of 2 successes. C has lower RMSE, while GOSPA and the 20
+m success rate do not improve. Ranking by response variation therefore shows no consistent
+benefit over the standard regional search B.
+3.5
+Conditional scores and failure analysis
+Conditional scores are examined for the 512 mixed records of B, with its main-budget outputs
+held fixed. For the 327 weak-source failures, the comparisons are: the true weak position versus
+the returned position under the estimated strong position; the same two positions under the true
+strong position; and the true position pair versus the returned pair under the joint objective.
+True positions are used only for diagnosis, not for candidate generation.
+Table 3.4
+Conditional-score analysis of all failed records.
+Samples
+Weak
+failures of B
+True weak score
+higher: estimated
+strong
+True weak score
+higher: true strong
+True pair gives
+better joint fit
+4096
+169
+147
+159
+158
+16384
+158
+145
+155
+155
+Total
+327
+292
+314
+313
+In 292 of 327 failures (89.30%), the true weak-source position already has a higher score
+than the returned position, without changing the estimated strong position or score function.
+Local refinement initialized at the true weak position finds a higher-scoring solution within 20
+m in 295 records. These counts can overlap. Most failed records therefore contain a better
+position that the solver did not find.
+Of the 35 records without a score advantage at the true weak position under the estimated
+strong position, 22 gain that advantage when the true strong position is substituted. In one of
+these records, the original strong-source error is already below 20 m. The success radius is thus
+13
+
+
+not a suitable stopping threshold for strong-source refinement: smaller errors can still affect the
+weak-source score.
+The true position pair gives a smaller joint residual in 313 of the 327 failures.
+For the
+remaining records, scores at the true positions alone do not establish a search failure; local
+estimation bias and convergence to an incorrect basin must be distinguished. Denser-search
+comparisons further assess the effect of candidate coverage.
+-1000
+-500
+0
+500
+1000
+x / m
+-1000
+-750
+-500
+-250
+0
+250
+500
+750
+1000
+y / m
+(a) Long-record example: 10 m score map
+True weak source
+Dense-search output
+Estimated strong
+position fixed
+True strong
+position fixed
+0
+50
+100
+150
+200
+250
+300
+350
+Records with higher score
+at the true weak position
+292
+314
+(b) All 327 weak-source failures
+Estimated strong
+position fixed
+True strong
+position fixed
+0
+2
+4
+6
+8
+10
+12
+14
+16
+18
+Recovered / 16 selected failures
+14
+15
+(c) 10 m grid and top 5 candidates
+Nearest
+grid point
+Dense-search
+output
+True
+position
+Local solution
+near truth
+0.00
+0.02
+0.04
+0.06
+0.08
+0.10
+Normalized incremental score
+0.08160
+0.08705
+0.08989
+0.08992
+(d) Candidate scores near a narrow peak
+0.80
+0.85
+0.90
+0.95
+1.00
+Score / maximum score
+Figure 3.3
+Score structure and diagnosis of missed candidates.
+(a) Auxiliary long-record example, IoU = 0.5 and N = 65536: a 10 m score map over the full region,
+with the true weak position and dense-search output. This example is excluded from statistics for the
+two main record lengths. (b) Conditional scores for all 327 weak-source failures of B. (c) Recovery within
+20 m among 16 previously selected failures; all 8 historical controls also meet 20 m after the update.
+(d) A narrow-peak case with N = 4096, IoU = 1, and a 12 dB power difference: scores at four types of
+position, with the true strong position fixed.
+3.6
+Dense search and missed narrow peaks
+The search diagnosis retains 24 records previously selected under a 100 m criterion; it does
+not resample the current 327 failures. The records cover four layouts and eight strata defined
+by length, overlap, and power difference, with two historical failures and one historical control
+per stratum. All 16 historical failures initially exceed 20 m. Of the 8 controls, only 6 initially
+satisfy 20 m; the other errors are 61.42 m and 63.37 m. The two fixed groups are retained, and
+updated outputs are evaluated at 20 m throughout. The diagnostic search fixes the strong-source
+position and re-estimates the weak source using a full-region 10 m scan, the top 5 candidates,
+and continuous refinement.
+14
+
+
+Table 3.5
+Search diagnosis on the fixed records.
+Group
+Records
+Weak successes:
+estimated strong
+fixed
+Weak successes:
+true strong fixed
+Both successful:
+initialized at true
+pair
+Historical failures
+16
+14
+15
+16
+Historical controls
+8
+8
+8
+8
+Keeping the estimated strong-source position fixed, denser search recovers 14 of the 16
+selected failures. These records can be recovered by changing the search, but this recovery
+fraction from purposively selected cases does not estimate recovery across all failures.
+The two remaining cases have different causes. In the coupling case with 4096 samples, IoU
+= 1, and a 6 dB power difference, the original strong-source error is 558.73 m. Holding that
+estimate fixed leaves a weak-source error of 1095.56 m after dense search. Substituting the true
+strong position reduces it to 0.828 m, directly demonstrating position coupling in this case.
+In the narrow-peak case with 4096 samples, IoU = 1, and a 12 dB power difference, the
+strong-source error is only 0.073 m, yet the 10 m search returns a weak-source error of approx-
+imately 125.48 m. With the true strong position fixed, the scores are as follows.
+Table 3.6
+Scores in a case with a missed narrow peak.
+Position
+Normalized incremental
+score
+Distance from true weak
+source
+Nearest 10 m grid point
+0.08159913
+4.523 m
+Dense-search output
+0.08704823
+125.36 m
+True weak position
+0.08989170
+0 m
+Local solution near truth
+0.08992482
+0.803 m
+The nearest grid point is only 4.523 m from the true position but scores below the distant
+returned point. Local refinement from the correct region reaches submeter error, yet the 10
+m grid with five retained candidates omits that region. This behavior is consistent with the
+sampling loss and ranking changes described by (2.17) and (2.18).
+Grid spacing and candidate count are also compared on these 24 records. With the estimated
+strong position fixed and the same batched score implementation, a 10 m grid with 5 candidates
+recovers 14 of 16 historical failures. Increasing the count to 32 still recovers 14, whereas a 5
+m grid with 5 candidates recovers 15. All three configurations bring the 8 historical controls
+within 20 m, including the 2 that initially exceed that radius. Mean supplementary weak-source
+search times over the 16 failures are 2.95, 3.61, and 11.29 s, respectively, excluding the preceding
+strong-source estimation. For these records, retaining more candidates does not replace finer
+spatial sampling.
+In a separate auxiliary diagnosis of 16 selected long-record conditions, changing the search
+while holding the score fixed increases the number of weak sources recovered within 20 m from
+3 to 8. This set illustrates a similar candidate-omission effect and is not pooled with the main
+sample.
+15
+
+
+3.7
+Numerical illustration of projection with strong-source error
+Projected energies under the frequency-domain response in (2.6) illustrate how small position
+errors leave strong-source leakage. The receiver coordinates are those in Figure 2.1; the strong
+and weak sources are at (650, −300) m and (−800, −700) m. There are 65 uniformly spaced
+frequencies over [−6.25, 6.25] MHz. The complex noise variance is 1, and network-averaged
+SNRs at each frequency are 15 and 3 dB. Source spectra with fixed random phases are treated
+as unknown deterministic coeﬀicients. This example illustrates projection and is excluded from
+the BPSK localization success statistics.
+-6
+-4
+-2
+0
+2
+4
+6
+Frequency / MHz
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+ηm
+(a) Weak-source energy retained
+10−2
+10−1
+100
+101
+Strong-source position offset along x / m
+10−6
+10−5
+10−4
+10−3
+10−2
+10−1
+100
+101
+Leakage / retained weak-source energy
+(b) Leakage relative to retained weak energy
+Exact projection
+First-order response approximation
+Figure 3.4
+Numerical illustration of projection loss and leakage.
+The frequency-domain parameters are specified in this subsection.
+(a) Retained weak-source energy
+fraction ηm at each frequency. (b) Strong-source leakage divided by the weak-source energy retained
+under exact projection, for strong-source offsets of 0.01 to 50 m along x.
+The first-order response
+approximation in (2.16) is also shown. The energy ratio grows approximately quadratically for small
+offsets.
+For small offsets, the leakage agrees with the quadratic energy approximation in (2.16).
+This explains why a strong-source error below the success threshold may still affect weak-source
+search, but it does not supply a practical stopping rule for strong-source refinement.
+The
+conditional-score results in Section 3.5 are consistent with this error-propagation mechanism.
+16
+
+
+3.8
+Success rates, processing time, and error distributions
+0.5T0
+T0
+2T0
+Time budget
+0
+20
+40
+60
+80
+100
+Weak-source success (20 m) / %
+30.86
+31.25
+31.25
+33.59
+33.98
+33.98
+33.59
+34.38
+34.38
+N = 4096
+A
+B
+C
+0.5T0
+T0
+2T0
+Time budget
+0
+20
+40
+60
+80
+100
+Weak-source success (20 m) / %
+31.25
+31.25
+31.25
+37.89
+38.28
+38.28
+37.11
+37.11
+37.11
+N = 16384
+A
+B
+C
+0.5T0
+T0
+2T0
+Time budget
+0
+2
+4
+6
+8
+Mean time within budget / s
+1.86
+3.65
+3.74
+1.86
+3.72
+4.93
+1.86
+3.72
+7.44
+N = 4096
+0.5T0
+T0
+2T0
+Time budget
+0
+5
+10
+15
+20
+25
+Mean time within budget / s
+5.77
+11.19
+11.25
+5.77
+11.54
+14.15
+5.77
+11.54
+23.07
+N = 16384
+Figure 3.5
+Weak-source success and online time at three budgets.
+Each method and record length has 256 mixed conditions. The abscissa gives budgets 0.5T0, T0, 2T0. The
+upper panels show weak-source success within 20 m. The lower panels report mean online processing
+time capped at each budget: actual time for runs that finish early and the deadline otherwise. The last
+completed output before the deadline is evaluated. Table 3.7 separately reports measured time over the
+entire run window.
+Table 3.7
+Mean measured processing time with a run limit of 2T0.
+Samples
+A / s
+B / s
+C / s
+C/B
+4096
+3.739
+4.933
+7.446
+≈1.51
+16384
+11.248
+14.154
+23.078
+≈1.63
+C exhausts the 2T0 window in 507 of 512 mixed tasks. Its additional time relative to B yields
+no success-rate advantage. Weak-source success changes little across the three budgets for each
+method, indicating that running the same search longer does not adequately improve candidate
+coverage under these settings.
+17
+
+
+0
+500
+1000
+1500
+2000
+Weak-source position error / m
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+Empirical CDF
+N = 4096
+DPD
+A
+B
+C
+0
+500
+1000
+1500
+2000
+Weak-source position error / m
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+Empirical CDF
+N = 16384
+DPD
+A
+B
+C
+6 dB
+12 dB
+IoU 0.5
+IoU 1.0
++1.56
++1.56
+-3.13
++1.56
+C minus B: weak-source success
+(percentage points)
+6 dB
+12 dB
+IoU 0.5
+IoU 1.0
++0.00
+-1.56
+-3.13
++0.00
+C minus B: weak-source success
+(percentage points)
+Figure 3.6
+Untruncated errors and performance by condition.
+Upper panels: weak-source error CDFs under minimum-squared-distance assignment, with 256 records
+per curve. Lower panels: the difference in 20 m weak-source success rate between C and B, in percentage
+points, for each length, overlap, and power difference, with 64 records per cell. The error axis includes
+all observed values.
+The error distributions in Figure 3.6 have long tails, and the success-rate difference between
+C and B varies with the condition. Lower RMSE does not necessarily imply higher success
+probability.
+Search strategies therefore need to be assessed using success rate, untruncated
+error, and processing time together.
+3.9
+Benefits and cost of more extensive search
+Following the diagnosis in Section 3.6, method D is evaluated on six new layouts with its 5
+m grid, top 5 candidates, and update rounds fixed. Each layout has two record lengths, two
+spectral overlaps, and two power differences, giving 6 × 2 × 2 × 2 = 48 conditions, each with
+one waveform/noise realization. Complete methods B and D process the same observations
+and execute their prescribed procedures. They do not use the deadline outputs from the first
+experiment.
+Table 3.8
+Complete-solver results on six new layouts, with a 20 m success radius.
+Method
+Weak
+successes
+Both
+successful
+Strong
+successes
+GOSPA
+/ m
+RMSE
+/ m
+P95
+/ m
+Mean time
+/ s
+B
+8/48
+8/48
+48/48
+69.16
+128.56
+343.98
+8.04
+D
+40/48
+40/48
+48/48
+18.37
+64.28
+121.40
+31.10
+18
+
+
+D recovers 32 weak-source failures of B and retains all 8 of its successes. Weak-source success
+rises from 16.67% to 83.33%, and overall RMSE falls from 128.56 m to 64.28 m, while mean
+total processing time increases by a factor of 3.87. This result measures the combined effect
+of supplementary global search and joint updates; their separate contributions have not been
+quantified.
+0
+1
+2
+3
+4
+5
+6
+7
+8
+Weak-source successes (20 m; 8 conditions per layout)
+Layout 6
+Layout 5
+Layout 4
+Layout 3
+Layout 2
+Layout 1
+0/8 → 8/8
+0/8 → 0/8
+0/8 → 8/8
+0/8 → 8/8
+8/8 → 8/8
+0/8 → 8/8
+B
+D
+Figure 3.7
+Weak-source success counts for B and D in the six new layouts.
+Each layout contains 8 conditions, with a 20 m success radius. Circles denote B and squares denote D.
+Coincident markers are offset slightly in the vertical direction; horizontal coordinates remain the actual
+success counts. Layout labels apply only to this comparison.
+0.0
+2.5
+5.0
+7.5
+10.0
+12.5
+15.0
+17.5
+Mean total processing time / s
+0
+20
+40
+60
+80
+100
+Weak-source success (20 m) / %
+B: 4/24
+3.91 s
+D: 20/24
+12.94 s
+N = 4096
+0
+10
+20
+30
+40
+50
+60
+70
+Mean total processing time / s
+0
+20
+40
+60
+80
+100
+Weak-source success (20 m) / %
+B: 4/24
+12.17 s
+D: 20/24
+49.26 s
+N = 16384
+Figure 3.8
+Success rate and total processing time for the two record lengths.
+There are 24 conditions per length. Mean times for B and D are 3.91 s and 12.94 s at 4096 samples,
+and 12.17 s and 49.26 s at 16384 samples. D includes the complete B procedure and subsequent search,
+without deadline truncation.
+D succeeds on 20 of 24 weak-source records at each length. The remaining 8 failures all
+occur in layout 2, with weak-source errors from 83.72 to 290.93 m. This layout fails at both
+lengths, overlaps, and power differences. The concentration of failures suggests a dependence
+on geometry, but these results do not separate finer candidate omissions, incorrect local optima,
+and position coupling. This sample differs from the preceding 32-layout set; success rates and
+times are interpreted separately.
+19
+
+
+3.10
+Regional subdivision on fixed diagnostic records
+To test whether (2.22) can reduce search effort, four single-update weak-source searches are
+compared on the same 24 diagnostic records as in Section 3.6: a uniform 5 m grid; a 10 m grid
+shifted by 5 m along each coordinate; score-prioritized subdivision; and upper-bound-prioritized
+subdivision. All strategies fix the original strong-source estimate, retain the top 5 candidates,
+and use the same continuous refinement. An output is retained only if its score is no lower than
+that of the initial estimate. The 5 m scan here updates only the weak position once, unlike the
+sequential global searches and joint updates of complete method D.
+Both subdivision strategies start from a 50 m grid with initial cell half-width 25 m. They
+subdivide at most 32 cells per step, evaluate at most 16384 grid points, and use a minimum
+half-width of 1.5625 m. Score-prioritized subdivision ranks cells by center score. Upper-bound-
+prioritized subdivision ranks them by U(C) and prunes a cell when its bound is below the best
+score found. Numerical checks cover two record lengths, zero to two fixed sources, and four cell
+scales, giving 24 configurations. No sampled score exceeds its cell bound. These checks assess
+numerical consistency, not localization performance.
+Table 3.9
+Single weak-source updates with the estimated strong position fixed.
+Strategy
+Historical
+failures
+recovered
+Historical
+controls
+successful
+Mean grid
+evaluations
+Mean update
+time / s
+Cells
+pruned
+Uniform 5 m grid
+15/16
+8/8
+160689.5
+11.2231
+—
+Shifted 10 m grid
+14/16
+8/8
+39971.2
+2.8870
+—
+Score-prioritized
+subdivision
+2/16
+6/8
+16384
+1.2901
+—
+Bound-prioritized
+subdivision
+9/16
+6/8
+16384
+1.5700
+0
+Success means a weak-source error no greater than 20 m. Times and grid counts are averaged over all 24
+records. Time includes candidate refinement but excludes the preceding strong-source estimation; grid
+counts exclude function evaluations during continuous optimization. Only the bound-prioritized strategy
+performs pruning, and its pruned-cell count is zero in every record.
+At the same limit of 16384 grid evaluations, bound-prioritized subdivision recovers 9 of 16
+historical failures, compared with 2 for score-prioritized subdivision. The bound thus improves
+cell ordering. Both strategies exhaust the evaluation limit, however, and the bound-prioritized
+strategy eliminates no cells. Its mean update time is approximately 14.0% of the 5 m scan time,
+but it recovers 6 fewer failures, so recovery is not comparable. The current bound satisfies the
+adopted response-model constraints but is too loose to provide useful pruning.
+The shifted 10 m grid recovers 14 of 16 historical failures using approximately 25.7% of the
+5 m scan time, matching the recovery count of the ordinary 10 m scan in Section 3.6. In the
+narrow-peak case where the two grids differ, the 5 m error is 0.805 m and the shifted 10 m error
+is 48.54 m. Shifting samples changes candidate positions, but these results do not show that
+it can reliably replace a finer grid. Both subdivision strategies succeed on 6 of the 8 historical
+controls, retaining all 6 original successes at 20 m. The 5 m and shifted 10 m scans also bring
+the other 2 controls within 20 m.
+20
+
+
+These results concern a single weak-source update with the strong estimate fixed, on purpo-
+sively selected historical failures and controls. The recovery fractions are not population success
+rates, and the update times do not establish a speedup for the complete localization algorithm.
+3.11
+Findings
+In the 32-layout comparison, sequential projection and joint updates raise weak-source success
+within 20 m to 31% to 36%, still below the isolated-source rates of 91% to 95%. Conditional
+scores reveal better positions that the solver misses in most failures. Strong-source position
+errors also affect weak-source scores in some records.
+Response-variation ranking in C shows no consistent benefit over B. Supplementary 5 m
+global search in D increases weak-source successes from 8 of 48 to 40 of 48 in six new layouts,
+at 3.87 times the mean total processing time. On the fixed diagnostic sample, the regional
+bound improves subdivision order but produces no pruning and recovers fewer failures than the
+dense grid. Search design must reduce unproductive evaluations while preserving narrow-peak
+candidates. Longer runs or a different ranking alone have not resolved this tradeoff.
+All conditions in one layout still fail after the complete dense-search procedure. The single-
+update comparisons with a fixed strong estimate do not explain those remaining failures. Candi-
+date omissions and position coupling must be separated to determine when both source positions
+should change together.
+4
+Discussion
+4.1
+Narrow-peak width and search scale
+In Table 3.6, the grid point 4.523 m from the true position scores below a distant incorrect peak,
+while a local solution near the truth has error 0.803 m. Equation (2.17) describes second-order
+behavior near a peak, but neither its location nor its curvature is known before the search. It
+therefore does not directly determine grid spacing.
+Equation (2.22) provides a regional score bound from response perturbations, yet it yields
+no pruning in the present comparison. When the projected-response norm is small or phase
+changes substantially across a cell, the directional constraint can reduce to the residual-energy
+bound. The remaining question is how to use center scores, response derivatives, and residuals
+to tighten the bound at acceptable cost. Equivalent Fisher information describes local statistical
+accuracy, whereas the score Hessian describes peak shape for one observation. Conditions under
+which either can guide search scale need to be established.
+4.2
+Candidate selection and computational allocation
+In 292 of 327 weak-source failures, the true weak position already scores higher under the
+original strong estimate. D recovers many failures on new layouts, but its mean time is 3.87
+times that of B. On the fixed records, bound-prioritized subdivision also recovers fewer failures
+than the simple shifted grid. A more elaborate cell rule does not necessarily preserve more useful
+candidates for a given computational cost. When a cell center has a low score, what observed
+information justifies further subdivision? A few additional samples, residual correlations, or
+21
+
+
+curvature estimates may help reduce uniform global refinement, but their cost and recovery
+must be assessed together.
+Multiple delay hypotheses are another possible source of position candidates. Relative to
+receiver 1, position determines the delay difference
+∆τℓ1(p) = ∥p −rℓ∥−∥p −r1∥
+c
+.
+(4.1)
+Several correlation peaks could be retained, geometric consistency used to generate position
+candidates, and the joint residual used to select among them [1], [2], [3]. The unresolved choices
+are whether to estimate delays from the raw mixture or the residual after strong-source projec-
+tion, and when to impose cross-receiver constraints so that incorrect combinations are reduced
+without discarding weak-source hypotheses too early.
+Correlation computation, hypothesis
+combinations, and signal-domain validation must all be included in processing time.
+In the same selected cases, increasing the retained candidate count from 5 to 32 on a 10 m
+grid gives no additional recovery, whereas a 5 m grid with 5 candidates recovers more records.
+Candidate count and sampling density therefore require separate treatment. New selection rules
+should retain uniform and shifted grids as references, compare recovery and cost under the same
+continuous-refinement configuration, and account for total time in the complete solver.
+4.3
+Strong-source accuracy and joint position updates
+In the conditional-score analysis, substituting the true strong position restores a score advantage
+at the true weak position in 22 records, including one whose original strong-source error is below
+20 m. Equation (2.16) approximates leakage for small errors, but the true error is unavailable
+during estimation, and the success threshold cannot determine when refinement should stop.
+The remaining failures of D occur in one layout, raising the question of whether sequential
+updates are constrained by coupled local solutions.
+Can local curvature, response derivatives, and residuals estimate the benefit of refining the
+strong position versus searching again for the weak source? Alternating updates change one
+position at a time and may repeatedly return to the same local solution. When to retain multiple
+strong-position hypotheses or update all four position coordinates jointly remains unresolved. In
+a four-receiver system, expanding the suppression subspace also reduces the retained dimension
+[7]. These alternatives therefore need to be compared in terms of strong-source leakage, loss of
+weak-source information, and additional computation.
+22
+
+
+5
+References
+[1] C. H. Knapp and G. C. Carter, “The generalized correlation method for estimation of time delay,”
+IEEE Trans. Acoust., Speech, Signal Process., vol. 24, no. 4, pp. 321–327, 1976, doi: 10.1109/
+TASSP.1976.1162830.
+[2] Y. T. Chan and K. C. Ho, “A simple and eﬀicient estimator for hyperbolic location,” IEEE Trans.
+Signal Process., vol. 42, no. 8, pp. 1905–1915, 1994, doi: 10.1109/78.301830.
+[3] K. C. Ho, “Bias reduction for an explicit solution of source localization using TDOA,” IEEE Trans.
+Signal Process., vol. 60, no. 5, pp. 2101–2114, 2012, doi: 10.1109/TSP.2012.2187283.
+[4] A. J. Weiss and A. Amar, “Direct position determination of multiple radio signals,” EURASIP J.
+Appl. Signal Process., vol. 2005, no. 1, pp. 37–49, 2005, doi: 10.1155/ASP.2005.37.
+[5] J. C. Chen, R. E. Hudson, and K. Yao, “Maximum-likelihood source localization and unknown
+sensor location estimation for wideband signals in the near-field,” IEEE Trans. Signal Process., vol.
+50, no. 8, pp. 1843–1854, 2002, doi: 10.1109/TSP.2002.800420.
+[6] T. Tirer and A. J. Weiss, “High resolution direct position determination of radio frequency sources,”
+IEEE Signal Process. Lett., vol. 23, no. 2, pp. 192–196, 2016, doi: 10.1109/LSP.2015.2503921.
+[7] W. Mantzel, J. Romberg, and K. G. Sabra, “Round-robin multiple-source localization,” J. Acoust.
+Soc. Am., vol. 135, no. 1, pp. 134–147, 2014, doi: 10.1121/1.4835795.
+[8] B. Mamandipoor, D. Ramasamy, and U. Madhow, “Newtonized orthogonal matching pursuit: Fre-
+quency estimation over the continuum,” IEEE Trans. Signal Process., vol. 64, no. 19, pp. 5066–5081,
+2016, doi: 10.1109/TSP.2016.2580523.
+[9] E. Tengan, T. Dietzen, F. Elvander, and T. van Waterschoot, “Multi-source direction-of-arrival
+estimation using steered response power and group-sparse optimization,” IEEE/ACM Trans. Audio,
+Speech, Lang. Process., vol. 32, pp. 3517–3531, 2024, doi: 10.1109/TASLP.2024.3419417.
+[10] D. Zachariah and P. Stoica, “Cramér–Rao bound analog of Bayes rule,” IEEE Signal Process. Mag.,
+vol. 32, no. 2, pp. 164–168, 2015, doi: 10.1109/MSP.2014.2365593.
+[11] E. Weinstein and A. J. Weiss, “Fundamental limitations in passive time-delay estimation—Part II:
+Wide-band systems,” IEEE Trans. Acoust., Speech, Signal Process., vol. 32, no. 5, pp. 1064–1078,
+1984, doi: 10.1109/TASSP.1984.1164429.
+[12] A. S. Rahmathullah, Á. F. García-Fernández, and L. Svensson, “Generalized optimal sub-pattern
+assignment metric,” in Proc. 20th Int. Conf. Inf. Fusion (FUSION), Xi’an, China, 2017, pp. 1–8,
+doi: 10.23919/ICIF.2017.8009645.
+23

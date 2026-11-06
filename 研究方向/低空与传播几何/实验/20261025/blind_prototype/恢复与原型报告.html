@@ -1,0 +1,175 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>盲拟合原型：修复完成，暂不扩大实验</title><style>
+:root{--ink:#193b43;--muted:#5c7175;--teal:#14746b;--paper:#f5f5ef;--line:#d7e2dd;--soft:#e8f1eb}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;background:var(--研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿);color:var(--ink);font:16px/1.85 "Segoe UI","Microsoft YaHei",sans-serif}a{color:var(--teal);text-underline-offset:4px;overflow-wrap:anywhere}a:hover{color:#0e4944}a:focus-visible,summary:focus-visible{outline:3px solid #b07e32;outline-offset:4px}.wrap{max-width:1120px;width:calc(100% - 64px);margin:auto}header{padding:32px 0 26px}header .eyebrow{color:var(--teal);font-size:13px;letter-spacing:.12em}h1{font-size:clamp(30px,4vw,48px);line-height:1.3;max-width:900px;margin:20px 0}header p{max-width:830px;font-size:18px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:26px 0 8px}.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:19px 23px}.stat b{font-size:28px;display:block}.stat span{font-size:13px;color:var(--muted)}nav{position:sticky;top:0;z-index:2;background:#f5f5eff5;border-block:1px solid var(--line);backdrop-filter:blur(8px)}nav .wrap{display:flex;gap:22px;overflow-x:auto;white-space:nowrap;padding-block:13px}nav a{text-decoration:none;font-size:14px;color:var(--ink)}main{padding-bottom:36px}main>h2{font-size:27px;line-height:1.45;margin:52px 0 18px;padding-top:12px;border-top:2px solid var(--teal)}p{margin:14px 0}main>p:first-child{color:var(--muted);font-size:13px}main>p:nth-child(2){font-size:20px;background:var(--soft);padding:22px 26px;border-radius:14px}blockquote{margin:20px 0;padding:18px 25px;background:var(--soft);border-left:4px solid var(--teal);border-radius:0 12px 12px 0}blockquote p{margin:0;font-size:19px}strong{font-weight:650}ol,ul{padding-left:26px}li+li{margin-top:12px}main>ol>li{padding:5px 0}table{width:100%;border-collapse:collapse;font-size:14px;background:white}th,td{text-align:left;vertical-align:top;padding:15px 18px;border-bottom:1px solid var(--line);min-width:160px}th{background:var(--soft)}tr:last-child td{border:0}.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:13px;margin:18px 0}details{background:#fff;border:1px solid var(--line);border-radius:12px;margin:12px 0}summary{padding:18px 22px;cursor:pointer;font-weight:650;line-height:1.6}summary:hover{background:#f0f6f1;border-radius:12px}.paper-body{padding:0 23px 18px;border-top:1px solid var(--line)}.paper-body p:first-child{font-size:15px}.paper-body p{margin:16px 0 0}.source-list ul{padding:0 30px 20px 45px;font-size:14px}.source-list span{color:var(--muted);white-space:nowrap}pre{overflow-x:auto;max-width:100%;padding:22px;border:1px solid var(--line);border-radius:13px;background:white;font:14px/1.9 Consolas,"Microsoft YaHei",monospace}code{overflow-wrap:anywhere;font-size:13px}footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--muted);font-size:13px}.pill{display:inline-block;border-radius:6px;background:var(--soft);color:var(--teal);font-size:12px;padding:4px 9px;margin-right:7px}.pill.amber{background:#f6ecd7;color:#855c28}#motion{scroll-margin-top:90px}
+@media(max-width:680px){.wrap{width:calc(100% - 32px)}header{padding-top:23px}.stats{gap:8px}.stat{padding:14px 11px}.stat b{font-size:23px}.stat span{font-size:12px}nav .wrap{gap:19px}main>h2{font-size:23px;margin-top:38px}main>p:nth-child(2),blockquote{padding:17px 19px;font-size:18px}summary{padding:16px}th,td{padding:13px;min-width:145px}pre{font-size:12px;padding:15px}}
+@media print{nav{position:static}details:not([open])>.paper-body{display:block}summary{list-style:none}.wrap{width:100%}.stats{break-inside:avoid}body{background:white}h2{break-after:avoid}}
+
+h1{font-size:clamp(27px,4vw,38px)}main{padding-top:18px}main>p:nth-child(2){font-size:14px;background:none;padding:0}.top{padding-top:25px}.intro{padding:22px;border-left:4px solid #a47a2c;background:#f3eddf;border-radius:0 12px 12px 0}.table-wrap{overflow:auto}td{min-width:90px}code{overflow-wrap:anywhere}.decision{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}.decision div{padding:16px 20px;border:1px solid #d7e2dd;border-radius:12px;background:white}.decision strong{display:block;font-size:18px}.decision small{color:#5c7175}@media(max-width:680px){.decision{grid-template-columns:1fr}.decision div{padding:12px 16px}}footer{padding:24px 0 45px;color:#627575}</style></head><body><div class="wrap top"><a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E7%A0%94%E7%A9%B6%E8%AE%B0%E5%BD%95/%E5%87%86%E5%85%A5%E4%B8%8E%E6%96%87%E7%8C%AE_20261024/%E5%87%86%E5%85%A5%E6%8A%A5%E5%91%8A.html">← 研究准入总报告</a> · <a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E5%AE%9E%E9%AA%8C/20261025/reduced_oracle/%E5%A4%9A%E8%BD%AE%E6%A0%B8%E9%AA%8C%E6%8A%A5%E5%91%8A.html">上一轮机制核验</a><p class="intro">从“信息可能存在”走到了实际盲拟合。<br><strong>当前原型尚未可靠利用这些信息；不能把它的失败直接当作理论创新空间。</strong></p><div class="decision"><div><strong>保存故障：已修复</strong><small>原配置完整重跑，历史输出一致</small></div><div><strong>盲拟合：仍不足</strong><small>选中结果两源误差52m / 11.5m</small></div><div><strong>正式扩测：暂缓</strong><small>初始化、收敛与数值重放尚待解决</small></div></div></div><main class="wrap"><h1>汇总已修复，盲拟合原型还没有通过放行</h1>
+<p>2026-10-25 · 工程恢复完成 · 固定案例的小规模原型，不是正式方法比较</p>
+<p><strong>两次JSON保存错误已解决，原配置重跑完整保存。随后完成公共波形表示、四起点联合拟合和归因诊断；结果表明当前原型仍需解决初始化、收敛与数值稳定性，暂不扩大实验。</strong></p>
+<h2>1 这次没有只停在修复报错</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>工作</th>
+<th>状态</th>
+<th>实际完成的内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>汇总恢复</td>
+<td>通过</td>
+<td>统一转换嵌套NumPy标量/数组；非有限值、复数不静默改写；5项专项测试通过</td>
+</tr>
+<tr>
+<td>原配置重跑</td>
+<td>通过</td>
+<td>新目录完整保存，盲候选输出与历史失败目录中的文件SHA完全一致</td>
+</tr>
+<tr>
+<td>公共波形表示</td>
+<td>通过容量检查</td>
+<td>不使用生成器特定频率列表，公开带宽和时长足以构造高精度表示</td>
+</tr>
+<tr>
+<td>四起点盲联合拟合</td>
+<td>已完成预定预算，未完成可靠定位</td>
+<td>真值未参与初始化/选优；最佳结果仍有一个源约52m误差</td>
+</tr>
+<tr>
+<td>归因与严格重放</td>
+<td>结果已保存，严格重放未通过</td>
+<td>固定几何仍存在波形/增益估计困难；独立预测差异超过预定数值阈值</td>
+</tr>
+</tbody></table></div>
+<p>两次失败目录继续保留，不改成PASS。新有效前端目录为<code>frontend_20261025_204005_991746</code>，主计算约8.26秒；这包含两种入口和两档预设容差，不是单个定位算法耗时。</p>
+<h2>2 公共表示不再依赖生成器的特定频率</h2>
+<p>用公开的12.5MHz带宽和记录时长T，构造2T、3T的均匀Fourier延拓表示。它不是把原记录首尾直接接成周期信号。检查时给予正确几何和路径增益，只让波形系数未知，因此是有利的容量正对照，不是盲定位。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>表示</th>
+<th align="right">每源复系数数</th>
+<th align="right">截断1e-8时的相对IQ残差</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2T延拓</td>
+<td align="right">513</td>
+<td align="right">4.17×10⁻⁸</td>
+</tr>
+<tr>
+<td>3T延拓</td>
+<td align="right">769</td>
+<td align="right">1.79×10⁻⁹</td>
+</tr>
+</tbody></table></div>
+<p>两者都通过执行前规定的10⁻⁶门槛。后续原型采用3T、1e-8设置。<strong>表示能够容纳正确答案，不等于盲优化能找到它。</strong></p>
+<h2>3 原型怎样在不看真值的条件下运行</h2>
+<p>前端只读混合IQ、站点坐标及公开条件，形成多峰闭环图和三/四站候选。普通相关的候选集合覆盖两个真源附近，但三站输出仍是高度不确定的曲线。</p>
+<p>联合拟合采用有限预算的常规分块最小二乘：</p>
+<ol>
+<li>从盲四站候选及互补三站图取两个位置初值；三站高度取公开搜索域中点，不取真实高度。</li>
+<li>用两个预定随机种子提出有限墙面初值，仅按候选自身几何检查每源至少3LOS，不读取真实墙面。</li>
+<li>交替估计未知波形、每条可见路径的未知常复增益、源位置和墙面参数；有限面片完整决定遮挡与一次反射。</li>
+<li>四个起点各运行固定3个外循环。以观测拟合残差选择输出，之后才读取真值做一对一评价。</li>
+</ol>
+<p>没有把1/d增益真值或真实LOS集合交给盲估计器。这个程序不是原论文完整复现，也不是已充分优化的强基线；限额用于发现原型问题，不能作为算法能力上限。</p>
+<h2>4 盲运行得到了什么</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>起点</th>
+<th align="right">相对IQ拟合残差</th>
+<th align="right">源A误差</th>
+<th align="right">源B误差</th>
+<th>是否由数据残差选中</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>位置对0、种子811</td>
+<td align="right">26.80%</td>
+<td align="right">52.00m</td>
+<td align="right">11.53m</td>
+<td>是</td>
+</tr>
+<tr>
+<td>位置对0、种子812</td>
+<td align="right">38.78%</td>
+<td align="right">53.62m</td>
+<td align="right">10.97m</td>
+<td>否</td>
+</tr>
+<tr>
+<td>位置对1、种子811</td>
+<td align="right">41.42%</td>
+<td align="right">248.17m</td>
+<td align="right">14.43m</td>
+<td>否</td>
+</tr>
+<tr>
+<td>位置对1、种子812</td>
+<td align="right">42.02%</td>
+<td align="right">248.68m</td>
+<td align="right">15.94m</td>
+<td>否</td>
+</tr>
+</tbody></table></div>
+<p>相对残差定义为‖预测IQ−观测IQ‖/‖观测IQ‖，不是定位误差比例。源A/B为事后评价身份；四行是同一个观测的不同初始化，不是四次独立试验。</p>
+<p>选中结果的两源RMSE为37.66m，只描述这个案例。四起点合计约24.20秒，没有达到充分收敛认证，状态均为<code>PROTOTYPE_BUDGET</code>。后续外循环的拟合残差仍下降，不能把尚未完成的求解认作“已经卡在不可改善的局部最优”。</p>
+<p><strong>当前原型没有解决本例，但这还不是“常规方法不行”的证据。</strong> 原型也没有证明多候选、更多迭代或新模块必然有价值。</p>
+<h2>5 为什么不能把责任都归到位置搜索</h2>
+<p>又做了两个单列的、有真值信息的诊断，未改动盲输出：</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>给予什么额外信息</th>
+<th>波形是否未知</th>
+<th align="right">三轮后的相对残差</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>正确位置和墙面；波形从混合IQ的PCA分量初始化，增益仍估计</td>
+<td>是</td>
+<td align="right">20.15%</td>
+</tr>
+<tr>
+<td>正确位置和墙面，再给予正确通道增益初值</td>
+<td>是</td>
+<td align="right">约1.79×10⁻⁹</td>
+</tr>
+</tbody></table></div>
+<p>这说明：<strong>即使位置和墙已经正确，当前波形—增益交替估计在这点预算内仍未充分拟合。</strong> 所以不能直接宣布失败来自“墙面候选不够”或“几何搜索器不好”。</p>
+<p>第二行只是强正对照，不可作为可实现算法成绩。这组对照支持继续核查初始化与收敛，不证明一般盲分离不可解，也尚未确定唯一根因。</p>
+<h2>6 严格数值重放没有被掩盖</h2>
+<p>用等价的镜像长度、显式逐路径叠加重放保存状态时，最大相对预测差为9.38×10⁻¹⁰，超过原设10⁻¹⁰阈值；4项中有3项未达到该阈值。进一步保持同一长度、只改变求和实现，仍有2项略超阈值，最大约1.65×10⁻¹⁰。</p>
+<p>原型中的波形系数范数最高约3.96×10⁴，存在较大分量相互抵消。两种等价长度计算相差约10⁻¹³m，相关相位扰动的保守上界能够容纳观察到的差异；但同长度重放也有差异，尚不能把全部误差只归于长度公式。高精度裁决尚未执行。</p>
+<p>这与当前表示下的浮点敏感性一致，不是52m定位误差的解释，也不能通过提高阈值直接改成PASS。<strong>归因目录和数值回放目录的失败状态均保留；整个原型没有获得正式运行放行。</strong></p>
+<h2>7 现在应怎样推进</h2>
+<p>这轮已经越过工程保存故障，并把下一问题缩小了：</p>
+<ul>
+<li>不需要继续寻找生成器特定频率；公共表示已经有能力描述正确答案。</li>
+<li>不应仅靠增加墙面候选继续碰运气；正确几何下的盲波形/增益估计也需要检查。</li>
+<li>先在固定几何的小问题中核验常规初始化、停止规则及稳定的数值表示，再接回未知几何。任何参数/先验变更都应独立登记，不悄悄替换本轮结果。</li>
+<li>在稳定常规求解尚未建立前，不启动大批次，也不据当前失败包装算法创新。</li>
+</ul>
+<p>本轮停在这一明确的原型问题处。没有自动增加外循环、放宽数值阈值、重新选场景，或修改论文/Zotero。</p>
+<details>
+<summary>合同、代码与原始结果</summary>
+<div class="paper-body">
+
+<ul>
+<li><a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E5%AE%9E%E9%AA%8C/20261025/blind_prototype/%E6%89%A7%E8%A1%8C%E5%90%88%E5%90%8C.md">初始执行合同</a> · <a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E5%AE%9E%E9%AA%8C/20261025/blind_prototype/%E5%85%AC%E5%85%B1%E8%A1%A8%E7%A4%BA%E6%A3%80%E6%9F%A5%E5%90%88%E5%90%8C.md">公共表示合同</a> · <a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E5%AE%9E%E9%AA%8C/20261025/blind_prototype/%E8%81%94%E5%90%88%E6%8B%9F%E5%90%88%E7%9F%AD%E6%B5%8B%E5%90%88%E5%90%8C.md">联合拟合短测合同</a> · <a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E5%AE%9E%E9%AA%8C/20261025/blind_prototype/%E5%BD%92%E5%9B%A0%E6%A3%80%E6%9F%A5%E5%90%88%E5%90%8C.md">归因检查合同</a></li>
+<li><a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E5%AE%9E%E9%AA%8C/20261025/blind_prototype/frontend_20261025_204005_991746/result.json">新前端完整结果</a> · <a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E5%AE%9E%E9%AA%8C/20261025/blind_prototype/frontend_20261025_204005_991746/public.json">公开输入</a></li>
+<li><a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E5%AE%9E%E9%AA%8C/20261025/blind_prototype/representation_20261025_204157_466399/result.json">公共表示检查</a></li>
+<li><a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E5%AE%9E%E9%AA%8C/20261025/blind_prototype/joint_20261025_204840_719110/result.json">四起点联合拟合及事后评价</a> · <a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E5%AE%9E%E9%AA%8C/20261025/blind_prototype/joint_20261025_204840_719110/initial_pairs.json">数据生成的初值</a></li>
+<li><a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E5%AE%9E%E9%AA%8C/20261025/blind_prototype/attribution_20261025_205117_892831/result.json">含严格重放失败的归因检查</a></li>
+<li><a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E5%AE%9E%E9%AA%8C/20261025/blind_prototype/numeric_replay_20261025_205453_060281/result.json">进一步数值回放检查：仍未通过原阈值</a></li>
+<li><a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E5%AE%9E%E9%AA%8C/20261025/blind_prototype/test_output_json.py">序列化专项测试</a> · <a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E5%AE%9E%E9%AA%8C/20261025/blind_prototype/joint_20261025_204840_719110/joint_model.py">联合模型源码</a></li>
+<li><a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E5%AE%9E%E9%AA%8C/20261025/blind_prototype/%E6%9C%AA%E5%AE%8C%E6%88%90%E8%AF%8A%E6%96%AD.md">此前失败记录</a> · <a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E5%AE%9E%E9%AA%8C/20261025/reduced_oracle/%E5%A4%9A%E8%BD%AE%E6%A0%B8%E9%AA%8C%E6%8A%A5%E5%91%8A.html">上一轮机制报告</a></li>
+</ul>
+<p>各实验目录保留源码/合同快照及事前SHA。复相关符号与复相位不变性、三/四站几何正例、接受更新的残差非增检查通过；初始固定可见性区内解析梯度差分误差低于10⁻⁵。跨可见性边界不宣称目标光滑；几何可见LOS数不自动等于有足够能量的有效LOS数，部分估计路径增益已趋近零。</p>
+<p>普通图入口参考DATEMM/C3思想，并未复现完整raster matching。相关文献和此前适配边界见<a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E4%BD%8E%E7%A9%BA%E4%B8%8E%E4%BC%A0%E6%92%AD%E5%87%A0%E4%BD%95/%E5%AE%9E%E9%AA%8C/20261025/blind_prototype/%E6%9C%AA%E5%AE%8C%E6%88%90%E8%AF%8A%E6%96%AD.md">原始前端说明</a>。本轮没有新增文献新颖性确认。</p>
+</div>
+</details>
+</main><footer class="wrap">一例无噪观测、四个起点、固定原型预算；不是充分收敛的基线排名。严格重放失败如实保留。</footer></body></html>

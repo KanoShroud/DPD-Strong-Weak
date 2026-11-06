@@ -1,0 +1,84 @@
+{
+  "sources": {
+    "Latex PDF/document.tex": "9dc9015d965ce911aa90e30334a618ee7260c7dd9ba9b55a512ce1157281558a",
+    "Latex PDF English/document.tex": "856f29010734ae1e5152f964c3184e480d5db38685a7b2e954b2550d75917991"
+  },
+  "paragraph_pairs": [
+    {
+      "zh": "本次汇报讨论短时观测下强弱混叠源的直接定位。当前结果表明，补充全局搜索能够恢复相当一部分弱源失败，但计算代价明显增加；区域上界有助于候选排序，却尚未实现有效剪枝。研究重点是如何以较低计算量覆盖弱源窄峰，并处理强源位置误差带来的耦合。",
+      "en": "This report examines direct localization of strong and weak sources from short observations. Additional global search recovers many weak-source failures, at a substantial computational cost. A regional upper bound improves candidate ordering but has not enabled effective pruning. The focus is on covering narrow weak-source peaks at lower cost and handling coupling caused by errors in the strong-source position.",
+      "source": "对应报告 / Report: 摘要 Abstract; §3.9–3.11; §4"
+    },
+    {
+      "zh": "不同发射功率和传播距离会造成接收功率差；同时发射且频谱重叠时，弱源的时延峰可能被强源掩盖，多站间的峰也难以正确关联。因此，我们采用直接位置确定，即DPD，在信号域联合利用多站观测约束位置。这里的困难主要发生在时延提取和关联环节，不能据此认为两步TDOA的几何求解公式失效。",
+      "en": "Differences in transmit power and propagation distance produce unequal received powers. When sources transmit simultaneously with overlapping spectra, the strong source may mask weak-source delay peaks, and peaks across receiver pairs can be difficult to associate. We therefore use direct position determination, or DPD, to constrain positions jointly from the received signals. The difficulty lies mainly in delay extraction and association; it does not imply that the geometric solver in two-step TDOA localization is invalid.",
+      "source": "对应报告 / Report: §1.1–1.3; references [1], [2], [4]"
+    },
+    {
+      "zh": "模型采用四个已知位置的同步接收站和两个静止源，源数已知，假设直达传播及独立复高斯噪声。在忽略观测窗边缘效应的频域近似下，每个频点的观测是两个位置响应与未知源系数的线性叠加。固定位置后先用最小二乘消去源系数，再最小化多站混合观测的联合残差。",
+      "en": "The model uses four synchronized receivers at known locations and two stationary sources, with known source count, direct-path propagation, and independent complex Gaussian noise. Under a frequency-domain approximation that neglects observation-window edge effects, each frequency-bin observation is a linear combination of two position-dependent responses with unknown source coefficients. For fixed positions, least squares eliminates these coefficients; localization then minimizes the joint residual of the mixed observations.",
+      "source": "对应报告 / Report: §2.1–2.3; Eqs. (2.5)–(2.10)"
+    },
+    {
+      "zh": "求解时固定其他源的位置，对残余和候选响应同时投影，搜索一个源的位置，再做连续精修和联合拟合。条件投影既能抑制强源，也可能损失弱源信息；强源位置估计不准还会留下残余干扰。因此，评分较高的弱源候选能否被搜索到，以及联合更新能否避免耦合局部解，是当前的核心问题。",
+      "en": "The solver fixes the other source positions, projects both the residual and the candidate response, searches for one source, and then applies continuous refinement and joint fitting. Conditional projection suppresses the strong source but may also remove weak-source information. An inaccurate strong-source position leaves residual interference. The main questions are whether the search reaches high-scoring weak-source candidates and whether joint updates can escape coupled local solutions.",
+      "source": "对应报告 / Report: §2.4–2.5; Fig. 2.2"
+    },
+    {
+      "zh": "比较方法共四种：A为多初值交替投影，B为标准区域搜索，C在候选排序中加入响应方向变化信息，D则从完整B的结果出发，对两个源依次补充5 m全局搜索，保留前5个候选连续精修，再做两轮联合更新，仅接受降低联合残差的结果。理论分析给出局部信息界、强源残留近似和区域评分上界；局部精度界本身并不保证全局搜索成功。",
+      "en": "Four methods are compared. A uses multistart alternating projection; B uses standard regional search; C includes response-direction variation in candidate ranking. Starting from the complete result of B, D applies a 5 m global search to each source in turn, refines the top five candidates, and performs two rounds of joint updates, accepting only reductions in the joint residual. The analysis provides a local information bound, an approximation to strong-source leakage, and a regional score upper bound. A local precision bound alone does not guarantee successful global search.",
+      "source": "对应报告 / Report: Table 2.2; §2.5"
+    },
+    {
+      "zh": "主比较采用32个布局，每种方法处理相同的512条混合记录。记录长度为4096和16384点，频谱交并比为0.5和1，功率差为6和12 dB，弱源网络信噪比为3 dB。源位置按平方距离最优匹配，误差不超过20 m判为成功；GOSPA的100 m截断参数与该成功阈值分开使用。",
+      "en": "The main comparison uses 32 layouts, with each method processing the same 512 mixed records. Record lengths are 4096 and 16384 samples, spectral intersection-over-union values are 0.5 and 1, power differences are 6 and 12 dB, and the weak-source network SNR is 3 dB. Estimated and true sources are matched by minimizing squared distances. Success requires an error of at most 20 m; the 100 m GOSPA cutoff is a separate parameter.",
+      "source": "对应报告 / Report: Table 3.1; §3.2"
+    },
+    {
+      "zh": "孤立弱源在两种记录长度下分别有116/128和122/128条成功，即90.63%和95.31%。混合后，B的对应成功数降至87/256和98/256，即33.98%和38.28%。因此，当前配置下弱源单独存在时通常可以定位，强弱混叠后的联合求解仍有明显困难。",
+      "en": "For the isolated weak source, 116 of 128 and 122 of 128 records succeed at the two lengths, giving 90.63% and 95.31%. In the mixtures, B succeeds on 87 of 256 and 98 of 256 records, or 33.98% and 38.28%. Under these settings, the weak source can usually be localized in isolation, while joint estimation in the mixture remains difficult.",
+      "source": "对应报告 / Report: Fig. 3.1; Table 3.2"
+    },
+    {
+      "zh": "在512条混合记录上，A、B、C的弱源成功率分别为31.25%、36.13%和35.74%。C的平均运行耗时在两种长度下约为B的1.51倍和1.63倍，但没有成功率优势。仅延长原搜索流程的预算，成功率也变化很小。这说明需要改善候选覆盖，不能仅依赖增加同一流程的运行时间。",
+      "en": "Across the 512 mixed records, weak-source success rates are 31.25% for A, 36.13% for B, and 35.74% for C. C takes about 1.51 and 1.63 times as long as B at the two record lengths, without a success-rate advantage. Extending the budget of the existing search also changes success rates little. These results motivate better candidate coverage beyond simply allowing the same procedure to run longer.",
+      "source": "对应报告 / Report: Table 3.3; Fig. 3.5; Table 3.7"
+    },
+    {
+      "zh": "B的327条弱源失败中，有292条在固定原强源估计时，真实弱源位置的条件评分已经高于估计位置。这为搜索遗漏提供了证据。同时，换用真实强源位置后，又有22条记录恢复了真实弱源的评分优势，其中1条原强源误差已小于20 m。强源满足成功阈值，并不意味着其精度已足以保护弱源。",
+      "en": "Among B’s 327 weak-source failures, the true weak-source position already scores higher than the estimate in 292 cases when the original strong-source estimate is held fixed. This supports search misses as a failure mechanism. Replacing the strong-source estimate with its true position restores the true weak source’s score advantage in another 22 cases; one already has a strong-source error below 20 m. Meeting the strong-source success threshold does not ensure sufficient accuracy to preserve the weak source.",
+      "source": "对应报告 / Report: §3.5; Table 3.4; §4.3"
+    },
+    {
+      "zh": "在另选的六个新布局、48个条件上，完整方法D将B的弱源成功数从8/48提高到40/48，保留原有8条成功记录，并恢复32条失败。总体RMSE由128.56 m降至64.28 m，平均完整处理时间由8.04 s增至31.10 s，约为原来的3.87倍。剩余8条失败集中于同一布局。这里观察到的是补充搜索与联合更新的合并收益，尚未分离两者各自的作用。",
+      "en": "On six new layouts with 48 conditions, complete method D increases weak-source successes from 8/48 to 40/48, retaining all eight original successes and recovering 32 failures. Overall RMSE falls from 128.56 m to 64.28 m, while mean complete processing time rises from 8.04 s to 31.10 s, a factor of about 3.87. The remaining eight failures occur in one layout. This is the combined benefit of additional search and joint updates; their separate contributions have not been isolated.",
+      "source": "对应报告 / Report: §3.9; Table 3.8; Figs. 3.7–3.8"
+    },
+    {
+      "zh": "在固定的16条历史失败与8条对照上，只更新弱源并固定原强源估计。5 m均匀网格、10 m错位网格、得分优先细分和上界优先细分分别恢复15、14、2和9条历史失败。前两种策略的对照成功数均为8/8，后两种均为6/8，并保留原有6条20 m成功记录。四种策略按全部24条平均的更新时间依次为11.22、2.89、1.29和1.57 s。",
+      "en": "A separate diagnostic comparison fixes the original strong-source estimate and updates only the weak source in 16 historical failures and eight controls. The 5 m uniform grid, shifted 10 m grid, score-prioritized subdivision, and bound-prioritized subdivision recover 15, 14, 2, and 9 historical failures, respectively. The first two succeed on all eight controls; the subdivision strategies retain the six original successes at 20 m. Mean update times over all 24 records are 11.22, 2.89, 1.29, and 1.57 s, respectively.",
+      "source": "对应报告 / Report: §3.10; Table 3.9"
+    },
+    {
+      "zh": "在相同的16384点评分上限下，上界优先比得分优先多恢复7条失败，但24条记录的剪枝数均为零，恢复能力也低于5 m扫描。当前上界对排序有帮助，仍不足以排除无效区域。这组样本是按诊断目的选取的，恢复比例不能视为总体成功率，单次更新时间也不能直接换算为完整算法加速比。",
+      "en": "With the same limit of 16384 grid-score evaluations, bound-prioritized subdivision recovers seven more failures than score-prioritized subdivision. Yet it prunes no regions in any of the 24 records and recovers fewer failures than the 5 m scan. The bound helps ordering but remains too loose to discard regions. These records were selected for diagnosis, so recovery fractions are not population success rates, and single-update times do not establish a speedup for the complete solver.",
+      "source": "对应报告 / Report: §3.10–3.11"
+    },
+    {
+      "zh": "希望获得指导的问题集中在三个方面。第一，如何利用响应导数、局部曲率和残余收紧区域界，使搜索尺度能够覆盖窄峰，并实现有效剪枝？第二，如何把计算量分配给有希望的区域，避免低中心评分使真实窄峰被过早舍弃？第三，如何判断应继续精修强源，还是重新搜索弱源或联合更新位置，以减少耦合局部解的影响？这些问题都需要在相同连续精修条件下，同时比较恢复能力和完整处理时间。",
+      "en": "I would welcome guidance on three questions. How can response derivatives, local curvature, and residuals tighten the regional bound, resolve narrow peaks, and support effective pruning? How should computation be allocated so that a low score at a region’s center does not discard a true narrow peak too early? How can we decide whether to refine the strong source, search again for the weak source, or update the positions jointly to reduce the effect of coupled local solutions? These choices should be compared under the same continuous-refinement settings, measuring both recovery and complete processing time.",
+      "source": "对应报告 / Report: §4.1–4.3"
+    },
+    {
+      "zh": "目前可以确认，补充搜索能够恢复相当一部分弱源失败，但尚未以较低代价达到同等恢复能力。后续重点是提高有效候选的覆盖效率，并处理剩余失败中的位置耦合。区域上界比较已经说明，界成立与界足够紧、能够加速求解，是需要分别验证的问题。",
+      "en": "The current evidence shows that additional search can recover many weak-source failures, but comparable recovery at lower cost remains unresolved. Further work should improve coverage of useful candidates and address positional coupling in the remaining failures. The regional-bound comparison also shows that validity, tightness, and practical acceleration must be assessed separately.",
+      "source": "对应报告 / Report: §3.11; §4"
+    }
+  ],
+  "references": [
+    "[1] C. H. Knapp and G. C. Carter, “The generalized correlation method for estimation of time delay,” IEEE Trans. Acoust., Speech, Signal Process., vol. 24, no. 4, pp. 321–327, 1976, doi: 10.1109/TASSP.1976.1162830.",
+    "[2] Y. T. Chan and K. C. Ho, “A simple and efficient estimator for hyperbolic location,” IEEE Trans. Signal Process., vol. 42, no. 8, pp. 1905–1915, 1994, doi: 10.1109/78.301830.",
+    "[4] A. J. Weiss and A. Amar, “Direct position determination of multiple radio signals,” EURASIP J. Appl. Signal Process., vol. 2005, no. 1, pp. 37–49, 2005, doi: 10.1155/ASP.2005.37."
+  ],
+  "scope": "Summary of current manuscripts; no new experiments or claims"
+}

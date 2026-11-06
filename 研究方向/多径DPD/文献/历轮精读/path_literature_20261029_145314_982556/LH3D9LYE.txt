@@ -1,0 +1,595 @@
+
+=== PDF PAGE 1 ===
+LOST-FIND: A SPECTRAL-SPACE-TIME DIRECT BLIND GEOLOCALIZATION
+ALGORITHM
+Cyrile Delestre1,2, Anne Ferr´eol1,2 and Pascal Larzabal2
+1Thales Communications & Security, 4, Avenue des Louvresses 92230 Gennevilliers Cedex, France
+2Laboratoire SATIE - ENS Cachan - CNRS - UniverSud, 61 av du President Wilson 94235 CACHAN Cedex, France
+ABSTRACT
+In the literature of direct blind geolocalization algorithms,
+two algorithms are mainly concurrent: DPD and LOST. The
+ﬁrst one appears to be very sensitive to the spectral con-
+tents and the second, although presenting wide scope of
+scenarii with better performance than DPD, does not ex-
+ploit the TDoA. This last algorithm could therefore be again
+improved. The purpose of this paper is to propose a new al-
+gorithm LOST-FIND which exploits (for non monochromatic
+sources) the structured TDoA between stations thanks to a
+spectral estimation of sources. The proposed algorithm is an
+iterative extension of LOST algorithm initially designed for
+monochromatic sources. Simulations conﬁrm the expected
+improvements versus DPD and LOST.
+Index Terms— AoA estimation, TDoA, direct geolocal-
+ization, performance
+1. INTRODUCTION
+The context of this work is the geolocation of multiple radi-
+ating sources with multiple separated arrays (also called sta-
+tions). Traditional technics [1] rely on a two steps strategy
+where measurements such as Angle of Arrival (AoA), Time
+Differential of Arrival (TDoA), Frequency Differential of Ar-
+rival (FDoA), etc. are obtained from each array in a ﬁrst step
+and combined in a second step to estimate the sources po-
+sition. The sources impingings on each station are assumed
+to be narrowband and far-ﬁeld. For instance, the AoAs of
+sources are estimated by each station independently in the
+ﬁrst step and, in a second step, the locations of source are
+computed from the AoAs (e.g., by triangulation) [1].
+However, such 2-steps methods present drawbacks [3]
+and are generally less efﬁcient than the direct algorithms
+(1-step methods) [4]-[8].
+The recently direct geolocation
+algorithms [7], [8] use the array of arrays (global array) to
+directly estimate the sources locations.
+Unfortunately, the
+sources are generally wideband with respect to that global
+array [12]. These algorithms transform this broadband prob-
+lem into narrowband problems in order to efﬁciently apply
+algorithms such as MUSIC [2]. For that, DPD (Direct Po-
+sition Determination) [7] decomposes the received signal
+into K narrowbands subsignals and LOST (LOcalization by
+Space-Time) [8] uses a space-time approach.
+Even if the
+DPD exploits the TDoA of sources between stations, its prin-
+cipal drawback consists in the high spectrum sensitivity in the
+sense that an absence of signal or even a low SNR on a FFT
+bin (subband) leads to outliers on the position estimation. On
+the other hand, the LOST algorithm has not this drawback
+as it has been designed to be spectrum adaptive and, conse-
+quently, it is not sensitive to the source spectrum. Moreover,
+in the case of monochromatic sources, it is optimal. In pres-
+ence of non monochromatic sources it would be interesting
+to exploit the TDoA between stations.
+The purpose of this paper is to propose a new algorithm,
+named LOST-FIND (LOcalization by Space Time with Fre-
+quency Identiﬁcation in Narrowband Decomposition), which
+is spectrum adaptive and explicitly exploits the TDoA struc-
+ture contained in the model.
+For that, we start with the
+space-time approach of LOST and exploit the modeling of
+the space-time observation in order to use in one hand the
+TDoA and in a second hand a source selectivity into the
+frequency domain.
+2. SIGNAL MODELING AND PROBLEM
+FORMULATION
+2.1. Signal Modeling and hypothesis
+The global geolocation system is composed of L perfectly
+synchronized remote stations with Ml sensors for 1 ≤l ≤L.
+In presence of Q sources, the associated observation vectors,
+xl(t), whose components xl
+m(t) (1 ≤m ≤Ml) are the sig-
+nals complex envelopes at the output of the antennas stemmed
+from the Line of Sight (LoS) assumption, are thus:
+xl(t) =
+Q
+X
+q=1
+ρl,qal(θl(pq))sq(t −τl(pq)) + nl(t)
+(1)
+where sq(t) is the complex envelope of the q-th source, nl(t)
+is a spatially white noise vector and al(θl(p)) is the steering
+vector, noted al(p) in the remainder of the paper. In addition,
+ρl,q, θl(pq) and τl(pq) are the complex attenuation, the AoA
+and Time of Arrival (ToA) of the q-th source arriving on the
+l-th station respectively. Let us note ∆τij(p) = τi(p)−τj(p)
+the TDoAs. The carrier (resp. sampling) frequency of xl
+m(t)
+is f0 (resp. Fe). For sake of simplicity the signal of the q-th
+source is:
+2619
+978-1-4673-6997-8/15/$31.00 ©2015 IEEE
+ICASSP 2015
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 23,2026 at 08:54:38 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 2 ===
+sq(t) =
+Kq
+X
+k=1
+αqkei2πfqkt and |fqk| ≤Fe
+2
+(2)
+where fqk and αqk are the residual frequency and attenuation
+of the k-th component of the q-th source. The sources are
+decorrelated between each other. Then, the associated band-
+width is Bq = maxk(fqk) −mink(fqk).
+The direct geolocation algorithms use the global array and
+the associated observation vector is then:
+x (t) =
+h
+xT
+1 (t), ..., xT
+L(t)
+iT
+(3)
+where (·)T denotes the transpose operator. For a given source
+location pq, the global observation is generally broadband as
+|sq(t −τ1(pq))| , ..., |sq(t −τL(pq))| are different. That is
+why a conventional narrowband algorithm [2] cannot be used
+to estimate pq from x(t). More precisely, the narrowband
+hypothesis is veriﬁed on the global array if and only if:
+max
+q,i,j |τi (pq) −τj (pq)| × Bq ≪1
+(4)
+2.2. Space-Time observation
+A space-time observation takes into account that the signal
+x(t) is broadband in general. Let us deﬁne:
+y(t) =
+h
+xT (t), xT (t −Te), ..., xT (t −(K −1)Te)
+iT
+(5)
+where Te is the sampling period such that Te =
+1
+Fe . Accord-
+ing to Eq.(2), the signal sq(t −τl(pq) −(j −1)Te) is:
+sq(t−τl(pq)−(j−1)Te) =
+Kq
+X
+k=1
+sq,k (t) cj−1(fqk)zl(pq, fqk)
+(6)
+with c (f) = e−i2πfTe, zl(p, f) = e−i2πfτl(p) and sq,k (t) =
+αqkei2πfqkt. The space-time observation of Eq.(5) becomes:
+y(t) =
+Q
+X
+q=1
+Kq
+X
+k=1
+v(pq, fqk, ρq)sq,k(t) + n(t)
+(7)
+where ρq = [ρ1,q, ..., ρL,q]T and
+(
+v(pq, fqk, ρq) = c(fqk) ⊗u(pq, fqk, ρq)
+u(pq, fqk, ρq) = U(pq)Λ(pq, fqk)ρq
+(8)
+with
+U(p) =
+
+
+a1(p)
+· · ·
+0
+...
+...
+...
+0
+· · ·
+aL(p)
+
+, c(f) =
+
+
+c0(f)
+...
+cK−1(f)
+
+
+(9)
+Λ(p, f) =
+
+
+z1(p, f)
+· · ·
+0
+...
+...
+...
+0
+· · ·
+zL(p, f)
+
+
+(10)
+Thanks to Eq.(7), one could remark that the space-time
+observation is composed of a ﬁnite number of steering vectors
+v(pq, fqk, ρq) depending on the frequency fqk as in a context
+of narrowband hypothesis.
+2.3. Problem formulation
+Let us move on the problem formulation which will show that
+the LOST algorithm does not exploit the TDoA.
+LOST exploits the structure of the space-time observa-
+tion covariance matrix Ry = E
+
+y(t)yH(t)
+
+with E[·] is the
+mathematical expectation. Thus, the signal subspace of rank
+R = PQ
+q=1 Kq is spanned by the vectors v(pq, fqk, ρq). The
+parameters (pq, fqk, ρq) for 1 ≤q ≤Q and 1 ≤k ≤Kq can
+then be estimated with a MUSIC approach by searching the
+zeros of:
+JMUSIC(p, f, ρ) = vH(p, f, ρ)Π⊥v(p, f, ρ)
+vH(p, f, ρ)v(p, f, ρ)
+(11)
+where Π⊥is the projector onto the noise subspace from Ry.
+However, the optimization of the cost function JMUSIC(p, f, ρ)
+can be simpliﬁed by reducing the number of interest parame-
+ters to the location vector p. Indeed, according to Eqs.(8-10),
+the steering vector can be rewritten as:
+v(p, f, ρ) = W(p)β(f, p, ρ)
+(12)
+where
+(
+W (p) = (IK ⊗U (p))
+β (f, p, ρ) = c (f) ⊗(Λ (p, f) ρ)
+(13)
+where IK is the identity matrix of dimension K. In LOST,
+the steering vector v(p, f, ρ) in Eq.(11) is thus replaced by
+W(p)β(f, p, ρ) and, for each p, the criterion JMUSIC(p, f, ρ)
+is minimized with respect to β(f, p, ρ).
+Thanks to the
+Rayleight’s quotient [9], [10], we deﬁne the LOST criterion:
+JLOST (p) = λmin
+
+Q−1
+2 (p)Q1(p)
+	
+(14)
+where
+(
+Q1(p) = WH(p)Π⊥W(p)
+Q2(p) = WH(p)W(p)
+(15)
+where λmin {A} is the minimum eigenvalue of A. In LOST,
+the sources location pq for 1 ≤q ≤Q can then be estimated
+by searching the Q zeros of JLOST (p). The advantage is that
+the LOST criterion only depends on p. However, LOST is
+based on the separation of W (p) and the vector β(f, p, ρ)
+which depends on the sources TDoAs according to Eqs.(6),
+(10) and (13). That is why the LOST algorithm cannot ex-
+ploit the stations TDoAs. In addition, as the q-th source is
+associated to Kq frequencies fqk (cf. Eq.(2)), a source of lo-
+cation pq is associated to Kq steering vectors v(pq, fqk, ρq)
+and only one matrix W(pq). This last remark shows that the
+frequency diversity of the sources is not optimally exploited
+in LOST (cf. Eq.(14)). The purpose of this paper is to exploit
+the structure of the vectors β (fqk, pq, ρq) for 1 ≤k ≤Kq
+to take into account the TDoA and the spectrum diversity of
+sources for the estimation of the location pq.
+3. NEW SPACE-TIME GEOLOCATION
+ESTIMATION
+The aim of this approach is to propose a spectrum adaptive
+algorithm which explicitly and simultaneously uses the link
+between the TDoA, AoA and the sources coordinates of the
+spatio-temporal process. This strategy will be incorporated in
+a relaxed optimization algorithm.
+2620
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 23,2026 at 08:54:38 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 3 ===
+3.1. Estimation of the source frequencies from its location
+We ﬁrst desire to estimate the frequencies set Fq of the q-th
+source from its known location pq. According to Eqs.(11),
+(14) and (15), the eigenvector vmin associated to the mini-
+mum eigenvalue of Q−1
+2 (pq)Q1(pq) veriﬁes:
+JMUSIC(pq, f ∈Fq, ρq) = vH
+minQ1(pq)vmin
+vH
+minQ2(pq)vmin
+(16)
+where Fq = {fqk : 1 ≤k ≤Kq}.
+It is known that, assuming that pq is the true source
+location and if ρq is the true complex source attenuation,
+JMUSIC(pq, f
+∈
+Fq, ρq) is null.
+As a consequence,
+Q−1
+2 (pq)Q1(pq) has Kq null eigenvalues with the associ-
+ated eigenvectors:
+vmin(j) =
+Kq
+X
+k=1
+ξkjβ(fqk, pq, ρq)
+for 1 ≤j ≤Kq
+(17)
+with ξkj is one coefﬁcient of a change of basis matrix.
+However, fqk and ρq are unknown. Thus, a cost function
+independent of ρ is preferred. Hence, we write the vector
+β(f, pq, ρ) as, using Eqs.(9) and (13):
+β(f, pq, ρ) = ΛK(pq, f)ρ
+(18)
+ΛK(pq, f) = c(f) ⊗Λ(pq, f)
+(19)
+Then, the frequencies fqk can be estimated by a MUSIC ap-
+proach. Indeed, the Kq vectors β(f, pq, ρ) are orthogonal to
+the following projector onto the noise subspace:
+Π⊥
+v = IKL −
+Kq
+X
+j=1
+vmin(j)vH
+min(j)
+(20)
+Consequently, from [9], [10] and Eq.(19), the fqk for 1 ≤
+k ≤Kq can be estimated by searching the zeros of the fol-
+lowing criterion:
+JFq(f) = λmin
+
+A−1
+2 (f)A1(f)
+	
+(21)
+where
+(
+A1(f) = ΛH
+K(pq, f)Π⊥
+v ΛK(pq, f)
+A2(f) = ΛH
+K(pq, f)ΛK(pq, f)
+(22)
+From the knowledge of the estimated fqk’s and the loca-
+tion vector pq, the vector ρq can ﬁnally be estimated from the
+vectors vmin(j) of Eq.(17). Indeed, the vector vmin(j) can
+be expressed as:
+vmin(j) = Vq (ξmin(j) ⊗ρq)
+(23)
+where Vq =
+
+ΛK(pq, fq1), ..., ΛK(pq, fqKq)
+
+and ξmin(j) =
+[ξ1j, ..., ξKqj]T . We deﬁne ηj = ξmin(j)⊗ρq and is deduced
+from the least squares:
+ηj =
+
+VH
+q Vq
+−1
+VH
+q vmin(j)
+(24)
+The ηj components being reshaped into a Kq × L matrix
+Ωj = ξmin(j)ρT
+q , one could deduce the vector ρq from:
+Ω=
+Kq
+X
+j=1
+ΩT
+j Ω∗
+j = ρqρH
+q
+
+
+Kq
+X
+j=1
+ξH
+min(j)ξmin(j)
+
+
+(25)
+where (·)∗is the conjugate operator. Indeed, ρq is its eigen-
+vector of Ωassociated to the maximum eigenvalue.
+3.2. Direct geolocalization from the frequencies set
+After the estimation of the frequencies set of the q-th source,
+one could directly geolocalise it using this information.
+The q-th source subspace is spanned by the vectors
+v(p, fqk, ρq) for (1 ≤k ≤Kq). Using Eqs.(12) and (13):
+v(p, fqk, ρq) = B(p, fqk)ρq
+(26)
+B(p, fqk) = W(p) (c(fqk) ⊗Λ(p, fqk))
+(27)
+The location pq of the source is estimated with a Weighting
+Subspace Fitting (WSF) approach [11] by searching the zeros
+of the following criterion:
+JF IND,q(p) = trace
+
+Π⊥Πq(p)
+
+(28)
+Πq(p) = Eq(p)
+
+EH
+q (p)Eq(p)
+−1
+EH
+q (p)
+(29)
+with Eq(p) =
+
+v(p, fq1, ρq), ..., v(p, fqKq, ρq)
+
+.
+From Eqs.(26) and (27), it can be shown that vH(p, f1, ρq)
+×v(p, f2, ρq) = 0 for f2 −f1 =
+kFe
+K , k ∈Z \ {0}, and
+||v(p, f, ρq)||2
+2 = KM. Hence, in presence of frequencies
+such that fqi−fqj = kFe
+K , the LOST-FIND criterion becomes:
+JF IND1,q(p) =
+K
+X
+k=1
+vH(p, fqk, ρq)Π⊥v(p, fqk, ρq)
+KM
+(30)
+If ρq is unknown or has not been estimated, we inject
+Eq.(26) in Eq.(30) and the vector ρq can be jointly estimated
+to pq. Indeed, the location pq is deduced from:
+JF IND2,q(p) = min
+ρ∈CL JF IND1,q(p, ρ) = λmin {Q(p)} (31)
+Q(p) =
+K
+X
+k=1
+BH(p, fqk)Π⊥B(p, fqk)
+KM
+(32)
+When the assumption fqi −fqj
+=
+kFe
+K
+is not veri-
+ﬁed, JF IND1,q(p)̸ = JF IND,q(p) but JF IND1,q(pq) =
+JF IND,q(pq) = 0. In this case, the source location can be
+estimated with JF IND1,q(p). In addition, this estimator is
+not the optimal one (in the sense that it does not exploit all
+the available information) which is JF IND,q(p).
+3.3. LOST-FIND algorithm
+The steps of the LOST-FIND algorithm are then:
+• Step-1: First estimation of pq for (1 ≤q ≤Q) with
+LOST algorithm for each q from Eq.(14),
+• Step-2: Frequencies estimation Fq = {fqk : 1 ≤k ≤
+Kq} from searching the zeros of JFq(f) in Eq.(21),
+• Step-3: From Fq, pq and Ω(Eq.(25)), estimation of
+the attenuation vector ρq: eigenvector associated to the
+maximum eigenvalue of Ω,
+• Step-4: From the knowledge of Fq and ρq, new esti-
+mation of pq with the criterion JF IND,q(p) (Eq.(28))
+or JF IND1,q(p) (Eq.(30)),
+• Step-5 (optional): Go to Step-2.
+2621
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 23,2026 at 08:54:38 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 4 ===
+4. SIMULATIONS
+In this part we compare the LOST-FIND algorithm to the
+LOST, the DPD, the classical triangulation (AoA/AoA) and
+the localization in 2-step combining the AoA of one station
+and the TDoA with 1 sensor of each station (AoA/TDoA).
+We will consider two arrays. In a Cartesian coordinate sys-
+tem, we place the ﬁrst array at (-400m,0), and the second at
+(+400m,0). The arrays are composed of six sensors where
+ﬁve are in a circular formation around a sixth in the center.
+The arrays radius is 0.8m and we consider K = 4 tempo-
+ral shifts for the space-time process (LOST and LOST-FIND)
+and K = 4 decompositions of the stations bandwidth for the
+DPD.
+We ﬁrst consider the single source case, where the source
+is located at (0,+5m). Such a scenario is very severe for al-
+gorithms which exploits only the AoA, where their perfor-
+mances are strongly deteriorated. This source is composed
+of 4 subcarrier frequencies fairly distributed in each subband
+of the DPD decomposition. Indeed, to correctly operate, the
+DPD needs a signal presence in all the subbands. In Fig.1, we
+plot the RMSE of the estimated source position as a function
+of the bandwidth of the arrays with SNR= 10dB. We observe
+that, for the two algorithms which do not exploit the TDoA
+(e.g. LOST and AoA/AoA), the arrays bandwidth has no im-
+pact on the performance. Furthermore, for the methods which
+exploit the TDoA, we note that the higher the bandwidth is,
+the smaller the RMSE are. In addition, the performance is
+similar between the DPD and the AoA/TDoA because, with
+a single source, when the signal is narrowband after the DPD
+decomposition, it was shown that the performance is similar
+[12]. Finally, exploiting the space-time structure, the LOST-
+FIND gives a better RMSE. In the remainder of this part we
+ﬁx the arrays bandwidth at B = 500kHz.
+Fig. 1. Visualization of the RMSE as a function of the bandwidth
+of the arrays
+In Fig.2 we keep the same source position, but consider-
+ing now a source composed of 3 subcarrier frequencies, and
+we plot the RMSE of the source position as a function of the
+SNR. We observe that the algorithms exploiting the TDoA
+have a better performance. The DPD has poorer performance
+than in Fig.1 because the source signal is not present in
+each decomposition subband. Moreover, we constate that the
+LOST-FIND is the algorithm having the better performance.
+Fig. 2. One source at position (0,+5m)
+In Fig.3 we consider the two sources case. We place the
+sources locations in a more favorable context for the AoA es-
+timation. We place the ﬁrst source at (0,+200m) and the sec-
+ond at (+5m,+200m) and we have 3 (resp. 2) subcarrier fre-
+quencies for the ﬁrst (resp. second) source. We ﬁrst observe
+that the AoA/TDoA gives bad results as, the two sources be-
+ing really too close, the temporal resolution of the criterion
+does not allow to separate the two sources. Although, due
+to the total exploitation of the system information (AoA of
+the two arrays and their TDoA simultaneously), the DPD is
+not optimal in this context, it gives better performance than
+the AoA/AoA methods. Thanks to the identiﬁcation of the
+frequencies of each source, the LOST-FIND algorithm per-
+mits to reject the source we do not want to locate (the second
+source). Consequently, it allows to have better performance
+than the other algorithms. Finally, we apply the optional iter-
+ation given by the step-5 of LOST-FIND and we remark that
+the performance is better.
+Fig. 3. Two sources of positions (0,+200m), (+5m,+200m), estima-
+tion of the ﬁrst source
+5. CONCLUSIONS
+A new algorithm LOST-FIND was proposed for blind geolo-
+calization. This algorithm is spectrum adaptive and simul-
+taneously exploits the TDoA and AoA. Indeed, the spatio-
+temporal structure of the model is more correctly handled
+than the recently introduced LOST algorithm. Moreover, this
+property gives a good robustness when DPD and/or LOST
+fail. The proposed algorithm outperforms the existing ones as
+shown in the simulations.
+2622
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 23,2026 at 08:54:38 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 5 ===
+6. REFERENCES
+[1] M. Porreta, P. Nepa, G. Manara & F. Giannetti, Location,
+Location, Location, IEEE Vehicular Technology Maga-
+zine, vol.3, #2, 2008.
+[2] R. O. Schmidt, Multiple Emitter Location and Signal Pa-
+rameter Estimation, IEEE Transactions Antennas Propa-
+gation, vol. 34, p.276-280, 1986.
+[3] M. Oispuu, U. Nickel, 3D Passive Source Localization
+by a Multi-Array Network: Noncoherent vs. Coherent
+Processing, International ITGWorkshop Smart Antennas
+(WSA) 2010-Bremen, p.300-305.
+[4] M. Wax & T. Kailath, Decentralized Processing in Sen-
+sor Arrays, IEEE Transactions on Acoustics, Speech, and
+Signal Processing, vol. ASSP-33, p.1123-1129, 1985.
+[5] P. Stoica, A. Nehorai & T. S¨oderstr¨om, Decentralized Ar-
+ray Processing Using the Mode Algorithm, Circuits, Sys-
+temes, Signal Processing, vol.14, #1, p.17-38, 1995.
+[6] E. Weinstein, Decentralization of the Gaussian Maximum
+Likelihood Estimator and Its Applications to Passive Ar-
+ray Processing, IEEE Transactions on Acoustics, Speech,
+and Signal Processing, vol. ASSP-29, p.945-951, 1981.
+[7] A. Amar & A. J. Weiss, Direct Position Determination of
+Multiple Radio Signals, IEEE ICASSP 2004-Montreal,
+vol.2, p.81-4.
+[8] J. Bosse, A. Ferr´eol & P. Larzabal, A Space Time Array
+Processing for Passive Geolocalization of Radio Trans-
+mitters, IEEE ICASSP 2011-Prague, p.2596-2599.
+[9] B. N. Parlett, The symmetric eigenvalue problem, SIAM,
+Classics in Applied Mathematics, 1998.
+[10] F. Gantmacher, The theory of matrices, Chelsa: vol.I-II,
+1959.
+[11] M. Viberg & B. Ottersten, Sensor array processing
+based on subspace ﬁtting, IEEE Trans. Signal Process-
+ing, vol. 39, pp. 11101121, 1991.
+[12] R. J. Kozick & B. M. Sadler, Source Location With
+Distributed Sensor Arrays and Partial Spatial Coher-
+ence, IEEE Transactions on Signal Processing, vol.52,
+#3, p.601-616, 2004.
+2623
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 23,2026 at 08:54:38 UTC from IEEE Xplore.  Restrictions apply. 

@@ -1,0 +1,831 @@
+
+=== PDF PAGE 1 ===
+Spatially Distributed Task-Oriented Compression for
+Multi-Emitter Localization and Characterization
+with Spectral Overlap
+H. Nazim Bicer and J. Nicholas Laneman
+Dept. of Electrical Engineering
+University of Notre Dame
+Notre Dame, IN, USA
+{hbicer, jnl}@nd.edu
+Abstract—Radio frequency spectrum awareness requires the
+ability to detect, localize, and characterize emitters in dense
+and contested wireless environments. In this work, we propose
+a task-oriented distributed compression framework for joint
+multi-emitter localization and characterization using spatially
+distributed receivers. Each receiver observes a short window
+of complex IQ samples, converts the observation to a time–
+frequency representation, and encodes it into a compact latent
+vector. A central fusion decoder combines the receiver latents to
+estimate an unordered set of active emitters, including their
+locations, center-frequency offsets, occupied bandwidths, and
+waveform families. A permutation-invariant training objective
+is used to handle the arbitrary ordering of emitters and
+predictions. Experiments on synthetic multi-emitter scenes with
+spectral overlap show that even extremely compact receiver-
+side representations can preserve useful information for emitter
+counting and waveform-family estimation. However, accurate
+localization and spectral-parameter regression require larger
+latent dimensions. Increasing the receiver latent dimension from
+drx = 1 to drx = 16 provides the largest improvement, while
+further increasing to drx = 64 gives smaller gains. These results
+demonstrate the potential of learned task-oriented compression
+for communication-efficient distributed spectrum awareness.
+Index Terms—spectrum awareness, multi-emitter localization,
+distributed sensing, task-oriented compression, deep learning.
+I. INTRODUCTION
+Radio frequency (RF) spectrum awareness is becoming
+increasingly critical as wireless deployments grow denser and
+spectrum access becomes more contested. In many commer-
+cial systems, interference is managed through scheduling,
+spectrum planning, coexistence rules, or prior coordination
+among authorized users [1]–[3]. These mechanisms are effec-
+tive when transmitters are known and cooperative. However,
+unauthorized, uncoordinated, malfunctioning, or adversarial
+emitters can still disrupt systems, including critical infrastruc-
+ture, public safety networks, airports, and other operational
+environments [4], [5]. Rapidly detecting, localizing, and char-
+acterizing such emitters is therefore an important capability
+for spectrum security and resilient wireless operation.
+A single high-quality receiver can often detect the pres-
+ence of an interferer when the received signal-to-noise ratio
+is sufficient [6], [7]. However, single-receiver observations
+provide limited spatial information, especially when multiple
+emitters are active in a complex propagation environment.
+Distributed sensing offers a natural way to address this
+limitation. By observing the same RF scene from multiple
+spatially separated locations, a receiver network can exploit
+spatial diversity and recover information that is not available
+from any individual receiver alone [8], [9]. At the same
+time, low-cost software-defined radios (SDRs) and embedded
+processors increasingly support local processing of wideband
+observations, making cooperative spectrum sensing practical
+at the network edge.
+Modern SDRs can collect complex in-phase and quadra-
+ture (IQ) samples, which preserve spectral, temporal, and
+modulation-dependent structure beyond received power alone.
+This enables spectrum awareness tasks that go beyond detec-
+tion or localization, including estimation of the number of ac-
+tive emitters, their locations, carrier frequencies, bandwidths,
+and waveform families. However, directly forwarding raw
+IQ samples from many receivers to a central processor can
+require substantial communication bandwidth, particularly for
+wideband sensing. This motivates task-oriented distributed
+compression, where each receiver transmits a compact repre-
+sentation designed specifically for the downstream inference
+task rather than a faithful reconstruction of the raw observa-
+tion [10], [11].
+In this paper, we study communication-efficient distributed
+spectrum awareness using multiple spatially separated SDR-
+like receivers. Each receiver observes a short window of IQ
+samples and maps its local observation to a low-dimensional
+latent representation using a neural encoder. A central neural
+decoder then fuses the receiver latents and estimates the active
+emitter set. Unlike formulations that address detection, local-
+ization, or waveform classification separately, we consider a
+joint multi-emitter setting in which the number of emitters,
+spatial locations, carrier frequencies, bandwidths, and wave-
+form families are all unknown. The output is treated as an
+unordered set, allowing the model to estimate multiple active
+emitters without imposing an artificial ordering on the scene
+[12]. During training, we handle the resulting assignment
+ambiguity with a permutation-invariant objective that mini-
+mizes the loss over possible matches between predicted and
+arXiv:2606.01446v2  [eess.SP]  4 Jun 2026
+
+
+=== PDF PAGE 2 ===
+true emitters, following the same principle as permutation-
+invariant training for multi-source separation [13].
+The main contributions of this work are as follows.
+First, we formulate distributed spectrum awareness as a
+joint emitter-set estimation problem from compressed multi-
+receiver IQ observations. Second, we propose a task-oriented
+neural compression architecture in which receiver-side en-
+coders produce compact latents that are fused by a central
+neural decoder for joint emitter localization and characteriza-
+tion. Third, we use a permutation-invariant training objective
+to handle the unordered nature of multi-emitter outputs, in-
+cluding scenes with partially or strongly overlapping spectra.
+Finally, we evaluate how receiver-side latent dimensionality
+and maximum emitter count affect cardinality estimation,
+localization accuracy, and spectral-parameter recovery.
+II. RELATED WORK
+The communication-efficient distributed inference problem
+considered in this paper is closely related to classical multi-
+terminal source coding. In the CEO problem [14], multiple
+agents observe noisy versions of an underlying source and
+send rate-limited descriptions to a central estimator. The
+distributed information bottleneck framework extends this
+idea by compressing multiple observations into represen-
+tations that collectively preserve information relevant to a
+target variable [15]. This perspective naturally fits distributed
+spectrum awareness: each receiver observes a different view
+of the same RF scene, while the fusion center only requires
+information relevant to estimating the active emitter set rather
+than reconstructing the raw observations.
+Recent task-oriented communication methods have trans-
+lated these ideas into neural edge-inference architectures. The
+work in [10] studied information-bottleneck-based feature
+encoding for single-device edge inference, where compact
+task-relevant features are transmitted instead of full observa-
+tions. A subsequent study extended this setting to cooperative
+multi-device inference using distributed feature encoding to
+reduce communication overhead [11]. These works motivate
+communication-efficient fusion, but focus mainly on image-
+based inference rather than RF spectrum awareness.
+Deep-learning-based multiple-transmitter localization has
+also been studied for spectrum monitoring. DeepTxFinder
+[16] uses distributed received-power measurements and a
+convolutional neural network to estimate the number and loca-
+tions of unknown transmitters. DeepMTL [17] and DeepMTL
+Pro [18] formulate transmitter localization as a learned spa-
+tial inference problem from received-power measurements,
+with DeepMTL Pro additionally estimating transmitter power.
+These methods demonstrate the value of distributed sensing
+and deep learning, but they primarily rely on power-based
+measurements and therefore do not exploit the richer spectral,
+temporal, and waveform-dependent information available in
+wideband complex IQ observations.
+Complementary work on edge-based RF signal detection
+and characterization developed an RFSoC-deployable neural
+model that operates on Fourier domain passband RF data to
+detect and classify RF signals in real time while estimating
+center frequency and bandwidth [19]. This demonstrates
+the feasibility of neural spectrum awareness processing on
+deployable hardware, but it considers an individual edge
+platform rather than cooperative sensing across spatially dis-
+tributed receivers and does not address emitter localization or
+distributed task-oriented compression.
+Our work lies at the intersection of these directions. Moti-
+vated by distributed information bottleneck and task-oriented
+communication principles, we compress observations locally
+at multiple receivers and fuse the resulting latent representa-
+tions centrally. Relative to power-based localization methods,
+we use IQ-derived observations to jointly estimate emitter
+cardinality, locations, center-frequency offsets, bandwidths,
+and waveform families. Relative to single-platform edge RF
+detection methods, we study a spatially distributed latent-
+bottleneck architecture for unordered multi-emitter scenes
+with potentially overlapping spectra.
+III. PROBLEM FORMULATION
+We consider a two-dimensional monitoring region A ⊂R2
+containing M spatially distributed receivers. Receiver i ∈
+{1, . . . , M} is located at a known position ri ∈A. The
+receiver locations are fixed across all scenes, and receiver
+observations are provided to the fusion center in a consistent
+order.
+All receivers observe the same RF scene over a common
+complex-baseband observation window during an interval
+Tobs. With sampling rate fs, receiver i obtains N = fsTobs
+complex samples, where N is assumed to be an integer:
+xi = [xi[0], xi[1], . . . , xi[N −1]]T ∈CN.
+(1)
+The modeled complex-baseband observation window is
+F =
+
+−fs
+2 , fs
+2
+
+.
+(2)
+Thus, frequencies in this work represent offsets within the
+sampled baseband window rather than absolute RF carrier
+frequencies.
+Each observed scene contains an unknown number K of
+simultaneously active emitters, with 1 ≤K ≤Kmax. The
+physical parameters governing the signal generated by emitter
+k are represented by
+ξk = (pk, νk, Bk, Pk, gk, qk) ,
+(3)
+where pk ∈A is the emitter location, νk ∈F is its center-
+frequency offset within the sampled baseband window, Bk is
+its occupied bandwidth, Pk is its transmit-power parameter,
+gk ∈G is its waveform-family label, and qk ∈Q is its
+modulation label. The spectral placement of each emitter
+satisfies νk ∈[−fs/2 + Bk/2, fs/2 −Bk/2), so that its
+occupied bandwidth remains inside the observation window.
+Different emitters may have partially or fully overlapping
+occupied frequency intervals, may use the same waveform
+family or modulation type, and may transmit with different
+powers.
+
+
+=== PDF PAGE 3 ===
+In this work, transmit power and modulation type are
+treated as nuisance variables: they influence the receiver
+observations but are not included in the target output. The
+task-relevant parameter vector associated with emitter k is
+therefore
+θk = (pk, νk, Bk, gk) ,
+(4)
+and the desired scene-level output is the unordered emitter
+set
+Θ = {θk}K
+k=1 .
+(5)
+Let sgk,qk[n; Bk] denote a unit-power complex-baseband
+waveform whose structure depends on the waveform fam-
+ily, modulation type, and occupied bandwidth of emitter
+k. Including its center-frequency offset within the sampled
+baseband window, define
+uk[n] = sgk,qk[n; Bk] ej2πνkn/fs,
+n = 0, . . . , N −1.
+(6)
+Let di,k = ∥pk −ri∥2 denote the Euclidean distance
+between emitter k and receiver i. The simulated channel
+is designed to isolate localization information arising from
+receiver-dependent received powers. Specifically, the received
+IQ sample at receiver i is modeled as
+xi[n] =
+K
+X
+k=1
+p
+Pk αi,k uk[n] + wi[n],
+n = 0, . . . , N −1.
+(7)
+where wi[n] ∼CN(0, σ2
+w) denotes receiver thermal noise
+modeled as complex AWGN, and αi,k is the distance-
+dependent amplitude attenuation for the link between emitter
+k and receiver i.
+The amplitude attenuation is modeled using a reference-
+distance power-law relationship [20, Sec. 2.5]:
+αi,k =
+max(di,k, d0)
+d0
+−η/2
+,
+(8)
+where d0 is the reference distance and η is the path-loss
+exponent. Accordingly, the received power contribution of
+emitter k at receiver i is P rx
+i,k = Pkα2
+i,k, with all power
+quantities understood in linear units.
+No propagation delay, phase rotation, multipath effect,
+shadowing, or receiver synchronization impairment is applied
+in the present simulation model. Consequently, emitter local-
+ization is driven only by the receiver-dependent power varia-
+tions induced by the known receiver geometry. The complex
+time–frequency observations retain spectral and waveform-
+dependent structure for estimating center-frequency offset,
+occupied bandwidth, and waveform family, but they do not
+contain additional modeled phase- or time-difference-based
+localization cues.
+The objective is to infer Θ from the distributed observations
+{xi}M
+i=1 while limiting the dimensionality of the information
+provided by each receiver to the fusion center. Specifically,
+receiver i forms a latent representation
+zi = Encϕi (T (xi)) ∈Rdrx,
+(9)
+where ϕi denotes the parameters of receiver i’s encoder and
+T (·) represents the local observation transform. The specific
+transform and neural encoder realization are defined in Sec-
+tion IV. The receivers employ the same encoder architecture
+but do not share encoder parameters, allowing receiver-
+specific representations under the fixed receiver geometry
+considered in this work.
+The fusion center estimates the emitter set according to
+bΘ = Decψ (z1, . . . , zM) ,
+(10)
+where ψ denotes the fusion-decoder parameters. Since the
+latent vectors are provided to the decoder in a consistent re-
+ceiver order, the decoder can learn receiver-dependent power
+relationships associated with the fixed sensing geometry with-
+out taking receiver coordinates as additional numerical inputs.
+Here, drx controls the dimensionality of the receiver-side
+latent bottleneck. Since the latent vectors are not quantized or
+entropy coded, drx characterizes representation compactness
+rather than an explicit communication bit rate.
+The training objective must be invariant to permutations
+of emitter indices. We therefore minimize an expected set
+distortion that accounts for existence, waveform-family clas-
+sification, and continuous parameter-estimation errors:
+minimize
+{ϕi}M
+i=1, ψ
+E
+h
+Dset
+
+Θ, bΘ
+i
+.
+(11)
+IV. PROPOSED METHOD
+To address the distributed estimation problem in Section III,
+we use a neural architecture with receiver-specific local
+encoders and a central fusion decoder. Each receiver maps its
+local IQ observation to a compact latent vector. The fusion
+decoder then combines the ordered collection of receiver
+latents to estimate the unordered set of active emitters.
+A. Local Time–Frequency Encoding
+In Section III, the receiver-side encoder was defined using
+an abstract local transform T (·). In this work, we set T (·)
+to a time–frequency representation based on the short-time
+Fourier transform (STFT). For receiver i, the complex IQ
+sequence xi is mapped to
+Si = STFT (xi) ∈CNf ×Nt,
+(12)
+where Nf and Nt denote the number of frequency bins and
+time frames, respectively. The real and imaginary components
+are then stacked as two input channels,
+Xi = T (xi) = [Re{Si}; Im{Si}] ∈R2×Nf ×Nt.
+(13)
+This
+representation
+preserves
+spectral
+placement
+and
+complex-valued
+time–frequency
+structure
+relevant
+to
+estimating emitter bandwidth, center-frequency offset, and
+waveform family. Time–frequency representations have also
+been shown to outperform raw IQ inputs in a related neural
+RF classification task [21].
+Each receiver applies a local encoder to produce a drx-
+dimensional latent vector,
+zi = Encϕi (Xi) ∈Rdrx,
+i = 1, . . . , M.
+(14)
+
+
+=== PDF PAGE 4 ===
+All receivers use the same encoder architecture, but the
+encoder parameters are not shared. This allows each receiver
+to learn a receiver-specific representation under the fixed
+sensing geometry. The encoder is implemented as a resid-
+ual convolutional network with asymmetric downsampling.
+The time dimension is reduced more aggressively than the
+frequency dimension before projection to the latent vector.
+B. Central Fusion and Set Prediction
+The fusion center concatenates the receiver latents in the
+fixed receiver order,
+z =
+
+zT
+1 , . . . , zT
+M
+T ∈RMdrx.
+(15)
+A multilayer perceptron maps the fused latent vector to Kmax
+candidate emitter slots,
+bY = Decψ (z) ∈RKmax×6.
+(16)
+Each row of bY corresponds to one candidate emitter slot. For
+slot j, the decoder output is
+byj =
+h
+bej, bpx,j, bpy,j, bνj, bBj, bcj
+i
+,
+(17)
+where bej is an existence logit. The pair (bpx,j, bpy,j) is the
+estimated emitter location. The quantity bνj is the estimated
+center-frequency offset, and bBj is the estimated occupied
+bandwidth. The quantity bcj is a waveform-family logit. In
+the experiments considered here, the waveform-family label is
+binary, so a single logit is sufficient. The continuous quantities
+are normalized during training and converted back to physical
+units for evaluation.
+C. Permutation-Invariant Training
+The decoder always produces Kmax slots, while a scene
+contains only K ≤Kmax active emitters. We therefore
+represent each ground-truth scene using padded target slots
+yk = [ek, px,k, py,k, νk, Bk, ck] ,
+k = 1, . . . , Kmax.
+(18)
+where ek = 1 for active emitters and ek = 0 for padded
+inactive slots. For inactive slots, the remaining target entries
+are set to zero by convention. These zero-padded entries are
+not treated as physical emitter parameters, since the corre-
+sponding waveform-family and regression losses are masked
+by ek. The label ck ∈{0, 1} denotes the binary encoding of
+the waveform-family label gk when ek = 1.
+Since emitter ordering is arbitrary, predicted and target slots
+are matched using a permutation-invariant cost. The cost of
+assigning predicted slot j to target slot k is
+C(k, j) =λeℓBCE (bej, ek) + ekλfamℓBCE (bcj, ck)
++ ek
+h
+λxℓreg (bpx,j, px,k) + λyℓreg (bpy,j, py,k)
++ λfcℓreg (bνj, νk) + λbwℓreg
+
+bBj, Bk
+ i
+.
+(19)
+where ℓBCE is binary cross-entropy applied to logits and
+ℓreg is the Smooth L1 loss, i.e., a Huber-type regression
+loss applied to normalized continuous targets. The factor
+ek ensures that waveform-family and continuous-parameter
+errors are only penalized for active emitters.
+The optimal assignment is
+π⋆= argmin
+π∈SKmax
+Kmax
+X
+k=1
+C (k, π(k)) ,
+(20)
+where SKmax is the set of all permutations of the Kmax output
+slots. In the experiments, we consider Kmax ∈{3, 4, 5}.
+Therefore, the exact minimum is obtained by evaluating 6,
+24, and 120 assignments, respectively.
+Using the assignment π⋆, the training loss is
+L =λeLe + λfamLfam + λxLx + λyLy
++ λfcLfc + λbwLbw,
+(21)
+where Le is computed over all matched slots. The remaining
+loss terms are computed using the matched target existence
+indicators. Specifically, the waveform-family and continuous-
+parameter losses are masked by ek and averaged only over
+active target slots. Thus, inactive padded slots contribute only
+to the existence loss. The latent dimension drx controls the
+receiver-side bottleneck, and Kmax controls the maximum
+scene complexity considered during training and evaluation.
+V. EXPERIMENTS AND RESULTS
+A. Experimental Setup
+We evaluate the proposed architecture using synthetic
+multi-emitter RF scenes generated according to the model in
+Section III. The monitored region is an 800 m × 800 m area
+with M = 4 fixed receivers located at (50, 100), (125, 700),
+(700, 150), and (675, 600) m. Each receiver observes Tobs =
+1 ms of complex baseband IQ samples at fs = 40 MHz,
+corresponding to a modeled baseband window of [−20, 20)
+MHz. Each scene contains between one and Kmax active
+emitters. Emitters are assigned a center-frequency offset,
+occupied bandwidth, waveform family, modulation type, and
+transmit-power parameter. Bandwidths are sampled between 1
+MHz and 16 MHz, and center frequencies are chosen so that
+the occupied band remains within the observation window.
+The waveform-family label is binary, corresponding to OFDM
+or single-carrier signals, while modulation type and transmit
+power are nuisance variables.
+Separate datasets are generated for Kmax ∈{3, 4, 5}. For
+each value of Kmax, we use 40,000 training scenes, 4,000
+validation scenes, and 4,000 test scenes. The propagation
+model uses distance-dependent attenuation with path-loss ex-
+ponent η = 2.7 and excludes delay, multipath, shadowing, and
+phase-based localization cues. Thus, localization information
+is limited to receiver-dependent power variation under the
+fixed receiver geometry.
+Each receiver IQ sequence is converted to a complex STFT
+using a Hann window with Nf = 256 frequency bins and
+hop length 160, yielding Nt = 249 time frames. The real and
+imaginary STFT components are stacked as two channels,
+producing a 2 × 256 × 249 tensor per receiver. We train
+
+
+=== PDF PAGE 5 ===
+1
+16
+64
+푑rx
+99.4
+99.5
+99.6
+99.7
+99.8
+99.9
+100.0
+100.1
+Accuracy (%)
+Cardinality
+1
+16
+64
+푑rx
+98.50
+98.75
+99.00
+99.25
+99.50
+99.75
+100.00
+Accuracy (%)
+Waveform
+1
+16
+64
+푑rx
+100
+150
+200
+250
+RMSE (m)
+Localization
+1
+16
+64
+푑rx
+1.5
+2.0
+2.5
+3.0
+3.5
+4.0
+4.5
+RMSE (MHz)
+Center freq.
+1
+16
+64
+푑rx
+1.5
+2.0
+2.5
+3.0
+3.5
+4.0
+RMSE (MHz)
+Bandwidth
+퐾max = 3
+퐾max = 4
+퐾max = 5
+Fig. 1. Test set performance versus receiver latent dimension drx for Kmax ∈{3, 4, 5}. The panels show cardinality accuracy, waveform-family accuracy,
+localization RMSE, center-frequency RMSE, and bandwidth RMSE.
+models with receiver latent dimensions drx ∈{1, 16, 64},
+corresponding to fused latent dimensions of 4, 64, and 256
+at the central decoder.
+Each receiver uses an independent residual convolutional
+encoder with the same architecture but separately learned
+parameters. The encoder applies asymmetric downsampling,
+adaptive average pooling, and a fully connected projection
+to produce zi ∈Rdrx. The fusion center concatenates the
+four receiver latents in fixed receiver order and applies an
+MLP with hidden dimensions (256, 256, 128). The decoder
+outputs Kmax candidate emitter slots, each containing an
+existence logit, two normalized location coordinates, a nor-
+malized center-frequency offset, a normalized bandwidth, and
+a waveform-family logit.
+For each pair of Kmax and drx, a separate model is trained
+using the permutation-invariant loss in Section IV-C. Exact
+assignment evaluates all Kmax! slot permutations during
+training. All models are trained for 200 epochs using AdamW
+with learning rate 10−3 and batch size 64. The checkpoint
+with the lowest validation loss is used for test set evaluation.
+B. Results and Discussion
+We evaluate scene-level cardinality accuracy, waveform-
+family accuracy, localization RMSE, center-frequency RMSE,
+and
+bandwidth
+RMSE.
+Waveform-family
+accuracy
+and
+continuous-parameter errors are computed after permutation-
+invariant matching between predicted and true active emitters.
+Figure 1 shows that the receiver-side bottleneck strongly
+affects continuous estimation. With drx
+= 1, the fused
+representation is only four-dimensional, and the model loses
+substantial fine-grained information. Increasing the latent di-
+mension to drx = 16 gives the largest improvement across all
+values of Kmax. Localization RMSE decreases from 238.4,
+267.0, and 290.5 m for Kmax = 3, 4, 5, respectively, at
+drx
+= 1 to 102.7, 120.3, and 140.5 m at drx
+= 16,
+while center-frequency and bandwidth errors decrease from
+approximately 3.5–4.6 MHz to about 1–2 MHz. Increasing
+the latent dimension further to drx = 64 gives smaller and
+less consistent gains, suggesting that drx = 16 captures
+most of the useful information while keeping the receiver
+representation compact.
+Performance also degrades as Kmax increases. This is
+expected because larger values of Kmax allow more si-
+multaneous emitters, increasing spatial ambiguity, spectral
+overlap, and assignment difficulty. The effect is most visible
+in localization and bandwidth RMSE, where the Kmax = 5
+case is consistently more challenging than the Kmax = 3
+case.
+Figure 2 shows a representative inference example with
+three active emitters, including two emitters with partially
+overlapping spectra.
+The proposed method has several limitations. The trained
+model is tied to the fixed receiver geometry and simulated
+propagation statistics, so changes in receiver placement or
+RF environment may require retraining or fine-tuning. The
+decoder also assumes a known Kmax, fixed receiver ordering,
+and no receiver-coordinate inputs. Finally, drx measures latent
+compactness rather than explicit communication rate, since
+quantization, entropy coding, channel effects, and hardware
+latency are not modeled.
+VI. CONCLUSION
+We proposed a task-oriented distributed compression
+framework for joint localization and characterization of mul-
+tiple RF emitters from spatially distributed IQ observations.
+Each receiver encodes a local time–frequency representation
+into a compact latent vector, and a central decoder fuses
+the receiver latents to estimate an unordered emitter set.
+Experiments on synthetic multi-emitter scenes show that
+receiver-side latent dimensionality strongly affects continuous
+parameter estimation: increasing drx from 1 to 16 provides
+the largest performance gain, while further increasing to
+64 yields smaller improvements. These results suggest that
+compact learned receiver representations can preserve useful
+task-relevant information for distributed spectrum awareness.
+Future work will incorporate explicit bit-level rate constraints,
+quantization, geometry-aware fusion, and more realistic prop-
+agation and hardware effects.
+
+
+=== PDF PAGE 6 ===
+−130
+−120
+−110
+RX0
+PSD [dB/Hz]
+Receiver PSDs: color = matched emitter; dashed = GT, solid = prediction
+Dashed: GT | Solid: prediction
+RX PSD
+Pair 1
+Pair 2
+Pair 3
+−130
+−120
+−110
+RX1
+PSD [dB/Hz]
+−130
+−120
+−110
+RX2
+PSD [dB/Hz]
+−20
+−15
+−10
+−5
+0
+5
+10
+15
+20
+Baseband frequency oﬀset [MHz]
+−130
+−120
+−110
+RX3
+PSD [dB/Hz]
+0
+100
+200
+300
+400
+500
+600
+700
+800
+x position (m)
+0
+100
+200
+300
+400
+500
+600
+700
+800
+y position (m)
+RX0
+RX1
+RX2
+RX3
+E1
+E1
+E2
+E2
+E3
+E3
+Localization
+RMSE = 31.9 m
+Receiver
+Ground truth (X)
+Prediction (O)
+Received spectra and emitter localization
+Fig. 2.
+Representative test example with three active emitters using drx = 64. Receiver PSDs show ground-truth bandwidths and ground-truth/predicted
+center frequencies; the map shows receiver, true-emitter, and predicted-emitter locations. Two positive-frequency emitters partially overlap in spectrum. The
+active-emitter RMSE values are 31.9 m for localization, 0.761 MHz for center frequency, and 0.753 MHz for bandwidth.
+REFERENCES
+[1] A. S. Hamza, S. S. Khalifa, H. S. Hamza, and K. Elsayed, “A survey
+on inter-cell interference coordination techniques in OFDMA-based
+cellular networks,” IEEE Communications Surveys & Tutorials, vol. 15,
+no. 4, pp. 1642–1670, 2013.
+[2] G. Boudreau, J. Panicker, N. Guo, R. Chang, N. Wang, and S. Vrzic,
+“Interference coordination and cancellation for 4G networks,” IEEE
+Communications Magazine, vol. 47, no. 4, pp. 74–81, 2009.
+[3] I. F. Akyildiz, W.-Y. Lee, M. C. Vuran, and S. Mohanty, “Next
+generation/dynamic spectrum access/cognitive radio wireless networks:
+a survey,” Comput. Netw., vol. 50, no. 13, p. 2127–2159, Sep. 2006.
+[Online]. Available: https://doi.org/10.1016/j.comnet.2006.05.001
+[4] H. Pirayesh and H. Zeng, “Jamming attacks and anti-jamming strategies
+in wireless networks: A comprehensive survey,” IEEE Communications
+Surveys & Tutorials, vol. 24, no. 2, pp. 767–809, 2022.
+[5] S. Liu, Y. Chen, W. Trappe, and L. J. Greenstein, “ALDO: An anomaly
+detection framework for dynamic spectrum access networks,” in IEEE
+INFOCOM 2009, 2009, pp. 675–683.
+[6] R. Tandra and A. Sahai, “SNR walls for signal detection,” IEEE Journal
+of Selected Topics in Signal Processing, vol. 2, no. 1, pp. 4–17, 2008.
+[7] T. Yucek and H. Arslan, “A survey of spectrum sensing algorithms
+for cognitive radio applications,” IEEE Communications Surveys &
+Tutorials, vol. 11, no. 1, pp. 116–130, 2009.
+[8] A. Ghasemi and E. Sousa, “Collaborative spectrum sensing for op-
+portunistic access in fading environments,” in First IEEE International
+Symposium on New Frontiers in Dynamic Spectrum Access Networks,
+2005. DySPAN 2005., 2005, pp. 131–136.
+[9] I.
+F.
+Akyildiz,
+B.
+F.
+Lo,
+and
+R.
+Balakrishnan,
+“Cooperative
+spectrum sensing in cognitive radio networks: A survey,” Physical
+Communication, vol. 4, no. 1, pp. 40–62, 2011. [Online]. Available:
+https://www.sciencedirect.com/science/article/pii/S187449071000039X
+[10] J. Shao, Y. Mao, and J. Zhang, “Learning task-oriented communication
+for edge inference: An information bottleneck approach,” IEEE J.Sel.
+A. Commun., vol. 40, no. 1, p. 197–211, Jan. 2022. [Online]. Available:
+https://doi.org/10.1109/JSAC.2021.3126087
+[11] J. Shao, Y. Mao, and J. Zhang, “Task-oriented communication for mul-
+tidevice cooperative edge inference,” IEEE Transactions on Wireless
+Communications, vol. 22, no. 1, pp. 73–87, 2023.
+[12] M. Zaheer, S. Kottur, S. Ravanbakhsh, B. P´oczos, R. Salakhutdinov,
+and A. J. Smola, “Deep sets,” in Proceedings of the 31st International
+Conference on Neural Information Processing Systems, ser. NIPS’17.
+Red Hook, NY, USA: Curran Associates Inc., 2017, p. 3394–3404.
+[13] D.
+Yu,
+M.
+Kolbæk,
+Z.-H.
+Tan,
+and
+J.
+Jensen,
+“Permutation
+invariant
+training
+of
+deep
+models
+for
+speaker-independent
+multi-talker
+speech
+separation,”
+in
+2017
+IEEE
+International
+Conference
+on
+Acoustics,
+Speech
+and
+Signal
+Processing
+(ICASSP).
+IEEE Press, 2017, p. 241–245. [Online]. Available:
+https://doi.org/10.1109/ICASSP.2017.7952154
+[14] T. Berger, Z. Zhang, and H. Viswanathan, “The CEO problem,” IEEE
+Transactions on Information Theory, vol. 42, no. 3, pp. 887–902, 1996.
+[15] I. Estella Aguerri and A. Zaidi, “Distributed information bottleneck
+method for discrete and gaussian sources,” in International Zurich
+Seminar on Information and Communication (IZS 2018). Proceedings.
+Zurich, Switzerland: ETH Zurich, Feb. 2018, pp. 35–39.
+[16] A. Zubow, S. Bayhan, P. Gawłowicz, and F. Dressler, “Deeptxfinder:
+Multiple transmitter localization by deep learning in crowdsourced
+spectrum sensing,” in 2020 29th International Conference on Computer
+Communications and Networks (ICCCN), 2020, pp. 1–8.
+[17] C. Zhan, M. Ghaderibaneh, P. Sahu, and H. Gupta, “DeepMTL:
+Deep learning based multiple transmitter localization,” in 2021 IEEE
+22nd International Symposium on a World of Wireless, Mobile and
+Multimedia Networks (WoWMoM), 2021, pp. 41–50.
+[18] C. Zhan, M. Ghaderibaneh, P. Sahu, and H. Gupta, “DeepMTL
+Pro: Deep learning based multiple transmitter localization and power
+estimation,” Pervasive Mob. Comput., vol. 82, no. C, Jun. 2022.
+[Online]. Available: https://doi.org/10.1016/j.pmcj.2022.101582
+[19] G. Parpart, P. Martin, S. Jones, N. Elmore, and J. Rounds, “Passband
+signal detection at the edge,” in MILCOM 2025 - 2025 IEEE Military
+Communications Conference (MILCOM), 2025, pp. 1–5.
+[20] A. Goldsmith, Wireless Communications.
+Cambridge, U.K.: Cam-
+bridge University Press, 2005.
+[21] S. Gl¨uge, M. Nyfeler, N. Ramagnano, C. Horn, and C. Sch¨upbach,
+“Robust drone detection and classification from radio frequency signals
+using convolutional neural networks,” in Proc. 15th Int. Joint Conf.
+Comput. Intell., 2023, pp. 496–504.

@@ -1,0 +1,255 @@
+% Main sections for the unknown-complex-gain model. Edit directly.
+\section{Problem formulation and localization methods}\label{sec:ug-model}
+\subsection{Geometry, propagation, and unknown parameters}\label{sec:ug-assumptions}
+Consider $L$ synchronized single-antenna receivers at known positions and $K$ stationary emitters. The primary scenario uses $L=4$ and $K=2$. Receiver and source positions are $\mathbf r_\ell\in\mathbb R^2$ and $\mathbf p_k\in\Omega$, where $\Omega=[-1000,1000]^2\ \mathrm{m}^2$. The propagation distance is $d_{\ell k}=\|\mathbf p_k-\mathbf r_\ell\|$, and the delay is $\tau_{\ell k}=d_{\ell k}/c$, with known propagation speed $c$. The source count, receiver positions, and synchronization are known; source waveforms, transmit powers, and complex gains across receivers are unknown. The sources are generated independently, but their cross terms need not vanish in a finite record.
+
+The simulator uses free-space line-of-sight propagation. For fixed carrier frequency and antenna characteristics, received field amplitude is proportional to $1/d_{\ell k}$ and power to $1/d_{\ell k}^2$. A common scale can be absorbed into the waveform, and carrier propagation phase into the complex gain. The estimator treats the gains across receivers as unknown instead of imposing relative amplitudes determined by distance. The time-domain model is
+\begin{equation}\label{eq:ug-time}
+x_\ell[n]=\sum_{k=1}^K\beta_{\ell k}v_k(nT_s-\tau_{\ell k})+w_\ell[n],
+\quad w_\ell[n]\sim\mathcal{CN}(0,\sigma_t^2).
+\end{equation}
+Here $T_s=1/F_s$ and $n=0,\ldots,N-1$; receiver noises are independent and have equal variance. Each complex gain is constant over the observation and the frequency band used. Let $\mathbf g_k=[\beta_{1k},\ldots,\beta_{Lk}]^T$ and $\mathbf b_k=\mathbf g_k/\|\mathbf g_k\|$. Absorb its norm into the source waveform and fix the phase of a nonzero reference component:
+\begin{equation}\label{eq:ug-gauge}
+\|\mathbf b_k\|=1,\qquad
+\operatorname{Im}b_{\ell_0 k}=0,\quad \operatorname{Re}b_{\ell_0 k}>0.
+\end{equation}
+If the reference component is zero, use a nonzero component for the local parameterization. These constraints remove the scale and common-phase ambiguities between gain and waveform. They do not normalize the energy of the received observations.
+
+With a DFT divided by $N$, the noise variance is $\sigma_f^2=\sigma_t^2/N$. Using a frequency-domain approximation that neglects observation-window edge effects\cite{ref04,ref05}, and retaining signed baseband frequencies $f_m$, gives
+\begin{equation}\label{eq:ug-model}
+\begin{aligned}
+\mathbf x_m&=\sum_{k=1}^K\mathbf D_m(\mathbf p_k)\mathbf b_k s_{k,m}+\mathbf n_m
+=\mathbf A_m(\theta,\mathbf B)\mathbf s_m+\mathbf n_m,\\
+\mathbf D_m(\mathbf p)&=\operatorname{diag}_{\ell=1}^L
+\{e^{-j2\pi f_m\tau_\ell(\mathbf p)}\},\qquad
+\mathbf n_m\sim\mathcal{CN}(\mathbf0,\sigma_f^2\mathbf I_L).
+\end{aligned}
+\end{equation}
+Here $\theta=[\mathbf p_1^T,\ldots,\mathbf p_K^T]^T$, $\mathbf B=[\mathbf b_1,\ldots,\mathbf b_K]$, and $\mathbf A_m=[\mathbf D_m(\mathbf p_1)\mathbf b_1,\ldots,\mathbf D_m(\mathbf p_K)\mathbf b_K]$. Positions and gains are shared across frequencies, whereas $\mathbf s_m$ is unknown at each frequency. Arbitrary, independently varying gains at every receiver and frequency could absorb the delay phases and remove the corresponding localization constraints.
+
+\begin{table}[!htbp]
+\centering\caption{Main notation for the unknown-gain model.}\label{tab:ug-symbols}
+\small\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\linewidth}{Y{.8}Y{1.5}Y{.7}}
+\toprule Symbol & Meaning & Dimension or unit\\\midrule
+$\theta,\mathbf B$ & Position vector and normalized unknown complex gains & $2K\times1$, $L\times K$\\
+$\mathbf x_m,\mathbf s_m$ & Receiver observations and source coefficients & $L\times1$, $K\times1$\\
+$\mathbf D_m,\mathbf A_m$ & Delay-phase matrix and multisource response & $L\times L$, $L\times K$\\
+$\mathbf P_m^\perp$ & Orthogonal complement of the response column space & $L\times L$\\
+$\mathbf R_k(\mathbf p)$ & Correlation of delay-compensated residuals for source $k$ & $L\times L$\\
+$\gamma,\Delta P$ & Weak-to-strong received-power ratio and power difference & Dimensionless, dB\\
+\bottomrule\end{tabularx}
+\end{table}
+Superscripts $H$ and $\dagger$ denote the conjugate transpose and Moore--Penrose pseudoinverse. In the main text, $\mathbf D_m$ denotes the delay-phase matrix. Appendix~\ref{sec:2} uses the same letter locally for derivatives of the mean.
+
+\subsection{Waveform elimination and joint least squares}\label{sec:ug-ls}
+Under~\eqref{eq:ug-model}, the negative log-likelihood, apart from a constant, is the total residual divided by $\sigma_f^2$. Define
+\begin{equation}\label{eq:ug-full-ls}
+\mathcal L(\theta,\mathbf B,\{\mathbf s_m\})
+=\sum_m\|\mathbf x_m-\mathbf A_m\mathbf s_m\|^2.
+\end{equation}
+For fixed positions and gains, the waveform coefficients form a linear least-squares (LS) subproblem. Substituting its minimum-norm solution gives
+\begin{equation}\label{eq:ug-profile}
+\begin{aligned}
+\widehat{\mathbf s}_m&=\mathbf A_m^\dagger\mathbf x_m,\qquad
+\mathbf P_m^\perp=\mathbf I_L-\mathbf A_m\mathbf A_m^\dagger,\\
+J(\theta,\mathbf B)&=\min_{\{\mathbf s_m\}}\mathcal L
+=\sum_m\|\mathbf P_m^\perp\mathbf x_m\|^2,\\
+(\widehat\theta,\widehat{\mathbf B})&\in
+\arg\min_{\theta\in\Omega^K,\,\mathbf B\in\mathcal G}
+J(\theta,\mathbf B).
+\end{aligned}
+\end{equation}
+The set $\mathcal G$ imposes~\eqref{eq:ug-gauge}. Waveform elimination does not eliminate the gains. Each complex gain vector has $2L-2$ real degrees of freedom after removing its two ambiguities. With four receivers and two sources, there are four position parameters and twelve real gain degrees of freedom. A position-only profile objective can be defined formally as
+\begin{equation}\label{eq:ug-position-profile}
+J_{\mathrm{pos}}(\theta)=\min_{\mathbf B}J(\theta,\mathbf B).
+\end{equation}
+An inner solver that finds only a local gain solution does not, in general, evaluate the exact minimum in~\eqref{eq:ug-position-profile}. Comparisons of general-purpose optimizers must use the same objective, gain constraints, and inner-solver convention, including the time spent estimating gains.
+
+\subsection{From single-source LS to a largest-eigenvalue spectrum}\label{sec:ug-single}
+Set $K=1$. Compensate the delays at candidate position $\mathbf p$ by defining $\mathbf y_m(\mathbf p)=\mathbf D_m^H(\mathbf p)\mathbf x_m$. Since $\mathbf D_m$ is unitary and $\|\mathbf b\|=1$,
+\begin{equation}\label{eq:ug-single-elimination}
+\begin{aligned}
+\min_{\{s_m\}}\sum_m\|\mathbf y_m-\mathbf b s_m\|^2
+&=E_x-\mathbf b^H\mathbf R(\mathbf p)\mathbf b,\\
+\widehat s_m&=\mathbf b^H\mathbf y_m,\quad
+\mathbf R(\mathbf p)=\sum_m\mathbf y_m\mathbf y_m^H,\quad
+E_x=\sum_m\|\mathbf x_m\|^2.
+\end{aligned}
+\end{equation}
+The extremum of the Rayleigh quotient gives
+\begin{equation}\label{eq:ug-single-eigen}
+\max_{\|\mathbf b\|=1}\mathbf b^H\mathbf R(\mathbf p)\mathbf b
+=\lambda_{\max}(\mathbf R(\mathbf p)),\qquad
+\widehat{\mathbf p}\in\arg\max_{\mathbf p\in\Omega}
+\lambda_{\max}(\mathbf R(\mathbf p)).
+\end{equation}
+The optimal gain direction is a unit eigenvector associated with the largest eigenvalue, with its common phase adjusted according to~\eqref{eq:ug-gauge}. This derivation connects LS, waveform elimination, and largest-eigenvalue scanning\cite{ref05,ref06}. Applying the same score to a mixture and selecting several peaks uses a pointwise single-source criterion; it is generally not the joint multisource ML estimator.
+
+\subsection{Eigenvalue updates on multisource residuals}\label{sec:ug-block}
+When updating source $k$, hold the positions, gains, and waveforms of the other sources fixed and subtract their fitted signals:
+\begin{equation}\label{eq:ug-residual}
+\mathbf e_{k,m}=\mathbf x_m-
+\sum_{q\ne k}\mathbf D_m(\mathbf p_q)\mathbf b_qs_{q,m},\qquad
+\mathbf y_{k,m}(\mathbf p)=\mathbf D_m^H(\mathbf p)\mathbf e_{k,m}.
+\end{equation}
+Applying the preceding elimination to this residual yields
+\begin{equation}\label{eq:ug-block-eigen}
+\begin{aligned}
+\min_{\|\mathbf b_k\|=1,\{s_{k,m}\}}
+\sum_m\|\mathbf e_{k,m}-\mathbf D_m(\mathbf p)\mathbf b_ks_{k,m}\|^2
+&=E_k-\lambda_{\max}(\mathbf R_k(\mathbf p)),\\
+E_k=\sum_m\|\mathbf e_{k,m}\|^2,\qquad
+\mathbf R_k(\mathbf p)&=\sum_m\mathbf y_{k,m}\mathbf y_{k,m}^H.
+\end{aligned}
+\end{equation}
+After scanning or continuously optimizing $\mathbf p$, update $\mathbf b_k$ using the principal eigenvector and set $s_{k,m}=\mathbf b_k^H\mathbf y_{k,m}$. Update the sources in turn; all waveforms may then be jointly refitted using~\eqref{eq:ug-profile}. Retaining the previous solution and accepting only updates that do not increase~\eqref{eq:ug-full-ls} ensures a nonincreasing residual. It does not ensure a global optimum. Finite position searches, errors in the initial residual, and stopping criteria can all affect the estimate.
+
+\subsection{Projected conditional spectra and MUSIC-type DPD}\label{sec:ug-spectra}
+Residual subtraction fixes the other waveforms, whereas orthogonal projection allows them to be refitted. For fixed positions and gains of the other sources, let $\mathbf A_{-k,m}$ contain their responses and $\mathbf P_{-k,m}^\perp=\mathbf I-\mathbf A_{-k,m}\mathbf A_{-k,m}^\dagger$. The reduction in residual obtained by adding a response is
+\begin{equation}\label{eq:ug-projection}
+Q(\mathbf p,\mathbf b)=\sum_m
+\frac{|\mathbf b^H\mathbf D_m^H(\mathbf p)\mathbf P_{-k,m}^\perp\mathbf x_m|^2}
+{\mathbf b^H\mathbf D_m^H(\mathbf p)\mathbf P_{-k,m}^\perp\mathbf D_m(\mathbf p)\mathbf b}.
+\end{equation}
+A zero projected response contributes zero. For fixed $\mathbf b$, this is the exact improvement in joint LS. Optimizing the frequency-shared $\mathbf b$ generally involves a sum of Rayleigh quotients with different denominators and does not reduce to one ordinary eigendecomposition. The conditional spectrum in Appendix~\ref{sec:2} follows this projection route with known relative gains.
+
+MUSIC-type DPD uses orthogonality between signal and noise subspaces\cite{ref04}. Suppose the same observation record provides $J_s$ usable statistical segments, with frequency-domain observation $\mathbf x_{m,j}$ in segment $j$. Form
+\begin{equation}\label{eq:ug-covariance}
+\widehat{\mathbf R}_{x,m}=\frac1{J_s}\sum_{j=1}^{J_s}\mathbf x_{m,j}\mathbf x_{m,j}^H
+=\mathbf U_{s,m}\Lambda_{s,m}\mathbf U_{s,m}^H+
+\mathbf U_{n,m}\Lambda_{n,m}\mathbf U_{n,m}^H.
+\end{equation}
+In the population model, with equal noise variances, a full-rank source covariance, and correctly separated subspaces, a true response satisfies
+\[\mathbf U_{n,m}^H\mathbf D_m(\mathbf p_k)\mathbf b_k=0.\]
+For fixed weights $w_m\geq0$ with $\sum_mw_m=1$, eliminating the unit-norm unknown gain gives
+\begin{equation}\label{eq:ug-music}
+\begin{aligned}
+\mathbf C(\mathbf p)&=\sum_mw_m\mathbf D_m^H(\mathbf p)
+\mathbf U_{n,m}\mathbf U_{n,m}^H\mathbf D_m(\mathbf p),\\
+P_{\mathrm{MUSIC}}(\mathbf p)&=\left[
+\min_{\|\mathbf b\|=1}\mathbf b^H\mathbf C(\mathbf p)\mathbf b\right]^{-1}
+=\frac1{\lambda_{\min}(\mathbf C(\mathbf p))}.
+\end{aligned}
+\end{equation}
+Since the signal and noise projectors sum to the identity, the denominator also equals $1-\lambda_{\max}(\sum_mw_m\mathbf D_m^H\mathbf U_{s,m}\mathbf U_{s,m}^H\mathbf D_m)$. This matrix contains subspace projectors, unlike the raw correlation matrix in~\eqref{eq:ug-single-eigen}. With one antenna per receiver and only one frequency, the unitary similarity transform preserves the eigenvalues and cannot localize a source through this spectrum. Shared gains and constraints across multiple frequencies are therefore essential.
+
+DPD-HR uses inverse covariance matrices to form another score. Its single-antenna structure is\cite{ref06}
+\begin{equation}\label{eq:ug-hr}
+P_{\mathrm{HR}}(\mathbf p)=
+\frac1{\lambda_{\min}\!\left(\sum_mw_m\mathbf D_m^H(\mathbf p)
+\widehat{\mathbf R}_{x,m}^{-1}\mathbf D_m(\mathbf p)\right)}.
+\end{equation}
+Segmentation must support both the delay-model approximation and covariance estimation. Loading or regularization for singular matrices must be stated. Snapshots from other Monte Carlo trials cannot be pooled, and the total observation duration cannot be increased for a comparison. Equations~\eqref{eq:ug-music} and~\eqref{eq:ug-hr} explain the method relationships; their implementation and performance with the present short records remain to be checked.
+
+\subsection{Compared methods and the complete estimation flow}\label{sec:ug-methods}
+\begin{table}[!htbp]
+\centering\caption{Planned comparisons with unknown gains.}\label{tab:ug-methods}
+\small\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\linewidth}{Y{.8}Y{1.25}Y{.95}}
+\toprule Method & Estimation criterion & Settings to fix\\\midrule
+Single-source eigenvalue scan with multiple peaks & Equation~\eqref{eq:ug-single-eigen} & Full-region candidates, peak selection, refinement\\
+MUSIC-type DPD & Equation~\eqref{eq:ug-music} & Segments, signal-subspace rank, frequency weights\\
+DPD-HR/MVDR & Equation~\eqref{eq:ug-hr} & Segments, covariance estimation, regularization\\
+Alternating joint LS & Equations~\eqref{eq:ug-full-ls} and~\eqref{eq:ug-block-eigen} & Initialization, source searches, joint waveform updates\\
+Multistart local optimization, differential evolution, GA & The same objective in~\eqref{eq:ug-profile} & Identical gain constraints and total processing budgets\\
+DPD-PDL & Sparse Bayesian estimation with a parametric dictionary & Full-region dictionary, complex gains, off-grid updates\\
+Unknown-gain versions of A--D & Supplementary search comparisons for~\eqref{eq:ug-profile} & Adaptation and new evaluation; no reuse of old scores\\
+\bottomrule\end{tabularx}
+\end{table}
+Table~\ref{tab:ug-methods} separates estimation criteria from solvers. A genetic algorithm (GA), differential evolution, and multistart local optimization are solvers, not additional observation models. Solvers for the same joint objective must receive the same information and constraints.
+
+DPD-PDL incorporates off-grid position offsets and unknown complex attenuation into a parametric dictionary and updates them within sparse Bayesian learning\cite{ref13}. Its observations are close to the single-antenna multireceiver model, making it a priority for qualification. Initialization, the cost of a full-region dictionary, and the complex-valued update equations still require inspection. Multisource ML using CSI obtained from a common known reference signal\cite{ref14} has different observation information. Its path gains may remain unknown; CSI should not be equated with known gains.
+
+\begin{figure}[!htbp]\centering
+\begin{tikzpicture}[node distance=8mm and 6mm,
+box/.style={draw=black!65,fill=black!3,rounded corners=2pt,text width=3.6cm,minimum height=12mm,align=center,font=\small},
+arr/.style={-{Stealth[length=2mm]},thick}]
+\node[box] (iq) {Multireceiver mixture\\Fixed data and noise convention};
+\node[box,right=of iq] (init) {Spectral candidates\\or multiple starts\\No true positions\\or gains};
+\node[box,right=of init] (state) {Initialize positions, complex gains, and waveforms};
+\node[box,below=of state] (res) {Hold other sources fixed\\Subtract their fitted signals};
+\node[box,left=of res] (update) {Eigenvalue search\\Update position, gain,\\and waveform};
+\node[box,left=of update] (accept) {Check joint residual\\Refit all waveforms};
+\draw[arr] (iq)--(init);\draw[arr] (init)--(state);\draw[arr] (state)--(res);
+\draw[arr] (res)--(update);\draw[arr] (update)--(accept);
+\draw[arr] (accept.south)--++(0,-.65)-|node[pos=.3,below,font=\small]{Cycle through sources until the stopping criterion is met} (res.south);
+\end{tikzpicture}
+\caption{An alternating joint-LS solver with unknown gains.}\label{fig:ug-flow}
+\end{figure}
+Figure~\ref{fig:ug-flow} connects spectral candidates to joint fitting. A spatial spectrum can also produce a direct multiple-peak estimate. General-purpose optimizers may update positions and gains jointly without using these source-by-source steps. Initialization effects require comparisons with a fixed solver and budget; they cannot be inferred from differences between complete algorithms.
+
+The unit-norm gain constraints and division by snapshot count in the classical derivations\cite{ref04,ref06} differ from scaling each receiver by the RMS of its mixed observation. The main comparison uses raw observations without this energy equalization. A receiver scaling matrix $\mathbf W=\operatorname{diag}(w_1,\ldots,w_L)$ changes the noise covariance to $\sigma_f^2\mathbf W\mathbf W^H$; unweighted LS on the scaled data therefore changes the criterion. Weights obtained from mixed observations also vary with strong-source power, so the RMS version is evaluated separately. Dividing a displayed spectrum by its maximum or expressing it in relative dB does not change the estimator.
+
+\subsection{Identifiability, local curvature, and nonconvex optimization}\label{sec:ug-information}
+The joint objective after waveform elimination is generally nonconvex. Convexity of the linear LS subproblem with a fixed response does not imply convexity of position optimization through delay phases. Nor does convexity of the largest eigenvalue as a function of a matrix imply convexity of the position search.
+
+In a smooth local parameterization with the ambiguities fixed, let $\eta$ collect real nuisance parameters for waveforms and gains, and let $\boldsymbol{\mu}$ be the stacked observation mean. The information blocks and effective position information are
+\begin{equation}\label{eq:ug-fim}
+\begin{aligned}
+\mathbf I_{ab}&=\frac{2}{\sigma_f^2}\operatorname{Re}
+\left\{\left(\frac{\partial\boldsymbol{\mu}}{\partial a}\right)^H
+\frac{\partial\boldsymbol{\mu}}{\partial b}\right\},\quad a,b\in\{\theta,\eta\},\\
+\mathbf I_{\theta}^{\mathrm{eff}}&=\mathbf I_{\theta\theta}
+-\mathbf I_{\theta\eta}\mathbf I_{\eta\eta}^{-1}\mathbf I_{\eta\theta}.
+\end{aligned}
+\end{equation}
+The inverse-block expression in~\eqref{eq:ug-fim} requires local identifiability of the relevant parameters. Singular cases require treatment of unidentifiable directions before asserting a finite position CRB\cite{ref10}. Position derivatives at fixed unknown gains differentiate the delay phases, not the simulator's $1/d$ amplitude law. The old information matrix, which eliminates only waveforms, cannot replace this expression.
+
+For local real parameters $z$, smooth complex residual $\boldsymbol{\rho}(z)$, and $\mathbf G=\partial\boldsymbol{\rho}/\partial z$,
+\begin{equation}\label{eq:ug-hessian}
+\nabla^2\|\boldsymbol{\rho}\|^2
+=2\operatorname{Re}\!\left\{\mathbf G^H\mathbf G
++\sum_i\rho_i^*\nabla^2\rho_i\right\}.
+\end{equation}
+In a noiseless, correctly specified model, the true residual is zero. If the real Jacobian of the effective parameters has full column rank, the Hessian is positive definite and continuity gives a locally strongly convex neighborhood. This requires stable response rank and local parameterization. With noise, the truth is generally not a stationary point of the sample objective, and the residual term can alter curvature. Limited weak-source information, degenerate geometry, and position--gain coupling can also produce flat directions. No fixed radius around the truth is therefore presumed convex, and positive expected information does not guarantee local convexity for every record.
+
+\section{Simulation design and pending results}\label{sec:ug-experiments}
+\subsection{Power-difference scan and paired single-source controls}\label{sec:ug-protocol}
+The first comparison measures how localization of a fixed weak source changes when another source is added at increasing power. Let $P_{\ell,k}$ be the record-averaged power of a noiseless received component. Define
+\begin{equation}\label{eq:ug-gamma}
+\overline P_k=\frac1L\sum_{\ell=1}^LP_{\ell,k},\qquad
+\gamma=\frac{\overline P_{\mathrm w}}{\overline P_{\mathrm s}},\qquad
+\Delta P=-10\log_{10}\gamma.
+\end{equation}
+The primary scenario uses four receivers, two sources, $N=16384$, complete spectral overlap, and power differences of $0,3,6,9,12,15$ dB. The corresponding $\gamma$ values are approximately $1,0.5012,0.2512,0.1259,0.0631,0.0316$. The sampling rate remains 100 MHz. Independent BPSK/RRC sources have a symbol rate of 10 MHz, roll-off factor 0.25, and support width of 12.5 MHz. Source identities remain fixed across power levels, including 0 dB.
+
+Weak-source power is calibrated on independent development samples and then frozen. Single-source localization should be close to saturation, with inadequate signal information distinguished from missed candidates. The formal scan holds the weak source and noise fixed and changes only strong-source power. Each geometry, base waveform pair, and noise realization defines three paired observations: the mixture, the isolated weak source, and the isolated strong source at the current power. The weak-only observation is reused across power levels; the strong-only observation changes with power. Single-source controls use $K=1$ and mixtures use $K=2$.
+
+\begin{table}[!htbp]\centering
+\caption{First-stage protocol and settings to be frozen.}\label{tab:ug-protocol}
+\small\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\linewidth}{Y{.57}Y{1.43}}
+\toprule Item & Convention\\\midrule
+Primary scenario & Four single-antenna receivers, two sources; 16384 samples; IoU=1; six power differences\\
+Estimator information & Receiver positions, synchronization, propagation speed, source count, common noise information; unknown waveforms and complex gains\\
+Evaluation & Strong/weak RMSE, 20 m success rates, joint success, CDFs, total processing time\\
+Freeze after development & Weak-source SNR, layout and trial counts, random seeds, frequency processing, algorithm settings, and runtime budget\\
+Subsequent checks & 4096 samples and partial overlap; initialization and RMS variants; adapted A--D\\
+\bottomrule\end{tabularx}
+\end{table}
+All methods receive the same observations and search region, without true gains or neighborhoods defined by the true positions. Gain estimation is included in total time; solvers for the same objective also receive equal-time comparisons. Statistical segmentation cannot add observation time or use data from other trials. The formal experiment in Table~\ref{tab:ug-protocol} has not yet been run.
+
+\subsection{Metrics and plotting conventions}\label{sec:ug-metrics}
+For valid two-source outputs, choose a one-to-one assignment that minimizes total squared position error, then evaluate the fixed source identities. With matched error $e_{k,i}$,
+\begin{equation}\label{eq:ug-metrics}
+\mathrm{RMSE}_k=\sqrt{\frac1{n_{\mathrm v}}\sum_{i\in\mathcal V}e_{k,i}^2},\qquad
+\widehat P_k=\frac1{n_{\mathrm{all}}}\sum_{i\in\mathcal V}\mathbb I(e_{k,i}\leq20\ \mathrm m).
+\end{equation}
+The set $\mathcal V$ includes all records with valid position outputs, including localization failures with errors exceeding 20 m; $n_{\mathrm v}=|\mathcal V|$. Missing valid outputs are reported separately and count as failures in the complete success-rate denominator $n_{\mathrm{all}}$. Error CDFs use the same full denominator, placing missing outputs at infinite error. If outputs are missing, report valid-output RMSE together with output coverage, not as an RMSE over all trials. Joint success requires both errors to be at most 20 m. Any supplementary GOSPA cutoff is stated separately from the success threshold.
+
+Plot strong- and weak-source RMSE and success rates, joint success, and faceted CDFs for the six power differences. Report mean, median, and a high percentile of total processing time, including candidate generation, gain estimation, refinement, and data transfer. One-time compilation and warm-up are reported separately. Optimizer seeds assess stability and are not treated as independent observation samples.
+
+Representative spatial spectra use a prespecified rule for selecting layouts and records. Show receiver positions, true sources, and estimates at equal, moderate, and large power differences. Largest-eigenvalue, MUSIC, and HR maps retain their own definitions; sparse methods display spatial power or support. Joint LS is shown through a two-dimensional conditional spectrum with the fixed variables identified, not as the complete four-dimensional position objective. Use common position limits and distinguish traces by markers, line styles, and text. Display normalization does not make absolute scores comparable across criteria.
+
+\subsection{Results to be added}\label{sec:ug-results}
+The six-level scan, single-source controls, spatial spectra, and timing results with unknown complex gains will be added after the experiments. Method-specific performance changes and computational costs will be reported separately. Paired single-source controls will then identify the additional loss associated with the strong source. No degradation threshold or performance ranking is asserted at this stage.
+
+Appendix~\ref{sec:3} retains the complete results obtained with known relative gains: the original method comparison, supplementary searches on new layouts, and fixed-sample diagnostics. These support discussion of candidate omission and computational cost under that model. They are not scores for the unknown-gain methods and will not be pooled with the new experiments.
+
+\section{Discussion}\label{sec:ug-discussion}
+The immediate question is how representative methods behave as received-power difference increases. Isolated-source controls distinguish a weak source that is already difficult to localize from the additional loss after a stronger source is added. If a method is unreliable even for a single source or at equal powers, its implementation, observation requirements, and search budget need to be checked before interpreting a strong--weak effect.
+
+Estimation objectives, spectral constructions, and numerical search require separate assessment. An eigenvalue spectrum may initialize a solver or define a source-wise LS update; MUSIC and HR use different statistical matrices. Local curvature describes behavior after an estimate enters the relevant neighborhood and does not show that a global candidate search will reach it. Paired comparisons with a fixed solver are needed to measure initialization effects.
+
+Further mechanism analysis or method design depends on these comparisons. If established solvers already provide reliable estimates at a reasonable cost, the case for a specialized search should be narrowed accordingly. Persistent degradation would motivate examination of spectral construction, nuisance-parameter estimation, missed candidates, and position coupling. The known-gain diagnostics provide reference evidence but do not establish which mechanism dominates with unknown gains.

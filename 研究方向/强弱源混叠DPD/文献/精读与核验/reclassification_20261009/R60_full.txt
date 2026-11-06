@@ -1,0 +1,1620 @@
+--- PDF PAGE 1 ---
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 62, NO. 19, OCTOBER 1, 2014
+5171
+A Steered-Response Power Algorithm Employing
+Hierarchical Search for Acoustic Source
+Localization Using Microphone Arrays
+Leonardo O. Nunes, Student Member, IEEE, Wallace A. Martins, Member, IEEE, Markus V. S. Lima, Member, IEEE,
+Luiz W. P. Biscainho, Member, IEEE, Maur´ıcio V. M. Costa, Felipe M. Gonçalves, Amir Said, Fellow, IEEE, and
+Bowon Lee, Senior Member, IEEE
+Abstract—The localization of a speaker inside a closed envi-
+ronment is often approached by real-time processing of multiple
+audio signals captured by a set of microphones. One of the leading
+related methods for sound source localization, the steered-re-
+sponse power (SRP), searches for the point of maximum power
+over a spatial grid. High-accuracy localization calls for a dense
+grid and/or many microphones, which tends to impractically
+increase computational requirements. This paper proposes a
+new method for sound source localization (called H-SRP), which
+applies the SRP approach to space regions instead of grid points.
+This arrangement makes room for the use of a hierarchical search
+inspired by the branch-and-bound paradigm, which is guaranteed
+to ﬁnd the global maximum in anechoic environments and shown
+experimentally to also work under reverberant conditions. Besides
+beneﬁting from the improved robustness of volume-wise search
+over point-wise search as to reverberation effects, the H-SRP
+attains high performance with manageable complexity. In par-
+ticular, an experiment using a 16-microphone array in a typical
+presentation room yielded localization errors of the order of 7 cm,
+and for a given ﬁxed complexity, competing methods’ errors are
+two to three times larger.
+Index
+Terms—Sound
+source
+localization,
+steered-response
+power, microphone array, computational complexity, hierarchical
+search, branch-and-bound.
+Manuscript received June 17, 2013; revised November 22, 2013; accepted
+June 16, 2014. Date of publication July 16, 2014; date of current version August
+28, 2014. The associate editor coordinating the review of this manuscript and
+approving it for publication was Dr. Pina Marziliano. This R&D project is a co-
+operation between Hewlett-Packard Brasil Ltda. and COPPE/UFRJ, being sup-
+ported with resources of Informatics Law (no. 8.248, from 1991). L. O. Nunes,
+W. A. Martins, M. V. S. Lima, and L. W. P. Biscainho would like to thank also
+CAPES, CNPq, and FAPERJ agencies for funding their research work.
+L. O. Nunes, W. A. Martins, M. V. S. Lima, L. W. P. Biscainho, and
+M. V. M. Costa are with the Signal, Multimedia, and Telecommunications
+Lab—DEL/Poli & PEE/COPPE, Federal University of Rio de Janeiro,
+Rio de Janeiro, RJ 21941-972, Brazil (e-mail: leonardo.nunes@smt.ufrj.br;
+wallace.martins@smt.ufrj.br; markus.lima@smt.ufrj.br; wagner@smt.ufrj.br;
+mauricio.costa@smt.ufrj.br).
+F. M. Gonçalves was with Signal, Multimedia, and Telecommunications
+Lab—DEL/Poli & PEE/COPPE, Federal University of Rio de Janeiro, Rio
+de Janeiro, RJ 21941-972, Brazil. He is now with the COPPEAD, Federal
+University of Rio de Janeiro, Rio de Janeiro, RJ 21941-918, Brazil (e-mail:
+felipemg7@poli.ufrj.br).
+A. Said was with Hewlett-Packard Laboratories, Palo Alto, CA 94304 USA.
+He is now with LG Electronics Mobile Research, San Jose, CA 98008 USA
+(e-mail: amir.said@lge.com).
+B. Lee was with Hewlett-Packard Laboratories, Palo Alto, CA 94304 USA.
+He is now with the Department of Electronic Engineering, Inha University, In-
+cheon 402-751, South Korea (e-mail: bowon.lee@inha.ac.kr).
+Digital Object Identiﬁer 10.1109/TSP.2014.2336636
+I. INTRODUCTION
+S
+OUND source localization (SSL) [1], [2] ﬁnds use in a
+variety of practical systems ranging from communications
+(e.g., teleconference systems) to medical applications (e.g.,
+hearing aids), to mention just a few [3], [4]. In order to localize
+an acoustic source, one must necessarily rely on some sort of
+spatial information such as that supplied by a microphone array
+(MA).
+Among the SSL techniques devised for MAs, two families
+of algorithms are usually the prevalent choices [2]: the ﬁrst
+is explicitly based on the time-difference of arrival (TDoA),
+whereas the second relies on maximizing the steered-response
+power (SRP) of a beamformer. TDoA-based methods, among
+which the most popular techniques use the TDoAs estimated
+by the generalized cross-correlation (GCC) [5]–[7], require rel-
+atively few numerical operations to localize a source, as com-
+pared to SRP-based algorithms. However, the performance of
+TDoA-based methods is highly affected by noise and reverber-
+ation [2], [8], which might hinder their use in practical applica-
+tions. In such situations, SRP-based methods, whose classical
+version (hereafter called C-SRP) [2], [8] is the most widely
+used, are more appropriate for their robustness to acoustical is-
+sues inherent to the application environment.
+In order to estimate a source position, the C-SRP method is
+applied over a grid of predeﬁned spatial points, which repre-
+sent source location candidates. High localization accuracy can
+only be achieved at the cost of increasing either the number of
+grid points or the number of microphones (usually, the larger the
+number of captured sound signals, the higher the attained spa-
+tial diversity). Therefore, the burden of the point-wise search for
+the source position drives the computational complexity of the
+C-SRP algorithm, whose increase can turn real-time operation
+impractical, thus rendering the algorithm useless in most appli-
+cations of interest [9].
+In an attempt to address this issue, several methods that
+modify the search process have been proposed. For instance,
+in [10] the authors devised a search strategy for the C-SRP
+based on the stochastic region contraction (SRC) algorithm,
+which enables the estimation of source location without nec-
+essarily evaluating the objective function associated with the
+C-SRP for every grid point. Similarly to the SRC method, the
+coarse-to-ﬁne region contraction (CFRC) [11] tries to ﬁnd the
+source position by progressively reducing the search space
+according to a set of heuristics. An improvement of the SRC
+method relying on particle ﬁltering was proposed in [12]. In
+1053-587X © 2014 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:57:26 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 2 ---
+5172
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 62, NO. 19, OCTOBER 1, 2014
+addition, low-energy contributions are disregarded in the search
+stage of the C-SRP in [9].
+All the previous methods decrease the number of arithmetical
+operations by avoiding the evaluation of the C-SRP objective
+function for every point in the search grid. This eventually
+means that the true source position can sometimes be missed,
+since there is no formal guarantee that the points which are
+disregarded in the search process are not good candidates for
+the source location. This disadvantage becomes more evident
+in the presence of reverberation, which induces many local
+maxima in the objective function of the related method.
+This paper proposes a novel SRP-based localization method
+for a single source which is able to reduce the computational
+complexity of the search stage, as compared to the C-SRP, and
+is theoretically guaranteed to converge to the global maximum
+(that indicates within the partitioned 3-D search space which
+subregion contains the source position) under anechoic condi-
+tions—while keeping good performance in practical non-ane-
+choic environments. The key idea is the implicit exploration
+of portions of the search space. The proposed search strategy,
+herein called hierarchical search, adapts the branch-and-bound
+(B&B) paradigm [14] to tackle the SSL problem by deﬁning an
+objective function related to acoustic activity whose value com-
+puted for a given 3-D spatial region is never smaller than for any
+of its subregions in ideal conditions. Simulation results under
+realistic reverberant conditions show that the proposed method
+(referred as H-SRP) can achieve good accuracy with relatively
+low computational burden. It should be pointed out that the idea
+of a volumetric SRP using hierarchical search, although differ-
+ently formulated, was originally proposed in [13].
+The paper is organized as follows. Section II provides an
+overview of the proposed hierarchical search, describing how
+the B&B paradigm can be tailored for SSL applications; the
+role played by the bounding function is emphasized, as well
+as the conditions it must satisfy to guarantee convergence to
+the global maximum of the related objective function. The
+choice of a bounding function that meets such conditions in
+an anechoic environment is addressed in Section III, which
+also includes a brief discussion on the effects of reverberation.
+Section IV considers practical aspects regarding the implemen-
+tation of the proposed H-SRP method, which is compared with
+previous work in Section V. Experiments using both artiﬁ-
+cially-generated and recorded signals are shown in Section VI.
+Conclusions are drawn in Section VII. The proofs of three
+theorems are left to Appendices A, B, and C.
+Notations: The symbols
+, and
+denote the set of real,
+integer, and natural numbers, respectively. The set of nonnega-
+tive real numbers is represented by
+. In addition, vectors are
+denoted by lowercase boldface letters and
+is the Euclidean
+norm. Given two sets
+and
+, the notation
+denotes the set
+containing the elements of
+which are not in
+. The round
+operator takes as an argument a real number and returns the in-
+teger number which is closest to the argument. For a function
+, and given a subset
+, the set
+is
+called the image of
+.
+II. B&B-INSPIRED HIERARCHICAL SEARCH
+As previously explained, most of the computational burden of
+the C-SRP is due to its search process, which requires the search
+space to be divided into a grid of points that must be visited once
+each. Moreover, for a given MA and a predeﬁned sampling fre-
+quency, one can only increase the accuracy of the position es-
+timates by increasing the number of points within the grid, i.e.,
+turning it denser. Some methods try to circumvent this issue by
+avoiding visiting all grid points [9], [10]. However, since the
+C-SRP objective function may exhibit multiple local maxima,
+such methods fail to guarantee convergence to the global max-
+imum (that determines the actual source position) from a deter-
+ministic point of view.1
+Therefore, the following dilemma arises: in order to assure
+convergence to the actual source position, no grid point should
+be disregarded; on the other hand, exhaustive search through the
+grid is usually too complex for real-time applications. A natural
+way to address this problem is by performing an implicit explo-
+ration of the search space [13]. The branch-and-bound (B&B)
+paradigm [14], [15], originally developed for discrete and com-
+binatorial optimization problems, seems to be well-tailored for
+this purpose since it guarantees convergence to the global max-
+imum of its corresponding objective function.
+B&B-based algorithms work with search spaces that can be
+divided into nested subspaces, each subspace seen as a node in
+a dynamically generated tree structure [14]. Rather than eval-
+uating the underlying objective function for all possible nodes
+in the tree, B&B-based algorithms work with a bounding func-
+tion,2 which helps one decide how new nodes will be gener-
+ated through the branching process. In summary, the main com-
+ponents of a general B&B algorithm are [14]: (i) selection of
+the node to process, (ii) bounding function calculation, and (iii)
+node branching. By their proper shaping (and their adaptation
+to the SSL problem), this paper develops the proposed hierar-
+chical search.
+To start with, the proposed hierarchical search considers that
+a node will correspond to a 3-D spatial region. In this case, the
+root node is the entire Euclidean search space (e.g., a meeting
+room). The bounding process uses a bounding function, which
+is proposed in Section III, that is associated with the presence
+(or absence) of the sound source within the given spatial region.
+Here, the objective function and the bounding function turn out
+to be the same. As for the branching process, it is simply the
+way a node is subdivided in order to generate new subregions
+(new nodes). Thus, the proposed hierarchical search operates
+by dividing the search space (root node) into smaller regions
+(nodes)—which constitutes the branching process—and then
+calculating for each spatial region the value of the bounding
+function—which constitutes the bounding process.
+The role of the bounding function is to allow parts of the re-
+lated search space to be implicitly evaluated, i.e., the whole Eu-
+clidean search space can be explored without explicitly visiting
+each point. Mathematically, the proposed hierarchical search re-
+lies on an appropriate bounding function
+, in
+which
+is a family of sets over the full search space
+, with
+denoting the power set3 of
+. An ancil-
+lary technical condition is that the elements of
+are compact
+1In fact, the term “the global maximum” is loose, since there may even exist
+more than one global maximum, depending on the chosen array geometry and
+the acoustical characteristics of the environment.
+2This name comes from the fact that this function is always smaller than or
+equal to the objective function of the related problem.
+3The power set of a set
+is the set of all subsets of
+.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:57:26 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 3 ---
+NUNES et al.: SRP ALGORITHM EMPLOYING HIERARCHICAL SEARCH FOR ACOUSTIC SOURCE LOCALIZATION
+5173
+and connected sets (e.g., cuboids). The hierarchical search se-
+quentially subdivides the search space
+into subregions up to a
+predeﬁned minimum “size”
+, which is related to the
+stopping criteria of the search algorithm.4 During this process,
+the bounding function plays a key role in discarding sets that do
+not require any further subdivision. Using
+to represent a list
+of pairs
+of subregions
+to be evaluated, together
+with their related bounding values
+, and with
+being the maximum bounding value found at a given iteration
+of the algorithm and
+being its corresponding subregion (i.e.,
+), the proposed hierarchical search is as follows.
+1) (Initialization) Let
+, and
+.
+2) If
+then stop: the search is complete and
+is
+the subregion of size not larger than
+with the largest
+bounding value.
+3) Sample one element
+from list
+, and let
+.
+4) (Bound) If
+then go to Step 2.
+5) If size
+, then let
+and
+,
+and go to Step 2. Otherwise, go to Step 6.
+6) (Branch)
+Divide
+into
+distinct
+subregions
+, such that their interiors are disjoint and
+, and then compute
+.
+7) Let
+and go to Step 2.
+Fig. 1 illustrates how the hierarchical search operates. The
+ﬁrst step of the algorithm consists of sub-dividing the search
+space and computing the bounding function for each subregion
+(Fig. 1(a)). Then, the subregion with the largest bounding value
+is selected and further subdivided until the region of size
+is reached (Fig. 1(b)). Finally, in order to guarantee that the cur-
+rent maximum value corresponds to the global maximum, any
+other region that has a bounding value larger than (or equal to)
+that of the current maximum must be subdivided until a new
+maximum is found or all bounding values are lower than that of
+the current maximum (Fig. 1(c)). Alternatively, the algorithm
+can be represented in a tree-format where each node is a sub-
+division of the search space (in the case of the example where
+each region is subdivided into two regions, one would have a
+binary tree). In this case, the global maximum is found when all
+leaves of the tree have bounding values lower than that of the
+current maximum.
+From the illustration presented in the previous paragraph, it
+is possible to note that the potential of the hierarchical search
+in reducing the complexity of the search stage relies on its ca-
+pability of discarding large regions without further exploration/
+subdivision.
+In this section the fundamentals of the proposed hierarchical
+search were shown, but the bounding function was not stated. So
+far, any function
+satisfying both the following
+properties is sufﬁcient to guarantee convergence to the global
+maximum:
+1) If
+is a leaf that contains the source and
+is a
+leaf that does not, then
+.
+2) If
+is a subregion of
+, then
+.
+In the next section, a function that meets these properties will
+be proposed.
+4More information on how this quantity is chosen is given in Section IV.D.
+Fig. 1. Illustration of three different stages of the B&B algorithm for a 2-D
+search space. An equivalent tree-representation of each stage is also provided.
+The nodes are visited according to a “best ﬁrst search” strategy. The numbers
+inside each region/node represent the bounding value (output of the bounding
+function) for the given region.
+III. BOUNDING FUNCTION
+Before describing the proposed bounding function, it is worth
+ﬁrst presenting some known properties of the C-SRP method
+that naturally lead to the proposed bounding function. Thus, the
+idea here is to start by showing how the C-SRP technique solves
+the problem of localizing a source which emits a signal that is
+maximally concentrated in both space and time domains in an
+anechoic environment. It turns out that the interpretation of this
+simple toy example will be very instructive for further develop-
+ments. After this discussion, it will be shown how the C-SRP
+method can be modiﬁed to deal with acoustic signals which are
+not concentrated in time, such as wideband/speech signals. Such
+a presentation ordering will point out that “counting TDoAs” is
+indeed the key aspect for the construction of the bounding func-
+tion of the proposed hierarchical search.
+A. C-SRP
+The C-SRP method steers a microphone array beam to many
+locations searching for the acoustic source position. This search
+is based on maximizing the power of the output signal of a
+beamformer. Hence, the C-SRP maximizes the following ob-
+jective function:
+(1)
+where
+denotes a candidate for the
+acoustic source position and
+is the possibly ﬁltered ver-
+sion of the discrete-time signal acquired by the
+th microphone,
+for
+, where
+denotes the number
+of microphones in the array. In addition,
+would be
+the time-lag due to the propagation from the source position
+to the
+th microphone.
+It is possible to rewrite (1) as follows [8]:
+(2)
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:57:26 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 4 ---
+5174
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 62, NO. 19, OCTOBER 1, 2014
+where
+represents the discrete-time Fourier transform
+of
+, and
+is the discrete
+TDoA of a signal emitted at position
+to microphones
+and
+.
+Now, consider the application of the C-SRP method into two
+different setups, namely: localizing an impulse and localizing a
+wideband/speech signal both within an anechoic environment.
+1) Localizing an Impulse in an Anechoic Environment: As-
+sume that a single acoustic source, located at position
+,
+emits a pulse signal
+. In this case, considering an
+anechoic environment and disregarding the attenuation factors
+associated with sound propagation, one has (based on (2))
+(3)
+where any discrete TDoA
+can be rewritten as
+(4)
+in which
+denotes the
+th microphone position,
+is the sampling frequency5 related to the captured
+signals, and
+is the speed of sound. Note that
+for any
+.
+In this very idealized, yet instructive, setup, one can clearly
+see how the C-SRP method aggregates the TDoAs associated
+with each microphone pair in order to estimate the true source
+position. Indeed, (3) shows that, for each position
+in the 3-D
+Euclidean space, the C-SRP method simply associates a number
+that quantiﬁes how many actual TDoAs (associated with
+the true source position
+) match exactly the TDoAs computed
+as if the source were in position
+. In other words, counting
+TDoAs is the bottom line here.
+2) Localizing an Acoustic Source in an Anechoic Environ-
+ment—The Role of PHAT Filtering: Now, consider a more real-
+istic type of acoustic signal
+, which can represent a speech
+signal, for example. In order to preserve exactly the same in-
+tuitive and useful result obtained in (3), one should modify the
+C-SRP objective function from (2) to the following form, which
+deﬁnes the C-SRP-PHAT method:
+(5)
+in which the phase transform (PHAT) ﬁlter is deﬁned as
+(6)
+By using this new objective function, one arrives once more
+at
+(7)
+5Throughout this paper it will be assumed that the error induced by sampling
+is negligible, i.e., the limited time resolution does not impair the localizability
+of the source.
+Therefore, for anechoic environments, the interpretation of
+the C-SRP-PHAT objective function when dealing with generic
+source signals is the same as that of the C-SRP associated with a
+spatial-temporal well-localized source signal
+(i.e., counting
+TDoAs is the key idea).
+B. H-SRP
+Consider how one can implement the search for the optimal
+point which maximizes (5). In order to implement digitally such
+a process, one must somehow discretize the space, for instance,
+by deﬁning a grid of 3-D points. An alternative procedure is to
+divide the entire search region in a ﬁnite number of 3-D com-
+pact and connected spatial regions, such as cuboids. In this case,
+for each microphone pair there is not necessarily only a single
+TDoA, but rather there may be many TDoAs associated with a
+given spatial region. Indeed, assuming that
+is a 3-D con-
+nected spatial region, then the set
+, deﬁned as
+(8)
+contains all discrete TDoAs associated with the microphone pair
+which are images of some point
+within
+, with
+standing for the
+continuous TDoAs.
+Note that the limited temporal resolution related to the sam-
+pling process of the acquired signals induce a limited spatial
+resolution over the entire search region as well. Indeed, for each
+integer , there are inﬁnitely many 3-D spatial points
+that sat-
+isfy the relation
+, which can be ex-
+pressed as
+(9)
+In other words, all points in between the hyperboloids
+cannot be distinguished, since
+they are mapped into the same discrete TDoA
+.
+Therefore, following the idea of counting TDoAs, a natural
+modiﬁcation of (7) when dealing with a volumetric region is
+(10)
+which can be rewritten, based on (5), as
+(11)
+Observe that, in (7), for each spatial point, one accumulates
+the actual TDoAs which exactly match the TDoAs of the re-
+ferred spatial point, considering all microphone pairs. Hence,
+what matters for electing a candidate spatial point as the source
+position is the number of times the hyperboloids in (9) pass
+through/contain that point. On the other hand, in (10), for each
+spatial region, one accumulates the actual TDoAs that exactly
+match with the TDoAs of any spatial point within the referred
+region, considering all microphone pairs. Thus, the same under-
+lying idea of the C-SRP holds here: what matters for electing a
+spatial region as the one containing the source position is the
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:57:26 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 5 ---
+NUNES et al.: SRP ALGORITHM EMPLOYING HIERARCHICAL SEARCH FOR ACOUSTIC SOURCE LOCALIZATION
+5175
+number of times the hyperboloids in (9) pass through that spa-
+tial region. This is an efﬁcient way of summing up all pieces of
+information that the points within the region
+convey. There-
+fore, the proposed localization method sets the bounding func-
+tion
+, described in Section II, as
+in
+(11). As already mentioned in Section II, this bounding func-
+tion will represent the objective function of the proposed hier-
+archical search.
+An important question that may arise from the H-SRP objec-
+tive function deﬁnition in (11) is whether the sound source is
+contained within the region that maximizes the H-SRP-PHAT
+objective function or not. The answer to this question is yes, as
+described in the following theorem.
+Theorem 1: If
+, then
+,
+for any
+.
+Proof: See Appendix A.
+Theorem 1 guarantees that the source position is not lost
+during the search for the regions that maximize the objec-
+tive function
+. It is worth highlighting that more
+than one region may maximize
+, but the theorem
+guarantees that the volume containing the source location is
+always a candidate to be the winning volume in an anechoic
+environment. This property of the proposed objective function
+is one of the fundamental differences between the H-SRP and
+the method proposed in [13].
+Another important result refers to the bounding capability of
+the objective function in (11), which is key to the B&B process,
+namely: the fact that the objective function cannot increase
+when one passes from a given volume to one of its subsets.
+This result is described in the following theorem.
+Theorem 2: If
+, then
+.
+Proof: See Appendix B.
+C. Effects of Reverberation
+In order to motivate the deﬁnition of the H-SRP objective
+function, only anechoic signals were considered in the former
+discussion of the C-SRP-PHAT method. But, what occurs when
+reverberation is present? There is no deﬁnite answer to this
+question, since it depends on the degree of reverberation. In-
+deed, considering that the signal acquired by the
+th micro-
+phone can be written as
+, in which
+is the maximum delay (including those from the reﬂections)
+for the signal
+to arrive at any microphone in the array, and
+is the th coefﬁcient of the multipath model of the rever-
+beration effect between the source and the
+th microphone.6
+Substituting this model into (5), one gets (for the C-SRP-PHAT
+objective function)
+(12)
+6This model, in practice, needs to consider large values of
+in order to ade-
+quately model a reverberant room.
+where
+is
+the discrete-time Fourier transform of
+, and
+is as given in (6).
+Note that, in general,
+is not a linear function (with
+modulo
+) of the normalized frequency
+, which means that
+the integral in (12) is not equal to a simple discrete-time pulse
+signal. In fact, such an integral may not have a closed-form
+expression. However, since the aim of the C-SRP-PHAT tech-
+nique is to maximize
+and since the integral that ap-
+pears in (12) is always smaller than or equal to
+, then this
+approach will elect the position
+which yields TDoAs such
+that the referred integral is as close to
+as possible for as
+many microphone pairs as possible. Since
+depends
+not only on the source and microphone positions, but also on
+the reverberation effects that take place, then the applicability
+of such a beamformer may be limited, since multipath effects
+might hinder an accurate estimate of the delays related to the di-
+rect paths. As a consequence, the MA may not steer its beam to
+the correct source location. Nevertheless, C-SRP-PHAT is still
+quite employed to solve source-localization problems, since it is
+more robust to reverberation and noise effects than TDoA-based
+methods that employ the generalized cross-correlation (GCC)
+technique [2], [8].
+With respect to the proposed H-SRP-PHAT objective func-
+tion, the reverberation model along with (11) yield
+(13)
+Thus, the method will elect the spatial region whose associ-
+ated TDoAs maximize the integral in (13) for as many micro-
+phone pairs as possible. In other words, the method is also sen-
+sitive to reverberation effects, which are expressed in the phase
+. As regards Theorems 1 and 2, they no longer hold
+in the context of reverberant environments.
+It is worth mentioning that, when the direct path acquired
+signal is much stronger than the other multipath signals, then
+can be approximated by a linear function of
+,
+which eventually means that the result is analogous to that ob-
+tained considering an anechoic setup.
+IV. PRACTICAL CONSIDERATIONS
+In this section, practical considerations regarding the imple-
+mentation of the proposed algorithm are discussed. Firstly, the
+branching process, i.e., the strategy to divide the search space
+into subregions, is presented. Then, the algorithm employed to
+ﬁnd the time-delay bounds of (11) and (8) is described. After
+that, the initialization procedure of the hierarchical search is de-
+scribed. The section ends with an implementation summary of
+the proposed algorithm. It is worth mentioning that the topics
+addressed in this section are also new contributions of this work
+which are not present in [13].
+A. Branching Process
+In the current implementation only cuboid regions are consid-
+ered. Thus, the whole search space
+is assumed to be a cuboid
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:57:26 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 6 ---
+5176
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 62, NO. 19, OCTOBER 1, 2014
+with edges7 of sizes
+, and
+. The ﬁrst branching
+process subdivides the initial cuboid into
+distinct cuboids
+with edges of size
+, and
+, as explained in item 6) of
+Section II. Every subsequent branching process further divides
+the chosen region into 8 cuboids, each with half the edge size of
+the cuboids in the previous step.
+B. TDoA Bounds
+Given the deﬁnition of the set
+in (8), it is
+worth pointing out that, as
+is assumed to be com-
+pact and since
+is a continuous
+function, then the set
+is a compact
+subset of the real line
+and, therefore, has minimum and
+maximum values,
+and
+, respectively.
+In addition, using the continuity of
+along with
+the assumption that
+is also a connected set, then the image
+is an interval of the real line, i.e.,
+.
+These
+facts
+eventually
+imply
+that
+,
+in
+which
+and
+. The aim of this subsection is, there-
+fore, to show how one can determine the continuous TDoA
+bounds
+and
+, for a given microphone
+pair
+and for a predeﬁned cuboid region
+.
+In order to determine the minimum value of
+, with
+, one may solve the following optimization problem:8
+(14)
+(15)
+(16)
+(17)
+in which the limits of the inequality constraints are real numbers
+denoting the bounds of the edges of the cuboid
+. The solution
+to such optimization problem is described in Theorem 3.
+Theorem 3: The minimum value
+of the set
+, where
+is a cuboid, is
+(18)
+in which
+is a ﬁnite set containing at most 26 points
+of the Euclidean space, being deﬁned as
+(19)
+where
+is a (possibly empty) set containing at most
+6 candidate solutions on the faces of
+is a (pos-
+sibly empty) set containing at most 12 candidate solutions in the
+edges of
+, and
+is the set containing 8 candidate so-
+lutions which are the vertexes of
+.
+Proof: See Appendix C.
+The
+analytic
+deﬁnitions
+of
+the
+sets
+and
+are clearly stated along the proof of Theorem
+3 in Appendix C. Although those deﬁnitions are not essential
+for the forthcoming developments, they are important to justify
+7For the sake of simplicity, it will be assumed that each edge of the cuboid is
+parallel to one of the axis of the Cartesian coordinate system.
+8The formulation is analogous for the maximization problem.
+Fig. 2. Figure illustrating for 2-D space that the maximum and minimum
+TDoAs inside a square region will be located in its vertices.
+a simpliﬁcation that is adopted in this paper, described in
+Corollary 1.
+Corollary 1: The minimum value
+of the set
+, where
+is a cuboid, can be approximated
+as
+(20)
+in which
+is the set containing 8 candidate solutions
+which are the {vertices} of
+.
+Proof: As claimed in Appendix C, the sets
+and
+will be empty for most volumes
+, since the so-
+lutions are on a face or in an edge only if very speciﬁc symmetry
+conditions are satisﬁed (see Appendix 3 for further details). In
+practice, those symmetry conditions are not satisﬁed for most
+regions
+.
+In order to facilitate visualization, Fig. 2 depicts a 2-D rep-
+resentation illustrating how TDoAs and volumes are typically
+related for a given microphone pair. Actually, since it is a
+2-D representation, cuboids and hyperboloids map to squares
+and hyperbolas, where each hyperbola should be understood
+as a collection of points that lead to the same TDoA value.
+The TDoA values gradually increase from right (dark-blue
+hyperbola) to left (brown hyperbola). Observe that the min-
+imum TDoA
+and the maximum TDoA
+are, indeed, at the vertices of the square. Note that the same
+comments would still be valid if the square were in a different
+position.
+Therefore, the TDoA bounds for a given volume and a given
+microphone pair can be approximated by the maximum and
+minimum TDoA values associated with the vertices of the re-
+lated volume. It is worth mentioning that one can determine
+following the same steps previously described, but
+replacing the “min” operator with the “max” operator in the re-
+lated expressions.
+C. Hierarchical Search Initialization
+In this subsection, a comparison between the computational
+complexity of a hierarchical search and an equivalent full (ex-
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:57:26 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 7 ---
+NUNES et al.: SRP ALGORITHM EMPLOYING HIERARCHICAL SEARCH FOR ACOUSTIC SOURCE LOCALIZATION
+5177
+Fig. 3. Example denoting the minimum number of nodes that need to be visited
+(black circles) for the hierarchical search and the full-grid search, assuming that
+the node (2, 0) has the largest bounding value. (a) Hierarchical search. (b) Full-
+grid Search.
+haustive) search is made. This comparison looks into the com-
+putational complexity of the hierarchical search, showing that,
+under certain circumstances, it might be more efﬁcient to start
+the search from a subdivision of the search region.
+In general, the computational complexity of the H-SRP
+method can be decomposed into two parts: one associated with
+the calculation of the cross-correlations between the signals of
+each microphone pair9 and another arising from the calculation
+of the bounding function for each spatial region visited during
+the search. In the following discussion, focus will be put on the
+cost of computing the bounding function.
+Assuming that the cross-correlations have been computed for
+all possible TDoAs of all microphone pairs, the cost of com-
+puting the bounding value for a given spatial region
+is pro-
+portional to the number of terms in the summations of (13). In
+practice, this number will depend on the number of microphones
+and the number of discrete TDoAs in the set
+, i.e.,
+its cardinality.
+The hierarchical search employed starts by computing the
+bounding value of the whole search space
+. Since the cardi-
+nality of
+cannot be smaller than that of any other
+spatial region
+for the same microphone pair (see The-
+orem 2), the cost of computing the bounding value of
+will be
+no less than that of any other spatial region. In fact, the com-
+putational complexity of computing the bounding value for a
+certain region
+is no less than that of computing the bounding
+value for a region
+, if
+. This comes from the fact that
+all delays, for the same microphone pair, present in
+are also
+present in
+. Hence, the number of operations required to com-
+pute the bounding function grows with the region size.
+In order to study the computational complexity of the hierar-
+chical search, its tree representation will be employed, where the
+th node of the th level of the tree will be denoted as
+. Con-
+sidering the discussion in the previous paragraph, it can be seen
+that the number of operations required to compute the bound of
+a given node is always smaller than or equal to that of its parent
+node. One important question that must be answered, then, is
+if it is computationally efﬁcient to select a node with highest
+bound through the hierarchical search algorithm or through a
+full search among all nodes at a given level of the tree. As
+an illustration, Fig. 3(a) shows the minimum number of nodes
+that would have to be visited during the hierarchical search in
+order to select node
+as having the largest bound, whereas
+9Usually performed in the frequency domain using a fast Fourier transform
+(FFT) algorithm.
+Fig. 3(b) shows which nodes would have to be considered in the
+case of a full search. Comparing both diagrams in this ﬁgure,
+one can easily see that the full search is more computationally
+efﬁcient, since the hierarchical search computes nodes near the
+root node, which are likely to have more TDoAs and therefore a
+larger computational complexity. On the other hand, as the tree
+grows, more nodes could be ignored by the hierarchical algo-
+rithm, thus overcoming the cost of the ﬁrst-level nodes.
+In practical terms, the hierarchical search can be applied only
+from a level in which its best-case computational cost10 is lower
+than that of the full search. This scheme allows one to avoid
+the computation of large-cost nodes. This initial level can be
+chosen ofﬂine, by calculating the number of operations required
+to compute the bounding value11 of each node in the tree and
+the cost associated with the best-case hierarchical search and
+to the full search. Once the initial level is chosen, the hierar-
+chical search can be applied. This way, the computation of the
+high-cost bounds of the ﬁrst levels of the tree are avoided, while
+the hierarchical search can still avoid several branches of the
+tree, thus reducing the overall complexity. Algorithmically, the
+initialization can be performed by attributing the spatial regions
+and bounding values for all nodes of the initial level to the list
+instead of the corresponding quantities for the whole search
+space
+in the algorithm described in Section II. This way, all
+properties of the hierarchical search algorithm are preserved,
+including the convergence to a region containing the source po-
+sition (in an anechoic environment).
+D. Implementation Summary
+In this subsection, the H-SRP algorithm is summarized. The
+ﬁrst step of the algorithm consists of ﬁnding the level
+from which the hierarchical search will start, as explained in
+the last paragraph of Subsection IV.C. This can be determined
+as soon as the microphone positions and initial search space
+are known. The algorithm then executes the following steps for
+each signal frame:
+1) Compute
+the
+generalized
+cross-correlation
+function
+for each microphone pair using the PHAT
+ﬁlter;12
+2) Subdivide the search region
+into
+parts (each dimension is subdivided
+times) as described
+in Section IV.A, without computing the bounding function.
+For each volume ﬁnd its minimum and maximum delays
+for each microphone pair13 using the method described in
+Section IV.B;
+3) Compute the bounding function for each volumetric region
+in level
+through the expression:
+(21)
+4) Start the hierarchical search described in Section IV.A. For
+each new volume visited during the search algorithm, com-
+10In the sense that the least number of nodes are evaluated.
+11As mentioned previously, this number depends only on the initial search
+space
+and the positions of each microphone.
+12As mentioned before, the cross-correlation is efﬁciently computed in the
+frequency domain by the use of FFT algorithms.
+13The bounds for each volume can also be pre-computed and stored in look-up
+tables to reduce computational complexity.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:57:26 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 8 ---
+5178
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 62, NO. 19, OCTOBER 1, 2014
+pute its maximum and minimum delays as described in
+Section IV.B and its bounding function through (21).
+In each frame, at the end of the search algorithm, the region
+with “size”
+that expectedly contains the source is selected;
+the source position is then chosen as the center of the winning
+volume.
+So far, the term “size” has been intentionally left without a
+proper deﬁnition. Depending on the context, such term can have
+different meanings, such as the edges or the main diagonal of
+the cuboid. When presenting the results in Section VI, “size”
+means volume, i.e.,
+is the smallest volume that a cuboid
+can assume.
+V. COMPARISON WITH A PREVIOUS WORK
+In [16], the authors describe a modiﬁcation of the C-SRP al-
+gorithm in which several TDoAs associated with a certain re-
+gion in space around a single point are taken into account. The
+objective of the method is to deﬁne a certain area of inﬂuence
+around each point in space, ﬁnd a set of delays associated with
+this region, and then evaluate the modiﬁed SRP (hereafter called
+M-SRP) function for this point. Mathematically, this function is
+equal to
+(22)
+In which the values
+and
+are found by ﬁrst
+considering a cube centered on
+and then performing a linear
+approximation to ﬁnd the minimum and maximum delay values
+inside this cube, considering microphones
+and
+.
+If one rewrites (21) as
+(23)
+then it is possible to notice the similarity between the M-SRP
+objective function and the proposed bounding function. Both
+methods take into account a set of delays in order to estimate a
+certain region. Nevertheless, the possible regions are different:
+cubes for the M-SRP and cuboids for the proposed H-SRP. Also,
+the maximum and minimum delays are only approximated in
+(22) whereas for (23) they are exact if some (mild) conditions
+hold (see Section IV.B). Overall, these differences allow the use
+of the bounding function in the hierarchical search, whereas (22)
+is more appropriate for use in exhaustive searches, as was its
+original purpose.14
+VI. EXPERIMENTS
+In this section, two experiments are described. The ﬁrst exper-
+iment uses simulated signals and shows how the parameters of
+14While this paper was under review, a modiﬁed version of [16] which in-
+cludes an iterative search appeared in [17]. The main feature of the present paper
+is the proposal of a hierarchical procedure with proved convergence under ideal
+conditions, which makes it reliable for use under not much demanding practical
+conditions. Since [17] follows a different path and also modiﬁes the objective
+function of [16], the authors considered that the consequent content enhance-
+ment would not justify its inclusion among the experiments of this paper, at this
+point. Of course, further continuations of this work will include detailed com-
+parison with [17].
+Fig. 4. Positioning of the microphones (circles) used in the experiment with
+simulated signals.
+the hierarchical search inﬂuence its performance under different
+acoustic conditions. The second experiment uses recorded sig-
+nals and compares the performance of the hierarchical search
+with other methods found in the literature.
+A. Evaluation Using Simulated Signals
+The objective of this experiment using simulated signals is
+to understand how the choice of
+affects the performance
+of the hierarchical search, especially the tradeoff between lo-
+calization accuracy and number of operations performed. The
+hierarchical search is also tested under different reverberation
+conditions in order to show that, even though its theoretical for-
+mulation has been based on an anechoic scenario, it can also be
+employed under more realistic conditions.
+1) Experimental Setup: The simulation considered three
+rooms sized 4 m
+6 m
+3 m with different acoustic charac-
+teristics. The ﬁrst is an anechoic room, whereas the second
+and third have reverberation times [18]
+of 250 and 500
+ms, respectively.15 As previously mentioned, these parameter
+choices allow the study of the algorithm in the idealized (ane-
+choic) acoustic scenario used in its development as well as the
+impact of reverberation on its performance.
+Similarly to the arrangement in [2], this experiment employed
+a planar16 array with 16 microphones randomly placed in a 2
+m
+1 m rectangular region, as illustrated in Fig. 4. In the simu-
+lations, the array was supposed to be placed on one of the room
+walls (which, according to the adopted convention, implies that
+all microphones have coordinate
+).
+The source signal was a 1-s long female speech signal
+pre-processed by a voice-activity detector (VAD) to remove
+any silent intervals. This step guarantees that there is always a
+speech signal impinging on the microphones. In practice, the
+VAD step would have been executed after the acquisition of
+the signal by the microphones. The speech signal was sampled
+at 48 kHz with 24 bits of precision. The speech source was
+simulated at 5 randomly chosen positions, shown in Table I.
+Such positions were chosen so as to be representative of the
+region of interest regarding its discriminability index (DI) [20]
+range. The DI is a numerical measure of the capability of a
+15These acoustic characteristics were simulated using the image method [19]
+implemented in the Audio Systems Array Processing Toolbox available at http://
+www.engr.uky.edu/~donohue/audio/Arrays/MAToolbox.htm.
+16Although it could be argued that a 3-D conﬁguration would be better suited
+for SSL algorithms in general, we selected a planar array in this experiment
+because this simple arrangement is more suitable to practical systems.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:57:26 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 9 ---
+NUNES et al.: SRP ALGORITHM EMPLOYING HIERARCHICAL SEARCH FOR ACOUSTIC SOURCE LOCALIZATION
+5179
+TABLE I
+COORDINATES OF THE 5 SIMULATED SOURCE POSITIONS
+microphone array to distinguish a given point in space from
+its neighbors that is inﬂuenced mainly by the array geometry
+and the spatial region under consideration. Speciﬁcally, the 5
+positions encompass the DI range of 30% to 90% found for the
+region from which they were picked up.
+2) Algorithm Setup: The hierarchical search algorithm was
+used to estimate the source position in successive 4096-sample
+long frames with 50% of overlap. The PHAT pre-ﬁlter was
+employed in the estimation of the cross-correlation function
+for every microphone pair. As regards the conﬁguration of
+the search algorithm itself, it was initialized with
+,
+and 6 different values for
+(
+for
+, with
+cm) were tested in an attempt to
+quantify the compromise between the number of operations
+performed and the localization accuracy. The initial search
+space
+was the whole room.
+3) Figures of Merit: The localization error for each frame
+is measured as the Euclidean distance between actual and esti-
+mated source positions. In order to obtain an overall value for
+the localization performance, the median value of the error is
+calculated across all different frames and different positions.
+One median error value is computed for each chosen
+.
+The computation of the number of operations performed is
+based on the number of evaluations of (21). Since the search al-
+gorithm is executed in a frame-by-frame basis, the number of
+operations can vary from frame to frame. Then, for each frame
+and source position, the total number of summations in each
+evaluation of (21) is stored, and an overall measure of com-
+plexity is obtained by averaging this number of summations
+over all frames and source positions.
+4) Results: Fig. 5 shows three curves depicting the different
+results of median error and number of operations found for the
+6 chosen values of
+for the three different rooms. As can be
+gathered from the ﬁgure, for a given acoustic conﬁguration, as
+the size of
+is reduced, the error decreases with an associ-
+ated increase in the number of operations performed. Increasing
+the reverberation time, on the other hand, increases the error for
+a given number of operations. Hence, it appears that the more
+challenging the acoustic scenario is, the smaller
+should
+be in order to attain a given performance, at the cost of an in-
+crease in the necessary number of operations. Nevertheless, the
+fact that the error decreases with
+, even under reverberant
+conditions, validates the method. The minimum median error
+achieved by the hierarchical search was 1.5 cm for both the ane-
+choic room and the room with
+ms, and 2.5 cm for
+the room with
+ms.
+B. Evaluation Using Recorded Signals
+In this experiment, a recording was made in order to obtain
+the signals at each microphone. In this more realistic scenario,
+Fig. 5. Results obtained for the experiment with the simulated signals. All re-
+sults refer to the hierarchical search method with varying values of
+(the
+leftmost point corresponds to
+in all plots).
+Fig. 6. Positioning of the microphones (circles) used in the experiment with
+simulated signals.
+the objective is to compare the localization accuracy of the hi-
+erarchical search with that of other methods found in the litera-
+ture. The methods chosen were the classical SRP (employing a
+full-grid search), the modiﬁed SRP (M-SRP) described in [16]
+(which also employs a full-grid search), and the C-SRP with
+stochastic region contraction (SRC) [10].
+1) Experimental Setup: The recording took place in an
+acoustically-treated presentation room located at the Federal
+University of Rio de Janeiro. The room dimensions are 5.2
+m
+7.5 m
+2.6 m and its measured reverberation time is
+approximately 500 ms.
+The array employed omnidirectional high-sensitivity micro-
+phones.17 The array geometry is planar as in the previous exper-
+iment, this time with the microphones placed as shown in Fig. 6.
+The MA was placed on one of the walls of the room, i.e.,
+for all microphones.
+The source signal was a 5-s long silence-free female speech
+signal sampled at 48 kHz with 24 bits of precision. Loud-
+speakers with a diameter of 6 cm18 were employed as sound
+sources. Fig. 7 shows a top-down view of the 9 different source
+17Model SMK 4060 by DPA.
+18By Orb Audio.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:57:26 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 10 ---
+5180
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 62, NO. 19, OCTOBER 1, 2014
+Fig. 7. Top-down view of the sources in the experiment with recorded signals.
+The number next to each source position represents the height of the source in
+meters.
+Fig. 8. Histograms of the errors committed for each frame and each source
+position by both the hierarchical search and SRC algorithms. (a) Hierarchical
+search. (b) SRC.
+positions recorded. Regardless of the source position, the
+loudspeaker was always facing the microphone array.
+2) Algorithm Setup: All of the evaluated algorithms estimate
+the source position in successive 4096-sample long frames with
+50% of overlap, and employed the PHAT pre-ﬁlter when com-
+puting cross-correlations.
+The individual parameters of each search method were
+chosen so as to yield a similar number of operations. The
+C-SRP algorithm was set to operate over a grid with a spacing
+between adjacent points equal to 10 cm. The M-SRP method
+employed a grid with a spacing of 20 cm. The SRC method
+used 9000 points per iteration, selecting the 300 best points.
+The hierarchical search used a minimum volume of size 1.0
+cm
+1.5 cm
+0.5 cm and was initialized with
+. All
+methods searched for the source position in the whole room.
+3) Figures of Merit: The localization performance of each
+method was assessed by the median of the Euclidean distances
+between actual and estimated source positions across all frames
+and positions.
+The number of operations, on the other hand, considered the
+number of summations performed by each evaluation of the ob-
+jective function associated with each method. For all methods,
+the computational cost of the cross-correlation function for each
+microphone pair was not considered. Also, computational cost
+of the TDoA associated with each position in space (for the
+C-SRP and SRC algorithms) or the TDoA bounds (for the hi-
+TABLE II
+EXPERIMENTAL RESULTS
+erarchical method and M-SRP) were not considered.19 For the
+C-SRP and M-SRP, which employ a full-grid search, the number
+of summations per frame is used since it does not vary from
+frame to frame. For the SRC and hierarchical search, the number
+of operations per frame varies, hence the average number of op-
+erations per frame is employed.
+4) Results: Table II shows the median error and number of
+operations20 obtained for each method. By design, the number
+of operations for each method is similar; under these condi-
+tions, the median error varies signiﬁcantly.21 Overall, the best
+performance was achieved by the proposed hierarchical search
+method, which attained an error equal to less than half of the
+error of the next best method. It should be noted that the loud-
+speaker membrane itself has a diameter of approximately 6 cm,
+which induces an uncertainty on the exact position of the source
+signals.
+When one compares the two methods that do not perform
+full-grid searches, the hierarchical search and the SRC, one can
+see the advantages of having a method that deterministically
+searches for the source position. Fig. 8 shows the histograms
+depicting the error distributions for the hierarchical search and
+the SRC methods for all frames and all source positions. As can
+be seen, the main difference between both methods is the small
+number of erroneous estimates found in the hierarchical search,
+indicating that it usually selects the global maximum associated
+with the source position. On the other hand, the SRC seems
+to quite often elect positions that are far away from the actual
+source position.
+VII. CONCLUDING REMARKS
+In this paper, a novel sound source localization method, called
+H-SRP, is proposed. The method relies on measurements cor-
+responding to the acoustic activity inside a given volumetric
+region and employs a hierarchical search method inspired by
+the branch-and-bound paradigm. It is proved that the proposed
+method ﬁnds a volume with a given minimum size (stop crite-
+rion) that contains the global maximum targeted by the C-SRP
+method in an anechoic and single-source scenario. Tests in sim-
+ulated and practical reverberant rooms have shown that the pro-
+posed method can be successfully applied in more realistic sce-
+narios. Moreover, the results indicate that the H-SRP can pro-
+19In practice, these values can be efﬁciently pre-computed [21], since the mi-
+crophone array geometry and search space are usually ﬁxed.
+20For example, the C-SRP performs
+functional evaluations requiring
+operations (addi-
+tions) each, thus yielding a total of
+numerical operations.
+21The equivalence by the number of operations was chosen because one usu-
+ally wants to know what is the best performance achievable given a computa-
+tional “budget”. Moreover, in order to equate the performances of the methods,
+a prohibitive number of operations would be required by the C-SRP.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:57:26 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 11 ---
+NUNES et al.: SRP ALGORITHM EMPLOYING HIERARCHICAL SEARCH FOR ACOUSTIC SOURCE LOCALIZATION
+5181
+vide an accurate position estimate with fewer numerical op-
+erations than competing localization methods. Finding a suf-
+ﬁcient condition for guaranteeing the convergence to a region
+containing the source position in reverberant environments, and
+performing extensive tests with different microphone array ge-
+ometries and speech signals are interesting topics for future
+research.
+APPENDIX A
+PROOF OF THEOREM 1
+Assume that there exists
+such that
+. This means that
+(24)
+Now, for each ﬁxed pair of microphones
+, one has that
+can only be nonzero for at most one
+within
+. This implies that
+(25)
+On the other hand, as
+, then
+will be
+nonzero for exactly one
+within
+. This fact yields
+(26)
+thus arriving at a contradiction with (24).
+APPENDIX B
+PROOF OF THEOREM 2
+Theorem 2 holds since
+, i.e., all
+discrete TDoAs that are associated with region
+are also as-
+sociated with region
+, thus implying that
+(27)
+which, after summing over all microphone pairs, leads to
+.
+APPENDIX C
+PROOF OF THEOREM 3
+From the discussions on the theorem stated in [16], at least
+one of the inequality constraints must be active in the opti-
+mization problem that deﬁnes
+(see expressions (14),
+(15), (16), and (17)), since the minimum/maximum values of
+are achieved at the boundary surface of
+. There-
+fore, one must have
+and/or
+and/or
+.
+Let
+be a ﬁxed region. For the sake of notational sim-
+plicity, the dependency on
+will be omitted in the forthcoming
+derivations. Due to the symmetry of the coordinate variables
+that appear in the deﬁnition of the TDoA
+, one
+can assume that
+is a ﬁxed real number,
+without loss of generality. This means that
+(28)
+Now, assume that there is only one active constraint (in this
+case,
+), i.e., the candidate solution is on a face. Thus, by
+deﬁning
+, then the application of
+the Karush-Kuhn-Tucker (KKT) conditions [22] leads to
+(29)
+where
+and
+.
+Since
+(30)
+with
+, then the optimal point
+must
+satisfy22
+(31)
+The former equation implies that
+(32)
+yielding
+(33)
+22Assuming that
+, and
+.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:57:26 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 12 ---
+5182
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 62, NO. 19, OCTOBER 1, 2014
+which is a known (
+, and
+are given), ﬁxed, and non-
+negative real number. Therefore, assuming
+, one has
+(34)
+in which one must necessarily check if
+and
+. In this case, one has
+.
+However, if the solutions
+and
+do not satisfy the former
+inequality constraints, then
+. It is worth
+highlighting that, if sign
+, then
+the points
+, and
+are co-linear, which gives us a hint that the solutions on a face
+seem to be rare, only occurring for a few volumes
+.
+Note that, if
+, then
+and
+, which implies that
+and
+.23
+In this case (which may occur, for instance, in uniform linear
+arrays aligned with the
+-axis), any
+and
+can be taken as solutions. Nevertheless,
+this possibility may be regarded as only existing in theory, since
+just few array geometry could satisfy it and, besides that, there
+is always an uncertainty about the true position of the micro-
+phones (they are not ideal points), so that having
+and
+is virtually impossible to occur in practice.
+Moreover, one can always avoid these conditions when building
+the microphone array and choosing the search region.
+Everything performed considering
+must also be done
+for
+and
+. The resulting set
+will therefore
+contain at most 6 spatial points whose related TDoAs must be
+evaluated. If the candidate solutions previously found do not
+satisfy the related inequality constraints
+, then
+there is no solution with only one active constraint.
+Consider now the case in which only two inequality con-
+straints are active, which means that the optimal point is on the
+edge of the rectangular parallelepiped. Without loss of gener-
+ality, assume that one has
+and
+. Then, by applying the KKT conditions to
+so that
+, one arrives at
+(35)
+which is a known, ﬁxed, and nonnegative real number. If
+, one has
+(36)
+in which one must check if
+. In this case, one
+has
+. When this inequality condition is not
+satisﬁed, then
+and the optimal solution is
+one of the vertices of the rectangular parallelepiped.
+If
+, then
+. This condition occurs when,
+for example,
+and
+. Another possi-
+bility is having
+, thus implying that
+.
+As in the previous case of one active inequality constraint, some
+ULAs may theoretically satisfy these last conditions, but having
+is virtually impossible to occur in practice.
+23Here, it is taken into account the fact that
+whenever
+.
+REFERENCES
+[1] J. Benesty, J. Chen, and Y. Huang, Microphone Array Signal Pro-
+cessing.
+Berlin, Germany: Springer, 2010.
+[2] J. H. DiBiase, H. F. Silverman, and M. S. Brandstein, “Robust lo-
+calization in reverberant rooms,” in Microphone Arrays: Signal Pro-
+cessing Techniques and Applications, M. S. Brandstein and D. B. Ward,
+Eds.
+Berlin, Germany: Springer-Verlag, 2001, ch. 8, pp. 157–180.
+[3] H. Gamper, S. Tervo, and T. Lokki, “Speaker tracking for teleconfer-
+encing via binaural headset microphones,” presented at the Int. Work-
+shop Acoust. Signal Enhancement, Aachen, Germany, Sep. 2012.
+[4] H. Puder, E. Fischer, and J. Hain, “Optimized directional processing in
+hearing aids with integrated spatial noise reduction,” presented at the
+Int. Workshop Acoust. Signal Enhancement, Aachen, Germany, Sep.
+2012.
+[5] C. H. Knapp and G. C. Carter, “The generalized correlation method
+for estimation of time delay,” IEEE Trans. Acoust., Speech, Signal
+Process., vol. 24, no. 4, pp. 320–327, Aug. 1976.
+[6] G. C. Carter, A. H. Nuttall, and P. G. Cable, “The smoothed coherence
+transform,” Proc. IEEE, vol. 61, no. 10, pp. 1497–1498, Oct. 1973.
+[7] M. S. Brandstein, “A pitch-based approach to time-delay estimation
+of reverberant speech,” presented at the IEEE ASSP Workshop Appl.
+Signal Process. Audio Acoust., New Paltz, NY, USA, Oct. 1997.
+[8] J. DiBiase, “High-accuracy, low-latency technique for talker localiza-
+tion in reverberant environments,” Ph.D. dissertation, Brown Univ.,
+Providence, RI, USA, May 2000.
+[9] J. P. Dmochowski, J. Benesty, and S. Affes, “A generalized steered
+response power method for computationally viable source localiza-
+tion,” IEEE Trans. Audio, Speech, Lang. Process., vol. 15, no. 8, pp.
+2510–2526, Nov. 2007.
+[10] H. Do, H. F. Silverman, and Y. Yu, “A real-time SRP-PHAT source
+location implementation using stochastic region contraction (SRC) on
+a large-aperture microphone array,” in Proc. IEEE Int. Conf. Acoust.,
+Speech, Signal Process., Honolulu, HI, USA, Apr. 2007, vol. 1, pp.
+121–124.
+[11] H. Do and H. F. Silverman, “A fast microphone array SRP-PHAT
+source location implementation using coarse-to-ﬁne region contrac-
+tion (CFRC),” in Proc. IEEE Workshop Appl. Signal Process. Audio
+Acoust., New York, NY, USA, Oct. 2007, pp. 295–298.
+[12] H. Do and H. F. Silverman, “Stochastic particle ﬁltering: A fast SRP-
+PHAT single source localization algorithm,” in Proc. IEEE Workshop
+Appl. Signal Process. Audio Acoust., New Paltz, NY, USA, Oct. 2009,
+pp. 213–216.
+[13] A. Said, B. Lee, and T. Kalker, “Fast steered response power computa-
+tion in 3D spatial regions,” HP Labs, Palo Alto, CA, USA, Tech. Rep.
+HPL-2013-40, Apr. 2013.
+[14] J. Clausen, Branch and Bound Algorithms: Principles and Examples,
+Mar. 1999 [Online]. Available: http://www.diku.dk/OLD/undervis-
+ning/2003e/datVoptimer/JensClausenNoter.pdf
+[15] B. Gendron and T. G. Cranic, “Parallel branch-and-bound algorithms:
+Survey and synthesis,” Oper. Res., vol. 42, no. 6, pp. 1042–1066, Jun.
+1994.
+[16] M. Cobos, A. Marti, and J. J. Lopez, “A modiﬁed SRP-PHAT func-
+tional for robust real-time sound source localization with scalable spa-
+tial sampling,” IEEE Signal Process. Lett., vol. 18, no. 1, pp. 71–74,
+Jan. 2011.
+[17] A. Marti, M. Cobos, J. J. Lopez, and J. Escolaro, “A steered re-
+sponse power iterative method for high-accuracy acoustic source lo-
+calization,” J. Acoust. Soc. Amer., vol. 134, no. 4, pp. 2627–2630,
+Oct. 2013.
+[18] M. Schroeder, “New method of measuring reverberation time,” J.
+Acoust. Soc. Amer., vol. 37, no. 409–412, Mar. 1965.
+[19] J. B. Allen and D. A. Berkley, “Image method for efﬁciently simu-
+lating small-room acoustics,” J. Acoust. Soc. Amer., vol. 65, no. 3, pp.
+943–950, Apr. 1979.
+[20] L. O. Nunes, W. A. Martins, M. V. S. Lima, L. W. P. Biscainho, B.
+Lee, A. Said, and R. W. Schafer, “Discriminability index for micro-
+phone array source localization,” in Proc. Int. Workshop Acoust. Signal
+Enhancement, Aachen, Germany, Sep. 2012, vol. 1, pp. 1–4.
+[21] B. Lee and T. Kalker, “A vectorized method for computationally efﬁ-
+cient SRP-PHAT sound source localization,” presented at the 12th Int.
+Workshop Acoust., Echo, Noise Control, Tel Aviv, Israel, Aug. 2010.
+[22] A. Antoniou and W.-S. Lu, Practical Optimization: Algorithms and
+Engineering Applications.
+New York, NY, USA: Springer, 2008.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:57:26 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 13 ---
+NUNES et al.: SRP ALGORITHM EMPLOYING HIERARCHICAL SEARCH FOR ACOUSTIC SOURCE LOCALIZATION
+5183
+Leonardo O. Nunes (S’06) received his B.Sc.
+degree in electronics and computer engineering
+and his M.Sc. degree in electrical engineering,
+both from the Federal University of Rio de Janeiro
+(UFRJ) in 2007 and 2009, respectively. He is now
+a researcher working at the Applied Photonics
+Center & Halliburton Brazil Technology Center on
+distributed acoustic sensing technology and acoustic
+information retrieval with application to the oil &
+gas industry. He is also a pursuing a D.Sc. title from
+COPPE/UFRJ, in electrical engineering. His main
+interests are in: digital signal processing, adaptive signal processing, array
+signal processing, and machine learning. He is a student member of the IEEE
+(Institute of Electrical and Electronics Engineers).
+Wallace A. Martins (M’12) was born in Brazil in
+1983. He received the Electronics Engineer degree
+from the Federal University of Rio de Janeiro
+(UFRJ) in 2007, the M.Sc. and D.Sc. degrees in
+electrical engineering from COPPE/UFRJ in 2009
+and 2011, respectively. In 2008, he was a research
+visitor at the Department of Electrical Engineering,
+University of Notre Dame, Notre Dame, IN. Since
+2013 he has been with the Department of Elec-
+tronics and Computer Engineering (DEL/Poli) and
+Electrical
+Engineering
+Program
+(PEE/COPPE),
+UFRJ, where he is presently an Associate Professor. His research interests
+are in the ﬁelds of digital communications, underwater communications,
+microphone/sensor array processing, adaptive signal processing, and machine
+learning techniques. Dr. Martins received the Best Student Paper Award from
+EURASIP at EUSIPCO-2009, Glasgow, Scotland, and the 2011 Best Brazilian
+D.Sc. Dissertation Award from Capes.
+Markus V. S. Lima (S’08–M’14) was born in Rio
+de Janeiro, Brazil, in 1984. He received the Elec-
+tronics Engineer degree from Universidade Federal
+do Rio de Janeiro (UFRJ) in 2008, and the M.Sc.
+and D.Sc. degrees in Electrical Engineering from
+COPPE/UFRJ in 2009 and 2013, respectively. Since
+2014, he has been with the Department of Electrical
+Engineering, DEE/Poli/UFRJ, where he is presently
+an Associate Professor. His research interests in-
+clude digital communications, microphone/sensor
+array processing, and adaptive ﬁltering.
+Luiz W. P. Biscainho (S’95–M’01) was born in Rio
+de Janeiro, Brazil, in 1962. He received the Elec-
+tronics Engineering degree (magna cum laude) from
+the EE (now Poli) at Universidade Federal do Rio
+de Janeiro (UFRJ), Brazil, in 1985, and the M.Sc.
+and D.Sc. degrees in electrical engineering from the
+COPPE at UFRJ in 1990 and 2000, respectively.
+Having worked in the telecommunication industry
+between 1985 and 1993, Dr. Biscainho is now
+Associate Professor at the Department of Electronics
+and Computer Engineering (DEL) of Poli and the
+Electrical Engineering Program (PEE) of COPPE at UFRJ. His research area
+is digital audio processing. He is currently a member of the IEEE (Institute of
+Electrical and Electronics Engineers), the AES (Audio Engineering Society),
+the SBrT (Brazilian Telecommunications Society), and the SBC (Brazilian
+Computer Society).
+Maur´ıcio V. M. Costa was born in Rio de Janeiro,
+Brazil, in 1989. He received the Electronics Engi-
+neer degree from Universidade Federal do Rio de
+Janeiro (UFRJ) in 2013 and is currently a graduate
+student in signal processing at Electrical Engi-
+neering Program, COPPE/UFRJ. His research area
+include microphone/sensor array processing and
+Query-by-Humming systems.
+Felipe M. Gonçalves was born in Rio de Janeiro,
+Brazil, in 1990. He received the Electronics Engineer
+degree from Universidade Federal do Rio de Janeiro
+(UFRJ) in 2013 and is currently a graduate student
+in Finance and Managerial Control at COPPEAD
+Graduate School of Business—UFRJ. His research
+area includes Venture Capital and support services
+for New Technology-Based Firms.
+Amir
+Said
+(S’90–M’95–SM’06–F’14)
+received
+the B.S. and M.S. degrees in electrical engineering
+from University of Campinas, Brazil, and the Ph.D.
+degree in computer and systems engineering from
+Rensselaer Polytechnic Institute, Troy, NY. After
+working at IBM, University of Campinas, and HP
+Labs, in 2013 he joined LG Electronics, where he
+is now principal researcher and program manager.
+His current research interests are in the areas of
+multimedia signal processing, compression, and 3D
+visualization, and their efﬁcient implementation in
+new processing architectures. He has more than 100 technical publications
+among book chapters, conference and journal papers, more than 30 US
+patents and applications. Dr. Said received several awards including Best
+Paper Award from the IEEE Circuits and Systems Society, the IEEE Signal
+Processing Society Best Paper Award for his work on multi-dimensional
+signal processing, and the Most Innovative Paper Award at the 2006 IEEE
+International Conference on Image Processing. Among his technical activities,
+he was Associate Editor for the SPIE/IS&T Journal of Electronic Imaging,
+and IEEE TRANSACTIONS ON IMAGE PROCESSING; a member of the IEEE SPS
+Multimedia Signal Processing, and the Image, Video, and Multidimensional
+Signal Processing Technical Committees, was technical co-chair of the 2009
+IEEE Workshop on Multimedia Signal Processing, the 2013 Picture Coding
+Symposium, and has co-chaired conferences at the SPIE/IS&T Electronic
+Imaging since 2006.
+Bowon Lee (SM’10) received the B.S. degree in
+electrical engineering from Seoul National Univer-
+sity, Seoul, Korea in 2000, and the M.S. and Ph.D.
+degrees in electrical and computer engineering from
+the University of Illinois at Urbana-Champaign in
+2003 and 2006 respectively. From 2007 to 2014, he
+worked as a research scientist at Hewlett-Packard
+Laboratories in Palo Alto, California until he joined
+the faculty of the Department of Electronic En-
+gineering at Inha University in March 2014. His
+research interests include statistical signal processing
+on audio and speech, microphone array signal processing, acoustic event de-
+tection and localization, and multimodal signal processing. He received two
+top 10% awards from the IEEE Workshop on Multimedia Signal Processing
+in 2009 and has served as the technical program committee of numerous IEEE
+conferences and workshops. He is a member of the Audio Engineering Society.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:57:26 UTC from IEEE Xplore.  Restrictions apply. 

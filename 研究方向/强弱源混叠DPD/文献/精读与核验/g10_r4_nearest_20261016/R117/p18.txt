@@ -1,0 +1,52 @@
+Y. Yang et al.                                                                                                   Journal of Sound and Vibration 517 (2022) 116549
+
+6. Experiments
+
+  An identification experiment of 3 small loudspeaker sources (Abramtek Type M5, Shenzhen, China) excited by random noise was
+performed outdoors. The array and acoustic source distribution are shown in Fig. 11, where the planar microphone array is a Brüel &
+Kjær (Type 8608, Nærum, Denmark) 36-channel sector wheel array with a diameter of 0.65 m and an average microphone spacing of
+0.1 m. The three loudspeakers are distributed in a plane parallel to the array and 1 m away from it. In this experiment, a PULSE data
+acquisition and analysis system (Brüel & Kjær Type 3660C, Nærum, Denmark) was used to synchronously sample the sound pressure
+signals of 36 microphones. The collected microphone sound pressure signals were performed FFT on BK Connect™ (Brüel & Kjær Type
+8404, Nærum, Denmark) to obtain Fourier spectra with a frequency resolution of 50 Hz. We extract the components of Fourier spectra
+under 3 different frequency combinations of [1000, 1050, …, 5000] , [1000, 2000, …, 5000] , and [3000, 3050, …, 3200] Hz and use
+the aforementioned four methods to process them to obtain the acoustic source imaging results.
+    Fig. 12 is the acoustic source localization colormaps under a wideband of [1000, 1050, …, 5000] Hz (L = 81). Fig. 12(a) and (b)
+show that in the entire frequency band, the localization results of OMP-CB are scattered, while the localization results of NOMP-CB are
+more concentrated. However, at many frequencies, the localization accuracy of these two methods is low, and there are many spurious
+sources far from the true source. In contrast, both BOMP-CB and BNOMP-CB can locate these acoustic sources correctly. For the left two
+sources close to each other (S1 and S2), at many frequencies, OMP-CB and NOMP-CB fail to separate them, while BOMP-CB and
+BNOMP-CB both succeed in separating them and obtain accurate coordinate estimates. Besides, comparing the localization results of
+BOMP-CB and BNOMP-CB for the source S2 and S3, we can see that BNOMP-CB can overcome the basis mismatch problem through
+Newtonian optimization and obtain better localization than BOMP-CB.
+    Fig. 13 is the localization colormaps with multiple harmonic frequencies of [1000, 2000, …, 5000] Hz (L = 5) to demonstrate the
+performance of the proposed method under multiple intermittent frequencies. It can be seen from this figure that OMP-CB can
+accurately locate the source S1. However, since the strength of the source S2 is weak at the frequencies of interest, OMP-CB locates this
+source scatted. Compared to OMP-CB, NOMP-CB improves acoustic source identification accuracy, which is attributed to the intro­
+duction of Newtonian optimization. In contrast, both BOMP-CB and BNOMP-CB obtain accurate coordinate estimates, and BNOMP-CB
+is superior to BOMP-CB. These phenomena are similar to those in processing with a wideband of [1000, 1050, …, 5000] Hz. This case
+demonstrates that the proposed method enjoys good source identification performance, even with only a few processing frequencies.
+    Fig. 14 is the localization colormaps with a narrowband of [3000, 3050, …, 3200] Hz (L = 5) to demonstrate the performance of the
+proposed method in identifying narrowband sources. As shown in this figure, OMP-CB cannot locate the two left sources (S1 and S2)
+correctly, and their localization results are blurred and fused with each other. For the source S3, due to the basis mismatch, OMP-CB
+locates it to the grid points near the actual position, which causes the energy of different frequencies to be dispersed. NOMP-CB
+successfully separates the left two sources (S1 and S2) with small spacing at all 5 frequencies and obtains their correct coordinates
+estimates, which is significantly improved compared to OMP-CB. However, the localization results under different frequencies are still
+not completely consistent. The multi-frequency synchronous BOMP-CB and BNOMP-CB can locate all the sources with an accuracy
+comparable to the above two frequency conditions.
+   In addition, for the above case of 5 frequencies, four methods consume about 0.005, 0.248, 0.205, and 0.539 s on a 3.5 GHz Intel(R)
+Xeon(R) E5–1650 v3 CPU (only for solving), respectively. For the above case of 81 frequencies, four methods consume about 0.034,
+5.794, 195.748, and 240.108 s, respectively. It can be seen that as the number of processing frequencies increases, the time consumed
+by BOMP-CB and BNOMP-CB with multi-frequency simultaneous processing increases sharply due to the increase in the dimension of
+the sensing matrix. Reducing the number of processing frequencies helps improve the efficiency of the proposed method.
+   Since the speaker signal is unstable and only a single snapshot data is used, the source strength amplitude measured when a single
+loudspeaker emits noise is not suitable for measuring the quantification accuracy of the above case where three loudspeakers emit
+noise at the same time. To explore the quantification performance, we performed three additional sets of measurements, with only one
+
+
+
+
+
+                           Fig. 11. Experimental layout. The red circles are used to indicate the loudspeaker sources.
+
+                                                                18

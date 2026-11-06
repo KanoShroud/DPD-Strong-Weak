@@ -1,0 +1,1683 @@
+
+=== PDF PAGE 1 ===
+
+View
+Online 
+Export
+Citation
+JANUARY 27 2023
+An architecture for passive joint localization and structure
+learning in reverberant environments
+Toros Arikan 
+ ; Amir Weiss 
+ ; Hari Vishnu 
+ ; Grant B. Deane 
+ ; Andrew C. Singer 
+ ;
+Gregory W. Wornell 
+J. Acoust. Soc. Am. 153, 665–677 (2023)
+https://doi.org/10.1121/10.0016999
+Articles You May Be Interested In
+An architecture for passive joint localization and environment learning in shallow-water underwater
+acoustic settings
+J. Acoust. Soc. Am. (March 2023)
+Three-dimensional higher-order raypath separation in a shallow-water waveguide
+JASA Express Lett. (July 2022)
+A deep learning method for reflective boundary estimation
+J. Acoust. Soc. Am. (July 2024)
+ 25 October 2026 05:04:35
+
+
+=== PDF PAGE 2 ===
+An architecture for passive joint localization and structure
+learning in reverberant environments
+Toros Arikan,1,a)
+Amir Weiss,1
+Hari Vishnu,2
+Grant B. Deane,3
+Andrew C. Singer,4
+and Gregory W. Wornell1
+1Electrical Engineering and Computer Science Department, Massachusetts Institute of Technology, Cambridge,
+Massachusetts 02142, USA
+2Acoustic Research Laboratory, Tropical Marine Science Institute, National University of Singapore, Singapore 119222
+3Scripps Institution of Oceanography, University of California San Diego, La Jolla, California 92037, USA
+4University of Illinois at Urbana Champaign, Urbana, Illinois 61820, USA
+ABSTRACT:
+Passive localization and tracking of a mobile emitter, and joint learning of its reverberant three-dimensional (3D)
+acoustic environment, where critical structural features are unknown, is a key open problem. Unaccounted-for
+occluders are potentially present, so that the emitter can lose line-of-sight to the receivers, and can only be observed
+through its reﬂected raypaths. The locations of reﬂective boundaries must therefore be jointly estimated with the
+emitter’s position. A multistage global optimization and tracking architecture is developed to solve this problem
+with a relatively unconstrained model. Each stage of this architecture establishes domain knowledge such as syn-
+chronization and initial environment estimation, which are inputs for the following stages of more reﬁned algo-
+rithms. This approach is generalizable to different physical scales and modalities and improves on methods that do
+not exploit the motion of the emitter. In one stage of this architecture, particle swarm optimization is used to simulta-
+neously estimate the environment and the emitter location. In another stage, a Hough transform-inspired boundary
+localization algorithm is extended to 3D settings, to establish an initial estimate of the environment. The perfor-
+mance of this holistic approach is analyzed and its reliability is demonstrated in a reverberant watertank testbed,
+which models the shallow-water underwater acoustic setting. V
+C 2023 Acoustical Society of America.
+https://doi.org/10.1121/10.0016999
+(Received 11 August 2022; revised 15 December 2022; accepted 6 January 2023; published online 27 January 2023)
+[Editor: Stan E. Dosso]
+Pages: 665–677
+I. INTRODUCTION
+Passive underwater acoustic localization in shallow-
+water settings is one of the most important and challenging
+localization problems (Fischell et al., 2019; Waterston
+et al., 2019). The emitter to be localized could be a surface
+vessel or underwater vehicle, and the receivers could be sur-
+reptitiously placed for passively monitoring a body of water.
+Receivers are typically omnidirectional tethered hydro-
+phones, but could also be placed on a set of mobile under-
+water
+vehicles,
+as
+illustrated
+in
+Fig.
+1.
+When
+the
+environment is accurately known, state-of-the-art matched-
+ﬁeld processing (MFP) methods can be used for localization
+(Baggeroer et al., 1993). The standard MFP framework does
+not account for the presence of man-made features such as
+pier pilings or anchored vessels, or unsurveyed reefs (Chitre
+and Pelekanakis, 2014). Depending on their positions, these
+large and potentially unknown objects can act as additional
+reﬂective boundaries, or as occluders that block the line-of-
+sight (LOS) arrivals to receivers. MFP is sensitive to model
+mismatch (Le Gall et al., 2016; Xu et al., 2006) and its per-
+formance could therefore deteriorate due to such objects,
+motivating the formulation of a localization framework
+that incorporates their presence. A representative scenario
+is presented in Fig. 2, where the goal is to estimate the
+unknown source position at each transmission point along
+a trajectory (red circles), in the presence of a large
+occluder, in a scaled model of the shallow-water setting.
+This is an instance of an open problem that also arises for
+indoor acoustic or radio frequency localization (Dokmanic
+et al., 2015), where the non-line-of-sight (NLOS) arrivals
+due to multipath reﬂections must be judiciously exploited
+rather than mitigated, with a robust passive localization
+method.
+Without restrictions on the localization setting, such
+problems are ill-posed and admit inﬁnitely many solutions.
+The static nature of the environment, and the spatial conti-
+nuity in the trajectory of a moving emitter, are key to unam-
+biguous localization. Some of the important aspects of the
+setting are modeled as in Table I; the limited information
+here leaves some key parameters undetermined so that it is
+natural to adopt a multistage approach to ﬁrst estimate them.
+Accordingly, we deploy a series of localization algorithms
+sequentially, as depicted in Fig. 3, using an architecture that
+we call passive end-to-end localization (PEEL). Each stage
+of PEEL produces approximate solutions to different aspects
+a)Electronic mail: atoros@mit.edu
+J. Acoust. Soc. Am. 153 (1), January 2023
+V
+C 2023 Acoustical Society of America
+665
+0001-4966/2023/153(1)/665/13/$30.00
+ARTICLE
+...................................
+ 25 October 2026 05:04:35
+
+
+=== PDF PAGE 3 ===
+of the localization problem, which then become inputs for
+the following stages. We call this an end-to-end method
+because it starts from received waveforms that do not have a
+common clock with the emitter, and delivers a joint estimate
+of the full emitter trajectory and the environment. We ulti-
+mately demonstrate that PEEL achieves strong performance,
+even when there is modeling mismatch that violates the
+assumptions in Table I.
+While there is currently no end-to-end passive localiza-
+tion method such as the one we propose, similar frameworks
+have been designed for different settings. Joint acoustic
+tracking and environment learning problems can be solved
+using simultaneous localization and mapping (SLAM) meth-
+ods (Li and Krolik, 2013; Ribeiro et al., 2010) in active set-
+tings, or when the emitter and receivers form a network
+(Naseri and Koivunen, 2016). Similarly, while there are
+time-difference-of-arrival
+(TDOA)
+and
+time-of-arrival
+(TOA) methods for localization (Scheuing and Yang, 2008;
+Venkateswaran and Madhow, 2012; Alameda-Pineda and
+Horaud, 2014), they do not account for unknown occluders
+as PEEL does.
+Our main contribution is an architecture for joint locali-
+zation and environment learning. Among other tools, PEEL
+makes use of:
+• A global optimization method for joint boundary estima-
+tion and localization, which does not need to be tuned to a
+speciﬁc problem.
+• The mapping of unknown occluders after tracking, fol-
+lowed by iterations with a reﬁned optimization metric,
+which has not been implemented for passive localization.
+• Closed-form derivations for some key steps of a boundary
+localization technique (Naseri and Koivunen, 2016), that
+improve computational efﬁciency and accuracy.
+The paper is structured as follows. In Sec. II, we present
+the signal model and geometric considerations used for
+localization. We present the PEEL method in Sec. III. The
+results that are achieved in the scale watertank environment
+of Fig. 2 are given in Sec. IV. In Sec. V, we conclude with
+potential avenues for future research.
+In our mathematical notation throughout the paper, low-
+ercase bold variables such as p are vectors, and uppercase
+calligraphic characters such as P denote sets.
+II. LOCALIZATION PRINCIPLE: EXPLOITING VIRTUAL
+RECEIVERS
+In this section, we introduce the notation and signal
+model, and present key geometrical considerations that are
+necessary to frame the localization problem. We speciﬁcally
+focus on how multipath arrivals can be modeled and used to
+improve localization performance.
+Triangulation is a standard localization principle that
+models the emitter as the point of intersection of circles of
+equal time-of-ﬂight (TOF) from the emitter to each receiver.
+FIG. 2. (Color online) Top-down view
+of the test environment with emitter’s
+trajectory (a), and the actual experi-
+mental setup (b). This is a 3D localiza-
+tion and tracking problem with an
+occluding cylinder, and is more chal-
+lenging
+than
+settings
+where
+the
+receivers surround the emitter (Setlur
+et al., 2012).
+TABLE I. Model of the localization setting.
+Problem feature
+Modeling assumptions
+Speed of sound, vs
+Known, and constant within the environment
+Environment
+Static; only the emitter position is changing
+Reﬂectors, gi
+Planar, known number, unknown position and orientation
+Transmissions
+Periodic transmissions of deterministic pulses,
+with known period
+Receivers, pr;j
+At least 4 receivers deployed, with known positions
+FIG. 1. (Color online) Typical shallow-water underwater acoustic localiza-
+tion problem setting [image is modiﬁed from the original in Kim et al.
+(2019); licensed under a Creative Commons Attribution 4.0 License].
+666
+J. Acoust. Soc. Am. 153 (1), January 2023
+Arikan et al.
+https://doi.org/10.1121/10.0016999
+ 25 October 2026 05:04:35
+
+
+=== PDF PAGE 4 ===
+Since these TOF arcs do not perfectly intersect in practice
+(e.g., due to noise), an estimation method has to be used;
+often, this method has to simultaneously solve a data associ-
+ation problem (Too et al., 2017). When the locations of
+reﬂectors are known, multipath can be leveraged for better
+accuracy. Reﬂections can be interpreted as producing ‘vir-
+tual receivers’ as illustrated in Fig. 4, which corresponds to
+the structure of our watertank setting.
+We make the simpliﬁcation that reﬂective structures are
+(piecewise) approximated as planar boundaries (Deane,
+1994), characterized by the range q, azimuth h, and eleva-
+tion / of their normal vector relative to the origin. Thus,
+boundary i is parametrized as the vector gi ¼ ½qi; hi; /iT.
+We denote the Cartesian coordinates of the emitter and
+receiver positions as pe 2 R3 and pr 2 R3, respectively.
+The LOS TOF, s0, is calculated as
+s0 ¼ jjpr  pejj2
+vs
+;
+(1)
+where vs is the constant speed of sound, which can be a
+valid approximation for well-mixed shallow-water setting
+at short ranges and high acoustic frequencies (Chitre, 2007;
+Too et al., 2017). For boundary i, we obtain the virtual
+receiver location pi by ﬁnding the corresponding reﬂection
+of pr. The TOF to the receiver from the NLOS arrival of
+boundary i is equal to the TOF from pe to the correspond-
+ing pi; thus
+si ¼ jjpi  pejj2
+vs
+:
+(2)
+We denote a single copy of the periodically emitted sig-
+nal as s(t), and we merge the effects of attenuation and
+reﬂection as the equivalent attenuation coefﬁcient ai for
+each path. The received signal r(t) is then
+rðtÞ ¼
+X
+N
+i¼0
+ais t  si pe; gi
+ð
+Þ
+ð
+Þ þ nðtÞ;
+(3)
+where n(t) is an unknown random noise realization, and N is
+the (known) number of reﬂective surfaces. Note that ai can
+be zero, as when an occluder blocks a particular arrival, so
+Eq. (3) incorporates occlusion. We denote each receiver as
+pr;j, each of which has TOFs si;j from their own virtual
+receivers, and received signals rjðtÞ [deﬁned as in Eq. (3)].
+FIG. 3. (Color online) The sequence of
+algorithms in the PEEL method. The
+sections with green outlines incorpo-
+rate novel developments or applica-
+tions of those algorithms.
+FIG. 4. (Color online) Illustration of virtual receivers produced by reﬂective planar boundaries in an occluder-free environment (a), and the corresponding
+noise-free simulated received signal for this scenario (b). A NLOS TOF to the real receiver is equivalent to the LOS TOF to the virtual receiver.
+J. Acoust. Soc. Am. 153 (1), January 2023
+Arikan et al.
+667
+https://doi.org/10.1121/10.0016999
+ 25 October 2026 05:04:35
+
+
+=== PDF PAGE 5 ===
+We only model the single-bounce reﬂections, which are typ-
+ically the strongest multipath components. In practice, not
+only will there be reverberation, but the N that is assumed
+known may be inaccurate. A proposed localization method
+must be robust to the resulting discrepancies.
+We model s(t) as pulsed and periodic, which limits our
+estimation scenarios to such man-made sources. This model
+allows us to record s(t) and to infer some key parameters:
+the approximate (truncated) channel impulse response
+length Tc (Sun and Wang, 2018), and the time period Tp
+between emissions. We require s(t) to meet the following
+constraints in order to have accurate estimates f^si;jg of the
+fsi;jg. First, we deﬁne Ts as the temporal duration of s(t), so
+that s(t) is strictly zero outside 0  t  Ts. Next, we deﬁne
+TA to be the full width at half maximum (FWHM) of the
+autocorrelation function of s(t), which is the time resolution
+of the matched-ﬁltered emitted signal. Finally, we deﬁne Tm
+as the minimum time difference between the main multipath
+arrivals. The PEEL operation modes are then as follows:
+• If Ts < Tm, we have a pulse that is shorter than the multi-
+path separation, as is the case with the Gaussian pulse in
+our experiments. Here, we do not need to know s(t) for
+PEEL; Ts is short enough that the multipath arrivals are
+roughly separable.
+• If Ts > Tm and TA < Tm, then after matched-ﬁltering, the
+multipath peaks are roughly separable. Now, we do in
+fact need to know s(t) for this matched-ﬁltering step, so
+that we are able to identify the distinct arrivals and
+thereby solve for the environment.
+We also need Tp > Tc to avoid different periodic emis-
+sions being observed within the same r(t).1 With these intro-
+ductory
+developments,
+we
+are
+ready
+to
+present
+an
+architecture for reliable localization in the presence of such
+errors.
+III. END-TO-END LOCALIZATION AND STRUCTURE
+LEARNING
+We now present our proposed joint localization and
+structure learning method, PEEL. First, we use TDOA and
+TOA localization for initialization; then obtain an initial
+boundary localization estimate; and ﬁnally track a moving
+emitter as we simultaneously learn the environment, as sum-
+marized in Fig. 5.
+A. Stage 1: Coarse localization of the emitter
+We ﬁrst describe a standard TDOA localization algo-
+rithm (which does not require knowledge of fgig) for syn-
+chronization with the emitter (Korhonen, 2008), then a TOA
+algorithm that leverages multipath from known boundaries
+fgig after synchronization (Ribeiro et al., 2010; Brutti et al.,
+2010). Both algorithms use a grid-search for the emitter to
+obtain ^pe, where a set P of grid points pcand is deﬁned over
+the target area.2 Each pcand 2 P corresponds to a potential
+emitter location, with an associated set of fsi;j;candg to the
+receivers pr;j and the corresponding virtual receivers pi;j.
+Thus, each si;j;cand is a function of pr;j and of gi. The TDOA
+and TOA stages are used to initialize more reﬁned
+techniques.
+TDOA does not require a common clock with the emit-
+ter and is suitable to establish synchronization (Su et al.,
+2017; Qiao et al., 2013). Denoting the calculated cross cor-
+relation between the signals at receivers j1 and j2 as Rj1;j2ðsÞ,
+the TDOA metric that we use is
+CTDOA scand pcand
+ð
+Þ
+ð
+Þ
+¢
+X
+j26¼j1
+X
+M
+j1¼1
+jRj1;j2 sj1;cand pr;j1
+ð
+Þ  sj2;cand pr;j2
+ð
+Þ
+ð
+Þj:
+(4)
+Using the generalized cross correlation with phase transform
+(GCC-PHAT) method for better performance (Knapp and
+Carter, 1976), we estimate the emitter location ^pe;TDOA as
+^pe;TDOA ¼ argmax
+pcand2P
+CTDOA scand pcand
+ð
+Þ
+ð
+Þ:
+(5)
+The average difference between LOS peak delays and
+the expected TOFs from TDOA is then used to establish
+synchronization.3 One can then use more accurate TOA
+localization methodologies. We deﬁne the additive TOA
+metric CTOAðscandðpcandÞÞ as
+CTOA scand pcand
+ð
+Þ
+ð
+Þ¢
+X
+M
+j¼1
+X
+N
+i¼0
+jrj t  si;j;cand pr;j; gi
+ð
+Þ
+
+j;
+(6)
+where the time indices ðt  si;j;candðpr;j; giÞÞ are rounded to
+the nearest sample in a discrete-time implementation. The
+estimate ^pe;TOA is then obtained as
+^pe;TOA ¼ argmax
+pcand2P
+CTOA scand pcand
+ð
+Þ
+ð
+Þ:
+(7)
+The heuristic metric in Eq. (6) is maximized when each
+si;j corresponds to a peak location; such locations are the
+intersections of TOF arcs, as seen in Fig. 6(a). When the
+FIG. 5. (Color online) Conceptual ﬂow chart for the proposed PEEL
+architecture.
+668
+J. Acoust. Soc. Am. 153 (1), January 2023
+Arikan et al.
+https://doi.org/10.1121/10.0016999
+ 25 October 2026 05:04:35
+
+
+=== PDF PAGE 6 ===
+fgig are known, and therefore the virtual receivers are
+labeled correctly, ^pe is obtained accurately.
+TDOA and TOA localization are more robust if the
+search space P can be limited to the vicinity of the correct
+location, pe. Consider the results in Fig. 6(a); although pe is
+estimated accurately, there are many local maxima in the
+search space. These can lead to large errors as in Fig. 6(b).
+Conﬁning P to the vicinity of pe avoids such ambiguities.
+We summarize our TDOA and TOA localization algorithms
+in Algorithms 1 and 2.
+One advantage of Algorithm 2 is that it is a heuristic
+weighting of the arrivals. A localization method that is
+solely based on fsi;jg will assign equal importance to each
+arrival so that there will be no automatic compensation for
+faulty TOF estimates. A TOF estimate is likelier to have a
+high error if the corresponding arrival is weak. In such
+cases, its contribution to CTOA in Algorithm 2 will be
+smaller, and its impact on ^pe;TOA in Eq. (7) will be
+reduced.
+Algorithm 2 also allows us to compare different hypoth-
+esized environments. Given candidate boundaries fgigcand,
+we can run Algorithm 2 for each fgigcand, and pick the maxi-
+mum metric solution as our joint estimate of ^pe;TOA and
+fgig. CTOA is therefore a heuristic measure of the estimate’s
+goodness. Recall that the fgig cannot generally be assumed
+known; thus, we next propose a boundary localization algo-
+rithm to produce a suitable set of fgigcand.
+B. Stage 2: Preliminary boundary localization
+After TDOA and TOA localization, we have an initial
+estimate of the emitter’s position and coarse synchroniza-
+tion. To jointly estimate the emitter and the environment in
+a computationally feasible manner, we need a good initial
+estimate of reﬂective boundary positions, which ultimately
+yields a tight search space for fgig. We assume that a set of
+unlabeled f^si;jg has been estimated (Demirli and Saniie,
+2001), though some of these estimated arrival times might
+have large errors. We now develop a Hough transform-
+inspired method to estimate fgig which is robust to errors in
+f^si;jg, building on (Naseri and Koivunen, 2016).
+As some background context, Euclidean distance matri-
+ces (EDM) (Dokmanic et al., 2015) and convex optimiza-
+tion methods (Naseri et al., 2014) have been used to solve
+for virtual emitter positions and thereby obtain boundary
+positions. These methods can suffer from large errors if an
+arrival ^si;j has been labeled incorrectly, and their performan-
+ces are initialization-sensitive. An alternative approach
+relies on the fact that in two dimensions, these ^si;j each
+deﬁne an ellipse whose foci are pe and pr, as in Fig. 7(a); in
+three dimesions, they deﬁne spheroids. In Naseri and
+Koivunen (2016), boundaries are observed to be common
+tangents to such ellipses; by ﬁtting tangent planes to these
+ellipses, we can estimate the boundaries while avoiding the
+error-prone initialization and labeling procedure in multi-
+path environments, such as in Fig. 7(b). It is convenient to
+deﬁne a given gi by the spherical coordinates of a vector
+from the origin (arbitrarily selected) that is orthogonal to the
+boundary plane. Thus, each boundary is speciﬁed by a range
+q, azimuth h, and elevation /, where these local spherical
+FIG. 6. (Color online) A TOA grid-
+search that localizes the emitter on real
+data (a), and a grid-search that fails at a
+different location due to the alternative
+arrival arc crossings (b), at 36 dB
+SNR.
+ALGORITHM 1. TDOA localization for initialization.
+Require: Unoccluded LOS arrivals at each receiver.
+Input: P;
+rjðtÞ
+
+M
+j¼1;
+pr;j
+f
+g
+M
+j¼1
+for pcand 2 P do
+Calculate CTDOA [Eq. (4)]
+end
+Get ^pe;TDOA[Eq. (5)]
+Result: ^pe;TDOA
+ALGORITHM 2. TOA localization after initialization.
+Require: Time synchronization after applying Algorithm 1; number of
+boundaries N is known.4
+Input: P;
+rjðtÞ
+
+M
+j¼1;
+pr;j
+f
+g
+M
+j¼1;
+gi
+f gN
+i¼1
+for pcand 2 P do
+Calculate CTOA [Eq. (6)]
+end
+Get ^pe;TOA [Eq. (7)]
+Result: ^pe;TOA
+J. Acoust. Soc. Am. 153 (1), January 2023
+Arikan et al.
+669
+https://doi.org/10.1121/10.0016999
+ 25 October 2026 05:04:35
+
+
+=== PDF PAGE 7 ===
+coordinates correspond to a standard east-north-up Cartesian
+coordinate system.
+The transform for boundary localization in Naseri and
+Koivunen (2016), which for convenience we refer to as
+common tangents to spheroids (COTANS), is derived as fol-
+lows. A boundary deﬁned by q, h, and / can be conceptual-
+ized as a point ðq; h; /Þ in a COTANS transform domain;
+working out the ðq; h; /Þ expression of a plane is to take the
+plane’s COTANS transform (Borrmann et al., 2011). When
+the space q  h  / is discretized as a 3-mode tensor, each
+hypothetical tangent has a ﬁnite set of ðq; h; /Þ on which it
+may lie. Incrementing this “accumulator” tensor over every
+potential ðq; h; /Þ entry yields a COTANS-domain image
+[as in Fig. 9(a)], with maxima at the true boundaries in the
+noiseless case.
+Here, we extend the method of Naseri and Koivunen
+(2016) to three dimensions, and we further derive a direct
+solution for the tangents in the COTANS domain, which
+precludes the need for randomly sampling points ðq; h; /Þ
+on the surface of an ellipse/spheroid. We deﬁne a grid over
+h and /, and obtain the COTANS transform for the tangents
+at each h and /. In two dimensions, for a given h, we obtain
+the COTANS transform’s q in Appendix A 1 as
+q h
+ð Þ ¼
+ﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃ
+a2 cos2h þ b2 sin2h
+p
+;
+(8)
+and in three dimensions, the result for a given h and / is cal-
+culated in Appendix A 2 as
+q h; /
+ð
+Þ ¼
+ﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃ
+c2 cos2/ þ a2 sin2/
+q
+;
+(9)
+where a, b, and c are standard axes of spheroids calculated
+from the f^si;jg. This result is obtained for an origin-centered
+spheroid. To move a point cloud of ðq; h; /Þ centered on the
+origin to the true emitter and receiver positions, we rotate
+the points to match the true spheroid’s orientation (adjusting
+their h and / to be some hrot and /rot), and then translate the
+points to the true spheroid’s position (yielding a ﬁnal
+qCOTANS; hCOTANS, and /COTANS). These COTANS-domain
+operations are illustrated in Fig. 8.
+In practice, we ﬁrst generate a set of points
+ðq; h; /Þ
+
+
+by deﬁning an azimuth-elevation grid, and obtaining the
+COTANS transforms for each of the corresponding tangents.
+The resulting points
+ðq; h; /Þ
+
+
+COTANS are then rounded to a
+desired accuracy.5 We deﬁne a tensor over q, h, and / with
+this resolution, for each rounded
+ðq; h; /Þ
+
+
+COTANS point,
+we increment the corresponding cell in the tensor by 1. We
+sum the tensors for each NLOS arrival at each receiver, to
+obtain a ﬁnal tensor of superimposed COTANS curves such
+as in Fig. 9(a). Each ellipse contributes a curve; observe that
+the curves do not intersect at a single point because of errors
+in f^si;jg and in the measured pe and pr, so we have multiple
+maxima. We therefore use a smoothing ﬁlter to replace the
+tensor values with local averages.6 Then, we extract the
+locations of as many maxima as there are boundaries as in
+Fig. 9(b), where we set the neighborhood of each maximum
+FIG. 7. (Color online) The NLOS arriv-
+als deﬁne ellipses/spheroids of equidis-
+tance (a); we illustrate the ellipses
+deﬁned by fsi;jg for our experimental
+setting (depicted in 2D for conve-
+nience). Each boundary is a common
+tangent to a single ellipse due to each
+receiver, highlighted here by matching
+colors.
+FIG. 8. (Color online) Illustration of the steps to obtain the COTANS transform of a particular tangent line (depicted in 2D). Description of one tangent to a
+standard ellipse (a); rotation of this origin-centered ellipse and its tangent (b); and the translation of this ellipse to its real position (c).
+670
+J. Acoust. Soc. Am. 153 (1), January 2023
+Arikan et al.
+https://doi.org/10.1121/10.0016999
+ 25 October 2026 05:04:35
+
+
+=== PDF PAGE 8 ===
+in the tensor to zero, to avoid picking the same boundary
+multiple times.7 This method is summarized in Algorithm 3.
+Modeling the environment as consisting of planar
+boundaries makes environment learning more computation-
+ally tractable. Note that the virtual receiver model is not lim-
+ited to planar boundaries: the planar boundary estimates can
+be tangents to a non-planar boundary. In this case, however,
+the boundary estimates will be inaccurate for localization
+purposes when the emitter moves to a different position.
+Therefore, rather than using the initial COTANS boundary
+estimates for the entire emitter trajectory, we need evolving
+boundary estimates over time, utilizing the global optimiza-
+tion method which we now discuss.
+C. Stage 3: Joint boundary estimation and emitter
+localization
+At this stage, we have initial estimates of both the emitter
+position and the boundaries, allowing for simultaneous optimi-
+zation over pe and f^gig. We assume candidate boundaries
+fgigcand that are in the vicinity of the f^gig, and then carry out
+TOA localization (Algorithm 2) for each fgigcand. These
+fgigcand
+are drawn from a search space q 2 ½qi  q0;
+qi þ q0; h 2 ½hi  h0; hi þ h0; / 2 ½/i  /0; /i þ /0,
+where qi, hi, and /i are estimated from Algorithm 3, and q0,
+h0, and /0 are error margins obtained as the typical maximum
+parameter estimation errors from COTANS, for a given set-
+ting. The f^gig associated with the highest maximum metric
+CTOA [Eq. (6)] yields the most likely pe and fgig. Interlacing
+this algorithm with tracking over the emitter positions, we dis-
+cover and map the occluders in the environment, and reﬁne
+our estimates for joint localization and environment learning.
+In this simultaneous optimization problem with mea-
+surement errors, it is advantageous to maintain multiple
+evolving estimates of the emitter and boundary locations,
+for which we use particle swarm optimization (PSO) (Clerc,
+2010). In this global optimization algorithm, each fgigcand is
+termed a “particle.” Each particle is initialized at a random
+location and given an initial “velocity” in the search space.
+Algorithm 2 is carried out for each particle, and the maxi-
+mum CTOA and corresponding ^pe;cand is recorded. Particle
+velocities are modiﬁed at each PSO iteration towards the
+global maximum metric particle (with the maximum CTOA),
+and also to the maximum metric particle in a random
+“neighborhood” of particles. Thus, particles explore the
+region around the current best approximation.
+PSO was used in PEEL because its metaparameters do
+not need to be adapted to a speciﬁc physical setting and
+because it can be run without re-initialization during tracking.
+There are alternative global optimization algorithms that can
+also be used in PEEL, however, and it would be advantageous
+in an application setting to ﬁne-tune the metaparameters of
+PSO or another algorithm for that particular environment.
+In order to be able to accommodate for occlusion, we
+rely on a tracking procedure over the periodic transmissions
+of the moving emitter. Kalman tracking with a constant-
+acceleration model, for example, can be applied. The ^pe
+obtained using PSO is used as the measurement vector to
+update the tracking. Critically, the grid-search is conﬁned to
+a sufﬁciently small area P around the resulting prediction.
+This way, even if the emitter is temporarily occluded and
+the underlying CTOA metric is erroneous, ^pe will still be
+close to the actual pe. Thus, if the emitter enters an area that
+is unfavorable for localization, PEEL can potentially miti-
+gate the resulting estimation errors. Our algorithm for PSO
+localization and boundary estimation is given in Fig. 10, and
+our overall approach is summarized in Algorithm 4.
+FIG. 9. (Color online) The COTANS accumulator for inconsistent f^si;jg (a), and its boundary estimates (b). The image is periodic in azimuth, so the maxi-
+mum near 360 is close to the correct location at 0.
+ALGORITHM 3. COTANS transform-based boundary localization.
+Require: Time synchronization from Algorithm 2; number of boundaries N
+is known.
+Input: f^si;jg;
+pr;j
+f
+g
+M
+j¼1; ^pe;TDOA
+for ^si;j 2 f^si;jg do
+Calculate COTANS transform for spheroid, add to accumulator
+(Appendix A)
+end
+Result: Apply smoothing to COTANS accumulator, ﬁnd its N maxima
+as f^gig.
+J. Acoust. Soc. Am. 153 (1), January 2023
+Arikan et al.
+671
+https://doi.org/10.1121/10.0016999
+ 25 October 2026 05:04:35
+
+
+=== PDF PAGE 9 ===
+From the results of Algorithm 4, we can determine
+whether each LOS path to receivers has been attenuated
+beyond expectation. Occlusion can be determined by assum-
+ing a 1= ^R attenuation factor in the received signal magni-
+tude, where ^R is a given estimated LOS range. Unoccluded
+arrivals allow estimation of the emitted power, by scaling
+the corresponding LOS magnitudes by ^R. If the received
+LOS magnitude is substantially below the magnitude pre-
+dicted by geometric spreading, we conclude that an occluder
+is present.8 Volumetric intersection methods can then be
+used to map the occluders (Srinivasan et al., 1990).
+After mapping the occluders, we re-run Algorithm 4. We
+now know which LOS arrivals are blocked by the occluder,
+and we change the additive metric CTOA by leaving blocked
+paths out of the sum in Eq. (6). Our ﬂexible cost function
+thereby allows us to compensate for model mismatch due to
+occlusion, and yields increasingly improved performance.
+IV. EXPERIMENTAL RESULTS
+We now evaluate our PEEL method for its passive
+localization and environment learning capabilities, seeking
+to demonstrate and understand its performance and robust-
+ness. For this purpose, we use the convenient setting of the
+watertank depicted in Fig. 2. We ﬁrst test PEEL on real data
+obtained from the watertank; then add synthetic noise to this
+data to analyze PEEL’s performance compared to other
+localization methods and ﬁnally conduct trials in a simula-
+tion setting with a wider range of localization scenarios.
+In our experiments, we emit a high-frequency Gaussian
+pulse
+sðtÞ ¼ et2f 2
+0 cos 2pf0t
+ð
+Þ;
+(10)
+where the center frequency f0 was set to 280 kHz, corre-
+sponding to a wavelength of 5 mm. The boundaries used for
+localization are the water surface, whose position is known
+since the receiver depths are known; and the bottom and
+three plastic sides of the tank, whose ranges to the origin
+and azimuths are respectively known to within 65 mm and
+66, as obtained using COTANS. One side-boundary is
+deliberately left unaccounted for, which presents the difﬁ-
+culty of having an unmodeled set of arrivals in the data so
+that we have N ¼ 5. We use M ¼ 4 receivers. The speed of
+sound through water in the tank was measured as 1485 m/s.
+For our PEEL implementation, we use 128 particles and
+5000 PSO iterations for each emitter position. At each PSO
+iteration, we use a grid P of 0.5 mm resolution and sides of
+6 mm centered on the expected emitter location. We perform
+ten experiments for each localization scenario and obtain
+the root mean square (rms) localization error. The rms error
+for the ﬁrst pass of PEEL is 3.9 mm, as seen in Fig. 11(a).
+To put this into perspective, the average distance of the
+emitter from the receivers for this trajectory is 93.5 mm, and
+the rms error in this scenario is 4.2% of the mean distance to
+the emitter. The ﬁnal boundary estimates in Fig. 11(a) are
+obtained using the full estimated trajectory, which leads to a
+more accurate solution compared to the results obtained
+from using just one emitter position. Running PEEL’s sec-
+ond pass, we get the result in Fig. 11(b), where the rms error
+is reduced to 2.7 mm (2.9% of the mean distance). The
+occluder
+is
+reconstructed
+with
+sufﬁcient
+accuracy
+to
+improve our localization result. To understand how much
+the unknown occluder’s presence affects the result, we
+experimented with the same scenario but with no occluder,
+obtaining an rms error of 1.5 mm (1.6% of the mean dis-
+tance), which is within our margin of measurement accu-
+racy. In these trials, occlusion and interference due to
+reverberation are the key error factors; the SNR of unoc-
+cluded LOS arrivals is > 30 dB.
+If synchronization and an initial boundary estimate are
+given to us, single-receiver localization using Algorithm 4
+becomes feasible. In an experiment with a single emitter at
+the origin and no occluder, we get 2.1 mm of rms error
+(2.2% of the mean distance). This strong performance is sur-
+prisingly only slightly worse than when we use four
+receivers.
+In order to analyze the performances of the localization
+algorithms that we have examined (TOA localization with
+known boundaries, and PSO), we carried out localization tri-
+als with synthetic Gaussian noise added to experimental sig-
+nals. For the ﬁrst position in the trajectory, where there is
+LOS to every receiver, the same noise power in units of
+dBm was added to each recorded signal. In Fig. 12(a), we
+compare PSO’s performance for different numbers of PSO
+iterations, vs that of TOA localization with known bound-
+aries. Because PSO optimizes for the boundary locations as
+well, its high runtime led to us conduct 150 trials for each
+noise level, while 5000 trials were carried out for TOA.
+There is a performance gap between PSO and the “ground
+truth” TOA result, which is smaller for higher noise levels.
+Longer runtimes improve PSO’s performance and help close
+this gap.
+FIG. 10. (Color online) Flowchart for simultaneous boundary and emitter
+localization with PSO.
+ALGORITHM 4. Joint PSO localization and Kalman tracking.
+Input:
+rjðtÞ
+
+M
+j¼1;
+pr;j
+f
+g
+M
+j¼1;
+gi
+f gcand
+Require: Moving emitter.
+for each emitter position in trajectory do
+for pre-speciﬁed number of PSO iterations do
+Perform PSO, get ^pe;PSO; f^gig (Fig. 10, Appendix B)
+end for
+Use ^pe;PSO to update Kalman tracking, get new P for next iteration.
+end for
+Result: ^pe;PSO; f^gig
+672
+J. Acoust. Soc. Am. 153 (1), January 2023
+Arikan et al.
+https://doi.org/10.1121/10.0016999
+ 25 October 2026 05:04:35
+
+
+=== PDF PAGE 10 ===
+We next evaluate the performance of environment
+learning by adding synthetic Gaussian noise to the signals
+measured at the last position in the trajectory (where two
+LOS arrivals are occluded) and obtaining the rms range
+error from the origin to all the boundaries, averaged over tri-
+als and the number of boundaries. We conducted 100 such
+trials for each noise level and for three scenarios: in the
+absence of the occluding cylinder as measured in a separate
+set of experiments, with the occluding cylinder present but
+not accounted for, and with the occluded arrivals removed
+in the revised metric (modeling the PEEL second pass). The
+results are given in Fig. 12(b), where we observe a gap in
+performance caused by the occlusion, beyond the perfor-
+mance deterioration caused by a lower effective SNR.
+Boundary estimation is improved by compensating for the
+occluder, though this improvement is less dramatic than the
+performance gains in emitter localization. Adding a noise
+power greater than 20 dBm causes much larger errors in the
+localization and boundary estimation tasks in this setting, as
+the noise peaks have much greater magnitude than the
+NLOS arrivals.
+To test PEEL’s performance on a wider range of experi-
+mental geometries, we generated synthetic data that mod-
+eled
+the
+watertank
+setting
+with
+randomized
+receiver
+locations. We implemented a simulation setting as per
+Deane (1994) that modeled a reverberant environment with
+multibounce arrivals, producing synthetic received signals
+with the mirror image method. In these trials, the emitter’s
+trajectory, the boundary locations, the occluder, and the
+position of the receiver at the origin were kept constant, and
+PEEL was run for 10 different deployments of the other
+three receivers. These receivers were distributed uniformly
+over the region bounded by the positions of receivers in the
+real experimental setting. We used the same Gaussian pulse
+that was used in the watertank experiment, though the only
+distortion that these pulses underwent in simulation was
+attenuation. Ultimately, we obtained an rms error of 2.6 mm
+over ten trials, which was close to the watertank results.
+Overall, we observed reliable performance across all of
+the trials for this particular demonstration. Once the
+unknown occluder is compensated-for, we only observe sev-
+eral millimeters of error, which is reasonable since there are
+FIG.
+11. (Color
+online)
+First-pass
+localization
+performance,
+with
+an
+occluding cylinder present in the envi-
+ronment (a), and the improved second-
+pass result, using the modiﬁed metric
+obtained by taking the occluder into
+account (b). The boundary that is
+unaccounted-for to introduce model
+mismatch is the bottom boundary in
+these top-view ﬁgures.
+FIG. 12. (Color online) Performance of PSO localization versus TOA with known boundaries, highlighting better accuracy with more PSO iterations (a);
+and rms boundary localization error performances for experimental results with synthetic added noise (b).
+J. Acoust. Soc. Am. 153 (1), January 2023
+Arikan et al.
+673
+https://doi.org/10.1121/10.0016999
+ 25 October 2026 05:04:35
+
+
+=== PDF PAGE 11 ===
+already millimeter-scale errors in the assumed receiver posi-
+tions. These results are summarized in Table II.
+V. CONCLUDING REMARKS
+In this paper, we developed a method for localization
+and environment learning, which was tested in a three-
+dimensional (3D) reverberant underwater environment with
+occluding objects. Our PEEL method performed iteratively
+reﬁned localization, with each solution yielding results that
+served as assumed knowledge for the following more
+sophisticated algorithm stages. This multi-stage approach
+handled a complex problem where successively establishing
+synchronization, boundary estimation, emitter tracking, and
+occluder estimation, made solving the overall task computa-
+tionally feasible. Applying these stages separately is subop-
+timal as compared to a hypothetical joint optimization over
+all of the aspects of the problem. However, PEEL breaks
+down the localization task into subproblems with well-
+posed solutions. We ultimately achieved accurate simulation
+and experimental results in end-to-end localization.
+The trajectory to which PEEL was applied resulted in a
+difﬁcult localization problem which nevertheless proved to
+be solvable. There are many adversarial scenarios, however,
+that can defeat our method. The emitter may move behind
+an occluder and come to a halt, or it may take a sharp turn
+which throws off the tracking algorithm. One way to cope
+with such scenarios would be to run several instances of
+PEEL in parallel. A discrepancy between their results would
+indicate catastrophic errors. This parallelization strategy for
+PEEL is also important for choosing the number of bound-
+aries, N. If one is not conﬁdent about the assumption on N,
+then running PEEL in parallel with different values of N
+becomes advantageous. Choosing the best N is an important
+open problem for PEEL.
+Note that we do not require a complete deduction of the
+occluders for improved localization performance. In this
+passive setting, a complete occluder mapping requires the
+emitter to move in an arc around them, as is the case in
+tomography. It is not guaranteed that occluders can be
+mapped since the emitter’s path is not under our control. As
+long as occlusion is detected, potential errors from summing
+over nonexistent arrivals are avoided.
+When deploying PEEL in an open water setting, there are
+improvements that must be made to cope with this more difﬁ-
+cult environment. To use as general a model as possible, we
+have used the simplest versions of each algorithm, such as
+GCC-PHAT for TDOA, basic PSO for optimization, and a
+constant acceleration model for Kalman tracking. Each of these
+algorithms can be enhanced if more domain knowledge is
+available. Applying an algorithm that tracks the multipath
+arrivals (Fleury et al., 1999; Salmi et al., 2008), for example,
+can help to further reﬁne the boundary estimates. The under-
+water environment’s bathymetric proﬁle or the presence of
+occluding objects may already be known, and must then be
+taken into account. PEEL can also be applied to tasks such as
+indoor (acoustic or RF) localization, which features easier
+channels, but cluttered environments with different challenges.
+PEEL currently incorporates global optimization over
+the emitter position and the locations of planar boundaries.
+A more sophisticated environmental model would allow it
+to work robustly with the complex non-planar boundaries in
+the real-life shallow-water environment. In the literature,
+global optimization with simulated annealing and genetic
+algorithms have been applied to MFP (Hermand, 1999) for
+geoacoustic inversion, using known emitters. Optimization
+over not just the locations of their boundaries but their phys-
+ical properties, while more computationally expensive,
+could lead to improved results in ﬁeld deployments.
+There are broader questions in TOA localization that per-
+tain to PEEL. Currently, PEEL exploits the emission of deter-
+ministic, pulsed signals. In practice, other types of emissions
+may arise, as with communications sources or vessel signa-
+tures. It would be challenging to establish time synchronization
+with such signals. Although we have experimented with per-
+formance in increasing noise, it would also be of interest to
+obtain a full bandwidth/noise characterization over different
+environments and signals. Finally, COTANS boundary estima-
+tion may be amenable to a machine learning method, to auto-
+mate the smoothing and peak extraction tasks. COTANS
+transform results are two-dimensional (2D) or 3D images, so
+we can train a neural network on such data for boundary esti-
+mation in future experiments.
+ACKNOWLEDGMENTS
+This work was supported, in part, by ONR under Grant
+Nos. N00014-19-1-2661, N00014-19-1-2662, and N00014-
+19-1-2665, and NSF under Grant No. CCF-1816209. The
+authors also thank Dr. Jim Preisig of JP Analytics LLC for
+valuable discussions and feedback on the work.
+APPENDIX A: DERIVATION OF THE BOUNDARY
+LOCALIZATION APPROACH
+1. COTANS transform for tangent lines to ellipses
+in 2D
+We present the derivation of the COTANS transform of
+tangent lines to an ellipse in 2D. First, we derive the tangent
+line to a standard ellipse centered around the origin, with a
+closed-form description in terms of the normal vector to the
+tangent. We then consider this ellipse to be rotated and
+translated to its actual position in 2D and modify the
+normal-vector description of the corresponding rotated and
+translated tangent. The ﬁnal parametrization of the tangent
+in terms of its normal vector is ðqCOTANS; hCOTANSÞ; this is a
+TABLE II. Localization experiment results.
+Scenario
+rms Error (mm)
+Four receivers, no occluder
+1.5
+Single receiver, no occluder
+2.1
+Four receivers, occluder, ﬁrst-pass
+3.9
+Four receivers, occluder, ﬁnal result
+2.7
+Simulation, random receivers
+2.6
+674
+J. Acoust. Soc. Am. 153 (1), January 2023
+Arikan et al.
+https://doi.org/10.1121/10.0016999
+ 25 October 2026 05:04:35
+
+
+=== PDF PAGE 12 ===
+point in
+ðq; hÞ
+
+
+-space, where q is the length of the vector
+and h is its direction as measured with respect to the x-axis.
+This description is by deﬁnition the COTANS transform of
+the tangent line.
+First, we obtain a description of tangent lines to stan-
+dard ellipses [as in Fig. 7(a)]. The equation for a standard
+ellipse centered on the origin is ðx2=a2Þ þ ðy2=b2Þ ¼ 1,
+where a and b are its major and minor axes, respectively.
+Consider a point ðx0; y0Þ on the ellipse, and note that this
+point can be parametrized as ða cos a; b sin aÞ, where the
+angle a is an intermediate parametrization. Differentiating
+the ellipse’s equation, the slope of a tangent line is
+2x
+a2 þ 2y
+b2
+dy
+dx ¼ 0 ) dy
+dx ¼  b2x
+a2y :
+(A1)
+From the fact that ðx0; y0Þ satisﬁes both ðx2
+0=a2Þ þ ðy2
+0=b2Þ
+¼ 1 and the equation of the tangent’s slope, we obtain the
+equation
+of
+the
+tangent
+line
+at
+ðx0; y0Þ
+as
+ðxx0=a2Þ
+þðyy0=b2Þ ¼ 1.
+Now, we obtain the COTANS transform of this tangent
+line, by parametrizing it in terms of its Euclidean distance q
+from the origin and the azimuth h of the normal line to the tan-
+gent going through the origin. Thus, a tangent to the ellipse at
+ða cos a; b sin aÞ will be expressed as a point ðqa; haÞ in the
+COTANS domain. One derivation of this COTANS transform
+result is as follows. Our method will obtain qðhÞ, the distance
+to the origin of a given tangent plane as a function of azimuth.
+The distance qa of the tangent line to the origin is the
+solution to
+min
+jjxjj2
+s:t:
+wT
+ax ¼ 1;
+(A2)
+where x ¼ ½x
+yT is the point of intersection of the tangent
+line
+and
+its
+normal
+through
+the
+origin,
+and
+wT
+a ¼ ½x0=a2
+y0=b2 ¼ ½cos a=a
+sin a=b. qa can be found
+by using Lagrange multipliers technique, where
+L x; k
+ð
+Þ ¼ 1
+2 xTx  k wT
+ax  1
+
+
+;
+rxL x; k
+ð
+Þ ¼ 0 ) x  kwa ¼ 0 ) x ¼ kwa;
+rkL x; k
+ð
+Þ ¼ 0 ) wT
+ax ¼ 1 ) kjjwajj2
+2 ¼ 1
+) k ¼
+1
+jjwajj2
+2
+;
+) x ¼ kwa ¼
+wa
+jjwajj2
+2
+¼
+a2b2
+a2 sin2a þ b2 cos2a
+
+cos a
+a
+sin a
+b
+
+T
+;
+) qa ¼ jjxjj2 ¼
+1
+jjwajj2
+¼
+ab
+ﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃ
+a2 sin2a þ b2 cos2a
+p
+: (A3)
+We now have qa in Eq. (A3), but our goal is to eliminate a
+and obtain qðhÞ. From Eq. (A1), we know that lines that are
+orthogonal to the tangent line have a slope of a2y=b2x, so
+tan h ¼ a sin a
+b cos a ¼ a
+b tan a;
+) cos 2a ¼
+1
+1 þ tan2a ¼
+1
+1 þ b2
+a2 tan2h
+;
+(A4)
+sin2a ¼
+b2
+a2 tan2h
+1 þ b2
+a2 tan2h
+:
+(A5)
+Therefore, for a given h, the corresponding qðhÞ is obtained
+after substitution as
+q h
+ð Þ ¼
+ab
+ﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃ
+a2 sin2a þ b2 cos2a
+p
+¼
+ﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃ
+a2 cos2h þ b2 sin2h
+p
+:
+(A6)
+Equation (A6) allows us to obtain the set of points
+ðq; hÞ
+
+
+in the COTANS domain for a standard ellipse, but
+we wish to obtain such points for a general ellipse whose foci
+are pe and pr. We are given that the LOS distance between
+the emitter and receiver is dLOS and that the distance of the
+NLOS reﬂection from a given boundary is dNLOS. Our
+method is to ﬁrst obtain ðq; hÞ for a standard ellipse with foci
+at p0
+r ¼ ½dLOS=2
+0T and p0
+e ¼ ½dLOS=2
+0T, with axes
+a ¼ dNLOS=2; b ¼
+ﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃ
+d2
+NLOS  d2
+LOS
+q
+=2. One example of such
+an ellipse is given in Fig. 8(a). The ellipse corresponding to
+the true localization scenario is obtained by rotating this stan-
+dard ellipse as in Fig. 8(b), and then translating it to its cor-
+rect position as in Fig. 8(c). The ðq; hÞ of the tangent line
+must be correspondingly transformed to match the new posi-
+tion of the rotated and translated tangent that yields the
+desired ðqCOTANS; hCOTANSÞ.
+To modify ðq; hÞ as per Fig. 8, ﬁrst consider the azimuth
+of the vector pe  pr as hrot. To align the standard ellipse
+with the target ellipse, we replace each ðq; hÞ with
+ðq; ðh þ hrotÞ mod 2pÞ, which we term ðq; h00Þ. This rotation
+leaves the q-value of each tangent line unchanged, and only
+affects the azimuth, while the new foci are at p00
+e and p00
+r .
+Next, we calculate a translation vector ptrans ¼ pr  p00
+r ,
+which would be added to any point on the rotated standard
+ellipse to obtain the target ellipse. To obtain the resulting
+ðqCOTANS; hCOTANSÞ pairs, we ﬁrst calculate the dot product
+qproj ¼ ptrans  ^q, where ^q ¼½cos h00 sin h00T is the unit vector
+pointing towards the tangent line. Thus, we project the trans-
+lation vector ptrans onto ^q. If qproj 	 0, then we replace
+ðq; h00Þ with ðq þ qproj; h00Þ. If qproj < 0, then we replace q
+with jq  jqprojjj. If jqprojj < q and qproj < 0, then we do not
+modify
+the
+azimuth
+h00;
+else,
+we
+replace
+h00
+with
+ðh00 þ pÞ mod 2p. Carrying out these operations for each of
+the starting
+ðq; hÞ
+
+
+points, we obtain a ﬁnal transformed
+set of points as
+ðqCOTANS; hCOTANSÞ
+
+
+.
+2. COTANS transform for tangent planes
+to spheroids in 3D
+The
+equation
+of
+an
+origin-centered
+spheroid
+is
+ðx2=a2Þ þ ðy2=b2Þ þ ðz2=c2Þ ¼ 1. A point ðx0; y0; z0Þ on its
+J. Acoust. Soc. Am. 153 (1), January 2023
+Arikan et al.
+675
+https://doi.org/10.1121/10.0016999
+ 25 October 2026 05:04:35
+
+
+=== PDF PAGE 13 ===
+surface can be parametrized as ða cos a sin b; b sin a sin b;
+c cos bÞ, where a and b are intermediate parameters.
+Similarly to 2D, the tangent plane at ðx0; y0; z0Þ is ðxx0=a2Þ
+þðyy0=b2Þ þ ðzz0=c2Þ ¼ 1, and we have an optimization
+similar to Eq. (A2), this time using wT
+a;b ¼ ½x0=a2
+y0=b2
+z0=c2 ¼ ½cos a sin b=a
+sin a sin b=b
+cos b=c instead of
+wT
+a. A Lagrangian method as in Eq. (A3) yields
+qa;b ¼
+1
+jjwa;bjj2
+¼
+1
+ﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃ
+cos2a sin2b
+a2
+þ sin2a sin2b
+b2
+þ cos2b
+c2
+r
+;
+(A7)
+x ¼
+wa;b
+jjwa;bjj2
+2
+¼ q2
+a;b
+cos a sin b
+a
+sin a sin b
+b
+cos b
+c
+
+T
+:
+(A8)
+To eliminate a and b and express x in terms of the azimuth
+h and elevation /, we use
+x ¼ qa;b cos h sin /
+sin h sin /
+cos /
+½
+T:
+(A9)
+First, noting that tan / ¼ ða=bÞ tan a, we have the same
+results of Eq. (A4) for cos2a and Eq. (A5) for sin2a. Note
+that for the case of a spheroid where a ¼ b, we have a ¼ h,
+since the x–y cross section of the ellipsoid is then a circle.
+To eliminate b, we observe that
+tan 2/ ¼ c2
+a2
+cos2a
+cos2h tan 2b ¼ c2
+a2 tan 2b;
+) cos 2b ¼
+1
+1 þ a2
+c2 tan2/
+;
+(A10)
+sin2b ¼
+a2
+c2 tan2/
+1 þ a2
+c2 tan2/
+:
+(A11)
+We substitute into Eq. (A7) our results in Eq. (A4), (A5),
+(A10), and (A11) to get
+q h; /
+ð
+Þ ¼
+ﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃ
+c2 cos2/ þ a2 sin2/
+q
+:
+(A12)
+Note that because of symmetry around the z-axis, there is no
+h-dependence at this stage.
+Using Eq. (A12), we can take the COTANS transform
+of tangent planes to a standard spheroid with a ¼ b. We can
+rotate this spheroid and translate it, and correspondingly
+transform the points ðq; h; /Þ that deﬁne the tangent planes.
+Our operations are similar to those in the 2D case. We ﬁrst
+deﬁne our standard spheroid to have foci at p0
+r ¼ ½0
+0
+dLOS=2T and p0
+e ¼ ½0
+0
+dLOS=2T, with axes a ¼ b
+¼
+ﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃ
+d2
+NLOS  d2
+LOS
+q
+=2 and c ¼ dNLOS=2. We calculate the
+azimuth and elevation of the vector pe  pr, and call these
+angles hrot and /rot, respectively. We rotate the spheroid by
+/rot with the y-axis as the axis of rotation (thereby obtain-
+ing the correct elevation), then rotate the result by hrot
+with the z-axis as the axis of rotation (thereby obtaining
+the correct azimuth), and ﬁnally, we translate it to its cor-
+rect position.
+Rotating the spheroid by /rot will not change the q of a
+given ðq; h; /Þ tangent plane, but may affect its azimuth and
+elevation. The unit vector orthogonal to ðq; h; /Þ in
+Cartesian
+coordinates
+is
+given
+by
+^q ¼½cos h sin /
+sin h sin / cos /T. To rotate this vector with the y-axis as
+the axis of rotation, we multiply it by the corresponding
+rotation matrix to obtain
+cos /rot
+0
+sin /rot
+0
+1
+0
+sin /rot
+0
+cos /rot
+2
+664
+3
+775
+cos h sin /
+sin h sin /
+cos /
+2
+664
+3
+775
+¼
+cos /rot cos h sin / þ sin /rot cos /
+sin h sin /
+sin /rot cos h sin / þ cos /rot cos /
+2
+664
+3
+775:
+(A13)
+The azimuth and elevation of the vector obtained in Eq.
+(A13) are then substituted as the new h and / values of the
+plane, h00 and /00. Next, we rotate the tangent plane by hrot,
+which does not change q or /00 but replaces h00 with
+ðh00 þ hrotÞ mod 2p ¼ h000. At this stage, the point corre-
+sponding to the transformed value of p0
+r is a point p00
+r .
+Finally, we calculate the translation vector ptrans ¼ pr  p00
+r ,
+and obtain qproj ¼ ptrans  ^q. The transformation of the tan-
+gent plane in the COTANS domain is similar to the 2D case.
+If qproj 	 0, we replace ðq; h000; /00Þ with ðq þ qproj; h000; /00Þ.
+If qproj < 0, then we subtract the projection result from q,
+thus replacing q with jq  jqprojjj. If jqprojj < q and
+qproj < 0, then we do not modify the azimuth h000 or the ele-
+vation /00; else, we replace h000 with ðh000 þ pÞ mod 2p and /00
+with p  /00. Carrying out this procedure for each of the
+starting
+ðq; h; /Þ
+
+
+points, we obtain a ﬁnal set of
+ðqCOTANS; hCOTANS; /COTANSÞ
+
+
+points in the 3D COTANS
+domain.
+APPENDIX B: PSO IMPLEMENTATION
+In the standard PSO algorithm (Clerc, 2010), we deﬁne
+N particles xðkÞ
+i , corresponding to points xðkÞ
+i
+¼ ½xðkÞ
+i;1 …xðkÞ
+i;DT
+in a D-dimensional search space at iteration k of the PSO
+algorithm. This search space is delimited by the boundaries
+½xj;min; xj;max for each of the j 2
+1…D
+f
+g parameters that we
+optimize
+over.
+Each
+particle
+has
+a
+velocity
+vector
+vðkÞ
+i
+¼ ½vðkÞ
+i;1 …vðkÞ
+i;DT,
+assigned
+randomly
+at
+initialization.
+Particles remember their best locations pi in the search
+space over iterations 1 through k, where their objective func-
+tion fðpiÞ was the largest. Finally, each particle is in a set of
+M randomly chosen neighbors, over which we determine the
+best location pig over past iterations. The PSO update step
+for the velocity and position of each particle is then given
+for each dimension d by
+676
+J. Acoust. Soc. Am. 153 (1), January 2023
+Arikan et al.
+https://doi.org/10.1121/10.0016999
+ 25 October 2026 05:04:35
+
+
+=== PDF PAGE 14 ===
+v kþ1
+ð
+Þ
+id
+ av k
+ð Þ
+id þ U 0; b
+ð
+Þ pid  x k
+ð Þ
+id
+	
+
+þ U 0; b
+ð
+Þ pig  x k
+ð Þ
+id
+	
+
+;
+(B1)
+x kþ1
+ð
+Þ
+id
+ x k
+ð Þ
+id þ v kþ1
+ð
+Þ
+id
+;
+(B2)
+where a and b that deﬁne a particle’s inertia and accelera-
+tion for updating its velocity (standard values are 0.7298
+and 1.4986, respectively), and Uð0; bÞ is a sample of the uni-
+form random variable. Particles that exit the boundaries of
+the search space are reﬂected back.
+1In practice, if Tp > Tc, then Tp can be estimated, but this is an
+environment-specific problem outside the scope of our method, as is an
+estimation of Tm.
+2In our scale watertank setting, the regularly-spaced grid-squares have
+length 1 mm.
+3More sophisticated methods for extracting the LOS peak could also be
+used (Guvenc and Sahinoglu, 2005).
+4Algorithm 2 does not require leveraging all of the boundaries to yield an
+accurate result. The additional NLOS arrivals provide spatial diversity
+that helps to increase localization accuracy and mitigate occlusion.
+5We use a resolution of 0.1 mm for q and 0.1 for h and / in our
+experiments.
+6We heuristically use a uniform averaging filter that is 3 mm wide in q,
+and 3 wide in h and /.
+7Given a maximum of the accumulator result at some ðqmax; hmax; /maxÞ,
+we zero out the h and / within 615 of the maximum, and all q values
+within this sector.
+870% below the predicted magnitude, in our implementation.
+Alameda-Pineda, X., and Horaud, R. (2014). “A geometric approach to
+sound source localization from time-delay estimates,” IEEE/ACM Trans.
+Audio. Speech. Lang. Process. 22(6), 1082–1095.
+Baggeroer, A. B., Kuperman, W. A., and Mikhalevsky, P. N. (1993). “An
+overview of matched ﬁeld methods in ocean acoustics,” IEEE J. Oceanic
+Eng. 18(4), 401–424.
+Borrmann, D., Elseberg, J., Lingemann, K., and N€uchter, A. (2011). “The
+3D Hough transform for plane detection in point clouds: A review and a
+new accumulator design,” 3D Res. 2(2), 3.
+Brutti, A., Omologo, M., and Svaizer, P. (2010). “Multiple source localiza-
+tion based on acoustic map de-emphasis,” EURASIP J. Audio Speech
+Music Process. 2010, 1–17.
+Chitre, M. (2007). “A high-frequency warm shallow water acoustic commu-
+nications channel model and measurements,” J. Acoust. Soc. Am. 122(5),
+2580–2586.
+Chitre, M., and Pelekanakis, K. (2014). “Channel variability measurements
+in an underwater acoustic network,” in Proceedings of UComms 2014,
+September 3–5, Levante, Italy, pp. 1–4.
+Clerc, M. (2010). Particle Swarm Optimization (John Wiley & Sons, New
+York).
+Deane, G. B. (1994). “A three-dimensional analysis of sound propagation in
+facetted geometries,” J. Acoust. Soc. Am. 96(5), 2897–2907.
+Demirli, R., and Saniie, J. (2001). “Model-based estimation of ultrasonic
+echoes. Part I: Analysis and algorithms,” IEEE Trans. Ultrason,
+Ferroelect, Freq. Contr. 48(3), 787–802.
+Dokmanic, I., Parhizkar, R., Ranieri, J., and Vetterli, M. (2015). “Euclidean
+distance matrices: Essential theory, algorithms, and applications,” IEEE
+Signal Process. Mag. 32(6), 12–30.
+Fischell, E. M., Kroo, A. R., and O’Neill, B. W. (2019). “Single-hydro-
+phone low-cost underwater vehicle swarming,” IEEE Robot. Autom. Lett.
+5(2), 354–361.
+Fleury, B. H., Tschudin, M., Heddergott, R., Dahlhaus, D., and I. Pedersen,
+K. (1999). “Channel parameter estimation in mobile radio environments
+using the SAGE algorithm,” IEEE J. Select. Areas Commun. 17(3),
+434–450.
+Guvenc, I., and Sahinoglu, Z. (2005). “Threshold selection for UWB TOA
+estimation based on kurtosis analysis,” IEEE Commun. Lett. 9(12),
+1025–1027.
+Hermand, J.-P. (1999). “Broad-band geoacoustic inversion in shallow
+water from waveguide impulse response measurements on a single
+hydrophone: Theory and experimental results,” IEEE J. Oceanic Eng.
+24(1), 41–66.
+Kim, J., Kim, J., Nguyen, L. T., Shim, B., and Hong, W. (2019). “Tonal sig-
+nal detection in passive sonar systems using atomic norm minimization,”
+EURASIP J. Adv. Signal Process. 2019, 43.
+Knapp, C., and Carter, G. (1976). “The generalized correlation method for
+estimation of time delay,” IEEE Trans. Acoust, Speech, Signal Process.
+24(4), 320–327.
+Korhonen, T. (2008). “Acoustic localization using reverberation with vir-
+tual microphones,” in Proceedings of the IWAENC 2008, September
+14–17, Seattle, WA, pp. 211–223.
+Le Gall, Y., Socheleau, F., and Bonnel, J. (2016). “Matched-ﬁeld perfor-
+mance prediction with model mismatch,” IEEE Signal Process. Lett.
+23(4), 409–413.
+Li, L., and Krolik, J. (2013). “Simultaneous target and multipath position-
+ing,” IEEE J. Sel. Top. Signal Process. 8(1), 153–165.
+Naseri, H., Costa, M., and Koivunen, V. (2014). “Multipath-aided coopera-
+tive network localization using convex optimization,” in Proceedings of
+the 48th Asilomar Conference on Signals, Systems and Computers,
+November 2–5, Paciﬁc Grove, CA, pp. 1515–1520.
+Naseri, H., and Koivunen, V. (2016). “Cooperative simultaneous localiza-
+tion and mapping by exploiting multipath propagation,” IEEE Signal
+Process. Mag 65(1), 200–211.
+Qiao, T., Redﬁeld, S., Abbasi, A., Su, Z., and Liu, H. (2013). “Robust
+coarse position estimation for TDOA localization,” IEEE Wireless
+Commun. Lett. 2(6), 623–626.
+Ribeiro, F., Zhang, C., Flor^encio, D. A., and Ba, D. E. (2010). “Using rever-
+beration to improve range and elevation discrimination for small array
+sound source localization,” IEEE Trans. Audio. Speech. Lang. Process.
+18(7), 1781–1792.
+Salmi, J., Richter, A., and Koivunen, V. (2008). “Detection and tracking of
+MIMO propagation path parameters using state-space approach,” IEEE
+Trans. Signal Process. 57(4), 1538–1550.
+Scheuing, J., and Yang, B. (2008). “Disambiguation of TDOA estimation
+for multiple sources in reverberant environments,” IEEE Trans. Audio.
+Speech. Lang. Process. 16(8), 1479–1489.
+Setlur, P., Smith, G. E., Ahmad, F., and Amin, M. G. (2012). “Target locali-
+zation with a single sensor via multipath exploitation,” IEEE Trans.
+Aerosp. Electron. Syst. 48(3), 1996–2014.
+Srinivasan, P., Liang, P., and Hackwood, S. (1990). “Computational geo-
+metric methods in volumetric intersection for 3D reconstruction,” Pattern
+Recogn. 23(8), 843–857.
+Su, Z., Shao, G., and Liu, H. (2017). “Semideﬁnite programming for NLOS
+error mitigation in TDOA localization,” IEEE Commun. Lett. 22(7),
+1430–1433.
+Sun, W., and Wang, Z. (2018). “Online modeling and prediction of the
+large-scale temporal variation in underwater acoustic communication
+channels,” IEEE Access 6, 73984–74002.
+Too, Y. M., Chitre, M., Barbastathis, G., and Pallayil, V. (2017).
+“Localizing snapping shrimp noise using a small-aperture array,” IEEE J.
+Oceanic Eng. 44(1), 207–219.
+Venkateswaran, S., and Madhow, U. (2012). “Localizing multiple
+events using times of arrival: A parallelized, hierarchical approach to
+the
+association
+problem,” IEEE
+Trans.
+Signal
+Process.
+60(10),
+5464–5477.
+Waterston, J., Rhea, J., Peterson, S., Bolick, L., Ayers, J., and Ellen, J.
+(2019). “Ocean of Things: Affordable maritime sensors with scalable ana-
+lysis,” in OCEANS 2019-Marseille, pp. 1–6.
+Xu, W., Baggeroer, A. B., and Schmidt, H. (2006). “Performance analysis
+for matched-ﬁeld source localization: Simulations and experimental
+results,” IEEE J. Oceanic Eng. 31(2), 325–344.
+J. Acoust. Soc. Am. 153 (1), January 2023
+Arikan et al.
+677
+https://doi.org/10.1121/10.0016999
+ 25 October 2026 05:04:35

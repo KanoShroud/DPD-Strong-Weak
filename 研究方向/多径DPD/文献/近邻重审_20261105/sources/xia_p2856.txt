@@ -1,0 +1,75 @@
+2856                                                                                        IEEE SYSTEMS JOURNAL, VOL. 15, NO. 2, JUNE 2021
+
+
+
+                                                            where H denotes a conjugate operator and the elements of I(x) are
+                                                            deﬁned as
+                                              M                    ∂τp,m,0 H   ∂τq,m,0
+                                                                                    Ip,q =   ΛHp,m(k)Λq,m(k)                                (6)
+                                                           m=1                ∂xp        ∂xq
+
+                                                                           in which p, q = 1, 2
+
+                                                                             k
+                                                                   Λp,m(k) = −i2π                                                                                          αp,m,0Sp(k)e−i2π Kk τp,m,0         (7)
+                                               K
+                                                                             ∂τp,m,0    fs   xp −θm     xp −θ1
+Fig. 1.   Multipath propagation scenario, where the solid line denotes the direct-            =                                                 .        (8)path component, the dashed line and the tiny-dashed line are the multipath             ∂xp      c   ∥xp −θm∥− ∥xp −θ1∥
+components.
+                                                                Then, the CRLB can be obtained by inverting I(x).
+
+with the impulse response function
+                                                                        IV. COCHANNEL SIGNALS LOCALIZATION ALGORITHM
+   hj,m(l) = hdj,m(l) + hrj,m(l)                                                                         In this section, a direction localization method is proposed to jointly
+                                Gj,m                             estimate the positions of cochannel sources. A set of random position
+      = αj,m,0δ(l −τj,m,0) +     αj,m,pδ(l −τj,m,p)    (1)   points (particles) {xn}Nn=1 is ﬁrst drawn from a prior uniform distri-
+                                g=1                             bution U(A), where A is the area of interest and N is the number of
+                                                                                 particles. Then, the delay particles {τ m}Nn n=1 are determined accordingwhere l = 0, 1, . . ., L −1 is the coefﬁcient index of the impulse re-
+                                                                           to (2). A cross spatial spectrum between the signals received by the
+sponse function with L being the length, hdj,m(l) and hrj,m(l) model                                                    mth BS and the reference can be obtained as
+the direct-path and multipath, respectively, g = 0, 1, . . ., Gj,m is the
+                    denoting                               the                                       total number,                                                                   is                                                  an                                                  complexpath    index with            Gj,m                                             αj,m,g                                                                                (k)Rm(k)                                                                           1 K RH1                                                                                                                 ei2π Kk τnm.            (9)                                                      F mn =                  δ(·)                                                                    is                                                          the                                     TDOAattenuation           term,                           is the Dirac                                    delta                                         function,                                                 τj,m,g                                            K                                                                                               |R1(k)|2
+between the p-th path of the mth BS and the direct-path of the reference                       k=1
+with respect to the jth source. Deﬁne hdj,m(l) corresponding to g = 0,  Assume that the observations of each BS is independent with that
+with τj,m,0 expressed as                                               of other BSs, the joint cross spatial spectrum of multiple BSs is
+                                                                     derived as
+                      fs
+               τj,m,0 =    (∥xj −θm∥−∥xj −θ1∥)            (2)                   M
+                       c                                                           n         n
+                                                             F =     |F m|.                     (10)
+where c is the speed of light, fs is the sampling frequency, and ∥· ∥                         m=1
+denotes Euclidean norm of a vector. The received discrete-time-domain
+                                                         The multipath components are suppressed in the proposed spatial
+signal at each BS can be expressed as
+                                                           domain since the TDOAs of multipath signals τj,m,g are raised from
+                       2 L−1                                         geolocations of multiple emitters according to the distance difference
+           rm(t) =        hj,m(l)sj(t −l) + vm(t)           (3)   function in (2). Therefore, most values of F n are very small except for a
+                   j=1 l=0                                   few particles close to the real positions. We propose a sparse algorithm
+where sj(t) is the jth time-domain source signal, vm(t) is the mea-    that can reduce the inﬂuence of the measurement noise, since both of
+surement noise modeled by zero-mean Gaussian variable with the   the cochannel signals can be identiﬁed as well-separated clusters in the
+distribution N(0, σ2v). The fast Fourier transform (FFT) of rm(t) can    spatial domain.
+be expressed as                                     We ﬁrst determine a threshold Tr to set most of the elements of the
+                                                          random spatial spectrum F n to zero. The threshold is given as follows:
+                         2
+         Rm(k) =    Sj(k)  αj,m,0e−i2π Kk τj,m,0                   1) Divide the range of values that F n can take in intervalsn of equal
+                    j=1                                              width Δa. Compute the empirical probability of F   in each
+                                                                                    interval [ai1, ai1 + Δa] as
+              Gj,m
+                                                                                                      Ni1       +      αj,m,ge−i2π Kk τj,m,g + Vm(k)             (4)             P (F n|F                                                                                                                                      (11)                                                                               n ∈[ai1, ai1 + Δa]) =
+              g=1                                                    N
+where k = 1, 2, . . ., K is the frequency-domain index with K denoting        where i1 is the index of interval, a1 = min(F n) and Ni1 is the
+                                                               number of times.the length. Sj(k) and Vm(k) denote the FFT of sj(t) and vm(t),
+                                                                         2) Find the index i′1 that is the maximum solution to the problemrespectively.
+                                                                                              Ni1
+                                                                                                                                                      i′1 = arg max                        (12)                  III. CRAMÉR RAO LOWER BOUND                                                                   i1  N
+   In this section, the CRLB for localization of cochannel sources is        and determine the threshold Tr = 2(ai′1 + Δa) −a1.
+derived. Deﬁne R(k) = [R1(k), R2(k), . . ., RM(k)]T the observation     Thus, we obtain a set of sparse values of the spatial spectrum
+vectorandx = [x1, x2]T theunknownpositionvectorrespectively,and
+assume that the TDOAs of direct-path τj,m,0 and multipath τj,m,p are                     n   F n,  F n ≥Tr                                                                                                      ˜F =                                     (13)
+independent. The Fisher information matrix I(x) ∈C2×2 is given as                                   n                                                                                                        0,   F < Tr.
+
+                                                                                     n are decomposed with a proposed                  1 K   ∂R(k) H  ∂R(k)                     Next, the nonzero elements of ˜F            I(x) =                                               (5)
+                  σ2v k=1   ∂x       ∂x                      clustering method, which can be described as follows.
+
+
+        Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 27,2026 at 04:51:29 UTC from IEEE Xplore. Restrictions apply.

@@ -1,0 +1,2130 @@
+--- PDF PAGE 1 ---
+IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 9, NO. 6, JUNE 2010
+2033
+Robustness Analysis and New Hybrid Algorithm of
+Wideband Source Localization for
+Acoustic Sensor Networks
+Kun Yan, Hsiao-Chun Wu, Senior Member, IEEE, and S. S. Iyengar, Fellow, IEEE
+Abstract—Wideband source localization using acoustic sensor
+networks has been drawing a lot of research interest recently
+in wireless communication applications, such as cellular hand-
+set localization, global positioning systems (GPS), and land
+navigation technologies, etc. The maximum-likelihood is the
+predominant objective which leads to a variety of source localiza-
+tion approaches. However, the appropriate optimization (search)
+algorithms are still being pursuit by researchers since different
+aspects about the effectiveness of such algorithms have to be
+addressed on different circumstances. In this paper, we focus
+on the two popular source localization methods for wideband
+acoustic signals, namely the alternating projection (AP) algorithm
+and the expectation maximization (EM) algorithm. We explore
+the respective limitations of these two methods and design a new
+hybrid approach thereupon. Through Monte Carlo simulations,
+we demonstrate that the trade-off can be achieved between the
+computational complexity and the localization accuracy using our
+newly proposed scheme. Moreover, we present the new robustness
+analysis for the source localization algorithms. We derive the
+Cramer-Rao lower bound (CRLB) involving the source spectral
+estimation error and thus prove that the new hybrid algorithm is
+more efﬁcient than the EM algorithm. By employing the Gaus-
+sianity test, we also quantify the statistical mismatch between the
+actual statistics of the sensor signals and the underlying Gaussian
+model. We show that the Gaussianity measure can be a reliable
+robustness ﬁgure for source localization.
+Index Terms—Source localization, alternating projection, ex-
+pectation
+maximization,
+acoustic
+sensors,
+Gaussianity
+test,
+CRLB.
+I. INTRODUCTION
+S
+OURCE localization using low-cost and low-complexity
+sensor arrays has been the active research area in the
+ﬁelds of radar, sonar, geophysics, wireless communications
+and acoustic tracking for years [1]. Various techniques have
+been proposed for the narrow-band direction-of-arrival (DOA)
+estimation in the far ﬁeld case [1]–[8]. Recently, the wide-
+band source localization in the near ﬁeld case has drawn a lot
+of research interest in the signal processing and communica-
+tions applications [6]–[9]. Extensive studies for the wide-band
+Manuscript received April 10, 2009; revised August 6, 2009 and April 16,
+2010; accepted August 17, 2009. The associate editor coordinating the review
+of this paper and approving it for publication was J. Tugnait.
+K. Yan and H.-C. Wu are with the Department of Electrical and Computer
+Engineering, Louisiana State University, Baton Rouge, LA 70803, USA (e-
+mail: kyan2@lsu.edu, wu@ece.lsu.edu).
+S. S. Iyengar is with the Department of Computer Science, Louisiana State
+University, Baton Rouge, LA 70803, USA (e-mail: iyengar@csc.lsu.edu).
+This work was supported by NSF-ECCS 0426644, Louisiana Board of
+Regents-PKSFI Grant 32-4233-40860 (LSU), DoD-DEPSCoR: N0014-08-1-
+0856, and NSF-DUE 0621128.
+Digital Object Identiﬁer 10.1109/TWC.2010.06.090515
+source localization can be found in [10]–[17]. Among them,
+the maximum-likelihood (ML) approach in [10] has been
+regarded as the optimal and robust scheme for coherent source
+signals. However, when the multiple sources are present, the
+ML approach poses a nonlinear optimization problem, which
+is impractical to solve especially for the energy-constrained
+sensor networks. Since the energy consumption is strictly
+limited in those sensor networks, the reduction in the com-
+putational complexity of the source localization algorithm
+appears to be crucial. Thus, the computational complexity
+issue remains challenging for the researchers in this area. Re-
+cently, we designed an Expectation-Maximization (EM) based
+localization algorithm for multiple wide-band sources [18]
+and it can be shown that our proposed algorithm is much
+more computationally efﬁcient than the existing alternating
+projection (AP) method [10]–[17] for achieving the similar
+localization accuracy.
+However, there are three major issues which have never
+been tackled in the existing literature regarding the source
+localization. First, the trade-off between the EM algorithm
+in [18] and the AP algorithm in [10]–[17] has not been
+studied in detail so far. Second, the comparative analysis
+based on the location estimation measures, such as Cramer-
+Rao lower bound (CRLB), has not been presented for the
+EM scheme versus the AP method. Third, the qualitative and
+quantitative justiﬁcations of the maximum-likelihood source
+location estimation using the Gaussian-mixture probabilistic
+model have never been addressed. Motivated by the afore-
+mentioned concerns, we make an attempt to answer these
+important questions in this paper.
+Through our exhaustive heuristic studies, the EM source
+localization algorithm in [18] is rather sensitive to the initial
+condition since the EM based algorithms cannot guarantee
+that the global optimality would be achieved for any arbitrary
+initial condition. On the other hand, the AP source localization
+algorithm is based on the exhaustive search procedure, which
+certainly can reach the global optimality but the computational
+complexity would increase tremendously as the ﬁne search-
+grid resolution is in demand. If the initial condition is ill-
+posed for the EM localization algorithm in [18], the AP
+algorithm in [10]–[17] can deﬁnitely perform better with a
+much larger computational complexity. In this paper, we will
+provide the computational complexity analyses of these two
+methods and propose a hybrid scheme to seek the trade-off
+between the accuracy and the complexity which are related to
+1536-1276/10$25.00 c⃝2010 IEEE
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:28 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 2 ---
+2034
+IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 9, NO. 6, JUNE 2010
+the individual advantages of the two aforementioned source
+localization methods. In addition to the complexity analyses,
+we evaluate the robustness of these two localization schemes
+by deriving the corresponding CRLB. The effect of noise
+statistics will also be discussed [19]. Different noise charac-
+teristics will induce different probabilistic mismatchs between
+the actual statistics of the sensor signals and the underlying
+Gaussian-mixture model. We propose a new means to quantify
+this mismatch and show why the ML source localization
+performance varies with respect to different noise statistics.
+The rest of this paper is organized as follows. The source
+localization problem formulation and the corresponding signal
+model are introduced in Section II. The maximum-likelihood
+objective function for the near-ﬁeld wideband source localiza-
+tion is also derived in Section II. The associated alternating
+projection and expectation maximization algorithms to maxi-
+mize this objective function are presented in Section III. The
+computational complexity analyses will be presented and a
+novel hybrid source localization algorithm will be proposed
+thereby in Section IV. The robustness analysis, which in-
+volves the CRLB derivation and the probabilistic mismatch
+evaluation, will be manifested in Section V. Monte Carlo
+simulation results for demonstrating our proposed new hybrid
+method and illustrating our newly derived robustness analysis
+will be provided in Section VI. Conclusion will be drawn in
+Section VII.
+Nomenclature: 𝐴denotes a vector and ˜𝐴denotes a matrix.
+𝒞and ℛdenote the sets of complex and real numbers,
+respectively. ˜𝐴𝑇, ˜𝐴𝐻are the transpose and the Hermitian
+adjoint of a matrix ˜𝐴. The statistical expectation is denoted
+as 𝐸{ } and ∥𝐴∥denotes the Euclidean norm of the vector
+𝐴.
+II. SIGNAL MODEL FOR SOURCE LOCALIZATION
+According to [10], [20], we consider a randomly distributed
+array of 𝑃sensors to collect the data from 𝑀sources. Since
+the sources are assumed to be in the near ﬁeld, the signal gains
+are different across the sensors. Thus, the signal collected by
+the 𝑝th sensor at time instant 𝑛is given by
+𝑥𝑝(𝑛) =
+𝑀
+∑
+𝑚=1
+𝑎(𝑚)
+𝑝
+𝑠(𝑚)
+0
+(
+𝑛−𝑡(𝑚)
+𝑝
+)
++ 𝑤𝑝(𝑛),
+(1)
+for 𝑛= 0, 1, . . . , 𝐿−1, 𝑝= 1, . . . , 𝑃, 𝑚= 1, . . . , 𝑀, where
+𝑎(𝑚)
+𝑝
+is the gain of the 𝑚th source signal arriving at the 𝑝th
+sensor; 𝑠(𝑚)
+0
+(𝑛) denotes the 𝑚th source signal waveform; 𝑡(𝑚)
+𝑝
+is the propagation delay (in data samples) incurred from the
+𝑚th source to the 𝑝th sensor; 𝑤𝑝(𝑛) represents the zero-mean
+independently identically distributed (i.i.d.) noise process with
+variance 𝜎2. Several parameters can be speciﬁed as follows:
+𝑡(𝑚)
+𝑝
+= ∥𝑟𝑠(𝑚)−𝑟𝑝∥
+𝑣
+: the propagation delay from
+the 𝑚th source to the 𝑝th sensor,
+𝑟𝑠(𝑚) ∈ℛ2×1: the 𝑚th source location,
+𝑟𝑝∈ℛ2×1: the 𝑝𝑡ℎsensor location,
+𝜈: the source signal propagation speed in me-
+ters/sec.
+Taking the discrete Fourier transform (DFT) of both sides
+in Eq. (1), we have
+𝑋(𝑘) = ˜𝐷(𝑘)𝑆0(𝑘) + 𝑈(𝑘), for 𝑘= 0, 1, . . ., 𝑁−1,
+(2)
+where
+𝑋(𝑘)
+def= [𝑋1(𝑘) ⋅⋅⋅𝑋𝑝(𝑘)]𝑇∈𝒞𝑃×1
+(3)
+and 𝑋𝑝(𝑘) is the 𝑘th DFT point of 𝑥𝑝(𝑛), 𝑝= 1, . . . , 𝑃. The
+notations for the right-hand side of Eq. (2) are described as
+follows.
+˜𝐷(𝑘)
+def= [𝑑(1)(𝑘) ⋅⋅⋅𝑑(𝑀)(𝑘)] ∈𝒞𝑃×𝑀
+(4)
+consists of 𝑀steering vectors, each given by
+𝑑(𝑚)(𝑘)
+def= [𝑑(𝑚)
+1
+(𝑘) ⋅⋅⋅𝑑(𝑚)
+𝑃
+(𝑘)]𝑇∈𝒞𝑃×1, 𝑚= 1, . . . , 𝑀,
+(5)
+where
+𝑑(𝑚)
+𝑝
+def= 𝑎(𝑚)
+𝑝
+𝑒−
+𝑗2𝜋𝑘𝑡(𝑚)
+𝑝
+𝑁
+,
+(6)
+and 𝑗
+def= √−1. Note that
+𝑆0(𝑘)
+def= [𝑆(1)
+0 (𝑘) ⋅⋅⋅𝑆(𝑀)
+0
+(𝑘)]𝑇∈𝒞𝑀×1
+(7)
+consists of 𝑀individual source signal spectra, each given by
+𝑆(𝑚)
+0
+(𝑘) where 𝑆(𝑚)
+0
+(𝑘) is the 𝑘th DFT point of 𝑠(𝑚)
+0
+(𝑛),
+𝑚= 1, . . . , 𝑀.
+In reality, the source signal spectral vector 𝑆0(𝑘) is un-
+known and deterministic. The noise spectral vector 𝑈(𝑘) ∈
+𝒞𝑃×1 is a complex-valued zero-mean white Gaussian process
+and each element of 𝑈(𝑘) has a variance 𝐿𝜎2.
+For source localization, we deﬁne the unknown parameter
+vector Θ ∈𝒞1×(𝑀𝑁+2𝑀) as
+Θ =
+[
+𝑟𝑠𝑇𝑆0
+(1)𝑇⋅⋅⋅𝑆0
+(𝑚)𝑇⋅⋅⋅𝑆0
+(𝑀)𝑇]𝑇
+,
+(8)
+where
+𝑟𝑠
+def=
+[
+𝑟𝑠(1)𝑇⋅⋅⋅𝑟𝑠(𝑚)𝑇⋅⋅⋅𝑟𝑠(𝑀)𝑇]𝑇
+∈ℛ2𝑀×1,
+(9)
+and
+𝑆0
+(𝑚) def=
+[
+𝑆(𝑚)
+0
+(0) ⋅⋅⋅𝑆(𝑚)
+0
+(𝑁−1)
+]𝑇
+∈𝒞𝑁×1.
+(10)
+According to Eqs. (2)-(10), we may construct the equivalent
+log-likelihood of the sensor signal spectra after neglecting the
+constant terms, which is given by
+𝐽(𝑟𝑠) = log 𝑓𝑋[Θ; 𝑋(𝑘)]
+def= −
+𝑁−1
+∑
+𝑘=0
+[
+𝑋(𝑘) −˜𝐷(𝑘)𝑆0(𝑘)
+]𝐻[
+𝑋(𝑘) −˜𝐷(𝑘)𝑆0(𝑘)
+]
+.
+(11)
+Thus, the maximum-likelihood estimation of Θ can be
+achieved as
+ˆΘ = arg max
+Θ
+(
+𝐽(𝑟𝑠)
+)
+= arg min
+Θ
+( 𝑁−1
+∑
+𝑘=0
+[
+𝑋(𝑘) −˜𝐷(𝑘)𝑆0(𝑘)
+]𝐻
+×
+[
+𝑋(𝑘) −˜𝐷(𝑘)𝑆0(𝑘)
+] )
+. (12)
+Eq. (12) yields the source signal spectral estimates ˆ𝑆0(𝑘) as
+ˆ
+𝑆0(𝑘) =
+(
+˜𝐷(𝑘)𝐻˜𝐷(𝑘)
+)−1 ˜𝐷(𝑘)𝐻𝑋(𝑘), 𝑘= 0, 1, . . . , 𝑁−1.
+(13)
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:28 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 3 ---
+YAN et al.: ROBUSTNESS ANALYSIS AND NEW HYBRID ALGORITHM OF WIDEBAND SOURCE LOCALIZATION FOR ACOUSTIC SENSOR NETWORKS
+2035
+According to [10] and Eqs. (11), (12), and (13), the ML source
+location estimates can be obtained as
+arg max
+𝑟𝑠
+(
+𝐽(𝑟𝑠)
+)
+= arg max
+𝑟𝑠
+(𝑁−1
+∑
+𝑘=0
+ ˜𝑃(𝑘, 𝑟𝑠)𝑋(𝑘)
+
+2
+)
+,
+(14)
+where the projection matrix ˜𝑃(𝑘, 𝑟𝑠) ∈𝒞𝑃×𝑃is deﬁned as
+˜𝑃(𝑘, 𝑟𝑠)
+def= ˜𝐷(𝑘)
+(
+˜𝐷(𝑘)𝐻˜𝐷(𝑘)
+)−1 ˜𝐷(𝑘)𝐻.
+(15)
+For the single source case, the ML estimator in Eq. (14) can
+be further simpliﬁed as
+arg max
+𝑟𝑠
+(
+𝐽(𝑟𝑠)
+)
+= arg max
+𝑟𝑠
+(𝑁−1
+∑
+𝑘=0
+𝐵(𝑘, 𝑟𝑠)
+2
+)
+,
+(16)
+where
+𝐵(𝑘, 𝑟𝑠)
+def= 𝑑(𝑘, 𝑟𝑠)𝐻𝑋(𝑘) = 𝑑(1)(𝑘)𝐻𝑋(𝑘)
+(17)
+is a scalar. Note that 𝑑(1)(𝑘) is a function of 𝑟𝑠implicitly
+according to Eqs. (1) and (2). It is obvious that the cost
+function 𝐽(𝑟𝑠) in Eq. (14) is nonlinear for multiple sources.
+Hence, the iterative methods are in demand for the associated
+optimization.
+III. AP AND EM SOURCE LOCALIZATION ALGORITHMS
+To solve Eq. (12) or Eq. (14), the AP schemes in [10]–
+[17] were proposed to decouple Eq. (14) into the single-source
+localization problems as described by Eq. (16) and then the
+exhaustive search procedure was applied to determine ˆΘ.
+On the other hand, we can employ the EM-algorithm to
+solve Eq. (12) instead [18]. We deﬁne the complete-data as
+𝑋(𝑚)(𝑘)
+def=
+[
+𝑋(𝑚)
+1
+(𝑘) 𝑋(𝑚)
+2
+(𝑘) ⋅⋅⋅𝑋(𝑚)
+𝑃
+(𝑘)
+]𝑇
+∈𝒞𝑃×1
+(18)
+such that
+𝑋(𝑘) =
+𝑀
+∑
+𝑚=1
+𝑋(𝑚)(𝑘),
+(19)
+where 𝑋(𝑚)(𝑘) denotes the mixture Gaussian process (with
+the cluster mean vector 𝑑(𝑚)(𝑘)𝑆(𝑚)
+0
+(𝑘) and the identical
+cluster covariance matrix 𝜎2
+𝑀˜𝐼, ∀𝑚, and ˜𝐼is the 𝑃×𝑃identity
+matrix) of the received signal spectrum contributed by the 𝑚th
+source. Thus, 𝑋(𝑘) is deﬁned as the incomplete-data.
+Then Eq. (11) can be rewritten in terms of the complete
+data as
+log 𝑓𝑋
+[
+Θ; 𝑋(𝑚)(𝑘)
+]
+def=
+−
+𝑀
+∑
+𝑚=1
+𝑁−1
+∑
+𝑘=0
+𝑋(𝑚)(𝑘) −𝑑(𝑚)(𝑘)𝑆(𝑚)
+0
+(𝑘)
+
+2
+, (20)
+and we deﬁne
+𝑓𝑥(𝑚)(𝑟𝑠(𝑚), 𝑆0
+(𝑚))
+def=
+𝑁−1
+∑
+𝑘=0
+𝑋(𝑚)(𝑘) −𝑑(𝑚)(𝑘)𝑆(𝑚)
+0
+(𝑘)
+
+2
+.
+(21)
+The log-likelihood of the complete data given by Eq. (20)
+is a summation of the individual log-likelihood functions for
+the incident sources given by 𝑓𝑥(𝑚)(𝑟𝑠(𝑚), 𝑆0
+(𝑚)) in Eq. (21).
+Thus, the source locations can easily be searched indepen-
+dently and separately using our proposed EM algorithm.
+Since 𝑋(𝑚)(𝑘), 𝑚= 1, 2, . . . , 𝑀, are unknown, we have
+to estimate them based on [𝑋(𝑘), ˆΘ]. Given the estimate ˆΘ
+[𝑖]
+for the 𝑖th iteration (𝑖≥0), the (𝑖+ 1)th iteration of EM
+algorithm can be carried out thereby. Thus, the procedure is
+stated as follows. Calculate
+𝑄(ˆΘ, ˆΘ
+[𝑖])
+def=
+𝐸
+{
+log 𝑓𝑋
+[
+Θ; 𝑋(𝑚)(𝑘)
+]  𝑋(𝑘), ˆΘ
+[𝑖]}
+=
+log 𝑓𝑋
+[
+ˆΘ; ˆ𝑋
+(𝑚)(𝑘, ˆΘ
+[𝑖])
+]
+,
+for 𝑚= 1, . . . , 𝑀, (22)
+where
+ˆ𝑋
+(𝑚)(𝑘, ˆΘ
+[𝑖])
+def= 𝐸
+[
+𝑋(𝑚)(𝑘)
+ 𝑋(𝑘), ˆΘ
+[𝑖]]
+= ˆ𝑑
+(𝑚)(𝑘) ˆ𝑆(𝑚)
+0
+(𝑘) + 1
+𝑀
+(
+𝑋(𝑘) −ˆ˜𝐷(𝑘) ˆ𝑆0(𝑘)
+)
+.
+(23)
+It is noted that ˆ𝑑
+(𝑚)(𝑘), ˆ𝑆(𝑚)
+0
+(𝑘), ˆ˜𝐷(𝑘), ˆ𝑆0(𝑘), 𝑘=
+0, 1, . . . , 𝑁−1, are all estimated using ˆ𝑟𝑠
+(𝑚) (the estimate
+of 𝑟𝑠(𝑚)) obtained from the previous iteration 𝑖according to
+the deﬁnitions given by Eqs. (4), (5), (6), (7) and (10).
+Then,
+re-estimate
+Θ
+by
+maximizing
+log 𝑓𝑋
+[
+ˆΘ; ˆ𝑋
+(𝑚)(𝑘, ˆΘ
+[𝑖])
+]
+in Eq. (22) as
+ˆΘ
+[𝑖+1] = arg max
+Θ
+{
+log 𝑓𝑋
+[
+ˆΘ; ˆ𝑋
+(𝑚)(𝑘, ˆΘ
+[𝑖])
+]}
+.
+(24)
+The solution to Eq. (24) is
+ˆ𝑟𝑠
+(𝑚)
+=
+arg max
+𝑟𝑠(𝑚)
+𝑁−1
+∑
+𝑘=0
+
+[
+ˆ𝑑
+(𝑚)(𝑘)
+]𝐻ˆ𝑋
+(𝑚)(𝑘, ˆΘ
+[𝑖])
+
+2
+=
+arg max
+𝑟𝑠(𝑚)
+𝑁−1
+∑
+𝑘=0
+∣Υ𝑖∣2,
+(25)
+where
+Υ𝑖
+def=
+[
+ˆ𝑑
+(𝑚)(𝑘)
+]𝐻ˆ𝑋
+(𝑚)(𝑘, ˆΘ
+[𝑖]),
+(26)
+and
+ˆ𝑆0
+(𝑚)(𝑘) =
+[
+ˆ𝑑
+(𝑚)(𝑘)
+]𝐻ˆ𝑋
+(𝑚) (
+𝑘, ˆΘ
+[𝑖])
+ˆ𝑑
+(𝑚)(𝑘)
+
+2
+,
+(27)
+for 𝑚= 0, 1, . . ., 𝑀, 𝑘= 0, 1, . . ., 𝑁−1. Then update
+ˆΘ
+[𝑖+1] =
+[
+ˆ𝑟𝑠
+𝑇ˆ𝑆0
+(1)𝑇
+⋅⋅⋅ˆ𝑆0
+(𝑚)𝑇
+⋅⋅⋅ˆ𝑆0
+(𝑀)𝑇]𝑇
+,
+(28)
+where
+ˆ𝑟𝑠
+def=
+[
+ˆ𝑟𝑠
+(1)𝑇⋅⋅⋅ˆ𝑟𝑠
+(𝑚)𝑇⋅⋅⋅ˆ𝑟𝑠
+(𝑀)𝑇]𝑇
+,
+(29)
+and
+ˆ𝑆0
+(𝑚) def=
+[
+ˆ𝑆0
+(𝑚)(0) ⋅⋅⋅
+ˆ𝑆0
+(𝑚)(𝑁−1)
+]𝑇
+,
+for 𝑚= 1, . . . , 𝑀.
+(30)
+The E- and M-steps are repeated until the pre-deﬁned conver-
+gence of the estimated parameters is achieved.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:28 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 4 ---
+2036
+IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 9, NO. 6, JUNE 2010
+IV. COMPUTATIONAL COMPLEXITY STUDIES AND NOVEL
+HYBRID SOURCE LOCALIZATION SCHEME
+There is a trade-off between the localization accuracy and
+the computational complexity when the aforementioned AP
+and EM algorithms are adopted. The studies of computational
+complexity for these two source localization algorithms are
+presented in the following subsections.
+A. Computational Complexities for Complex Multiplications
+For simplicity, in our computational complexity studies of
+the AP and EM source localization schemes, we only consider
+the computational burden for complex multiplications. In
+addition, the computations of the discrete Fourier transform
+and the matrices ˜𝐷(𝑘), 𝑘= 0, 1, . . ., 𝑁−1, are neglected.
+𝑁𝑥, 𝑁𝑦denote the numbers of search points along the 𝑥−
+and 𝑦−axes, respectively. For our proposed EM method, we
+need 𝑁𝑀2𝑃3 complex multiplications to carry out Eq. (23),
+𝑁𝑁𝑥𝑁𝑦𝑀𝑃2 multiplications to carry out ∑𝑁−1
+𝑘=0 ∣Υ𝑖∣2 in
+Eq. (25), and 𝑁𝑀𝑃complex multiplications to carry out
+[
+ˆ𝑑
+(𝑚)(𝑘)
+]𝐻ˆ𝑋
+(𝑚)(
+𝑘, ˆΘ
+[𝑖])
+∥ˆ𝑑
+(𝑚)(𝑘)∥2
+in Eq. (27). Consequently, in our pro-
+posed EM algorithm, the number of complex multiplications
+per iteration is
+ℂ×
+EM(𝑁, 𝑀, 𝑃, 𝑁𝑥, 𝑁𝑦) = 𝑁
+(
+𝑀2𝑃3 + 𝑀𝑃+ 𝑁𝑥𝑁𝑦𝑀𝑃2)
+.
+(31)
+According to [10], it is easy to derive the number of complex
+multiplications for the existing AP method as
+ℂ×
+AP(𝑁, 𝑀, 𝑃, 𝑁𝑥, 𝑁𝑦) = 𝑁𝑀2𝑃3𝑁𝑥𝑁𝑦.
+(32)
+B. Computational Complexities for Comparison Operations
+Furthermore, the search for the maximum objective function
+values is needed by both AP and EM schemes. There involve
+𝑁𝑥𝑁𝑦−1 comparison operations in Eq. (25) for each source
+per iteration in our proposed EM algorithm. Thus we need
+𝑀𝜁(𝑁𝑥𝑁𝑦−1) comparison operations where 𝜁is the total
+iteration number and 𝑀is the source number. For the AP
+method, we need 𝑀𝜁(𝑁𝑥𝑁𝑦−1) comparison operations (𝜁
+iterations for the AP method are also assumed for a fair
+comparison). Since the EM algorithm for each source location
+estimate can be carried out in parallel, we actually need to
+undertake 𝜁(𝑁𝑥𝑁𝑦−1) comparison operations per computer.
+The AP algorithm has to do the maximum search for each
+source location estimate sequentially instead (impossible for
+parallel computation) [10]. Hence, the numbers of comparison
+operations needed by these two methods are
+ℂ𝑐𝑜𝑚
+EM = 𝜁(𝑁𝑥𝑁𝑦−1)
+(33)
+and
+ℂ𝑐𝑜𝑚
+AP = 𝑀𝜁(𝑁𝑥𝑁𝑦−1) .
+(34)
+According to Eqs. (33) and (34), the EM method requires
+only
+1
+𝑀times of the comparison operations as many as the
+AP method if the parallel computation is feasible. However,
+the EM method is very sensitive to the initial condition and
+can only assure the sub-optimality.
+C. Novel Hybrid Source Localization Algorithm
+From the previous discussion in Sections III, IV-A and IV-B,
+the obvious trade-off is inevitably encountered between the
+AP and the EM methods in practice. To seek the best trade-
+off between the localization performance and the incurred
+computational complexity, we propose a new hybrid source
+localization scheme as follows:
+Step 1) Employ the AP algorithm using the "rough" reso-
+lution, which is speciﬁed by 𝑁𝑥
+′, 𝑁𝑦
+′ grid points in the 𝑥-
+and 𝑦-directions, respectively. The outcome of this step can
+be considered as the coarse location estimate 𝑟𝑆′.
+Step 2) Utilize the estimation outcome 𝑟𝑆′ from Step 1 to
+carry out the EM procedure with a ﬁner resolution, which
+is speciﬁed by the new grid parameters 𝑁𝑥
+′′, 𝑁𝑦
+′′ for 𝜁
+iterations. The ultimate location estimate can be achieved as
+𝑟𝑆′′.
+It is obvious that the computational complexity ℂ×
+𝐻𝑦𝑏𝑟𝑖𝑑for
+the above-described new hybrid source localization scheme in
+terms of complex multiplications can be expressed as
+ℂ×
+𝐻𝑦𝑏𝑟𝑖𝑑
+=
+ℂ×
+AP(𝑁, 𝑀, 𝑃, 𝑁𝑥
+′, 𝑁𝑦
+′)
++𝜁ℂ×
+EM(𝑁, 𝑀, 𝑃, 𝑁𝑥
+′′, 𝑁𝑦
+′′).
+(35)
+According to Eqs (31)-(34), the trade-off between the compu-
+tational complexity and the location estimation accuracy can
+be maneuvered. Our new hybrid method would be much less
+sensitive to the initial condition than our previously proposed
+EM algorithm [18] but it also leads to a much less computa-
+tional complexity than the conventional AP method [10]–[17].
+V. ROBUSTNESS ANALYSIS FOR SOURCE LOCALIZATION
+ALGORITHMS
+To evaluate our novel hybrid source localization scheme,
+we provide the Cramer-Rao Lower Bound (CRLB) of the
+source location estimator. By analyzing the CRLB, we prove
+that our proposed hybrid algorithm is more robust than the
+EM algorithm in [18]. The major factor is the probabilistic
+mismatch. In this section, we will employ the Non-Gaussianity
+test for source localization to demonstrate that the source
+localization estimator is sensitive to the mismatch between
+the adopted underlying statistical model (Gaussian mixture)
+and the actual sensor signal statistics.
+A. Cramer-Rao Lower Bound for Source Location Estimation
+To study the robustness, we ﬁrst derive the CRLB involv-
+ing the source spectral estimation here. The source spectral
+estimation error 𝜀(𝑘), 𝑘= 0, 1, . . . , 𝑁−1, is deﬁned as
+𝜀(𝑘)
+def= ˆ𝑆0(𝑘) −𝑆0(𝑘), for 𝑘= 0, 1, . . ., 𝑁−1,
+(36)
+where ˆ𝑆(𝑚)
+0
+(𝑘) = 𝑆(𝑚)
+0
+(𝑘) + 𝜀(𝑚)(𝑘), 𝑚= 1, . . . , 𝑀denotes
+the source signal spectral estimate. We deﬁne
+𝜆𝑝
+(𝑚) def=
+ˆ𝑟𝑠
+(𝑚)𝑇−𝑟𝑝𝑇
+∥ˆ𝑟𝑠
+(𝑚) −𝑟𝑝∥
+∈ℛ1×2,
+(37)
+where ˆ𝑟𝑠
+(𝑚) is given by Eq. (25) and 𝑟𝑝is deﬁned below
+Eq. (1). Given the signal model as described in Section II, we
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:28 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 5 ---
+YAN et al.: ROBUSTNESS ANALYSIS AND NEW HYBRID ALGORITHM OF WIDEBAND SOURCE LOCALIZATION FOR ACOUSTIC SENSOR NETWORKS
+2037
+derive the entries in Fisher information matrix ˜ℱ∈ℛ2𝑀×2𝑀
+for the source location vector 𝑟𝑠as (according to [21])
+˜ℱ(𝑚1, 𝑚2) =
+4𝜋2
+𝐿𝑁2𝜎2𝜐2
+×
+𝑃
+∑
+𝑝=1
+(
+𝑎(𝑚1)
+𝑝
+𝑎(𝑚2)
+𝑝
+exp
+⎡
+⎣−
+𝑗2𝜋
+(
+𝑡(𝑚2)
+𝑝
+−𝑡(𝑚1)
+𝑝
+)
+𝑁
+⎤
+⎦
+× 𝐸
+{
+𝜆𝑝
+(𝑚1)𝑇𝜆𝑝
+(𝑚2)} )
+𝐸
+{
+ˆ𝑆(𝑚1)𝐻
+0
+(𝑘) ˆ𝑆(𝑚2)
+0
+(𝑘)
+}
+.
+(38)
+Considering the source spectral estimation error deﬁned by
+Eq. (36), we get
+˜
+ℱ(𝑚1, 𝑚2) =
+4𝜋2
+𝐿𝑁2𝜎2𝜐2
+×
+𝑃
+∑
+𝑝=1
+(
+𝑎(𝑚1)
+𝑝
+𝑎(𝑚2)
+𝑝
+exp
+⎡
+⎣−
+𝑗2𝜋
+(
+𝑡(𝑚2)
+𝑝
+−𝑡(𝑚1)
+𝑝
+)
+𝑁
+⎤
+⎦
+× 𝐸
+{
+𝜆𝑝
+(𝑚1)𝑇𝜆𝑝
+(𝑚2)} )
+×
+[
+𝑆(𝑚1)𝐻
+0
+(𝑘)𝑆(𝑚2)
+0
+(𝑘) + 𝐸
+{
+𝜀(𝑚1)𝐻(𝑘)𝜀(𝑚2)(𝑘)
+}
++𝑆(𝑚1)𝐻
+0
+(𝑘)𝐸
+{
+𝜀(𝑚2)(𝑘)
+}
++ 𝑆(𝑚2)
+0
+(𝑘)𝐸
+{
+𝜀(𝑚1)𝐻(𝑘)
+} ]
+,
+(39)
+where 𝑚1, 𝑚2 indicate the associated row and column indices,
+respectively. According to Eq. (58) in the appendix, we get
+𝐸
+[
+(ˆ𝑟𝑠−𝑟𝑠)2]
+≥𝑡𝑟
+[
+˜ℱ−1]
+,
+(40)
+where 𝑡𝑟
+[
+˜ℱ−1]
+is the CRLB and 𝑡𝑟[
+] is the trace of a
+square matrix. According to Eqs. (39) and (40), it is obvious
+that the estimation error 𝜀(𝑘) will affect the CRLB. Since the
+EM algorithm initializes randomly, such initial location errors
+are bounded as
+𝐸
+[
+(ˆ𝑟𝑠−𝑟𝑠)2]
+≤𝑀
+2
+(
+(ℓ𝑥)2 + (ℓ𝑦)2)
+,
+(41)
+where ℓ𝑥and ℓ𝑦correspond to the lateral sizes of the 𝑥- and
+𝑦-directions, respectively, for the entire search scope. On the
+other hand, since our novel hybrid algorithm as presented in
+Section IV-C is initialized using the AP algorithm [10]–[17]
+with a rougher resolution, the corresponding estimation error
+of the source location vector is bounded as
+𝐸
+[
+(ˆ𝑟𝑠−𝑟𝑠)2]
+≤𝑀
+2
+(( ℓ𝑥
+𝑁𝑥
+′
+)2
++
+( ℓ𝑦
+𝑁𝑦
+′
+)2)
+.
+(42)
+It is well known that the EM algorithm is sensitive to the
+initial location [18]. Obviously our proposed hybrid algorithm
+in Section IV-C would lead to a smaller estimation error
+𝐸
+[
+(ˆ𝑟𝑠−𝑟𝑠)2]
+than the EM algorithm with random initial-
+ization [18].
+B. Non-Gaussianity Test
+The ML source localization as introduced in Section II relies
+on the multivariate mixture Gaussian density (or Gaussian
+mixture) model. However this assumption is not valid in
+general especially when the signal sample size is limited and
+the signal-to-noise (SNR) is large [22]. According to [10],
+the received signals at the sensor array are always modeled
+as a Gaussian mixture. Since the source spectra 𝑆0(𝑘) are
+not necessarily Gaussian, the statistical mismatch would occur
+frequently thereby.
+After numerous simulations, we have discovered a very
+interesting fact as follows. Consider that the source localiza-
+tion is performed in two cases for the same source signals
+at the same comparative SNR, namely when the ambient
+noise is uniformly distributed and when the ambient noise
+is Gaussianly distributed. The former performance is better
+than the latter according to our heuristic studies. To explain
+this phenomenon, we employ the Gaussianity test for the
+received signals added with these two different kinds of
+ambient noise. Since the ML location estimation relies on the
+DFT, the Gaussianity measure has to be undertaken on the
+DFT sequences.
+The received signal spectral waveform at the 𝑝th sensor is
+given by
+𝑋𝑝(𝑘)
+=
+Re {𝑋𝑝(𝑘)} +
+√
+−1 Im {𝑋𝑝(𝑘)}
+=
+𝑁−1
+∑
+𝑛=0
+[
+cos
+(2𝜋𝑘𝑛
+𝑁
+)
+𝑥(𝑛)
++
+√
+−1
+𝑁−1
+∑
+𝑛=0
+sin
+(2𝜋𝑘𝑛
+𝑁
+)
+𝑥(𝑛)
+]
+,
+𝑘= 0, 1, . . ., 𝑁−1.
+(43)
+According to Eq. (43), we can measure the Gaussianities
+separately for the real and imaginary parts of 𝑋𝑝(𝑘). The
+relevant statistical characterization approaches are discussed
+in the following subsections.
+1)
+Edgeworth Expansion for PDF Characterization: As
+previously stated, the ﬁnite sample size and high SNR would
+often lead to the non-Gaussian characteristics of the received
+signals [22]. We use the Edgeworth expansion to model the
+actual statistics of the aforementioned signal Re {𝑋𝑝(𝑘)} and
+evaluate the mismatch between the actual statistics and the
+underlying Gaussian mixture model [23], [24]. Similar to the
+Gram-Charlier series, the Edgeworth expansion can be used to
+characterize the unknown probability density function (PDF)
+based on the moments and the cumulants.
+For a random variable 𝑍(𝑍= Re {𝑋𝑝(𝑘)} in our appli-
+cation here) with 𝐸{𝑍}= 0 (this can always be achieved
+by setting a new random variable 𝑍as 𝑍−𝐸{𝑍}) and
+unit variance for simplicity, the arbitrary probability density
+function for 𝑍can be written by the Edgeworth expansion
+as [23], [24]:
+𝑓𝑍(𝑧) = 𝜗(𝑧)
+{
+1 +
++∞
+∑
+𝑘=1
+𝑃𝑘(𝑧)
+}
+,
+(44)
+where 𝜗(𝑧) is the zero-mean univariate Gaussian PDF, which
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:28 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 6 ---
+2038
+IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 9, NO. 6, JUNE 2010
+is given by
+𝜗(𝑧)
+def=
+1
+√
+2𝜋exp
+(
+−𝑧2
+2
+)
+,
+(45)
+and 𝑃𝑘(𝑧) is a polynomial such that
+𝑃𝑘(𝑧)
+def=
+∑
+{𝑙𝑚}
+𝐻𝑘+2𝜛(𝑧)
+𝑘
+∏
+𝑚=1
+1
+𝑙𝑚!
+( 𝜒𝑚+2
+(𝑚+ 2)!
+)𝑙𝑚
+.
+(46)
+Here the set {𝑙𝑚} consists of all non-negative integer solutions
+to the equation 𝑙1+2𝑙2+. . .+𝑘𝑙𝑘= 𝑘, and 𝜛= 𝑙1+𝑙2+. . .+
+𝑙𝑘. Note that 𝜒𝑙is the 𝑙th-order cumulant of 𝑍= Re {𝑋𝑝(𝑘)},
+which is given by
+𝜒𝑙= (−1)𝑙𝑑𝑙
+𝑑𝜂𝑙log ˆ𝑓𝑍(𝜂) ∣𝜂=0,
+(47)
+where ˆ𝑓𝑍(𝜂)
+def= 𝐸
+{
+𝑒𝑗𝑧𝜂}
+is the characteristic function of 𝑍=
+Re {𝑋𝑝(𝑘)} and 𝐻𝑙(𝑧) is the 𝑙th-order Hermite polynomial
+such that
+𝜗(𝑧)𝐻𝑙(𝑧) = (−1)𝑙𝑑𝑙
+𝑑𝑧𝑙𝜗(𝑧).
+(48)
+2) Gaussianity Measure Using Bispectrum: The Edgeworth
+expansion in Eq. (44) cannot provide the speciﬁc measurement
+of the aforementioned mismatch. Instead, the Gaussianity
+measure based on the bispectrum can be employed to examine
+the statistics for time series [25]. If 𝑧(0), 𝑧(1), . . ., 𝑧(𝑁−1)
+is the sensor signal sequence (𝑧(𝑛) = 𝑥𝑝(𝑛), for any 𝑝), its
+bispectrum is deﬁned as
+ˆ𝐶𝑧𝑧𝑧(𝑖′, 𝑖′′)
+def= 1
+𝑁𝑍(𝑖′)𝑍(𝑖′′)𝑍𝐻(𝑖′ + 𝑖′′),
+(49)
+where 𝑍(𝑖′) = ∑𝑁−1
+𝑛=0 𝑧(𝑛) exp
+(
+−𝑗2𝜋𝑛𝑖′
+𝑁
+)
+is the 𝑁-point dis-
+crete Fourier transform of the signal 𝑧(0), 𝑧(1), . . . , 𝑧(𝑁−1).
+The estimated bispectrum can be further smoothed by a two-
+dimensional window 𝑊(𝑖′, 𝑖′′), 0 ≤𝑖′, 𝑖′′ ≤M𝑤−1, (window
+size is M𝑤× M𝑤) [25]. Then a sampled bispectrum is used
+to construct a statistical test whether the bispectrum given
+by Eq. (49) is nonzero; whereas a rejection action of the
+null hypothesis implies that the signal is Gaussian [25]. The
+statistics is constructed below. According to Eq. (49), we can
+compute
+𝜁𝑖′,𝑖′′ =
+ˆ𝐶𝑧𝑧𝑧(𝑖′, 𝑖′′)
+√
+𝑁
+M2𝑤
+(
+ˆ𝑆𝑧𝑧(𝑖′) ˆ𝑆𝑧𝑧(𝑖′′) ˆ𝑆𝑧𝑧(𝑖′ + 𝑖′′)
+).
+(50)
+It is noted that 𝜁𝑖′,𝑖′′ is random according to Eq. (50). It can be
+proved that the PDF of 𝜁𝑖′,𝑖′′ is complex Gaussian with unit-
+variance [25], [26]. Here ˆ𝑆𝑧𝑧(𝑖′) is the sample estimate for the
+power spectrum of 𝑧(0), 𝑧(1), . . ., 𝑧(𝑁−1). Consequently,
+∣𝜁𝑖′,𝑖′′∣2 is approximately a chi-square random variable with
+two degrees of freedom. Thus, we can construct the statistics
+Φ for the Gaussianity test [25], [26]:
+Φ
+def= 2
+𝑁−1
+∑
+𝑖′=0
+𝑁−1
+∑
+𝑖′′=0
+∣𝜁𝑖′,𝑖′′∣2.
+(51)
+Asymptotically speaking, Φ is chi-square distributed under the
+null hypothesis of Gaussianity. Hence it is easy to derive a sta-
+tistical test to determine whether the observation is consistent
+with a central chi-squared distribution; this "consistency" is
+characterized as the probability-of-false-alarm value, i.e. the
+probability that the sensor data possess a nonzero bispectrum.
+If this probability-of-false-alarm value is small, we can get a
+higher probability of accepting the Gaussian assumption.
+Since the sample size is limited in source localization, we
+cannot directly apply the technique in [25] (it requires a
+large sample size) to estimate the bispectrum of the sensor
+signal. Instead, we use the bootstrap algorithm which is
+more appropriate for ﬁnite sample sizes [26]. The estimation
+result within a primary region is considered only due to the
+symmetry of the bispectrum such that
+𝐷
+def=
+{
+0 < 𝑖′ ≤𝑁
+2 , 0 < 𝑖′′ < 𝑖′, 2𝑖′ + 𝑖′′ < 𝑁
+}
+.
+(52)
+We propose to use the Gaussianity test, as given by Eq. (51),
+for the robustness analysis of the ML source localization. The
+application of this new analysis can be manifested in the next
+section.
+VI. SIMULATION
+In this section, we provide the simulation results for our
+proposed hybrid source localization scheme in Section IV-C
+and our new robustness analysis in Section V. We present
+the comparison of the three underlying schemes, namely (1)
+the conventional alternating projection method (AP), (2) our
+previously proposed EM method (EM) and (3) the novel
+hybrid method (AP-EM hybrid). Acoustic source signal is
+acquired from [10]. The sampling frequency is 100 kHz. The
+propagation speed is 345 meter/sec. The data is simulated for
+a circularly-shaped array of ﬁve sensors using the recorded
+acoustic data from [10]. The sample size is 𝐿= 200 and
+the DFT size is 𝑁= 256. Two-dimensional grid-point search
+is employed in the scope of 10 meters by 10 meters, where
+both 𝑥- and 𝑦- axes are uniformly sampled. Fifty Monte Carlo
+experiments are carried out. In the EM algorithm, randomly
+initiated source locations are used for a particular signal-to-
+noise ratio (SNR=20 dB).
+The resolution parameters are chosen as 𝑁𝑥= 𝑁𝑦= 100
+for both AP and EM methods. On the other hand, for the
+new hybrid scheme, the resolution parameters are chosen as
+𝑁′
+𝑥= 𝑁′
+𝑦= 5 for Step 1 and 𝑁′′
+𝑥= 𝑁′′
+𝑦= 100 for Step
+2, respectively. The iteration number 𝜁is 5 for both EM
+and AP-EM hybrid schemes. Figure 1 depicts the average
+root-mean-square errors versus different signal-to-noise ratios
+(SNRs). It can be observed in Figure 1 that our proposed
+hybrid method almost always achieves the highest accuracy
+(lowest RMS errors) among the three schemes in comparison.
+The detailed accuracy performances are illustrated in Table I
+for the individual source location estimates. We also delineate
+the computational complexity curves versus the numbers of
+sources, 𝑀, in Figure 2. Our newly proposed hybrid scheme
+leads to a much less complexity than the conventional AP
+method as illustrated in Figure 2. The computational com-
+plexity of the hybrid scheme is very close to that of the EM
+algorithm. To visualize the trade-off between the computa-
+tional complexity and the estimation accuracy (RMS error),
+we propose to enumerate the product between them. Figure 3
+depicts the trade-off curve (the product of the computational
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:28 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 7 ---
+YAN et al.: ROBUSTNESS ANALYSIS AND NEW HYBRID ALGORITHM OF WIDEBAND SOURCE LOCALIZATION FOR ACOUSTIC SENSOR NETWORKS
+2039
+5
+10
+15
+20
+25
+30
+0.5
+1
+1.5
+2
+2.5
+3
+Signal−to−noise ratio in dB
+Average RMS Error in Meters
+EM
+AP
+AP−EM Hybrid
+Fig. 1.
+Average root-mean-square (RMS) errors versus SNR.
+2
+3
+4
+5
+6
+10
+8
+10
+9
+10
+10
+10
+11
+10
+12
+Number of sources
+Computational complexity
+AP
+EM
+AP−EM Hybrid
+Fig. 2.
+The computational complexity in terms of complex multiplications
+versus the number of sources for the three compared schemes.
+complexity and the RMS error) versus the SNRs for these
+three methods.
+For the robustness analysis of source localization, we use
+the derived CRLB to illustrate the optimistic estimation vari-
+ance. The CRLBs are demonstrated in Figure 4. The signal-to-
+approximation-error ratio (SAER), which is a critical factor
+controlling the CRLB, is given by
+𝑆𝐴𝐸𝑅
+def=
+1
+𝑁
+𝑁−1
+∑
+𝑘=0
+⎛
+⎜
+⎜
+⎝10 log10
+⎡
+⎢⎢⎣
+𝐸
+{∑𝑀
+𝑚=1
+𝑆(𝑚)
+0
+(𝑘)
+
+2}
+𝐸
+{∑𝑀
+𝑚=1
+𝜀(𝑚)(𝑘)
+2}
+⎤
+⎥⎥⎦
+⎞
+⎟
+⎟
+⎠.(53)
+Obviously, a reliable source spectral estimate (∣𝜀(𝑚)(𝑘)∣is
+small) leads to a large SAER, deﬁnitely improves the source
+localization performance and results in a smaller CRLB.
+To provide some insight of the reason why our proposed
+hybrid algorithm is more robust than the EM algorithm, we
+calculate the spectral estimation error for the ﬁrst iteration of
+the EM algorithm and the spectral estimation error for the
+ﬁrst iteration of the new hybrid algorithm after the rough-
+resolution initialization with the help of the AP method as
+5
+10
+15
+20
+25
+30
+0
+0.5
+1
+1.5
+2
+2.5
+3
+3.5
+4
+Signal−to−noise ratio in dB
+Complexity × Summed−RMS−Error
+EM
+AP
+AP−EM Hybrid
+Fig. 3.
+The trade-off curves (product of computational complexity and
+summed root-mean-square error for both sources) versus signal-to-noise ratio
+(SNR).
+5
+10
+15
+20
+25
+30
+0.05
+0.1
+0.15
+0.2
+0.25
+0.3
+0.35
+0.4
+0.45
+0.5
+0.55
+Signal−to−noise ratio in dB
+Root−Mean−Square Error in Meters
+ 
+ 
+CRLB for SAER = ∞ dB 
+CRLB for SAER = 10 dB
+CRLB for SAER = 20 dB
+CRLB for SAER = 30 dB
+Actual variance from AP−EM hybrid
+Fig. 4.
+Cramer-Rao lower bounds for different SAER values (10, 20, 30
+dB, error-free or ∞dB) and the actual source location estimation variance
+resulting from our proposed AP-EM hybrid algorithm versus the signal-to-
+noise ratio.
+described in Section III. Figure 5 depicts the average spectral
+estimation error (1/𝑁) ∑𝑁−1
+𝑘=0 𝐸
+{∑𝑀
+𝑚=1 ∣𝜀(𝑚)(𝑘)∣2}
+, 𝑚=
+1, 2, over 100 Monte Carlo trials versus the SNR. Clearly,
+the EM algorithm leads to larger average spectral estimation
+errors and therefore it also induces larger CRLBs since the
+EM algorithm is sensitive to the random initialization.
+Using the Gaussianity test, we can quantify the statistical
+mismatch for source localization and develop the correspond-
+ing robustness analysis. Three kinds of noise are artiﬁcially
+added to the acoustic data from [10]. The localization perfor-
+mances in terms of average RMS errors are depicted in Fig-
+ures 6 for uniform, Laplace and Gaussian noises, respectively.
+The detailed accuracy performances are illustrated in Table
+II for the individual source location estimates. Surprisingly,
+the localization results based on uniform noise outperform the
+others. This phenomenon is caused by the statistical mismatch.
+When the sample size is limited and the SNR is large, the
+Gaussian model cannot ﬁt the sensor data perfectly. To visu-
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:28 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 8 ---
+2040
+IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 9, NO. 6, JUNE 2010
+TABLE I
+AVERAGE ROOT-MEAN-SQUARE (RMS) ERRORS IN METERS FOR THE LOCATION ESTIMATES OF SOURCES 1 AND 2
+SNR (dB)
+5
+10
+15
+20
+25
+30
+Average
+EM (source 1)
+3.47
+2.69
+2.37
+1.97
+1.86
+1.77
+2.36
+EM (source 2)
+2.09
+2.06
+1.50
+0.88
+0.78
+0.68
+1.33
+AP (source 1)
+1.29
+1.25
+1.29
+2.53
+2.54
+2.50
+1.90
+AP (source 2)
+0.54
+0.47
+0.54
+0.45
+0.45
+0.45
+0.48
+AP-EM hybrid (source 1)
+1.17
+1.82
+1.19
+1.83
+1.96
+1.81
+1.63
+AP-EM hybrid (source 2)
+0.48
+0.42
+0.16
+0.15
+0.16
+0.22
+0.27
+5
+10
+15
+20
+25
+30
+50
+100
+150
+200
+250
+Signal−to−noise ratio in dB
+Average Spectral Estimation Error
+EM
+AP−EM Hybrid
+Fig. 5.
+Average spectral estimation errors 𝐸
+{∑𝑀
+𝑚=1 ∣𝜀(𝑘)∣2}
+resulting
+from the EM algorithm and the hybrid algorithm over 100 Monte Carlo
+experiments.
+5
+10
+15
+20
+25
+30
+0.5
+1
+1.5
+2
+Comparative SNR in dB
+Average RMS Error in Meters
+with Uniform Noise
+with Gaussian Noise
+with Laplace Noise
+Fig. 6.
+Average root-mean-square (RMS) error versus comparative SNR for
+the source localization with different noise models. The comparative SNR is
+the average SNR over all the sensor signals.
+alize this mismatch, an Edgeworth expansion is employed to
+generate the "actual" PDF while an underlying Gaussian PDF
+is also generated using the estimates of mean and variance
+from the sensor data for comparison. These two PDFs are
+plotted in Figure 7 and the obvious discrepancy can be found
+therein.
+Moreover, to demonstrate our newly derived robustness
+analysis, we apply the Gaussian rejection hypothesis in [25]
+for the two sensor signal sets used to generate Figure 6.
+Figure 8 depicts the probabilities of rejection (as stated in
+−2
+−1
+0
+1
+2
+x 10
+7
+0
+0.1
+0.2
+0.3
+0.4
+0.5
+0.6
+0.7
+0.8
+0.9
+1 x 10
+−5
+Random Variable Z
+PDF of Random Variable Z
+Estimated PDF using Edgeworth expansion
+Modeled PDF using Gaussian Model
+Fig. 7.
+The actual PDF resulting from the Edgeworth expansion and the PDF
+using the underlying Gaussian model for the sensor signal of ﬁnite sample
+size.
+Section V) for the aforementioned data added with either
+Gaussian (denoted as "with Gaussian Noise" in the ﬁgure),
+Laplace (denoted as "with Laplace Noise" in the ﬁgure) or
+uniform noise (denoted as "with Uniform Noise" in the ﬁgure).
+According to Figure 8, the interesting result can be found that
+the sensor data involving the uniform noise is "more Gaussian"
+than that involving the Gaussian noise. Hence the former leads
+to a less statistical mismatch and thus outperforms the latter in
+source localization. The CRLB we deduced in Section V-A is
+also used to compare different noise statistics. We artiﬁcially
+add the signal with generalized Gaussian noises (possessing
+different kurtosis values) [27] and the CRLBs corresponding
+to these different noise statistics are compared in Figure 9 for
+three different SNRs. It is obvious that the CRLB decreases
+with the increase in the kurtosis value.
+VII. CONCLUSION
+In this paper, we investigate the AP and EM algorithms for
+multiple wide-band source localization and make an attempt
+to seek the trade-off between the computational complexity
+and the localization accuracy. Through the analysis and the
+empirical studies for the AP and EM source localization
+methods, we design a new multi-resolution hybrid source lo-
+calization scheme to overcome their individual disadvantages.
+The Monte Carlo simulation results show that our proposed
+hybrid scheme can outperform both AP and EM methods in
+terms of the accuracy and the corresponding trade-off measure
+(the product of complexity and accuracy). This new hybrid
+scheme turns out to be optimal among these three methods
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:28 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 9 ---
+YAN et al.: ROBUSTNESS ANALYSIS AND NEW HYBRID ALGORITHM OF WIDEBAND SOURCE LOCALIZATION FOR ACOUSTIC SENSOR NETWORKS
+2041
+TABLE II
+AVERAGE ROOT-MEAN-SQUARE (RMS) ERRORS IN METERS FOR THE LOCATION ESTIMATES OF DIFFERENT NOISE STATISTICS
+SNR (dB)
+5
+10
+15
+20
+25
+30
+Average
+AP-EM with Gaussian Noise (source 1)
+1.17
+1.82
+1.19
+1.83
+1.96
+1.81
+1.63
+AP-EM with Uniform Noise (source 1)
+1.34
+1.20
+1.0
+1.40
+1.79
+0.98
+1.29
+AP-EM with Laplacian Noise (source 1)
+1.60
+2.02
+1.80
+1.95
+1.75
+1.94
+1.84
+AP-EM with Gaussian Noise (source 2)
+0.48
+0.42
+0.16
+0.15
+0.16
+0.22
+0.27
+AP-EM with Uniform Noise (source 2)
+0.34
+0.25
+0.20
+0.09
+0.12
+0.23
+0.21
+AP-EM with Laplacian Noise (source 2)
+0.97
+0.73
+0.34
+0.28
+0.30
+0.32
+0.42
+5
+10
+15
+20
+25
+30
+0.2
+0.3
+0.4
+0.5
+0.6
+0.7
+0.8
+0.9
+1
+Signal−to−noise ratio in dB
+Probability of Rejection
+Source 1(with Uniform Noise)
+Source 1(with Gaussian Noise)
+Source 1(with Laplace Noise)
+Fig. 8.
+Probabilities of rejection versus SNR for three different sets of sensor
+signals (Source 1) enduring Gaussian, uniform and Laplace noises.
+−1
+0
+1
+2
+3
+0
+0.5
+1
+1.5
+Kurtosis
+CRLB 
+SNR=15dB
+SNR=10dB
+SNR=5dB
+Fig. 9.
+CRLB with respect to different noise statistics in terms of kurtosis.
+Kurtosis of a mean-removed random variable 𝑌, i.e., 𝐸{𝑌} = 0, is deﬁned
+as
+𝐸{∣𝑌∣4}
+𝐸2{∣𝑌∣2} −3.
+in such a sense. To provide the robustness analysis for source
+localization algorithms, we derive the CRLB of the source
+localization problem. Finally, we discuss the inﬂuence of the
+statistical mismatch on the source localization algorithms.
+Using the Edgeworth expansion and the bispectrum, we can
+measure the departure of Gaussianity for different sensor
+signals or the received signals enduring different kinds of
+ambient noise. By employment of the Gaussianity test for the
+sensor signals, we can quantify the statistical mismatch and
+provide the corresponding robustness ﬁgures.
+APPENDIX
+In this appendix, we derive the CRLB based on the signal
+model in Eq. (2) with the estimated received signal spectrum
+[
+ˆ𝑆0
+(1)𝑇
+, . . . , ˆ𝑆0
+(𝑚)𝑇
+, . . . , ˆ𝑆0
+(𝑀)𝑇]
+∈𝒞1×𝑀𝑁, where ˆ𝑆0
+(𝑚)
+is deﬁned in Eq. (30). The parameters for the CRLB deriva-
+tion are 𝑟𝑠𝑇=
+[
+𝑟𝑠(1)𝑇⋅⋅⋅𝑟𝑠(𝑚)𝑇⋅⋅⋅𝑟𝑠(𝑀)𝑇]
+∈ℛ1×2𝑀,
+where 𝑟𝑠(𝑚)𝑇
+def= [𝑥𝑠(𝑚), 𝑦𝑠(𝑚)]. Note that 𝑥𝑠(𝑚), 𝑦𝑠(𝑚) are the
+𝑥−and 𝑦−coordinates of source 𝑚, respectively. Since the
+PDF of the received signal is multivariate Gaussian, the Fisher
+information matrix ˜ℱ∈ℛ2𝑀×2𝑀of 𝑟𝑠𝑇is given by
+˜ℱ= 𝐸
+⎧
+⎨
+⎩
+(
+∂( ˜𝐷(𝑘) ˆ𝑆0(𝑘))
+∂𝑟𝑠𝑇
+)𝐻
+˜𝑅−1
+𝑈
+∂( ˜𝐷(𝑘) ˆ𝑆0(𝑘))
+∂𝑟𝑠𝑇
+⎫
+⎬
+⎭,
+𝑘= 0, 1, . . . , 𝑁−1,
+(54)
+where ˆ𝑆0(𝑘) =
+[
+ˆ𝑆(1)
+0 (𝑘), ˆ𝑆(2)
+0 (𝑘), . . . , ˆ𝑆(𝑀)
+0
+(𝑘)
+]𝑇
+. Note that
+the noise covariance matrix ˜𝑅𝑈
+def= 𝐸
+{
+𝑈(𝑘)𝑈(𝑘)𝐻}
+is a
+diagonal matrix whose diagonal elements are 𝐿𝜎2.
+First, we compute
+∂( ˜𝐷(𝑘) ˆ𝑆0(𝑘))
+∂𝑟𝑠𝑇
+= −𝑗2𝜋
+𝑁𝑣× ˜Ϝ,
+(55)
+where ˜Ϝ is a 𝑃× 2𝑀matrix given by Eq. (56) above and
+𝜆𝑝
+(𝑚)
+def=
+[
+∂𝑑(𝑚)
+𝑝
+∂𝑥(𝑚)
+𝑠
+, ∂𝑑(𝑚)
+𝑝
+∂𝑦(𝑚)
+𝑠
+]
+=
+ˆ𝑟𝑠
+(𝑚)𝑇−𝑟𝑝𝑇
+∥ˆ𝑟𝑠
+(𝑚) −𝑟𝑝∥
+∈ℛ1×2
+∂𝑑(𝑚)
+𝑝
+∂𝑥(𝑚)
+𝑠
+=
+𝑥(𝑚)
+𝑠
+−𝑥𝑝
+√
+(𝑥(𝑚)
+𝑠
+−𝑥𝑝)2 + (𝑦(𝑚)
+𝑠
+−𝑦𝑝)2
+∂𝑑(𝑚)
+𝑝
+∂𝑦(𝑚)
+𝑠
+=
+𝑦(𝑚)
+𝑠
+−𝑦𝑝
+√
+(𝑥(𝑚)
+𝑠
+−𝑥𝑝)2 + (𝑦(𝑚)
+𝑠
+−𝑦𝑝)2
+.
+(57)
+Thus, the entries of the Fisher information matrix with respect
+to 𝑟𝑠𝑇are
+˜ℱ(𝑚1, 𝑚2) =
+4𝜋2
+𝐿𝑁2𝜎2𝜐2
+×
+𝑃
+∑
+𝑝=1
+(
+𝑎(𝑚1)
+𝑝
+𝑎(𝑚2)
+𝑝
+𝐸
+{
+ˆ𝑆(𝑚1)𝐻
+0
+(𝑘) ˆ𝑆(𝑚2)
+0
+(𝑘)
+}
+× exp
+[
+−𝑗2𝜋(𝑡(𝑚2)
+𝑝
+−𝑡(𝑚1)
+𝑝
+)
+𝑁
+]
+× 𝐸
+{
+𝜆𝑝
+(𝑚1)𝑇𝜆𝑝
+(𝑚2)} )
+,
+(58)
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:28 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 10 ---
+2042
+IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 9, NO. 6, JUNE 2010
+˜Ϝ
+def=
+⎡
+⎢⎢⎢⎢⎢⎢⎣
+𝑎(1)
+1 𝑒−
+𝑗2𝜋𝑡(1)
+1
+𝑁
+𝜆1
+(1) ˆ𝑆(1)
+0 (𝑘)
+𝑎(2)
+1 𝑒−
+𝑗2𝜋𝑡(2)
+1
+𝑁
+𝜆1
+(2) ˆ𝑆(2)
+0 (𝑘)
+. . .
+𝑎(𝑀)
+1
+𝑒−
+𝑗2𝜋𝑡(𝑀)
+1
+𝑁
+𝜆1
+(𝑀) ˆ𝑆(𝑀)
+0
+(𝑘)
+𝑎(1)
+2 𝑒−
+𝑗2𝜋𝑡(1)
+2
+𝑁
+𝜆2
+(1) ˆ𝑆(1)
+0 (𝑘)
+𝑎(2)
+2 𝑒−
+𝑗2𝜋𝑡(2)
+2
+𝑁
+𝜆2
+(2) ˆ𝑆(2)
+0 (𝑘)
+. . .
+𝑎(𝑀)
+2
+𝑒−
+𝑗2𝜋𝑡(𝑀)
+2
+𝑁
+𝜆2
+(𝑀) ˆ𝑆(𝑀)
+0
+(𝑘)
+...
+...
+⋅⋅⋅
+...
+𝑎(1)
+𝑃𝑒−
+𝑗2𝜋𝑡(1)
+𝑃
+𝑁
+𝜆𝑃
+(1) ˆ𝑆(1)
+0 (𝑘)
+𝑎(2)
+𝑃𝑒−
+𝑗2𝜋𝑡(2)
+𝑃
+𝑁
+𝜆𝑃
+(2) ˆ𝑆(2)
+0 (𝑘)
+. . .
+𝑎(𝑀)
+𝑃
+𝑒−
+𝑗2𝜋𝑡(𝑀)
+𝑃
+𝑁
+𝜆𝑃
+(𝑀) ˆ𝑆(𝑀)
+0
+(𝑘)
+⎤
+⎥⎥⎥⎥⎥⎥⎦
+,
+(56)
+˜ℱ=
+4𝜋2
+𝐿𝑁2𝜎2𝜐2 ×
+𝑃
+∑
+𝑝=1
+⎡
+⎣
+𝒜(1,1)
+𝑝
+˜Γ(1,1)
+𝒜(1,2)
+𝑝
+˜Γ(1,2)𝑒−
+𝑗2𝜋(𝑡(2)
+𝑝
+−𝑡(1)
+𝑝
+)
+𝑁
+𝒜(2,1)
+𝑝
+˜Γ(2,1)𝑒−
+𝑗2𝜋(𝑡(1)
+𝑝
+−𝑡(2)
+𝑝
+)
+𝑁
+𝒜(2,2)
+𝑝
+˜Γ(2,2)
+⎤
+⎦∈ℛ4×4.
+(59)
+where
+ˆ𝑆(𝑚1)
+0
+(𝑘) and 𝜆𝑝
+(𝑚2), ∀𝑚1, 𝑚2, are assumed to
+be element-wise statistically independent of each other.
+Here 𝑚1, 𝑚2 indicate the row and column indices re-
+spectively. For notational convenience, we deﬁne a scalar
+𝒜(𝑚1,𝑚2)
+𝑝
+def= 𝑎(𝑚1)
+𝑝
+𝑎(𝑚2)
+𝑝
+𝐸
+{
+ˆ𝑆(𝑚1)
+0
+(𝑘) ˆ𝑆(𝑚2)𝐻
+0
+(𝑘)
+}
+and a ma-
+trix ˜Γ(𝑚1,𝑚2)
+def= 𝐸
+{
+𝜆𝑝
+(𝑚1)𝑇𝜆𝑝
+(𝑚2)}
+∈ℛ2×2. As an exam-
+ple, the Fisher information matrix with two sources according
+to Eq. (58) is given by Eq. (59) shown on top of the next page.
+In employment with the matrix partitioning principles, it is
+easy to ﬁnd that the inverse of ˜ℱhas real diagonal elements.
+Thus, the CRLB can be deﬁned as Eq. (40) thereby.
+REFERENCES
+[1] H. Krim and M. Viberg, “Two decades of array signal processing
+research: the parametric approach," IEEE Signal Process. Mag., vol. 13,
+no. 4, pp. 67-94, July 1996.
+[2] J. Capon, “High-resolution frequency-wavenumber spectrum analysis,"
+Proc. IEEE, vol. 57, no. 8, pp. 1408-1418, Aug. 1969.
+[3] R. O. Schmidt, “Multiple emitter location and signal parameter estima-
+tion," IEEE Trans. Antennas Propagation, vol. 34, no. 3, pp. 276-280,
+Mar. 1986.
+[4] S. S. Reddi, “Multiple source location—a digital approach," IEEE Trans.
+Aerospace Electron. Syst., vol. AES-15, no. 1, pp. 95-105, Jan. 1979.
+[5] M. I. Miller and D. R. Fuhrmann, “Maximum-likelihood narrow-band
+direction ﬁnding and the EM algorithm," IEEE Trans. Acoustics, Speech,
+Signal Process., vol. 38, no. 9, pp. 1560-1577, Sep. 1990.
+[6] W. Wang, V. Srinivasan, B. Wang, and K.-C. Chua, “Coverage for
+target localization in wireless sensor networks," IEEE Trans. Wireless
+Commun., vol. 7, no. 2, pp. 667-676, Feb. 2008.
+[7] L. Xiao, L. J. Greenstein, and N. B. Mandayam, “Sensor-assisted
+localization in cellular systems," IEEE Trans. Wireless Commun., vol. 6,
+no. 12, pp. 4244-4248, Dec. 2007.
+[8] A. Boukerche, H. A. B. Oliveira, E. F. Nakamura, and A. A. F.
+Loureiro, “Localization systems for wireless sensor networks," IEEE
+Trans. Wireless Commun., vol. 6, no. 6, pp. 6-12, Dec. 2007.
+[9] A. J. Weiss and J. S. Picard, “Network localization with biased range
+measurements," IEEE Trans. Wireless Commun., vol. 7, no. 1, pp. 298-
+304, Jan. 2008.
+[10] J. C. Chen, R. E. Hudson, and K. Yao, “Maximum-likelihood source
+localization and unknown sensor location estimation for wideband
+signals in the near-ﬁeld," IEEE Trans. Signal Process., vol. 50, no. 8,
+pp. 1843-1854, Aug. 2002.
+[11] ——, “Source localization of a wideband source using a randomly
+distributed beamforming sensor array," in Proc. International Society
+Inf. Fusion, 2001, pp. TuC1: 11-18.
+[12] T. L. Tung, K. Yao, D. Chen, R. E. Hudson, and C. W. Reed,
+“Source localization and spatial ﬁltering using wideband MUSIC and
+maximum power beamforming for multimedia applications," in Proc.
+IEEE Workshop Signal Process. Syst., Oct. 1999, pp. 625-634.
+[13] S. Valaee and P. Kabal, “Wideband array processing using a two-sided
+correlation transformation," IEEE Trans. Signal Process., no. 1, pp. 160-
+172, Jan. 1995.
+[14] S. Valaee, B. Champagne, and P. Kabal, “Localization of wideband
+signals using least-squares and total least-squares approaches," IEEE
+Trans. Signal Process., no. 5, pp. 1213-1222, May 1999.
+[15] H. Hung and M. Kaveh, “Focusing matrices for coherent signal-subspace
+processing," IEEE Trans. Acoustic, Speech, Signal Process., no. 8, pp.
+1272-1281, Aug. 1988.
+[16] E. Cekli and H. A. Cirpan, “Unconditional maximum likelihood ap-
+proach for localization of near-ﬁeld sources: algorithm and performance
+analysis," AEU International J. Electron. Commun., vol. 57, no. 1, pp.
+9-15, Jan. 2003.
+[17] I. Ziskind and M. Wax, “Maximum likelihood localization of multiple
+sources by alternating projection," IEEE Trans. Acoustics, Speech,
+Signal Process., no. 10, pp. 1553-1560, Oct. 1988.
+[18] K. K. Mada and H.-C. Wu, “EM algorithm for multiple wideband source
+localization," in Proc. IEEE Global Telecommun. Conf., Nov. 2006, pp.
+1-5.
+[19] K. Yan, H.-C. Wu, and S. S. Iyengar, “Robustness analysis of source
+localization using Gaussianity measure," in Proc. IEEE Global Telecom-
+mun. Conf., Nov. 2008, pp. 1-5.
+[20] K. K. Mada, H.-C. Wu, and S. S. Iyengar, “Efﬁcient and robust EM
+algorithm for multiple wideband source localization," IEEE Trans. Veh.
+Technol., vol. 58, no. 6, pp. 3071-3075, July 2009.
+[21] S. M. Kay, Fundamentals of Statistical Signal Processing, Estimation
+Theory. Prentice-Hall, 1993.
+[22] A. Renaux, P. Forster, E. Boyer, and P. Larzabal, “Unconditional
+maximum likelihood performance at ﬁnite number of samples and high
+signal-to-noise ratio," IEEE Trans. Signal Process., vol. 55, no. 5, pp.
+2258-2364, May 2007.
+[23] N. Menemenlis and C. D. Charalambous, “An Edgeworth series ex-
+pansion for multipath fading channel densities," in Proc. IEEE Conf.
+Decision Control, vol. 4, Dec. 2002, pp. 4030-4035.
+[24] H. Cramer, Random Variables and Probability Distributions. Cambridge
+University Press, 1970.
+[25] M. Hinich, “Testing for Gaussianity and linearity of a stationary time
+series," J. Time-Series Analysis, vol. 3, no. 3, pp. 169-176, 1982.
+[26] A. M. Zoubir and D. R. Iskander, “Bootstrapping bispectra: an appli-
+cation to testing for departure from Gaussianity of stationary signals,"
+IEEE Trans. Signal Process., vol. 47, no. 3, pp. 880-884, Mar. 1999.
+[27] H.-C. Wu, “Blind source separation using information measures in the
+time and frequency domains," Ph.D. thesis, Department of Electrical
+and Computer Engineering, University of Florida, Gainesville, FL, USA,
+1999.
+Kun Yan received the B.S.E.E. and M.S. degrees
+from Xidian University, Shaanxi, China, in 2004 and
+2008, respectively. She is currently working toward
+the Ph.D. degree in electrical and computer engi-
+neering, Louisiana State University, Baton Rouge,
+Louisiana, USA. Her research interests are in the
+area of digital communications as well as digital and
+statistical signal processing.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:28 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 11 ---
+YAN et al.: ROBUSTNESS ANALYSIS AND NEW HYBRID ALGORITHM OF WIDEBAND SOURCE LOCALIZATION FOR ACOUSTIC SENSOR NETWORKS
+2043
+Hsiao-Chun Wu (M’00-SM’05) received a B. S.
+E. E. degree from National Cheng Kung University,
+Taiwan, in 1990, and the M. S. and Ph. D. degrees
+in electrical and computer engineering from Uni-
+versity of Florida, Gainesville, in 1993 and 1999
+respectively. From March 1999 to January 2001, he
+had worked for Motorola Personal Communications
+Sector Research Labs as a Senior Electrical Engi-
+neer. Since January 2001, he has joined the faculty in
+Department of Electrical and Computer Engineering,
+Louisiana State University, Baton Rouge, Louisiana,
+USA. From July to August 2007, Dr. Wu had been a visiting assistant
+professor at Television and Networks Transmission Group, Communications
+Research Centre, Ottawa, Canada. From August to December 2008, he was a
+visiting associate professor at Department of Electrical Engineering, Stanford
+University, California, USA.
+Dr. Wu has published more than 120 peer-refereed technical journal and
+conference articles in electrical and computer engineering. His research
+interests include the areas of wireless communications and signal processing.
+Dr. Wu is an IEEE Senior Member and an IEEE Distinguished Lecturer.
+He currently serves as an Associate Editor for IEEE TRANSACTIONS ON
+BROADCASTING, IEEE SIGNAL PROCESSING LETTERS, IEEE COMMU-
+NICATIONS MAGAZINE, International Journal of Computers and Electrical
+Engineering, Journal of Information Processing Systems, Physical Communi-
+cation, and Journal of the Franklin Institute. He used to serve as an Associate
+Editor for IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY. He has
+also served for numerous textbooks, IEEE/ACM conferences and journals as
+the technical committee, symposium chair, track chair, or the reviewer in
+signal processing, communications, circuits and computers.
+S. S. Iyengar (Fellow, IEEE) is the Chairman
+and Roy Paul Daniels Chaired Professor of Com-
+puter Science at Louisiana State University, Baton
+Rouge, and is also the Chaired Professor at vari-
+ous institutions around the world. His publications
+include six textbooks, ﬁve edited books and over
+380 research papers. His research interests include
+high-performance algorithms, data structures, sensor
+fusion, data mining, and intelligent systems. He is
+a world class expert in computational aspects of
+Sensor Networks, Data Structures, and Algorithms
+for various distributed applications. His techniques have been used by various
+federal agencies (NRL, ORNL, NASA) for their projects. His work has been
+cited very extensively by researchers and scientists around the world. He is an
+SIAM Distinguished lecturer/ ACM National Lecturer/ IEEE Distinguished
+Scientist. He is a Fellow of IEEE, Fellow of ACM, Fellow of AAAS and
+Fellow of SDPS. He is a recipient of IEEE awards, best paper awards, the
+Distinguished Alumnus award of the Indian Institute of Science, Bangalore
+and other awards.
+He has served as the editor of several IEEE journals and is the founding
+editor-in-chief of the International Journal of Distributed Sensor Networks.
+His research has been funded by National Science Foundation (NSF), Defense
+Advanced Research Projects Agency (DARPA), Multi-University Research
+Initiative (MURI Program), Ofﬁce of Naval Research (ONR), Department of
+Energy/OakRidge national Laboraoty (DOE/ORNL), Naval Research Labora-
+tory (NRL), National Aeronautics and Space Administration (NASA), US
+Army Research Ofﬁce (URO) and various state agencies and companies.
+He has served on US National Science Foundation and National Institute
+of Health Panels to review proposals in various aspects of computational
+science and has been involved as and external evaluator (ABET-accreditation)
+for several computer science and Engineering departments. Dr. Iyengar had
+40 doctoral students under his supervision and the legacy of these students
+can be seen in prestigious Laboratories (JPL, Oak Ridge National Lab, Los
+Alamos National Lab, Naval Research Lab) and universities round the world.
+He has been the program Chairman of various international conferences and
+has given more than 50 keynote talks at international conferences.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 11:53:28 UTC from IEEE Xplore.  Restrictions apply. 

@@ -1,0 +1,2070 @@
+--- PDF PAGE 1 ---
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 72, 2024
+4463
+Grid Hopping in Sensor Networks: Acceleration
+Strategies for Single-Step Estimation Algorithms
+Gilles Monnoyer
+, Thomas Feuillen
+, Luc Vandendorpe
+, Fellow, IEEE, and Laurent Jacques
+Abstract—In radars, sonars, or for sound source localization,
+sensor networks enable the estimation of parameters that cannot
+be unambiguously recovered by a single sensor. The estimation
+algorithms designed for this context are commonly divided
+into two categories: the two-step methods, separately estimating
+intermediate parameters in each sensor before combining them;
+and the single-step methods jointly processing all the received
+signals. This paper provides a general framework, coined Grid
+Hopping (GH), unifying existing techniques to accelerate the
+single-step methods, known to provide robust results with a
+higher computational time. GH exploits interpolation to approx-
+imate evaluations of correlation functions from the coarser grid
+used in two-step methods onto the ﬁner grid required for single-
+step methods, hence “hopping” from one grid to the other. The
+contribution of this paper is two-fold. We ﬁrst formulate GH,
+showing its particularization to existing acceleration techniques
+used in multiple applications. Second, we derive a novel theoret-
+ical bound characterizing the performance loss caused by GH in
+simpliﬁed scenarios. We ﬁnally provide Monte-Carlo simulations
+demonstrating how GH preserves the advantages of both the
+single-step and two-step approaches and compare its performance
+when used with multiple interpolation techniques.
+Index Terms—Radar, localization, sensor network, interpola-
+tion, grid hopping, multilateration.
+I. INTRODUCTION
+S
+ENSOR networks have received growing attention for the
+last decade in many ﬁelds of applications, including remote
+videoconferencing [1], [2], surveillance [3], autonomous robot
+[4], [5], automotive or smart-cities applications [6], [7]. In these
+examples, the sensors composing the networks may be cameras,
+radars, sonars, microphones, or Ultra-Wide Bandwidth (UWB)
+receivers. Although those applications use different kinds of
+sensors with different purposes, they all share a common prin-
+ciple. They leverage the diversity of information gathered by
+multiple sensors to estimate one or several parameters of inter-
+est. In this paper, we focus our study on applications in which
+Received 20 December 2023; revised 2 July 2024; accepted 15 September
+2024. Date of publication 23 September 2024; date of current version 18
+October 2024. This research was supported by the Belgian FNRS. The
+associate editor coordinating the review of this article and approving it
+for publication was Prof. Florian Meyer. (Corresponding author: Gilles
+Monnoyer.)
+Gilles Monnoyer and Luc Vandendorpe are with the ICTEAM/ELEN,
+Cosy Group, UCLouvain, 1348 Ottignies-Louvain-la-Neuve, Belgium (e-mail:
+gilles.monnoyer@uclouvain.be).
+Thomas Feuillen is with the SnT, SPARC Group, UniLu, 4365 Esch-sur-
+Alzette, Luxembourg.
+Laurent Jacques is with the ICTEAM/IMNA, ISP Group, UCLouvain, 1348
+Ottignies-Louvain-la-Neuve, Belgium.
+Digital Object Identiﬁer 10.1109/TSP.2024.3465842
+Fig. 1.
+The two-process acquisition model involved in a sensor network.
+The q-th sensor (q ∈[Q]) observes a signal yq parameterized by the q-th
+sensed parameter θ∗
+q, which is a projection of the parameter of interest p∗
+from its domain P onto the sensing domain Θ.
+the network enables the estimation of parameters of interest
+that cannot be unambiguously recovered by a single sensor.
+This happens, for example, when a single sensor provides a
+signal carrying information about distances. Multiple sensors
+are thereby required to estimate locations as the parameters of
+interest. In this example, the distances are projections of the
+location in a reduced space. With the formalism of this paper,
+we call them the sensed parameters. In Fig. 1, we represented
+this sensing process of one parameter of interest through obser-
+vations of sensed parameters, with the mathematical formalism
+we provide in Sec. III.
+The algorithms used to estimate the parameters of interest
+can be divided into two main categories. One processes the
+collected data with two-step strategies [8], [9], [10], [11], [12],
+[13], [14] and the other with single-step approaches [15], [16],
+[17], [18], [19], [20], [21], [22], [23]. On the one hand, the two-
+step methods ﬁrst perform local processing at each sensor to
+provide estimates for the sensed parameters. In their second
+step, they combine these estimates by projecting them onto
+a space of feasible parameters of interest. This second step
+is commonly referred to as multilateration when the sensed
+parameters are ranges or delays [14], or triangulation when
+angles are sensed [8]. On the other hand, single-step methods
+gather all received signals and process them jointly to directly
+provide estimates for the parameters of interest. This is achieved
+by maximizing a decision function evaluated in a set, or a grid,
+of candidate values for the parameters of interest.
+Regardless of the network’s properties, the main advantage
+of the two-step strategy resides in its simplicity and its low com-
+plexity because the sensed parameters are usually taken from a
+lower-dimensional domain compared to the domain of interest.
+1053-587X © 2024 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.
+See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:19:05 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 2 ---
+4464
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 72, 2024
+However, it is more sensitive to non-idealities such as noise,
+reverberation, wave occlusion, or interference. The single-step
+approaches are usually more robust to the above limitations but
+are computationally heavier [19], [24], [25]. Moreover, esti-
+mating multiple parameters of interest with a two-step method
+requires solving the challenging “data association problem”
+[26], [27], [28]. In short, the sensed parameters provided by
+each sensor need to be correctly associated with one another
+for the second step. This problem has been addressed in [29]
+using feature vectors based on the structure of speech signals,
+or in [30], [31] by means of tracking. Nonetheless, its absence
+in the single-step procedures makes them more reliable at the
+price of their higher computational cost, which we aim to reduce
+in this paper.
+The ﬁrst contribution of this paper is the presentation of a
+framework, named Grid Hopping (GH), for the acceleration
+of the single-step methods. Our framework encapsulates and
+extends existing acceleration approaches from the literature
+related to different applicative ﬁelds, including Source Local-
+ization (SL) of sound or UWB, and multistatic radar. Prac-
+tically, GH relies on interpolation strategies from one grid,
+the discretized domain of the sensed parameter, to another
+grid discretizing the domain of the parameters of interest. A
+comparison of different interpolation schemes used with the
+GH framework is performed through extensive Monte-Carlo
+simulations of several applications in Sec. VIII.
+As a second contribution, we provide a novel theoretical
+bound to quantify the performance of GH. Our bound char-
+acterizes the impacts of (i) the nature of the projection of
+the parameter of interest into the sensed domain (e.g., from
+a position to a collection of distances), commonly connected
+to the locations of the sensors, (ii) the density of the grid of
+parameters of interest, and (iii) the precision loss due to the
+interpolation strategy used by GH.
+The remainder of this paper is structured as follows. Sec. II
+provides an overview of existing acceleration techniques for
+single-step methods in different ﬁelds of applications. In
+Sec. III, we derive the global model of signals for a network of
+sensors collectively observing a parameter of interest. Sec. IV
+summarizes the conventional implementations of the two-step
+and the single-step methods. In Sec. V we instantiate the general
+framework from Sec. III to applications for which the methods
+from Sec. IV apply. Next, Sec. VI presents our GH formalism
+and considers its construction using multiple existing inter-
+polation strategies. In Sec. VII, we derive an error bound on
+the parameter estimation with GH. Sec. VIII presents several
+simulation results comparing multiple interpolation schemes
+with the conventional single-step and two-step algorithms. We
+also compare the actual performance of a single-step algorithm
+improved with GH with the bound.
+Notations: In this paper, j = √−1, lower case bold symbols
+denote vectors and upper case bold symbols denote matrices.
+The transpose of a matrix A is A⊤, and its More-Penrose
+inverse is A†. Its largest and the lowest eigenvalues are λmax(A)
+and λmin(A). The operator δi,j = 1 if i = j and 0 otherwise.
+We refer to the ground truth and the estimate of a quantity a
+as a∗and ˆa, respectively. Given p ∈N, we use Bp(r) := {z ∈
+Rd : ∥z∥p ≤r} to denote the ℓp-norm ball with radius r. For
+N ∈N, [N] is the index set {1, . . . , N}. The scalar product of
+vectors a and b is denoted by ⟨a, b⟩.
+II. RELATED WORK
+The single-step methods have been studied independently in
+different signal sensing communities, each proposing speciﬁc
+acceleration strategies.
+In the multistatic radar ﬁeld, a single-step method, often
+referred to as joint [15], [16] or direct [18], [19], [20], has arisen
+in connection with the sparse signal recovery literature as an
+application of the Block Orthogonal Matching Pursuit (BOMP)
+algorithm proposed by Y. C. Eldar in [32]. In those applications,
+the collection of targets’ parameters is represented as a sparse
+vector in the location-velocity space. Yet, the discretization of
+the 4D (or 6D) location-velocity space is a limitation that makes
+such single-step method unsuitable for real-time applications.
+Acceleration techniques have been suggested in [17], [33] to
+factorize the model, enabling the sequential estimation of lo-
+cations and velocities with reduced computation time. Real-
+time single-step estimation nonetheless remains challenging in
+multistatic radar applications.
+In the SL community, the Steered Response Power (SRP) al-
+gorithm is an instance of a single-step method [34], [35]. Many
+low-complexity strategies have been proposed to decrease the
+computational complexity of SRP. In [34], the authors propose
+different techniques to restrict the research to a subset of the
+domain of interest. In [36], a hybrid approach between the
+single-step and two-step paradigms is developed by leveraging
+the intrinsic properties of speech signals to ﬁrst perform a
+two-step estimation and then correct it with a single-step-like
+approach to avoid data-association issues. Other techniques,
+such as the stochastic region contraction proposed in [37] or
+grid rescaling methods from [23], [38], [39], propose to iter-
+atively reﬁne the search space, starting from a coarse search
+of candidates. In [21], [22], the authors propose a volumetric
+technique that enables the representation of multiple grid bins
+into a single one, enabling the search on a coarser grid. In
+the contributions above, the SRP map is computed from the
+computation of the Generalized Cross-Correlation (GCC) [40].
+As shown in Sec. VI, this mapping is an approximation that can
+be assimilated as the most simple particularization of GH.
+In [41], the authors propose a low-complexity single-step al-
+gorithm exploiting the sampling properties of the speech signals
+to build an interpolation-based mapping from the delay grid
+bins to the location grid. GH generalizes this work for other
+applications as well as other interpolation schemes.
+Recently, we proposed an experimental validation of a spe-
+ciﬁc case of application GH to the Multistatic Radar (MSR)
+context [42], hence accelerating existing single-step methods in
+that context. This paper provides the generalization and comple-
+mentary theoretical validation of this work. The bound derived
+in Sec. VII enables us to quantify the performance loss caused
+by the use of GH with different interpolation schemes, including
+the one presented in [41] and the polar interpolation [43] which
+is popular for continuous sparse signal processing [44], [45].
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:19:05 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 3 ---
+MONNOYER et al.: GRID HOPPING IN SENSOR NETWORKS: ACCELERATION STRATEGIES
+4465
+Fig. 2.
+Two examples of PPFs, i.e., S(·), where the parameter of interest p∗
+is a location. (a) The sensed parameters are distances between p and reference
+locations. (b) The sensed parameter is a 2D location in a plane corresponding
+to an image projection of the 3D domain of interest.
+III. PROBLEM STATEMENT: THE MULTI-SENSOR MODEL
+We consider the general problem of estimating a parameter
+of interest denoted by p∗from the signals received by Q distinct
+sensors. We focus on systems in which each sensor is only
+sensitive to a certain projection of p∗onto a low-dimensional
+observation space, from which p∗may not be retrieved unam-
+biguously. Our generalized model for such sensor networks in-
+terprets the measurement as a composition of two processes: (i)
+the parameter projection process, which projects the parameter
+of interest into the sensing space, and (ii) the sensing process
+that provides the received signals as functions of the sensed
+parameters (see Fig. 1).
+In our model of a Q-node sensor network, the q-th sensor
+(q ∈[Q]) only observes a projection of the parameter of interest
+p∗, belonging to some space P ⊂Rd, onto a reduced sensing
+domain Θ ⊂R ˜d. That sensor thus only has access to the sensed
+parameter θ∗
+q through a speciﬁc Parameter Projection Function
+(PPF) Sq,
+Sq : P →Θ : θ∗
+q = Sq(p∗).
+(1)
+While p∗has a physical meaning, it is not required that θ∗
+q
+has one. We provide in Fig. 2 simple examples of PPFs where
+p∗is a location whose projection θ∗
+q lies in a reduced domain.
+Examples of expressions for the PPF are given in Table I for
+some typical applications.
+The deﬁnition of the PPF comes with crucial assumptions.
+Assumption 1 (PPF): The global PPF deﬁned as
+S(p) :=
+
+S1(p), · · · , SQ(p)
+⊤
+(2)
+is injective over P. Equivalently, S is a bijection between P
+and the admissible sensing domain
+T := S(P) := {θ = S(p) : p ∈P}.
+(3)
+The domains P, Θ, and T are all assumed bounded.
+To properly deﬁne GH and its associated upper bound, we
+also assume that, for all q ∈[Q], Sq is differentiable over P.
+Assumption 1 is necessary for the network to recover p∗unam-
+biguously because the sensing process only enables observing
+its transformation through the global PPF. Without this assump-
+tion, two distinct values of p∗may provide exactly the same set
+of Q received signals, even in noiseless conditions. Addition-
+ally, one notes the absence of injectivity condition on Sq taken
+alone, translating the potential ambiguity in the recovery of p∗
+with one single sensor.
+For simplicity, we set the sensing domain Θ identical for all q
+and ˜d = 1 for the remaining of the paper, such that Θ ⊂R. This
+simpliﬁcation restricts the model to one-dimensional sensed
+parameters such as angles and distances. Still, our approach
+extends beyond this restriction.
+The sensing process corresponding to the observation of a
+single parameter of interest (e.g., a multistatic radar observing
+a single moving target, or a single source of sound captured
+by a network of microphones) is characterized, for the q-th
+sensor, by the acquisition of a signal parametrized by the sensed
+parameter θ∗
+q ∈Θ. This signal yq ∈CM reads
+yq = αqa(θ∗
+q) + wq = αqa(Sq(p∗)) + wq,
+(4)
+where the function (or atom) a : Θ 
+→CM connects, for each
+q ∈[Q], the value θ∗
+q to a waveform acquired by the sensor,
+αq ∈C models an unknown amplitude and phase, and the noise
+wq is assumed white and Gaussian. Up to the noise wq, the
+recorded signal yq is thus 1-sparse in a parametric dictionary
+A := {a(θ) : θ ∈Θ} [46], [47]. The model (4) easily general-
+izes to the joint estimation of K parameters of interest but we
+restrict our analysis to K = 1.
+The model (4) implicitly assumes that the network is com-
+posed of homogeneous sensors whose node signals are all repre-
+sentable in the same dictionary A. This means, for example, that
+the multistatic radar presented in Sec. V-A must be composed
+of radars operating on identical modulation and acquisition
+settings. Similarly, the arrays of sub-receivers composing the
+Direction of Arrival (DoA)-based localization system described
+in Sec. V-C share an identical spatial geometry of sub-receivers.
+While our approach extends beyond this restriction, our perfor-
+mance bound is built upon it.
+Our approach considers that the atoms of A respect the
+following assumptions.
+Assumption 2 (Atom function): The operator a has unit norm
+∥a(θ)∥2 = 1 for all θ ∈Θ and is one-to-one over Θ, i.e., a(θ)̸ =
+a(θ′) for all θ̸ = θ′ ∈Θ.
+Assumptions 1 and 2 together ensure the ability of the net-
+work to recover p∗unambiguously. Their combination implies
+that each value of p∗provides its own and unique set of vectors
+{ a(Sq(p∗)) }Q
+q=1.
+The derivation of the bound in Sec. VII additionally requires
+that a generates a translation invariant kernel κ [43], [48],
+[49], i.e.,
+⟨a(θ), a(θ′)⟩= κ(θ −θ′),
+∀θ, θ′ ∈Θ.
+(5)
+IV. SINGLE-STEP AND TWO-STEP METHODS
+We now brieﬂy describe the single-step and the two-step
+methods, two conventional classes of techniques used to esti-
+mate a parameter of interest p∗from a Q-node sensor network
+according to the measurement model (4), i.e., from the mea-
+surements {yq}Q
+q=1.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:19:05 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 4 ---
+4466
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 72, 2024
+a) The Two-Step Methodology: In this methodology, Q
+estimates ˆθ := (ˆθ1, · · · , ˆθQ)⊤are ﬁrst computed by maximiz-
+ing, for each node q ∈[Q], the correlation,
+ˆθq = arg max
+θ∈Θ
+|Cq(θ)|2,
+Cq(θ) := ⟨yq, a(θ)⟩.
+(6)
+Next, the estimate ˆp is computed from a non-linear least squares
+minimization
+ˆp = arg min
+p′∈P
+∥ˆθ −S(p′)∥2.
+(7)
+This second step is referred to as multilateration for ellipses or
+hyperbolas intersection [9], [14], and triangulation for direc-
+tions intersection [8].
+Since the ﬁrst step is a non-convex continuous optimization
+over Θ, (6) is generally approximated by restricting θ to a
+uniform discretization ΘG ⊂Θ, resulting in
+ˆθq = arg max
+θ∈ΘG
+|Cq(θ)|2.
+(8)
+This ﬁrst estimate can then be improved by, e.g., starting a gradi-
+ent descent on the cost −|Cq(θ)|2 in (6) initialized with ˆθq [50],
+[51], [52]. Alternatively, one can consider faster interpolation
+techniques to maximize an approximation of Cq [43], [45], [53].
+b) The Single-Step Methodology: In this method we look
+for a value of ˆp ∈P directly maximizing the non-coherent sum
+of all measurement correlations with Sq(p), i.e., all signals are
+jointly processed in the global optimization
+ˆp = arg max
+p∈P
+
+q∈[Q]
+|Cq(Sq(p))|2.
+(9)
+If all the measurement noises are independent in (4), and all
+αq are i.i.d. and independent from p, this step is a maximum
+likelihood estimator [19], [25], [54]. In this case, (9) is equiv-
+alent to minimizing −log P({yq}Q
+q=1 | p, α) := 
+q∈[Q] ∥yq −
+αqa(Sq(p))∥2
+2.
+The maximization (9) is also often approximated on a uni-
+form discretization PG of P through
+ˆp = arg max
+p∈PG
+
+q∈[Q]
+|Cq
+
+Sq(p)
+
+|2.
+(10)
+Similar to the problem (6), the single-step approach (9) can be
+solved efﬁciently in its continuous form with solvers that ini-
+tiate reﬁnement steps on estimates obtained from a grid-search
+approach (10). This is particularly exempliﬁed by the Multi-
+snapshot Newtonalized Orthogonal Matching Pursuit [55]. For
+the intelligibility of the focus of our paper, i.e., the analysis
+of the GH framework, we limit its scope to the single-step
+and two-step methods restricted to their grid search version,
+respectively using (8) and (10) instead of (6) and (9). Since p∗is
+assumed to be taken from the continuous domain P unrestricted
+to the grid PG, this aspect induces gridding errors that are taken
+into account in both the theoretical and numerical study of this
+paper. We note that the GH technique we present in Sec. VI can
+be coupled with the off-grid search and reﬁnement techniques
+mentioned above. We postpone this coupling with advanced
+algorithms estimating multiple parameters of interest from a
+continuous domain to future contributions.
+c) Differences Between the Two Methodologies: Compu-
+tationally speaking, two-step methods based on the discretiza-
+tion (8) require NΘ := |ΘG| evaluations of the correlation Cq,
+for all q ∈[Q]. On the other hand, single-step methods based
+on the discretization (10) require NP := |PG| such evaluations
+for each index q. Since the domain of interest P is typically of
+higher dimensions compared to the sensed domain Θ, it results
+in NP ≫NΘ. This intensiﬁes as a higher precision is targeted
+by the use of denser grids, which is why two-step methods are
+known to be faster than their single-step counterparts.
+The single-step methods, however, potentially offer a more
+robust estimation of p∗as they directly gather all available
+information and promote, via the mappings Sq(p), consistent
+models across all sensors. This has, for example, been shown for
+signal transmissions submitted to high noise [19] or is subjected
+to reverberation [24], [25]. The question we address in this work
+is thus to preserve the advantages of both approaches in a hybrid
+strategy: Grid Hopping.
+V. EXAMPLES OF APPLICATIONS
+Let us provide a few standard examples of applications (also
+summarized in Table I) for which the model and the two classes
+of methods described above apply. For each application, we
+describe the contextual meaning of (i) the number Q of ac-
+quired signals, (ii) the length M of the measurements, (iii) the
+sensed parameters {θ∗
+q}Q
+q=1, and (iv) the parameter of interest
+p∗. Moreover, we provide the parametric expression of the atom
+a(θ) and the expression of the PPF, Sq(p).
+A. Multistatic FMCW Radar
+A MSRs is composed of multiple RXs and one or multi-
+ple transmitters (TXs). For simplicity, we consider a single
+transmitter in a linear chirp modulation setting and a single
+antenna in each receiver. The MSR estimates the location and
+the velocity vectors describing a target. With the appropriate
+simpliﬁcations of the radar signal model [17], a Frequency-
+Modulated Continuous Wave (FMCW) radar can be seen as
+the combination of a Doppler radar and a radar emitting a
+single chirp [56], [57], [58]. For simplicity, we restrict here the
+application of (4) to the separate estimation of the location and
+the velocity.
+The number of measurements Q is the number of RXs since
+we assume here a single TX. The dimension M is the number
+of samples acquired per RX in one processing time frame.
+a) Location estimation with a MSR: The parameter of
+interest p∗is a target’s location. The q-th sensed parameter is the
+sum of distances from the TX to the target and from the target
+and the q-th RX. Fig. 3(a) illustrates the geometrical properties
+of those parameters in the MSR application. Given xTX and xRX
+q
+as the TX and the q-th RX’s locations respectively, the PPF of
+the q-th receiver
+Sq(p) = B
+c (∥p −xTX∥2 + ∥p −xRX
+q ∥2),
+(11)
+where B
+c is inserted for the simplicity of the atom’s expression
+in (12), with B is the radar’s bandwidth and c the speed of
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:19:05 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 5 ---
+MONNOYER et al.: GRID HOPPING IN SENSOR NETWORKS: ACCELERATION STRATEGIES
+4467
+TABLE I
+SUMMARY OF THE APPLICATIONS PRESENTED IN SEC. V WITH THE CONTEXTUAL MEANING OF EACH MODEL QUANTITY
+(‘‘#’’ MEANS ‘‘NUMBER OF’’)
+Applications
+Q
+M
+p∗
+parameter projection Sq(p) =
+atom am(θ) =
+Localization with MSR
+Fig. 3(a)
+# receiver (RX)s antennas
+# samples
+per chirp
+target’s
+location
+B
+c (∥p −xTX∥2 + ∥p −xRX
+q
+∥2)
+exp(j2πθm/M)
+Velocity from MSR
+Fig. 3(b)
+# RXs antennas
+# chirps
+target’s
+velocity
+Mf0Ts
+c
+⟨hTX + hRX
+q
+, p⟩
+exp(j2πθm/M)
+Source Loc. with TDoA
+Fig. 3(c)
+# pairs of Rxs
+# Fourier bins
+used in GCC
+source
+location
+1
+cTs (∥p −xq∥2 −∥p −x′
+q∥2)
+exp(j2πθm/M)
+Source Loc. with DoA
+Fig. 3(d)
+# sensor arrays
+# sub-receivers
+per array
+source
+location
+∠(p −xRX
+q
+)
+exp(j2πλ−1 h⊤
+meθ)
+Fig. 3.
+Representations of the applications described in Sec. V, each with Q = 3 measurements. The dashed lines represent the loci of identical sensed
+parameters in the domain of interest. (a)MSR composed of one TX and three RXs, for the estimation of the target location p∗. The loci are given by ellipses.
+(b) The same MSR for the estimation of p∗as the target velocity. (c)SL system composed of three RX (yielding Q = 3 pairs of RXs), with p as the source’s
+location. The loci are hyperbolas. (d)SL system composed of three receiving nodes, each composed of an array of L receivers such as depicted in Fig. 4.
+light. As derived in [59], [60], the atom’s expression for a single
+linear-chirp FMCW radar reads
+am(θ) = exp(−j2πθ m
+M ).
+(12)
+b) Velocity estimation with a MSR: The target’s velocity
+is now the parameter p∗, and the sensed parameters are the
+bistatic speeds [15], [16]. Given the unit vectors hTX and hRX
+q
+pointing toward the target from the TX and the q-th RX, respec-
+tively, the PPF linking the velocity vector contained in p to the
+q-th bistatic speed reads
+Sq(p∗) = Mf0Ts
+c
+⟨hTX + hRX
+q , p⟩,
+(13)
+similarly normalized with Mf0Ts
+c
+, where f0 is the carrier fre-
+quency and Ts the sampling period. With this normalization,
+the atom’s expression for the Doppler multistatic radar follows
+the same expression as (12).
+B. Source Localization With Time Difference of Arrival
+Our approach also applies to the estimation of the location
+p∗of the source of a signal. When the receivers are not syn-
+chronized with the transmitter, the delays cannot be used for
+intersections of ellipses like in MSR. Therefore, evaluating the
+Time Difference of Arrival (TDoA) between pairs of receivers
+is a commonly used strategy that leads to intersections of hy-
+perbolas. A simple representation of this application is shown
+in Fig. 3(c). This method is typically used in sound source
+localization [25] or UWB positioning systems [61].
+Let L be the number of receivers (such as microphones for
+sound source localization) located around p∗(see Fig. 3(c)).
+In our model (4), the number of measurements is Q = L(L −
+1)/2, i.e., to the number of pairs of receivers that we associate
+to record the TDoA. The measurement yq from the q-th pair
+of RXs is obtained at the output of a cross-correlation using
+a phase-transform weighting function [21]. This amounts to
+computing the Discrete Fourier Transform (DFT) of each of the
+L received signals, and, given a pair of receivers, multiplying
+their two spectra and keeping only their phase by modulus
+division (see e.g., [35] for details).
+Mathematically, for a single source, all RXs record the same
+signal with different unknown delays, leading to
+am(θ) = exp(j2πθ m
+M ),
+m ∈[M],
+(14)
+where θ is the TDoA (normalized with respect to the sampling
+rate Ts for simplicity) so that the PPF is
+Sq(p) =
+1
+cTs (∥p −xq∥2 −∥p −x′
+q∥2),
+(15)
+where xq and x′
+q denote the locations of the two receivers of
+the q-th pair.
+C. Source Localization From Directions of Arrival
+Estimating a source location p∗from a collection of Q sensor
+arrays, each sensitive to a Direction of Arrival (DoA) the wave
+emitted by the source, also enters into the scope of the model
+(4). This case typically happens with arrays of microphones
+[62], [63], or radio frequency receivers [64], and p∗is estimated
+from the intersection of lines given by the DoAs, such as de-
+picted in Fig. 3(d).
+Each sensor array is composed of M sub-receivers as de-
+picted in Fig. 4. The atom function in model (4) corresponds to
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:19:05 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 6 ---
+4468
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 72, 2024
+Fig. 4.
+Representation of the q-th node of a DoA-based application. The
+node is composed of M co-located sub-receivers such that the source is
+located in the far ﬁeld, implying an angle of arrival θ (acting as the sensed
+parameter) identical for all receivers of a given array.
+the steering vector which can, for a generic array of receivers,
+be written following [65], [66],
+am(θ) = exp(j2πλ−1 h⊤
+meθ),
+m ∈[M],
+(16)
+where λ is the signal’s wavelength, hm is the vector pointing
+from a chosen reference sub-receiver’s location toward the m-th
+sub-receiver, and eθ is the unit vector pointing in the direction
+given by the sensed parameter θ. If the location to estimate p∗
+lies in 2D, then θ is an angle of arrival deﬁned with respect to an
+arbitrary reference direction. If, however, p∗is a 3D position,
+then θ is a pair of azimuth and elevation angles. In both cases,
+the PPF reads
+Sq(θ) = ∠(p −xRX
+q ).
+(17)
+VI. GRID HOPPING
+The GH methodology is a fast proposition to approximately
+solve (10). We ﬁrst intuitively motivate the technique by con-
+sidering the simple MSR instance of Fig. 5(a), composed of
+one TX and two RXs. The system acquires a single chirp,
+taking M = 10 samples to determine the location p∗of a single
+target, thus acquiring a signal modeled according to Sec. V-A
+a). Fig. 5(b) shows an example of a correlation function used by
+the single-step method (9) with a typical grid PG discretizing
+the domain of interest P. In Fig. 5(c), we observe the corre-
+lations that one maximizes in a two-step approach. The blue
+samples form a uniform sensing grid ΘG discretizing Θ with a
+precision similar to the way PG discretizes P. The grey samples
+are taken from the grids Sq(PG), which are the transformation
+of PG through the PPFs.
+Computationally speaking, the grid search used to exactly
+solve the single-step problem (10) restricted to PG requires,
+for each index q ∈[Q], to evaluate the correlation Cq(θ) for
+all θ taken from the grid Sq(PG). With GH, we use atom
+interpolation to “hop” from the (blue) grid ΘG onto the (grey)
+grid Sq(PG) for the evaluations of Cq(θ). This operation is
+expected to provide a good approximation of the exact single-
+step grid search with a computational complexity with the same
+order of magnitude as exhibited by two-step methods, which are
+commonly faster.
+One can understand the performance of GH as follows. Given
+a ground truth p∗, the precision of the estimate ˆp resulting
+from (10) is intrinsically limited by the density of the grid
+PG. Yet, as observed in Fig. 5(b) and 5(c), the grids Sq(PG)
+Algorithm 1: Grid-Hopping Single-step Method
+Input : The measurement: yq and the pre-computed
+lookup tables Lq ∈CNP×2I,
+for all q ∈[Q]
+Output: The estimate: ˆp
+for q = 1 to Q do
+gq = Cq(ΘG)
+(20)
+for nP = 1 to NP do
+(n1, . . . , nI, c1, . . . , cI) ←Lq[nP]
+(21)
+hq,nP = I
+i=1 ci gq,ni
+(22)
+ˆnP = arg maxnP∈[NP]
+Q
+q=1
+hq,nP
+2
+(23)
+ˆp = ˆnP-th element of PG
+(24)
+discretize Θ more densely than PG discretizes P. Therefore, we
+expect, and quantify with the bound derived in Sec. VII, that the
+error caused by interpolating from the lower density grid ΘG
+toward Sq(PG) is often negligible compared to the limitation
+intrinsically caused by the gridding PG of P.
+Beyond the intuitive example, we ﬁrst deﬁne the order-I in-
+terpolation performed by GH from the partition ∪n∈[NΘ]Θn =
+Θ, with Θn ∩Θ′
+n = ∅for n̸ = n′. With {¯θn,i}i∈[I] ⊂ΘG de-
+noting a subset the grid ΘG taken in the neighbourhood of its
+n-th bin, the interpolated atom ˜a(θ) approximates a(θ) as
+˜a(θ) :=
+
+n∈[NΘ]
+Xn(θ)
+
+i∈[I]
+cn,i(θ)a(¯θn,i),
+(18)
+where Xn(θ) = 1 for θ ∈Θn and 0 otherwise, and where the
+interpolating coefﬁcients are such that cn,i(¯θn′,i′) = δn,i′δn,i′.
+Second, GH uses the interpolated atom (18) in the single-step
+correlation (10), i.e.,
+ˆp = arg max
+p∈PG
+
+q∈[Q]
+| ˜Cq(Sq(p))|2,
+˜Cq(θ) := ⟨yq, ˜a(θ)⟩. (19)
+In practice, (19) can be computed efﬁciently with a lookup
+table (mapping each p ∈PG to the right grid index n in ΘG)
+and by pre-computing the coefﬁcients {cn,i(θ)}i∈[I] for all
+θ ∈Sq(PG) and all q ∈[Q]. Formally, we have Q pre-computed
+matrices denoted by Lq ∈CNP×2I. For all q ∈[Q], the nP-
+th row (denoted Lq[nP]) contains the I indexes to perform
+the interpolation from the grid ΘG, and the I pre-computed
+coefﬁcients.
+The resulting GH procedure is summarized in Alg. 1. Dur-
+ing the real-time processing, we compute, for all q ∈[Q], the
+correlations Cq(ΘG) in (20). Next, for each p ∈PG, we read
+the interpolation data in (21) and perform the hopping in (22).
+Overall, the QMNP products required for the grid search
+of the one-step estimation (9) is replaced by the computa-
+tion of QMNΘ products for the computation of the Q sets
+of correlations Cq(ΘG) plus additional QINP products for
+the interpolations (22). Because in non-degenerate conditions
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:19:05 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 7 ---
+MONNOYER et al.: GRID HOPPING IN SENSOR NETWORKS: ACCELERATION STRATEGIES
+4469
+Fig. 5.
+(a) Schematic representation of an example of a MSR composed of one TX and two RXs. The received signals are composed of M = 10 samples
+we have B
+c = 0.5. The grid of grey dots represents the elements of PG. (b) The resulting noiseless single-step correlation function used by (9), or evaluated
+only to the grid PG by (10). (c) The correlation function of the ﬁrst step (6) for q = 1 (top) and q = 2 (bottom) corresponding to two RXs in the situation
+described in (a). The big blue dots represent the samples taken on the grid ΘG. The dense stem plot in grey depicts the samples taken on the grids Sq(PG).
+Fig. 6.
+Comparison of the exact correlation function Cq(θ) and its approximation ˜Cq(θ) resulting either from (a) the NN strategy (no interpolation), (b)
+an order-2 polynomial interpolation (I = 3), (c) the conventional polar interpolation [43] (I = 3), and (d) the LS-optimal interpolation with I = 3.
+I ≪M and NΘ ≪NP, the GH-based grid search is expected
+to be computed faster than the standard single-step computation
+given in (10).
+We end this section by illustrating, in Fig. 6, the approxi-
+mated correlation functions ˜Cq(θ) obtained for the simple ex-
+ample presented at the beginning of this section (see Fig. 5)
+while using the four interpolation schemes that we compare
+with our numerical results in Sec. VIII: (i) the Zero-Order
+Hold (ZOH) strategy, i.e., no interpolation, with I = 1, (ii) a
+conventional polynomial interpolation method (Fig. 6(b) for
+I = 3), (iii) the “Polar” interpolation, which is speciﬁcally ef-
+ﬁcient for translation-invariant atoms [43], [44]. Its standard
+version with I = 3 (Fig. 6(c)) has more recently been ex-
+tended to higher order versions [53]. Finally (iv) the Least-
+Squares (LS) optimal interpolation, minimizing the interpo-
+lation error for a given order I, such that (c1, · · · cI)⊤=
+[a(¯θ1), · · · , a(¯θI)]†a(θ) (Fig. 6(d) for I = 3).
+VII. UPPER BOUND ON THE GH ESTIMATION
+This section theoretically studies the estimation errors result-
+ing from the approximations used in our GH strategy. Let us ﬁrst
+motivate the study proposed in this section. Assuming a set of
+measurement vectors yq described by the model (4), the GH-
+based single-step estimation (19) produces an estimate ˆp with
+an error ∥ˆp −p∗∥2 that originates from three aspects:
+• The noise w, affecting any estimation method, including
+the continuous single-step optimization (9),
+• the restriction to a grid search on PG, affecting both (10)
+and (19),
+• and the interpolation error, speciﬁc to our GH approach.
+While the stochastic errors caused by the noise are efﬁciently
+characterized by the well-known Cramèr-Rao Lower Bound
+(CRLB) [67], [68], [69], we evaluate here the estimation er-
+rors speciﬁcally caused by the two latest, deterministic, effects
+within the sensor network context of this paper. To that end,
+we derived an upper bound on the error ∥ˆp −p∗∥2 for an
+estimate ˆp resulting from (19) while considering noiseless mea-
+surements. We express our bound with respect to the properties
+of the grids ΘG and PG as well as the interpolator used for GH,
+showing the joint effect of each processing step.
+We note that our bound encompasses the study of the lone
+effect of either the gridding or the interpolation since it can be
+particularized to corresponding scenarios by appropriately set-
+ting limit values of some variables upon which it is expressed.
+This aspect is detailed later in this section.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:19:05 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 8 ---
+4470
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 72, 2024
+Fig. 7.
+Interpolation gaps of multiple interpolators applied to the example
+of Fig. 5: These results are obtained with a sensed grid uniformly discretizing
+the sensed space Θ := [0, M[ with NΘ grid bins.
+In the remainder of this section, we ﬁrst deﬁne variables
+describing the estimation context. Next, the upper bound is
+given in Theorem 1, with its proof deferred to the appendix.
+At the end of this section, we discuss the insights one learns
+from our bound and its limitations.
+A. Technical Deﬁnitions
+Our upper bound is formulated using four deﬁnitions. With
+Deﬁnitions 1 and 2, we extract variables respectively quantify-
+ing the grid’s density and the interpolation’s accuracy that drive
+the estimation error under study. Additionally, Deﬁnitions 3 and
+4 identify attributes characterizing the shape of the single-step
+estimation’s objective function.
+In detail, Deﬁnition 1 relates the spacing of the grid PG using
+the concept of “covering radius”, denoted by ρ. In words, ρ is
+the distance within which any p ∈P is guaranteed to ﬁnd a
+nearby element from the grid PG.
+Deﬁnition 1 [Covering radius]: The grid PG discretizes P
+with the covering radius ρ deﬁned by
+ρ := max
+p∈P min
+p′∈PG ∥p −p′∥2.
+(25)
+A high-density grid corresponds to a small value of ρ, which
+goes towards 0 for an “inﬁnitely dense” grid. We intuitively ex-
+pect an estimation error that linearly increases with ρ, following
+the increasing worst-case distance between p∗and its closest
+neighbor in PG.
+Next, we evaluate the interpolation accuracy using the inter-
+polation gap ξ deﬁned below. As later shown in Theorem 1,
+the worst-case error also grows linearly with ξ.
+Deﬁnition 2 (Interpolation Gap): Given an interpolation
+scheme from which ˜a(θ) is derived by (18), we deﬁne the
+interpolation gap ξ as
+ξ := maxθ∈Θ ∥˜a(θ) −a(θ)∥2.
+(26)
+Let us highlight that ξ is driven in practice by three elements:
+(i) the nature of the interpolation, (ii) its order I, and (iii)
+the density of the grid ΘG. This dependency is represented in
+Fig. 7 by showing the value of ξ corresponding to different
+interpolation schemes and orders, with respect to the density
+of the 1D grid ΘG.
+The impact of ρ and ξ on the estimation error depends on
+the properties of the single-step cost function. Deﬁnition 3
+translates a ﬁrst such property by deﬁning parameters related
+to the jacobian of the transformation S. These enable us to
+make connections between worst-case errors in the admissible
+sensing domain T (deﬁned in (3)) and corresponding errors in
+the domain of interest P.
+Deﬁnition 3 (Variations of parameter projection): The global
+projection function S : P 
+→T exhibits the maximal and the
+minimal variation coefﬁcient, respectively deﬁned by
+¯λmin := min
+p∈P λmin
+
+J(p)⊤J(p)
+
+,
+(27)
+¯λmax := max
+p∈P λmax
+
+J(p)⊤J(p)
+
+,
+(28)
+where J(p) denotes the jacobian matrix of S evaluated in p.
+The quantities ¯λmin and ¯λmax are also related to the injectivity
+of the global PPF. We emphasize this aspect with the following
+lemma, proven in Appendix D,
+Lemma 1: Given S, a global PPF, and a convex domain P
+meeting Assumption 1, if ¯λmin > 0 then S is invertible over P.
+It follows that the ill-posed situation of a non-injective global
+projection function yields ¯λmin = 0. This extreme case suggests
+that a high value of ¯λmax with a low value of ¯λmin leads to higher
+estimation errors.
+Finally, the shape of the single-step cost function also de-
+pends on the decreasing properties of the squared correlation
+kernel |κ(·)|2 (deﬁned in (5)). We evaluate this aspect by intro-
+ducing the concept of “lobe-r” functions.
+Deﬁnition 4 (lobe-r function): Given r > 0 and a domain
+Z ⊂Rn, a function f : Z 
+→R is said to be lobe-r if there is
+R ≥r such that for all zin ∈B2(r) and for all zout ∈Z\B∞(R),
+we have
+f(zin) > f(zout),
+(29)
+and if there are positive lobe-bounding constants 0 < U ≤L
+such that for all z ∈B∞(R), the following holds
+1 −L∥z∥2
+2 ≤f(z) ≤1 −U∥z∥2
+2.
+(30)
+In particular, all the above imply that f(z) has a unique global
+maximizer z = 0, with f(0) = 1.
+This concept can be better understood by inspecting Fig. 8.
+More precisely, Fig. 8(a) shows an example of a lobe-r function
+with its lower and upper bounding parabolas that illustrate the
+condition (30). In Fig. 8(b), a 2D lobe function is given with
+regions highlighted in different colors. We respectively call the
+inner-lobe and the outer-lobe of f, the domains B2(r) and
+B∞(R)\B2(r). The property (29) tells us that any value of f
+taken inside the inner lobe is greater than all evaluations of
+f outside the outer lobe. For z ∈B∞(R)\B2(r), f(z) may
+take values larger than inside the inner lobe but follows the
+decreasing rule (30).
+We note that the squared kernel |κ(·)|2 resulting from any
+of the examples given in Sec. V is a lobe-r function for some
+r > 0. Practically speaking, the inner radius r of |κ(·)|2 is then
+closely related to the sensor resolution.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:19:05 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 9 ---
+MONNOYER et al.: GRID HOPPING IN SENSOR NETWORKS: ACCELERATION STRATEGIES
+4471
+Fig. 8.
+(a) Example of a lobe-r function (r = .75) corresponding to the
+squared kernel |κ(δ)|2 of the atom (12), with a choice of upper and
+lower bounding parabolas. (b) A two-dimensional lobe-r function (r = .53)
+obtained from a weighted outer summation of two functions as depicted in
+(a). We call the green region the inner-lobe, the blue region the outer-lobe,
+and the red region the outside.
+B. The Grid Hopping Estimation Bound
+Using the deﬁnitions above, we present here our main theo-
+retical result in Theorem 1. In the following, we use a notation
+for normalized amplitude coefﬁcients (deﬁned in (4)),
+γq = |αq|2 /
+Q
+
+q′=0
+|αq′|2,
+(31)
+and we set γmax := maxq∈[Q] γq, γmin := minq∈[Q] γq.
+Theorem 1 (Grid Hopping Estimation Bound): Assuming
+that
+(A.1) the grid PG discretizes P with a covering radius ρ,
+(A.2) we use an interpolation scheme with a gap ξ,
+(A.3) the atom function a deﬁnes a translation invariant
+kernel such that |κ(·)|2 is a lobe-r function with L,
+U as lower and upper bounding constants,
+and given measurements provided by (4) with no noise, the
+following error bound on the estimate ˆp resulting from the
+estimation (19) holds: With the constants
+RP :=
+
+Lγmax
+Uγmin ,
+˜U := Uγmin,
+˜RP := (4RP+
+√
+2)
+√
+˜U
+,
+(32)
+if
+(¯λmaxR2
+P) ρ2 + 2
+√
+2
+˜U ξ ≤r2,
+(33)
+then
+∥ˆp −p∗∥2 ≤¯λ
+−1
+2
+min
+ ˜RP ξ + ¯λ
+1
+2maxRP ρ
+
+.
+(34)
+Theorem 1 is proven in the appendix. In words, if the cover-
+ing radius ρ of PG is sufﬁciently smaller than the inner lobe r,
+then the noiseless estimation error ∥ˆp −p∗∥2 is upper bounded
+by a weighted sum of the interpolation gap ξ and the covering
+radius ρ.
+As announced at the beginning of this section, we can partic-
+ularize our bound for two scenarios. In a standard single-step
+estimation with no GH, and hence the only error is the gridding
+error, proportional to ρ according to (34) with ξ = 0. If, on the
+other hand, GH is used to estimate p in a continuous space
+(e.g., with an inﬁnitely dense grid PG), then ρ = 0 and only
+the interpolation error, proportional to ξ, remains.
+C. Discussion on the GH Estimation Bound
+We now proceed to analyze the insights we can learn from
+our bound. We ﬁrst highlight that the factor ¯λ
+−1
+2
+min translates the
+impact of the “geometry” of the scenario and the network’s
+ability to observe the parameter of interest diversely, inher-
+ently embodied in the properties of the PPF. Notably, the ill-
+conditioned network with ¯λmin = 0 studied by Lem. 1 yields an
+unbounded error.
+In addition, since RP is minimized when all the received
+signals exhibit similar power (i.e., γmax = γmin), our bound sug-
+gests that imbalance between the power levels of the signals
+negatively impacts the estimation performance in single-step
+methods.
+The bound also enables us to study the impacts of using either
+a dense grid or a higher-order interpolation scheme. We remind
+the reader that GH’s computational complexity is proportional
+to NΘM + NPI. If the term in ρ dominates the error, we
+can only decrease ρ to signiﬁcantly improve the performance,
+thereby increasing NP. If, however, the term in ξ dominates,
+we can decrease this term either by using a more precise inter-
+polation scheme (e.g., a polar interpolation instead of ZOH) or
+by increasing the density of the grid ΘG. Computationally, in
+the ﬁrst case, we increase I; in the other case, we increase NΘ.
+Therefore, determining the best choice between these two ways
+of decreasing ξ depends on the value of NP. If NΘM dominates
+the computation time, a higher-order interpolation scheme is
+preferred. If NPI dominates, a low-order interpolation scheme
+with a denser grid ΘG is preferred. This effect will be observed
+in the numerical results.
+Finally, while our bound studies the joint impact of the dis-
+cretization of PG and the interpolation on the estimation error,
+its deterministic point of view makes it a separated approach
+from standard bounds on the effect of the noise, such as the
+CRLB. We postpone the in-depth study of the joint effect of
+the three sources of errors we listed at the beginning of this
+section for a future dedicated publication. In particular, the
+derivation of a CRLB, taking into account the effect of the
+gridding and interpolation errors as equivalent noise in the
+estimate, in a similar fashion as quantization noise, is expected
+to add a valuable contribution in the future to understand the
+interconnection between those aspects.
+VIII. NUMERICAL RESULTS
+This section presents numerical results from extensive
+Monte-Carlo simulations. First, we compare the bound from
+Sec. VII with simulation results on the simple MSR application
+of Fig. 5, in a noiseless scenario that ﬁts the conditions for
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:19:05 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 10 ---
+4472
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 72, 2024
+Fig. 9.
+(a) Maximal squared error ∥ˆp −p∗∥2
+2 observed over 10,000 real-
+izations of p∗for multiple interpolation schemes used in GH. (b) The same
+data as (a), with respect to the interpolation gap ξ, obtained from Fig. 7.
+which Thm. 1 applies. These results, presented in Sec. VIII-A,
+compare our theoretical worst-case error bound with corre-
+sponding worst-case errors observed in numerical experiments,
+thereby showing the bound’s level of tightness.
+Next, in Sec. VIII-B, we assess the effectiveness of GH
+in connection with the choice of interpolation scheme, using
+simulations performed for two different applications. These
+results highlight how GH can augment single-step estimation
+algorithms by signiﬁcantly reducing their computational com-
+plexity while maintaining efﬁciency and only inducing minimal
+estimation inaccuracy.
+A. Evaluation of the GH Bound
+We randomly selected 10,000 realizations for the value of
+the true parameter of interest p∗, taken following a uniform
+distribution in P, depicted in Fig. 5(a). For each selected value
+of p∗, we computed the collection of Q noiseless and equal-
+power measurements {yq}Q
+q=1 (i.e., with γmin = γmax = 1/Q).
+For each realization, GH was used with all the interpolation
+schemes compared in Fig. 7 to obtain estimates ˆp of p∗. These
+estimations were performed for several uniform griddings ΘG
+of Θ and griddings PG of P. The grids PG all have a similar
+structure as the grid from Fig. 5(a) and are deﬁned with different
+spacing between adjacent bins, which is directly proportional to
+the covering radius ρ.
+For each grid and interpolation scheme, we recorded the re-
+alization which provided the worst (higher) estimation squared
+error ∥ˆp −p∗∥2
+2. This metric is used here to evaluate the ability
+of our upper bound to properly translate the behavior of the error
+it is intended to bound. The next section compares performance
+in detail using an average error metric. Fig. 9(a) depicts these
+worst-case errors with respect to the density of ΘG expressed by
+NΘ/M, while the grid PG is ﬁxed with ρ = 1/8. The compar-
+ison with Fig. 7 conﬁrms that the interpolation schemes with
+lower gaps ξ lead to lower worst-case errors. Increasing NΘ
+decreases the error, following the value of ξ shown in Fig. 7
+before reaching the grid error resulting from the limited density
+of the grid PG.
+In Fig. 9(b), the same data as Fig. 9(a) are shown, with
+respect to the values of ξ taken from Fig. 7. We added the
+Fig. 10.
+Comparison of the GH bound with the maximal squared error
+∥ˆp −p∗∥2
+2 obtained using GH with the order-5 polar interpolation [53]. Three
+distinct uniform grids PG, characterized by their covering radius ρ are shown.
+GH bound computed with the ﬁxed covering radius ρ = 1/8.
+Similar results, restricted to the polar interpolation, are depicted
+in Fig. 10 for multiple values of ρ. We observe two regimes in
+each curve. The left ﬂat part corresponds to values of ξ such that
+EG dominates EI while the right increasing part corresponds
+to the regime where EI dominates. The same two regimes with
+similar slopes appear in the simulated results. The vertical shift
+between the theoretical bound and the results is caused by a
+constant coefﬁcient. In contrast, the horizontal shift translates
+a mismatch between the theoretical and the actual weightings
+of ρ and ξ in the expression of the bound. Those are due to
+the unlikeliness of all the intermediate inequalities used in the
+derivation of the bound to be tight in a single value of p∗. Still,
+the weighted-sum property of ρ and ξ is preserved when moving
+from the theory to the simulations.
+B. Grid-Hopping Performance
+We validate, on two different systems, the performance of
+GH in comparison to the single-step and two-step methods
+presented in Sec. IV. While multiple contributions have already
+shown the superiority of single-step methods over their two-
+step counterpart under sophisticated nuisance [19], [24], [25],
+we restrict our study to the robustness of the GH estimation
+against white noise. This simple case enables us to highlight
+the ability of GH to attain performance comparable to those of
+single-step methods with a computational complexity closer to
+two-step methods, as well as deriving a rule of thumb to choose
+the most appropriate interpolation scheme.
+The ﬁrst application is a MSR with Q = 3 receivers and a
+geometry similar to the one presented in Fig. 5(a) with different
+scales. More precisely, all dimensions are multiplied by 8 and
+each antenna provides M = 64 samples. The other application
+is a network of sensor arrays as described in Sec. V-C. The
+receiver nodes are located in the same location as the receivers
+of the MSR described above, and each node is a circular array
+of sub-receivers, as used in [63], whose radius is 16λ and com-
+posed of M = 64 receivers. Examples of correlation functions
+computed by a single-step method in both setups are given in
+Fig. 11.
+Simulating the MSR system for multiple values of Signal-
+to-Noise Ratio (SNR), we averaged the estimation error ∥ˆp −
+p∗∥2 over 10,000 realizations of signals (see model 4) in which
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:19:05 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 11 ---
+MONNOYER et al.: GRID HOPPING IN SENSOR NETWORKS: ACCELERATION STRATEGIES
+4473
+Fig. 11.
+Correlation functions used in the single-step method (9) on a signal
+obtained with the two systems simulated in Sec. VIII-B, observing a single
+target or a signal source located in p∗= (−16, 32)⊤with a SNR = 20dB.
+(a) the MSR system. (b) the DoA-based localization system.
+Fig. 12.
+Simulation results from the MSR system showing the average of the
+estimation error ∥ˆp −p∗∥2 over 10,000 realization of noisy signals following
+(4). The polynomial, the polar, and the LS interpolator used in GH for this
+simulation are all of order I = 3. Two different distinct uniform grids PG
+are used. In (a)-(c), covering radius ρ = 1/4 and in (d)-(f), ρ = 1/8.
+p∗have been taken uniformly at random in P and the coef-
+ﬁcients αq have been taken independently for each index q
+from a complex normal distribution of variance equal to 1.
+Fig. 12(a) shows the resulting performance with a covering ra-
+dius ρ = 1/4, when NΘ/M = 4. The results conﬁrm the single-
+step method’s stronger robustness against noise. At a high SNR,
+the performance saturates, as it reaches the limitation due to
+the gridding PG. The GH curves follow the one of the single-
+step but saturate sooner to reach, at high SNR, a performance
+which depends on the choice of interpolation. The ZOH strategy
+logically yields the worst GH performance, while higher order
+interpolations exhibit here performance almost indistinguish-
+able from the single-step algorithm.
+Fig. 12(b) and 12(c) respectively show the average estimation
+error and the computation time with respect to the cardinality
+NΘ of ΘG with a constant 20dB SNR. For a given interpolation
+Fig. 13.
+Simulation results from the DoA-based localization system, similar
+as Fig. 12, for a grid PG with ρ = 1/8.
+scheme, increasing NΘ leads to smaller errors, but increases the
+GH’s computation time. In the considered scenario, the term in
+NΘM dominates the computation time of GH methods. The po-
+lar interpolation with NΘ/M = 4 thus appears as the potential
+best compromise between the performance and the computation
+time. The LS interpolator requires a higher computation time
+than the polar one because it requires complex interpolating co-
+efﬁcients and, hence, is computationally of order I = 6 instead
+of 3.
+Fig. 12(d)–12(f), shows similar results for ρ PG equal to
+1/8. The same conclusions as before apply but the computation
+times tell another story. Since the number of grid bins NP has
+increased, the term in NPI now dominates the computation
+time. It is now more efﬁcient to reduce ξ by increasing NΘ
+instead of I. Practically, this translates into the conclusion that
+the ZOH strategy with a dense sensed grid ΘG is the best
+compromise between performance and computation time.
+This observation conﬁrms the intuition described in Sec. VII
+and provided by the GH bound. In short, when NP is sufﬁciently
+small, then a higher order interpolation is preferred to reach the
+single-step method’s performance with GH. As NP becomes
+larger, using a lower order interpolation with a dense sensing
+grid ΘG becomes computationally more efﬁcient.
+Finally, Fig. 13 shows similar results when applied to the
+second application. Since the atom function described by (16)
+is not translation invariant, we can no longer use the polar
+interpolation for which this property is a requirement. Also, this
+implies that our theoretical bound is no longer ensured. Still, the
+observation of similar results as for the MSR system tends to
+assume that the main intuition provided by the bound can be
+extended beyond the translation-invariance assumption.
+IX. CONCLUSION
+This paper intends to introduce and evaluate the Grid
+Hopping framework, which generalizes multiple acceleration
+techniques of single-step estimation methods for networks of
+sensors. With a few assumptions on the system and the sensing
+scenario, we provided a theoretical bound on the estimation
+error between the GH estimate and the ground truth. We used
+our bound to derive a rule indicating the situations where us-
+ing a lower order interpolation with a dense grid is expected
+to be computationally more efﬁcient than using a high order
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:19:05 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 12 ---
+4474
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 72, 2024
+interpolating with coarse grids for similar performance. With
+the Monte-Carlo simulation, we conﬁrmed the intuitive rule and
+showed the effectiveness of GH in simple sensing scenarios.
+While this paper focused on presenting and characterizing
+the GH framework in its simplest applicative context, future
+research includes the application of GH to more advanced
+single-step algorithms tailored for the estimation of multiple pa-
+rameters of interest and including off-grid search or reﬁnement
+of the estimates, as well as further evaluations of the method
+in systems that suffer from additional non-idealities such as
+reverberation. When integrating these advanced algorithms with
+GH, comparing their resulting performance with the CRLB is
+expected to provide insight into the level of degradation intro-
+duced by the use of GH. Therefore, deriving CRLB speciﬁcally
+tailored to take into account this degradation is another possible
+key direction for future research built upon our results.
+APPENDIX
+This appendix is dedicated to the proof of Theorem 1. This
+proof is structured on the basis that Theorem 1 results from
+a particularization of simpler and a more general theorem:
+Theorem 2. This theorem bounds the norm of the maximizer
+of a function ˜f approximating a lobe-r function f.
+More precisely, we organize the appendix as follows. First,
+Appendix A describes, proves, and interprets the more general
+Theorem 2 from which Theorem 1 originates. Next, we provide
+in Appendix B three technical lemmas required to apply Theo-
+rem 2 in the speciﬁc context of interest for our bound, i.e., the
+GH’s optimization problem (19). Finally, Appendix C exploits
+all the above to effectively prove Theorem 1.
+A. Approximate Lobe Function Maximization Bound
+The maximizer of a lobe-r function f is trivially 0 by deﬁni-
+tion of this concept. In contrast, Theorem 2 bounds the “error”
+(compared to 0) one obtains when maximizing an approximate
+function ˜f instead, and when this optimization is moreover
+constrained in a subset of the domain of f. To bound this error,
+this theorem exploits the decreasing properties of the lobe-r
+function f.
+In the proof of Theorem 1, we will match the GH optimiza-
+tion (19) with the optimization problem studied by Theorem 2.
+Note that the distinction of the two constants η and η′ in this
+theorem has importance for the derivation of Theorem 1.
+Theorem 2 (Lobe Function Maximization Bound): Let ˜f :
+Z 
+→R be an approximation of the lobe-r function f such that
+for all z ∈Z,
+| ˜f(z) −f(z)| ≤η.
+(35)
+Given a set Z′ ⊂Z and zref ∈arg minz∈Z′∥z∥2, if
+∥zref∥2
+2 < Ur2−2η
+L
+,
+(36)
+then the estimate ˆz deﬁned by
+ˆz := arg max
+z∈Z′
+˜f(z)
+(37)
+is such that
+∥ˆz∥2
+2 ≤L
+U ∥zref∥2
+2 + 2
+U η′,
+(38)
+where η′ is a constant potentially smaller than η such that
+| ˜f(z) −f(z)| ≤η′ holds speciﬁcally for z ∈{zref, ˆz}.
+Proof: To exploit the decreasing property (30) of the lobe-r
+function f and thereby prove Theorem 2, we must ﬁrst guaran-
+tee that ˆz belongs inside the outer lobe, i.e., ˆz ∈B∞(R). This
+is directly proven if we show that for all zout ∈Z\B∞(R), we
+always have ˜f(ˆz) > ˜f(zout).
+We demonstrate this inequality by ﬁrst rewriting (36) as
+1 −L∥zref∥2
+2 −η > 1 −Ur2 + η.
+(39)
+Next, we upper bound the left part of (39) by applying (30) in
+zref. We can do this since L ≥U and η ≥0 by deﬁnition, and
+hence the constraint (36) ensures ∥zref∥2 < r.
+We also lower bound the right part of (39) by noticing that
+for all zout ∈Z\B∞(R), it holds f(zout) ≤1 −Ur2. Indeed,
+by the decreasing property (30), any zin such that ∥zin∥2 = r
+provides f(zin) ≤1 −Ur2, while following the property (29),
+we have f(zout) ≤f(zin).
+Applying the above to (39), it results
+f(zref) −η > f(zout) + η,
+(40)
+for all zout ∈Z\B∞(R). Using (35), we conclude that
+˜f(zref) > ˜f(zout) and hence ˆz ∈B∞(R).
+With the above, we showed that we can apply (30) on both
+f(zref) and f(ˆz). Combined with the deﬁnition of η′, this leads
+to
+˜f(ˆz) ≤f(ˆz) + η′ ≤1 −U∥ˆz∥2
+2 + η′,
+(41)
+and
+˜f(zref) ≥f(zref) −η′ ≥1 −L∥zref∥2
+2 −η′.
+(42)
+Since ˜f(ˆz) ≥˜f(zref), this implies ∥ˆz∥2
+2 ≤L
+U ∥zref∥2
+2 + 2
+U η′ and
+concludes the proof.
+B. Auxilliary Lemmas
+Showing how the context of the GH estimation ﬁts the one
+of Theorem 2 requires a few technical lemmas.
+We begin with a lemma showing that a positive weighted
+sum of the lobe-r function is also a lobe-˜r function, described
+by an inner radius and bounding constants that depend on the
+sum’s weights. This lemma is helpful to characterize properties
+of the objective function of (19) and to show that it meets the
+conditions for Theorem 2.
+Lemma 2 (Summation of lobes): Given positive b1, · · · , bQ
+such that 
+q∈[Q] bq = 1 and the separable function
+fb : ZQ 
+→R : fb(z) = 
+q∈[Q]
+bqf(zq),
+(43)
+with f a lobe-r function and z = [z⊤
+1 , · · · , z⊤
+Q]⊤, fb is lobe-˜r
+whose lobe is bounded by ˜L and ˜U obtained from
+˜r2 = U
+L
+bmin
+bmax r2,
+˜L = Lbmax,
+˜U = Ubmin,
+(44)
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:19:05 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 13 ---
+MONNOYER et al.: GRID HOPPING IN SENSOR NETWORKS: ACCELERATION STRATEGIES
+4475
+and where bmax := maxq∈[Q] bq and bmin := minq∈[Q] bq.
+Proof: For this proof, we use the notation ¯Bp(r) := {z ∈
+ZQ : ∥z∥p ≤r}, while the ball Bp(r) is deﬁned in Z. We ﬁrst
+prove that property (29) holds for fb with ˜r deﬁned by (44). To
+this end, let us deﬁne
+zin := [(zin
+1 )⊤, · · · , (zin
+Q)⊤]⊤,
+(45)
+zout := [(zout
+1 )⊤, · · · , (zout
+Q )⊤]⊤.
+(46)
+such that zout ∈ZQ\¯B∞(R) and that zin
+q ∈B2(r) for all q ∈
+[Q]. By construction, there is at least one index q′ ∈[Q] such
+that zout
+q′ ∈Z\B∞(R). For such index q′, the properties of a
+lobe-r function guarantee that
+f(zout
+q′ ) <
+min
+z∈B2(r) f(z) ≤1 −U max
+z∈B2(r) ∥z∥2
+2 = 1 −Ur2.
+(47)
+For other indexes q̸ = q′, we have f(zout
+q ) ≤1 since 1 is the
+maximum value of f by deﬁnition. Therefore,
+fb(zout) < 1 −bq′Ur2 ≤1 −bminUr2.
+(48)
+Moreover, using property (30), we have
+fb(zin) ≥
+q∈[Q]
+bq(1 −L∥zin
+q ∥2
+2)
+(49)
+= 1 −
+q∈[Q]
+bqL∥zin
+q ∥2
+2
+(50)
+≥1 −bmaxL∥zin∥2
+2.
+(51)
+From (48) and (51), we deduce that any couple (zin, zout)
+deﬁned as above exhibits the inequality
+fb(zin) −fb(zout) > bminUr2 −bmaxL∥zin∥2
+2.
+(52)
+A sufﬁcient condition for fb(zin) −fb(zout) to be positive is
+∥zin∥2
+2 ≤U
+L
+bmin
+bmax r2 := ˜r2, which proves (44).
+Now we prove that the bounding property (30) holds for fb
+with ˜L and ˜U. For all z = [z⊤
+1 , . . . , z⊤
+Q]⊤∈¯B∞(R) ⊂ZQ, we
+necessarily have zq ∈B∞(R) ⊂Z for all q ∈[Q]. Therefore,
+we can apply (30) separately to each term of the summation
+(43) to obtain
+fb(z) ≥1 −
+q∈[Q] bqL∥zq∥2
+2 ≥1 −bmaxL∥z∥2
+2
+(53)
+fb(z) ≤1 −
+q∈[Q] bqU∥zq∥2
+2 ≤1 −bminU∥z∥2
+2,
+(54)
+which proves (44) and concludes this proof.
+Next, we provide a lemma that will help us in bounding the
+error between the exact sum of squared correlations appearing
+in (9) with the approximation used by GH in (19).
+Lemma 3: Given three vectors v1, v2 and v3 with unit ℓ2
+norm and two positive constants ε and η such that
+|⟨v1, v2⟩|2 ≥1 −ε2
+and
+|⟨v1, v3⟩|2 ≥1 −η2,
+(55)
+two inequalities hold
+|⟨v1, v3⟩|2 −|⟨v2, v3⟩|2 ≤
+√
+2ε,
+(56)
+|⟨v1, v3⟩|2 −|⟨v2, v3⟩|2 ≤2εη + ε2.
+(57)
+Proof: For this proof, we use the notation V i = vivH
+i for
+i ∈{1, 2, 3} and ⟨, ⟩F as the Frobenius inner product. The left
+part of (56) and (57) is thus equivalent to
+⟨V 1 −V 2, V 3⟩F
+.
+To prove (56), we apply the Cauchy-Scharwz inequality,
+⟨V 1 −V 2, V 3⟩F
+ ≤∥V 1 −V 2∥F∥V 3∥F.
+(58)
+Since ∥V i −V j∥2
+F = 2 −2|⟨vi, vj⟩|2 and ∥V 3∥F = 1, inject-
+ing (55) in the above provides (56).
+The inequality (57) is similarly proven by developing
+⟨V 1 −
+V 2, V 3⟩F
+ as
+⟨V 1 −V 2, V 1 −V 3⟩F −⟨V 1 −V 2, V 1⟩F
+
+≤∥V 1 −V 2∥F∥V 1 −V 3∥F + |1 −⟨V 1, V 2⟩F|.
+(59)
+Since ⟨V 1, V 2⟩F = |⟨v1, v2⟩|2, injecting (55) in the above
+provides (57).
+We end this tour of technical lemmas with a property en-
+abling us to exploit Deﬁnition 3 to navigate from the domain
+of interest P to the admissible sensed domain T and inversely.
+Lemma 4: Given a global PPF following assumption 1 and
+denoted by S, for all pairs p1, p2 ∈P and θ1, θ2 ∈T such that
+θ1 = S(p1) and θ2 = S(p2), the following holds
+¯λmin∥p2 −p1∥2
+2 ≤∥θ2 −θ1∥2
+2 ≤¯λmax∥p2 −p1∥2
+2.
+(60)
+Proof:
+From
+the
+mean
+value
+theorem,
+θ2 −θ1 =
+J(p)(p2 −p1) for some p ∈P. Therefore,
+∥θ2 −θ1∥2
+2 = (p2 −p1)⊤J⊤(p)J(p)(p2 −p1)
+∈[¯λmin, ¯λmax]∥p2 −p1∥2
+2.
+(61)
+C. Proof of Theorem 1
+Now, we exploit the above lemmas to prove Theorem 1 by
+applying Theorem 2 to the GH estimation (19).
+To help us connect this optimization problem with the for-
+malism of Theorem 2, let us begin this proof by deﬁning some
+functions derived from the kernel κ (see (5)). Given the ground
+truth p∗which is sensed through its associated sensed param-
+eters θ∗= (θ∗
+1, · · · , θ∗
+Q)⊤:= S(p∗), the approximated kernels,
+which result from the use of ˜a instead of a in the correlation
+processes, read for all q ∈[Q],
+˜κq(δ) := ⟨˜a(θ∗
+q + δ), a(θ∗
+q)⟩.
+(62)
+Next, we consider the summation performed in the single-step
+method with and without GH respectively in (9) and (19). When
+particularized to the noiseless context for which this bound
+applies, and given δ := (δ1, · · · , δQ)⊤, this yields
+κΣ(δ) := 
+q∈[Q] γq |κ(δq)|2,
+(63)
+˜κΣ(δ) := 
+q∈[Q] γq |˜κq(δq)|2
+(64)
+Using the deﬁnition here above and the notation
+ˆδ = ˆθ −θ∗,
+(65)
+we can now reformulate the optimization in (19) as equivalent
+to solve
+ˆδ = arg max
+δ∈TG
+˜κΣ(δ),
+(66)
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:19:05 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 14 ---
+4476
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 72, 2024
+where TG := S(PG) −θ∗⊂T −θ∗, and then apply the bijec-
+tion ˆp = S−1(θ∗+ ˆδ). The next part of this proof consists in
+demonstrating in three steps that (66) meets the conditions for
+Theorem 2. These steps provide
+1) a proof that κΣ(δ) is a lobe function,
+2) an upper bound on |˜κΣ(δ) −κΣ(δ)|,
+3) an
+upper
+bound
+on
+the
+ℓ2
+norm
+of
+δref :=
+arg minδ∈TG∥δ∥2,
+by respectively using Lemma 2, 3 and 4.
+Step 1) Since A.3 imposes that |κ(δ)|2 is a lobe-r function
+and since 
+q∈[Q] γq = 1 by construction, we can use Lemma 2
+to derive the properties of κΣ. We conclude that κΣ is a lobe-˜r
+with lobe-bounding constants ˜L and ˜U deﬁned by
+˜L = γmaxL,
+˜U = γminU,
+˜r =
+
+γminU
+γmaxLr.
+(67)
+Step 2) The deﬁnition of the interpolation gap implies, for
+all θ ∈Θ, that
+ξ2 ≥∥˜a(θ) −a(θ)∥2
+2 = 2(1 −ℜ{⟨˜a(θ), a(θ)⟩})
+(68)
+≥2(1 −|⟨˜a(θ), a(θ)⟩|),
+(69)
+which in turn, for all q ∈[Q] and for all δ ∈Θ −θ∗
+q, leads to
+|⟨a(θ∗
+q + δ), ˜a(θ∗
+q + δ)⟩|2 ≥1 −ξ2 + ξ4
+4
+(70)
+≥1 −ξ2.
+(71)
+Additionally, the lobe bounding property of |κ(δ)|2 gives
+|κ(δ)|2 = |⟨a(θ∗
+q + δ), a(θ∗
+q)⟩|2 ≥1 −Lδ2.
+(72)
+We now apply Lemma 3 to the above. In the notation of this
+lemma, v1, v2 and v3 are respectively mapped to a(θ∗
+q + δ),
+˜a(θ∗
+q + δ) and a(θ∗
+q). It results for all q ∈[Q] and for all δ ∈
+Θ −θ∗
+q,
+|˜κq(δ)|2 −|κ(δ)|2 ≤min
+√
+2ξ, 2
+√
+Lξ|δ| + ξ2	
+.
+(73)
+We end this step by extending the above to the sum ˜κΣ. For all
+δ ∈T −θ∗, we have
+|˜κΣ(δ) −κΣ(δ)| =
+ 
+q∈[Q] γq(|˜κq(δq)|2 −|κ(δq)|2)
+
+≤
+q∈[Q] γq
+|˜κq(δq)|2 −|κ(δq)|2
+≤
+q∈[Q] γq min
+√
+2ξ, 2
+√
+Lξ|δq| + ξ2	
+≤min
+√
+2ξ, 2
+
+˜Lξ∥δ∥2 + ξ2	
+,
+(74)
+where the last inequality exploits the property 
+q∈[Q] γq = 1,
+which implies 
+q∈[Q] γq|δq| ≤γ
+1
+2max∥δ∥2.
+Step 3) The statement A.1 guarantees the existence of pref ∈
+PG such that ∥pref −p∗∥2
+2 ≤ρ2. Applying Lemma 4, we have
+∥S(pref) −θ∗∥2
+2 ≤¯λmaxρ2.
+(75)
+Since by construction, S(pref) −θ∗∈TG, we have δref :=
+arg minδ∈TG∥δ∥2 such that
+∥δref∥2
+2 ≤¯λmaxρ2
+(76)
+This completes the three steps enabling us to apply Theorem
+2 to the maximization (66). Following our conclusion in (74),
+we map the term η (in the notation of Theorem 2) to
+√
+2ξ. The
+term η′ is mapped to 2
+√
+Lξ∥ˆδ∥2 + ξ2. This is allowed since
+|˜κΣ(δref) −κΣ(δref)| ≤2
+√
+Lξ∥δref∥2 + ξ2,
+(77)
+≤2
+√
+Lξ∥ˆδ∥2 + ξ2,
+(78)
+by deﬁnition of δref.
+With the above mapping of η and η′, and the properties of
+κΣ in (67), we apply Theorem 2: if ρ is such that
+¯λmaxρ2 ≤
+˜U ˜r2−2
+√
+2ξ
+˜L
+= Uγmin
+Lγmax (r2 −2
+√
+2ξ
+Uγmin ),
+(79)
+then (76) guarantees
+∥δref∥2
+2 ≤
+˜U ˜r2−2
+√
+2ξ
+˜L
+= Uγmin
+Lγmax (r2 −2
+√
+2ξ
+Uγmin ),
+(80)
+and therefore Theorem 2 gives the bound ∥ˆδ∥2
+2 ≤
+˜L
+˜U ¯λmaxρ2 +
+4
+√
+˜L
+˜U
+ξ ∥ˆδ∥2 + 2
+˜U ξ2. Finding the only positive root of the above
+order-2 polynomial in ∥ˆδ∥2 yields
+˜U ∥ˆδ∥2 ≤2
+
+˜Lξ +
+
+(4˜L + 2 ˜U)ξ2 + ˜L ˜U ¯λmaxρ2.
+(81)
+≤(4
+
+˜L +
+
+2 ˜U)ξ +
+
+˜L ˜U ¯λmax > ρ.
+(82)
+Using the notation RP deﬁned in (32), we rewrite the above as
+∥ˆδ∥2 ≤4RP +
+√
+2
+
+˜U
+ξ + RP¯λ
+1
+2maxρ.
+(83)
+Since ¯λmin∥ˆp −p∗∥2
+2 ≤∥ˆδ∥2
+2 by Lemma 4, we ﬁnally obtain
+(34) by using all the notations given in (32). Similarly, (80) is
+rewritten as (33) with those notations. This ﬁnally concludes
+the whole proof of Theorem 1.
+D. Proof of Lemma 1
+Proof: If S is differentiable and non-injective over P, there
+exist two distinct parameters p1, p2 ∈P such that S(p1) =
+S(p2). From the mean value theorem, there is ¯p ∈P on the
+segment from p1 to p2 such that
+0 = S(p2) −S(p1) = J(¯p)(p2 −p1),
+(84)
+meaning that λmin
+
+J⊤(¯p)J(¯p)
+
+= 0 = ¯λmin.
+REFERENCES
+[1] H. Wang and P. Chu, “Voice source localization for automatic camera
+pointing system in videoconferencing,” in Proc. IEEE Int. Conf. Acoust.,
+Speech, Signal Process., vol. 1, Munich, Germany: IEEE Comput. Soc.
+Press, 1997, pp. 187–190.
+[2] A. Marti, M. Cobos, and J. J. Lopez, “Real time speaker localization
+and detection system for camera steering in multiparticipant videocon-
+ferencing environments,” in Proc. IEEE Int. Conf. Acoust., Speech Signal
+Process. (ICASSP), Prague, Czech Republic. Piscataway, NJ, USA: IEEE
+Press, May 2011, pp. 2592–2595.
+[3] S. Saponara and B. Neri, “Radar sensor signal acquisition and 3D
+FFT processing for smart mobility surveillance systems,” in Proc. IEEE
+Sensors Appl. Symp. (SAS). Catania, Italy. Piscataway, NJ, USA: IEEE
+Press, Apr. 2016, pp. 1–6.
+[4] C. Rascon and I. Meza, “Localization of sound sources in robotics: A
+review,” Robot. Auton. Syst., vol. 96, pp. 184–210, Oct. 2017.
+[5] A. Y. Majid, C. Van Der Horst, T. Van Rietbergen, D. JohannesZwart,
+and R. V. Prasad, “Lightweight audio source localization for swarm
+robots,” in Proc. IEEE 18th Annu. Consum. Commun. & Netw. Conf.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:19:05 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 15 ---
+MONNOYER et al.: GRID HOPPING IN SENSOR NETWORKS: ACCELERATION STRATEGIES
+4477
+(CCNC), Las Vegas, NV, USA. Piscataway, NJ, USA: IEEE Press, Jan.
+2021, pp. 1–6.
+[6] S. Capobianco, L. Facheris, F. Cuccoli, and S. Marinai, “Vehicle
+classiﬁcation based on convolutional networks applied to FMCW radar
+signals,” in Trafﬁc Mining Applied to Police Activities, F. Leuzzi and
+S. Ferilli, Eds, Cham, Switzerland: Springer International Publishing,
+2018, vol. 728, pp. 115–128.
+[7] M. Gottinger et al., “Coherent automotive radar networks: The next
+generation of radar-based imaging and mapping,” IEEE J. Microw.,
+vol. 1, no. 1, pp. 149–163, Jan. 2021.
+[8] E. Hanle, “Survey of bistatic and multistatic radar,” IEE Proc. F
+Commun. Radar Signal Process. UK, vol. 133, no. 7, 1986, Art. no. 587.
+[9] A. Frischen, J. Hasch, and C. Waldschmidt, “A cooperative MIMO
+radar network using highly integrated FMCW Radar Sensors,” IEEE
+Trans. Microw. Theory Techn., vol. 65, no. 4, pp. 1355–1366,
+Apr. 2017.
+[10] B. G. Stewart, A. Nesbitt, and L. Hall, “Triangulation and 3D
+location estimation of RFI and partial discharge sources within
+a 400kV substation,” in Proc. IEEE Elect. Insul. Conf., Mon-
+treal, QC, Canada. Piscataway, NJ, USA: IEEE Press, May 2009,
+pp. 164–168.
+[11] M. Szirtes and R. Cselko, “Comparative examination of iterative and
+non- iterative algorithms for partial discharge location approximation in
+high voltage equipment,” in Proc. 16th Workshop Positioning, Naviga-
+tion Commun. (WPNC), Bremen, Germany. Piscataway, NJ, USA: IEEE
+Press, Oct. 2019, pp. 1–6.
+[12] J. Chen, J. Benesty, and Y. Huang, “Time delay estimation in room
+acoustic environments: An overview,” EURASIP J. Adv. Signal Process.,
+vol. 2006, no. 1, Dec. 2006, Art. no. 026503
+[13] J. Fresno, G. Robles, J. Martínez-Tarifa, and B. Stewart, “Survey
+Performance of Source Localization Algorithms,” Sensors , vol. 17, no.
+11, Art. no. 2666, Nov. 2017.
+[14] S. Kiti´c, C. Gaultier, and G. Pallone, “A comparative study of multilat-
+eration methods for single-source localization in distributed audio,” Jul.
+2020, arXiv:1910.10661.
+[15] C. R. Berger and J. M. F. Moura, “Noncoherent compressive sensing
+with application to distributed radar,” in Proc. 45th Annu. Conf. Inf.
+Sciences Syst.. Baltimore, MD, USA. Piscataway, NJ, USA: IEEE Press,
+Mar. 2011, pp. 1–6.
+[16] S. Gogineni and A. Nehorai, “Target estimation using sparse modeling
+for distributed MIMO radar,” IEEE Trans. Signal Process., vol. 59,
+no. 11, pp. 5315–5325, Nov. 2011.
+[17] G. Monnoyer, T. Feuillen, L. Jacques, and L. Vandendorpe, “Sparsity-
+driven moving target detection in distributed multistatic FMCW radars,”
+in Proc. IEEE 8th Int. Workshop Comput. Adv. Multi-Sensor Adaptive
+Process. (CAMSAP), Le gosier, Guadeloupe. Piscataway, NJ, USA:
+IEEE Press, Dec. 2019, pp. 151–155.
+[18] Z. Yu, J. Li, Q. Guo, and J. Ding, “Efﬁcient direct target localization
+for distributed MIMO radar with expectation propagation and belief
+propagation,” IEEE Trans. Signal Process., vol. 69, pp. 4055–4068,
+2021.
+[19] J. Bosse, O. Krasnov, and A. Yarovoy, “Direct target localization with
+an active radar network,” Signal Process., vol. 125, pp. 21–35, Aug.
+2016.
+[20] D. E. Hack, L. K. Patton, A. D. Kerrick, and M. A. Saville, “Direct
+Cartesian detection, localization, and de-ghosting for passive multistatic
+radar,” in Proc. IEEE 7th Sensor Array Multichannel Signal Process.
+Workshop (SAM), Hoboken, NJ, USA. Piscataway, NJ, USA: IEEE
+Press, Jun. 2012, pp. 45–48.
+[21] M. Cobos, A. Marti, and J. J. Lopez, “A modiﬁed SRP-PHAT functional
+for robust real-time sound source localization with scalable spatial
+sampling,” IEEE Signal Process. Lett., vol. 18, no. 1, pp. 71–74, Jan.
+2011.
+[22] M. V. S. Lima et al., “A volumetric SRP with reﬁnement step for sound
+source localization,” IEEE Signal Process. Lett., vol. 22, no. 8, pp. 1098–
+1102, Aug. 2015.
+[23] R. Boora and S. K. Dhull, “Performance evaluation of iterative SRP-
+PHAT techniques for acoustic source localization,” in Proc. 1st Int.
+Conf. Comput. Electron. Wireless Commun., S. Rawat, A. Kumar, P.
+Kumar, and J. Anguera, Eds, Singapore: Springer Nature, 2022, vol. 329,
+pp. 403–418.
+[24] J. H. DiBiase, H. F. Silverman, and M. S. Brandstein, “Robust local-
+ization in reverberant rooms,” in Microphone Arrays, A. Lacroix, A.
+Venetsanopoulos, M. Brandstein, and D. Ward, Eds, Berlin, Heidelberg:
+Springer, 2001, pp. 157–180.
+[25] P. Aarabi, “The fusion of distributed microphone arrays for sound
+localization,” EURASIP J. Adv. Signal Process., vol. 2003, no. 4, Mar.
+2003, Art. no. 860465.
+[26] A. N. Bishop and P. N. Pathirana, “Localization of emitters via the
+intersection of bearing lines: A ghost elimination approach,” IEEE Trans.
+Veh. Technol., vol. 56, no. 5, pp. 3106–3110, Sep. 2007.
+[27] A. Alexandridis, G. Borboudakis, and A. Mouchtaris, “Addressing the
+data-association problem for multiple sound source localization using
+DOA estimates,” in Proc. 23rd Eur. Signal Process. Conf. (EUSIPCO),
+Aug. 2015, pp. 1551–1555.
+[28] T. J. Wei and Y. H. Lun, “An empirical exploration of a simple
+deghosting method for multistatic radars,” in Proc. IEEE Radar Conf.
+(RadarCon), May 2015, pp. 1440–1445.
+[29] A. Alexandridis and A. Mouchtaris, “Multiple sound source location
+estimation in wireless acoustic sensor networks using DOA estimates:
+The data-association problem,” IEEE/ACM Trans. Audio, Speech, Lang.
+Process., vol. 26, no. 2, pp. 342–356, Feb. 2018,
+[30] A. A. Gorji, R. Tharmarasa, and T. Kirubarajan, “Widely separated
+MIMO versus multistatic radars for target localization and tracking,”
+IEEE Trans. Aerosp. Electron. Syst., vol. 49, no. 4, pp. 2179–2194, Oct.
+2013.
+[31] J. Liu, F. Lian, and M. Mallick, “Distributed compressed sensing based
+joint detection and tracking for multistatic radar system,” Inf. Sci.,
+vol. 369, pp. 100–118, Nov. 2016.
+[32] Y. C. Eldar, P. Kuppinger, and H. Bolcskei, “Block-sparse signals: Un-
+certainty relations and efﬁcient recovery,” IEEE Trans. Signal Process.,
+vol. 58, no. 6, pp. 3042–3054, Jun. 2010.
+[33] B. Li and A. P. Petropulu, “Distributed MIMO radar based on sparse
+sensing: Analysis and efﬁcient implementation,” IEEE Trans. Aerosp.
+Electron. Syst., vol. 51, no. 4, pp. 3055–3070, Oct. 2015.
+[34] J. P. Dmochowski, J. Benesty, and S. Affes, “A generalized steered
+response power method for computationally viable source localization,”
+IEEE Trans. Audio, Speech, Lang. Process., vol. 15, no. 8, pp. 2510–
+2526, Nov. 2007.
+[35] M. Cobos, F. Antonacci, A. Alexandridis, A. Mouchtaris, and B. Lee, “A
+survey of sound source localization methods in wireless acoustic sensor
+networks,” Wireless Commun. Mobile Comput., vol. 2017, no. 1, 2017,
+Art. no. 3956282, doi: 10.1155/2017/3956282.
+[36] R. Boora and S. K. Dhull, “A TDOA-based multiple source localization
+using delay density maps,” S¯adhan¯a, vol. 45, no. 1, Aug. 2020, Art. no.
+204.
+[37] H. Do, H. F. Silverman, and Y. Yu, “A real-time SRP-PHAT source
+location implementation using stochastic region contraction (SRC) on
+a large-aperture microphone array,” in Proc. IEEE Int. Conf. Acoust.,
+Speech Signal Process. (ICASSP)’, vol. 1, Apr. 2007, pp. I–121–I–124.
+[38] A. Marti, M. Cobos, J. J. Lopez, and J. Escolano, “A steered response
+power iterative method for high-accuracy acoustic source localization,”
+J. Acoust. Soc. Amer., vol. 134, no. 4, pp. 2627–2630, Oct. 2013.
+[39] M. B. Çöteli, O. Olgun, and H. Hac˙ihabibo˘glu, “Multiple sound source
+localization with steered response power density and hierarchical grid
+reﬁnement,” IEEE/ACM Trans. Audio, Speech, Lang. Process., vol. 26,
+no. 11, pp. 2215–2229, Nov. 2018.
+[40] C. Knapp and G. Carter, “The generalized correlation method for
+estimation of time delay,” IEEE Trans. Acoust., Speech, Signal Process.,
+vol. 24, no. 4, pp. 320–327, Aug. 1976.
+[41] T. Dietzen, E. De Sena, and T. van Waterschoot, “Low-complexity
+steered response power mapping based on Nyquist-Shannon sampling,”
+in Proc. IEEE Workshop Appl. Signal Process. Audio Acoust. (WASPAA),
+Oct. 2021, arXiv:2012.09499.
+[42] G. Monnoyer, T. Feuillen, M. Drouguet, L. Jacques, and L. Vandendorpe,
+“Grid hopping: accelerating direct estimation algorithms for multistatic
+FMCW radar,” Jul. 2023, arXiv:2307.16550.
+[43] C. Ekanadham, D. Tranchina, and E. P. Simoncelli, “Recovery of sparse
+translation-invariant signals with continuous basis pursuit,” IEEE Trans.
+Signal Process., vol. 59, no. 10, pp. 4735–4744, Oct. 2011.
+[44] K. Fyhn, M. F. Duarte, and S. H. Jensen, “Compressive parameter esti-
+mation for sparse translation-invariant signals using polar interpolation,”
+IEEE Trans. Signal Process., vol. 63, no. 4, pp. 870–881, Feb. 2015.
+[45] K. C. Knudson, J. Yates, A. Huk, and J. W. Pillow, “Inferring sparse
+representations of continuous signals with continuous orthogonal match-
+ing pursuit,” in Proc. Adv. Neural Inf. Process. Syst., vol. 27, Montreal,
+Canada: Curran Associates, Inc., 2014.
+[46] S. Mallat, “CHAPTER 1 - Sparse Representations,” in A Wavelet Tour
+of Signal Processing (Third Edition), S. Mallat, Ed. Boston, MA, USA.
+Academic, Jan. 2009, pp. 1–31.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:19:05 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 16 ---
+4478
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 72, 2024
+[47] C. Elvira, R. Gribonval, C. Soussen, and C. Herzet, “When does OMP
+achieve exact recovery with continuous dictionaries?” Appl. Comput.
+Harmonic Anal., vol. 51, pp. 374–413, Mar. 2021.
+[48] A. Hyvärinen and P. Hoyer, “Emergence of phase- and shift-invariant
+features by decomposition of natural images into independent feature
+subspaces,” Neural Comput., vol. 12, no. 7, pp. 1705–1720, Jul. 2000.
+[49] R. Grosse, R. Raina, H. Kwong, and A. Y. Ng, “Shift-invariance sparse
+coding for audio classiﬁcation,” Jun. 2012, arXiv:1206.5241.
+[50] R. Gribonval, “Fast matching pursuit with a multiscale dictionary of
+Gaussian chirps,” IEEE Trans. Signal Process., vol. 49, no. 5, pp. 994–
+1001, May 2001.
+[51] L. Jacques and C. De Vleeschouwer, “A geometrical study of matching
+pursuit parametrization,” IEEE Trans. Signal Process., vol. 56, no. 7,
+pp. 2835–2848, Jul. 2008.
+[52] Y. Traonmilin and J.-F. Aujol, “The basins of attraction of the global
+minimizers of the non-convex sparse spike estimation problem,” Sep.
+2019, arXiv:1811.12000.
+[53] F. Champagnat and C. Herzet, “Atom selection in continuous dictio-
+naries: Reconciling polar and SVD approximations,” in Proc. IEEE Int.
+Conf. Acoust., Speech Signal Process. (ICASSP), May 2019, pp. 5516–
+5520.
+[54] R. Niu, R. S. Blum, P. K. Varshney, and A. L. Drozd, “Target local-
+ization and tracking in noncoherent multiple-input multiple-output radar
+systems,” IEEE Trans. Aerosp. Electron. Syst., vol. 48, no. 2, pp. 1466–
+1489, Apr. 2012.
+[55] L. Han, X. Liu, N. Zhang, S. Wu, J. Zhu, and Z. Xu, “Two-dimensional
+multi-snapshot newtonized orthogonal matching pursuit for DOA esti-
+mation,” Digit. Signal Process., vol. 121, 2022, Art. no. 103313.
+[56] R. Baraniuk and P. Steeghs, “Compressive radar imaging,” in Proc. IEEE
+Radar Conf., Apr. 2007, pp. 128–133.
+[57] B. Han, “The research of velocity compensation method based on range-
+proﬁle function,” Int. J. Hybrid Inf. Technol., vol. 7, no. 2, pp. 49–56,
+Mar. 2014.
+[58] T. Feuillen, A. Mallat, and L. Vandendorpe, “Stepped frequency radar
+for automotive application: Range-Doppler coupling and distortions
+analysis,” in Proc. IEEE Mil. Commun. Conf., (MILCOM), Nov. 2016,
+pp. 894–899.
+[59] G. Wang, J.-M. Muñoz-Ferreras, C. Gu, C. Li, and R. Gómez-García,
+“Application of linear-frequency-modulated continuous-wave (LFMCW)
+radars for tracking of vital signs,” IEEE Trans. Microw. Theory Techn.,
+vol. 62, no. 6, pp. 1387–1399, Jun. 2014.
+[60] G. Monnoyer, T. Feuillen, L. Vandendorpe, and L. Jacques, “Sparse
+factorization-based detection of off-the-grid moving targets using
+FMCW radars,” in Proc. IEEE Int. Conf. Acoust., Speech Signal Process.
+(ICASSP), Jun. 2021, pp. 4575–4579.
+[61] J. Aleksandravicius, N. Decarli, A. Guerra, and D. Dardari, “High-
+accuracy localization of backscattering UWB tags: Implementation and
+experimental results,” in Proc. IEEE Int. Conf. RFID Technol. & Appl.
+(RFID-TA), Sep. 2017, pp. 34–39.
+[62] L. Wang, Y. Yang, and X. Liu, “A direct position determination approach
+for underwater acoustic sensor networks,” IEEE Trans. Veh. Technol.,
+vol. 69, no. 11, pp. 13 033–13044, Nov. 2020.
+[63] D. Pavlidi, A. Grifﬁn, M. Puigt, and A. Mouchtaris, “Real-time multiple
+sound source localization and counting using a circular microphone
+array,” IEEE Trans. Audio, Speech, Lang. Process., vol. 21, no. 10,
+pp. 2193–2206, Oct. 2013.
+[64] A. Weiss, “Direct position determination of narrowband radio frequency
+transmitters,” IEEE Signal Process. Lett., vol. 11, no. 5, pp. 513–516,
+May 2004.
+[65] B. Demissie, M. Oispuu, and E. Ruthotto, “Localization of multiple
+sources with a moving array using subspace data fusion,” in Proc. 11th
+Int. Conf. Inf. Fusion, Jun. 2008, pp. 1–7.
+[66] G. Chardon, “Theoretical analysis of beamforming steering vector
+formulations for acoustic source localization,” J. Sound Vib., vol. 517,
+Jan. 2022, Art. no. 116544.
+[67] J. Zhu, L. Han, R. S. Blum, and Z. Xu, “On the analysis of the ﬁsher
+information of a perturbed linear model after random compression,”
+IEEE Signal Process. Lett., vol. 25, no. 1, pp. 100–104, Jan. 2018.
+[68] H. Godrich, A. M. Haimovich, and R. S. Blum, “Target localization
+accuracy gain in MIMO radar-based systems,” IEEE Trans. Inf. Theory,
+vol. 56, no. 6, pp. 2783–2803, Jun. 2010.
+[69] A. G. Amigó, P. Closas, A. Mallat, and L. Vandendorpe, “Cramér-Rao
+bound analysis of UWB based localization approaches,” in Proc. IEEE
+Int. Conf. Ultra-WideBand (ICUWB), 2014, pp. 13–18.
+Gilles Monnoyer received the M.Sc. degree in
+electrical engineering from UCLouvain, Louvain-
+la-Neuve, Belgium in 2019, and the Ph.D. degree
+from the Department of Electrical Engineering of
+UCLouvain on “Accelerated Sparse Signal Decom-
+position for Single-Step Estimation in Multistatic
+Radars and Sensor Networks”, in 2023. Since he
+received his Ph.D. degree in late 2023, he is a
+Postdoctoral Researcher working on 6G Radio Ac-
+cess Network. His research interests include signal
+processing for sensor network, telecommunication
+systems as well as multistatic FMCW radars design.
+Thomas Feuillen received the Ph.D. degree from
+UCLouvain (Belgium), in 2021. He was a scientiﬁc
+expert for Mitsubishi Electric Research Laboratory
+(MERL) in Boston and for the SPARC team at
+SnT from 2021 to 2022. In late 2022, he joined
+the Signal Processing Applications in Radar and
+Communications research group, SPARC as a Re-
+search Associate. In late 2023, Dr. Thomas Feuillen
+became a Research Scientist at SnT after acquiring
+the competitive CORE-Junior grant from FNR for
+his work on computational radar. He is one of the
+founding co-general chairs of the International Symposium on Computational
+Sensing (iscs2023.com) as well as part of the Organizing Committee of
+ICASSP23, ICASSP24 and COSERA24. His research interests include in
+radar signal processing and sampling theory with a focus on computational
+sensing.
+Luc Vandendorpe (Fellow, IEEE) was born in
+Mouscron, Belgium, in 1962. He received the de-
+gree (summa cum laude) in electrical engineer-
+ing and the Ph.D. degree in applied science from
+UCLouvain, Louvain-la-Neuve, Belgium, in 1985
+and 1991, respectively. Since 1985, he has been with
+the Communications and Remote Sensing Labora-
+tory, UCL, where he ﬁrst worked in the ﬁeld of
+bit rate reduction techniques for video coding. In
+1992, he was a Visiting Scientist and a Research
+Fellow with the Telecommunications and Trafﬁc
+Control Systems Group, Delft Technical University, The Netherlands, where
+he worked on spread spectrum techniques for personal communications
+systems. From 1992 to 1997, he was a Senior Research Associate with
+Belgian NSF, UCL, and an Invited Assistant Professor. He is currently a Full
+Professor with the Institute for Information and Communication Technologies,
+Electronics and Applied Mathematics, UCLouvain. His research interests
+include digital communication systems and more precisely resource allocation
+for OFDM(A)-based multicell systems, MIMO and distributed MIMO, sensor
+networks, UWB-based positioning, and wireless power transfer. He has been
+a TPC Member of several IEEE conferences, such as VTC, GLOBECOM,
+SPAWC, ICC, PIMRC, and WCNC. He was an Elected Member of the Signal
+Processing for Communications Committee, from 2000 to 2005, and the
+Sensor Array and Multichannel Signal Processing Committee of the Signal
+Processing Society, from 2006 to 2008 and from 2009 to 2011. He was the
+Chair of the IEEE Benelux Joint Chapter on communications and vehicular
+technology, from 1999 to 2003. He was the Co-Technical Chair of IEEE
+ICASSP 2006. He served as an Editor of synchronization and equalization
+for IEEE TRANSACTIONS ON COMMUNICATIONS, from 2000 to 2002; and an
+Associate Editor for IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS,
+from 2003 to 2005, and IEEE TRANSACTIONS ON SIGNAL PROCESSING, from
+2004 to 2006.
+Laurent Jacques received the B.Sc., M.Sc., and
+Ph.D. degrees in mathematical physics in 1996,
+1998, and 2004, respectively. He has been a FNRS
+Research Associate from 2012 to 2022 with Image
+and Signal Processing Group, ICTEAM, UCLou-
+vain, Louvain-La-Neuve, Belgium, where he is cur-
+rently a Professor. His research interests include
+sparse signal representations, quantized compres-
+sive sensing theory, and computational imaging.
+For more information, see https://laurentjacques.
+gitlab.io.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 09:19:05 UTC from IEEE Xplore.  Restrictions apply. 

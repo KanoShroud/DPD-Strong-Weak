@@ -1,0 +1,710 @@
+
+--- PDF PAGE 1 ---
+                    IEEE SENSORS JOURNAL, VOL. 20, NO. 14, JULY 15, 2020                                                           7859
+
+Direct Position Determination of Moving Sources
+        Based on Delay and Doppler
+
+                         Fuhe Ma   , Fucheng Guo, and Le Yang
+
+
+
+
+  Abstract—In this paper, we address the problem of direct
+position determination (DPD) for moving sources. Different
+from traditional two-step localizationmethods where the inter-
+mediate time difference of arrival (TDOA) and frequency dif-
+ference of arrival (FDOA) parameters are estimated and used
+for the subsequent moving source localization, in this paper
+the locations and velocities of moving sources are estimated
+directly from the received signals. To address the difﬁculty of
+estimating the high-dimensional unknown parameters simul-
+taneously, a new multiple particle ﬁlter based DPD method
+is proposed, where the position and velocity are updated
+alternately using separate local particle ﬁlters. The proposed
+method requires smaller particle numbers compared to the
+classic particle ﬁlters, and its convergence is proved both theoretically and numerically. Moreover, the Cramér Rao lower
+bound for the considered moving source DPD is developed. Simulation results corroborate the effectiveness of the
+proposed method in terms of computational efﬁciency and estimation accuracy.
+
+  Index Terms— Time delay, Doppler, direct position determination (DPD), multiple particle ﬁltering (MPF).
+
+
+
+                             I. INTRODUCTION                           arrivals (FDOAs) of received signals are measured via the
+   ASSIVELY  locating  uncooperative  sources  has been   cross ambiguity  function (CAF) maximization  algorithms
+    a  popular  research  topic  during  the  past  decades.   [13], [14]. The obtained TDOA and FDOA measurements areP
+It  is widely applied to numerous ﬁelds including naviga-   exploited to estimate the source position and velocity jointly
+tion, reconnaissance, emergency rescue and wireless sensor  by solving a set of nonlinear equations during the second step
+networks [1]–[3].                                                  [11], [12]. Among the algorithms developed for the second
+  In wireless sensor networks, the time delay information is   step, the pseudo-linear weighted least squares (WLS) algo-
+usually exploited to locate the source with relatively high   rithms are very popular with their performance being able
+precision  [4]–[6]. When  the source  is moving such  that   to approach the Cramér Rao lower bound (CRLB) under
+there exists relative motion between the source and sensors,   mild Gaussian measurement errors. However, the TDOAs and
+the resultant Doppler effect could be combined with the time  FDOAs are estimated without considering the fact that they
+delay so as to determine the position as well as the velocity   are dependent on the same source location and velocity [15].
+of moving sources [7]–[12]. In this paper, we focus on the   Moreover, the covariance matrices of TDOAs and FDOAs,
+position and velocity estimation for moving sources based on  which are used to weight the TDOA and FDOA measurement
+time delay and Doppler information.                          equations during the second step, are not easily available.
+   Traditionally, localizing sources  is usually achieved via   Although the CRLB expressions could serve as an approxi-
+two  steps. To be speciﬁc, during the  ﬁrst  step, the time   mation to the covariance matrix, this may not be appropriate
+difference of arrivals (TDOAs) and frequency difference of  when the TDOA/FDOA estimation could not approach the
+                                                     bound [16]. Both  facts lead  to the sub-optimality of the
+  Manuscript received January 28, 2020; accepted March 8, 2020. Date   two-step methods.
+of publication March 11, 2020; date of current version June 18, 2020.     Recently, the  direct position determination (DPD) algo-
+The associate editor coordinating the review of this article and approving
+it for publication was Dr. Marco J. Da Silva. (Corresponding author:   rithms, which estimate the source position directly from the
+Fuhe Ma.)                                                      received signals, have attracted much research interest [15],
+ Fuhe Ma and Fucheng Guo are with the State Key Laboratory of Com-   [17]–[20]. Speciﬁcally, in DPD algorithms, the source position
+plex Electromagnetic Environment Effects on Electronics and Information
+System (CEMEE), National University of Defense Technology, Changsha   estimate is found to be the position candidate that maximizes
+410073, China (e-mail: mafuhe14@nudt.edu.cn; gfcly75@163.com).     the cost function formulated directly from the received signals.
+  Le Yang is with the Department of Electrical and Computer Engineer-   In this way, the intermediate TDOAs/FDOAs are not estimated
+ing, University of Canterbury, Christchurch 8020, New Zealand (e-mail:
+le.yang@canterbury.ac.nz).                                   and the implicit constraint that TDOAs/FDOAs correspond
+  Digital Object Identiﬁer 10.1109/JSEN.2020.2980012                  to the same source position  is inherently satisﬁed. As a
+
+
+               1558-1748 © 2020 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.
+                          See https://www.ieee.org/publications/rights/index.html for more information.
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 24,2026 at 15:17:30 UTC from IEEE Xplore. Restrictions apply.
+--- PDF PAGE 2 ---
+7860                                                                             IEEE SENSORS JOURNAL, VOL. 20, NO. 14, JULY 15, 2020
+
+
+
+result, the DPD methods are more robust to low signal to   the whole tracking procedure. These assumptions may be
+noise  ratio (SNR) scenarios compared with  their two-step   violated  for sources with short-time transmission or with
+counterparts. However, the cost function of DPD is highly   fast changing velocities and unpredictable motion models,
+non-convex and nonlinear with a considerable number of local  which entails estimating the position and velocity of sources
+maxima. Computationally expensive grid search  is usually   instantaneously without measurements accumulation. In [30],
+adopted to guarantee that global optimum could be found   a GN type iterative DPD algorithm was proposed to jointly
+with high probability. Regarding DPD for moving sources,   determine the position and velocity of moving sources using
+the velocities should also be estimated along with the posi-   the Doppler frequency of narrowband signals. It could not be
+tions, thus doubling the dimension of unknown parameters and   applied to the problem in consideration, and may suffer from
+rendering grid search based DPD methods computationally   local convergence when the initial solution is not close enough
+cumbersome.                                                      to the true solution.
+  With these observations in mind, we propose in this paper    To summarize,  the  contributions  of  this paper mainly
+to estimate the position and velocity of a moving source   include:
+using multiple particle ﬁltering (MPF) techniques [21]–[23].      • A new moving source DPD method is proposed exploit-
+The proposed method determines the position and veloc-                                                                  ing delay and Doppler information of received signals.
+ity without accumulating measurements from multiple time                                                      The proposed method uses MPF techniques to update the
+instants, and it yields comparable accuracy with that of con-                                                                      position and velocity of moving sources alternately, which
+ventional particle ﬁlters (PFs) with much less computational                                                                                     is computationally efﬁcient.
+complexity.                                                            • The CRLB for the considered moving source DPD prob-
+  Although there already exist some literature on DPD uti-                                                         lem is derived, which is different from the one provided
+lizing delay and Doppler information, we note that the pro-                                                                         in [27].
+posed method is signiﬁcantly different from them. Speciﬁcally,      • The convergence property of the proposed method  is
+in [15], the time-delay and Doppler information of multiple                                                                       investigated  theoretically and  numerically. Simulation
+short-time signal segments were used to localize the stationary                                                                            results indicate that the proposed method could achieve
+source via grid search algorithm. In [17], the DPD algo-                                                                approximately the same performance as classic PFs with
+rithms for cooperative and uncooperative sources were stud-                                                                   smaller particle numbers.
+ied, using coherent summation of multiple short-time signal
+                                                     The rest of the paper is organized as follows. Section II
+segments. In [18], the position of instantaneously wideband
+                                                             formulates the  signal model of  the moving source DPD
+sources was determined via a combination of sparse grid
+                                                           problem. Then an MPF based DPD method is developed in
+search and Gaussian-Newton (GN) iteration, where the time
+                                                             Section III together with the convergence and computational
+delayed and Doppler stretched signals were approximated
+                                                           complexity analyses. The corresponding CRLB expression for
+efﬁciently and accurately using low dimensional sinc inter-
+                                                                the considered problem is given in Section IV. Section V
+polation. In [19], the cost function for stationary source DPD
+                                                               corroborates the effectiveness of the proposed method using
+was solved using the PF with multiple iterations, where the
+                                                           numerical  results.  Concluding  remarks  are  provided  in
+posterior distribution of source position was approximated
+                                                              Section VI.
+with weighted particles. The methods mentioned above are
+focused on DPD for static sources and they are not suitable
+for moving source localization scenarios.
+                                                                                                          II. PROBLEM FORMULATION
+  Considering moving source localization, besides the classic
+                                                                 In this section, the system model for moving source DPDtwo-step localization and tracking algorithms [1], [7], [10],
+                                                                               is described. The source moves with unknown velocity ˙u at[12], [24]–[26], which are nonrobust to low SNRs, there are
+                                                  unknown position u, where the dimension of position, u, andalso some literature on DPD or direct tracking of moving
+                                                                      velocity,  ˙u,  is denoted by dim(dim =  2, 3). The signalssources. In  [27], the  direct tracking was  realized via PF
+                                                                transmitted from the source are intercepted by K  spatiallyupdate based on delay and Doppler information of signal
+                                                               separated sensors, with the position and velocity of sensorobservations at multiple sensors. Speciﬁcally, the direct track-
+                                                           k represented by uk and  ˙uk. According to the geometricaling under stochastic and deterministic signal models were
+                                                                   relationship between the source and sensors, the distance asconsidered. Their corresponding CRLBs were also provided.
+                                                             well as the radial Doppler speed of the source with respect toIn [28], the distributed PF technique was adopted to directly
+                                                              sensor k is given astrack moving targets in large-scale sensor networks based on
+delay and Doppler information of collected signals. In [29],
+the direct tracking of multiple moving targets was achieved in                   dk = ∥u −uk∥2,
+multi-input multi-output (MIMO) radar systems. In the above                   vk = (˙uk −˙u)T (u −uk)/dk,              (1)
+mentioned methods [27]–[29], the particle number required
+to achieve satisfactory estimation accuracy increases with the  where ∥· ∥2 denotes the ℓ2-norm operator, and where (·)T
+parameter dimensionality. Moreover, these methods update the   denotes the transpose operator. Assume that the baseband
+position and velocity using signal observations from multiple   source signal is x(t) with its carrier frequency given by f0. The
+time instants, and they are developed under the assumption   intercepted signal at sensor k with an observation duration of
+that the motion model of moving sources is known during  T is a time delayed, frequency shifted and noise contaminated
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 24,2026 at 15:17:30 UTC from IEEE Xplore. Restrictions apply.
+--- PDF PAGE 3 ---
+MA et al.: DIRECT POSITION DETERMINATION OF MOVING SOURCES BASED ON DELAY AND DOPPLER                                        7861
+
+
+
+version of the original source signal, i.e.,                 A. Cost Function
+                                                         Denote by θ = [xT , bT , uT , ˙uT ]T the composite parameter
+      rk(t) = ak exp{ jφk}x(t −τk) exp{ j2π fkt} + wk(t)
+                                                               vector formed by concatenating all the unknown parameters
+      = bkx(t −τk) exp{ j2π fkt} + wk(t),            (2)  on top of each other, where b = [b1, b2, · · · , bK ]T  is the
+                                                         complex-valued attenuation vector. As the white noise wkwhere τk = dk/c and  fk =  f0 vk/c, indicating the time
+                                                                               is zero-mean with identical variance at difference sensors,delay and Doppler frequency shift of the received signals at
+                                                                                         i.e., E{wkwHk } = σn2 I N where I N denotes the identity matrix,sensor k. ak represents the real-valued amplitude attenuation,
+                                                                 the logarithm of the probability density function of  r  isand φk accounts for the unknown phase shift caused by the
+                                                            given bychannel propagation. c denotes the signal propagation speed,
+which is assumed precisely known. bk = ak exp{ jφk}. wk(t)                     K
+is the additive white Gaussian noise at time t, with zero mean     L(r|θ) = C0 −1     ∥rk −bk D( fk)FH  (τk)Fx∥22,  (4)
+                                                                σ2n k=1and variance σn2 . It is common to assume that the noises are
+temporally white and spatially independent.                 where C0  is a constant irrelevant to θ.  fk ≜fk(u, ˙u) and
+  Sampling  the  received  signals  with  the  sampling  fre-   τk ≜τk(u) represent the nominal Doppler frequency and time
+quency fs, the discrete samples of received signals at sensor k   delay of signals at sensor k evaluated at position u and velocity
+are obtained in vectors rk with length of N = ⌊fsT ⌋, where    ˙u. For illustration purpose, their dependencies on position and
+⌊·⌋denotes the rounding down operator. Invoking Fourier                                                                  velocity are omitted. In this way, the cost function for solving
+transform, we have                                                                 the source position and velocity could be formulated as
+              rk = bk D( fk)FH  (τk)Fx + wk,            (3)                  K
+                                                          C(θ) = −    ∥rk −bk D( fk)FH  (τk)Fx∥22.      (5)
+where   rk  =    [rk(1),rk(2), · · · ,rk(N)]T ,   rk(i)  ≜                   k=1
+rk(t =  i/fs), wk =  [wk(1), wk(2), · · · , wk(N)]T , x =                                                   The complex attenuation bk  is unknown and  its maximum
+[x(1), x(2), · · · , x(N)]T .  (τk) = diag{exp{−j2π fsnτk/N}},                                                                 likelihood (ML) estimate  is used  in  lieu of  it, which  is
+where n = [−N/2, −N/2 + 1, · · · , N/2 −1]T and diag{·}
+                                                            given as
+denotes the diagonal matrix with the diagonal elements taken
+from the input vector.  (τk) accounts for the phase group delay                  ˆbk = x H FH  H(τk)F DH( fk)rk/(x H x).         (6)
+induced by the time delay τk. As τk  is usually negligible                                                          Plugging ˆbk in (6) into (5) and noting that rk is independent
+compared with  the  observation  duration,  i.e.,  τk ≪  T,                                                               of source position and velocity, the cost function could be
+approximating the linear convolution with cyclic convolution                                                         approximated as [31]
+via  discrete  Fourier transform  in  (3)  is  reasonable  [15].
+                                                                       K
+D( fk)  =   diag{exp{ j2π fk ¯n/fs}}  denotes  the  Doppler                       H                                                                C′(u, ˙u, x) =    (r k D( fk)FH  (τk)Fx)Hfrequency shift operator, where ¯n = [0, 1, · · · , N −1]T . F is
+                                                                               k=1
+the discrete Fourier transform (DFT) matrix.
+                                                                                                              k                                                                    H D( fk)FH  (τk)Fx)/∥x∥22  Given the signal vectors r = [rT1 , rT2 , · · · , rTK]T together                   ×(r
+with the positions and velocities of sensors  (i.e., uk and            = xH Q(u, ˙u)x/∥x∥22,                 (7)
+˙uk), the problem remains to jointly estimate the position u                                                      where we have deﬁned  Q(u, ˙u) = V V H, with V =
+and velocity  ˙u of the source using time delay and Doppler
+                                             [FH    H(τ1) F DH( f1)r1, · · · , FH  H(τK )F DH( fK )r K ].
+information embedded in r. This problem differs from that of
+                                                   The original source signal x is unknown because the source is
+[15], [17]–[19] because additional unknown velocity should be
+                                                               uncooperative. Then the ML estimate of x is used in (7), whose
+estimated, which increases the dimensionality of the parameter
+                                                              normalization is essentially the eigenvector corresponding to
+space and renders the grid search based DPD algorithms com-
+                                                                 the maximal eigenvalue of the matrix Q(u, ˙u). In this way, the
+putationally infeasible. The classic PF based methods could                                             maximum of C′(u, ˙u, x)  in  (7)  is  equivalently given by
+yield more efﬁcient solutions than the grid search. However,
+                                                                 the maximal eigenvalue of Q(u, ˙u). Further note that the
+the required particle number increases exponentially with the
+                                                         dimension of Q(u, ˙u) is very high, especially for large N,
+dimensionality of parameters. To deal with the problem of joint
+                                                               leading to the eigenvalue decomposition of Q(u, ˙u) compu-
+position and velocity estimation, we propose an MPF based                                      H      H                                                                      tationally intractable. Noticing the fact that V V   and V V
+DPD method in the following section.
+                                                              share identical non-zero eigenvalues, we could turn to ﬁnd
+                                                                 the maximal eigenvalue of ˜Q(u, ˙u) = V H V instead, which
+                       III. PROPOSED METHOD                                                               involves decomposing matrices with dimension of K −1. The
+  In this section, a computationally efﬁcient DPD method   cost function is thus simpliﬁed as
+is proposed to jointly estimate the position and velocity of
+                                                                                 ˜C(u, ˙u) = λmax( ˜Q(u, ˙u)),                (8)moving sources. First, the maximum likelihood cost function
+is formulated for moving source DPD problem. Classic PF  where λmax(·) represents the maximal eigenvalue of a matrix.
+algorithm solving this cost function is introduced to make  The position and velocity of the source could be estimated via
+our paper self-contained. Then the proposed MPF based DPD   maximizing the cost function ˜C(u, ˙u), i.e.,
+method is presented as a computationally efﬁcient alternative
+                                          < ˆu, ˆ˙u >= arg max { ˜C(u, ˙u)}.              (9)
+to the classic PF.                                                                                                                 u,˙u
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 24,2026 at 15:17:30 UTC from IEEE Xplore. Restrictions apply.
+--- PDF PAGE 4 ---
+7862                                                                             IEEE SENSORS JOURNAL, VOL. 20, NO. 14, JULY 15, 2020
+
+
+
+  The challenge of solving (9) lies in its high non-convexity  where C1  is a constant to keep the weight ωi numerically
+and nonlinearity. Although one could solve (9) via  tradi-   stable. After normalizing the weights ωi, the estimate of source
+tional grid search approaches, the required computational cost   position and velocity could be given by (12).
+would be prohibitively high because one has to search in the    To increase the sampling efﬁciency of the PF algorithm,
+joint position and velocity space, which has a dimensionality   instead of applying the resampling technique [35], we con-
+of 2dim. The PF method has been adopted widely to deal with   struct the proposal density adaptively and repeat the above PF
+the position and velocity update for direct tracking of moving   estimation procedure for multiple times. During each iteration,
+sources. However, when the dimension of parameter space is   the proposal density q(ξ) is reconstructed according to the
+high, large number of particles are required. Next, we ﬁrst   current estimation results such that the discrepancy between
+re-visit the classic PF for solving (9). Then a new MPF based   the proposal density and the posterior density would generally
+DPD method is proposed to reduce the computational cost.     decrease. Drawing particles from the updated proposal density
+                                                       and weighting them according  to (13)  yield  the updated
+                                                               empirical approximation of the target posterior. In this way,B. Moving Source DPD via Classic Particle Filtering
+                                                                 the number of particles that fall into the high likelihood region
+  In this subsection, the solution to the problem in (9) via
+                                                     would increase and the weight degeneracy problem is avoided.
+the classic PF is discussed. In PF algorithms [32], [33], each
+                    T                                    The PF algorithm elaborated above could solve the costparticle ξi = [ξT1,i, ξ 2,i]T , i = 1, 2, · · · , Np is generated such                                                               function in (9). However, when the dimension of parameter
+that its position component ξ1,i and velocity component ξ2,i                                                           space increases, the required particle number increases expo-
+are generated uniformly within the a prior region, i.e.,
+                                                                       nentially, consequently resulting in a huge computational load.
+                   ξ1,i(l) ∈U(−umax, umax)                     In the following, we proceed to propose an alternative method
+                   ξ2,i(l) ∈U(−˙umax, ˙umax),             (10)   to solve (9) with smaller number of particles.
+
+where  ξ1,i(l)  and  ξ2,i(l)  denote  the  lth  entry  of  the
+                                               C. Proposed DPD Algorithm
+sub-component vectors  ξ1,i and  ξ2,i, respectively. U(a, b)
+represents the uniform distribution between a and b. umax and     In our proposed method, the high-dimensional parameter
+˙umax are the maximal values of source position and velocity   space is divided into two subspaces with lower dimensions,
+along any particular coordinate axis. All particles ξi together    i.e., ξ1 and ξ2 with a slight abuse of notation, each subspace
+                                                                                                                          2. Here,  ξl,iwith their weights ωi form the corresponding ﬁlter {ξi, ωi}Npi=1.   containing a  local PF  {ξl,i, ωl,i}Nli=1,l =  1,
+                                                            denotes the ith particle of the lth local PF, with Nl denotingThe empirical representation of the posterior distribution of ξ
+                                                                 the number of particles. Through the information exchangeis [32]
+                                                       and alternating the update of the two local PFs, the position
+                         Np
+                                                       and velocity estimates of the source are improved using the
+                p(ξ) ≈    ωiδ(ξ −ξi),               (11)   corresponding local PFs.
+                          i=1                                  For the lth local PF, the weight of the ith particle is given by
+where ξ = [uT , ˙uT ]T , and δ(·) indicates the Dirac delta    ωl,i ∝p(ξl,i|r)/q(ξl,i), where q(ξl,i) is the proposal density.
+function. The minimum mean square error (MMSE) estimate   This weight could be evaluated via marginalizing the posterior
+could be obtained as a weighted summation of all the particles,   distribution through
+i.e.,
+                                                                                        ωl,i ∝    p(ξl,i, ξ ⊥l|r)p(ξ⊥l)/q(ξl,i)dξ⊥l,      (15)                          Np
+                                            ˆξ =    ωiξi.                    (12)                                                      where ξ⊥l  represents  the complementary of  ξl,  i.e.,  the
+                            i=1
+                                                          remaining entries of ξ after removing ξl from it. Speciﬁcally,
+  According to the importance sampling technique, the parti-  ξ⊥1 = ξ2 and ξ⊥2 = ξ1. As the distributions of position
+cle weights are determined by [34]                         and velocity of a given source are independent a priori in the
+                                  p(r|ξi)p(ξi)              absence of measurements, one could simplify (15) using the
+            ωi ≜p(ξi|r)/q(ξi) =                              ﬁrst-order moment approximation, thus arriving at [21]–[23]                                   p(r)q(ξi)
+              ∝p(r|ξi)/q(ξi),                        (13)                      ωl,i ∝p(ξl,i, ¯ξ⊥l|r)/q(ξl,i),             (16)
+where the a prior distribution of particles, p(ξi), is assumed to                                                      where ¯ξ⊥l represents the current MMSE estimate (ﬁrst-order
+be uninformative, and q(ξi) is the proposal density. The estab-                                                   moment) of the state vector ξ⊥l. As a result, (16) could now
+lishment of q(ξi) for the proposed method will be elaborated                                                        be evaluated using (13) and (14). In this way, we replace
+in the following.                                                                 the  original high-dimensional  joint estimation of  position
+  Substitute the position  ξ1,i and velocity  ξ2,i  of the ith                                                       and velocity with the alternating update of them using their
+particle  into  (9)  to  calculate  the maximal eigenvalue  of                                                                 respective local PFs. The proposed method works as follows.
+˜Q(ξ1,i, ξ2,i), which is denoted by λi. The weight of the ith                                                       At the (m + 1)th iteration, assume that we have obtained
+particle ξi could be evaluated as [27]                                                           both ˆum = ¯ξ1 and ˆ˙um = ¯ξ2, i.e., the estimates of position and
+                                 λi                                 velocity after the mth iteration. In order to avoid the weight
+                ωi ∝exp         /q(ξi),              (14)
+                     C1σ2n                            degeneracy phenomenon, following  the  idea  in Gaussian
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 24,2026 at 15:17:30 UTC from IEEE Xplore. Restrictions apply.
+--- PDF PAGE 5 ---
+MA et al.: DIRECT POSITION DETERMINATION OF MOVING SOURCES BASED ON DELAY AND DOPPLER                                        7863
+
+
+
+PF [36], the proposal densities of position and velocity are con-  Algorithm 1 MPF Based DPD for Moving Sources
+structed as q(ξ1) = N(ˆum, Qm+11    ), q(ξ2) = N(ˆ˙um, Qm+12    ),                                                      At  iteration m + 1, previous estimates  ˆum and  ˆ˙um  are
+where N(μ, Q) denotes the Gaussian distribution with mean μ                                        m      m
+                                                                       available, along with their bias upper bounds   u and      ˙u .
+and covariance Q. Qm+11   and Qm+12    represent the covariance    The following steps are performed successively.
+matrices of the proposal density for position and velocity esti-
+                                                                   1) Update velocity estimate using ﬁxed  ˆum: draw N2mation at the (m + 1)th iteration. As the discrepancy between
+                                                                              particles for the velocity PF from the proposal densitythe proposal density and the posterior distribution is reduced,
+most particles drawn from the proposal density fall into the          q(ξ2), with the MSE matrix of q(ξ2) given in (19).
+                                                                   Evaluate  the weights  for  particle  ξ2,i  using  (14).high likelihood region and the re-sampling procedure [35]
+is not necessary. To determine a proper Qm+1l      , we use the         Normalize the weights and obtain the updated ˆ˙um+1
+                                                                    using (12).following approximations.
+                                                                   2) Update position estimate using ﬁxed ˆ˙um+1: draw N1  Note that the source position and velocity estimates via
+maximizing p(ξl,i, ¯ξ ⊥l|r) are biased due to the use of the inac-           particles for the position PF from the proposal density
+curate ﬁrst order moment, ¯ξ⊥l. Here we denote by   um and     ˙um          q(ξ1), with the MSE matrix of q(ξ1 given in (19).
+                                                                   Evaluate the weights  for  particles  ξ1,i  using  (14).the upper bounds for norms of estimation bias of u and  ˙u
+after the mth iteration. At the (m + 1)th iteration, the MSE         Normalize the weights and obtain the updated ˆum+1
+matrices for source position and velocity are thus composed          using (12).
+of two parts, which come, respectively, from the estimation
+bias introduced by replacing the true value of ξ⊥l with their
+current ﬁrst-order moment in (16) and the random error due to                                                               of the source position estimate  at previous  iteration,  ˆum,
+the Gaussian measurement noise. We further denote the above
+                                                           with each particle  ξ2,i  to form the complete state vector,
+mentioned estimation bias and random error by ςl and νl                                                      which  is subsequently plugged into (8) and (14) to obtain
+(l = 1 for position estimate and l = 2 for velocity estimate).
+                                                                 the corresponding weights ω2,i ∝p(ˆum, ξ2,i|r)/q(ξ2,i). ThenObviously, Qm+1l     is given by                                                                 the weights ω2,i are normalized and the velocity estimate is
+            Qm+1l  = ςlςTl + E{νlνTl },              (17)   updated as ˆ˙um+1 = N2 ω2,iξ2,i.
+                                                                                    i=1
+where E{·} denotes the expectation operator. As the estimation                                                    Once  the updated  velocity  estimate  ˆ˙um+1  is  obtained,
+bias ςl is not available, we develop the following proposition                                                                                               it  is  in  return combined with each  particle drawn from
+to yield an upper bound for its norm.
+                                 m     m         q(ξ1) to produce source position particles, and the weight
+  Proposition 1: Given the upper bounds   u and     ˙u  for the                                                               of ξ1,i  is found similarly using (8) and (14),  i.e., ω1,i ∝norm of the estimation bias after the mth iteration, the upper
+                                                                    p(ξ1,i, ˆ˙um+1|r)/q(ξ1,i). Thus  the  position  update  of  thebounds for the norm of ςl at the (m + 1)th iteration could be                                                                                                                 N1
+given by                                                    source at iteration m + 1 is given by ˆum+1 =     ω1,iξ1,i.
+                   m+1              m+1                                                             i=1
+          ∥ς1∥2 ≤   u  = max |λ(K 1)|    ˙u                The above mentioned steps are repeated until a predeﬁned
+          ∥ς2∥2 ≤      ˙um+1 = max |λ(K 2)|  um ,         (18)   iteration number is achieved or when the change in position
+                                                       and velocity estimates between two consecutive iterations is
+where λ(·) returns the eigenvalues of a square matrix, and   within a given tolerance. A summary of the proposed method
+                                                             ∂2 ˜C(u,˙u)
+K 1 = G−1uu Guv, K 2 = G−1vv Gvu. Here, Gvu ≜   ∂u∂˙uT   ,    is given in Algorithm 1.
+              ˜C(u,˙u)                                                         Next the implementation details of the proposed method are                                                                                       .Gvv ≜∂2                         , Guv ≜∂2∂˙u∂uT˜C(u,˙u)                           and Guu ≜∂2∂u∂uT˜C(u,˙u)            ∂˙u∂˙uT                                                              discussed including initial value setup, convergence analysis
+  The proof of Proposition 1 is shown in Appendix A. As the                                                      and computational complexity.
+true values of source position and velocity are unknown,                                                     Remark 1: Initial value setup
+we use their previous estimates (ˆum and ˆ˙um) in lieu of them                                                            For the initial values of position and velocity at iteration 0,
+when evaluating these partial derivatives. Direct evaluation                                                             they are given as follows. First, the velocity of the source
+of these partial derivatives may be somewhat cumbersome                                                                               is assumed to be zero, and one estimates the position of the
+[30], one could alternatively follow similar derivations as that                                                            source only to obtain the initial source position. In order to
+in [18] to obtain these partial derivatives.                                                                mitigate the negative effects of omitting the Doppler effects in
+  Applying Proposition 1, a proper choice of MSE matrices                                                                      signals, authors in [37] artiﬁcially divided the received signals
+for source position and velocity would be                                                                    into multiple segments to estimate their TDOAs respectively,
+           Qm+11  = (  um+1 )2Idim + Qu                which then were exploited to estimate the FDOA using least
+                      m+1                               squares ﬁtting approaches [37]. Similarly, we divide the signals           Qm+12  = (    ˙u   )2Idim + Q ˙u,           (19)                                                                    into multiple short-time segments while omitting the Doppler
+where Qu and Q ˙u denote the CRLBs of the source position   effect within each segment. Then the source position estimate
+and velocity evaluated with their previous estimates, which are    ˆu0 is obtained by applying PF approach to these segmented
+used to quantify the terms E{ν1νT1 } and E{ν2νT2 }.               signals. This ˆu0 is combined with each particle ξ2,i to yield
+  Given the proposal density q(ξ2), the local PF ξ2 is applied     ˆ˙u0 via (8), (12) and (14). The initial proposal densities for
+to estimate  the  velocity. Combine the  ﬁrst-order moment   source position and velocity are given by (10), and the upper
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 24,2026 at 15:17:30 UTC from IEEE Xplore. Restrictions apply.
+--- PDF PAGE 6 ---
+7864                                                                             IEEE SENSORS JOURNAL, VOL. 20, NO. 14, JULY 15, 2020
+
+
+                     √
+bounds for bias are given by      ˙u0 = ˙umax  dim and   u0 =   position u as well as the velocity ˙u is given by
+max |λ(K 1)|    ˙u0  for dim-dimensional localization  scenario.                                    K                                                                      2
+The initialization is thus completed.                        FI M                                           =   (C −BT B/(1 +     |bk,1|2)).    (21)                                                                                                                            ˜b,u,˙u
+  Remark 2: Convergence analysis                                      σ2n                k=2
+  Next we show that the proposed MPF based DPD method                                                   The detailed derivations and expressions of matrices B and C
+converges at least to local optimums after a ﬁnite number of                                                                are given in Appendix C.
+iterations.                                                                 Therefore, one could obtain the CRLB corresponding to  ˜b,
+  Proposition 2: Deﬁne the position estimation error after the
+                                                u and ˙u by inverting FI M ˜b,u,˙u.mth iteration as  um = u −ˆum, and the velocity estimation
+error as   ˙um = ˙u−ˆ˙um. Thus we have ∥  um+1∥2 ≤∥  um∥2,                   V. SIMULATION RESULTS
+and ∥  ˙um+1∥2 ≤∥  ˙um∥2.                                                                 In this section, numerical results are provided to corroborate
+  The proof of Proposition 2 is given in Appendix B. As con-                                                                 the effectiveness of the proposed method. As the real-world
+cluded in Proposition 2, the estimation errors of both position                                                          experiment involves costly and sophisticated devices, we con-
+and velocity decrease semi-monotonically as the iteration pro-                                                             duct computer simulations instead  for ease of implemen-
+ceeds. Therefore, the proposed method is converging. Due to                                                                         tation. In the simulations, we consider source localization
+the high nonlinearity of the cost function, theoretical analysis                                                                    in  3-dimensional  space  with dim =   3,  and  a  group
+for the global convergence of the proposed method is rather                                                               of K =  5  stationary sensors  are introduced, with  their
+difﬁcult and would be left for future researches.                                                                 positions given by u1 =  [1732, −1000, 1200]Tm, u2 =
+  Remark 3: Computational complexity                                                     [−1732, −1000, −800]Tm, u3 = [0, 2000, 1500]Tm, u4 =
+  The computational load mainly comes from the calculation                                                           [2000, 1000, −900]Tm,  u5 =  [−2000, 1000, −1200]Tm,
+of  particle weights using  (8) and  (14). Assume  that N1                                                                    respectively. It should be mentioned that the sensors could
+and N2 particles are used for local PFs {ξ1,i, ω1,i}N1i=1 and   also be moving. To show that the proposed method is robust
+{ξ2,i, ω2,i}N2i=1, and the iteration number is given in average   to varying localization scenarios, the position of the mov-
+by Niter. For each particle at each iteration of the proposed   ing  source,  u,  is  distributed uniformly on each  axis  for
+method, the maximal eigenvalue is calculated using (8) with a   each Monte-Carlo run,  i.e., u(l) ∈U(−720m, 720m), and
+computational complexity of approximately O(K N log2 N +    its  velocity  is  also randomly  selected such  that  ˙u(l) ∈
+K 3). In this way, the total computational load of the proposed  U(−25m/s, 25m/s),  l =  1, 2, 3. As the proposed method
+method is given by O(Niter(N1 + N2)(K N log2 N + K 3)).   imposes no assumption on the signal type of the moving
+When the signal length N is very large and the sensor number   sources, without loss of generality, the source signal is mod-
+K  is relatively small such that N log2 N ≫K, the compu-   eled as an auto-regressive moving-average (AR-MA) process,
+tational complexity of the proposed method is approximately  which could be obtained by ﬁltering the white noise sequence
+O(Niter(N1 + N2)K N log2 N).                              through a ﬁlter with the discrete-time transform function given
+   It  is worth mentioning  that for  classic PF based DPD  by [17]
+discussed in section III-B, the total particle number required
+                                                                        1 + 0.9z−1 + 0.8z−2
+is very large such that Np Niter ≫(N1 + N2)Niter . Therefore,              H(z) =                                 .            (22)
+one can conclude that the proposed method is computationally                          1 −0.7z−1
+much more efﬁcient than the classic PF.                   The sampling frequency of the time and frequency synchro-
+                                                             nized sensors is  fs = 1MHz.
+                          IV. CRLB                                  First the convergence analysis of the proposed method is
+  In this section, the CRLB of the considered moving source   performed. In the ﬁrst simulation, we set |bi| = 1. The position
+DPD problem is provided. Note that the unknown complex  and velocity estimation root mean square errors (RMSEs) of
+attenuation vector b is ambiguous with the unknown source   the proposed method versus the iteration number are shown
+signal x up to a non-zero constant (multiplying b with any   in Fig. 1 and Fig. 2 under different particle numbers. For
+non-zero constant is equivalent to dividing x by this constant),   illustration brevity, the particle numbers used in local PFs
+we  set the unknown deterministic signal as  y = b1x  to   ξ1 and ξ2 are respectively 100, 200, 300, 400. The SNR of
+make the CRLB derivable [38]. The corresponding complex   signals  is set to be 10dB, and the observation duration  is
+attenuation factors are  ˜b =  [b2,1, b3,1, · · · , bK,1]T , where  T = 1ms. The maximal values of source position and velocity
+bi,1 ≜bi/b1. The unknown composite parameter vector is   along each coordinate axis are umax = 800 and ˙umax = 30,
+θ =  [Re{y}T , Im{y}T , Re{˜b}T , Im{˜b}T , uT , ˙uT ]T , and the   respectively. As depicted in Fig. 1 and Fig. 2, the position
+                                                       and velocity RMSEs converge very quickly as the iterationobservation is r, where Re{·} and Im{·} represents the real
+                                                    number increases, and the required iteration number is at mostpart and imaginary part of complex variables. The Fisher
+                                                     8 for the considered scenario. Moreover, comparing the resultsinformation matrix for the considered moving source DPD is
+                                                         under different particle numbers, one could ﬁnd negligiblegiven as
+                                                                 differences between these results. In the following simulations,
+                   2      ∂r  H  ∂r
+         FI M =   Re                             .          (20)  we choose the particle numbers for position and velocity
+                 σ2n     ∂θT     ∂θ T                   update to be 200, with the iteration number given by 10.
+After some mathematical manipulations, the Fisher  infor-    Then we examine in the second simulation the performance
+mation matrix corresponding to the unknown  ˜b, the source   of classic PF based DPD method under different particle
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 24,2026 at 15:17:30 UTC from IEEE Xplore. Restrictions apply.
+--- PDF PAGE 7 ---
+MA et al.: DIRECT POSITION DETERMINATION OF MOVING SOURCES BASED ON DELAY AND DOPPLER                                        7865
+
+
+
+
+
+Fig. 1.   Source position estimation RMSEs versus varying iteration
+                                                                               Fig. 4.  Velocity estimation RMSEs of classic PF under varying particlenumbers under different particle numbers. SNR = 10dB, T = 1ms.
+                                                                numbers.
+
+
+
+
+
+Fig. 2.   Source velocity estimation RMSEs versus varying iteration
+                                                                               Fig. 5.  Source position estimation RMSEs of different methods as anumbers under different particle numbers. SNR = 10dB, T = 1ms.
+                                                                            function of SNR. T = 1ms.
+
+
+                                                                     classic PF is gradually able to reach the corresponding CRLB
+                                                                curves. It is observed that for the current simulation setting,
+                                                           a particle number of Np = 2000 is enough for the method to
+                                                   work well. Therefore, in the following we adopt Np = 2000
+                                                                      particles when simulating classic PF based DPD algorithm
+                                                           with 10 iterations.
+                                                               Next, we compare the position and velocity estimation
+                                                         performance of  the proposed method with  that  of  other
+                                                         benchmarks. The ﬁrst method is the classic PF, which approx-
+                                                             imates the joint posterior distribution of position and veloc-
+                                                                           ity in high-dimensional space. The particle number  is  set
+                                                                    to 2,000 with the iteration number being 10. The second
+Fig. 3.  Position estimation RMSEs of classic PF under varying particle  method is the conventional two-step method, where the TDOA
+numbers.                                                and FDOA are estimated by interpolating the CAF surface
+                                                            during the ﬁrst step and then the source position and velocity
+                                                                are obtained in closed-form using the iterative constrained
+numbers. The particle number is set to 200, 500, 1000 and   weighted least squares (ICWLS) method in [12]. The RMSE
+2000, respectively. The iteration number of the PF is uniformly   for each algorithm is obtained using a total of 200 Monte-Carlo
+set to 10. The RMSEs of position and velocity estimates are   runs.
+shown in Fig.3 and Fig.4. From the results in Fig.3 and Fig.4,     In the third simulation, the SNR of source signal increases
+the performance of classic PF based DPD method relies highly  from −5dB to 25dB, and the other settings remain the same as
+on the particle numbers. When the particle number is small,   that in the ﬁrst simulation. The position and velocity estimation
+the RMSEs of source position and velocity estimates suffer  RMSEs of different methods are shown in Fig. 5 and Fig. 6 as
+from thresholding effect caused by insufﬁcient particle num-   a function of SNR. Combining the results in Fig. 5 and Fig. 6,
+bers. With the increase of particle number, the performance of  we conclude that as the SNR increases, the PF method as
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 24,2026 at 15:17:30 UTC from IEEE Xplore. Restrictions apply.
+--- PDF PAGE 8 ---
+7866                                                                             IEEE SENSORS JOURNAL, VOL. 20, NO. 14, JULY 15, 2020
+
+
+
+
+
+Fig. 6.  Source velocity estimation RMSEs of different methods as a    Fig. 8.  Source velocity estimation RMSEs of different methods versus
+function of SNR. T = 1ms.                                              the observation duration. SNR = 10dB.
+
+
+                                                                             TABLE I
+                                                               AVERAGED EXECUTION TIMES OF DIFFERENT
+                                                                   METHODS (IN SECONDS)
+
+
+
+
+
+                                                        According to Fig.5, as SNR increases, the proposed method
+                                                     would eventually reach the CRLB.
+                                                                 In Table I, the averaged execution times of different meth-
+                                                         ods are shown as a function of observation duration under the
+                                                              simulation setting that generates Fig. 7. As depicted from the
+Fig. 7.  Source position estimation RMSEs of different methods versus   table, the proposed method is computationally more efﬁcient
+the observation duration. SNR = 10dB.
+                                                     compared with the classic PF because smaller number of
+                                                                      particles are adopted. The proposed method consumes longer
+                                                           time than two-step methods, but it could yield more accurate
+well as the proposed method approaches the CRLB gradually.   localization results, especially under low SNR levels. Although
+The traditional two-step method, on the contrary, performs   the proposed method requires several seconds to produce
+not so well as the proposed method. This performance loss   the estimation results, the execution time could be further
+roots in the negligence of the constraint that all TDOAs and   shortened by applying powerful computing servers. Moreover,
+FDOAs are correlated according to the source position and   since we are not considering the recursive online tracking of
+velocity. The reason that the proposed method and the classic  moving sources, the processing delay is acceptable.
+PF fail to approach the CRLB when SNR is low is that local
+convergence may occur due to the presence of large noise. In                       VI. CONCLUSION
+the fourth simulation, the SNR is ﬁxed as 10dB, and the signal     In this paper, we addressed the problem of moving source
+observation duration T  varies from 0.5ms to 5.5ms. Other  DPD using delay and Doppler information of signal observa-
+settings remain the same as that produce Fig. 1 and Fig. 2. The   tions at multiple sensors, and a new method was proposed to
+estimation RMSEs of source position and velocity of different   solve the DPD cost function efﬁciently. The proposed method
+methods are plotted as a function of T  in Figs. 7 and 8.   adopts the MPF technique to decompose the high-dimensional
+From these two ﬁgures, one could ﬁnd that as the observation   position-velocity space into two subspaces with lower dimen-
+duration increases, the estimation accuracy improves as well   sions, and each subspace maintains a local PF. Through infor-
+for different methods. This phenomenon  is  intuitive since   mation exchange and alternating update of the two local PFs,
+longer observation duration brings more information about the   the position and velocity of moving sources could be estimated
+source position and velocity. Consistent with our expectation,   with smaller number of particles compared with the classic PF.
+the proposed method outperforms the two-step methods, and   Simulation results showed that the proposed method performed
+its RMSEs almost coincide with that of classic PF based   comparably with  the  classic PF based DPD while being
+DPD. All these methods could not approach the CRLB curve   computationally more efﬁcient. Although  it required longer
+because the SNR level  is not high enough such that the   execution time than two-step methods, the beneﬁt would be
+obtained solution may be local optimal but global suboptimal.   the superior positioning accuracy under low SNR levels.
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 24,2026 at 15:17:30 UTC from IEEE Xplore. Restrictions apply.
+--- PDF PAGE 9 ---
+MA et al.: DIRECT POSITION DETERMINATION OF MOVING SOURCES BASED ON DELAY AND DOPPLER                                        7867
+
+
+                   APPENDIX A                    ∥  um+1∥2   ≤    ∥G−1uu Guv G−1vv Gvu∥2∥  um∥2   ≤
+           PROOF OF PROPOSITION 1               ∥Idim∥2∥  um∥2 = ∥  um∥2, which yields
+  In this appendix, the proof of Proposition 1 is given. For the
+                                                                    ∥  um+1∥2 ≤∥  um∥2.                (29)proposed method, deﬁne the position and velocity estimation
+errors after the mth iteration as  um and   ˙um. It is usually                                                                   Similarly, we could obtain that
+assumed that the cost function in (9) is second-order differ-
+entiable and smooth, such that its ﬁrst-order and second-order                 ∥  ˙um+1∥2 ≤∥  ˙um∥2.               (30)
+partial derivatives with respect to the source position and
+                                                                     ∂˜C(u,˙u)      According to the above analyses, the position and velocity
+velocity exist [30]. Further denote by g(u, ˙u) =     ∂˙u    the                                                               estimation errors decrease semi-monotonically as the iteration
+partial derivative of the cost function ˜C(u, ˙u) with respect to
+                                                              proceeds, which concludes Proposition 2.
+˙u. Obviously, in the absence of measurement noise, the cost
+function achieves its global optimum at the true source position
+and velocity. When substituting the current source position                     APPENDIX C
+estimate ˆum into (16) to update the velocity estimate ˆ˙um+1,              THE DERIVATION OF CRLB
+the cost function achieves the local maximum at (ˆum, ˆ˙um+1).     For notational brevity, deﬁne   1 = j2πdiag{¯n}/fs,   2 =
+Therefore, we have                              −j2π fs/Ndiag{n}, Fi ≜FH  (τi)F, Dk ≜D( fk). The
+                                                                        partial derivative of r with respect to θ is given by
+                         g(u, ˙u) = 0
+                                                             ∂r
+                               i g(ˆum, ˆ˙um+1) = 0.                 (23)        = [J1     j J1   J2     j J2   J3   J4] ,     (31)
+                                                           ∂θT
+Expanding g at the true source position and velocity using the
+                                                      where J1 = [(D1F1)T , b2,1(D2F2)T , · · · , bK,1(DK FK)T ]T ,ﬁrst-order Taylor expansion yields
+                                                       and
+     g(ˆum, ˆ˙um+1) = g(u, ˙u) + Gvu  um + Gvv  ˙um+1,  (24)         ⎡                    ⎤
+                                              O N×1   ON×1     · · ·   ON×1
+where we have ignored the second-order terms. Plugging (23)              D2F2 y  ON×1     · · ·   ON×1
+                                                                  N×1   D3F3 y    · · ·   ON×1    ,     (32)into (24) and left multiplying the inverse of Gvv on both sides,         J2 =  O
+we have                                                                                                                                                                                                                                                                       ⎢⎢⎢⎢⎢⎣                ...                                         ...       ...   ON×1      ⎥⎥⎥⎥⎥⎦
+                    ˙um+1 = G−1vv Gvu  um                      O N×1   ON×1     · · ·  DK FK y
+              = K 2  um.                   (25)  where Om×n  denotes a zero matrix with m rows and n
+                                                          columns, andObviously, the norm of   ˙um+1,  i.e. ∥  ˙um+1∥2,  is upper
+                       m+1             m           ⎡                             ⎤bounded by ∥  ˙um+1∥2 ≤      ˙u  ≜max |λ(K 2)|  u .                                  ∂f1                     ∂τ1                                                                                      1 D1F1 y   + D1FH  2  (τ1)Fy   Similarly, using the updated velocity estimate  ˆ˙um+1  to                     ∂uT                  ∂uT
+obtain the updated source position ˆum+1,  it follows imme-                           ∂f2                     ∂τ2                                                                               b2,1(  1 D2F2 y   + D2FH  2  (τ2)Fy     )
+diately that                                             J3 =                ∂uT                  ∂uT      ,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                      ...               um+1 = G−1uu Guv  ˙um+1                                                                                                                        ⎢⎢⎢⎢⎢⎢⎢⎣                                                                                                                                                                                                                                      ⎥⎥⎥⎥⎥⎥⎥⎦                                                                           ∂fK                    ∂τK
+             = K 1  ˙um+1.                  (26)           bK,1(  1 DK FK y   + DK FH  2 (τK)Fy     )                                                                      ∂uT                   ∂uT
+                                                                                                                       (33)As a result, one could obtain the estimation upper bound for     ⎡            ⎤
+                            m+1              m+1                        ∂f1source position as ∥  um+1∥2 ≤   u  ≜max |λ(K 1)|    ˙u     .                  1 D1F1 y
+The proof of Proposition 1 is thus completed.                                          ∂˙uT                                                                                   ∂f2
+                                                                                b2,1  1D2F2 y
+                                                       J4 =                   ∂˙uT     ,                        (34)
+                   APPENDIX B                                                                                                                                                                                                  ...           PROOF OF PROPOSITION 2                                                                                                                                                                                                                                                                                                                                                                      ⎢⎢⎢⎢⎢⎢⎢⎢⎣                                                                                                             ⎥⎥⎥⎥⎥⎥⎥⎥⎦                                                                          ∂fK
+  Combining (25) and (26), one could obtain                         bK,1  1 DK FK y
+                                                                                             ∂˙uT
+            um+1 = G−1uu Guv G−1vv Gvu  um.          (27)              ∂fi       f0                                ∂fK                                        =                                                      where                                                                         ∂uT                                                                                                c (˙ui −˙u)T (Idim −ρiρTi ) and ∂˙uT = −f0ρTi /c
+As the Hessian matrix                                          are the partial derivatives of Doppler frequency shift with
+                   Guu  Gvu                             respect to the source position and velocity, respectively, where
+                                                        (28)                    Guv   Gvv                             ρi = (u −ui)/∥u −ui∥2 represents the unit-norm vector
+                                                               pointing from the ith sensor to the source.                                                                                                                                                        ∂fi = ρTi /c is the                                                                                                             ∂uTis positive semi-deﬁnite, applying the Schur-complementary                                                                   derivative of time delay with respect to the source position.
+theorem [39], one could obtain Guu −Guv G−1vv Gvu ⪰0,     Plugging (31) into (20) and after some mathematical manip-
+where A ⪰  0 means  that A  is  positive  semi-deﬁnite.                                                                  ulations yield
+Left  multiplying  both  sides  of   it  with  the  inverse  of
+matrix  Guu,  one  arrives  at  Idim ⪰  G−1uu Guv G−1vv Gvu.                         2   A  B                                                        FI M =                    ,              (35)
+Last, invoking  the matrix norm theorem,  it  follows  that                       σ2n  BT  C
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 24,2026 at 15:17:30 UTC from IEEE Xplore. Restrictions apply.
+--- PDF PAGE 10 ---
+7868                                                                             IEEE SENSORS JOURNAL, VOL. 20, NO. 14, JULY 15, 2020
+
+
+
+               K
+where A = (1 +    |bk,1|2)I2N  is a diagonal matrix. B and     [4]  J. Smith and J. Abel, “Closed-form least-squares source location estima-                                                                                            tion from range-difference measurements,” IEEE Trans. Acoust., Speech,
+                k=2
+C are given, respectively as                                                  Signal Process., vol. ASSP-35, no. 12, pp. 1661–1669, Dec. 1987.
+                                                                                       [5]  Y. T. Chan and K. C. Ho, “A simple and efﬁcient estimator for hyperbolic
+      Re{yb  H}  −Im{ybH}  Re{B1}  Re{B2}                      location,” IEEE Trans. Signal Process., vol. 42, no. 8, pp. 1905–1915,B =                                                              ,  (36)        Aug. 1994.
+      Im{ybH}    Re{ybH}  Im{B1}   Im{B2}                 [6] L. Yang and K. C. Ho, “An approximately efﬁcient TDOA localization
+                                                                                  algorithm in closed-form for locating multiple disjoint sources with
+           K
+                                                ∂fi                   ∂τi                   erroneous sensor positions,” IEEE Trans. Signal Process., vol. 57, no. 12,
+where B1 ≜    |bi,1|2(FHi   1Fi y ∂uT + FH  2Fy ∂uT ), B2 ≜         pp. 4598–4615, Dec. 2009.
+            k=1                                                                                       [7] K. C. Ho and W. Xu, “An accurate algebraic solution for moving source
+ K
+                                       .                                                                                        Process., vol. 52, no. 9, pp. 2453–2463, Sep. 2004.    |bi,1|2FHi   1Fi y ∂˙uT∂fi                                                            location using TDOA and FDOA measurements,” IEEE Trans. Signal
+k=1
+                                                                                       [8] M. Sun and K. C. Ho, “An asymptotically efﬁcient estimator for TDOA
+                                                                          and                                                       FDOA                                                                                                   positioning                                                                                                             of multiple                                                                                                                                       disjoint                                                                                                                              sources                                                                                                                                                   in                                                                                                                                                the presence                                                                                                                                                         of                   ∥y∥22 I2(K−1)  C1                                                                                         IEEE                                                                                                                          Trans.                                                                                                                                Signal                                                                                   sensor                                                                                                location                                                                                                               uncertainties,”                                                                                                                                              Process.,                                                                                                                                                                   vol. 59,          C =                                                      ,             (37)
+                   CT1      C2                                  no. 7, pp. 3434–3440, Jul. 2011.
+                                                                                       [9] K. C. Ho, X. Lu, and L. Kovavisaruch, “Source localization using TDOA
+            Re{C11} Re{C12}                                       and FDOA measurements in the presence of receiver location errors:where C1 =                                    ,
+            Im{C11} Im{C12}                                           Analysis and solution,” IEEE Trans. Signal Process., vol. 55, no. 2,
+     ⎡                           ⎤            pp. 684–696, Feb. 2007.
+                            ∂f2                ∂τ2            [10] H.-W. Wei, R. Peng, Q. Wan, Z.-X. Chen, and S.-F. Ye, “Multidimen-
+         b2,1(yHFH2  1F2 y   + yH FH  2Fy     )                sional scaling analysis for passive moving target localization with TDOA                       ∂uT              ∂uT                                                                          and FDOA measurements,” IEEE Trans. Signal Process., vol. 58, no. 3,
+                                                                          ,           pp. 1677–1688, Mar. 2010. C11 =                                                                                                                    ...                       ⎢⎢⎢⎢⎣                                                                                                                                     ⎥⎥⎥⎥⎦       [11] G. Wang, S. Cai, Y. Li, and N. Ansari, “A bias-reduced nonlinear WLS                         ∂fK              ∂τK
+        bK,1(yHFHK  1FK y   + yH FH  2Fy     )            method for TDOA/FDOA-based source localization,” IEEE Trans. Veh.                        ∂uT              ∂uT                 Technol., vol. 65, no. 10, pp. 8603–8615, Oct. 2016.
+                                                        (38)    [12] X. Qu, L. Xie, and W. Tan, “Iterative constrained weighted least squares
+     ⎡              ⎤                                       source localization using TDOA and FDOA measurements,” IEEE Trans.                           ∂f2
+                                                                                                                vol. 65, no. 15, pp. 3990–4003, Aug. 2017.            b2,1 yHFH2  1F2 y                                                 Signal Process.,                              ∂˙uT                                        [13] R. Ulman and E. Geraniotis, “Wideband TDOA/FDOA processing using
+                                                      .                    (39)        summation of short-time CAF’s,” IEEE Trans. Signal Process., vol. 47, C12 =                                                                 ...                                                                                     no. 12, pp. 3193–3200, Dec. 1999.                       ⎢⎢⎢⎢⎣                                                                    ⎥⎥⎥⎥⎦                        ∂fK                                       [14]  S. Stein, “Algorithms for ambiguity function processing,” IEEE Trans.
+          bK,1 yHFHK  1FK y                                                   Acoust., Speech, Signal Process., vol. ASSP-29, no. 3, pp. 588–599,                               ∂˙uT
+                                                                                      Jun. 1981.
+As the explicit expression of C2 is cumbersome, it is directly    [15] A. J. Weiss, “Direct geolocation of wideband emitters based on delay and
+given by                                                                         Doppler,” IEEE Trans. Signal Process., vol. 59, no. 6, pp. 2513–2521,
+                                                                                      Jun. 2011.
+                Re{J 3H J3}  Re{J 3H J4}                        [16] A. Yeredor and E. Angel, “Joint TDOA and FDOA estimation: A con-         C2 =      H         H         .          (40)          ditional bound and its use for optimally weighted localization,” IEEE
+                Re{J 4 J3}  Re{J 4 J4}                              Trans. Signal Process., vol. 59, no. 4, pp. 1612–1623, Apr. 2011.
+Inverting the whole FIM matrix directly would incur large    [17]  J. Li, L. Yang, F. Guo, and W. Jiang, “Coherent summation of multiple
+                                                                                      short-time signals for direct positioning of a wideband source based on
+computational and memorial costs. As an alternative, we could         delay and Doppler,” Digit. Signal Process., vol. 48, pp. 58–70, Jan. 2016.
+use the Schur-complementary theorem [39] to obtain the FIM    [18]  F. Ma, Z.-M. Liu, and  F. Guo, “Direct  position determination  for
+of complex attenuation, source position and velocity  ˜b, u, ˙u,        wideband sources using fast approximation,” IEEE Trans. Veh. Technol.,
+                                                                                              vol. 68, no. 8, pp. 8216–8221, Aug. 2019.
+which is shown as                                                         [19] Z. Lu, B. Ba,  J. Wang, W.  Li, and D. Wang, “A  direct  position
+                                  K                               determination method with combined TDOA and FDOA based on
+                 2                                                                 particle ﬁlter,” Chin. J. Aeronaut., vol. 31, no. 1, pp. 161–168, Jan. 2018.         =    FI M               C −BT B/(1 +                                                  |bk,1|2)  .   (41)                   ˜b,u,˙u                                                                                [20]  J.                                                                                       Yin, D.                                                                              Wang,                                                                                                      Y. Wu,                                                                                                 and                                                                                                                         T.                                                                                                               Tang, “Single-step                                                                                                                                                     localization                                                                                                                                                 using               σ2n                                     k=2                                                                                     multiple                                                                              moving                                                                                                          arrays                                                                                                                      in                                                                                                                    the                                                                                                                presence                                                                                                                               of observer                                                                                                                                                 location errors,”
+Inverting FI M ˜b,u,˙u and taking the lower-right 2 dim×2 dim    [21]  P.SignalClosasProcess.,and M.vol.F. 152,Bugallo,pp. 392–410,“ImprovingNov.accuracy2018.   by iterated mul-
+square, one could ﬁnally obtain the CRLB for source position           tiple  particle  ﬁltering,” IEEE Signal Process.  Lett.,  vol. 19, no.  8,
+and velocity.                                                                     pp. 531–534, Aug. 2012.
+                                                                                [22]  I. Urteaga, M. F. Bugallo, and  P. M. Djuric, “Multiple  particle ﬁl-
+                                                                                            tering for inference in the presence of state correlation of unknown
+              ACKNOWLEDGEMENT                           mixing parameters,” in Proc. IEEE Int. Conf. Acoust., Speech Signal
+  The authors would like to thank the anonymous reviewers         Process. (ICASSP), Mar. 2017, pp. 3849–3853.
+                                                                                [23]  P. M. Djuric, T. Lu, and M. F. Bugallo, “Multiple particle ﬁltering,” in
+for their valuable comments that helped to improve the quality                                                                                  Proc. IEEE Int. Conf. Acoust., Speech Signal Process. (ICASSP), vol. 3,
+of the article.                                                                 Apr. 2007, pp. 1181–1184.
+                                                                                [24] L. Lamentowski, R. Mularzuk, T. Brenner, and M. Nieszporski, “Track-
+                                                                                   ing algorithm analysis for the PCL-PET fusion system,” in Proc. Signal
+                 REFERENCES                                                                                    Process. Symp. (SPSympo), Jun. 2015, pp. 1–6.
+ [1] H. Song, V. Shin, and M. Jeon, “Mobile node localization using fusion    [25]  P. Nordlund,  F. Gunnarsson, and  F. Gustafsson, “Particle  ﬁlters for
+      prediction-based interacting multiple model in cricket sensor network,”         positioning in wireless networks,” in Proc. 11th Eur. Signal Process.
+    IEEE Trans. Ind. Electron., vol. 59, no. 11, pp. 4349–4359, Nov. 2012.         Conf., Sep. 2002, pp. 1–4.
+ [2] B. Friedlander, “A passive localization algorithm and its accuracy analy-    [26] R. Plˇoek, V. Stejskal, M. Pelant, and M. Vojáˇcek, “Passive coherent
+       sis,” IEEE J. Ocean. Eng., vol. OE-12, no. 1, pp. 234–245, Jan. 1987.          location and passive ESM tracker systems synergy,” in Proc. 14th Int.
+ [3] A. Aubry, V. Carotenuto, A. De Maio, and L. Pallotta, “Joint exploitation        Radar Symp. (IRS), vol. 1, Jun. 2013, pp. 149–154.
+      of TDOA and PCL techniques for two-dimensional target localization,”    [27] A. Y. Sidi and A. J. Weiss, “Delay and Doppler induced direct tracking
+    IEEE Trans. Aerosp.  Electron.  Syst.,  vol.  56,  no.  1,  pp. 597–609,        by particle ﬁlter,” IEEE Trans. Aerosp. Electron. Syst., vol. 50, no. 1,
+     Feb. 2020.                                                                     pp. 559–572, Jan. 2014.
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 24,2026 at 15:17:30 UTC from IEEE Xplore. Restrictions apply.
+--- PDF PAGE 11 ---
+MA et al.: DIRECT POSITION DETERMINATION OF MOVING SOURCES BASED ON DELAY AND DOPPLER                                        7869
+
+
+
+
+[28] M. Sun, W. Xia, and Y. Wang, “Direct target tracking by distributed   Fuhe Ma received the M.Sc. degree in statistical signal processing
+     Gaussian particle ﬁltering based on delay and Doppler,” in Proc. 14th   from National University of Defense Technology (NUDT) in 2016. He
+    IEEE Int. Conf. Signal Process. (ICSP), Aug. 2018, pp. 58–63.             is currently pursuing the Ph.D. degree with the NUDT, Changsha, China.
+[29]  P. Vu, A. M. Haimovich, and B. Himed, “Direct tracking of multiple   His research interests include passive localization and statistical signal
+      targets in MIMO radar,” in Proc. 50th Asilomar Conf. Signals, Syst.   processing.
+     Comput., Nov. 2016, pp. 1139–1143.
+[30] D. Wang and G. Zhang, “A direct  localization method for moving
+     narrowband source based on Doppler frequency shifts,” Acta Electronica
+      Sinica, vol. 45, no. 3, pp. 591–598, 2017.                       Fucheng Guo received the B.S. and Ph.D. degrees from the National
+[31] A. J. Weiss and A. Amar, “Direct geolocation of stationary wideband    University of Defense Technology (NUDT), Changsha, China, in 1998
+      radio signal based on time delays and Doppler shifts,” in Proc. IEEE/SP   and 2002, respectively. From 2006 to 2007, he was a Visiting Scientist
+     15th Workshop Stat. Signal Process., Aug. 2009, pp. 101–104.           with the Xi’an Jiaotong University, Xi’an, China. From 2009 to 2010, he
+[32] N. J. Gordon, D. J. Salmond, and A. F. M. Smith, “Novel approach to   was a Visiting Scholar with the University of Missouri, Columbia, MO,
+     nonlinear/non-Gaussian Bayesian state estimation,” IEE Proc. F Radar   USA. He is currently a Professor with NUDT. His current research inter-
+     Signal Process., vol. 140, no. 2, pp. 107–113, Apr. 1993.                ests include passive localization, tracking, and radar signal processing.
+[33]  J. Carpenter, P. Clifford, and P. Fearnhead, “An improved particle ﬁlter
+      for nonlinear problems,” IEE Proc.-Radar, Sonar Navigat., vol. 146,
+      no. 1, pp. 2–7, 1999.
+[34] H. Wang, S. Kay, and S. Saha, “An importance sampling maximum   Le Yang received the B.Eng. and M.Sc. degrees in electrical engineering
+      likelihood direction of arrival estimator,” IEEE Trans. Signal Process.,   from the University of Electronic Science and Technology of China
+      vol. 56, no. 10, pp. 5082–5092, Oct. 2008.                        (UESTC), Chengdu, China, in 2000 and 2003, respectively, and the Ph.D.
+[35]  J. D. Hol, T. B. Schon, and F. Gustafsson, “On resampling algorithms for   degree in electrical and computer engineering from the University of
+      particle ﬁlters,” in Proc. IEEE Nonlinear Stat. Signal Process. Workshop,   Missouri, Columbia, MO, USA, in 2010. From 2003 and 2004, he was
+     Sep. 2006, pp. 79–82.                                       a Lecturer with the UESTC. From 2004 and 2005, he was with the Uni-
+[36]  J. H. Kotecha and P. M. Djuric, “Gaussian sum particle ﬁltering,” IEEE    versity of Victoria, Victoria, BC, Canada, working on diversity techniques
+     Trans. Signal Process., vol. 51, no. 10, pp. 2602–2612, Oct. 2003.      and performance evaluation of communication systems. In January 2006,
+[37] E. Weinstein and D. Kletter, “Delay and Doppler estimation by time-   he transferred to the McMaster University, Hamilton, ON, Canada, where
+     space partition of the array data,” IEEE Trans. Acoust., Speech, Signal   he focused his research on artiﬁcial neural networks and computational
+      Process., vol. ASSP-31, no. 6, pp. 1523–1535, Dec. 1983.              neuroscience. From 2011 to 2018, he was an Associate Professor with
+[38] M. Pourhomayoun and M. L. Fowler, “Cramer-Rao lower bound for   the Jiangnan University, Wuxi, China. Since 2019, he has been with
+     frequency estimation for coherent pulse train with unknown pulse,” IEEE   the Department of Electrical and Computer Engineering, University of
+     Trans. Aerosp. Electron. Syst., vol. 50, no. 2, pp. 1304–1312, Apr. 2014.   Canterbury, Christchurch, New Zealand. His current research interests
+[39] R. A. Horn and C. R. Johnson, Matrix Analysis. New York, NY, USA:   include sensor networks, passive localization, tracking, and machine
+     Cambridge Univ. Press, 1986.                                           learning.
+
+
+
+
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 24,2026 at 15:17:30 UTC from IEEE Xplore. Restrictions apply.

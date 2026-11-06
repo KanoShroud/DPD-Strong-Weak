@@ -1,0 +1,984 @@
+
+=== PDF PAGE 1 ===
+IEEE INTERNET OF THINGS JOURNAL, VOL. 12, NO. 12, 15 JUNE 2025                                                                             22267
+
+Index Ambiguity Elimination of Overlapped Signals
+             in Multisource Localization
+
+            Shuai Zhou   , Tao Li   , Member, IEEE, Chaozheng Xue, Rui Zhang   , Member, IEEE,
+    Yuhan Ruan   , Member, IEEE, Dong Yang, Member, IEEE, and Yongzhao Li   , Senior Member, IEEE
+
+
+
+  Abstract—Multisource localization (MSL) for overlapped sig-   unauthorized usage or security attacks. Such illegal devices
+nals has attracted much attention, and the existing methods   can easily transmit data on the shared spectrum without any
+rely on the combination of multitype measurements, which puts                                                                 authorization and potentially cause harmful interference to the
+higher requirements on the receiver. Besides, these methods can
+                                                        incumbent users, which makes wireless security becomes anot avoid the problem of measurement-source association. In
+view of this, on the basis of broadband signal time-frequency   pressing concern [6]. In spectrum sharing systems, locating
+spectrogram detection (TFSD), we propose an MSL scheme for   radiation sources can efﬁciently ﬁnd out the intruders, pro-
+overlapped signals based on index ambiguity elimination, which   tecting the shared spectrum from malicious jamming or other
+can avoid the above-mentioned measurement-source association                                                             unauthorized utilization. In particular, accurately determining
+problem by extracting the pure part of each signal component.
+                                                                 the individual location of each signal source in overlappingSpeciﬁcally, we ﬁrst conduct the time-frequency transformation
+of the received signal, and analyze the overlapping types of   signal environments is essential for many applications, such
+the time-frequency blocks (TFBs) in two aspects: 1) inter-TFB,   as wireless communication systems, autonomous  vehicles,
+i.e., the overlapping types between the TFBs and  2)  intra-  and industrial Internet of Things (IoT)  [7]. Therefore, the
+TFB,  i.e., the overlapping types between  signal components                                                              multisource localization (MSL) for overlapped signals is the
+contained in the TFB. On this basis, the TFB nonoverlapping part
+                                                             focus of this article.extraction algorithm is designed to eliminate the overlap between
+                                                       Over the years, a plethora of localization techniques haveTFBs. Afterward, the signal segmentation algorithm based on
+the signal characteristic change mechanism is designed to obtain   been proposed by utilizing different signal or measurement
+the pure part of each signal component, that  is, eliminating   types, including ultrasound, visible light, radio frequency (RF),
+the index ambiguity of each  signal component contained in   inertial measurement, and hybrid signals. Among these modal-
+the extracted nonoverlapping TFB. Finally, the angle-of-arrival                                                                                   ities, RF signals are widely used because of their ubiquity
+(AOA) information of multiple receivers for a certain signal
+                                                                    in current wireless communication systems [8], in which thecan be obtained through the AOA estimation method, as well
+as the location of source device corresponding to the signal   localization methods can be categorized into geometry-based
+can be  estimated by  the  triangulation  method.  Simulation  and deep-learning (DL)-based. For geometry-based localiza-
+and experiment results verify the effectiveness of the designed   tion,  it  is widely used in current communication systems.
+scheme.                                                     Over the past several decades, signal metrics, such as the
+  Index Terms—Index ambiguity elimination, multisource local-   received signal strength (RSS) [9], [10], time-of-arrival (TOA)
+ization, overlapped signal, signal segmentation, time-frequency   [11], [12], time-difference-of-arrival (TDOA) [13], [14], [15],
+spectrogram detection.                                                       and angle-of-arrival (AOA) [16], [17], [18], [19], and their
+                                                           combinations [20], [21], [22], [23] have been designed for
+                                                                 characterizing the location-bearing information. The essence
+                           I. INTRODUCTION
+                                                               of RSS, TOA, TDOA, and AOA is based on measuring the
+  N RECENT years, wireless devices are becoming ubiq-   distance (distance-based) or angle (angle-based) of wireless
+   uitous in our daily  life, providing us with higher data   devices with respect to multiple receivers with known loca-I
+rate and higher quality of service, but also challenging the   tions. By adopting trilateration or triangulation algorithms,
+traditional static spectrum allocation policy [1], [2], [3], [4].   the location of wireless devices can be calculated from these
+In this case, cognitive radio technology is proposed to further   measurements. Techniques in geometry-based localization are
+improve the spectrum efﬁciency, whose essence is spectrum   training-free, easy to analyze theoretically, and scalable to
+sharing [5]. However, the increasing illegal usage of wireless   different environments. Contrary to the practical algorithms
+devices makes the shared spectrums  particularly prone  to   designed for geometry-based localization, DL-based methods
+                                                                 require ofﬂine training [24], [25]. Such an ofﬂine process
+  Received 23 October 2024; Revised 23 December 2024; accepted 9 March
+2025. Date of publication 12 March 2025; date of current version 9 June 2025.   can sufﬁciently reduce online computations, while a large
+This work was supported in part by the Shaanxi Provincial Key Research and  volume of data from wireless communication systems needs
+Development Program under Grant 2023-ZDLGY-33; in part by the China   to be collected for training purposes, and the trained models
+Postdoctoral Science Foundation under Grant 2024M762543; and in part by
+the Fundamental Research Funds for the Central Universities under Grant   have to be updated with fresh data to adapt to environmental
+ZYTS25271. (Corresponding authors: Tao Li; Yongzhao Li.)                 variations.
+  The  authors  are with  the  State Key  Laboratoryoratory  of  Integrated     Notably, MSL for overlapped signals refers to the process
+Services Networks, Xidian University, Xi’an 710071, China (e-mail: taoli@
+xidian.edu.cn; yzhli@xidian.edu.cn).                                   of determining the individual locations of multiple sources in
+   Digital Object Identiﬁer 10.1109/JIOT.2025.3550475                  an environment where their signals overlap or interfere with
+
+
+              2327-4662 c⃝2025 IEEE. All rights reserved, including rights for text and data mining, and training of artiﬁcial intelligence
+                     and similar technologies. Personal use is permitted, but republication/redistribution requires IEEE permission.
+                                  See https://www.ieee.org/publications/rights/index.html for more information.
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 2 ===
+22268                                                                        IEEE INTERNET OF THINGS JOURNAL, VOL. 12, NO. 12, 15 JUNE 2025
+
+
+each other. This is a common challenge in wireless communi-   localization task and a ﬁne correction task [36]. In addition,
+cation systems, where multiple devices may transmit signals  two computationally light methods are developed in [7] to
+simultaneously, leading to signal overlap. Compared to single-   handle the measurement-source association problem, where
+source localization (SSL), simultaneously locating multiple   both RSS and AOA measurements are required to obtain.
+sources is more challenging in practice since the association     In summary, although the existing methods can solve the
+between measurement parameters and source devices are not   problem of MSL for overlapped signals to a certain extent,
+known. It is crucial to discriminate which measurements cor-   there are still the following problems.
+respond to the same source before localization. Moreover, the     1) There  are  restrictions on  the  distribution  of source
+number of possible measurement-source associations increases         devices, requiring that the distribution of source devices
+exponentially with the number of receivers. Overall, MSL for           is far away.
+overlapped signals involves complex signal processing, data     2)  It is necessary to combine multitype measurements to
+fusion, and possibly DL to accurately determine the location         acquire more information and solve it through traditional
+of each source in overlapping signal environments.                   optimization methods, resulting in high requirements on
+  In view of this problem, a lot of meaningful works have         receivers in terms of obtaining multitype measurements.
+been carried out. To keep the processing of receiver simple,        For example, RSS-based methods require to know the
+the RSS-based crowd-sensing schemes are designed for MSL,        channel information as well as the transmit power, while
+which require the receivers to report  their perceived RSS       TOA-based and TDOA-based methods require the high
+values [26], [27]. Nevertheless, their application is limited to         precision time synchronization.
+very speciﬁc cases where the source devices are separated     3)  It does not analyze the overlapping situation of the
+with a signiﬁcant distance of tens or hundreds of meters         received overlapped signals, but starts from the whole
+and  all  the  radio  channel  characteristics  as  well  as  the         received signal directly, which inevitably encounters the
+transmit power values are known at the receiver. Furthermore,        problem of measurement-source association.
+some MSL approaches estimate the location of each source     4) DL-based methods involve a large number of ofﬂine
+separately, depending on  the  distinguishability  of  signals         training processes, which need to collect a large amount
+[28], [29]. Nevertheless, signals from different source devices         of data, bringing challenges to practical applications.
+are intractable to separate, especially in noncooperative and  To address these challenges, we ﬁrst analyze the characteristics
+spectrum sharing situations. With the AOA estimation results,   of the received signal by means of time-frequency analysis,
+a classiﬁcation process is proposed to associate each estimate  and design the signal extraction algorithm on this basis to
+with  the  corresponding  source, which  is modeled  as an   extract the pure part of the signal corresponding to each source
+optimization problem and solved by the brute force search   device to convert the problem of MSL into SSL, avoiding
+in the sense of least square error [30]. However, the com-   the problem of measurement-source association. Then, con-
+putational complexity dramatically increases as the number   sidering that the AOA-based methods are highly desirable in
+of sources increases. To solve this problem, by taking into  many practical applications due to the fact that they generally
+account the statistical distribution of the AOA estimates at the  work in a noncooperative, stealthy and passive manner without
+receivers, a classiﬁcation procedure is formulated using the   requiring the  prior knowledge of channel parameters and
+essentials of an evolutionary process, and optimized in the   the internode synchronization, the AOA-based triangulation
+paradigm of genetic algorithm (GA) [31].                  method  is  utilized  in  this  article  to  realize  localization.
+  Moreover, DL is still effective to capture the propagation   Notably, 2-D time-frequency spectrogram detection (TFSD)
+features and achieve  the MSL without  signal  separation.   has received extensive  attention and made  great progress
+DeepTxFinder uses  the RSS  as  the  input  of  the convo-   in broadband spectrum sensing, which can obtain the time-
+lutional neural network (CNN)  to regress the coordinates   frequency information (TFI) of each time-frequency block
+directly, which always suffers from overﬁtting due to lots  (TFB) well. While when the TFB is the overlapped results
+of connections  in  fully connected  layers, thus hampering   of multiple signal components, the existing TFSD methods
+its generalization ability [32]. HMTLNet aims to formulate   can not known the speciﬁc TFI of each signal component
+the MSL as a heatmap regression problem based on fully   contained in it but only the contour TFI of the whole TFB.
+convolutional network, learning a nonlinear mapping func-   This makes it impossible to obtain the nonoverlapping part of
+tion from the input RSS measurements to a heatmap [33].   each signal only by means of time-domain interception and
+DeepMTL solves the MSL problem with CNN from the view   frequency-domain ﬁltering, that is, the problem is still dealing
+of computer vision, while it relies on the dense deployment of   with overlapped signals that contain multiple components. In
+receivers due to the assumption of the corwdsourced sensing   this way, when estimate the AOA of the received overlapped
+architecture [34]. It is worth mentioning that the regression-   signals at each receiver, we can not match the AOA estimates
+based or image-based schemes require hundreds of receivers   to the corresponding signal component, which is deﬁned as
+and have to predict the continuous location variables in the   the index ambiguity in this article.
+solution space  [35]. To lower the  difﬁculty of  regressive     In general, the intention of the designed scheme is to elim-
+mapping, authors in [36] utilize the classiﬁcation to narrow   inate the index ambiguity with the designed signal processing
+the solution space by dividing the continuous study area into   algorithm after obtaining the TFSD results, i.e., obtain the TFI
+grids at ﬁrst, and then a multitask gated CNN (MT-GCNN)   of each signal component and acquire the AOA information
+is proposed to decompose the MSL problem into a coarse   of each signal component associated to multiple receivers to
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 3 ===
+ZHOU et al.: INDEX AMBIGUITY ELIMINATION OF OVERLAPPED SIGNALS IN MULTISOURCE LOCALIZATION                                        22269
+
+
+realize the MSL on this basis (more details can be found in
+our previous work [37]). Speciﬁcally, the main contributions
+are as follows.
+  1) To  solve  the problem  of MSL  for overlapped  sig-
+       nals, we propose an index ambiguity elimination based
+      processing scheme. Different from the existing MSL
+     methods, where the received signal is directly used to
+      calculate various kinds of measurements, the TFSD is
+      ﬁrst performed before conducting MSL in our designed
+     scheme. On the basis of obtaining the TFSD results, the
+     designed scheme extracts the pure part of the signal step
+     by step at the TFB level and signal level, which can
+      avoid the problem of measurement-source association.     Fig. 1.  System model.
+  2)  First,  the  overlapping  situations  at  the TFB  level
+                                                 {BPSK, QPSK, 8PSK, 16QAM}. In addition, the Ds’ signals      (inter-TFB) are analyzed and seven overlapping types
+                                                        impinge on the UCAs of Rs from the far ﬁeld, where all Ds      are summarized. On the basis of the TFSD  results,
+                                                                 are in the same horizontal plane as the Rs, i.e., the elevation      the TFB nonoverlapping part extraction algorithm  is
+                                                                               is considered 90◦here.     designed  according  to  the summarized  overlapping
+                                                        Based on this, the samples at the i-th snapshot received by      types. Hence, the received overlapped signals can be sep-
+                                                  Rp can be expressed as      arated from the time-frequency domain at the TFB level.
+      Afterward, the nonoverlapping TFB can be obtained and                   Q
+      converted into the time-domain, laying a foundation for                  rp(i) =    a ψp,q sq(i) + wp(i)             (1)
+      the subsequent analysis.                                                   q=1
+  3) Subsequently, the overlapping situations of signal com-
+                                                                    in which wp(i) =  [w1(i), w2(i), . . . , wM(i)]T  is the inde-     ponents contained in the extracted nonoverlapping TFB
+                                                          pendent and identically distributed (i.i.d.) complex Gaussian      (intra-TFB) are analyzed and four overlapping types
+                                                               noise vector with zero-mean and variance σn2 ,  i.e., wp(i) ∼       at the signal level are summarized. According to the
+                                                CN(0, σn2 IM). sq(i) and rp(i) = [rp,1(i), rp,2(i), . . . , rp,M(i)]T     change mechanism of the rank feature of the signal,
+                                                                 represent the transmitted signal of Dq and the received signal      the signal segmentation algorithm is designed to obtain
+                                                               of Rp, respectively. In addition, a(ψp,q) is the steering vector      the TFI of each signal component,  i.e., eliminate the
+                                                               of Dq to Rp, where ψp,q represents the incident azimuth of Dq      index ambiguity of the signal component contained in
+                                                                    to Rp      the extracted TFB. Then, the AOAs of each signal
+     component can be estimated, and the location of the                                                       T                                                                                                             cos(ψp,q−γM−1)                                                         a ψp,q =  ejζ cos(ψp,q−γ0), . . . , ejζ                     (2)      device corresponding  to each  signal component can
+     be obtained by combining the AOA measurements of                                                                    in which ζ = κ0r, κ0 = 2π/λ denotes the wavenumber, and
+      multiple receivers.                              λ is the signal wavelength. Besides, ψp,q̸ = ψp,i ∀q̸ = i with
+  The remainder of this article is structured as follows. In   q, i = 1, 2, . . . , Q.
+Section II, the preliminaries are presented. The designed MSL                                                      Assuming a total of L samples are received by Rp, the matrix
+scheme for overlapped signals is introduced in Section  III,                                                      form of the received signal can be expressed as
+consisting of analysis of overlapping types inter-TFB, extrac-
+tion of nonoverlapping part of TFB, analysis of overlapping                 Rp = Ap(  )S + Wp                   (3)
+types intra-TFB, signal segmentation of the extracted nonover-
+                                                      where Ap(  ) = [a(ψp,1), . . . , a(ψp,Q)] is the M × Q steering
+lapping TFB, and AOA-based location estimation. Simulation
+                                                                vector matrix, S is the Q × L transmitted signal, Wp is the
+analysis and experiment results are discussed in Sections IV
+                                M × L noise signal, and Rp is the M × L received signal.
+and V, respectively, followed by the conclusion in Section VI.
+                                                            Moreover, the considered path loss model  is shown as
+                                                              follows [38]:
+                         II. PRELIMINARIES
+                                                                      Lp,q = 28.0 + 22 log10 dp,q + 20 log10(fc)        (4)
+A. System Model
+                                                      where dp,q m represents the distance between Rp and Dq, fc  The system model considered in this article is shown in
+                                          GHz is the carrier frequency.Fig. 1: There are Q single-antenna source devices (Ds) sharing
+the current frequency band, and P receivers (Rs) equipped with
+                                                             B. Time-Frequency Spectrogram Detectionthe uniform circular array (UCA) sensing the current spectrum,
+where the UCA is composed of M omni-directional antennas    As mentioned above, to eliminate the index ambiguity of
+with radius r and the angle γm = 2πm/M, m = 0, 1, . . . ,   overlapped signals, we ﬁrst need to perform time-frequency
+M −1. Moreover,  all Ds adopt  the orthogonal frequency   spectrogram  detection (TFSD) on  the  received  signal  to
+division multiplexing (OFDM) system to transmit their own   determine the TFI of each TFB. In which, short-time Fourier
+data, and its digital modulation type is randomly selected in   transform (STFT) is usually used to represent the spectrogram
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 4 ===
+22270                                                                        IEEE INTERNET OF THINGS JOURNAL, VOL. 12, NO. 12, 15 JUNE 2025
+
+
+of the received signal. The received signal of the mth antenna   A. Analysis of Overlapping Types Inter-TFB
+is reshaped to a matrix Ym ∈CN×V with N×V = L as follows:     In order to study the extraction of nonoverlapping part
+      ⎡                      ⎤         of TFBs, we ﬁrst analyze and classify the possible overlap-
+             rm(1) rm(N + 1) · · · rm(N(V −1) + 1)
+                                                           ping types of the received overlapped signals  at the TFB
+             rm(2) rm(N + 2) · · · rm(N(V −1) + 2)
+   Ym =                                                  (5)   level (inter-TFB), as shown  in Fig. 3. Speciﬁcally,  it can                          ⎢⎢⎢⎣              ...                                     ...       ...                                          ...                    ⎥⎥⎥⎦        be seen that there are seven different types of overlapped
+           rm(N)  rm(2N)   · · ·     rm(NV)                  signals, i.e., Types (a)–(g). Fig. 3(a) shows the time-frequency
+                                                           spectrograms of seven different overlapping types. Fig. 3(b)
+where  rm(i)  is  the  ith sample of  the mth antenna,  i =  shows the TFSD results of seven different overlapping types,
+1, 2, . . . , L. The spectrum xυm  of each column rυm  of  the  where the black rectangle box represents the TFSD result of
+reshaped matrix Ym is calculated by discrete Fourier transform   each TFB. Fig. 3(c) shows the results of nonoverlapping part
+(DFT)                                                            extraction for time-frequency spectrograms of seven different
+             N                                             overlapping types, where the red rectangle box represents the
+                                  N k, k = 1, 2, . . . , N     (6)   possible extraction results for TFB-1 and the blue rectangle      xυm(k) =    rυm(n)ω(n)e−j 2πn
+                                                     box represents the possible extraction results for TFB-2.              n=1
+                                                                 After  the  analysis  of  the most advanced TFSD meth-
+where ω(·) denotes the window function. Then, by stacking   ods [39], [40], [41], we learn that:
+the DFT results of each column in Ym, the spectrogram Xm     1) For Type (a), (b), and (c), the TFSD methods can usually
+of the received signal at the mth antenna can be expressed as         acquire the TFI for each TFB.
+                                                                  2) For Type (d), the TFSD methods can obtain the TFI for
+         Xm =  |x1m|2, |x2m|2, . . . , |xVm|2  .             (7)       TFB-1, while for TFB-2, there may be two results, i.e.,
+                                                                       the solid line black rectangle box and the dotted line
+Then, the ﬁnal spectrogram X can be obtained by averaging        black rectangle box.
+the spectrogram Xm of each individual antenna.                   3) For Type (e), the TFSD methods can only obtain the
+  After the above data preprocessing, the TFSD results can be        contour TFI  for  the whole TFB,  but not  the TFB
+obtained using the methods designed in [39], [40], and [41],        corresponding to each device.
+i.e., the frequency-domain information [flower, fupper] and the     4) For Type (f), when the RSS of TFB-1 is greater than
+time-domain information [tstart, tend] of each TFB, as shown in          that of TFB-2, only the contour TFI for the whole TFB
+Fig. 2(b). These four values determine a rectangle representing        can be recognized; if the RSS of TFB-2 is greater than
+the contour information of each TFB.  It can be seen that          that of TFB-1, the TFI for TFB-1 and TFB-2 can be
+the TFBs corresponding to signals of different source devices         obtained, respectively.
+may overlap, which means that the TFSD methods can only     5) For Type (g), only the TFI for the whole TFB can be
+obtain the 2-D contour TFI of each TFB, but can not obtain         obtained.
+the detailed TFI of each signal component contained in  it.     In general, for Types (a)–(f), we can obtain the nonover-
+Therefore, to obtain the AOA information of source device   lapping parts of TFB-1 or TFB-2 by designing appropriate
+contained  in each TFB,  it  is  necessary  to  process each   signal processing algorithm; while for Type (g), we can only
+predicted TFB and extract the nonoverlapping part between   analyze the whole overlapped signal. In addition, it is worth
+the TFBs.                                                 mentioning that two independent source devices can hardly
+                                                         have the same frequency-domain information  [flower, fupper]
+                                                       and time-domain information  [tstart, tend]  in  practice. That        III. INDEX AMBIGUITY ELIMINATION-BASED
+                                                                                      is, even  if two devices have  the same frequency-domain
+        MSL FOR OVERLAPPED SIGNALS
+                                                                information, in most cases they do not completely overlap in
+  As mentioned above, the AOA information of each signal                                                                 the time-domain, such as Type (e).
+component can not be extracted directly, which means that
+the  pairing problem between  the source devices and  the
+                                                             B. Extraction of Nonoverlapping Part of TFBAOA estimates of multiple receivers can not be avoided. In
+view of  this, the index ambiguity elimination scheme for    From the previous description of TFSD, we know  that
+overlapped signals is designed with the assistance of TFSD,   the TFI of each TFB is determined by four values, ˆD(i) =
+i.e, determination of the detailed TFI and the AOA information    [flower, fupper, tstart, tend],  i = 1, . . . , NTFB, which forms a rect-
+of each signal component contained in the TFB from the   angular box. And NTFB is the number of predicted TFBs. After
+overlapped signals. Then, the location of each source device   obtaining the TFSD results ˆD = [ ˆD(i); . . . ; ˆD(NTFB)] of TFBs,
+can be estimated by combining the AOAs acquired by multiple   to acquire the AOA information of each signal component, we
+receivers.                                                    design a nonoverlapping part extraction algorithm of TFBs on
+  Speciﬁcally,  the  designed  index  ambiguity  elimination   this basis to eliminate the overlap inter-TFB.
+scheme is shown in Fig. 2(c), where the processing procedure     Speciﬁcally, we ﬁrst sort the TFSD results ˆD in ascending
+consists of three main parts, extraction of nonoverlapping part   order according  to  the  flower  of each TFB  to  obtain D.
+of TFBs, signal segmentation of the extracted nonoverlapping   Then, by treating the range occupied in the frequency-domain
+TFB, and acquisition of AOA information.                           [ D(i, 1), D(i, 2)] or the time-domain  [ D(i, 3), D(i, 4)] as a
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 5 ===
+ZHOU et al.: INDEX AMBIGUITY ELIMINATION OF OVERLAPPED SIGNALS IN MULTISOURCE LOCALIZATION                                        22271
+
+
+  (a)                                  (b)                                    (c)
+
+
+
+
+
+Fig. 2.  Framework of the proposed index ambiguity elimination scheme for multisource overlapped signals. (a) Received signal of Rp. (b) TFSD. (c) Index
+ambiguity elimination.
+
+   (a)
+
+
+
+
+
+   (b)
+
+
+
+
+
+   (c)
+
+
+
+
+
+Fig. 3.  Overlapping types inter-TFB. Type (a) represents no overlap both in time-domain and frequency-domain; Type (b) represents partial overlap both in
+time-domain and frequency-domain; Type (c) represents complete overlap in time-domain and partial overlap in frequency-domain; Type (d) represents partial
+overlap in time-domain and complete overlap in frequency-domain, where the bandwidths of TFB-1 and TFB-2 are different; Type (e) represents partial overlap
+in time-domain and complete overlap in frequency-domain, where the bandwidths of TFB-1 and TFB-2 are same; Type (f) represents complete overlap both
+in time-domain and frequency-domain, where TFB-1 and TFB-2 have different bandwidths or different signal durations; Type (g) represents complete overlap
+both in time-domain and frequency-domain, where TFB-1 and TFB-2 have the same bandwidth and the same signal duration. In addition, for Type (d) and
+(e), the blue part depicts the overlapped part. (a) Time-frequency spectrogram of the received overlapped signals. (b) Result of time-frequency spectrogram
+detection (TFSD). (c) Extraction of nonoverlapping part of time-frequency block (TFB).
+
+
+continuous  interval, we judge whether each TFB overlaps     In view of this, we analyze the possible compositions of the
+with other TFBs in time-frequency domain using a series   extracted TFB, as shown in Fig. 4. It can be observed that there
+of intersection and union processing in turn, and extract the   are four types, Type (1) means only one signal component in
+nonoverlapping parts ¯D between each TFB. In conclusion,   the extracted TFB, and Types (2)–(4) mean multiple signal
+the proposed TFB nonoverlapping part extraction algorithm is  components in the extracted TFB. Nevertheless, during the
+summarized in Algorithm 1. It can be seen that through the   actual processing procedure, we can not obtain this speciﬁc
+designed TFB nonoverlapping part extraction algorithm, we   composition information of the extracted TFB in advance, so
+can extract the nonoverlapping parts between each TFB and    it is necessary to further analyze the extracted TFB before
+other TFBs for subsequent analysis.                             extracting the AOA information.
+
+C. Analysis of Overlapping Types Intra-TFB                D. Signal Segmentation of the Extracted Nonoverlapping
+                                             TFB  Up to now, we can eliminate the overlaps inter-TFB, but
+whether the extracted nonoverlapping TFB itself (intra-TFB)     Without the TFI of each signal component in the extracted
+contains only the signal of a single source device needs further  TFB, the AOA information of each signal component can
+analysis.                                                      not be  extracted  directly. Therefore,  to acquire  the AOA
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 6 ===
+22272                                                                        IEEE INTERNET OF THINGS JOURNAL, VOL. 12, NO. 12, 15 JUNE 2025
+
+
+Algorithm 1 TFB Nonoverlapping Part Extraction Algorithm
+  1: Input: ˆD, NTFB;
+  2: Sort the TFSD results ˆD in ascending order according to
+    the flower of each TFB, D ←sort( ˆD);
+  3: Get the index set Z of other TFBs that need to be avoided
+    in the frequency-domain for each TFB:
+  4: for i = 1 to NTFB do
+  5:    for j = 1 to NTFB do
+  6:        if [ D(i, 1), D(i, 2)] ∩[ D(j, 1), D(j, 2)]̸ = ∅,     i̸ =  j
+        then
+  7:      Add the current index j to the index set Zi;                                                                                   Fig. 4.    Overlapping types intra-TFB. Type (1) means only one signal
+  8:     end if                                                   component in the extracted TFB, while Types (2)–(4) mean that the extracted
+  9:   end for                                          TFB contains multiple signal components. In Type (2), the blue part depicts
+                                                                                 the overlapping part of D1 and D2. 10: end for
+ 11: Obtain the nonoverlapping part ¯D of each TFB based on
+    the index set Z:
+ 12: for i = 1 to NTFB do
+ 13:     if isempty(Zi) then
+ 14:       ¯D(i) = D(i);
+ 15:    else
+ 16:     Compute the nonoverlapping parts  FD of D(i) and
+        D(Zi) in the frequency-domain,
+
+      A = [ D(i, 1), D(i, 2)], B = [ D(Zi, 1), D(Zi, 2)],
+
+                       FD = A −A ∩B;
+
+ 17:     Compute the nonoverlapping parts  TD of D(i) and
+        D(Zi) in the time-domain,                                      Fig. 5.  Framework of the designed sliding window-based feature extraction.
+
+         C = [ D(i, 3), D(i, 4)], D = [ D(Zi, 3), D(Zi, 4)],
+
+                      TD = C −C ∩D;                  each extracted TFB
+ 18:      Obtain the nonoverlapping part of current TFB:       R = ISTFT ℏ T (X, (tstart, tend)),  flower, fupper     .    (8)
+ 19:        if   FD̸ = ∅or   TD̸ = ∅then                                                   Then the signal R is analyzed to extract the statistical features
+ 20:          ¯D(i) is assigned the larger area of [  FD, D(i, 3:4)]                                                                      that can characterize the signal property. The existence of the
+          and [ D(i, 1:2),  TD];                                                            overlapped signal will cause the differentiation of some signal
+ 21:      else if  FD = ∅and  TD = ∅then                                                                   features to be weakened. So  it is necessary to analyze and
+ 22:        There is no nonoverlapping part of current TFB,
+                                                                      select appropriate features with signiﬁcant differentiation for
+             ¯D(i) = ∅;
+                                                            determining the corresponding relationship between the signal
+ 23:     end if
+                                                         segments and source devices.
+ 24:   end if
+                                                                                          It  is well known that the covariance matrix rank of the
+ 25: end for
+                                                               received signal  is a concrete representation of the number
+ 26: Output: ¯D.
+                                                               of Ds of overlapped signals, so the covariance matrix rank
+                                                               of  the  received  signal  is  taken  as  the  extracted  feature.
+                                                               In the ﬁeld of rank estimation, many excellent algorithms
+information  corresponding  to  a  certain  source  device  to   have emerged in the past few decades, including information
+achieve MSL, the signal segmentation algorithm is designed   theoretic criterion (such as Akaike information criterion (AIC)
+to conduct further analysis, including two parts: 1) sliding   [42] and minimum description length (MDL) criterion [42]),
+window-based feature extraction and 2) dividing point deter-   hypothesis testing (such as Wishart-matrix’s largest eigenvalue
+mination of overlapped signals. The goal is to divide the signal  (WME) [43]), and Gerschgorin disk estimator (GDE) [44].
+segments contained in the extracted TFB, that is, ﬁnding the  Among them, AIC has better estimation performance at low
+dividing points  t1 and  t2 in Fig. 2(c) and determining the  SNR region, but it is not a consistent estimation. MDL is a
+corresponding relationship between the signal segments and   consistent estimator, but its performance is worse than AIC at
+source devices.                                         low SNR region. The main idea of WME is starting from the
+  1) Sliding Window-Based Feature Extraction: On the basis   perspective of the distribution characteristics of the detection
+of Algorithm 1, we  ﬁrst  carry out time-domain  intercep-   statistics constructed by the eigenvalues of the received signal
+tion T (·), frequency-domain ﬁltering ℏ(·), and inverse STFT   covariance matrix to improve the rank estimation performance
+(ISTFT) to get the time-domain signal R corresponding to   in large sample region. GDE  utilizes the orthogonality of
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 7 ===
+ZHOU et al.: INDEX AMBIGUITY ELIMINATION OF OVERLAPPED SIGNALS IN MULTISOURCE LOCALIZATION                                        22273
+
+
+signal subspace and noise subspace to determine the rank from
+the perspective of the Gerschgorin disk, which can counteract
+the inﬂuence of eigenvalue dispersion. After the subsequent
+simulation analysis, we will select a rank estimation method
+suitable for processing overlapped signals for rank feature
+extraction.
+  To reﬂect the change of signal characteristics, a sliding
+window method W(ϱ, ς) is designed and the rank feature is
+extracted in each window, where ϱ and ς represent the window
+length and step length, respectively. Therefore, for the time-
+domain signal R, we can construct the following feature vector
+through the designed sliding window method
+
+                  Frank = [ξ1, ξt, . . . , ξT]                  (9)    Fig. 6.  Sketch map of the subsequence mode comparison method.
+
+in which  ξt  represents  the rank  estimation  result  of  the
+tth window,  t =  1, . . . , T. Speciﬁcally, Fig. 5 shows the   the two dividing points is judged to further ﬁlter the dividing
+feature extraction process  for Type  (2) deﬁned  in Fig. 4,   points in ˆvinitial to obtain the ﬁnal dividing point vector ˆvﬁnal.
+where we place the signals of D1 and D2 separately for easy    Through the conversion from the index of the sliding win-
+understanding.                                       dows t ∈[1, T] to the time-domain index of the spectrogram
+  2) Dividing Point Determination  of Overlapped Signal:  X,  t′ ∈[1, V], we can get the rank and TFI of each signal
+On the basis of the extracted rank feature vector Frank, the  component contained in the current extracted TFB,  i.e., the
+next step is to analyze the change mechanism of the signal   signal segmentation information matrix G. In conclusion, the
+characteristics  to determine the corresponding  relationship   proposed  signal segmentation algorithm  is summarized  in
+between each  signal segment and source device  in TFB.   Algorithm 2.
+For this problem, a dividing point determination method is
+designed to ﬁnd the dividing point of different ranks in the                                                             E. AOA-Based Location Estimation
+extracted rank vector, and the signal segmentation information
+                                                                 After the above processing steps, we can obtain the signal
+matrix G is obtained through the dividing point.
+                                                        segment  that  contains only  the pure  signal  of a  certain
+  Speciﬁcally, we ﬁrst utilize Frank and its right shift vector
+                                                             source device. Then, we utilize the AOA-based triangulationFrs  rank to acquire the difference point vector vdiff. Then, con-                                                     method to locate source devices, which consists of two steps,
+sidering that the rank estimation errors will lead to the false
+                                                                  acquisition of AOA information and AOA-based localization.
+dividing points, the subsequence mode comparison method
+                                                                  1) Acquisition of AOA Information: Based on the above
+is designed for preliminary screening of the difference point
+                                                                  analysis of the signal characteristic change mechanism, we can
+vector vdiff to get the initial dividing point vector  ˆvinitial, in
+                                                        segment the overlapped signals of the extracted TFB through
+which  vdiff  is initially screened by comparing whether the
+                                                                 the  designed  signal  segmentation  algorithm  to  determine
+mode in the window forward and backward of the current
+                                                          each signal segment. According to the signal segmentation
+difference point  is the same. For a given window size  ui,
+                                                              information matrix G, the AOA information of each signal
+when judging whether to retain a certain difference point
+                                                        segment can be obtained through the multiple signal classiﬁ-
+vdiff(j), we take the current difference point  vdiff(j) as the
+                                                                 cation (MUSIC) [45] method
+basis to take the mode  αi,j and  βi,j of the rank estimation
+results in the forward and backward windows, respectively.            PMUSIC(ψ) = aH(ψ)EnEHn a(ψ) −1
+If the modes of the forward and backward windows are the
+                                                                                                     ˆψ = arg max PMUSIC              (10)
+same, i.e., αi,j = βi,j, the current difference point vdiff(j) is                         ψ
+discarded; otherwise,  i.e.,  αi,j̸ =  βi,j, the current difference
+                                                      where a(ψ) and En are the steering vector and noise subspace,point vdiff(j) is retained. Moreover, to reduce the inﬂuence
+                                                                     respectively.of window size itself on the judgement, we utilize several
+                                                                  2) AOA-Based  Localization: When each R  obtains  thewindow sizes forming a window set U to judge, respectively,
+                                      AOA estimates of the current D, the location of the currentand the intersection of their screening results is performed
+                                     D can be calculated using the following solution method.to obtain the initial dividing point vector  ˆvinitial. For a more
+                                                    Assuming that the locations of three Rs are p1 = (x1, y1),intuitive understanding, the speciﬁc implementation process of
+                                                        p2 = (x2, y2), and p3 = (x3, y3), and the location of sourcethe subsequence mode comparison method is shown in Fig. 6.
+                                                             device Dq is qq = (xq, yq).  Although many  false dividing points can be  effectively
+                                                     The AOA of Dq with respect to the receiver Rp is deﬁnedscreened out after the above subsequence mode comparison
+                                                               as follows:
+method, there are  still some false dividing points. For this       ⎧
+problem, by analyzing the characteristics of the received signal                             ⎪⎪⎪⎨ arctan  yDq−yRpxDq−xRp                 1st, 4th quadrants
+we ﬁnd that the signal usually lasts for a period of time, and                                 yDq−yRp
+                                                                             ϕp,q =  180 − arctan  xDq−xRp       2nd quadrant        . (11)the overlap of two different signals is not too short. On this
+                                                                                                          yDq−yRp
+                                                                                                        3rd quadrant                                                                                                                                                                       ⎪⎪⎪⎩ − 180 − arctanbasis, by setting the threshold value δ, the interval between                                                                                                          xDq−xRp
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 8 ===
+22274                                                                        IEEE INTERNET OF THINGS JOURNAL, VOL. 12, NO. 12, 15 JUNE 2025
+
+Algorithm 2 Signal Segmentation Algorithm                   describing the simulation parameter settings and performance
+ 1: Input: R, W(ϱ, ς), U, and δ;                                  metrics.
+ 2: Extract the rank feature vector Frank of R according to the sliding
+   window method W(ϱ, ς);
+                                                             A. Preparations
+ 3: According to the extracted feature vector Frank, compute the
+    difference point vector vdiff:                                     1) Simulation Parameter Settings: There are Q Ds sharing
+                                                                 the current frequency band to conduct their own data trans-                             vdiff ←Frank̸ = Frsrank,
+                                                               mission. P = 3 Rs equipped with UCA that M = 12 are used
+   where Frs              rank                     is the right shift vector of Frank;                    to receive the signals and conduct localization. The carrier
+ 4: Utilize the subsequence mode comparison method (Fig. 6) to
+                                                            frequency fc is set to 5.8 GHz, the sampling rate is 16 MHz,    obtain the dividing point vector v(i)    according to the given
+                                                         initial                         the sample time is 3.4 ms, and the length of the received
+   window size ui ∈U:
+ 5: for i = 1 to length(U) do                                      signal samples is L = 54400. For the STFT, the number of
+ 6:    for j = 1 to length( vdiff) do                     DFT points is N = 256, then the dimension of spectrogram
+ 7:      For a given window size ui, calculate the mode αi,j and  X is 256 × 212. During the process of the sliding window
+            βi,j of the data in the window, respectively, with the current   based feature extraction, the choice of the window length ϱ is
+          difference point vdiff(j) as the window cutoff point and the                                                                    related to the rank estimation performance and the processing          starting point;
+ 8:         if αi,j̸ = βi,j then                                       speed, while the choice of the step length ς is related to the
+ 9:       Add the current difference point vdiff(j) to the dividing   subsequent segmentation accuracy and the processing speed.
+            point vector v(i)                                      Therefore, by considering the two factors of performance and                                     initial;
+10:     end if                                                processing speed, we choose the window length of ϱ = 500
+11:   end for                                                       and step length of ς = 100.
+12: end for
+                                                     To more easily measure the performance of the designed13: Obtain the  initial dividing point vector  ˆvinitial by ﬁnding the
+    intersection of the dividing point vectors v(i)                  scheme, we assume that the locations of three Rs are ﬁxed                                                                   initial:
+                                                                    to p1 =  (0, 200) m, p2 = (−173, −100) m, and p3 =
+                                    length(U)                         (173, −100) m. To reﬂect the inﬂuence of the RSS on the
+                                   ˆvinitial =           v(i)initial,                      localization performance, we change the RSS by ﬁxing the
+                                 i=1                             distance d = 1000 m from each D to the origin and adjusting
+14: According  to  the given  threshold value δ and  the  distance    its transmit power from 5 to 30 dBm, with an interval of 5
+    between the dividing points in ˆvinitial, obtain the ﬁnal dividing  dBm. The AOA of each D to the origin is randomly generated
+    point vector ˆvﬁnal:                                    on [−180◦, 180◦], which are different from each other. Then
+               ˆvﬁnal =  ˆvinitial|ˆvinitial(k) −ˆvinitial(k −1) > δ,           the location of each D can be expressed as (d cos(θ), d sin(θ)).
+                                                        Meanwhile, to reﬂect the impact of the difference in RSS
+                   k = 2, · · · , length ˆvinitial   ,
+                                                               of different Ds to R on the localization performance, the
+15: Transform the ˆvﬁnal from the index of the sliding windows t ∈   parameter η = 2  is used to make the difference between
+    [1, T] to the time-domain index of the spectrogram X, t′ ∈[1, V].   different Ds’ transmit power. For example, when the transmit
+16: Get the signal segmentation information matrix G demonstrating                                                     power is set to 5 dBm, the transmit power of each D will be
+    the relationship between the rank and the signal segment through
+                                                           uniformly distributed on [5 −(η/2), 5 + (η/2)] dBm.
+     ˆvﬁnal;
+17: Output: G.                                                    2) Performance   Metrics: The  root-mean-square   error
+                                               (RMSE)  is  used  to  evaluate  the  performance  of AOA
+                                                               estimation
+
+ Taking R1 and R2 as an example, the estimated location of                             Mc  Q
+                                                                        1 1                       2
+source device Dq can be calculated by                      RMSE =                     ψi,j −ˆψi,j          (14)
+       ⎧                                                   Mc Q
+       ⎨ ˆx12q = y2−y1+x1tan ϕ1,q−tantan ϕ1,q−x2ϕ2,qtan ϕ2,q                                                  i=1 j=1
+                                                         (12)  where Mc is the number of Monte Carlo simulation times, and       ⎩ ˆy12q =   ˆx12q −x2  tan ϕ2,q + y2.                                                                                                ˆψi,j denotes the AOA estimation result of Dj in the ith time.
+                                                                  In addition, for the received overlapped signals,  it maybeBy averaging the results of the pairwise receiver solution, the
+                                                               contain the signal components of multiple devices, where theﬁnal location estimation result of source device Dq can be
+                                                    number of devices  is unknown and needs to be estimatedobtained
+        ⎧                                                 for the receiver. Then, the accuracy of the number of located
+        ⎨ ˆxq = 13  ˆx12q + ˆx13q + ˆx23q                       devices is evaluated by the probability of correct detection (Pc)
+                                                                 .             (13)   of                                                                    the                                                          number                                                                               of                                                                                  located                                                                                             devices,                                                                                    deﬁned                                                                                                          as the                                                                                                                      probability
+        ⎩ ˆyq = 13  ˆy12q + ˆy13q + ˆy23q                                                                                                                       to                                                                                                                     the actual                                                                      that                                                                     the                                                           number                                                                                of                                                                                    located                                                                                         devices                                                                                                            ˆQLoc equals
+                                                    number of devices Q
+       IV. SIMULATION RESULTS AND DISCUSSION
+                                                                             Pc = Pr{ ˆQLoc = Q}.                 (15)
+  In this section, a series of simulations are performed to eval-
+uate the performance of the designed scheme. Before starting     Notably, the Pc is just the accuracy of the number of located
+the simulation analysis, some essential space is devoted to   devices, which is not related to the accuracy of the localization.
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 9 ===
+ZHOU et al.: INDEX AMBIGUITY ELIMINATION OF OVERLAPPED SIGNALS IN MULTISOURCE LOCALIZATION                                        22275
+
+
+                                                                           TABLE I
+                                                          TFB NONOVERLAPPING PART EXTRACTION RESULTS
+
+
+
+
+
+                                                       (b)
+
+
+
+
+
+                   (a)                                   (c)
+
+
+Fig. 7.   Time-frequency spectrogram of the received signal and the TFI of
+each device and each TFB. (a) STFT of the received signal. (b) TFI of each
+D. (c) TFI of each TFB.
+
+
+Considering the spatial distribution of  all Ds and Rs, we
+take the relative error (RE) as the performance metric of the
+localization accuracy [7],
+
+                     Mc  Q
+              1 1               ∥qi,j −ˆqi,j∥
+      RE =                                         (16)                                 1   P            Mc Q                                p=1 ∥pp −qi,j∥                   Fig. 8.  AOA estimation performance for different overlapping types.                        i=1 j=1 P
+
+where  qi,j and  ˆqi,j are, respectively, the true and estimated   algorithm (Algorithm 1) to eliminate the overlap inter-TFB,
+location of Dj  in the  ith run of Monte Carlo simulation,   as shown in Table I. By comparing Fig. 7(c) and Table I, we
+(1/P)   Pp=1 ∥pp −qi,j∥denotes the average D-R distance, pp   can ﬁnd that for TFB-1 and TFB-2, we analyze them from
+represents the location of Rp.                                 time-frequency domain and extract their nonoverlapping parts,
+                                                                     respectively, for subsequent analysis. Since neither TFB-3 nor
+B. Performance of TFB Nonoverlapping Part Extraction      TFB-4 overlap with other TFBs, no processing is required.
+Algorithm
+                                                          C. Performance Analysis of Auxiliary Algorithm  Considering that the TFSD algorithm itself is not the focus
+of this article, here we only give a schematic diagram shown     1) Analysis of AOA Estiamtion: To realize MSL from the
+in Fig. 7, which contains the signals of Q = 5 Ds and some   perspective of AOA, we ﬁrst evaluate the performance of
+of these Ds show different overlapping types. Speciﬁcally, the  AOA estimation under various overlapping types deﬁned in
+STFT of the received Ds’ signal R is depicted in Fig. 7(a),   Fig. 3, where we assume that there are Q = 2 Ds, and one
+where TFB-1, TFB-2, and TFB-3 correspond to the signal of  TFB corresponds to the signal of one D. The performance
+D1, D2, and D3, the overlapping type of TFB-1 and TFB-2   of AOA estimation using the MUSIC algorithm  is shown
+is Type (b), TFB-3 and other TFBs do not overlap. Notably,   in Fig. 8, where the number of Ds is taken as the known
+TFB-4 is the overlapped signals of D4 and D5, where the   condition. For the received overlapped  signal R, there  is
+red rectangle box corresponds to the signal of D5 that is not    little difference in the performance of AOA estimation under
+available. Moreover, the details of each D’s TFI are shown   different overlapping types, and the RMSE of all curves reach
+in Fig. 7(b) and the TFI of each TFB is shown in Fig. 7(c),  0 when SNR ≥−2 dB.
+where the meaning of numerical value in the time-frequency     2) Analysis of Rank Feature Extraction: On the basis of the
+domain corresponds to the dimension of the spectrogram X ∈  TFSD results, the nonoverlapping part corresponding to each
+C256×212. The output of the TFSD algorithm is similar to the  TFB can be obtained through the designed Algorithm 1. Then
+form shown in Fig. 7(c).                                        the time-domain signal R corresponding to each extracted
+  As mentioned above, we can only determine the contour  TFB can be obtained through  (8). Afterward, we need to
+TFI of  the received  signal through TFSD, while  for  the   further analyze the speciﬁc composition of the extracted TFB
+overlapped signals of multiple Ds, such as TFB-4, we can   to eliminate the index ambiguity at the signal level (intra-
+not obtain the speciﬁc TFI of each D contained in TFB-4.  TFB),  i.e., determining the relationship between the signal
+This overlapping type still hinders the MSL, which is also the  components  of  the  extracted TFB and  the corresponding
+problem to be solved by our designed scheme. Considering   Ds. Among them, accurate rank  feature  extraction  is the
+that the existing TFSD methods can usually obtain satisfactory   prerequisite for subsequent analysis of signal characteristic
+results, subsequent processing is carried out on the basis of   change mechanism, so we take Type (2) deﬁned in Fig. 4 as
+assuming that the TFSD result is known and ideal to verify   an example to evaluate the estimation performance of different
+the designed scheme.                                        rank estimation criteria, shown in Fig. 9.
+  After obtaining the TFSD results, we ﬁrst process the TFBs    From Fig. 9(a), it can be seen that for the original received
+according to the designed TFB nonoverlapping part extraction   signal R, the other three methods can achieve more than 95%
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 10 ===
+22276                                                                        IEEE INTERNET OF THINGS JOURNAL, VOL. 12, NO. 12, 15 JUNE 2025
+
+
+
+
+
+                          (a)                                           (b)                                             (c)
+
+
+Fig. 9.  Accuracy of different rank estimation methods for the signal R and R. Speciﬁcally, (a) is the rank estimation result of the signal R, (b) is the rank
+estimation result of the signal R, and (c) is the rank estimation result of the signal R with the process of the sliding window. (a) Estimation result of signal
+R (b) Estimation result of signal R (c) Estimation result of signal R with the process of sliding window.
+
+
+accuracy of rank estimation except for AIC. With the increase   Speciﬁcally, we take the Type (2) deﬁned in Fig. 4 as the
+of SNR, the estimation accuracy of MDL and WME gradually   example, where the TFB contains μ = 3 segments, the
+tends to 1. However, for the signal R, the performance of other   nonoverlapping part of D1, the nonoverlapping part of D2, and
+three criteria except GDE is seriously deteriorated, shown in   the overlapping part of D1 and D2. Therefore, when the esti-
+Fig. 9(b). The reason is that after the process of time-domain  mated number of segments is ˆμ = 3, the segmentation result
+interception and frequency-domain ﬁltering, the independence    is considered correct. On the basis of correct segmentation, the
+between signals is destroyed, resulting in serious deterioration   segmentation error is measured through the following criterion
+of the performance of AIC, MDL, and WME. When analyzing
+                                                                             ε = ∥ˆvﬁnal −vtrue∥2                 (18)the signal R with the process of  sliding window, shown
+in Fig. 9(c), the performance of the above four methods is                                                      where ˆvﬁnal and vtrue are the estimated dividing point vector
+deteriorated, and the accuracy of the other three methods is                                                       and the true dividing point vector, respectively.
+reduced to 0 except GDE. The reason is that when analyzing                                                                  In order to analyze the inﬂuence of window set U, ﬁve
+the signal after the process of sliding window, the samples used                                                                      different window sets are set to evaluate the performance of
+to estimate is only the samples inside the window (window                                                                dividing point determination, U1 = [3, 4, 5], U2 = [6, 8, 10],
+length ϱ = 500), so the performance  is further degraded                                                U3 = [9, 12, 15], U4 = [15, 20, 25], and U5 = [20, 30, 40],
+compared to analyzing the entire signal R.                                                   shown in Fig. 10, where we calculate ρ and ε through 10000
+  In addition, it can be found that we can not determine the                                                           independent Monte Carlo simulations  at each SNR.  It  is
+speciﬁc composition of overlapped signals only through the                                                         worth mentioning that in this simulation, the threshold value
+rank estimation of the signal R without the process of sliding                                                             δ  is set to 10 to determine the ﬁnal dividing point vector
+window. For Type (2) deﬁned in Fig. 4, we can only know                                                                                      ˆvﬁnal. In general, for different window sets, the ρ gradually
+that it contains two signal components, but can not determine                                                                 increases and tends to be stable with the increase of SNR,
+the speciﬁc TFI of each signal component. Therefore, GDE is                                                           while the ε decreases and tends to be stable with the increase
+selected for the rank feature extraction for subsequent analysis.                                                               of SNR. Moreover, it can be found that the various settings
+                                                                display similar performance in ρ, except U = [20, 30, 40]
+                                                      which appears slightly superior to the rest in low SNR. In
+D. Performance of Signal Segmentation Algorithm
+                                                                   addition, the various U settings show similar performance in ε.
+  For   the   designed   signal   segmentation   algorithm   Nevertheless, in terms of computational complexity, the longer
+(Algorithm 2),  the window  set U and  threshold  value  δ   the window set U, the more data needs to be considered within
+have a great inﬂuence on the accuracy of the dividing point   the current window during the dividing point determination,
+determination.  Therefore, we  conduct  simulation  analysis  which  will  introduce  higher computational complexity  in
+on the inﬂuence of these two parameters,  respectively.  It   signal segmentation. Therefore, considering the segmentation
+should be noted that the values of U and δ both corresponds   accuracy and processing speed comprehensively, the U =
+to the number of sliding windows T not the dimension of   [3, 4, 5] is selected for subsequent analysis.
+spectrogram X.                                                   In addition, to analyze the inﬂuence of threshold value δ,
+  Here, two metrics are deﬁned to measure the performance,  ﬁve different threshold values are used for testing, δ1 = 10,
+namely, segmentation accuracy ρ and segmentation error ε.   δ2 = 20, δ3 = 30, δ4 = 50, and δ5 = 70, shown in Fig. 11,
+For segmentation accuracy ρ,  if the estimated number of  where the window set is set to U = [3, 4, 5]. Similar to the
+segments  ˆμ of the segmentation results equals to the true   foregoing, we calculate ρ and ε through 10000 independent
+number of segments μ, then the segmentation is regarded as  Monte Carlo simulations at each SNR.  It can be seen that
+correct                                            when δ = 10, the ρ is superior to others and close to 90%,
+                                                       and its ε tends to stable with the increase of SNR similar to
+                 ρ = Pr{ ˆμ = μ}.                   (17)   others. So the δ = 10 is selected for subsequent analysis.
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 11 ===
+ZHOU et al.: INDEX AMBIGUITY ELIMINATION OF OVERLAPPED SIGNALS IN MULTISOURCE LOCALIZATION                                        22277
+
+
+
+
+
+                                    (a)                                                                        (a)
+
+
+
+
+
+                                  (b)                                                                    (b)
+
+
+Fig.  10.    Inﬂuence  of window  set U on  segmentation  performance.    Fig. 11.    Inﬂuence of threshold value δ on segmentation performance.
+(a) Segmentation accuracy of different window sets. (b) Segmentation error    (a) Segmentation accuracy of different threshold values. (b) Segmentation
+of different window sets.                                                           error of different threshold values.
+
+
+                                                                           TABLE II
+                                                             SIGNAL SEGMENTATION INFORMATION MATRIX G OF TYPE (2) AND THE
+                                                            AOA OF EACH SEGMENT
+  To sum up, we can conclude  that the designed  signal
+segmentation algorithm  is effective for dividing overlapped
+signals. As described in Algorithm 2, through the conversion
+from the index of the sliding windows  t ∈[1, T] to the
+time-domain index of the spectrogram X, t′ ∈[1, V], we can
+obtain the signal segmentation information matrix G. Besides,
+we can extract the signal corresponding to each segment and
+                                                             E. Performance of Designed MSL Schemeutilize the MUSIC algorithm to estimate the corresponding
+AOA. Due to the limitation of space, here we only give one     After completing signal segmentation, we can obtain the
+simulation result shown in Table II, where ˆq is the estimated   signal segmentation  information  matrix G and  the AOA
+number of signals of the corresponding signal segment. It is   information corresponding to each segment. On this basis, we
+worth mentioning that we can achieve better AOA estimates   can realize the localization of each D through the AOA-based
+only utilize parts of samples according to the time-domain   triangulation method, and the speciﬁc performance analysis is
+information of signal segment in G, so the segmentation error   described below.
+ε has little inﬂuence on AOA estimation.                We ﬁrst evaluate the performance of the designed MSL
+  Therefore, from Table II, we can obtain the speciﬁc TFI and  scheme for overlapped signal on several overlapping types
+AOA about each signal component in the received overlapped  deﬁned in Fig. 3, where Q =  2. From Fig. 12,  it can be
+signals, to achieve the elimination of index ambiguity, which   seen that with the increase of the transmit power, the RE
+can avoid the problem of measurement-source association.   of the designed scheme can be stabilized at about 6% under
+Speciﬁcally, we can obtain that Type (2) contains 2 signals,   other overlapping types except for Type (g). This is because
+the frequency-domain and time-domain information of the   that the Type  (g)  is completely overlapping  in the time-
+ﬁrst one are  [flower, fupper] =  [76, 108] and  [tstart, tend] =  domain and frequency-domain, and there is still the problem
+[0, 109], respectively, and the AOA  is 27◦; the frequency-   of measurement-source association, which can only randomly
+domain and time-domain  information  of  the second one  combine the AOA estimation results to conduct localization.
+are  [flower, fupper] = [76, 108] and  [tstart, tend] = [43, 212],   However,  it is worth noting that in practice, the probability
+respectively, and the AOA is −14◦.                            of complete overlap both in time and frequency domains is
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 12 ===
+22278                                                                        IEEE INTERNET OF THINGS JOURNAL, VOL. 12, NO. 12, 15 JUNE 2025
+
+
+
+
+
+                                    (a)
+                                                                                   Fig. 13.  Performance of multisource localization when Q = 5.
+
+                                                       R2024a, Microsoft Windows 11, Intel Core i5-1135G7 CPU
+                             @ 2.4 GHz, and 16-GB RAM. For the GA-based method, the
+                                                              population size and the number of iterations are both ten.
+                                                                                          It can be seen that the localization accuracy,  i.e., RE, of
+                                                                 the designed scheme is much better than that of the direct
+                                                                    localization method (about 10%), and  slightly worse than
+                                                                      that of the GA-based method (about 1%). Nevertheless, the
+                                                            computational complexity of the designed scheme is much
+                                                               smaller than that of the GA (about 1/10). The main reason
+                                                                               is that the GA-based method needs to perform GA for each
+                                                                      different source device according to the AOA estimates to ﬁnd
+                                   (b)                                                                 the code with the greatest goodness of ﬁt. While the designed
+                                                     scheme does not need such optimization process, so  it can
+Fig. 12.   Performance of multisource localization when Q = 2. (a) RE of
+localization. (b) Pc of the number of located devices.                     signiﬁcantly reduce the complexity of  traditional methods
+                                                           while achieving the comparable localization performance. In
+                                                                   addition, one can see that the direct localization method has the
+very small, and even if the overlapping Type (g) is presented
+                                                                smallest running time, because it does not need any processing
+in the current observation window,  it is usually found to be
+                                                                        after obtaining the AOA estimates, but directly obtains the
+asynchronous in time-domain in the subsequent observation
+                                                                    localization results through random matching of the AOA
+window, i.e., converting to the Type (e). Moreover, it can be
+                                                               estimation results. However, the localization accuracy of the
+seen that the Pc of the number of located sources can reach
+                                                                      direct localization method can not be guaranteed due to the
+more than 97% with the increase of transmit power.
+                                                    random guessing.
+  Above, we analyze the  localization performance of the
+                                                 As for the accuracy of the number of located devices i.e., Pc,designed scheme under Q =  2. While in  practice, there
+                                                                 the comparisons use the whole received signal directly at each
+are usually multiple source devices sharing a spectrum, and
+                                                                  receiver to estimate the number of sources at ﬁrst, and then
+various overlapping types will be presented, that is, including
+                                                               estimate the AOA. Since the AOA estimation does not affect
+a variety of overlapping types deﬁned in Fig. 3. To this end,
+                                                                 the estimated number of sources, the Pc is determined by thewe simulate the  localization performance of the designed
+                                                            accuracy of source number estimation (rank estimation), where
+scheme for this situation in Fig. 13, where we assume that a
+                                                                 the accuracy of rank estimation using the whole received
+total of Q = 5 devices share the current spectrum, and the
+                                                                  signal directly is very high, so the comparisons have a better
+overlapping types between them are randomly selected from
+                                                         performance in measuring the accuracy of the number of
+the overlapping types deﬁned in Fig. 3. One example with
+                                                                located devices. The designed scheme is to extract the pure
+respect to the STFT of the received overlapped signals can be
+                                                                    part of each signal component from the overlapped signals
+found in Fig. 7(a).
+                                                                  step by step and count the number of sources, so it is slightly
+  Here, the  direct  localization method and the GA-based
+                                                        worse in Pc. In addition,  it is worth mentioning that in themethod [31] are utilized as comparisons where the WME
+                                                          spectrum sensing scenario, the designed scheme can obtain
+method is utilized to estimate the number of source devices
+                                                                 the time-frequency resource usage information of each source
+directly from the received signal R at each receiver before
+                                                           while completing the MSL, which can provide more useful
+performing AOA estimation. Besides, we also conduct the
+                                                              information than the traditional GA-based localization method.
+computational complexity analysis of the designed scheme
+as well as the comparisons, shown in Table III. Speciﬁcally,
+                                                                   V. ACTUAL DEPLOYMENT VERIFICATIONwe characterize the computational complexity of an algorithm
+by measuring the running time on a computer, where the     In  order  to  verify  the  localization performance  of  the
+used software and the conﬁgurations are as follows: MATLAB   designed MSL scheme in the actual environment, we build
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 13 ===
+ZHOU et al.: INDEX AMBIGUITY ELIMINATION OF OVERLAPPED SIGNALS IN MULTISOURCE LOCALIZATION                                        22279
+
+
+                      TABLE III                                              TABLE IV
+            COMPUTATIONAL COMPLEXITY ANALYSIS                      SYSTEM COMPOSITIONS AND PARAMETER SETTINGS
+                                                                                                 IN ACTUAL EXPERIMENT
+
+
+
+
+
+Fig. 14.  Schematic of the deployed experiment system.
+
+
+
+the corresponding experiment system as shown in Fig. 14.                                      (a)
+Speciﬁcally, we choose the universal software radio peripheral
+(USRP)-X310 as  the  receiver, where TwinRX  is  selected
+as  the RF  daughterboard, which  uses  a  superheterodyne
+receiver to provide a wide dynamic range and accurate phase
+synchronization function. And the characteristics of multiple
+daughterboards sharing the local oscillator enable it to realize
+phase alignment  operation,  thereby  realizing an extended
+multichannel phased array. Moreover, HackRF One is selected
+as the source device, which  is suitable for receiving and
+sending radio signals in the frequency range of 1 MHz to
+6 GHz and supports a maximum sampling rate of 20 MS/s.
+  Notably, the difference between the actual experiment and
+the theoretical simulation is that the synchronization problem                                                                                                         (b)
+needs to be considered and solved. For  this purpose, we
+use White Rabbit Switch as the time synchronization module    Fig.  15.     Localization performance  of  the designed MSL scheme  in
+generating 1 PPS and 10-MHz signal as the reference clock    actual experiment. (a) Distance of estimated location to theoretical location.
+                                                                                     (b) Scatter plot of localization results.
+to achieve time synchronization between multiple receivers,
+the HackRF One as the phase calibration module generating
+a complex sine signal reference signal to achieve the phase
+calibration among multiple channels within one receiver. In     According to the above conﬁguration, we carry out the
+addition, absorbing materials are used to reduce the multipath   actual experiment as shown in Fig. 15. The locations of three
+effect caused by scattering and reﬂection from objects in the   receivers and three source devices are set to p1 = (0, 0) m,
+indoor environment.                                       p2 =  (0.65, 1.05) m, p3 = (−0.48, 0.55) m, and q1 =
+  Furthermore, taking into account the limitations of exper-   (−0.19, 3.03) m, q2 = (0.27, 3.04) m, q3 = (0.69, 3.06) m,
+imental conditions, we make corresponding adjustments to   respectively. And the RE of the designed MSL scheme in
+some  conﬁgurations and  parameter  settings made  in  the   the actual experiment is RE = (RED1 + RED2 + RED3)/3 =
+theoretical simulation part during the actual experiment. The  (0.0204+0.0459+0.0719)/3 = 0.0461, which is similar to the
+relevant conﬁgurations and parameter settings of the deployed   theoretical simulation. This further veriﬁes the effectiveness of
+experiment system are shown in Table IV, where those not   the designed MSL scheme in the actual environment and the
+listed are consistent with the theoretical simulation part.         feasibility of its actual deployment and application.
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 14 ===
+22280                                                                        IEEE INTERNET OF THINGS JOURNAL, VOL. 12, NO. 12, 15 JUNE 2025
+
+
+                   VI. CONCLUSION                              [13] Z. Han, C. S. Leung, H. C. So, and A. G. Constantinides, “Augmented
+                                                                           Lagrange programming neural network  for  localization using time-
+  In this article, we proposed an index ambiguity elimination-          difference-of-arrival measurements,” IEEE Trans. Neural Netw. Learn.
+based MSL scheme, which provides a new way to realize MSL           Syst., vol. 29, no. 8, pp. 3879–3884, Aug. 2018.
+for overlapped signals. Notably, the designed scheme does not    [14] Y. Kang, Q. Wang, J. Wang, and R. Chen, “A high-accuracy TOA-based
+                                                                                           localization method without time synchronization in a three-dimensional
+require the combination of multitype measurements reducing         space,” IEEE Trans. Ind. Inf., vol. 15, no. 1, pp. 173–182, Jan. 2019.
+the requirement on the receiver, and avoids the problem of    [15] W. Xiong, C. Schindelhauer, H. C. So, J. Bordoy, A. Gabbrielli, and
+measurement-source association. Speciﬁcally, we analyzed and            J. Liang, “TDOA-based localization with NLOS mitigation via robust
+                                                                       model transformation and neurodynamic optimization,” Signal Process.,
+summarized the overlapping types at TFB level and signal                                                                                              vol. 178, Jan. 2021, Art. no. 107774.
+level, and designed the TFB nonoverlapping part extraction    [16] L. Lu and H.-C. Wu, “Novel robust direction-of-arrival-based source
+algorithm and signal segmentation algorithm to extract the          localization algorithm  for wideband  signals,” IEEE Trans. Wireless
+                                                                     Commun., vol. 11, no. 11, pp. 3850–3859, Nov. 2012.
+pure part of each signal component for AOA estimation, and
+                                                                               [17] Y. Wang and K. C. Ho, “An asymptotically efﬁcient estimator in closed-
+then realized the localization through AOA-based triangulation        form for 3-D AOA localization using a sensor network,” IEEE Trans.
+method. In addition, the effectiveness and feasibility of the         Wireless Commun., vol. 14, no. 12, pp. 6524–6535, Dec. 2015.
+designed MSL scheme in the actual environment were veriﬁed    [18] Y. Sun, K. C. Ho, and Q. Wan, “Eigenspace solution for AOA local-
+                                                                                           ization in modiﬁed polar representation,” IEEE Trans. Signal Process.,
+by building an experiment system. Nevertheless, we only          vol. 68, pp. 2256–2271, 2020.
+assume that the source devices are all single antenna at present,    [19] A. Gabbrielli et al., “An echo suppression delay estimator for angle-
+that  is, the rank estimation result  is equal to the number          of-arrival ultrasonic indoor localization,” IEEE Trans. Instrum. Meas.,
+                                                                                              vol. 70, pp. 1–12, May 2021.
+of source devices. While with the widespread application    [20] L. Taponecco, A. D’Amico, and U. Mengali, “Joint TOA and AOA
+of multiantenna technology, source devices are likely to be         estimation for UWB localization applications,” IEEE Trans. Wireless
+equipped with multiple antennas for wireless communication.       Commun., vol. 10, no. 7, pp. 2207–2217, Jul. 2011.
+                                                                               [21] K. C. Ho and T.-K. Le,  “Integrating AOA with TDOA  for  joint
+The utilization of multiple antennas brings new challenges         source and sensor localization,” IEEE Trans. Signal Process., vol. 71,
+to the estimation of the number of devices, which  is not         pp. 2087–2102, 2023.
+satisﬁed that the rank estimation result is equal to the number    [22] W. Xiong, S. Mohanty, C. Schindelhauer, S.  J. Rupitsch, and H. C.
+                                                                                 So, “Convex relaxation approaches to robust RSS-TOA based source
+of devices. In the future, it is necessary to extend the study                                                                                           localization in NLOS environments,” IEEE Trans. Veh. Technol., vol. 72,
+scenario to the case of multiple antennas.                                 no. 8, pp. 11068–11073, Aug. 2023.
+                                                                               [23] W. Xiong,  S. Mohanty, and C. Schindelhauer, “A low-complexity
+                                                                                                  iterative message passing algorithm for robust RSS-TOA IoT local-
+                 REFERENCES                                           ization,” IEEE Internet Things  J., vol. 10, no. 18, pp. 16028–16035,
+                                                                                 Sep. 2023.
+ [1] M. Giordani, M. Polese, M. Mezzavilla, S. Rangan, and M. Zorzi,
+                                                                               [24] X. Wang, L. Gao, S. Mao, and S. Pandey, “CSI-based ﬁngerprinting     “Toward 6G networks: Use cases and technologies,” IEEE Commun.
+                                                                                           for indoor localization: A deep learning approach,” IEEE Trans. Veh.     Mag., vol. 58, no. 3, pp. 55–61, Mar. 2020.
+                                                                                        Technol., vol. 66, no. 1, pp. 763–776, Jan. 2017. [2] Y. Chen and H.-S. Oh, “A survey of measurement-based spectrum
+                                                                               [25] K. N. R. S. V. Prasad, E. Hossain, and V. K. Bhargava, “Machine     occupancy modeling for cognitive radios,” IEEE Commun. Surveys Tuts.,
+                                                                                      learning methods for RSS-based user positioning in distributed mas-      vol. 18, no. 1, pp. 848–859, 1st Quart., 2016.
+                                                                                          sive MIMO,” IEEE  Trans.  Wireless Commun.,  vol.  17,  no.  12, [3] A. Ali and W. Hamouda, “Advances on spectrum sensing for cognitive
+                                                                                     pp. 8402–8417, Dec. 2018.      radio networks: Theory and applications,” IEEE Commun. Surveys Tuts.,
+                                                                               [26]  J. K. Nelson, M. R. Gupta, J. E. Almodovar, and W. H. Mortensen, “A      vol. 19, no. 2, pp. 1277–1304, 2nd Quart., 2017.
+                                                                                    quasi EM method for estimating multiple transmitter locations,” IEEE [4] M. Amjad, M. H. Rehmani, and S. Mao, “Wireless multimedia cognitive
+                                                                                   Signal Process. Lett., vol. 16, no. 5, pp. 354–357, May 2009.      radio networks: A comprehensive survey,” IEEE Commun. Surveys Tuts.,
+      vol. 20, no. 2, pp. 1056–1103, 2nd Quart., 2018.                          [27] M. Khaledi et al., “Simultaneous power-based localization of transmit-
+ [5]  J. Lunden, V. Koivunen, and H. V. Poor, “Spectrum exploration and          ters for crowdsourced spectrum monitoring,” in Proc. 23rd Annu. Int.
+      exploitation for cognitive radio: Recent advances,” IEEE Signal Process.         Conf. Mob. Comput. Netw., 2017, pp. 235–247.
+     Mag., vol. 32, no. 3, pp. 123–140, May 2015.                            [28]  S. A. R. Kazemi, R. Amiri, and F. Behnia, “Data association for multi-
+ [6] Y. Zou, J. Zhu, X. Wang, and L. Hanzo, “A survey on wireless security:          target elliptic localization in distributed MIMO radars,” IEEE Commun.
+     Technical challenges, recent advances, and future trends,” Proc. IEEE,           Lett., vol. 25, no. 9, pp. 2904–2907, Sep. 2021.
+      vol. 104, no. 9, pp. 1727–1765, Sep. 2016.                               [29]  S. Kang,  T. Kim, and W. Chung,  “Multi-target  localization based
+ [7] K. Li, Y. Jiao, Y. Song,  J. Li, and C. Yue, “Passive localization of        on unidentiﬁed multiple RSS/AOA measurements in wireless sensor
+     multiple sources using joint RSS and AOA measurements in spectrum         networks,” Sensors, vol. 21, no. 13, p. 4455, 2021.
+     sharing system,” China Commun., vol. 18, no. 12, pp. 65–80, Dec. 2021.    [30] Y.  I. Wu, “Multiple sources localization with WSN, eliminating the
+ [8] H. Chen, H. Sarieddeen, T. Ballal, H. Wymeersch, M.-S. Alouini, and          direction-of-arrival ambiguity symmetric with respect  to the planar
+      T. Y. Al-Naffouri, “A tutorial on terahertz-band localization for 6G          array,” IEEE Access, vol. 6, pp. 46290–46296, 2018.
+     communication systems,” IEEE Commun. Surveys Tuts., vol. 24, no. 3,    [31] Y. Zhang and Y.  I. Wu, “Multiple sources localization by the WSN
+     pp. 1780–1815, 3rd Quart., 2022.                                            using the direction-of-arrivals classiﬁed by the genetic algorithm,” IEEE
+ [9]  S. Tomic, M. Beko, and R. Dinis, “RSS-based localization in wireless         Access, vol. 7, pp. 173626–173635, 2019.
+     sensor networks using convex relaxation: Noncooperative and coopera-    [32] A. Zubow, S. Bayhan, P. Gawłowicz, and F. Dressler, “DeepTxFinder:
+      tive schemes,” IEEE Trans. Veh. Technol., vol. 64, no. 5, pp. 2037–2050,         Multiple  transmitter  localization by deep learning  in crowdsourced
+    May 2015.                                                              spectrum sensing,” in Proc. IEEE Int. Conf. Comput. Commun. Netw.
+[10] Y. Sun, S. Yang, G. Wang, and H. Chen, “Robust RSS-based source        (ICCCN), 2020, pp. 1–8.
+      localization with unknown model parameters  in mixed LOS/NLOS    [33] M. Lin, Y. Huang, B. Li, and Z. Huang, “Heatmap-based multiple co-
+     environments,” IEEE Trans. Veh. Technol., vol. 70, no. 4, pp. 3926–3931,         channel transmitter localization with fully convolutional network,” in
+     Apr. 2021.                                                                   Proc. IEEE Int. Appl. Comput. Electromagn. Soc. (ACES-China) Symp.,
+[11] K. Cheung, H. So, W.-K. Ma, and Y. Chan, “Least squares algorithms        2021, pp. 1–2.
+      for time-of-arrival-based mobile location,” IEEE Trans. Signal Process.,    [34] C. Zhan, M. Ghaderibaneh, P. Sahu, and H. Gupta, “DeepMTL Pro:
+      vol. 52, no. 4, pp. 1121–1130, Apr. 2004.                              Deep learning based multiple transmitter localization and power estima-
+[12] W. Xiong, C. Schindelhauer, H. C. So, and S. J. Rupitsch, “A message          tion,” Pervasive Mob. Comput., vol. 82, Jun. 2022, Art. no. 101582.
+     passing based iterative algorithm for robust TOA positioning in impul-    [35]  S. Y. Lee,  J. Chang, and S. Lee, “Deep learning-based method for
+      sive noise,” IEEE Trans. Veh. Technol., vol. 72, no. 1, pp. 1048–1057,         multiple sound source localization with high resolution and accuracy,”
+      Jan. 2023.                                                           Mech. Syst. Signal Process., vol. 161, Dec. 2021, Art. no. 107959.
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 15 ===
+ZHOU et al.: INDEX AMBIGUITY ELIMINATION OF OVERLAPPED SIGNALS IN MULTISOURCE LOCALIZATION                                        22281
+
+
+
+[36] W. Wang, L. Zhu, Z. Huang, B. Li, L. Yu, and K. Cheng, “MT-GCNN:    [41] R. Zhao, Y. Ruan, Y. Li, T. Li, and R. Zhang, “CCD-GAN for domain
+     Multi-task learning with gated convolution for multiple transmitters         adaptation  in  time-frequency  localization-based wideband spectrum
+      localization in urban scenarios,” Sensors, vol. 22, no. 22, p. 8674, 2022.         sensing,” IEEE Commun. Lett., vol. 27, no. 9, pp. 2521–2525, Sep. 2023.
+[37]  S. Zhou et al., “Elimination of index ambiguity for overlapped signals    [42] M. Wax and T. Kailath, “Detection of signals by information theoretic
+      in spectrum sensing,” in Proc. IEEE 99th Veh. Technol. Conf., 2024,           criteria,” IEEE Trans. Acoust., Speech, Signal Process., vol. 33, no. 2,
+     pp. 1–6.                                                                       pp. 387–392, Apr. 1985.
+[38] “Study on channel model for frequencies from 0.5 to 100 GHz; (Release    [43]  T. Li, Y. Li, L. J. Cimini, and H. Zhang, “Hypothesis testing based
+      16), Version 16.1.0,” 3GPP, Sophia Antipolis, France, Rep. 38.901,         fast-converged blind estimation of transmit-antenna number for MIMO
+     Oct. 2019.                                                                    systems,” IEEE Trans. Veh. Technol., vol. 67, no. 6, pp. 5084–5095,
+[39] K. N. R. S. V. Prasad, K. B. D’Souza, and V. K. Bhargava, “A         Jun. 2018.
+     downscaled faster-RCNN framework for signal detection and time-    [44] H. T. Wu, J. F. Yang, and F. K. Chen, “Source number estimators using
+     frequency localization in wideband RF systems,” IEEE Trans. Wireless         transformed Gerschgorin radii,” IEEE Trans. Signal Process., vol. 43,
+    Commun., vol. 19, no. 7, pp. 4847–4862, Jul. 2020.                            no. 6, pp. 1325–1333, Jun. 1995.
+[40] A. Vagollari, V. Schram, W. Wicke, M. Hirschbeck, and W. Gerstacker,    [45] R. Schmidt, “Multiple emitter location and signal parameter estima-
+      “Joint detection and classiﬁcation of RF signals using deep learning,”          tion,” IEEE Trans. Antennas Propag.,  vol. 34, no.  3, pp. 276–280,
+      in Proc. IEEE 93rd Veh. Technol. Conf., 2021, pp. 1–7.                      Mar. 1986.
+
+
+
+
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 29,2026 at 11:02:17 UTC from IEEE Xplore. Restrictions apply.

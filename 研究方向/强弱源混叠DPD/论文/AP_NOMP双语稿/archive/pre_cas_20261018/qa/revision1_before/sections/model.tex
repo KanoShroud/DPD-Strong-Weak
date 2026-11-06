@@ -1,0 +1,55 @@
+\section{观测模型与定位目标}\label{sec:model}
+\subsection{同步单天线站的宽带观测}
+设$L$个站的已知位置为$\bm r_l\in\R^2$，$K$个源的未知位置为$\bm p_k\in\Omega\subset\R^2$。记
+\begin{equation}
+ d_{lk}=\|\bm p_k-\bm r_l\|_2,\qquad
+ \tau_{lk}=d_{lk}/c_0,\qquad \beta_{lk}=d_{lk}^{-1},
+ \label{eq:distance}
+\end{equation}
+其中$c_0$为传播速度。各站时间、频率及接收链路同步，发射天线各向一致。幅度采用自由空间$1/d$规律；固定工作条件下的公共比例系数并入源波形。时移与相位从基带出发建模。于是
+\begin{equation}
+ x_l[n]=\sum_{k=1}^{K}\beta_{lk}s_k(n/f_s-\tau_{lk})+w_l[n],
+ \quad n=0,\ldots,N-1 .\label{eq:time}
+\end{equation}
+源波形$s_k(t)$互相独立且未知，其幅度包含未知发射功率。噪声$w_l[n]\sim\mathcal{CN}(0,\sigma_t^2)$，在站间和采样点间独立。本模型中，每给定一个候选位置，其跨站相对响应即可计算。
+
+将各站记录作$1/N$归一化DFT，保留公共处理频带$\mathcal F$。在共同观测窗的频域时延表示下，令
+\begin{align}
+ \bm x_f&=\bm A_f(\bm P)\bm s_f+\bm n_f,\quad f\in\mathcal F,\label{eq:frequency}\\
+ [\bm a_f(\bm p)]_l&=\frac{1}{d_l(\bm p)}
+       \exp[-\mathrm j2\pi f d_l(\bm p)/c_0],\label{eq:response}\\
+ \bm A_f(\bm P)&=[\bm a_f(\bm p_1),\ldots,\bm a_f(\bm p_K)],\quad
+ \bm P=[\bm p_1,\ldots,\bm p_K].\nonumber
+\end{align}
+此处$f$为带符号的基带频率，$F=|\mathcal F|$。波形经连续时延后在有限窗内采样，频域模型相应采用共同窗下的时延近似。噪声在所选DFT频点上的方差仍为$\sigma_t^2/N$，频点筛选保留原DFT归一化分母。
+
+计算中也可用单位范数列$\bm q_f(\bm p)=\bm a_f(\bm p)/\|\bm a_f(\bm p)\|_2$。当逐频源系数自由估计时，列缩放不改变$\bm A_f$的列空间，因此不改变消元目标。它仍保留同一源在不同站之间的相对幅度。
+
+\subsection{带内信噪比与强弱源条件}
+记第$k$个源在第$l$站的时间平均接收功率为$P_{lk}$。名义信号带宽为$B$，白噪声在该带内的期望功率为$\sigma_t^2B/f_s$。本文采用
+\begin{equation}
+ \mathrm{SNR}_{k,\mathrm{in}}
+ =10\log_{10}\frac{L^{-1}\sum_{l=1}^L P_{lk}}
+ {\sigma_t^2B/f_s},\qquad
+ \Delta=10\log_{10}\frac{\sum_l P_{l1}}{\sum_l P_{l2}} .
+ \label{eq:snr}
+\end{equation}
+实验固定源2的波形、功率和噪声，仅缩放源1。$\Delta>0$时称源1为强源、源2为弱源；$\Delta=0$时保留这两个身份编号。各站局部功率差随几何变化，不强制等于四站平均的$\Delta$。
+
+\subsection{未知波形消元与联合位置估计}
+在白噪声模型下，将逐频未知信号作为确定性待估系数，可得到最小二乘位置准则。以观测总能量$E_x=\sum_f\|\bm x_f\|_2^2$归一化，定义
+\begin{align}
+ \mathcal L(\bm P,\{\bm s_f\})
+   &=E_x^{-1}\sum_f\|\bm x_f-\bm A_f(\bm P)\bm s_f\|_2^2,\label{eq:fullLS}\\
+ \widehat{\bm s}_f(\bm P)&=\bm A_f(\bm P)^\dagger\bm x_f,\label{eq:waveLS}\\
+ J(\bm P)&=E_x^{-1}\sum_f\|\bm\Pi_{\bm A_f}^{\perp}\bm x_f\|_2^2,
+ \quad \bm\Pi_{\bm A_f}^{\perp}=\bm I-\bm A_f\bm A_f^\dagger .\label{eq:profile}
+\end{align}
+所求位置为$\widehat{\bm P}=\arg\min_{\bm P\in\Omega^K}J(\bm P)$。对于本文的$K=2$，这是四维位置优化。不同源的系数在每次位置试探时共同重估，故$J$描述的是两个位置对原始混合观测的联合解释。
+
+单源最小二乘谱则为
+\begin{equation}
+ Q_0(\bm p)=E_x^{-1}\sum_f
+ \frac{|\bm a_f(\bm p)^H\bm x_f|^2}{\|\bm a_f(\bm p)\|_2^2} .\label{eq:single}
+\end{equation}
+单源情形下，最大化$Q_0$与最小化$J$等价；从同一张$Q_0$中直接取两个峰，则没有显式拟合两源之间的相互影响。这一区别是后续多源算法设计的起点。

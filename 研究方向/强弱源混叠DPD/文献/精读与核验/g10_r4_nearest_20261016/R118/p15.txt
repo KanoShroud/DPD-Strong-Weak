@@ -1,0 +1,31 @@
+                                                                                          Y. Zeng et al.: QNOMP: A Quasi-Newton-Based Joint Multipath Optimization Method
+
+
+
+
+
+ FIGURE 5. Performance evaluation of channel estimation and extrapolation for CDL-A and CDL-C channels with 100 ns RMS delay spread.
+
+
+
+percentile, with slight horizontal offsets for visual clarity     local refinement strategy is computationally more efficient
+while maintaining the same SNR values.                       than employing a uniformly fine grid. Specifically, compared
+  The median errors align with the previously reported mean     to OMP with a grid size of 0.251τ,θdft , OMP with local
+values, confirming that QNOMP consistently achieves supe-     refinement (k1 = k2 = 10) runs approximately five times
+rior super-resolution accuracy. The narrow error bars further     faster while achieving higher resolution, consistent with
+indicate that QNOMP maintains robustness comparable to the     the theoretical analysis in Section III. For two-dimensional
+baseline algorithms. The advantage of QNOMP, particularly     or higher-dimensional channels, the computational cost is
+when enhanced with block reweighting, is substantial:  it    dominated by the residual update, whose complexity scales
+delivers more accurate super-resolution results with high    with the number of paths Np, the signal dimensions M and
+probability. In the more challenging scenarios shown in    N, and the refinement rates k1 and k2. Thus, adopting a local
+Fig. 6(b)–(c), even the worst 25% of QNOMP+BR results     refinement strategy offers significant advantages.
+exhibit smaller errors than the best 25% of the baseline       In tests on the CDL-C channel, QNOMP demonstrates
+algorithms.                                                 high computational efficiency. For a fair comparison, we also
+                                                                  integrated the local refinement module into NOMP. Under
+E. COMPUTATIONAL COST                                     the given settings, NOMP requires roughly 3–4 times the
+Table 3 summarizes the CPU time required by different algo-   CPU time of conventional OMP but achieves substantially
+rithms for the CDL-C channel. The results confirm that the     better estimation and extrapolation accuracy, as shown in
+
+
+
+212666                                                                                                              VOLUME 13, 2025

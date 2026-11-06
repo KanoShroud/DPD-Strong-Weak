@@ -1,0 +1,1862 @@
+
+=== PDF PAGE 1 ===
+ 
+Contents lists available at ScienceDirect
+Signal Processing
+journal homepage: www.elsevier.com/locate/sigpro
+ 
+Low interactive direct position determination of radio emitters with hybrid 
+measurements
+Ming-Yi You a,b
+, Lin Gao c
+,∗, Yun-Xia Ye a,b, Wei Wang a,b
+a National Key Laboratory of Electromagnetic Space Security, China
+b No. 36 Research Institute of CETC, China
+c School of Information and Communication Engineering, University of Electronic Science and Technology of China, China
+A R T I C L E  I N F O
+Keywords:
+DPD
+Compressive sensing
+TDOA
+FDOA
+Duty ratio
+ 
+A B S T R A C T
+This paper proposes a direct position determination (DPD) method for stationary and moving non-cooperative 
+sources. Employing an unbalanced group of measurements consisting of uncompressed measurements at the 
+central receiver and compressed measurements from all other auxiliary receivers, the method estimates the 
+source position directly in the hybrid measurement domain without original signal recovering, where the 
+compressing matrix is not restricted to any specific form. A block coordinate descent (BCD)-like iterative 
+algorithm is proposed to handle the high-dimensional optimization problem of joint position and velocity 
+estimation for moving emitters, where a generalized cross ambiguity function (GCAF) is proposed to extract 
+the time-differences-of-arrival (TDOA) parameters from the hybrid measurements to initialize the iteration 
+process. In addition, the hybrid measurements-based Cramér–Rao lower bound (CRLB) for emitter position is 
+derived for performance evaluation. Several numerical case studies are carried out to evaluate the effectiveness 
+of the proposed DPD method as well as the proposed GCAF. The proposed method is expected to extend the 
+applicability of compressive sensing (CS)-based DPD to cases where there is relative radial motion between 
+the source.
+1. Introduction
+Emmiter localization through a sensor network is of vital signif-
+icance for many applications such as emergency rescue, cognitive 
+communications and military decision support [1–8]. Classical passive 
+localization methods are usually performed in a two-step manner. In 
+the first step, position related parameters are estimated based on the 
+received signals. Then in the second step the emitter’s location is 
+estimated by a central receiver which collects all necessary parameters. 
+As widely recognized, the two-step approaches usually perform well 
+at high signal-to-noise ratios (SNRs), but their performance degrade 
+greatly when SNR becomes low [2]. To improve the localization perfor-
+mance at low SNRs, direct position determination (DPD) is introduced 
+which estimates the source location directly from the received sig-
+nals [9–15] without the step of parameter extraction. DPD methods 
+are proved to outperform the two-step counterparts by utilizing the 
+underlying constraint that all received signals come from a common 
+position [1], which is simply ignored in two-step methods
+However, the advantages of DPD approaches are obtained at the 
+cost of huge data interaction, which is not desirable in many wireless 
+communication based applications such as unmanned vehicle (UAV) 
+∗Corresponding author.
+E-mail address: lingao_1014@126.com (L. Gao).
+based cooperative spectrum sensing. Actually, many works have al-
+ready been reported to lower the communication bandwidth require-
+ment while maintaining sound localization performance for two-step 
+methods, among which compressive sensing (CS) techniques are usually 
+considered [16–18].
+A CS method typically consists of a signal compression step and 
+a signal reconstruction step [19]. Generally, the signal reconstruction 
+step requires great computation effort [20–22] and is subject to large 
+reconstruction error when SNR is low. In [23], a CS based method 
+is proposed for TDOA estimation without signal reconstruction by 
+employing the special property of a Hadamard matrix. The approach 
+is shown to outperform the orthogonal matching pursuit (OMP) recon-
+struction method [24] and the focal underdetermined system solver 
+(FOCUSS) reconstruction method [25] regarding parameter estimation 
+accuracy and computational complexity.
+Despite the works on CS based data compression for classical two-
+step methods, very few data compression results have been reported for 
+DPD methods. In [26], we propose a reconstruction free DPD method 
+which explores the time-differences-of-arrival (TDOA) among receivers 
+by showing that the time-shift relationship can be retained when the 
+https://doi.org/10.1016/j.sigpro.2025.109987
+Received 15 October 2024; Received in revised form 24 January 2025; Accepted 2 March 2025
+Signal Processing 234 (2025) 109987 
+Available online 11 March 2025 
+0165-1684/© 2025 Elsevier B.V. All rights are reserved, including those for text and data mining, AI training, and similar technologies. 
+
+
+=== PDF PAGE 2 ===
+M.-Y. You et al.
+measurements are compressed by a Hadamard matrix. In [27], a one-bit 
+DPD approach of narrowband signals has been proposed for stationary 
+source and receivers, where one-bit quantized measurements are used.
+In practice, it is common to locate an emitter using moving plat-
+forms such as unmanned aerial vehicles (UAVs), trucks and satellites. 
+However, when there are relative radial motion between the source 
+and the receiver, i.e., when frequency-differences-of-arrival (FDOA) is 
+present, it is straightforward to show that the time-shift and frequency-
+shift relationship among receivers will be broken even Hadamard ma-
+trix is used, making it infeasible to extend to the case of moving 
+platforms based localization simply following the existing solutions 
+in [19,26].
+To address the problem of CS based DPD when relative radial 
+motion is present, in this paper, a DPD method is proposed to locate 
+stationary and moving emitters, based on unbalanced groups of hybrid 
+measurements consisting of original uncompressed measurements at 
+the central receiver and compressed measurements from all other auxil-
+iary receivers. The proposed DPD algorithm does not seek to recover the 
+original signal received by auxiliary receivers, but to perform DPD di-
+rectly based on the hybrid measurements. The performance of proposed 
+algorithm is verified via simulation experiments. Main contributions of 
+the current work include:
+(i) A CS based DPD method is outlined for moving platforms by 
+reconstructing the compressed measurements of the auxiliary receivers 
+from the uncompressed measurements at the central receiver with-
+out increasing the communication bandwidth, while the compressing 
+matrix is not restricted to any specific form.
+(ii) A block coordinate decent (BCD) like iterative algorithm is pro-
+posed to solve the high-dimensional optimization problem of moving 
+emitters, where a generalized cross ambiguity function named GCAF is 
+proposed to extract the TDOAs to initialize the iteration. The covariance 
+of GCAF based TDOAs is derived in detail.
+(iii) Cramér–Rao lower bounds (CRLBs) for position estimation are 
+derived for the case of stationary and moving emitters using hybrid 
+measurements.
+The reminder of the paper is organized as follows: Section 2 intro-
+duces the measurement models and the relevant symbols and notations. 
+Section 3 outlines the DPD approach for stationary and moving sources, 
+and details the proposed GCAF and the iterative algorithm for high-
+dimensional optimization of moving sources. CRLBs for emitter position 
+are given in Section 6. Section 5 conducts several numerical case stud-
+ies to investigate the performance of the proposed approach. Finally, 
+Section 6 concludes the paper.
+2. System model
+Consider the case where an emitter is located at 𝐮= [𝑥, 𝑦]𝑇 with 
+instantaneous velocity ̇𝐮= [̇𝑥,̇ 𝑦]𝑇 and 𝐿 moving sensors are used 
+to receive the emitted signals, where 𝐿≥3. Let [𝐮𝑇,̇ 𝐮𝑇]𝑇
+∈𝛺
+where 𝛺 represents the group containing all possible source locations 
+and velocities. The receivers are time and frequency synchronized. At 
+moment 𝑡, the position and velocity of receiver 𝑙 are 𝐩𝑙(𝑡) = [𝑥𝑙(𝑡), 𝑦𝑙(𝑡)]𝑇
+and ̇𝐩𝑙(𝑡) = [̇𝑥𝑙(𝑡),̇ 𝑦𝑙(𝑡)]𝑇, 𝑙= 1, 2, … , 𝐿. The time takes for an emitter to 
+propagate its signals to receiver 𝑙 is given by 
+𝜏𝑙(𝑡) = ‖𝐮−𝐩𝑙(𝑡)‖
+𝑐
+,
+(1)
+where 𝑐 is the speed of wave propagation. Suppose that the emitted 
+signal is represented by 𝑠(𝑡), then the signal received by receiver 𝑙 turns 
+out to be [13,14] 
+𝑧𝑙(𝑡) = 𝑒𝑗𝛼𝑙𝑠(𝑡−𝜏𝑙(𝑡)) + 𝑤𝑙(𝑡),
+(2)
+where 𝛼𝑙 is the unknown initial phase, denoted by 𝜂𝑙= 𝑒𝑗𝛼𝑙 hereafter for 
+simplicity, and 𝑤𝑙(𝑡) is zero-mean and statistically independent circular 
+complex Gaussian noise. When narrowband signal model is valid [14], 
+(2) can be simplified as 
+𝑧𝑙(𝑡) = 𝜂𝑙𝑠(𝑡−𝜏𝑙0
+) 𝑒𝑗2𝜋𝑓𝑑𝑙(𝑡−𝜏𝑙0) + 𝑤𝑙(𝑡),
+(3)
+where 𝑓𝑑 is the Doppler shift defined as 
+𝑓𝑑𝑙= 𝑓𝑐
+𝑐
+(𝐩𝑙(𝑡0) −̇ 𝐮)𝑇⋅(𝐮−𝐩𝑙(𝑡0))
+‖𝐮−𝐩𝑙(𝑡0)‖
+,
+(4)
+with 𝑓𝑐 being the carrier frequency, 𝜏𝑙0 = 𝜏𝑙(𝑡0), and 𝑡0 is the initial 
+moment of signal sampling.
+Let 𝛥 be the sampling interval, the discrete sampled signal is 
+𝑧𝑙[𝑛] = 𝜂𝑙𝑠(𝑛𝛥+ 𝑡0 −𝜏𝑙0
+) 𝑒𝑗2𝜋𝑓𝑑𝑙(𝑛𝛥+𝑡0−𝜏𝑙0) + 𝑤𝑙[𝑛],
+(5)
+where 𝑤𝑙[𝑛] = 𝑤𝑙(𝑛𝛥+𝑡0). Suppose that 𝑁 sampling points are collected, 
+and let the collected signal vector be 
+𝐳𝑙= [𝑧𝑙[0], 𝑧𝑙[1], … , 𝑧𝑙[𝑁−1]]𝑇,
+(6)
+also let 
+𝐬= [𝑠[0], 𝑠[1], … , 𝑠[𝑁−1]]𝑇.
+(7)
+Then 𝐳𝑙 can be modeled in terms of 𝐬 through a fast Fourier trans-
+form (FFT) and an inverse FFT as follows [13,14]. 
+𝐳𝑙= 𝜂𝑙𝐃𝑓𝑑𝑙𝐅𝐻𝐃𝜏𝑙𝐅𝐬+ 𝐰𝑙= 𝜂𝑙𝐐𝑙𝐬+ 𝐰𝑙,
+(8)
+where
+𝐧= [0, 1, … , 𝑁−1]𝑇,̃
+𝐧=
+[
+−𝑁
+2 , … , −1, 0, … , 𝑁
+2 −1
+]𝑇
+,
+(9)
+𝐅=
+1
+√
+𝑁
+exp
+(
+−𝑗2𝜋
+𝑁̃ 𝐧̃𝐧𝑇)
+,
+𝐃𝜏𝑙= diag
+(
+exp
+(
+−𝑗2𝜋
+𝑁̃ 𝐧𝜏𝑙
+))
+,
+(10)
+𝐃𝑓𝑑𝑙= diag
+(
+exp
+(
+𝑗𝑣𝑙𝛥
+(
+𝑛−𝜏𝑙
+𝛥𝟏𝑁
+)))
+,
+𝑣𝑙= 2𝜋𝑓𝑑𝑙,
+(11)
+and 𝐰𝑙∼(0, 𝜎2
+𝑙𝐈𝑁) follows complex Gaussian distribution with zero 
+mean and covariance 𝜎2
+𝑙𝐈𝑁, where 𝟏𝑁 represents an 𝑁× 1 vector with 
+all elements equal to 1 and 𝐈𝑁 represents an 𝑁× 𝑁 unit matrix.
+Let receiver 1 be the central receiver without loss of generality. 
+The collected signal vectors by all other receivers are transferred to 
+receiver 1 for TDOA and FDOA parameter extraction and emitter 
+localization. CS techniques are used to compress the original sampled 
+signals to reduce the communication data amount. The compressed 
+signal transmitted to the central receiver can be represented by 
+𝐲𝑘= 𝜱𝑘𝐳𝑘+ 𝜺𝑘= 𝜂𝑘𝜱𝑘𝐐𝑘𝐬+ 𝜱𝑘𝐰𝑘+ 𝜺𝑘,
+(12)
+where 𝜱𝑘 represents the 𝑀× 𝑁 compressing matrix with 𝑀≪𝑁, 𝑘=
+2, … , 𝐿. Term 𝜺𝑘 is the vector of noise generated in the communication 
+process, and 
+𝜺𝑘= [𝜀𝑘[0], 𝜀𝑘[1], … , 𝜀𝑘[𝑀−1]]𝑇,
+(13)
+where 𝜀𝑘[𝑛] is zero-mean and statistically independent circular complex 
+Gaussian noise with E {𝜀2
+𝑘[𝑛]} = 𝜎2
+𝜀𝑘. In practice, we usually have 𝜎2
+𝜀𝑘≪
+𝜎2
+𝑘 as high SNR can be guaranteed in cooperative communications and 
+then we have 
+𝐲𝑘≈Φ𝑘𝐳𝑘= 𝜂𝑘Φ𝑘𝐐𝑘𝐬+ Φ𝑘𝐰𝑘.
+(14)
+3. DPD using compressed and uncompressed measurements
+3.1. DPD framework
+Generally, (14) cannot be used directly for emitter positioning as 
+the time-shift relationship will be broken by the compressing operation. 
+In a special case, [23] shows that the time shift relationship can 
+be retained if a Hadamard compressing matrix is used for stationary 
+emitters and receivers. However, it can be proved that the time-shift 
+and frequency-shift relationship will be broken when 𝑓𝑑𝑙≠0, even a 
+Hadamard compressing matrix is used, as shown in detail in Appendix 
+A. Consequently, DPD based on 𝐿 vectors of compressed measurements 
+seems infeasible when 𝑓𝑑𝑙≠0. This is attributed to the fact that the 
+compressed measurements of one receiver cannot be reconstructed by 
+Signal Processing 234 (2025) 109987 
+2 
+
+
+=== PDF PAGE 3 ===
+M.-Y. You et al.
+the compressed measurements of the other receivers due to the break 
+of time-shift and frequency-shift relationship.
+Luckily, using the original uncompressed measurements at the cen-
+tral receiver will not compromise the benefits of data compression. 
+That is, one can localize the emitter using 𝑁−1 vectors of compressed 
+measurements and 1 vector of uncompressed original measurements 
+without increasing any communication burden. Specifically, DPD can 
+be processed using
+𝐳1 = 𝜂1𝐐1𝐬+ 𝐰1,
+(15)
+𝐲𝑘= 𝜂𝑘𝜱𝑘𝐐𝑘𝐬+ 𝜱𝑘𝐰𝑘.
+(16)
+It is straightforward to show that, 𝜱𝑘𝐰𝑘 is zero mean with covariance 
+Σ𝑘= 𝜱𝑘𝜱𝐻
+𝑘𝜎2
+𝑘𝐈𝑁, and Σ1 = 𝜎2
+1𝐈𝑁. And the likelihood function of 𝐮 and ̇
+𝐮 is 
+𝑙(𝐮,̇ 𝐮) ∝𝑝(𝐳1|𝐮,̇ 𝐮)
+𝐿
+∏
+𝑘=2
+𝑝(𝐲𝑘|𝐮,̇ 𝐮),
+(17)
+where
+𝑝(𝐳1|𝐮,̇ 𝐮) =
+exp
+(
+−1
+2
+‖𝐳1−𝜂1𝐐1𝐬‖2
+𝜎2
+1
+)
+(2𝜋)𝑁∕2det(Σ1)1∕2
+,
+(18)
+𝑝(𝐲𝑘|𝐮,̇ 𝐮) =
+exp
+(
+−1
+2
+(𝐲𝑘−𝜂𝑘𝜱𝑘𝐐𝑘𝐬)𝐻Σ−1
+𝑘
+(𝐲𝑘−𝜂𝑘𝜱𝑘𝐐𝑘𝐬))
+(2𝜋)𝑁∕2det(Σ𝑘)1∕2
+.
+(19)
+Substituting (18) and (19) into (17), taking the logarithm of (17) and 
+ignoring the terms irrelevant to 𝐮 and ̇𝐮 gives the maximum likelihood 
+estimator (MLE) of 𝐮 and ̇𝐮 as
+(̂𝐮,̂̇ 𝐮) = arg
+min
+[𝐮𝑇,̇𝐮𝑇]𝑇∈𝛺
+{
+‖𝐳1 −𝜂1𝐐1𝐬‖2
+𝜎2
+1
++
+𝐿
+∑
+𝑘=2
+(𝐲𝑘−𝜂𝑘𝜱𝑘𝐐𝑘𝐬)𝐻Σ−1
+𝑘
+(𝐲𝑘−𝜂𝑘𝜱𝑘𝐐𝑘𝐬)
+}
+.
+(20)
+In (20), 𝐬 is unknown for a non-cooperative emitter. A typical way to 
+handle unknown 𝐬 is to find the MLE of 𝐬 by (16) and substituting it 
+into (20). However, 𝐲𝑘 may not be able to contribute to the MLE of 𝐬, 
+since 𝜱𝑇
+𝑘𝜱𝑘 could be singular (𝑀≪𝑁) for some typical compressing 
+matrices such as the Hadamard matrix. Luckily, 𝐳1 can be exploited to 
+find ̂
+𝐬= 𝜂𝐻
+1 𝐐𝐻
+1 𝐳1.
+(21)
+Substituting (21) into (20) gives
+(̂
+𝐮,̂̇ 𝐮
+)
+=
+arg min
+[𝐮𝑇,̇𝐮𝑇]𝑇∈Ω
+⎧
+⎪
+⎨
+⎪⎩
+‖‖𝐳1 −𝜂1𝐐1𝐬‖‖
+2∕𝜎2
+1
++
+𝐿
+∑
+𝑘=2
+(𝐲𝑘−𝜂𝑘Φ𝑘𝐐𝑘𝐬) 𝐻(
+Σ𝑘
+)−1 (𝐲𝑘−𝜂𝑘Φ𝑘𝐐𝑘𝐬)
+⎫
+⎪
+⎬
+⎪⎭
+=
+arg min
+[𝐮𝑇,̇𝐮𝑇]𝑇∈Ω
+{ 𝐿
+∑
+𝑘=2
+(𝐲𝑘−𝜂𝑘Φ𝑘𝐐𝑘𝐬) 𝐻(
+Σ𝑘
+)−1 (𝐲𝑘−𝜂𝑘Φ𝑘𝐐𝑘𝐬)
+}
+= arg min
+[𝐮𝑇,̇𝐮𝑇]𝑇∈Ω
+{ 𝐿
+∑
+𝑘=2
+(𝐲𝑘−𝜂𝑘Φ𝑘𝐐𝑘𝜂𝐻
+1 𝐐𝐻
+1 𝐳1
+)𝐻(
+Σ𝑘
+)−1(𝐲𝑘−𝜂𝑘Φ𝑘𝐐𝑘𝜂𝐻
+1 𝐐𝐻
+1 𝐳1
+)
+}
+=
+arg min
+[𝐮𝑇,̇𝐮𝑇]𝑇∈Ω
+⎧
+⎪
+⎪
+⎨
+⎪
+⎪⎩
+𝐿
+∑
+𝑘=2
+𝐲𝑘
+(
+Σ𝑘
+)−1𝐲𝑘−𝜂𝑘𝜂𝐻
+1 Φ𝑘𝐐𝑘𝐐𝐻
+1 𝐳1
+(
+Σ𝑘
+)−1𝐲𝑘
+−𝜂𝑘𝜂𝐻
+1 𝐲𝑘
+(
+Σ𝑘
+)−1Φ𝑘𝐐𝑘𝜂𝐻
+1 𝐐𝐻
+1 𝐳1
++(𝜂𝑘Φ𝑘𝐐𝑘𝜂𝐻
+1 𝐐𝐻
+1 𝐳1
+)𝐻(
+Σ𝑘
+)−1 (𝜂𝑘Φ𝑘𝐐𝑘𝜂𝐻
+1 𝐐𝐻
+1 𝐳1
+)
+⎫
+⎪
+⎪
+⎬
+⎪
+⎪⎭
+= arg max
+[𝐮𝑇,̇𝐮𝑇]𝑇∈Ω
+⎧
+⎪
+⎪
+⎨
+⎪
+⎪⎩
+𝐿
+∑
+𝑘=2
+𝜂𝑘𝜂𝐻
+1 Φ𝑘𝐐𝑘𝐐𝐻
+1 𝐳1
+(
+Σ𝑘
+)−1𝐲𝑘
++𝜂𝑘𝜂𝐻
+1 𝐲𝑘
+(
+Σ𝑘
+)−1Φ𝑘𝐐𝑘𝜂𝐻
+1 𝐐𝐻
+1 𝐳1
+−(𝜂𝑘Φ𝑘𝐐𝑘𝜂𝐻
+1 𝐐𝐻
+1 𝐳1
+)𝐻(
+Σ𝑘
+)−1 (𝜂𝑘Φ𝑘𝐐𝑘𝜂𝐻
+1 𝐐𝐻
+1 𝐳1
+)
+⎫
+⎪
+⎪
+⎬
+⎪
+⎪⎭
+.
+≜arg
+max
+[𝐮𝑇,̇𝐮𝑇]𝑇∈Ω
+[𝐷(𝐮,̇ 𝐮)]
+(22)
+As 𝜂𝑘= e𝑗𝛼𝑘, we further have 
+(̂
+𝐮,̂̇ 𝐮
+)
+= arg max
+[𝐮𝑇,̇𝐮𝑇]𝑇∈Ω
+⎧
+⎪
+⎨
+⎪⎩
+𝐿
+∑
+𝑘=2
+2Re
+(
+Φ𝑘𝐐𝑘𝐐𝐻
+1 𝐳1
+(Σ𝑘
+)−1𝐲𝑘
+)
+−(Φ𝑘𝐐𝑘𝜂𝐻
+1 𝐐𝐻
+1 𝐳1
+)𝐻(Σ𝑘
+)−1 (Φ𝑘𝐐𝑘𝜂𝐻
+1 𝐐𝐻
+1 𝐳1
+)
+⎫
+⎪
+⎬
+⎪⎭
+,
+(23)
+where Re (𝐴) denotes the real part of 𝐴. Usually, using such treatment 
+would make the cost function sensitive to phase non-synchronization 
+and the selection of searching grid as illustrated in [13]. Hence, the 
+following approximation is adopted according to the suggestions in [13,
+14]
+(̂
+𝐮,̂̇ 𝐮
+)
+= arg
+max
+[𝐮𝑇,̇𝐮𝑇]𝑇∈𝛺
+{
+2 ⋅
+𝐿
+∑
+𝑘=2
+‖‖‖𝐲𝐻
+𝑘
+(Σ𝑘
+)−1 Φ𝑘𝐐𝑘𝐐𝐻
+1 𝐳1‖‖‖ −
+‖‖‖
+(Φ𝑘𝐐𝑘𝐐𝐻
+1 𝐳1
+)𝐻(Σ𝑘
+)−1 Φ𝑘𝐐𝑘𝐐𝐻
+1 𝐳1‖‖‖
+}
+= arg
+max
+[𝐮𝑇,̇𝐮𝑇]𝑇∈𝛺
+{𝐶(𝐮,̇ 𝐮)} .
+(24)
+Note that 𝜱𝑘 in (24) is general and is not subject to a specific type 
+of compressing matrix. Also note that (24) consists of the compressed 
+measurements 𝐲𝑘 and the uncompressed measurements 𝐳1.
+By (24), a grid search over the region of interest can help find the 
+approximate MLE of 𝐮 for stationary emitters whose ̇𝐮= 0. However, 
+for moving emitters whose ̇𝐮≠0, grid search would be computationally 
+very expensive and a more efficient treatment is needed.
+Remark 1.  Such a remark concerns with the signal model of (2). When 
+𝜂𝑘 corresponds to path attenuation whose magnitude and phase are 
+both unknown, it is generally hard to handle such a case if there is no 
+constraint on the chosen compressing matrix. Meanwhile, when some 
+specific compressing matrices, e.g. Hadamard matrix, are employed, 
+we are still able to perform estimation. Specifically by setting the 
+compression matrix as Hadamard, we have
+𝐷(𝐮,̇ 𝐮) =
+𝐿
+∑
+𝑘=2
+𝜂1𝜂𝐻
+𝑘Φ𝑘𝐐𝑘𝐐𝐻
+1 𝐳1
+(Σ𝑘
+)−1𝐲𝑘
++𝜂𝑘𝜂𝐻
+1 𝐲𝐻
+𝑘
+(Σ𝑘
+)−1Φ𝑘𝐐𝑘𝐐𝐻
+1 𝐳1
+(25)
+= η𝐻𝐑(𝐮,̇ 𝐮)η,
+(26)
+where 𝜼= [𝜂1, 𝜂2, … 𝜂𝐿
+]𝑇 and 𝐑(𝐮,̇ 𝐮) is the cross-correlation matrix of 
+size 𝐿× 𝐿 whose (𝑖, 𝑗)-th entry turns out to be
+𝑅𝑖𝑗=
+⎧
+⎪
+⎨
+⎪⎩
+𝐲𝐻
+𝑘
+(Σ𝑘
+)−1Φ𝑘𝐐𝑘𝐐𝐻
+1 𝐳1,
+if 𝑖= 1, 𝑗> 1
+Φ𝑘𝐐𝑘𝐐𝐻
+1 𝐳1
+(Σ𝑘
+)−1𝐲𝑘,
+if 𝑗= 1, 𝑖> 1
+0,
+else
+.
+(27)
+For the case where the path attenuation 𝜼 is unknown, it should 
+be replaced with its MLE in (26), which is the scaled eigenvector 
+corresponding to the largest eigenvalue of 𝐑(𝐮,̇ 𝐮). Then maximizing 
+(26) is equivalent to maximizing 
+𝐷′ (𝐮) = 𝜆max (𝐑(𝐮,̇ 𝐮)) ,
+(28)
+where 𝜆max (𝐀) represents the maximum eigenvalue of 𝐀. Such a treat-
+ment has been adopted in many DPD related works [9–12]. As the work 
+is mainly devoted to DPD with the hybrid measurements in (15) and 
+(16), we focus on (24) hereafter, while the developed algorithm can be 
+directly applied to (27).
+3.2. Iterative algorithm for moving emitters
+Alternating 
+optimization 
+strategy 
+is 
+effective 
+for 
+many
+high-dimensional DPD optimization problems such as joint calibration 
+and localization [28–30]. In this paper, a block coordinate descent 
+Signal Processing 234 (2025) 109987 
+3 
+
+
+=== PDF PAGE 4 ===
+M.-Y. You et al.
+Algorithm 1: Algorithm for CS-based DPD of Moving Emitters
+1: Initialize the sensor position ̂𝐮0, and let the iteration turn number 
+𝑖= 0. 
+2: 𝑖= 𝑖+ 1, find ̂̇𝐮𝑖= arg max[𝐮𝑇,̇𝐮𝑇]𝑇∈𝛺{𝐶(𝐮,̇ 𝐮)} |𝐮=̂𝐮𝑖−1 using grid 
+search. 
+3: Find ̂𝐮𝑖= arg max
+[𝐮𝑇,̇𝐮𝑇]𝑇∈𝛀
+{𝐶(𝐮,̇ 𝐮)} |||̇𝐮=̂𝐮𝑖 using grid search. 
+4: If the iteration stopping criteria is satisfied, let (̂𝐮,̂̇ 𝐮) = (̂𝐮𝑖,̂̇ 𝐮𝑖); 
+Otherwise, go to step 2.
+Fig. 1. Illustration of the cost function under SNR = −10 dB (based on the settings of 
+case 1 in simulations).
+(BCD)-like iterative algorithm is proposed to iteratively estimate 𝐮 and ̇
+𝐮 until a certain stopping criteria is satisfied.
+The entire process of the iterative optimization algorithm for mov-
+ing emitters is summarized in Algorithm 1, for which the iteration 
+stopping criteria could be 
+‖̂𝐮𝑖−̂ 𝐮𝑖−1‖ ≤𝜁,
+(29)
+where 𝜁 is a predetermined acceptable convergence parameter. The 
+iteration stopping criteria could also be the iteration number 𝑁𝐼, 
+i.e., the iteration stops when 𝑖= 𝑁𝐼. Note that the computational 
+complexity reduces from (𝑁4
+𝑠) to (𝑁𝐼×𝑁2
+𝑠) where 𝑁𝑠 is the searching 
+grids for one dimensional of position or velocity and usually 𝑁𝑠≫𝑁𝐼. 
+Please notice that (24) is not globally convex and it is easy to converge 
+to a local maxima with conventional Gauss–Newton like algorithms 
+especially in low SNR scenarios, a typical example can be found in Fig. 
+1. As a result, though the grid search strategy in Algorithm 1 is more 
+computationally intensive, but it can resolve such problem well.
+In Algorithm 1, how to get an initial estimate ̂𝐮0 remains a problem. 
+To get ̂𝐮0, we propose to obtain the initial estimate using the TDOA 
+extracted from the hybrid measurements, which is irrelevant to ̇𝐮 and 
+would not lead to a high-dimensional optimization problem. To do so, 
+a generalized cross ambiguity function (GCAF) is proposed for hybrid 
+measurements as follows: 
+ℎ𝑘1(𝜏𝑘1, 𝑓𝑘1) = ‖‖‖
+(𝜱𝑘𝐐1𝑘𝐳1
+)𝐻⋅𝐲𝑘‖‖‖ ,
+(30)
+where TDOA 𝜏1𝑘= 𝜏𝑘0 −𝜏10, FDOA 𝑓𝑘1 = 𝑓𝑑𝑘−𝑓𝑑1, and 𝐐1𝑘=
+𝐃𝑓1𝑘𝐅𝐻𝐃𝜏1𝑘𝐅. It is clear that ℎ1𝑘(𝜏1𝑘, 𝑓1𝑘) reduces to the classical CAF 
+when 𝜱𝑘= 𝐈𝑁. By (30), TDOA and FDOA could be estimated by 
+(̂𝜏1𝑘,̂ 𝑓1𝑘) = arg
+max
+(𝜏1𝑘,𝑓1𝑘)∈𝛺𝜏𝑓
+[ℎ1𝑘(𝜏1𝑘, 𝑓1𝑘)] ,
+(31)
+where 𝛺𝜏𝑓 represents the group containing all possible TDOAs and 
+FDOAs. It is worth pointing out that the possible sets for the TDOAs and 
+FDOAs can be obtained based on the prior knowledge including region 
+of interest, limit of velocity, range of radio frequency, etc. Usually, the 
+possible sets would be intentionally expanded to avoid the undesirable 
+exclusion of the true emitter position, velocity, TDOAs and FDOAs. 
+Then we have 
+𝜏1𝑘= ‖𝐮−𝐩𝑘(𝑡)‖
+𝑐
+−‖𝐮−𝐩1(𝑡)‖
+𝑐
+.
+(32)
+Let 𝝉= [𝜏21, … , 𝜏𝐿1]𝑇 and ̂𝝉= [̂𝜏21, … ,̂ 𝜏𝐿1]𝑇, then an initial estimate is 
+obtained based on the TDOA pairs in the following way: ̂
+𝐮0 = arg min {(𝝉−̂ 𝝉)𝑇Σ−1
+𝜏(𝝉−̂ 𝝉)} ,
+(33)
+where Σ𝜏 is the covariance matrix of 𝜏 derived in detail in the B for 
+the GCAF. Initialize ̂𝐮 using (33), then we have (̂𝐮,̂̇ 𝐮) = (̂𝐮𝑖,̂̇ 𝐮𝑖) when 
+the iterative process stops.
+4. Performance bound
+4.1. Performance bound for stationary emitters
+This subsection evaluates the CRLB of stationary emitters based 
+on the hybrid measurements in (16). The unknown signal 𝐬 can be 
+expressed in terms of its real and imaginary parts as [Re{𝐬𝑇}, Im{𝐬𝑇}]𝑇. 
+For ease of further derivation, define the composite unknown vector 
+𝜹= [Re{𝐬𝑇}, Im{𝐬𝑇}, 𝜽𝑇]𝑇,
+(34)
+where θ = [α𝑇, 𝐮𝑇]𝑇 and α = [𝛼1, 𝛼2, … 𝛼𝐿
+]𝑇. Let
+𝐱= [𝐳𝑇
+1 , 𝐲𝑇
+2 , … , 𝐲𝑇
+𝐿
+]𝑇,
+(35)
+𝐆= [(𝜂1𝜱1𝐐1)𝑇, (𝜂2𝜱2𝐐2)𝑇, … , (𝜂𝐿𝜱𝐿𝐐𝐿)𝑇]𝑇,
+(36)
+𝐰=
+[(Φ1𝐰1
+)𝑇, (Φ2𝐰2
+)𝑇, … (Φ𝐿𝐰𝐿
+)𝑇]𝑇
+,
+(37)
+where 𝜱1 = 𝐈𝑁. Then, we have the hybrid measurements 
+𝐱= 𝐆𝐬+ 𝐰.
+(38)
+Based on (34) and (38), the Fisher information matrix (FIM) is given 
+by 
+𝐉𝜹= 2Re
+{( 𝜕𝐆𝐬
+𝜕𝜹
+)𝐻
+Σ−1 ( 𝜕𝐆𝐬
+𝜕𝜹
+)}
+,
+(39)
+where Σ = blkdiag(Σ1, Σ2, … , Σ𝐿), Σ1 = 𝜎2
+1𝐈𝑁 and Σ𝑘 is defined in 
+(16), where blkdiag(⋅) is the block diagonal operator. In (39), more 
+specifically, we have:
+𝜕𝐆𝐬
+𝜕𝜹=
+[
+𝜕𝐆𝐬
+𝜕Re{𝐬} ,
+𝜕𝐆𝐬
+𝜕Im{𝐬}, 𝜕𝐆𝐬
+𝜕𝜽
+]
+,
+(40)
+𝜕𝐆𝐬
+𝜕Re{𝐬} = 𝐆,
+(41)
+𝜕𝐆𝐬
+𝜕Im{𝐬} = 𝑗𝐆,
+(42)
+𝜕𝐆𝐬
+𝜕𝜽=
+[(𝜕𝜂1𝜱1𝐐1𝐬
+𝜕𝜽
+)𝐻
+, … ,
+(𝜕𝜂𝐿𝜱𝐿𝐐𝐿𝐬
+𝜕𝜽
+)𝐻]𝐻
+,
+(43)
+where
+𝜕𝜂𝑙𝜱𝑙𝐐𝑙𝐬
+𝜕𝜽
+=
+[𝜕𝜂𝑙𝜱𝑙𝐐𝑙𝐬
+𝜕𝛼1
+, 𝜕𝜂𝑙𝜱𝑙𝐐𝑙𝐬
+𝜕𝛼2
+, … , 𝜕𝜂𝑙𝜱𝑙𝐐𝑙𝐬
+𝜕𝐮
+]
+,
+(44)
+𝜕𝜂𝑙𝜱𝑙𝐐𝑙𝐬
+𝜕𝛼𝑛
+=
+{
+𝑗𝑛𝜂𝑙𝜱𝑙𝐐𝑙𝐬,
+𝑙= 𝑛
+0,
+𝑙≠𝑛,
+(45)
+𝜕𝜂𝑙𝜱𝑙𝐐𝑙𝐬
+𝜕𝐮
+=
+[𝜕𝜂𝑙𝜱𝑙𝐐𝑙𝐬
+𝜕𝜏𝑙
+, 𝜕𝜂𝑙𝜱𝑙𝐐𝑙𝐬
+𝜕𝑣𝑙
+] [ 𝜕𝜏𝑙
+𝜕𝐮
+𝜕𝑣𝑙
+𝜕𝐮
+]
+,
+(46)
+In (46), we further have
+𝜕𝜂𝑙𝜱𝑙𝐐𝑙𝐬
+𝜕𝜏𝑙
+= −𝑗𝑓𝑑𝑙𝜂𝑙𝜱𝑙𝐐𝑙𝐬−𝑗2𝜋
+𝑁𝛥𝜂𝑙𝜱𝑙𝐃𝑓𝑑𝑙𝐅𝐻𝐃𝜏𝑙diag{̃𝐧}𝐅𝐬,
+(47)
+𝜕𝜂𝑙𝜱𝑙𝐐𝑙𝐬
+𝜕𝑣𝑙
+= 𝑗𝜂𝑙𝜱𝑙diag{𝛥𝑛}𝐐𝑙𝐬−𝑗𝜂𝑙𝜱𝑙𝐃𝑓𝑑𝑙𝐐𝑙𝐬,
+(48)
+𝜕𝜏𝑙
+𝜕𝐮=
+(𝐮−𝐩𝑙(𝑡0))𝑇
+𝑐‖𝐮−𝐩𝑙(𝑡0)‖ ,
+(49)
+Signal Processing 234 (2025) 109987 
+4 
+
+
+=== PDF PAGE 5 ===
+M.-Y. You et al.
+𝜕𝑣𝑙
+𝜕𝐮= 2𝜋𝑓𝑐
+𝑐
+⎛
+⎜
+⎜⎝̇
+𝐩𝑇
+𝑙(𝑡0)
+‖𝐮−𝐩𝑙(𝑡0)‖ −
+[𝐮−𝐩𝑙(𝑡0)]𝑇(̇𝐩𝑇
+𝑙(𝑡0) [𝐮−𝐩𝑙(𝑡0)])
+‖𝐮−𝐩𝑙(𝑡0)‖3
+⎞
+⎟
+⎟⎠
+.
+(50)
+Substituting (40)–(50) into (39), we have: 
+𝐉δ = 2
+⎡
+⎢
+⎢
+⎢⎣
+𝐀
+𝟎
+Re {𝐁𝐻}
+𝟎
+𝐀
+Im {𝐁𝐻}
+Re {𝐁}
+−Im {𝐁}
+𝐂
+⎤
+⎥
+⎥
+⎥⎦
+,
+(51)
+where 𝐀
+=
+𝐆𝐻Σ−1𝐆, 𝐁
+=
+(
+𝜕𝐆𝐬
+𝜕𝜽
+)𝐻
+Σ−1𝐆, 𝐂
+=
+Re
+{(
+𝜕𝐆𝐬
+𝜕𝜽
+)𝐻
+Σ−1 (
+𝜕𝐆𝐬
+𝜕𝜽
+)}
+. Using the partitioned matrix inversion for-
+mula [31], the FIM of 𝜽 is 
+𝐉𝜽= 2𝐂−2Re {𝐁𝐀−1𝐁𝐻} ,
+(52)
+and the CRLB of 𝜽 is 𝐉−1
+𝜽. Note that the lower right 2 × 2 of 𝐉−1
+𝜽 is the 
+CRLB of 𝐮, denoted as CRLB1(𝐮). Finally, we define the performance 
+lower bound of emitter localization with compression rate 𝑁∕𝑀 as 
+CRLBCS-DPD =
+√
+trace(CRLB1(𝐮)).
+(53)
+4.2. Performance bound for moving emitters
+Consider a moving emitter, define the composite unknown vector 
+𝜹2 = [Re{𝐬𝑇}, Im{𝐬𝑇}, 𝜽𝑇
+2
+]𝑇,
+(54)
+where 𝜽2 = [𝐚𝑇,̇ 𝐮𝑇, 𝐮𝑇]𝑇. Similarly to (39), we have 
+𝐉𝜹2 = 2Re
+{(
+𝜕𝐆𝐬
+𝜕𝜹2
+)𝐻
+Σ−1
+(
+𝜕𝐆𝐬
+𝜕𝜹2
+)}
+.
+(55)
+More specifically, we have 
+𝜕𝐆𝐬
+𝜕𝜹2
+=
+[
+𝜕𝐆𝐬
+𝜕Re{𝐬},
+𝜕𝐆𝐬
+𝜕Im{𝐬}, 𝜕𝐆𝐬
+𝜕𝜽2
+]
+.
+(56)
+In addition to the derivations in (41)–(50), we have
+𝜕𝐆𝐬
+𝜕θ2
+=
+[(𝜕𝜂1Φ1𝐐1𝐬
+𝜕θ2
+)𝐻
+, … ,
+(𝜕𝜂𝐿Φ𝐿𝐐𝐿𝐬
+𝜕θ2
+)𝐻]𝐻
+,
+(57)
+𝜕𝜂𝑙Φ𝑙𝐐𝑙𝐬
+𝜕θ2
+=
+[ 𝜕𝜂𝑙Φ𝑙𝐐𝑙𝐬
+𝜕𝛼1
+, 𝜕𝜂𝑙Φ𝑙𝐐𝑙𝐬
+𝜕𝛼2
+, … , 𝜕𝜂𝑙Φ𝑙𝐐𝑙𝐬
+𝜕̇𝐮
+𝜕𝜂𝑙Φ𝑙𝐐𝑙𝐬
+𝜕𝐮
+]
+,
+(58)
+𝜕𝜂𝑙Φ𝑙𝐐𝑙𝑠
+𝜕̇𝐮
+=
+[ 𝜕𝜂𝑙Φ𝑙𝐐𝑙𝑠
+𝜕𝜏𝑙
+, 𝜕𝜂𝑙Φ𝑙𝐐𝑙𝑠
+𝜕𝑣𝑙
+] ⎡
+⎢
+⎢⎣
+𝜕𝜏𝑙
+𝜕̇𝐮
+𝜕𝑣𝑙
+𝜕̇𝐮
+⎤
+⎥
+⎥⎦
+.
+(59)
+Besides we also have
+𝜕𝜏𝑙
+𝜕̇𝐮= 0,
+(60)
+𝜕𝑣𝑙
+𝜕̇𝐮= 𝜕𝜏𝑙
+𝜕𝐮.
+(61)
+Substituting (57)–(61) into (56), we have 
+𝐉δ2 = 2
+⎡
+⎢
+⎢
+⎢⎣
+𝐀
+𝟎
+Re {𝐁𝐻
+2
+}
+𝟎
+𝐀
+Im {𝐁𝐻
+2
+}
+Re {𝐁2
+}
+−Im {𝐁2
+}
+𝐂2
+⎤
+⎥
+⎥
+⎥⎦
+,
+(62)
+where 𝐁2 =
+(
+𝜕𝐆𝐬
+𝜕𝜽2
+)𝐻
+Σ−1𝐆 and 𝐂2 = Re
+{(
+𝜕𝐆𝐬
+𝜕𝜽2
+)𝐻
+Σ−1 (
+𝜕𝐆𝐬
+𝜕𝜽2
+)}
+. Simi-
+larly to (52), we have 
+𝐉𝜽2 = 2𝐂2 −2Re {𝐁2𝐀−1𝐁𝐻
+2
+} ,
+(63)
+and the CRLB of 𝜽2 is 𝐉−1
+𝜽2 . Note that the lower right 2 × 2 of 𝐉−1
+𝜽2 is the 
+CRLB of 𝐮, denoted as CRLB2(𝐮). Finally, we define the performance 
+lower bound of emitter localization as 
+CRLBCS-DPDm =
+√
+trace(CRLB2(𝐮)).
+(64)
+5. Numerical investigations
+This section conducts several numerical experiments to evaluate 
+the performance of the proposed DPD method. Case 1 studies the 
+DPD algorithm for stationary emitters with moving platforms. Case 2 
+evaluates the effectiveness of the GCAF which will be used to initialize 
+the DPD algorithm for moving emitters. Finally, case 3 evaluates the 
+performance of the DPD algorithm for moving emitters.
+5.1. Case 1: DPD for stationary emitters
+We consider a scenario where one stationary source and three 
+moving receivers are present. We consider a large range scenario which 
+meets the requirement of compressed transmission of signals so as to 
+reduce communication burden. Such a scenario finds applications in, 
+e.g., noncooperative sensing of emitters in defense fields. The source is 
+located at 
+𝐮= [14.5, 102.6]𝑇(km)
+(65)
+with known altitude. The positions of the receivers are
+𝐩1(𝑡0) = [40, 1]𝑇(km),
+(66)
+𝐩2(𝑡0) = [0, 0]𝑇(km),
+(67)
+𝐩3(𝑡0) = [5, 100]𝑇(km)
+(68)
+and their constant velocities arė
+𝐩1(𝑡0) = [358, 0]𝑇(m/s),
+(69)̇
+𝐩2(𝑡0) = [350, 0]𝑇(m/s),
+(70)̇
+𝐩3(𝑡0) = [200, −250]𝑇(m/s).
+(71)
+The source emits signals with BPSK modulation and the bandwidth 
+is 25 kHz. The carrier frequency is 𝑓𝑐= 403 MHz and the sampling 
+frequency is 𝑓𝑠= 100 kHz. 1024 sampling points are collected per 
+source location. Hadamard matrix is firstly used for data compression. 
+Please notice that we did not take the pathloss of signals into the 
+simulations since, as pointed out in Remark 1, this paper focuses on 
+the problem of DPD, and the signal model can be easily extended to 
+handle the pathloss cases.
+We firstly compare the performance lower bound of the proposed 
+method with those of several benchmarks in Fig. 1, where
+CRLBTwo-Step TDOA denotes the performance lower bound of the classical 
+two-step method based on TDOA without CS, CRLBTwo-Step TDOA & FDOA
+denotes the performance lower bound of the classical two-step method 
+based on TDOA and FDOA without CS, CRLBCS-DPD
+(
+𝑀
+𝑁
+)
+ denotes the 
+performance lower bound of the proposed DPD method when the 
+compressing rate is 𝑀
+𝑁, CRLBDPD denotes the performance lower bound 
+of the classical DPD method without CS, and CRLBDPD
+(
+𝑀
+𝑁
+)
+ denotes the 
+performance lower bound of the classical DPD method where only the 
+first 
+(
+𝑀
+𝑁
+)
+ of sampling points is retained and the rest sampling points 
+are simply truncated.
+In 
+Fig. 
+1, 
+comparison 
+of 
+CRLBTwo-Step-TDOA 
+with
+CRLBTwo-Step-TDOA & FDOA clarifies the nontrivial performance improve-
+ment when FDOA information is utilized. Therefore, the additional 
+information should be utilized when there are relative radial motions 
+between the source and the receiver. As expected, CRLBCS-DPD
+(
+𝑀
+𝑁
+)
+is slightly inferior to its counterpart CRLBDPD where data is not com-
+pressed. Interestingly, the proposed DPD method outperforms the clas-
+sical two-step methods without CS when SNR is low but is only slightly 
+inferior when SNR becomes high. The performance margin is significant 
+when SNR is low. It is worth noting that CRLBCS-DPD
+(
+𝑀
+𝑁
+)
+ outperforms 
+CRLBDPD
+(
+𝑀
+𝑁
+)
+ although the same compressing rate is adopted, high-
+lighting the effectiveness of the matrix compressing strategy. This can 
+be attributed to the fact that more Doppler information can be utilized 
+Signal Processing 234 (2025) 109987 
+5 
+
+
+=== PDF PAGE 6 ===
+M.-Y. You et al.
+Fig. 2. Performance bounds of the proposed DPD method and several benchmarks (left) with a partially enlarged view (right).
+Fig. 3. RMS localization error of the proposed DPD method and several benchmarks (left) with a partially enlarged view (right).
+Fig. 4. Performance bounds of the proposed DPD method with several compressing 
+rates.
+in the proposed approach although SNR cannot be improved after data 
+compressing.
+Fig. 2 compares the root mean square (RMS) localization error of 
+several methods based on 500 samples with randomly perturbed noises 
+under each SNR condition and confirms the results in Fig. 1, where 
+RMSTwo-Step-TDOA & FDOA, RMSCS-DPD
+(
+𝑀
+𝑁
+)
+, RMSDPD and RMSDPD
+(
+𝑀
+𝑁
+)
+are the RMS statistics corresponding to CRLBTwo-Step-TDOA, CRLBCS-DPD
+(
+𝑀
+𝑁
+)
+, CRLBDPD and CRLBDPD
+(
+𝑀
+𝑁
+)
+. In Fig. 2, there is significant de-
+viation of the performance of the classical two-step method from its 
+CRLB when SNR is low, and gradually matches well with its CRLB 
+when SNR grows high, demonstrating the effectiveness of the derived 
+performance bound in (40). Again, comparison of RMSCS-DPD
+(
+𝑀
+𝑁
+)
+ and 
+RMSDPD
+(
+𝑀
+𝑁
+)
+ demonstrates the effectiveness of the matrix compressing 
+strategy adopted in the work. And the performance margin is significant 
+when SNR is low.
+Fig. 3 summarizes the performance lower bound of the proposed 
+methods for different compressing rate 𝑀∕𝑁 and SNRs. It can be 
+seen that the proposed DPD method performs well at high SNRs even 
+with low 𝑀∕𝑁 values, i.e., high compression rate. In addition, the 
+proposed DPD method can work well even at low SNRs by using a 
+reasonably high 𝑀∕𝑁 value. For example, if we choose 𝑀∕𝑁= 1∕2, 
+the performance of the proposed DPD method is within about 3 dB 
+of its CRLBCS-DPD for all SNRs. Therefore, the proposed DPD method 
+is appropriate for reducing the compressing rate while maintaining 
+reasonable localization performance.
+5.2. Case 2: Investigation of GCAF
+This subsection investigates the performance of the proposed GCAF 
+which is used to extract the TDOA and FDOA parameters from the 
+hybrid measurements by (21). The scenario is similar as that in case 
+1 except that the source is moving with constant velocity ̇𝐮(𝑡0) =
+[16, 23]𝑇(m/s). Hadamard matrix is again used for data compression. 
+Fig. 4 illustrates the CAF (without data compression) and GCAF (with 
+compressing rate 1/2) for an example with SNR = −10 dB, whose actual 
+TDOA ⋅𝑓𝑠= −0.3772 and actual FDOA = 130.8224 Hz. The results in 
+Fig. 4 show that reasonably accurate TDOA and FDOA parameters can 
+be obtained by GCAF.
+Fig. 5 summarizes the localization performance based on
+the proposed GCAF when the compressing rate is 1∕2, denoted by 
+RMSTwo-Step TDOA
+(
+1
+2
+)
+. The counterpart based on the uncompressed 
+original data is also shown, which is denoted by RMSTwo-Step TDOA. 
+In addition, the performance lower bounds of the classical two-step 
+method based on compressed and uncompressed data are presented 
+for comparison. The results in Fig. 5 show that the performance of 
+the GCAF-based localization deviates from its CRLB when SNR is low 
+and gradually approaches its CRLB when SNR grows high, which 
+demonstrates the effectiveness of the GCAF. Therefore, a reasonable 
+Signal Processing 234 (2025) 109987 
+6 
+
+
+=== PDF PAGE 7 ===
+M.-Y. You et al.
+Fig. 5. CAF (a) and GCAF (b) for a receiver pair.
+Table 1
+Average convergence iterations.
+ SNR (dB)
+−5
+0
+5
+10
+15 
+ Mean Iterations
+7.38
+6.54
+2.52
+2.16
+2.08 
+ Median Iterations
+2
+2
+2
+2
+2
+ 
+Fig. 6. RMS localization error based on the GCAF when compressive rate is 1/2.
+initial location can be obtained based on the GCAF in the iterative DPD 
+algorithm for moving emitters.
+5.3. Case 3: DPD for moving emitters
+This subsection considers a scenario where one moving source and 
+three moving receivers are present, same as that in case 2. Table 1 
+firstly summarizes the average iterations for the 500 samples to satisfy
+‖̂𝐮𝑖−̂ 𝐮𝑖−1‖ ≤50(𝑚)
+when SNR ranges from −5 dB to 15 dB. Based on the results in Table 
+1, 10 iterations is enough for most samples to converge (see Fig. 6).
+Next, the algorithm for DPD of moving emitters is tested for 500 
+randomly generated samples when SNR ranges from −10 dB to 20 dB 
+with step size 5 dB. Fig. 7(a) illustrates the objective function 𝐶(𝐮,̇ 𝐮) for 
+the first iteration for 𝐮 with data compression rate 1/2 and SNR=5 dB 
+where the localization error is 806.5 m. For comparison, Fig. 7(b) 
+shows 𝐶(𝐮,̇ 𝐮) when the source is simply assumed stationary and the 
+localization error is 1249.2 m. Comparison of Fig. 7(a) and Fig. 7(b) 
+highlights the importance of joint position and velocity estimation in a 
+DPD model when the source is actually moving.
+The RMS localization error is summarized in Fig. 8, denoted by 
+RMSCS−DPDm(1∕2). For comparison, the corresponding results when 
+data is not compressed is also evaluated following the same algorithm, 
+denoted by RMSDPDm. The associated performance lower bounds, de-
+noted by CRLBCS−DPDm(1∕2) and CRLBDPDm, are also given. In addition, 
+RMSTwo−Step TDOA(1∕2) and RMSTwo−Step TDOA are added for compar-
+ison purpose. It is noted that the result of two-step TDOA based
+positioning is the same as that of the two-step TDOA & FDOA based
+positioning in this well-determined case. The results in Fig. 8
+show that RMSCS−DPDm(1∕2) greatly outperforms RMSTwo−Step TDOA(1∕2)
+when SNR is low and the performance margin narrows when SNR
+becomes high. The relationship also holds between RMSDPDm and 
+RMSTwo−Step TDOA. 
+RMSCS−DPDm(1∕2) 
+is 
+even 
+superior 
+to
+RMSTwo−Step TDOA in low SNR conditions, highlighting the effectiveness 
+of DPD strategy. In addition, RMSCS−DPDm(1∕2) slightly deviates from 
+CRLBCS−DPDm(1∕2) when SNR is low and can gradually approach 
+CRLBCS−DPDm(1∕2) when SNR grows, which shows the effectiveness of 
+the derived performance lower bound in (51).
+A compressing matrix which is one column less than the correspond-
+ing Hadamard matrix is also considered in our investigation, which is of 
+the size 511 × 1024 in this case and is clearly not a Hadamard matrix. 
+The RMS localization error, denoted by RMSCS−DPDm nonhadamard(1∕2), 
+is summarized in Fig. 9. The results in Fig. 9 in comparison with 
+RMSCS−DPDm(1∕2) demonstrate that RMSCS−DPDm nonhadamard(1∕2) per-
+forms closely with RMSCS−DPDm(1∕2), and this is understandable due to 
+the fact that two compressing matrices are only one row different. The 
+results in Fig. 9 validate the feasibility of using a compressing matrix 
+other than Hadamard matrices.
+5.4. Case 4: DPD for moving emitters subject to unknown path attenuation
+In this last simulation case, we further extend the model of Case 
+3 by assuming that the path attenuation is also unknown, which is 
+prevalent in the large scale localization scenarios. We set the true path 
+attenuation as follows 
+||𝜂1|| ∶||𝜂2|| ∶||𝜂3|| = 1 ∶2 ∶3,
+(72)
+and the Hadamard Matrix is adopted for compression, and the method 
+introduced in Remark 1 can be employed to estimate the 𝜼. Fig. 10 
+summarizes the RMS localization error denoted by RMSCS-DPDm-upl(1∕2)
+when the SNR of the signals in receiver 1 ranges from −10 dB to 20 dB. 
+In comparison, RMSCS-DPDm-pl(1∕2) is also evaluated which corresponds 
+to the case when the magnitude of path loss is known. In such case, by 
+(22), we can readily obtain the cost function.
+The results in Fig. 10 show that RMSCS-DPDm-upl(1∕2) still signifi-
+cantly outperforms RMSTwo-Step-TDOA(1∕2) when SNR is low even when 
+the path loss is unknown. In addition, RMSCS-DPDm-upl(1∕2) is slightly 
+inferior to RMSCS-DPDm-upl(1∕2) which is fed by the true pathloss. These 
+results have further verified the effectiveness of proposed algorithm.
+Signal Processing 234 (2025) 109987 
+7 
+
+
+=== PDF PAGE 8 ===
+M.-Y. You et al.
+Fig. 7. The objective function of a DPD algorithm when the source’s velocity is considered (a) or ignored (b), where ▾ denotes the actual source position.
+Fig. 8. RMS localization error of the proposed DPD method and several benchmarks (left) with a partially enlarged view (right).
+Fig. 9. RMS localization error of a DPD method using a compressing matrix which is 
+not a Hadamard matrix.
+6. Conclusion
+This paper develops a DPD method for stationary and moving 
+non-cooperative emitters using moving receivers and interactive data 
+compression. Using an unbalanced group of measurements consisting of 
+original uncompressed measurements at the central receiver and com-
+pressed measurements from all other auxiliary receivers, the method 
+can estimate the source location directly in the hybrid measurement 
+domain. An iterative algorithm is proposed to reduce the computational 
+complexity of the high-dimensional optimization problem of moving 
+emitter localization, while a GCAF is proposed to extract the TDOA 
+parameters to initialize the iteration. The CRLBs for emitter position 
+using hybrid measurements are derived for performance evaluation. 
+Fig. 10. RMS localization error of the proposed DPD method when the path loss is 
+unknown.
+The proposed DPD method performs comparably with the classical 
+DPD method without CS at high SNRs. With a reasonable compressing 
+rate, the CS-based DPD method significantly outperforms the classical 
+two-step methods without CS in low SNR scenarios.
+While the existing works on CS-based DPD approach only consider 
+localization of stationary emitters using Hadamard compressing matrix 
+which is only applicable for data length of 2𝑛 where 𝑛 is a positive 
+integer, this paper extends the methodology in three aspects: Firstly, it 
+extends the applicability of CS-based DPD approach for stationary emit-
+ters to the case when there is relative radial motion between the source 
+and the receiver. Secondly, it extends the applicability of CS-based DPD 
+approach to moving emitters. And thirdly, the compressing matrix is 
+Signal Processing 234 (2025) 109987 
+8 
+
+
+=== PDF PAGE 9 ===
+M.-Y. You et al.
+not restricted to any specific form and thus becomes applicable to any 
+data length.
+CRediT authorship contribution statement
+Ming-Yi You: Writing – original draft, Validation, Methodology. Lin 
+Gao: Writing – review & editing, Methodology. Yun-Xia Ye: Writing – 
+review & editing. Wei Wang: Writing – review & editing, Supervision.
+Declaration of competing interest
+The authors declare that they have no known competing finan-
+cial interests or personal relationships that could have appeared to 
+influence the work reported in this paper.
+Acknowledgment
+This work is supported by starlit South Lake Leading Elite Program.
+Appendix A. Proof of the break of time-shift and frequency-shift 
+relationship by a compressing matrix
+Let 
+𝐲𝑗= 𝜂𝑗Φℎ𝐐𝑗𝐬+ Φℎ𝐰𝑗,
+𝑗= 1, 2, … , 𝐿
+(A.1)
+where Φℎ denotes a Hadamard matrix. By (53), we have
+Φ𝐻
+ℎ𝐲𝑙= 𝜂𝑙Φ𝐻
+ℎΦℎ𝐐𝑙𝐬+ Φ𝐻
+ℎΦℎ𝐰𝑙
+= 𝟏𝑁∕𝑀⊗[𝑀𝜂𝑙
+(𝐈𝑀×𝑁𝐐𝑙𝐬) + 𝑀(𝐈𝑀×𝑁𝐰𝑙
+)] ,
+(A.2)
+where 𝟏𝑁∕𝑀= [1, 1, … , 1]𝑇
+𝑁∕𝑀 and ⊗ denotes the Kronecker product, 
+Π𝑀×𝑁= [
+𝐈𝑀
+𝐈𝑀
+…
+𝐈𝑀
+]. In detail, we have 
+Π𝑀×𝑁𝐬=
+[∑𝑁∕𝑀−1
+𝑖=0
+𝑠(𝑖𝑀𝛥+ 𝑡0), … , ∑𝑁∕𝑀−1
+𝑖=0
+𝑠(𝑖𝑀𝛥+ (𝑀−1)𝛥+ 𝑡0)
+]
+.
+(A.3)
+On the other hand,
+Π𝑀×𝑁𝐐𝑙𝐬
+=
+⎡
+⎢
+⎢⎣
+∑𝑁∕𝑀−1
+𝑖=0
+𝑠(𝑖𝑀𝛥+ 𝑡0 −𝜏𝑙0
+) 𝑒
+𝑗2𝜋𝑓𝑑𝑙
+(
+𝑖𝑀𝛥+𝑡0−𝜏𝑙0
+)
+, …
+∑𝑁∕𝑀−1
+𝑖=0
+𝑠((𝑖𝑀+ 𝑀−1)𝛥+ 𝑡0 −𝜏𝑙0
+) 𝑒
+𝑗2𝜋𝑓𝑑𝑙
+(
+(𝑖𝑀+𝑀−1)𝛥+𝑡0−𝜏𝑙0
+)
+, …
+⎤
+⎥
+⎥⎦
+𝑇
+,
+=
+[
+∑𝑁∕𝑀−1
+𝑖=0
+𝑠(𝑖𝑀𝛥+ 𝑡0 −𝜏𝑙0
+) 𝑒𝑗2𝜋𝑓𝑑𝑙(𝑖𝑀𝛥)𝑒𝑗2𝜋𝑓𝑑𝑙(𝑡0−𝜏𝑙0 ), …
+∑𝑁∕𝑀−1
+𝑖=0
+𝑠((𝑖𝑀+ 𝑀−1)𝛥+ 𝑡0 −𝜏𝑙0
+) 𝑒𝑗2𝜋𝑓𝑑𝑙((𝑖𝑀+𝑀−1)𝛥)𝑒𝑗2𝜋𝑓𝑑𝑙(𝑡0−𝜏𝑙0 ), …
+]𝑇
+.
+(A.4)
+Define another term
+𝐘𝑙=
+⎡
+⎢
+⎢
+⎢⎣
+∑𝑁∕𝑀−1
+𝑖=0
+𝑠
+(
+𝑖𝑀𝛥+ 𝑡0 −𝜏𝑙0
+)
+𝑒
+𝑗2𝜋𝑓𝑑𝑙
+(
+𝑡0−𝜏𝑙0
+)
+, …
+∑𝑁∕𝑀−1
+𝑖=0
+𝑠
+(
+𝑖𝑀𝛥+ (𝑀−1)𝛥+ 𝑡0 −𝜏𝑙0
+)
+𝑒
+𝑗2𝜋𝑓𝑑𝑙
+(
+(𝑀−1)𝛥+𝑡0−𝜏𝑙0
+)
+⎤
+⎥
+⎥
+⎥⎦
+𝑇
+In 𝐘1, the time-shift and frequency-shift relationship is retained. Then 
+in (56), due to the additional unknown term 𝑒𝑗2𝜋𝑓𝑑1(𝑖𝑀𝛥), the relation-
+ship will be broken.
+Appendix B. Derivation of Σ𝝉
+Let
+𝐳1 = 𝜂1𝐐1𝐬+ 𝐰1 = 𝐫+ 𝐰1,
+𝐲𝑘= 𝜂𝑘Φ𝑘𝐐𝑘𝐬+ Φ𝑘𝐰𝑘= 𝜂1𝑘Φ𝑘𝐐1𝑘𝐫+ Φ𝑘𝐰𝑘,
+(B.1)
+where 𝜂1𝑘= 𝜂𝑘∕𝜂1. Then we have 
+𝐲𝑘= 𝜂1𝑘Φ𝑘𝐐1𝑘(𝐳1 −𝐰1) + Φ𝑘𝐰𝑘,
+(B.2)
+Taking the 1st-order Taylor expansion at
+𝐲𝑘= 𝜂1𝑘Φ𝑘𝐐𝑘
+|||||
+(̂
+𝜏1𝑘,̂𝑓1𝑘
+)
+(𝐳1 −𝐰1
+)
++ 𝜂1𝑘Φ𝑘
+𝜕𝐐1𝑘
+𝜕𝜏1𝑘
+|||||
+(̂
+𝜏1𝑘,̂𝑓1𝑘
+)
+(𝐳1 −𝐰1
+) 𝛥𝜏1𝑘
++ 𝜂1𝑘Φ𝑘
+𝜕𝐐1𝑘
+𝜕𝑓1𝑘
+|||||
+(̂
+𝜏1𝑘,̂𝑓1𝑘
+)
+(𝐳1 −𝐰1
+) 𝛥𝑓1𝑘+ Φ𝑘𝐰𝑘,
+≈𝜂1𝑘Φ𝑘𝐐𝑘
+|||||
+(̂
+𝜏1𝑘,̂𝑓1𝑘
+)
+(𝐳1 −𝐰1
+)
++ 𝜂1𝑘Φ𝑘
+𝜕𝐐1𝑘
+𝜕𝜏1𝑘
+|||||
+(̂
+𝜏1𝑘,̂𝑓1𝑘
+)𝐳1𝛥𝜏1𝑘
++ 𝜂1𝑘Φ𝑘
+𝜕𝐐1𝑘
+𝜕𝑓1𝑘
+|||||
+(̂
+𝜏1𝑘,̂𝑓1𝑘
+)𝐳1𝛥𝑓1𝑘+ Φ𝑘𝐰𝑘,
+(B.3)
+where
+𝜕𝐐1𝑘𝐳1
+𝜕𝜏1𝑘
+= −𝑗𝑓𝑘1𝐐1𝑘𝐳1 −𝑗2𝜋
+𝑁𝛥𝐃𝑓1𝑘𝐅𝐻𝐃𝜏1𝑘diag {̂𝐧} 𝐅𝐳1,
+(B.4)
+𝜕𝐐1𝑘𝐳1
+𝜕𝑓1𝑘
+= 2𝜋⋅(jdiag {𝛥𝑛} 𝐐1𝑘𝐳1 −𝑗𝜏1𝑘𝐐1𝑘𝐳1
+) ,
+(B.5)
+Let 𝐠𝜏
+1𝑘= 𝜂1𝑘Φ𝑘𝐐1𝑘
+|||||
+(̂
+𝜏1𝑘,̂𝑓1𝑘
+),
+𝐠𝑓
+1𝑘= 𝜂1𝑘Φ𝑘
+𝜕𝐐1𝑘
+𝜕𝑓1𝑘
+|||||
+(̂
+𝜏1𝑘,̂𝑓1𝑘
+),
+𝐠𝜏
+1𝑘= 𝜂1𝑘Φ𝑘
+𝜕𝐐1𝑘
+𝜕𝜏1𝑘
+|||||
+(̂
+𝜏1𝑘,̂𝑓1𝑘
+).
+For expression simplicity, and by (60), we have: 
+𝛥𝑓1𝑘=
+(𝐠𝜏
+1𝑘𝐳1
+)𝐻[𝐲𝑘−𝐠1𝑘
+(𝐳1 −𝐰1
+) −𝐠𝜏
+1𝑘𝐳1𝛥𝜏1𝑘−Φ𝑘𝐰𝑘
+]
+(𝐠𝜏
+1𝑘𝐳1
+)𝐻(𝐠𝜏
+1𝑘𝐳1
+)
+(B.6)
+Substitute (63) into (60) gives
+𝛥𝜏1𝑘=
+(
+𝐠𝜏,𝑓
+1𝑘
+)𝐻⎧
+⎪
+⎨
+⎪⎩
+[𝐲𝑘−𝐠1𝑘𝐳1 + 𝐠1𝑘𝐰1 −Φ𝑘𝐰𝑘
+]
+−
+(
+𝐠𝑓
+1𝑘𝐳1
+)[(
+𝐠𝑓
+1𝑘𝐳1
+)𝐻(𝐲𝑘−𝐠1𝑘𝐳1+𝐠1𝑘𝐰1−Φ𝑘𝐰𝑘
+)]
+(
+𝐠𝑓
+1𝑘𝐳1
+)𝐻(
+𝐠𝑓
+1𝑘𝐳1
+)
+⎫
+⎪
+⎬
+⎪⎭
+(
+𝐠𝜏,𝑓
+1𝑘
+)𝐻(
+𝐠𝜏,𝑓
+1𝑘
+)
+(B.7)
+=
+(
+𝐠𝜏,𝑓
+1𝑘
+)𝐻
+(
+𝐈𝑀−
+(
+𝐠𝑓
+1𝑘𝐳1
+)(
+𝐠𝑓
+1𝑘𝐳1
+)
+(
+𝐠𝑓
+1𝑘𝐳1
+)𝐻(
+𝐠𝑓
+1𝑘𝐳1
+)
+𝐻)
+(
+𝐠𝜏,𝑓
+1𝑘
+)𝐻(
+𝐠𝜏,𝑓
+1𝑘
+)
+(𝐲𝑘−𝐠1𝑘𝐳1 + 𝐠1𝑘𝐰1 −Φ𝑘𝐰𝑘
+)
+(B.8)
+= 𝐆𝜏,𝑓
+1𝑘
+(𝐲𝑘−𝐠1𝑘𝐳1 + 𝐠1𝑘𝐰1 −Φ𝑘𝐰𝑘
+)
+(B.9)
+where
+𝐆𝜏,𝑓
+1𝑘= 𝐠𝜏
+1𝑘𝐳1 −
+(
+𝐠𝑓
+1𝑘𝐳1
+) [(
+𝐠𝑓
+1𝑘𝐳1
+)𝐻(𝐠𝜏
+1𝑘𝐳1
+)]
+(
+𝐠𝑓
+1𝑘𝐳1
+)𝐻(
+𝐠𝑓
+1𝑘𝐳1
+)
+.
+By (64) and the fact that 𝐰𝑘 is zero-mean and statistically indepen-
+dent circular complex Gaussian noise, we have
+cov (𝛥𝜏1𝑖𝛥𝜏1𝑗
+)
+Signal Processing 234 (2025) 109987 
+9 
+
+
+=== PDF PAGE 10 ===
+M.-Y. You et al.
+=
+⎧
+⎪
+⎪
+⎪
+⎪
+⎨
+⎪
+⎪
+⎪
+⎪⎩
+‖‖‖𝐆𝜏,𝑓
+1𝑖
+(𝐲𝑖−𝐠1𝑖𝐳1
+)‖‖‖
+2 +
+(
+𝐆𝜏,𝑓
+1𝑖𝐠1𝑖
+) (
+𝐆𝜏,𝑓
+1𝑖𝐠1𝑖
+)𝐻
+𝜎2
+1
++
+(
+𝐆𝜏,𝑓
+1𝑖Φ𝑖
+) (
+𝐆𝜏,𝑓
+1𝑖Φ𝑖
+)𝐻
+𝜎2
+𝑖
+𝑖= 𝑗
+Re
+⎧
+⎪
+⎨
+⎪⎩
+[
+𝐆𝜏,𝑓
+1𝑖
+(𝐲𝑖−𝐠1𝑖𝐳1
+)] [
+𝐆𝜏,𝑓
+1𝑗
+(𝐲𝑗−𝐠1𝑗𝐳1
+)]𝐻
++
+(
+𝐆𝜏,𝑓
+1𝑖𝐠1𝑖
+) (
+𝐆𝜏,𝑓
+1𝑗𝐠1𝑗
+)𝐻
+𝜎2
+1
+⎫
+⎪
+⎬
+⎪⎭
+𝑖≠𝑗
+,
+where cov(𝛥𝜏1𝑖𝛥𝜏1𝑗) is the element of Σ𝜏 on its 𝑖th row and 𝑗th column.
+Data availability
+No data was used for the research described in the article.
+References
+[1] A. Amar, A.J. Weiss, Localization of narrowband radio emitters based on Doppler 
+frequency shifts, IEEE Trans. Signal Process. 56 (11) (2008) 5500–5508.
+[2] K.C. Ho, W. Xu, An accurate algebraic solution for moving source location 
+using TDOA and FDOA measurements, IEEE Trans. Signal Process. 52 (9) (2004) 
+2453–2463.
+[3] K.C. Ho, L. Yang, On the use of a calibration emitter for source localization in 
+the presence of sensor position uncertainty, IEEE Trans. Signal Process. 56 (1) 
+(2008) 5758–5772.
+[4] G. Wang, S. Cai, Y. Li, N. Ansari, A bias-reduced nonlinear WLS method for 
+TDOA/FDOA-based source localization, IEEE Trans. Veh. Technol. 65 (10) (2016) 
+8603–8614.
+[5] X. Qu, L. Xie, W. Tan, Iterative constrained weighted least squares source 
+localization using TDOA and FDOA measurements, IEEE Trans. Signal Process. 
+65 (15) (2017) 3900–4003.
+[6] D. Wang, J. Yin, T. Zhang, C. Jia, F. Wei, Iterative constrained weighted least 
+squares estimator for TDOA and FDOA positioning of multiple disjoint sources in 
+the presence of sensor position and velocity uncertainties, Digit. Signal Process. 
+48 (2019) 179–205.
+[7] T. Tirer, A.J. Weiss, Performance analysis of a high-resolution direct position 
+determination method, IEEE Trans. Signal Process. 65 (3) (2017) 544–554.
+[8] D. Wang, P. Zhang, Z. Yang, F. Wei, C. Wang, A novel estimator for TDOA 
+and FDOA positioning of multiple disjoint sources in the presence of calibration 
+emitters, IEEE Access 8 (2020) 1613–1643.
+[9] A.J. Weiss, Direct position determination of narrowband radio frequency 
+transmitters, IEEE Signal Process. Lett. 11 (5) (2004) 513–516.
+[10] A.J. Weiss, A. Amar, Direct geolocation of stationary wideband radio signal 
+based on time delays and Doppler shifts, in: IEEE Workshop Stat. Signal Process, 
+Cardiff, U.K., 2009, pp. 101–104.
+[11] A.Y. Sidi, A.J. Weiss, Delay and Doppler induced direct tracking by particle filter, 
+IEEE Trans. Aerosp. Electron. Syst. 50 (1) (2014) 559–572.
+[12] A.J. Weiss, Direct geolocation for wideband emitters based on delay and Doppler, 
+IEEE Trans. Signal. Process. 41 (8) (2011) 2513–2521.
+[13] J. Li, L. Yang, F. Guo, W. Jiang, Coherent summation of multiple short-time 
+signals for direct positioning of a wideband source based on delay and Doppler, 
+Digit. Signal. Process. 48 (2016) 58–70.
+[14] Z. Lu, B. Ba, J. Wang, W. Li, D. Wang, A direct position determination with 
+combined TDOA and FDOA based on particle filter, Chin. J. Aeronaut. 31 (1) 
+(2018) 161–168.
+[15] F. Ma, F. Guo, L. Yang, Direct position determination of moving sources based 
+on delay and Doppler, IEEE Sensors J. 20 (14) (2020) 7859–7869.
+[16] Y.T. Chan, F. Chan, S. Rajan, B.H. Lee, Direct estimation of time difference 
+of arrival from compressive sensing measurements, in: The 3rd International 
+Workshop on Compressed Sensing Theory and Its Applications To Radar, Sonar 
+and Remote Sensing, Pisa, Italy, 2015, pp. 273–276.
+[17] H. Cao, Y.T. Chan, H.C. So, Maximum likelihood TDOA estimation from 
+compressed sensing samples without reconstruction, IEEE Signal Process. Lett. 
+24 (5) (2017) 564–568.
+[18] H. Cao, Y.T. Chan, H.C. So, Compressive TDOA estimation: Cramér-rao bound 
+and incoherent processing, IEEE Trans. Aerosp. Electron. Syst. 56 (4) (2020) 
+3326–3331.
+[19] R. Baraniuk, Compressive sensing, IEEE Signal Process. Mag. 24 (4) (2007) 
+118–121.
+[20] B. Li, Y. Zou, Y. Zhu, Direction estimation under compressive sensing framework: 
+A review and experimental results, in: Proc. IEEE Int. Conf. Inf. Autom, 2011, 
+pp. 63–68.
+[21] D. Yang, H. Li, G.D. Peterson, A. Fathy, Compressive sensing TDOA for UWB 
+positioning systems, in: Proc. IEEE Radio Wireless Symp, 2011, pp. 194–197.
+[22] K. Fyhn, S.H. Jensen, M.F. Duarte, Compressive time delay estimation using 
+interpolation, in: Proc. IEEE Global Conf. Signal Inf. Process, 2013, p. 624.
+[23] S. Salari, F. Chan, Y.T. Chan, W. Read, TDOA estimation with compressive 
+sensing measurements and Hadamard matrix, IEEE Trans. Aerosp. Electron. Syst. 
+54 (6) (2018) 3137–3142.
+[24] M. Niu, S. Salari, I.-M. Kim, F. Chan, S. Rajan, Recovery probability analysis 
+for sparse signals via OMP, IEEE Trans. Aerosp. Electron. Syst. 51 (4) (2015) 
+3475–3479.
+[25] D.P. Wipf, B.D. Rao, Sparse Bayesian learning for basis selection, IEEE Trans. 
+Signal Process. 52 (8) (2004) 2153–2164.
+[26] M.-Y. You, A.-N. Lu, Y.-X. Ye, K. Huang, C. Lou, Direct position determination 
+using compressive sensing measurements without reconstruction, IEEE Trans. 
+Aerosp. Electron. Syst. 59 (2) (2023) 2036–2043.
+[27] A. Weiss, G.W. Wornell, One-bit direct position determination of narrowband 
+Gaussian signals, in: Proc. of IEEE SSP, 2021, pp. 466–470.
+[28] D. Wang, J. Yin, R. Liu, H. Yu, Y. Wang, Performance analysis and improvement 
+of direct position determination based on Doppler frequency shifts in presence 
+of model errors: case of known waveforms, Multidim. Syst. Signal Process. 30 
+(2019) 749–790.
+[29] G. Wu, M. Zhang, F. Guo, Self-calibration direct position determination using 
+a single moving array with sensor gain and phase errors, Signal Process. 173 
+(107587) (2020) 1–11.
+[30] J. Yin, D. Wang, F. Nie, N. Zheng, Single-step geolocation for a non-circular 
+source in the presence of satellite orbit perturbations, IET Signal Process. 16 
+(2022) 170–200.
+[31] S.M. Kay, Fundamentals of statistical signal processing: Estimation theory, in: 
+Englewood Cliffs, Prentice-Hall, NJ, USA, 1993.
+Signal Processing 234 (2025) 109987 
+10 

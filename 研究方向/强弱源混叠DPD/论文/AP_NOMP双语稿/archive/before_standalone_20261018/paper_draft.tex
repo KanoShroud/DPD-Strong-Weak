@@ -1,0 +1,71 @@
+% !TeX program = xelatex
+% Main manuscript: Elsevier CAS single-column, Chinese working draft.
+% Original CAS sample and the previous manuscript are preserved in archive/.
+\providecommand{\PaperRoot}{./}
+\makeatletter
+\edef\input@path{{\PaperRoot}{\PaperRoot template/}}
+\makeatother
+\PassOptionsToPackage{no-math}{fontspec}
+\documentclass[a4paper,fleqn]{cas-sc}
+\usepackage[UTF8,scheme=plain,fontset=windows]{ctex}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{bm,tabularx,longtable}
+\usepackage{algorithm,algpseudocode}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit}
+\usepackage{placeins,needspace}
+\hypersetup{unicode=true,hidelinks}
+\pdfstringdefDisableCommands{\def\\{ }}
+\graphicspath{{\PaperRoot}}
+\numberwithin{equation}{section}
+\numberwithin{figure}{section}
+\numberwithin{table}{section}
+\renewcommand{\figurename}{图}
+\renewcommand{\tablename}{表}
+\renewcommand{\abstractname}{摘要}
+\floatname{algorithm}{算法}
+\algrenewcommand{\algorithmicrequire}{\textbf{输入：}}
+\renewcommand{\refname}{参考文献}
+\newcommand{\R}{\mathbb R}
+\newcommand{\C}{\mathbb C}
+\newcommand{\E}{\mathbb E}
+\newcommand{\Rea}{\operatorname{Re}}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\diag}{\operatorname{diag}}
+\setlength{\emergencystretch}{2em}
+\widowpenalty=10000
+\clubpenalty=10000
+% No author information has been supplied. Keep the draft footer factual.
+\ExplSyntaxOn
+\cs_set:Npn \__first_footerline:
+  { \small\rmfamily\itshape Signal~Processing\quad 中文初稿 }
+% CAS 2.4 uses a zero-width keyword overlay; stretchable glue preserves its
+% position while avoiding the template's artificial overfull-box diagnostic.
+\exp_args:Nc \patchcmd { environment~Abstract~code }
+  { \box \g_stm_key_box } { \box \g_stm_key_box \hss }
+  { } { \PackageError{paper}{CAS~abstract~compatibility~patch~failed}{} }
+\cs_new_eq:NN \paper_printorcid: \printorcid
+\RenewDocumentCommand \printorcid { }
+  { \seq_if_empty:NF \g_stm_orcid_seq { \paper_printorcid: } }
+\ExplSyntaxOff
+\begin{document}
+\let\WriteBookmarks\relax
+\shorttitle{未知宽带强弱重叠源的高效直接定位}
+\shortauthors{}
+\title[mode=title]{未知宽带强弱重叠源的高效直接定位：\\多候选联合精修与波形消元更新}
+% Add the real author, affiliation and correspondence here before submission.
+\input{\PaperRoot sections/abstract}
+\maketitle
+\input{\PaperRoot sections/introduction}
+\input{\PaperRoot sections/model}
+\input{\PaperRoot sections/methods}
+\input{\PaperRoot sections/experiments}
+\FloatBarrier
+\input{\PaperRoot sections/conclusion}
+\FloatBarrier
+\appendix
+\input{\PaperRoot sections/appendix}
+\FloatBarrier
+\bibliographystyle{\PaperRoot template/cas-model2-names}
+\bibliography{\PaperRoot references/references}
+\end{document}

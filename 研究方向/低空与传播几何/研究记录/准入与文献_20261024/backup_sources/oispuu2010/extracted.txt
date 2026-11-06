@@ -1,0 +1,1286 @@
+
+=== PDF PAGE 1 ===
+Direct detection and position determination of multiple sources
+with intermittent emission$
+M. Oispuu , U. Nickel
+Fraunhofer FKIE, Department of Sensor Data and Information Fusion, Neuenahrer Str. 20, 53343 Wachtberg, Germany
+a r t i c l e i n f o
+Article history:
+Received 23 December 2009
+Received in revised form
+3 May 2010
+Accepted 5 May 2010
+Available online 13 May 2010
+Keywords:
+Direct position determination
+Array processing
+Emitter localization
+Maximum likelihood estimation
+a b s t r a c t
+This paper investigates the direct position determination (DPD) problem from passive
+measurements made with a moving antenna array in the case of a time-varying number
+of emitting sources. We derive the Crame´r-Rao bound (CRB) for the estimation problem
+and ﬁnd an approximation that is applicable for a large number of observations. We use
+different DPD approaches to solve the estimation problem. Therein, all source positions
+are estimated directly from a single cost function that results from fusing all
+measurements. The considered DPD approaches are based on Capon’s method and the
+maximum likelihood (ML) estimation. The ML approach offers a superior performance
+compared to the Capon-type approach, but leads to a high-dimensional optimization.
+We use the alternating projection technique to solve the high-dimensional optimization
+by a sequence of low-dimensional optimizations. Finally, we propose an iterative direct
+detection and position determination (DDPD) approach that combines the aforemen-
+tioned DPD and the determination of the total number of sources (commonly called
+detection), because the total number of sources is typically unknown. We present
+simulation results that demonstrate the performance of the DDPD approach.
+& 2010 Elsevier B.V. All rights reserved.
+1. Introduction
+Localization of multiple sources using passive sensor
+arrays is a fundamental task encountered in various
+ﬁelds like wireless communication, radar, sonar, radio
+astronomy, and seismology. Passive bearings-only locali-
+zation (BOL) can be realized by multiple sensors, a moving
+sensor, or both. A moving platform on a known path is the
+preferable solution in many applications. The sensor
+is typically airborne e.g. on an aircraft, a helicopter, or a
+drone. Also of special importance is underwater acoustic
+localization using hydrophone arrays on a submarine.
+We consider a scenario with N observations of Q
+stationary narrowband far-ﬁeld sources. An array delivers
+a batch of data snapshots (complex output data vectors)
+with a sufﬁciently high data rate, i.e. the scenario is
+assumed
+to
+be
+stationary
+during
+one
+batch
+and
+non-stationary from batch to batch.
+The traditional approach to solve the localization
+problem consists of four steps (Fig. 1). After some
+pre-processing of the sensor data, the directions of
+arrival (DOAs) of all sources at all measurement points
+are estimated with a direction ﬁnding (DF) algorithm, like
+the subspace-based multiple signal classiﬁcation (MUSIC)
+method. Typically, DF systems report measurements of
+different
+origin,
+e.g.
+true
+sources
+and
+clutter
+(false
+alarms). Then a bearing data association step follows to
+partition the DOAs into sets of DOAs belonging to the
+same source. Multiple hypotheses tracking (MHT) is
+generally accepted as the preferred method for solving
+the measurement-to-track association problem [2]. In the
+last step, the DOAs for each source are used to estimate its
+position with the help of a suitable BOL algorithm, e.g. the
+bearings can be intersected to determine the emitter
+Contents lists available at ScienceDirect
+journal homepage: www.elsevier.com/locate/sigpro
+Signal Processing
+ARTICLE IN PRESS
+0165-1684/$ - see front matter & 2010 Elsevier B.V. All rights reserved.
+doi:10.1016/j.sigpro.2010.05.010
+$ The paper has been published in parts on the EUSIPCO 2009
+conference [1].
+ Corresponding author. Fax: +49 228 856 277.
+E-mail addresses: marc.oispuu@fkie.fraunhofer.de (M. Oispuu),
+ulrich.nickel@fkie.fraunhofer.de (U. Nickel).
+Signal Processing 90 (2010) 3056–3064
+
+
+=== PDF PAGE 2 ===
+position (triangulation). Aspects of the two-dimensional and
+three-dimensional BOL and bearings-only tracking problem
+examined in the literature include estimation algorithms,
+estimation accuracy, and source observability [3].
+Recently, some direct position determination (DPD)
+methods based on the antenna outputs without comput-
+ing intermediate parameters like DOAs have been pro-
+posed (Fig. 2). The basic idea for a subspace-based DPD
+approach goes back to the pioneering work of Wax and
+Kailath [4]. They noted that in this way the measurement-
+to-track association step is avoided. Moreover, this kind of
+approach was used for a multiarray network in order to
+estimate
+the
+positions
+of
+multiple
+sources
+without
+explicitly computing DOAs and times of arrival (TOAs)
+[5]. Maximum likelihood (ML) methods can be found e.g.
+in [6,7], but they are computationally more demanding in
+the case of multiple sources. The cyclic DPD algorithm for
+cyclostationary signals has been introduced in [8]. In a
+previous
+work
+we
+proposed
+a
+subspace-based
+DPD
+approach (referred to as subspace data fusion) for a
+single moving array [9]. Moreover, we have shown that
+the DPD approach can be extended to estimate the source
+states (e.g. positions, velocities) [10].
+In all these DPD approaches, the parameters of interest
+are obtained by minimizing a single cost function into
+which all array data batches enter jointly (Fig. 2). The
+estimation accuracy of the source state obtained in this
+way is much better than the traditional localization
+approach
+in
+situations
+where
+the
+variance
+of
+DOA
+estimates deviates from the corresponding Crame´r-Rao
+bound (CRB).
+However, the methods presented so far only investi-
+gate the case where the number of emitting sources is
+constant. Farina et al. derived the CRB for the general case
+that the probability of detection is smaller than unity [11].
+We extend the results to the case of multiple sources with
+intermittent emission and adapt them to derive the CRB
+for the DPD problem. We present two DPD approaches
+based on Capon’s (CPN) method [12] and deterministic
+ML [13]. We show that the positioning accuracy of the
+ML-DPD approach is much better compared to the
+CPN-DPD
+approach
+in
+situations
+of
+a
+time-varying
+number of emitting sources, but this approach leads to a
+high-dimensional optimization problem. We use the
+alternating projection (AP) technique to solve the high-
+dimensional optimization by a sequence of low-dimen-
+sional
+optimizations
+similar
+to
+results
+in
+[14].
+The
+considered DPD approaches require knowledge of the
+total number of sources, but in practice this number is
+unknown. We propose an iterative solution that combines
+the DPD and the determination of the total number of
+sources. In the area of signal processing this is commonly
+referred to as detection. This direct detection and position
+determination (DDPD) approach uses a sequence of
+statistical tests to decide if the choice of the source
+number is correct. The basis of the tests is the fact that the
+optima of the ML-DPD cost function are w2- distributed.
+We present simulation results that demonstrate the
+performance of the DDPD approach.
+This paper is organized as follows: Section 2.1 intro-
+duces the concept of emitting/non-emitting sequences,
+Section 2.2 presents the data model, and Section 2.3
+formulates the estimation problem. In Section 2.4 we
+derive the CRB for the described DPD problem and ﬁnd an
+approximation which is applicable for practical purposes.
+In Section 3.1, we outline the considered DPD approaches,
+in Section 3.2 we compare the DPD approaches in
+simulations and investigate the performance of the DPD
+approaches. In Section 3.3 we propose the novel DDPD
+approach. The conclusions are given in Section 4.
+The following notations are used throughout this
+paper: ðÞT
+and ðÞH denote transpose and Hermitian
+transpose, respectively; In and 0n denote the n  n-
+dimensional identity and zero matrix, respectively; and
+Efg denotes the expectation operation.
+2. Detection and estimation problem
+We
+consider
+an
+antenna
+array
+composed
+of
+M
+elements mounted on a moving platform and a scenario
+with Q ﬁxed sources located at xq=(xq,yq,zq)T, q=1,y,Q, in
+the far-ﬁeld of the antenna array. The receivers are
+assumed to receive narrowband signals (i.e. the receiving
+bandwidth is much smaller than the reciprocal of the time
+ARTICLE IN PRESS
+Fig. 1. Basic steps of the traditional localization approach.
+Fig. 2. Basic steps of the DPD approach.
+M. Oispuu, U. Nickel / Signal Processing 90 (2010) 3056–3064
+3057
+
+
+=== PDF PAGE 3 ===
+delay across the array) with wavelengths centered around
+a common wavelength l. The sensor moves along an
+arbitrary
+but
+known
+trajectory
+(Fig.
+3).
+During
+the
+movement of the array, N data batches are collected at
+the sensor positions rn, n=1,y,N. The geometry between
+the q-th source and the observer at the n-th time slot is
+given by the relative vector
+DrnðxqÞ ¼ rnxq:
+ð1Þ
+2.1. Emitting/non-emitting sequences
+For N observations, 2N possible emitting/non-emitting
+sequences per source can be formed. The k-th possible
+sequence reads Sq,k ¼ ðb1,q, . . . ,bN,qÞk, k ¼ 1, . . . ,2N, where
+bn,q is a binary variable that corresponds to the case where
+the q-th source, q=1,y,Q, is emitting or non-emitting at
+time tn, n=1,y,N. For a given emitting probability Pe,q,
+which is constant over the number of observations, the
+probability
+of
+occurrence
+of
+a
+particular
+emitting/
+non-emitting sequence is given by
+PðSq,kÞ ¼ PNk
+e,qð1Pe,qÞNk,
+ð2Þ
+where Nk and Nk ¼ NNk are the number of observations
+where the q-th source does emit or does not emit,
+respectively.
+We call the collection for the sequences of each source
+an event. For Q sources, 2NQ collections of independent
+emitting/non-emitting sequences are the possible events.
+The probability of
+occurrence of a
+particular event
+Ek1...kQ ¼ ðS1,k1, . . . ,SQ,kQ ÞT, is given by
+PðEk1...kQ Þ ¼
+Y
+Q
+q ¼ 1
+PðSq,kqÞ:
+ð3Þ
+Given a particular event Ek1...kQ , the effective number of
+emitting sources at time instant n is given as
+Qn ¼
+X
+Q
+q ¼ 1
+bn,q:
+ð4Þ
+To illustrate the nature of (2) and (3) with a simple
+example,
+we
+consider
+just
+N=4
+observations
+of
+a
+single source. For example the emitting/non-emitting
+sequence S1,k1 ¼ ð1,1,0,1Þ has the probability of occur-
+rence PðS1,k1Þ ¼ P3
+e,1ð1Pe,1Þ. For a second source with the
+sequence S2,k2 ¼ ð1,1,1,1Þ, the corresponding event has
+the probability of occurrence PðEk1,k2Þ ¼ P3
+e,1ð1Pe,1ÞP4
+e,2.
+Similar expressions can be written for the remaining
+events.
+2.2. Data model
+Let sn,k,q denote the complex envelope of the k-th
+sample, k=1,y,K, of the q-th source signal measured at
+time tn if this source emits, i.e. bn,q=1, and let zn,k 2 CM1
+denote the complex envelopes formed from the signals
+received by the array elements. This received vector can
+be expressed as
+zn,k ¼
+X
+Q
+q ¼ 1
+anðxqÞbn,qsn,k,q þwn,k,
+ð5Þ
+where wn,k 2 CM1 is the complex envelope of the noise.
+Assume the array be sampled sequentially at K different
+and mutually exclusive time slots, and assume that the
+array transfer vectors an(xq) can be considered quasistatic
+in each slot, i.e. the sensor’s displacement during each
+time slot is negligible (Fig. 3). The array transfer vector
+expresses the complex response at time tn to a planar
+wavefront arriving from the direction of the relative
+position DrnðxqÞ in (1). We assume that the antenna array
+is perfectly calibrated in which case the array transfer
+vector can be parameterized by the source positions:
+anðxqÞ ¼ ðejkT
+nðxqÞd1, . . . ,ejkT
+nðxqÞdMÞT:
+ð6Þ
+The array transfer vector depends on the wavenumber
+vector
+knðxqÞ ¼ 2p
+l
+DrnðxqÞ
+jDrnðxqÞj ,
+ð7Þ
+and
+the
+m-th
+antenna
+array
+element
+position
+dm,
+m=1,y,M, in earth-ﬁxed coordinates relative to the
+position rn, n=1,y,N. If the attitude of the sensor changes
+from observation to observation, the orientation of the
+sensor-ﬁxed coordinate system is commonly given by the
+heading angle cn, the pitch angle yn, and the roll angle
+fn. Then, the m-th antenna array element position in
+sensor-ﬁxed coordinates reads
+dn,m ¼ Rðcn,yn,fnÞdm,
+ð8Þ
+where Rðcn,yn,fnÞ is a suitable rotation matrix. For the
+sake of simplicity, we assume that the antenna attitude
+does
+not
+change
+with
+time,
+i.e.
+the
+orientation
+of
+the sensor-ﬁxed coordinate system is ﬁxed during the
+batches, i.e. dn,m=dm, n=1,y,N.
+ARTICLE IN PRESS
+Fig. 3. Geometry for the scenario of multiple ﬁxed sources and a single
+moving sensor.
+M. Oispuu, U. Nickel / Signal Processing 90 (2010) 3056–3064
+3058
+
+
+=== PDF PAGE 4 ===
+Eq. (5) can be written more compactly as
+zn,k ¼ AnðnnÞbn,k þwn,k,
+ð9Þ
+where
+AnðnnÞ ¼ ½anðx1Þ . . . anðxQnÞ 2 CMQn
+ð10Þ
+is the array transfer matrix that contains the array
+transfer vectors of the emitting sources, and
+nn ¼ ðxT
+1, . . . ,xT
+QnÞT 2 R3Qn1,
+bn,k ¼ ðsn,k,1, . . . ,sn,k,QnÞT 2 CQn1
+ð11Þ
+denote subsets from the complete parameter vectors
+n ¼ ðxT
+1, . . . ,xT
+QÞT 2 R3Q1,
+sn,k ¼ ðsn,k,1, . . . ,sn,k,QÞT 2 CQ1
+ð12Þ
+w.r.t. the effective number of emitting sources Qn in the
+n-th batch.
+Now, we introduce the compact data model
+zk ¼ AðnÞbk þwk
+ð13Þ
+by stacking the vectors on top and using a block-diagonal
+matrix:
+zk ¼ ðzT
+1,k, . . . ,zT
+N,kÞT 2 CMN1,
+AðnÞ ¼ diag½A1ðn1Þ . . . ANðnNÞ 2 CMNP
+nQn,
+bk ¼ ðbT
+1,k, . . . ,bT
+N,kÞT 2 C
+P
+nQn1,
+wk ¼ ðwT
+1,k, . . . ,wT
+N,kÞT 2 CMN1:
+2.3. Problem formulation
+The received data batches depend on the array transfer
+vectors, which depend on the relative vectors, which
+themselves depend on the desired source positions. Now,
+the problem is stated as follows: Estimate all source
+positions n from all received data batches Z. To solve the
+DPD problem, the following assumptions are made:
+A1. Every set of Qn array transfer vectors is linearly
+independent [15], i.e. the corresponding Qn DOAs are
+different and Qn oM, n=1,y,N.
+A2. The noise vectors wk, k=1,y,K, in (13) are zero-mean
+complex Gaussian. They are temporally and spatially
+uncorrelated with the covariances
+EfwkwH
+k0g ¼ s2
+wIMNdk,k0,
+EfwkwT
+k0g ¼ 0MN,
+ð14Þ
+where dk,k0
+denotes the Kronecker delta and the
+receiver noise variance s2
+w is known.
+A3. The signal vectors bn,k, n=1,y,N, k=1,y,K, in (9) are a
+given sequence of vectors and need to be estimated
+(deterministic data model). This does not exclude the
+possibility that the signals are sampled from a
+random process. Furthermore, this does not exclude
+the possibility of the signals being coherent. It should
+be pointed out that unlike synthetic aperture techni-
+ques, which exploit high correlation between the
+successive snapshots, no such correlation is assumed
+here.
+A4. We assume that Q is a priori known. In Section 3.3,
+we assume that Qn, n=1,y,N, the effective number of
+sources in each batch, is also known.
+The method most commonly referred to for detecting
+the number of sources was ﬁrst introduced in [16]
+and is based on Akaike’s information criterion (AIC)
+and Rissanen’s minimum description length (MDL)
+principle. It is well-known, that AIC tends to over-
+estimate even at high signal-to-noise ratio (SNR),
+while MDL tends to underestimate at low or moder-
+ate SNR with ﬁnite observations.
+2.4. Crame´r-Rao bound (CRB)
+For judging an estimation problem it is important to
+know the maximum estimation accuracy that can be
+attained given all measurements Z. It is well-known
+that the CRB provides a lower bound on the estimation
+accuracy
+for
+any
+unbiased
+estimator
+^qðZÞ
+and
+its
+parameter dependencies reveal characteristic features of
+the estimation problem. Given a particular event Ek1...kQ ,
+all target parameters are comprised in the vector
+q ¼ ðb
+T
+1, ~b
+T
+1, . . . ,b
+T
+K, ~b
+T
+K,nTÞT 2 R2KP
+nQn þ3Q1,
+ð15Þ
+where bk and ~bk are the real and imaginary part of the
+source signals. Then, the conditional CRB is related
+to the covariance matrix C of the estimation error
+Dq ¼ q ^qðZÞ as
+C ¼ EfDqDqTjEk1...kQ gZCRBðqjEk1...kQ Þ,
+ð16Þ
+where the inequality means that the matrix difference is
+positive semideﬁnite. If the estimator attains the CRB,
+then it is called efﬁcient. The CRB is given by the inverse
+Fisher information matrix (FIM)
+JðqjEk1...kQ Þ ¼ E
+@LðZ;qÞ
+@q
+
+ @LðZ;qÞ
+@q
+
+TEk1...kQ
+(
+)
+,
+ð17Þ
+where
+LðZ;qÞ ¼ KMNlnðps2
+wÞ 1
+s2w
+X
+K
+k ¼ 1
+jzkAðnÞbkj2
+ð18Þ
+is the log-likelihood function and the parameters refer to
+the event Ek1...kQ . In this log-likelihood function, zk are
+random variables due to the randomness of wk, k=1,y,K,
+and the expectation operation in (17) is w.r.t. these
+random variables.
+Performing all calculations analog to [13], we obtain
+the deterministic CRB for all source positions after some
+algebra (Assumption A2):
+CRBðnjEk1...kQ Þ ¼ s2
+w
+2
+X
+K
+k ¼ 1
+RefBH
+k DHP?
+AðnÞDBkg
+ 
+!1
+ð19Þ
+ARTICLE IN PRESS
+M. Oispuu, U. Nickel / Signal Processing 90 (2010) 3056–3064
+3059
+
+
+=== PDF PAGE 5 ===
+with
+Bk ¼ I3Q  bk 2 C3QP
+nQn3Q,
+D ¼ ½D1 . . . DQ 2 CMN3QP
+nQn,
+Dq ¼ @A
+@xq
+, @A
+@yq
+, @A
+@zq
+
+
+2 CMN3P
+nQn,
+P?
+AðnÞ ¼ IMNAðAHAÞ1AH,
+where  denotes the Kronecker product.
+The bound in (19) is conditioned on the particular
+event Ek1...kQ . The unconditional CRB is obtained by taking
+expectation over all events and using (3):
+CRBðnÞ ¼
+X
+k1
+  
+X
+kQ
+PðEk1...kQ ÞCRBðnjEk1...kQ Þ:
+ð20Þ
+Note that although the number of possible events 2NQ
+grows exponentially with the number of batches N and
+sources Q, the probabilities of the vast majority of events
+given by (3) are negligible.
+The events to be neglected can be determined as
+follows: The cumulative distribution function (CDF) fq of
+the number of batches N ¼ 0, . . . ,N with the non-emitting
+q-th source is given by [11, (23)]
+fqðNÞ ¼
+X
+N
+n ¼ 0
+N
+n
+
+
+PNn
+e,q ð1Pe,qÞn:
+ð21Þ
+By deﬁnition, fqðNÞ ¼ 1. Above a certain threshold value
+Nthr,q,
+all
+events
+corresponding
+to
+this
+sequences
+can be safely ignored in the calculation of the CRB in
+(20) for all practical purposes. The threshold value Nthr,q
+can be determined by progressively computing (21) for
+N ¼ 0,1,2, . . . until its value is greater than some CDF
+threshold fthr, which should be chosen to be marginally
+smaller than 1, e.g. fthr ¼ 0:99, i.e. [11, (24)]
+Nthr,q ¼ minfN, s:t: fqðNÞ4fthrg:
+ð22Þ
+This strategy ensures that only events are considered that
+contribute signiﬁcantly. Eq. (23) gives the number of
+events Lapprox to take into account in the approximate
+calculation of the CRB (20):
+Lapprox ¼
+Y
+Q
+q ¼ 1
+X
+N thr,q
+n ¼ 0
+N
+n
+
+
+52NQ:
+ð23Þ
+A reduction of fthr would correspond to less computa-
+tional load but also to a reduced accuracy.
+As an example, we consider three sources (Q=3) with
+the emitting probabilities Pe,1=1, Pe,2=0.7, and Pe,3=0.9,
+and N=12 observations. Then, the total number of all
+possible events is L=16,777,216. Fig. 4 displays the CDF
+given by (21). For the given sources, it is very unlikely
+that sequences with more than 0, 7, and 4 misses, respec-
+tively, occur. Consequently, sequences can be ignored,
+and we take Lapprox=2,621,788 events into account to
+evaluate (20).
+3. Solving the problem
+DPD approaches rely on the same key idea as the
+localization approach of Wax and Kailath for decentra-
+lized array processing [4]. They mentioned that this kind
+of estimation offers the advantage that the association
+problem inherent in the traditional method is circum-
+vented. Furthermore, no intermediate parameters like
+DOAs or additional parameters like DOA variances are
+necessary.
+For the problem speciﬁed in Section 2.3, the ML
+estimate is that value of q which maximizes (18). Thus,
+the ML estimate minimizes the least squares (LS) form
+2
+s2w
+X
+N
+n ¼ 1
+X
+K
+k ¼ 1
+jzn,kAnðnnÞbn,kj2:
+ð24Þ
+Using Assumption A3, we consider the deterministic data
+model, i.e. the signal vectors bn,k, n=1,y,N, k=1,y,K, need
+to be estimated. The ML estimators for all nn of the signals
+are given by the LS solution
+^bn,k ¼ ðAH
+n ðnnÞAnðnnÞÞ1AH
+n ðnnÞzn,k:
+ð25Þ
+Inserting (25) into (24), we obtain a cost function of the
+desired location parameters n
+f ðnÞ ¼ 2K
+s2w
+X
+N
+n ¼ 1
+trfP?
+AnðnnÞ ^Rng
+ð26Þ
+with
+P?
+X ¼ IMPX ¼ IMXðXHXÞ1XH,
+ð27Þ
+where PX is a M  M-dimensional projection matrix that
+projects onto the column space of X, P?
+X projects onto the
+corresponding orthogonal complement of the columns of
+X, and
+^Rn ¼ 1
+K
+X
+K
+k ¼ 1
+zn,kzH
+n,k
+ð28Þ
+is the estimated covariance matrix of the received signals
+at the sensor position rn, n=1,y,N. Then, (26) denotes the
+residual error after signal extraction.
+ARTICLE IN PRESS
+0
+2
+4
+6
+8
+10
+12
+0
+0.2
+0.4
+0.6
+0.8
+1
+¯N →
+q (N) →
+Pe, 1 = 1
+,Pe, 2 = 0.7
+,Pe,3 = 0.9
+¯
+←− Nthr, 1
+¯Nthr, 3
+¯Nthr, 2
+thr = 0.99
+Fig. 4. CDF for Q=3 sources and N=12 observations.
+M. Oispuu, U. Nickel / Signal Processing 90 (2010) 3056–3064
+3060
+
+
+=== PDF PAGE 6 ===
+3.1. DPD approaches
+In this section we outline the DPD approaches (Fig. 2)
+to solve the localization problem with the assumption
+that the number of sources Q is known. Note that the
+proposed DPD approaches do not account for the emitting
+probabilities Pe,q, because they are not sensor parameters
+like the probability of detection.
+The considered DPD approaches are based on Capon’s
+method and ML estimation using a low-dimensional or
+high-dimensional optimization, respectively. Therein, the
+source positions are calculated directly in one step from
+the covariance matrices at all sensor positions. We
+mention that, alternatively, the corresponding subspace
+data can be used by a MUSIC-type or SSF-type (subspace
+ﬁtting) approach [1]. It is well-known that MUSIC gives
+superior resolution and tends to be power independent in
+comparison to Capon’s method, but it is important to note
+that DPD approaches based on the subspaces require the
+knowledge of the effective number of sources per batch
+Qn, n=1,y,N, (Assumption A4), while DPD approaches
+based on the covariance matrices do not need any a priori
+knowledge
+about
+the
+effective
+number
+of
+emitting
+sources.
+3.1.1. Capon DPD approach (CPN-DPD)
+This DPD approach uses a Capon-type cost function
+[12]. The source positions are calculated directly in one
+step by fusing the covariances of all batches:
+^xCPN-DPD ¼ arg min
+x
+X
+N
+n ¼ 1
+aH
+n ðxÞ ^R
+1
+n anðxÞ,
+ð29Þ
+where the array transfer vector (Eq. (6)) is parameterized
+by the source position x. The cost function shows minima
+for a proper choice of x, if the covariance matrix of each
+batch is consistent with to the corresponding array
+transfer vector.
+3.1.2. Maximum likelihood DPD approach (ML-DPD)
+The ML estimate of all source locations is given by
+maximizing the likelihood function (18) or minimizing
+(26) and substituting nn with n. This leads to
+^nMLDPD ¼ arg min
+n
+X
+N
+n ¼ 1
+trfP?
+AnðnÞ ^Rng,
+ð30Þ
+where the array transfer matrix in (10) is parameterized
+by the source locations n. This approach is based on the
+full data covariance matrices and leads to a single
+optimization in 3Q dimensions. The cost function is highly
+nonlinear and multimodal.
+3.1.3. Alternating projection DPD technique (AP-DPD)
+The solution of the ML-DPD approach can be found by
+adapting the DF algorithm based on the alternating
+projection (AP) technique described in [14]. The iterative
+AP technique is a simple technique for multidimensional
+optimization. Therein, at every iteration a minimization is
+performed w.r.t. a single parameter while all other
+parameters are held ﬁxed. To solve the DPD problem,
+we hold all parameters of a single source ﬁxed. Then, the
+AP-DPD algorithm performs the 3Q-dimensional optimi-
+zation by optimizing a sequence of 3-dimensional cost
+functions (Assumption A4). The q-th source position
+estimate
+at
+the
+(i+1)-th
+iteration
+is
+obtained
+by
+[14, (16.a)]
+^xiþ1
+q
+¼ arg max
+x
+X
+N
+n ¼ 1
+trfP½Anð^n
+i
+:qÞ,anðxÞ
+^Rng,
+ð31Þ
+where ^n
+i
+:q is a vector of the computed parameters in the i-
+th iteration step, but without the parameters of the q-th
+source [14, (16.b)]:
+^n
+i
+:q ¼ ð^xi T
+1 , . . . , ^xi T
+q1, ^xi T
+qþ1, . . . , ^xi T
+Q ÞT 2 R3ðQ1Þ1:
+ð32Þ
+Let A and B be two arbitrary matrices with the same
+number of rows M, and PðAjBÞ denote the projection matrix
+onto the columns space of the composite matrix ðAjBÞ. The
+projection matrix decomposition lemma (or projection
+matrix update formula) reads
+PðAjBÞ ¼ PA þPP?
+A B,
+ð33Þ
+where P?
+AB is the residual of the columns of B when
+projected on A. A proof of (33) can be found e.g. in
+[17, Section 9.1].
+The cost function in (31) can be simpliﬁed by the
+projection matrix decomposition lemma in (33):
+^xiþ1
+q
+¼ arg max
+x
+X
+N
+n ¼ 1
+bH
+n ðx, ^n
+i
+:qÞ ^Rnbnðx, ^n
+i
+:qÞ
+bH
+n ðx, ^n
+i
+:qÞbnðx, ^n
+i
+:qÞ
+,
+ð34Þ
+with the vector
+bnðx, ^n
+i
+:qÞ ¼ P?
+Anð ^n
+i
+:qÞanðxÞ:
+Eq. (34) can be interpreted as a conventional beamformer
+in direction x with deterministic nulling of sources at
+locations ^n
+i
+:q.
+3.2. Comparison of the DPD approaches
+As an illustration, we consider a scenario in which the
+sensor moves along an arc from (0.5,0.5,0.5)T to
+(0.5,0.5,0.5)T km. Two sources are located on the ground
+at the positions x1= (0,0.5,0)T km and x2=(0,0.5,0)T km
+(Fig. 5a). Furthermore, we consider a uniform circular
+array (UCA) with M=10 elements:
+dm ¼ l
+2 sin p
+M
+
+1
+cos 2mp
+M ,sin 2mp
+M
+,0
+
+T
+:
+ð35Þ
+Assuming that the sensor moves always above each
+source (Dzn,q 40, q=1,y,Qn, n=1,y,N), the considered
+problem has a unique solution, because the condition for
+unique DF of narrowband sources holds (Assumption A1),
+and the observability condition established in [18] is
+satisﬁed.
+Moreover, we assume N=12 batches with K=100
+samples per batch. For the emitted waveforms of each
+source we assume that they have constant amplitude at
+all sensor positions: jsn,k,qj ¼ s, and we deﬁne the SNR of a
+single source and single element: SNR ¼ s2=s2
+w.
+ARTICLE IN PRESS
+M. Oispuu, U. Nickel / Signal Processing 90 (2010) 3056–3064
+3061
+
+
+=== PDF PAGE 7 ===
+Figs. 5b–f compare the cost functions of the DPD
+approaches for a ﬁxed z-coordinate and an SNR=0 dB. In
+Fig. 5d the coordinates of the ﬁrst source are ﬁxed
+and the function over the remaining two variables is
+plotted. In Fig. 5b, we assume an emitting probability
+of
+Pe,1=Pe,2=1.
+The
+CPN-DPD
+cost
+function
+displays
+well-pronounced minima at the true source positions
+and no further local minima. In the following cases, the
+emitting probability of the second source is reduced to
+Pe,2=0.7. Then, the CPN-DPD cost function introduces
+signiﬁcant
+errors
+due
+to
+missing
+targets
+(Fig.
+5c),
+while
+the
+ML-DPD
+cost
+function
+can
+account
+for
+missing signals (Fig. 5d), because there are more degrees
+available for ﬁtting. Note that for some rare events the
+CPN-DPD cost function displays no minimum at the
+location of the second source.
+ARTICLE IN PRESS
+−1
+−0.5
+0
+0.5
+1
+−1
+−0.5
+0
+0.5
+1
+x [km] →
+y [km] →
+−1
+−0.5
+0
+0.5
+1
+−1
+−0.5
+0
+0.5
+1
+x [km] →
+y [km] →
+−1
+−0.5
+0
+0.5
+1
+−1
+−0.5
+0
+0.5
+1
+x2 [km] →
+y2 [km] →
+−1
+−0.5
+0
+0.5
+1
+−1
+−0.5
+0
+0.5
+1
+x [km] →
+y [km] →
+−1
+−0.5
+0
+0.5
+1
+−1
+−0.5
+0
+0.5
+1
+x [km] →
+y [km] →
+−1
+−0.5
+0
+0.5
+1
+−1
+−0.5
+0
+0.5
+1
+x [km] →
+y [km] →
+scenario
+source 2
+source 1
+sensor
+path
+Pe, 1 = Pe, 2 = 1
+Pe, 1 = 1, Pe, 2 = 0.7
+Pe, 1 = 1, Pe, 2 = 0.7
+Pe, 1 = 1, Pe, 2 = 0.7
+Pe, 1 = 1, Pe, 2 = 0.7
+Fig. 5. Scenario (a); Cuts through cost function of the CPN-DPD approach (b,c) the ML-DPD approach (d), the AP-DPD approach (e,f) with the true (circles)
+and estimated (crosses) positions for the given emitting probabilities.
+M. Oispuu, U. Nickel / Signal Processing 90 (2010) 3056–3064
+3062
+
+
+=== PDF PAGE 8 ===
+The AP-DPD cost function after the ﬁrst iteration is
+depicted in Fig. 5e for the ﬁrst source and in Fig. 5f for the
+second source. We ﬁnd the same results for the ML-DPD
+and the AP-DPD approach, e.g. compare Fig. 5d and f.
+For the considered scenario, Monte Carlo simulations
+with 2000 runs have been carried out to study the
+performance of the CPN-DPD and ML-DPD approach. In
+our simulations, we use the simplex method of Nelder and
+Mead [19] to ﬁnd the minima of the cost functions, and
+we initialize every search with the true value. We
+mention that one can use the AP technique to solve the
+initialization problem [14].
+For the case of Pe,1=1 and Pe,2=0.7, we show in Fig. 6
+only
+the
+root
+mean
+square
+error
+(RMSE)
+of
+the
+y-coordinate, because the RMSE of the other coordinates
+have a similar form. The RMSE reveals that the ML-DPD
+approach
+performs
+much
+better
+than
+the
+CPN-DPD
+approach. For the ﬁrst source, both estimators attain the
+CRB, which is the expected asymptotic performance. For
+the second source, the ML-DPD estimator considerably
+outperforms the CPN-DPD approach. The CPN-DPD does
+not reach the CRB (solid line), because the position
+estimates are biased. The dashed line denotes the CRB
+for the case that the source emits continuously. Note that
+we ﬁnd a similar performance for both approaches in the
+cases of a single source with intermittent emission or
+multiple sources with continuous emission.
+3.3. Direct detection and position determination (DDPD)
+approach
+In practice, the total number of sources Q is unknown, but
+the proposed approaches in Section 3.1 require the knowl-
+edge of Q in order to choose the correct dimension of n.
+A statistical test is necessary to decide that the choice of ^Q is
+correct. The basis of the test proposed here is the following
+observation which is similar to the result in [20, Section IV]
+for the DF problem: The quantity (24) is w2n- distributed with
+n ¼ 2KNM degrees of freedom. Since the source signals need
+to be estimated (Assumption A3), the quantity fðnÞ in (26) is
+still w2n- distributed, but with n ¼ 2K PN
+n ¼ 1ðMQnÞ degrees
+of freedom. For many degrees of freedom ðn430Þ, the w2n-
+distribution can be approximated by a normal distribution
+with mean n and variance 2n.
+Now we outline the proposed DDPD approach. We
+perform a sequence of tests with increasing number of
+sources ^Q ¼ Q0, . . . ,M starting with some value Q0, e.g.
+Q0=1 or Q0 ¼ minfQng. First, we estimate the location
+parameters of the assumed number of sources, ^n 2 R
+^Q 1,
+using one of the DPD approaches described in Section 3.1.
+Then, the ﬁrst test in the nested sequence of tests is as
+follows:
+H : fð^nÞ  w2
+n, i:e: fð^nÞrw2
+a;n,
+A : :H, i:e: fð^nÞ4w2
+a;n,
+ð36Þ
+where the quantity w2a;n is the a- percentage point of the
+w2n- distribution. If the quantity fð^nÞ is consistent with
+the expected w2n- distribution, then we stop, otherwise we
+increase the number of sources
+^Q and re-estimate all
+location parameters. We keep testing until (26) ﬁts the
+expected w2n- distribution. The probability of overestimat-
+ing the number of sources, i.e. the probability of false
+alarms, will be equal to a, if all tests are independent. The
+case of an imperfect detection leads to false targets
+ð ^Q 4QÞ or misses ð ^Q oQÞ. The detected number of
+sources should never be smaller than the true number,
+because this would imply misses.
+Note, that the proposed approach requires the knowl-
+edge about the receiver noise variance s2
+w and the
+effective
+number
+of
+emitting
+sources
+Qn,
+n=1,y,N
+(Assumption A4).
+In order to verify accuracy of the proposed approach,
+we perform simulations. We use the same scenario as in
+Section 3.2, but an additional third source is located at
+x3=(1,0,0)T km with the corresponding emitting probabil-
+ity Pe,3=0.9. Fig. 7 shows the performance of the proposed
+test for a scenario with Q=3 sources each with an SNR of
+[10;5;0;5;10;15] dB, and a ¼ 0:99. We have plotted
+the frequency of selecting different values of Q from 1000
+trials. In approx. 99% of the cases, we ﬁnd the true number
+ARTICLE IN PRESS
+−20
+−15
+−10
+−5
+0
+5
+10
+100
+101
+102
+RMSE (y) [m] →
+source 2
+source 1
+SNR [dB] →
+Fig. 6. Square-root of the CRB (solid lines) and the estimated RMSE for
+CPN-DPD (dash-dot square lines) and ML-DPD (dashed diamond lines)
+versus SNR for y-coordinate.
+−10 −5 0
+5
+10 15
+1 2 3 4 5 6 7 8 9 10
+0
+20
+40
+60
+80
+100
+ˆQ →
+SNR [dB] →
+# [%] →
+Fig. 7. Detection probabilities for Q=3 sources.
+M. Oispuu, U. Nickel / Signal Processing 90 (2010) 3056–3064
+3063
+
+
+=== PDF PAGE 9 ===
+for all considered SNR values. In this simulation, the
+assumption of known Qn, n=1,y,N, leads to optimistic
+results in the case of low SNR.
+4. Conclusions
+We investigated the DPD problem for multiple sources
+with intermittent emission. Therefore, we derived the
+deterministic
+CRB
+and
+presented
+a
+computationally
+convenient approximation of the CRB, which is applicable
+for practical purposes. Furthermore, we proposed DPD
+approaches based on the data covariance matrices using a
+low- or high-dimensional optimization. We used the AP
+technique to solve the high-dimensional optimization
+by a sequence of low-dimensional optimizations. In
+simulations, we demonstrated the superior performance
+of the ML-DPD approach over the CPN-DPD approach.
+Consequently, the ML-DPD (and AP-DPD) approach offers
+a tactical advantage for locating sources with intermittent
+emission. We proposed an iterative DDPD approach to
+determine the number of sources and the corresponding
+source locations. We investigated the proposed method in
+simulations. Note that the approaches can be extended to
+moving sources.
+References
+[1] M. Oispuu, Direct state determination of multiple sources with
+intermittent emission, in: Proceedings of the 17th European Signal
+Processing Conference (EUSIPCO), Glasgow, Scotland, 2009, pp.
+1948–1952.
+[2] S.S. Blackman, Multiple hypothesis tracking for multiple target
+tracking, IEEE Aerosp. Electron. Syst. Mag. 19 (2004) 5–18.
+[3] K. Becker, Target motion analysis (TMA), in: S. Stergioulos (Ed.),
+Advanced Signal Processing Handbook, CRC Press, New York, NY,
+2001, pp. 284–301 (Chapter 9).
+[4] M. Wax, T. Kailath, Decentralized processing in sensor arrays, IEEE
+Trans. Acoust., Speech, Signal Process. 33 (1985) 1123–1129.
+[5] A.J. Weiss, A. Amar, Direct position determination of multiple radio
+transmitters, in: S. Chandran (Ed.), Advances in Direction-of-Arrival
+Estimation, Artech House, Norwood, MA, 2006, pp. 213–239
+(Chapter 11).
+[6] A.J. Weiss, Direct position determination of narrowband radio
+frequency
+transmitters,
+IEEE
+Signal
+Process.
+Lett.
+11
+(2004)
+513–516.
+[7] A. Amar, A.J. Weiss, A decoupled algorithm for geolocation of
+multiple emitters, Signal Process. 87 (2007) 2348–2359.
+[8] A.M. Reuven, A.J. Weiss, Direct position determination of cyclosta-
+tionary signals, Signal Process. 89 (2009) 2448–2464.
+[9] B. Demissie, M. Oispuu, E. Ruthotto, Localization of multiple sources
+with a moving array using subspace data fusion, in: Proceedings of
+the ISIF 11th International Conference on Information Fusion,
+Cologne, Germany, 2008, pp. 131–137.
+[10] M. Oispuu, B. Demissie, Multiple source target motion analysis with
+a moving array using subspace data fusion, FKIE Report 169,
+Research Establishment of Applied Science (FGAN), Wachtberg,
+December 2008.
+[11] A. Farina, B. Ristic, L. Timmoneri, Crame´r-Rao bound for nonlinear
+ﬁltering with Pd o1 and its application to target tracking, IEEE
+Trans. Signal Process. 50 (2002) 1916–1924.
+[12] J. Capon, High-resolution frequency-wavenumber spectrum analy-
+sis, Proc. IEEE 57 (1969) 1408–1418.
+[13] P. Stoica, A. Nehorai, MUSIC, maximum likelihood, and Crame´r-Rao
+bound, IEEE Trans. Acoust., Speech, Signal Process. 37 (1989)
+720–741.
+[14] I. Ziskind, M. Wax, Maximum likelihood localization of multiple
+sources by alternating projection, IEEE Trans. Acoust., Speech,
+Signal Process. 36 (1988) 1553–1560.
+[15] M. Wax, I. Ziskind, On unique localization of multiple sources by
+passive sensor arrays, IEEE Trans. Acoust., Speech, Signal Process.
+37 (1989) 996–1000.
+[16] M. Wax, T. Kailath, Detection of signals by information theoretic
+criteria, IEEE Trans. Acoust., Speech, Signal Process. 33 (1985)
+387–392.
+[17] U. Nickel, Angle estimation with adaptive arrays and its relation to
+super-resolution, microwaves, antennas and propagation, IEE Proc.
+H 134 (1987) 77–82.
+[18] K. Becker, Simple linear theory approach to TMA observability, IEEE
+Trans. Aerosp. Electron. Syst. 29 (1993) 575–578.
+[19] J.A. Nelder, R. Mead, A simplex method for function minimization,
+Comput. J. 7 (1965) 308–313.
+[20] M. Viberg, B. Ottersten, T. Kailath, Detection and estimation in
+sensor array using weighted subspace ﬁtting, IEEE Trans. Signal
+Process. 39 (1991) 2436–2449.
+ARTICLE IN PRESS
+M. Oispuu, U. Nickel / Signal Processing 90 (2010) 3056–3064
+3064

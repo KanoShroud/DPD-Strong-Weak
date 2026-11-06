@@ -1,0 +1,67 @@
+AKBARI AND VALAEE: DECIMETER LEVEL COOPERATIVE DIRECT LOCALIZATION WITH ISING MODEL APPROACH                                 14397
+
+
+                                                       one of the elements of s𝑝indicates LoS path is non-zero,
+                                                       and the rest are zero. However, in a multipath environment,
+                                                                 the signal is reflected from the objects in the environment.
+                                                   The received signal is a combination of both the LoS path
+                                                       and the reflections of the transmitted signal. Therefore, s𝑝has
+                                                               multiple non-zero components.
+                                                              Since the LoS paths of all the access points come from the
+                                                                  location of the source, the element in s𝑝corresponding to the
+                                                LoS path should be the same. Nevertheless, the NLoS paths
+                                                        stem from different locations in the environment; thus, they
+                                                     do not need to coincide.
+                                                     To estimate the location of the user, we need to estimate
+                                                      s𝑝for each access point. An effective method to do that is to
+Fig. 1. A two-dimensional environment and an arbitrary grid over it.       use compressed sensing. In the compressed sensing theory, a
+                                        𝐺×1 sparse signal can be reconstructed with 𝑀measurements,
+                                                      where 𝐺≫𝑀[16]. Then the joint signal recovery problem  In our method, we first grid our environment. Then, using
+                                                         can be formed as follows:the position information from our grid points, we form an
+over-complete array manifold to exploit compressed sensing.                𝑃
+                                                  ∑︁
+Next, we form our recovery problem, which  is NP-hard.          mins𝑝        ||s𝑝||0
+To solve this NP-hard problem, we restructure it into an Ising                  𝑝=1
+model.                                                                                               s.t.  ||y𝑝−𝚿𝑝s𝑝||22 < 𝜖, 𝑝= 1, 2, · · · , 𝑃      (11)
+                                                      where 𝜖is the maximum allowable mismatch between the
+A. Problem Formulation                                       observations and reconstructions.
+  Consider a grid over the environment, as shown in Fig. 1.     This problem is NP-hard. To find a solution, the common
+The set of grid points is denoted by S:                     methods are to either solve the problem with greedy methods
+                                                               or approximate  it with a tractable problem [16]. However,
+            S = {ˆp1, ˆp2, · · · , ˆp𝐺}                  (6)   in this paper, we solve the NP-hard problem using the binary
+where 𝐺is the total number of grid points and ˆp𝑖= [ ˆ𝑥𝑖, ˆ𝑦𝑖]𝑇.   approximation.
+  Now, assume the source is located at point ˆp𝑖∈S. As shown
+in Fig. 1, access point 𝑝measures the received signal from the   B. Binary Formulation
+source located at this point at the angle 𝜃(𝑖)𝑝and with the range                                                             Consider a set of signals transmitted from the source and
+𝑟(𝑖)𝑝. Using (4), the arriving angle is related to the position of   received by the receiver antenna arrays. These signals are taken
+the source by                                                  as unit gain symbols. Therefore, the elements of the vector s𝑝,
+                       ˆ𝑦𝑖−˜𝑦𝑝   𝜋                       which correspond to the gain of the transmitted signal at each
+           𝜃(𝑖)𝑝= arctan        +  −𝜋𝐼( ˆ𝑥𝑖< ˜𝑥𝑝).       (7)   grid point, will either be 0 or 1. Thus, we only need to estimate                        ˆ𝑥𝑖−˜𝑥𝑝    2
+                                                                 the support of our signals. So, (11) can be approximated with
+Also, considering (5), the range has the following relation with   a binary program as
+the position of the source                                              𝑃
+                                                  ∑︁
+                𝑟(𝑖)𝑝 = √︃ ( ˆ𝑦(𝑖) −˜𝑦𝑝)2 + ( ˆ𝑥(𝑖) −˜𝑥𝑝)2.           (8)        x𝑝∈{0,1}𝐺min          ||x𝑝||0                                                                                𝑝=1
+Considering this grid, we can form an over-complete array              s.t.     ||y𝑝−𝚿𝑝x𝑝||22 < 𝜖, 𝑝= 1, 2, · · · , 𝑃     (12)
+manifold matrix for each access point:
+                                                      where x𝑝∈{0, 1}𝐺is a sparse 𝐺×1 binary vector. This vector
+  𝚿𝑝= [a(𝜃(1)𝑝, 𝑟(1)𝑝), a(𝜃(2)𝑝, 𝑟(2)𝑝), · · · , a(𝜃(𝐺)𝑝    , 𝑟(𝐺)𝑝   )]    (9)    is the binary representation of s𝑝. Thus, all the elements of
+                                                    x𝑝should be zero except the elements that correspond to the
+where a(.) is defined in (2).
+                                                                  grid points that the signal emits from.
+  The measured received signal vector at access point 𝑝can
+                                                 As discussed above, all the access points share the same
+be modeled as follows:
+                                                LoS element x𝑝due to the fact that the mobile user is located
+              y𝑝= 𝚿𝑝s𝑝+ n𝑝                  (10)  on one of the grid points. Additionally, we are going to find
+                                                                 the location of the user which can be identified if the LoS
+where y𝑝is the 𝑀× 1 complex received signal, s𝑝is a                                                     component is estimated. We approximate all the binary signal
+𝐺× 1 complex vector of signal amplitudes for different grid                                                                 representations with the LoS component and therefore, we can
+points, n𝑝the 𝑀× 1 vector of white Gaussian noise, 𝚿𝑝is                                                          omit the 𝑝index and use the x vector instead.
+an 𝑀× 𝐺array manifold matrix.
+  As discussed in the previous section, s𝑝has a sparse nature.        min      ||x||0
+                                                                          x∈{0,1}𝐺
+We assume that the user is located at one of those 𝐺grid
+                                                                                                     s.t.     ||y𝑝−𝚿𝑝x||22 < 𝜖, 𝑝= 1, 2, · · · , 𝑃      (13)points. Therefore, in an environment with no reflections, only
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:02:33 UTC from IEEE Xplore. Restrictions apply.

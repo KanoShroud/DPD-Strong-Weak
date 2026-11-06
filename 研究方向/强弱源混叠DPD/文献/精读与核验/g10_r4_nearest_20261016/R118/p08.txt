@@ -1,0 +1,58 @@
+Y. Zeng et al.: QNOMP: A Quasi-Newton-Based Joint Multipath Optimization Method
+
+
+
+we first focus on one-dimensional frequency-domain channel    known. To overcome this difficulty, we introduce a linear
+extrapolation (with the spatial domain neglected) before    minimum mean squared error (LMMSE) estimator under the
+extending to the spatial-frequency joint case in Section IV-C.     conditional posterior to approximate the MMSE solution.
+  Let the extrapolated frequency points be f1, . . . , fK and      Given a posterior distribution p0(τ) = p(τ|h′), we define
+the corresponding frequency response vector is ae(τ) =    a specific joint distribution for (τ, β, h′) which is formulated
+[1, e−j2πτf1, . . . , e−j2πτfK ]. For simplicity, we assume fi =     as τ ∼p0(τ), β ∼CN(0, E), h′ = A0(τ)β + w′, w′ ∼
+(M + i −1)1f . The subsequent analysis can be generalized    CN(0, σ 2IM). Here τ, β and w′ are mutually independent.
+to arbitrary frequency configurations. To distinguish between    Under this joint distribution, we aim to solve the following
+estimation and extrapolation frequency bands, we denote the     linear minimum mean squared error (LMMSE) problem:
+sensing matrices for estimation and extrapolation as A0 =                                      2                                                                                                                                                     ˜h = Ah′ + b.    (19)                                                                                                      2,  s.t.A0(τ) = [aτ(τ1), . . . , aτ(τNp)] ∈CM×Np and Ae = Ae(τ) =       minA,b  Eτ,β,h′  ˜h −Ae(τ)β
+[ae(τ1), . . . , ae(τNp)] ∈CK×Np, respectively.
+  The estimation of channel parameters can be formulated      It can be shown that the solution to this problem is given by
+within a Bayesian framework. Based on the probability model          ˜h = Cov(Aeβ, h′)Cov(h′, h′)−1h′in (5), the posterior distribution of (τ, β|h′) under the channel
+                                    = Cov(Aeβ, A0β)(Cov(A0β, A0β) + σ 2IM)−1h′,  (20)model (2) is given by
+log P(τ, β|h′) = log P(h′|τ, β) + log P(τ, β)                where Cov(a, b)  =  Eτ|h′Eβ∼CN (0,E)abH  defines  the
+                 Z                                      covariance matrix of random vectors a and b under the
+            −log   P(τ, β, h′)dτdβ                                                                 specified joint distribution. We refer to this solution as the
+                                                                     linear optimal extrapolation (LOX). A detailed derivation of
+       = −1                                     log P(τ, β) + Const.,     the LMMSE estimator is provided in Appendix A.                          h′ −A0β  22 +                      2               σ
+                                                      (17)      The LOX offers a near-optimal approximation to the
+                                    MMSE estimator. Specifically, we have
+where P(τ, β) denotes the joint prior distribution of (τ, β)
+and the additional constant term is irrelevant to the estimation.    MMSE = Eτ|h′Ae(AH0 A0 + σ 2E−1)−1AH0 h′
+Assuming τ and β are independent with a non-informative                                       = Eτ|h′AeEAH0 (A0EAH0 + σ 2IM)−1h′.prior for τ and a complex Gaussian prior CN(0, E) on β, the
+                                                                                                                     (21)posterior distribution takes the form:
+                                          LOX = Cov(Aeβ, A0β)(Cov(A0β, A0β) + σ 2IM)−1h′                                       2     log P(τ|h′) ∼−1                                                      (18)                            h′ −A0β  2 −βHE−1β.                σ 2                                       = Eτ|h′AeEAH0 (Eτ|h′A0EAH0 + σ 2IM)−1h′.  (22)
+It can be observed that the optimization problem in (15)                                                   The discrepancy between the MMSE and LOX estimators
+minimizes the negative logarithm of the posterior distribution
+                                                                     arises from replacing the term A0EAH0  in (21) with  itswith respect  to (τ, β). Therefore, the QNOMP method                                                               expectation Eτ|h′A0EAH0 . This difference can be furthereffectively computes  the maximum a  posteriori (MAP)                                                              analyzed. In fact, we have
+estimate of (τ, β), where the regularization matrix E serves
+as  the  prior covariance matrix  of β. The  extrapolated      (AH0 A0 + σ 2E−1)−1AH0 −EAH0 (EA0EAH0 + σ 2IM)−1
+channel response at frequencies f1, . . . , fK is given by ˜h =
+                                                                               0 A0 + σ 2E−1)−1 AH0 (EA0EAH0 + σ 2IM)Ae(τ MAP) ˆβ.                             = (AH
+  The MAP estimator is widely used but not necessarily        −(AH0 A0                                          + σ 2E−1)EAH0 (EA0EAH0 + σ 2IM)−1
+optimal in terms of mean squared error. The minimum mean
+squared error (MMSE) estimator is given by the posterior     = (AH0 A0 + σ 2E−1)−1AH0 (EA0EAH0 −A0EAH0 )
+                                            + σ 2IM)−1.mean [59]: τ MMSE =  Eτ|h′τ, βMMSE =  Eβ|h′β. The                  · (EA0EAH0
+corresponding CSI with minimum extrapolation error is ˜h =
+Eτ|h′Ae(τ)E(β|τ, h′), where the conditional posterior mean    Thus, the discrepancy between the MMSE and LOX can be
+is E(β|τ, h′) = (AH0 A0 + σ 2E−1)−1AH0 h′, which coincides    bounded as
+exactly with (16). When the posterior distribution of τ|h′ is a
+                                          ∥MMSE −LOX∥22delta function δ(τ −τ MAP), the MMSE estimator reduces to
+the MAP estimator, which can be efficiently computed using      = O(Eτ|h′∥Eτ|h′A0EAH0 −A0EAH0 ∥22)
+QNOMP.                                 = O(X E∥Ea0(τi)a0(τi)H −a0(τi)a0(τi)H∥22)
+                                                                                                                                                       i
+A. LINEAR OPTIMAL EXTRAPOLATION BASED ON THE
+                                     = O(X X Var[exp(−j2π(k −j)1f τi)])POSTERIOR
+                                                                                                                                                       i    j,k
+The exact computation of the MMSE estimator is challeng-
+ing, as it involves evaluating high-dimensional integrals over      = O(X Var[τi|h′]).
+the conditional posterior even when the posterior form is                                     i
+
+
+VOLUME 13, 2025                                                                                                         212659

@@ -1,0 +1,82 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>几何推导与文献依据</title><style>
+:root{--ink:#193b43;--muted:#5c7175;--teal:#14746b;--paper:#f5f5ef;--line:#d7e2dd;--soft:#e8f1eb}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.85 "Segoe UI","Microsoft YaHei",sans-serif}a{color:var(--teal);text-underline-offset:4px;overflow-wrap:anywhere}a:hover{color:#0e4944}a:focus-visible,summary:focus-visible{outline:3px solid #b07e32;outline-offset:4px}.wrap{max-width:1120px;width:calc(100% - 64px);margin:auto}header{padding:32px 0 26px}header .eyebrow{color:var(--teal);font-size:13px;letter-spacing:.12em}h1{font-size:clamp(30px,4vw,48px);line-height:1.3;max-width:900px;margin:20px 0}header p{max-width:830px;font-size:18px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:26px 0 8px}.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:19px 23px}.stat b{font-size:28px;display:block}.stat span{font-size:13px;color:var(--muted)}nav{position:sticky;top:0;z-index:2;background:#f5f5eff5;border-block:1px solid var(--line);backdrop-filter:blur(8px)}nav .wrap{display:flex;gap:22px;overflow-x:auto;white-space:nowrap;padding-block:13px}nav a{text-decoration:none;font-size:14px;color:var(--ink)}main{padding-bottom:36px}main>h2{font-size:27px;line-height:1.45;margin:52px 0 18px;padding-top:12px;border-top:2px solid var(--teal)}p{margin:14px 0}main>p:first-child{color:var(--muted);font-size:13px}main>p:nth-child(2){font-size:20px;background:var(--soft);padding:22px 26px;border-radius:14px}blockquote{margin:20px 0;padding:18px 25px;background:var(--soft);border-left:4px solid var(--teal);border-radius:0 12px 12px 0}blockquote p{margin:0;font-size:19px}strong{font-weight:650}ol,ul{padding-left:26px}li+li{margin-top:12px}main>ol>li{padding:5px 0}table{width:100%;border-collapse:collapse;font-size:14px;background:white}th,td{text-align:left;vertical-align:top;padding:15px 18px;border-bottom:1px solid var(--line);min-width:160px}th{background:var(--soft)}tr:last-child td{border:0}.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:13px;margin:18px 0}details{background:#fff;border:1px solid var(--line);border-radius:12px;margin:12px 0}summary{padding:18px 22px;cursor:pointer;font-weight:650;line-height:1.6}summary:hover{background:#f0f6f1;border-radius:12px}.paper-body{padding:0 23px 18px;border-top:1px solid var(--line)}.paper-body p:first-child{font-size:15px}.paper-body p{margin:16px 0 0}.source-list ul{padding:0 30px 20px 45px;font-size:14px}.source-list span{color:var(--muted);white-space:nowrap}pre{overflow-x:auto;max-width:100%;padding:22px;border:1px solid var(--line);border-radius:13px;background:white;font:14px/1.9 Consolas,"Microsoft YaHei",monospace}code{overflow-wrap:anywhere;font-size:13px}footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--muted);font-size:13px}.pill{display:inline-block;border-radius:6px;background:var(--soft);color:var(--teal);font-size:12px;padding:4px 9px;margin-right:7px}.pill.amber{background:#f6ecd7;color:#855c28}#motion{scroll-margin-top:90px}
+@media(max-width:680px){.wrap{width:calc(100% - 32px)}header{padding-top:23px}.stats{gap:8px}.stat{padding:14px 11px}.stat b{font-size:23px}.stat span{font-size:12px}nav .wrap{gap:19px}main>h2{font-size:23px;margin-top:38px}main>p:nth-child(2),blockquote{padding:17px 19px;font-size:18px}summary{padding:16px}th,td{padding:13px;min-width:145px}pre{font-size:12px;padding:15px}}
+@media print{nav{position:static}details:not([open])>.paper-body{display:block}summary{list-style:none}.wrap{width:100%}.stats{break-inside:avoid}body{background:white}h2{break-after:avoid}}
+
+main{padding-top:16px}main>p:nth-child(2){font-size:14px;background:none;padding:0}h1{font-size:clamp(27px,4vw,38px)}.top{padding-top:25px}.intro{padding:20px;border-left:4px solid #177e80;background:#e6efea;border-radius:0 12px 12px 0}.table-wrap{overflow:auto}td{min-width:120px}summary{cursor:pointer;font-weight:650;padding:18px 0}details{border-top:1px solid #d4dfdc;margin-top:24px}code{overflow-wrap:anywhere}footer{padding:24px 0 50px;color:#627575}</style></head><body><div class="wrap top"><a href="../准入报告.html">← 文献准入总报告</a> · <a href="部署与多径歧义报告.html">本轮执行报告</a><p class="intro">从距离差方程与论文原文出发，区分几何双解、路径误关联和评分假峰。</p></div><main class="wrap"><h1>部署、路径归属与假位置：推导及原文对应</h1>
+<p>2026-10-25。模型核验记录，不是新算法贡献声明。</p>
+<h2>1 为什么合理部署能解决上一类双解</h2>
+<p>四个直达站共面，以站0为原点，平面正交基为E，法向量为n。候选位置写成p=s0+Ew+hn，参考距离为d0，距离差为r_i=d_i−d0，站点平面坐标为u_i=Eᵀ(s_i−s0)。平方距离相减得到</p>
+<p><code>2 u_iᵀ w + 2 r_i d0 = ||u_i||² − r_i²，i=1,2,3。</code></p>
+<p>这是关于两个平面坐标w和d0的三元线性系统。若增广系数矩阵满秩，w、d0唯一；再由<code>h²=d0²−||w||²</code>得到上下镜像。已知目标在安装平面上方且不在平面内，就只剩一个合法位置。还需回代未平方距离差方程，排除非法距离根。</p>
+<p>因此，“共面站点＋目标处于已知一侧”在上述非退化条件下，能排除<strong>正确四直达集合内部</strong>的双解。这是已有距离差几何的推论，不是新的论文创新。若矩阵奇异，结论不适用；不能从本批没有奇异样本推断整个工作域都非退化。</p>
+<h2>2 为什么仍可能出现另一套路径解释</h2>
+<p>令原观测到达长度为L_l。枚举某个候选四站集合I，求出位置p′，使这四站满足</p>
+<p><code>||p′−s_l|| − ||p′−s_ref|| = L_l − L_ref，l∈I。</code></p>
+<p>记Δ=||p′−s_ref||−L_ref。四站的候选直达长度就是L_l+Δ；剩余站的候选反射长度也取L_l+Δ。如果它大于候选直线距离，就满足当前模型的正绕行要求。将未知波形改写为<code>s′(t)=s(t+Δ/c)</code>，各站的时间平移恰好抵消，未知路径增益保持不变，所有接收样本可以完全相同。</p>
+<p>这里不是仅比较两根固定导向向量，而是比较<strong>允许重新估计未知波形、增益和反射参数之后的完整观测模型</strong>。另一源不变，等价仍可保留到双源混合IQ。若噪声分布相同，两套参数也给出相同观测分布；增加SNR或换搜索器不能保证区分这对参数。</p>
+<p>模型允许各NLOS延迟独立、每条路径常复增益未知。若加入公共墙面关系、可信的路径幅度先验或别的观测结构，需重新判断；本轮不把它们偷偷加入。</p>
+<h2>3 用户所说的“像真实位置的假响应”是什么</h2>
+<p>这是多径的重要机制。最直观的例子是镜面反射：对平面<code>nᵀx=b</code>，真实源p的镜像为<code>p*=p−2n(nᵀp−b)</code>（n为单位法向量）。在镜面点有效且可见时，一次反射的折线路径长度等于接收站到镜像点p*的直线距离。把反射误当直达，就可能把镜像点解释成源。</p>
+<p>但混合直达、不同反射面和不同路径可见性时，所有站不一定对应同一个镜像。当前数值反例用的是未知支持与独立反射延迟，不是已经验证某个共同建筑平面的镜像源。单条路径的镜面可行性不等于整个环境已通过共同墙面的光线追踪验证。</p>
+<p>还应区分三类问题：</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>含义</th>
+<th>处理方向</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>路径误关联/虚假一致性</td>
+<td>错误的路径集合也可能符合另一个位置的几何关系</td>
+<td>利用可观测结构排除或管理多解，不能只换峰值搜索</td>
+</tr>
+<tr>
+<td>评分函数假峰</td>
+<td>错误位置的目标值很高，原因可能是向量范数趋零或模型退化，并非真实物理解释相同</td>
+<td>修正目标、归一化或明确退化条件</td>
+</tr>
+<tr>
+<td>正确直达集合的几何双解</td>
+<td>路径归属都对，有限距离差仍对应多个位置</td>
+<td>检查部署、区域及可辨识条件</td>
+</tr>
+</tbody></table></div>
+<h2>4 参考论文如何描述</h2>
+<p>本轮在既有全文阅读基础上，针对问题重新核对以下原文页；不是仅凭标题或摘要归纳。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>原文</th>
+<th>具体描述及页码</th>
+<th>对当前研究的意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Scheuing &amp; Yang, <em>Disambiguation of TDOA Estimation for Multiple Sources in Reverberant Environments</em>, 2008，<a href="https://doi.org/10.1109/TASL.2008.2004533">正式DOI</a></td>
+<td>PDF第6页，刊页1484，§VI-D及Fig.10：零循环和是必要而非充分条件；反射产生的镜像接收点可使错误TDOA图也通过一致性检查，称为false consistency；之后再用定位残差消歧</td>
+<td>直接支持“错误路径也能形成看似自洽的几何解释”。但论文没有说所有这类假解都永远不可区分</td>
+</tr>
+<tr>
+<td>Du et al., <em>Unified Subspace Fitting Framework and Its Performance Analysis for Direct Position Determination in the Presence of Multipath Propagation</em>, 2019，<a href="https://doi.org/10.1109/ACCESS.2018.2889958">正式DOI</a></td>
+<td>PDF第2页/刊页6890：多径使相关函数出现多峰、路径与峰对应困难。PDF第7页/刊页6895，§III-E、Fig.6、式(31)—(34)：某些未归一化准则在错误位置因响应范数趋零而产生假极值，采用归一化处理</td>
+<td>提醒我们：空间谱假峰不全等于“另一物理位置真的产生相同信号”。该文模型/观测权限不能直接等同当前五站盲混合模型</td>
+</tr>
+<tr>
+<td>Garcia et al., <em>Direct Localization for Massive MIMO</em>, 2017，<a href="https://doi.org/10.1109/TSP.2017.2666779">正式DOI</a></td>
+<td>PDF第3页/刊页2477，§III-A、Fig.1及第5页：用各站LOS方向对应共同位置、NLOS作为局部分量的结构进行联合定位；使用高分辨率阵列方向信息和已知发射波形</td>
+<td>展示“跨站几何一致性＋路径分解”的常规思路；其额外观测信息不能免费搬给单天线未知波形场景</td>
+</tr>
+<tr>
+<td>Garcia et al., <em>High Precision TOA-based Direct Localization of Multiple Sources in Multipath</em>, 2015，<a href="https://arxiv.org/abs/1505.03193">预印本</a></td>
+<td>PDF第6页，Assumptions 2、3及Theorem 1：需要源对应的LOS站数，并假设只有真实位置与该数量的源路径一致；模型使用已知发射波形</td>
+<td>“足够多路径只能对应真位置”在这里是保证条件，而不是任意环境下由算法自动创造的事实。此条按当前取得版本标为预印本</td>
+</tr>
+</tbody></table></div>
+<h2>5 对研究问题的直接影响</h2>
+<p>合理的表述是：<strong>多径会产生额外到达分量和错误关联，其中一部分错误路径集合能够形成虚假位置；还需排除评分退化与几何双解。</strong> 核心不只是“有没有高峰”，而是“观测中的哪些结构能把错误解释排除”。</p>
+<p>本轮明确了一个可继续讨论的边界：部署解决了已知支持的一类歧义，未知路径归属仍未自动解决。后续如果维持当前自由路径模型，应研究有条件的可辨识性/多解，而不能承诺所有样本单一正确位置；若引入新的物理限制，应先有场景依据，再明确冻结，不能围绕反例事后调阈值。</p>
+</main><footer class="wrap">2026-10-25 · 本页说明模型与机制核验，不是性能排行榜。原始结果和失败尝试均保留。</footer></body></html>

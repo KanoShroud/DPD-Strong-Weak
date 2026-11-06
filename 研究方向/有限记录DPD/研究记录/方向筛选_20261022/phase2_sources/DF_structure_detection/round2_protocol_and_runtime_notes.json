@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-22",
+  "preflight_attempt": {
+    "status": "failed_output_binding",
+    "scope": [
+      "round2_baluev2008.pdf",
+      "round2_baluev2013.pdf",
+      "round2_davies2002.pdf"
+    ],
+    "error": "cannot bind CLI output: [Errno 129] anchored sidecar output requires POSIX dirfd operations",
+    "remediation": "run without --output; capture JSON stdout; apply_patch separate run-local sidecars",
+    "post_remediation": [
+      "PASS Baluev2008 7 pages",
+      "PASS Baluev2013 14 pages",
+      "PASS Davies2002 8 pages",
+      "PASS Davies1987 11 pages"
+    ]
+  },
+  "page_qa": [
+    {
+      "file": "round2_davies2002_page3.png",
+      "scope": "exact upper bounds equations 6,8 and geometric factor11 visually checked"
+    },
+    {
+      "file": "round2_baluev2013_page9.png",
+      "scope": "equations32/33, weak nonlinear previously detected base frequencies and asymptotic limitation visually checked"
+    },
+    {
+      "file": "round2_davies1987_page1.png",
+      "scope": "journal metadata, nuisance-only-alternative statement, unknown-frequency example visually checked"
+    }
+  ],
+  "protocol_deviation": {
+    "query": "\"False alarm probability for periodograms with correlated noise\"",
+    "reason": "removed arxiv from R2S10 after original results; actual variation saved with response rather than before call",
+    "impact": "transparent posthoc query variation; does not affect original evidence provenance or make search exhaustive"
+  },
+  "unretrieved": [
+    "2009 CDPD fulltext",
+    "2017 strict NC ML fulltext",
+    "2019 improved DDPD fulltext",
+    "2020 correlated noise periodogram fulltext"
+  ],
+  "no_experiment": true
+}

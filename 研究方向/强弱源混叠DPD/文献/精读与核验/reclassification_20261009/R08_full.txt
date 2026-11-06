@@ -1,0 +1,1028 @@
+--- PDF PAGE 1 ---
+320 
+IEEE  TRANSACTIONS 
+ON  ACOUSTICS,  SPEECH,  AND 
+SIGNAL  PROCESSING, 
+VOL. ASSP-24, NO. 4, AUGUST 1976 
+[7] J. L. Butler, “Comparative criteria for minicomputers,” 
+Instrum. 
+and  computer  simulation  results 
+for Gaussian and  television 
+Technol., vol. 17,  pp. 67-82,  Oct. 1970. 
+input signals,” Bell Syst. Tech. J., vol. 45, pp. 117-142, Jan. 
+[8] B. Liu,  “Effect 
+of finite  word  length 
+on accuracy of digital 
+1966. 
+filters-A  review,” 
+IEEE Trans. Circuit Theory, vol. CT-18, 
+[lo] D. J. Goodman and 
+A. Gersho, “Theory 
+of an adaptive quan- 
+pp. 
+ 
+670-677, 
+ 
+NOV. 
+ 
+1971. 
+ 
+tizer,” 
+IEEE Trans. Commun., vol. 
+ 
+COM-22, 
+pp. 
+ 
+1037-1045, 
+[9]  J. 
+B. O’Neal, Jr.,  “Delta  modulation  quantizing  noise  analytical 
+Aug. 1974. 
+The 
+ 
+Generalized 
+ 
+Correlation 
+Met 
+r 
+of Time 
+Abstruct-A maximum likelihood 
+(ML) estimator is developed for 
+determining  time  delay  between signals received at two spatially  sepa- 
+rated  sensors in the  presence  of  uncorrelated noise. This ML estimator 
+can be realized 
+as a pair of receiver prefilters followed 
+by a cross 
+correlator. 
+The  time  argument 
+at which  the  correlator  achieves  a 
+maximum is the delay estimate. 
+The ML estimator is compared with 
+several other proposed processors of similar form. Under certain con- 
+ditions  the ML estimator is shown to be identical to one proposed  by 
+Hannan  and  Thomson [ 101 and MacDonald  and  Schultheiss [ 2 11 . 
+Qualitatively, the role of the prefiiters is 
+to accentuate the signal 
+passed to the correlator at 
+frequencies for which the signal-to-noise 
+(S/N) ratio is highest  and,  simultaneously, to suppress the noise  power. 
+The same type of prefiitering is provided by the generalized Eckart 
+fiiter, which maximizes the S/N ratio of the conelator output. 
+For 
+low S/N ratio,  the ML estimator is shown to be equivalent to Eckart 
+prefiltering. 
+A 
+INTRODUCTION 
+SIGNAL emanating from a remote source and moni- 
+tored in the presence of noise at two spatially sepa- 
+rated sensors can  be mathematically modeled as 
+Xl(t> = Sl(t) +n1(t) 
+(1 a) 
+x2 (t) = as 1 (t + 0) + nz (t), 
+(1b) 
+where sl(t), nl(t), and nz(t) are real, jointly stationary ran- 
+dom processes. Signal sl(t) is assumed to be uncorrelated with 
+noise n (t) and nz (t). 
+There are many applications in which it is of interest to esti- 
+mate the delay D . This paper proposes a maximum likelihood 
+(ML) estimator and compares it with other similar techniques. 
+While the model of the physical phenomena’ presumes sta- 
+tionarity, the techniques to be developed herein are usually 
+employed in slowly  varying environments where the character- 
+Manuscript received July 
+24,  1975; revised November 21, 1975 and 
+C. H. Knapp is with the Department of Electrical Engineering and 
+G. C. Carter is with 
+the Naval Underwater Systems Center, 
+New 
+February 23,1976. 
+Computer  Science,  University of Connecticut,  Storrs, CT 06268. 
+London  Laboratory, New London, CT 06320. 
+istics of the signal and noise remain stationary only for finite 
+observation time T. Further, the delay D and attenuation a 
+may also  change 
+slowly. The estimator  is,  therefore, 
+con- 
+strained to operate on observations of a finite duration. 
+Another important consideration in estimator design is the 
+available amount of a priori knowledge of the signal and 
+noise statistics. In many problems, this information is negli- 
+gible. For example, in passive detection, unlike the usual 
+communications problems, the source spectrum is unknown 
+or only known approximately. 
+One common method  of determining the time delayD and, 
+hence, the arrival angle relative 
+to the sensor axis [l] is to 
+compute  the cross correlation function 
+where E denotes expectation. 
+The argument 7 that maxi- 
+mizes (2) provides an estimate of delay. Because of the finite 
+observation time, however, RxIx,(7) can only be estimated. 
+For example, for ergodic processes (2, p. 3271 , an estimate 
+of the cross correlation is  given by 
+where T represents the observation inter@. In 
+order to im- 
+prove the accuracy of the delay estimate D, 
+it is desirable to 
+prefdter xl(t) and xz(t) prior to the integration in (3). As 
+shown in Fig. 1, xi may be fdtered through Hi to  yieldyi for 
+i = 1, 2. 
+The resultant y i are multiplied, integrated, 
+and 
+squared for  a range of time shifts, T, until  the peak is obtained. 
+The time shift causing the peak is an estimate of the true 
+d,elay D . When the  fdters H I ( f ) = I f 2 (f) = 1, Vf, the estimate 
+D is simply the abscissa value at which the cross-correlation 
+function peaks. This paper provides for  a generalized correla- 
+tion through the  introduction of the  fdters H 1 ( f ) and H z ( f ) 
+which, when properly selected, facilitate the estimation 
+of 
+delay. 
+The cross correlation between xl(t) and xZ(t) is related to 
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 06:17:42 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 2 ---
+KNAPP AND CARTER: GENERALIZED CORRELATION 
+ 
+METHOD 
+32 1 
+Fig. 1. Received waveforms  filtered,  delayed,  multiplied,  and  inte- 
+grated  for  a  variety of delays  until  peak output is obtained. 
+the cross power spectral density function by the well-known 
+Fourier transform relationship 
+J) 
+Rxlx2(T)=J 
+- m Gx,x,(f)ejZnf7@-. 
+(4) 
+When x l ( t ) and x2(t) have been filtered as depicted in Fig. 1, 
+then the cross power spectrum between the filter outputs is 
+given by [3, p. 3991 
+G y , y , ( f > 
+ 
+= N l ( f ) H : ( f ) G X I . , ( f ) , 
+( 5 ) 
+where * denotes  the 
+complex conjugate. 
+Therefore,  the 
+generalized correlation between x 1  ( t ) 
+and x2  (t) 
+is 
+(64 
+where 
+$,(f3 = H1 ( f ) K ? ( f ) 
+(6b) 
+and denotes the general frequency weighting. 
+In  practice, only an estimate G,, x z ( f ) of G x I x z ( f ) 
+can be 
+obtained from finite observations of x l ( t ) and xz(t). Con- 
+sequently,  the integral 
+* 
+is evaluated and used for estimating delay. Indeed, depending 
+on the particular form of Qg(j’) and the a priori information, 
+it may also be necessary to estimate $,to in (6a)-(6b). For 
+example, when the role of the prefdters is to accentuate the 
+signal passed to the correlator at 
+those frequencies at which 
+the signal-to-noise (S/N) ratio is highest, then $,(f) c8n be 
+expected to be a function of signal and noise spectra which 
+must either be known a priori or  estimated. 
+The selection of $,(f) 
+to optimize certain performance 
+criteria has been studied by several investigators. (See, for 
+example, [4]  -[12] .) This paper will derive the ML estimator 
+for delay D in the mathematical model (la) and (lb), given 
+signal and noise spectra. The results will  be 
+shown to be 
+equivalent to (6a)-(6c) with an appropriate $ ( f ) . This 
+weighting turns out to 
+be equivalent to that proposed in 
+[12] and under simplifying assumptions to that proposed 
+in [21] . The development presented here does not presume 
+initially that the estimator has the 
+form (6c). Rather, it is 
+shown that the ML estimator may be realized by choosing r 
+that max@izes (6c) with proper weighting, $,(f), and proper 
+estimate, G X l x 2 ( f ) . The weighting $,(a yielding the ML 
+estimate will be compared to other weightings that have been 
+proposed. 
+Under certain conditions  the 
+ML estimator is 
+shown to be equivalent to other processors. 
+PROCESSOR INTERPRETATION 
+It is informative to examine the  effect of plocessor weight- 
+ings on the shape of R y I y , ( r ) under ideal conditions. For 
+models of the form of (l), the cross correlation of x l ( t ) and 
+x2  (t) 
+is 
+R x 1 x 2 ( ~ ) = ~ R , 1 , 1 ( ~ - ~ ) + R n , n z ( ~ ) . 
+(7) 
+GX] x 2 ( f ) = @
+G
+I
+ SI 
+n1 n, ( f 1. 
+(8) 
+If nl (t) and n2 (t) are uncorrelated (Gnl h, ( f ) = 0), the cross 
+power spectrum between x l ( t ) and xz(t) is a scaled signal 
+power spectrum times a complex exponential. Since multi- 
+plication in one domain is a convolution in the transformed 
+domain (see, for  example, [13]),  it follows for G n I n , ( f ) 
+= 0 
+that 
+The Fourier transform of (7) gives the cross power spectrum 
+(0 e -iznfD + G 
+R x l x z ( ~ ) = ~ R , l , l ( ~ ) 
+@ fi(t-D>, 
+(9) 
+where 0 
+denotes convolution. 
+One interpretation of (9) is that  the delta function has been 
+spread or “smeared” by the Fourier transform of the signal 
+spectrum. If sl(t) is a white noise source, then its Fourier 
+transform is a delta function 
+and no spreading takes place. 
+An important property of autocorrelation functions is that 
+Rss(7) < R,,(O). Equality will hold  for certain r for periodic 
+functions (see, for example, [3, pp. 323-3261). 
+However, 
+for most 
+practical applications, equality does not hold for 
+T f 0, and the true cross correlation (9) will peak at D re- 
+gardless of whether or not it is spread out. The spreading 
+simply acts to broaden the  peak.  For  a 
+single delay this 
+may not be a serious problem. 
+However, when the signal 
+has multiple delays, the  true cross correlation is  given by 
+R x , x * ~ 7 ) = R 8 1 , 1 ( ~ ) 
+@ c“iw.r-Di). 
+(10) 
+i 
+In this case, the convolution with Rslsl (r) can spread one 
+delta function into another, thereby making it impossible to 
+distinguish peaks or delay times. 
+Under ideal conditions 
+where’ ‘df, G X l x z ( f ) 
+s G x t x z ( f ) , $,(f) should be chosen 
+to ensure a large sharp peak in R y l y z (7) rather than  a broad 
+one in order to ensure good time-delay resolution. However, 
+sharp peaks are more sensitive to errors introduced by finite 
+observation time, particularly in cases of low S/N ratio.  Thus, 
+as with other spectral estimation problems, the choice of 
+$,(f) is a compromise between good resolution and stability. 
+The preceding discussion sets the background for the role 
+that $,(f) is to play. Now the five generalizations of the 
+cross-correlation function listed in Table I will be examined 
+individually. 
+The Roth Processor 
+A 
+The weighting proposed by Roth  [9] , 
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 06:17:42 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 3 ---
+322 
+IEEE TRANSACTIONS ON ACOUSTICS, SPEECH, AND 
+ 
+SIGNAL 
+PROCESSING, 
+ 
+AUGUST 
+1976 
+[where the subscript R is to distinguish the choice of $,(f)], 
+yields' 
+Equation (12) estimates the impulse response of the optimum 
+linear (Wiener-Hopf) filter 
+whch "best" approximates the mapping of x1 (t) to x 2 (t) (see, 
+for example, [ 141 , [ 151). If n 1 (t) # 0, as  is generally the case 
+for (I), then 
+~ x l x l ~ f ~ = ~ , ~ s l ~ f ~ + ~ n l . l ~ f ~ ~ 
+(14) 
+and 
+. e j271f7 df 
+(15) 
+Therefore, except when Gnlnl 
+(f) equals any constant (in- 
+cluding zero) times Gsls1(f), the  delta  function will again be 
+spread out. The Roth processor has the desirable effect of 
+suppressing those frequency regions where G,, n l (f) is large 
+and Gxl x2(f) is more likely to be in error. 
+The Smoothed Coherence Transfom  (SCOT) 
+Errors in GXLX2(j') 
+may be due to frequency bands where 
+Gnzn,(f> 
+is large, as well as bands where Gnlnl(f) 
+is large. 
+One is,  therefore, 
+uncertain whether to form J / R ( f ) = 
+selects 
+A 
+A 
+l/Gxlxl(f) or J / R ( ~ ) = 
+1/Gx2x2(f); hence, the SCOT [I11 
+J / s ( f ) = 1/d~X1Xl(f)GX2X2(f). 
+(16) 
+This weighting gives the SCOT 
+where the coherence estimate2 
+For H I (f> = u-1 
+and H2(f) 
+= U G J T ) , 
+the 
+SCOT  can be interpreted through Fig. 1 as prewhitening Fdters 
+followed by a cross correlation. When Gxlxl 
+(f) 
+= Gxzx2(f), 
+'As discussed earlier, I) (f) may  have to  be  estimated  for  this  proces- 
+sor and  those  which  follow,  because of a  lack of a priori information. 
+r," this  case, 
+(11) must be modified by replacing Gxlxl(f) 
+with 
+2A more  standard  coherence  estimate 
+is  formed  when 
+the auto 
+Gx,x,(f). 
+spectra  must  also be estimated,  as is usually the case. 
+the SCOT is equivalent to the Roth processor. If n l ( t ) # 0 
+and n2(t) # 0, the SCOT exhibits the same spreading as the 
+Roth processor. 
+This broadening persists because  of  an 
+apparent inability to adequately prewhiten the cross power 
+spectrum. 
+The Phase Transform (PHAT) 
+weighting [ 161 
+To avoid the spreading evident above, the PHAT uses the 
+which yields 
+Forthemodel(1)withuncorrelatednoise(i.e.,Gnlnz(f)=0), 
+I G X , X * ( f ) l = f f G S l S I ( f ) . 
+(2 1) 
+A 
+Ideally > when Gx x2 (f) = ex1 
+x 2 (f), 
+has unit magnitude and 
+R$,!Jz(7) = 6(t - 0). 
+(23) 
+The PHAT was developed 
+purely as an ad hoc technique. 
+Notice that, for models of the form of (1) with uncorrelated 
+noises, the PHAT (20), ideally, does not suffer the spreading 
+%at  other 
+processors do. 
+In practice, however, when 
+Gxlx2(f) 
+# GXlXZ(f), 
+O(f) # 27rfD and the estimate of 
+R$'$,(T) will not be a delta function.  Another 
+apparent 
+defect of the PHAT  is that  it weights ex, 
+x2 (f) as the inverse 
+of Gsl s1 (f). Thus,  errors are accentuated where signal  power 
+is smallest. In  particular, if Gxl x 2 (f) 
+= 0 in some frequency 
+band, then the phase e(f) is undefined in that band and the 
+estimate of the phase is erratic, being uniformly distributed 
+in the interval [-n, n] rad. For 
+models of the form of (l), 
+this behavior suggests that J / p ( f ) be additionally weighted 
+to compensate for the presence or absence of signal 
+power. 
+The SCOT is 
+one method of assigning weight 
+according to 
+signal and noise characteristics. Two remaining processors 
+also assign weights or filtering according to S/N ratio: the 
+Eckart filter [5] and the ML estimator or Hannan-Thomson 
+(HT) processor [ 121 . 
+The Eckart Filter 
+The Eckart filter derives its name from work in this area 
+done in [5] . Derivations in [7] , [8] , [17] , and [ 181 are 
+outlined here briefly for completeness. 
+The Eckart filter 
+maximizes the deflection criterion, i.e., the  ratio of the change 
+in mean correlator output due to signal present to the stan- 
+dard deviation of correlator output due to noise alone. For 
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 06:17:42 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 4 ---
+KNAPP AND 
+ 
+CARTER: 
+ZED 
+CORRELATION METHOD 
+323 
+long averaging time T, the deflection has been shown [8] to 
+be 
+TABLE I 
+CANDIDATE 
+PROCESSORS 
+(24) 
+where L is a constant proportional to T, and GsIsz(f) is the 
+cross power spectrum between s1 (t) and s2(t). For  the model 
+(I), Gsl s2 (f) 
+= aGsls, (f) exp (j27rfD). 
+Application of 
+Schwartz's inequality to (24) indicates that 
+H1 (f)H?(f) = \LE(f) e + j z n f D 
+(25) 
+maximizes d where 
+Weight 
+Processor 
+ 
+Name 
+rL (f) 
+= HI (f) f m f ) 
+Text 
+ 
+Reference 
+Cross Correlation 
+1 
+[21-[41, ~ 9 1 
+Roth  Impulse 
+SCOT 
+l / a l x , c f ) Gx2x,(f) 
+[I11 > [I61 
+PHAT 
+1/IGXIX2(f)l 
+[I61 
+Response 
+1/GXIX,(f) 
+191 
+Notice that the weighting (26), referred to as the Eckart 
+fdter, possesses some of the qualities of the SCOT. In par- 
+ticular, it acts to suppress frequency bands of high noise, 
+as does the SCOT. Also note that the Eckart 
+filter unlike 
+the PHAT attaches zero weight to bands where G,, 
+(f) = 0. 
+In practice, the Eckart 
+filter requires knowledge or estima- 
+tion of the signal and noise spectra. For (l), when a = 1 this 
+can  be accomplished by  letting 
+kE(f>= 
+l ~ x , x z ( f ) l  C ~ x , , , ( f > - 
+l ~ X i X Z ( f ) l 1 
+. [ 6 x z x z ( f ) - 
+ 
+l ~ x l x 2 ~ f ~ l l l ~ 
+(2 7) 
+The first five processors in Table I can be justified on the 
+basis of reasonable performance criteria, whether heuristic or 
+mathematical. 
+In the next section, the 
+ML estimator of the parameter D 
+is derived. It is shown to be identical to that proposed.by 
+Hannan and Thomson [ 121 . 
+The HT Processor 
+To make the model (1) mathematically tractable, it is 
+necessary to assume that sl(t), nl(t), and n2(t) are Gaussian. 
+Denote the Fourier coefficients of xi(t) as in [3, eq. (3.8)] 
+by 
+1 
+T/2 
+xi(k) = r IT/ 
+x i(t) e-jktwA dt, 
+(284 
+where 
+27r 
+T 
+0, =-. 
+Note that the linear transformation Xi@) is Gaussian since 
+xi(t) is Gaussian. Further, from [3, eq. (3.13)], 
+as T+m 
+and K + m such that KWA = o is constant 
+where is 
+the Fourier transform of xj(t). A more complete 
+discussion on Fourier transforms and their convergence  is 
+given in [3, p. 3811, [4, pp. 23-25], [19, 
+ch. 11, and [20, 
+p. 111 . From [21], it follows for T large compared to I Dl 
+plus the correlation time of R,, s1 (T), that 
+Now let  the vector 
+= [X1 
+x2 
+'> 
+(3 0) 
+where ' denotes transpose. Define the power spectral density 
+matrix Q such that 
+E [ X(k) X * '(k)] = E 
+1 
+-Qx(kWA). 
+: T 
+Properties of Qx(koa) can be used to prove 
+OG Iyx,x2(k~A)12 1, \JkaA 
+[4, p. 4671 . The vectors X@), k = -N, -N + 1, . . . , N are, as 
+a consequence of (29), uncorrelated Gaussian (hence, indepen- 
+dent) random variables. More explicitly, the probability for 
+X s X ( - N ) , X(-N+ l), * * , X(N), given the power spectral 
+density matrix Q (or the  delay,  attenuation, 
+and spectral 
+characteristics of the signal and noises necessary to determine 
+Q) is 
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 06:17:42 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 5 ---
+324 
+IEEE TRANSACTIONS ON ACOUSTICS, SPEECH, AND 
+ 
+SIGNAL 
+PROCESSING, AUGUST 1976 
+where 
+J1 = 
+x*'@) 
+Q;'(kO~)x(k) T 
+N 
+(33) 
+k=-N 
+and c is a function of I Qx(kwA)l [15, p. 1851 . Replacing 
+x(k) by - -?(koa) from (28), 
+1 
+T 
+~1 = 
+X*'(kuA) Q;' ( ~ w A ) 
+X ( ~ O A ) -. 
+(34) 
+N 
+1 
+T 
+k=-N 
+For ML estimation (see, for  example,  [4] 
+or [15]), it is 
+desired to choose D to maximize p(XIQ, 0). 
+In general, the parameter D affects both c and J1 in (32). 
+However,  under certain simplifying  assumptions, c is constant 
+or is only weakly related to the delay. Specifically, from (1) 
+and  (3 l), suppressing the  frequency argument k w ~ , 
+IQxI=(Gslsl -tGn,n,)(a2GsIsI +Gn,n,> 
+(42c) 
+In order to relate these results to  [I21 and interpret  how to 
+implement the ML estimation technique, note that for x l ( t ) 
+and xz(t) real,A*(f) = A ( - f ) . Then (42b) can  be rewritten as 
+Letting TGxl x2(f) 6 zl(f) g,*(f), 
+(43) and (42c) can be 
+rewritten as 
+A 
+For large T , (34) becomes 
+ca 
+J 1 2 
+X* ' ( f ) Q;'(f) 
+df. 
+which will exist provided lrl2(f)lZ 
+# 1; i.e., x l ( t ) and xz(t) 
+cannot be obtained  perfectly  from 
+one another by linear 
+filtering  [14] , or equivalently for  the  model  (1) that observa- 
+tion noise is present. 
+When Gn, n 2 (f) 
+= 0, 
+Gxlxl(f)=Gslsl(f)+Gnlnl(f)~ 
+(38) 
+G x z x 2 ( f ) = ~ 2 G s l s l ( f ) + G n 2 n , ( f ) ~ 
+(39) 
+Gx, x2 (f) = G
+I
+ 
+SI ( f ) ,-iznfD, 
+(40) 
+and  it follows that 
+Notice that the 
+ML estimator for D will minimize J1 = 
+J z -t J 3 , but the selection of D has no effect on J z . Thus, 
+D should maximize 
+-J3. Equivalently, when 2, 
+( f ) xz(f) 
+isAviewed as T times the estimated cross power spectrum, 
+TGxIx,(f), the ML estimator selects as the estimate  of 
+delay the value  of r at which 
+achieves a peak. 
+The  weighting in (6), 
+where (as required 
+for Q;' 
+to exist) Iyl2(f)I2 # 1, achieves 
+the ML estimator. 
+When  IG,,,,(f)l  and 
+lrlz(f)I2 
+are 
+known, this is exactly  the  proper weighting. ~ When the terms 
+in (45b) are unknown, they can be estimated via techniques 
+of [22] . Substituting estimated weighting for true weighting 
+is entirely a heuristic procedure 
+whereby the ML estimator 
+can approximately be  achieved in  practice. 
+Note that, like the HT processor, the PHAT computes a 
+type of transformation  on 
+However, the HT  processor, like the SCOT,  weights the phase 
+according to the  strength of the coherence. 
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 06:17:42 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 6 ---
+KNAPP AND CARTER: GENERALIZED CORRELATION METHOD 
+325 
+From [4,  p. 3791 , 
+A 
+1 - IYI2 1 
+IYI 
+L1 
+var [e(f)] 
+ET.---, 
+where L is a proportionality constant dependent on how the 
+data are processed. Thus, 
+Comparison of  (46b)  and (20) with (21) reveals that the ML 
+estimator is the PHAT inversely weighted according to the 
+variability of the phase estimates. 
+In interpreting the 
+similarity of the HT processor to the 
+other processors listed in Table I, it can be 
+shown that if 
+Gn,nl(f)=Gn2n2(f)=Gnn(f) 
+is equal to a constant times 
+GS1 (f), 
+then the last five processors in Table I are the 
+same except for a constant, but the 
+cross-correlation pro- 
+cessor ($( f) 
+= 1, V f ) is a delta function 
+smeared out by 
+the  Fourier transform of the signal (noise) power spectrum. 
+Interpretation of Low SINRatio ofML Estimator 
+Good delay estimation is most difficult to achieve in the 
+case of low S/N ratios. In order to compare estimates under 
+,-- 
+identical to the  Eckart  filter. Similarly, for low S/N ratio, 
+$s(f)E 1/dGnInl(f)Gn2n2(f). 
+(49) 
+Therefore, if Q! = 1, 
+(50a) 
+Thus, under low S/N ratio approximations with Q! = 1, both 
+the Eckart and HT prefdters can be interpreted  either 
+as 
+SCOT prewhitening filters with additional S/N ratio weight- 
+ing or PHAT prewhitening fdters with additional S/N ratio 
+squared weighting. 
+VARIANCE OF DELAY ESTIMATORS 
+It can be shown, by extending a result from [21], that the 
+variance of the time-delay estimate in the neighborhood of 
+the  true delay for general  weighting function $( f) is  given by 
+J 
+I$(f)12(271f)2Gx1x1(f)GX2X2(f)[1 
+- I Y W I ~ I 
+df 
+A 
+-m 
+var [Dl = 
+(5 1) 
+T 1- 
+(2.1Tf)21Gx1x2(f)lJ/(f)~f12 
+low S/N ratio  conditions,  let QI = 1. Then, 
+The variance 
+of the HT processor (substituting from (45b) 
+which agrees with [21, eq. (28)] if in (47b) Gnln1(f) 
+= 
+Gn2 
+n, ( f >. 
+For low S/N ratio, 
+it follows that 
+That is, for 
+01 = 1 and low S/N ratio, the HT 
+processor is 
+and using the definition of coherence) is 
+m 
+V ~ ~ H T [ E I 
+= (
+2
+~
+ (2nf)2IY(f)12/[1- 
+1r(f)121 df1-1. 
+(52) 
+In particular,  the HT processor achieves the Cram&-Rao lower 
+bound (see Appendix). It should be pointed out that (51) 
+and (52) evaluate the local variation of the time-delay esti- 
+mate and thus do 
+not account for ambiguous peaks which 
+may arise when 
+the averaging time is not large enough for 
+the given  signal 
+and noise characteristics. 
+Indeed, when 
+T is not sufficiently large, local variation may be a poor 
+indicator of system performance and the envelope of the 
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 06:17:42 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 7 ---
+326 
+IEEE TRANSACTIONS ON ACOUSTICS, SPEECH, AND SIGNAL PROCESSING, 
+ 
+AUGUST 
+1976 
+ambiguous  peaks 
+must be considered [21, p.  401,  [23], 
+[24, p. 411. Further, (51) and 
+(52) predict system perfor- 
+mance  when  signal  and  noise 
+spectral characteristics are 
+known; for 
+T sufficiently large, these spectra can be 
+esti- 
+mated accurately. 
+However, in general, (51) and (52) must 
+be modified 
+to account for estimation ezrors; alternatively, 
+system performance can 
+be evaluated by 
+computer simula- 
+tion. Empirical verification of expressions 
+for variance has 
+not been undertaken by simulation, because to do so with- 
+out special purpose 
+correlator hardware would be computa- 
+tionally prohibitive.  For  example,  for  a 
+given G,l s, (f), 
+Gnlnl(f), 
+Gnz,,(f), 
+a, and averaging time T, an estimated 
+generalized cross-correlation function can be  computed,  from 
+which  only  one number  (the delay estimate) can be  extracted. 
+To empirically evaluate 
+the statistics of the delay estimate 
+(which would 
+be valid 
+only for these particular signal and 
+noise spectra) many such trials would need to be conducted. 
+We have conducted one such trial (with T large) and verified 
+that useiul delay estimates can be 
+obtained by inserting esti- 
+mates lGxlx2(f)l 
+and l?12(f)12 
+in place of 
+the true values. 
+(This might have been expected since the  estimated  optimum 
+weighting will converge 
+to the true weighting as T + 00. In 
+practice, T may be limited by the stationary  properties of the 
+data and (52) may be an overly optimistic 
+prediction of sys- 
+tem  performance  when  signal and noise spectra are unknown.) 
+CONCLUSIONS AND DISCUSSION 
+The HT  processor  has  been  shown to be  an  ML estimator  for 
+time delay 
+under usual conditions. Under a low S/N ratio 
+restriction,  the HT processor  is  equivalent to Eckart  prefilter- 
+ing and cross correlation. These processors have been com- 
+pared with four 
+other candidate processors to demonstrate 
+the interrelation of all six estimation techniques. The deriva- 
+tion of the ML delay estimator, together with its relation to 
+various ad 
+hoc techniques 
+of intuitive appeal, suggests 
+the 
+practical significance of HT processing 
+for determination of 
+delay and,  thence, 
+bearing. 
+Finally,  interpretation 
+of the 
+results leads one to believe that, if the coherence is slowly 
+changing as 
+a function of time, the 
+ML estimation of the 
+source bearing will 
+still be a cross correlator preceded by 
+prefdters that must 
+also vary according to time-varying esti- 
+mates of coherence. 
+APPENDIX 
+Cram.4-Rao Lower Bound on Variance of Delay Estimators 
+The  Cram&-Rao  lower bound is  given [ 15, p. 721 by 
+I 
+The only part of the log density which 
+depends on r, the 
+hypothesized  delay, is .J3 of (44). More explicitly, 
+If GXtxz(f)= 
+IG,l,z(f)le-i2nfD, then since E[~x,xz(f)] 
+= 
+Hence the minimum  variance is 
+(A41 
+But this is the variance  which 
+the HT processor  achieves 
+[see (52)] . 
+REFERENCES 
+A. H. Nuttall,  G.  C.  Carter,  and  E. M. Montavon,  “Estimation of 
+the  two-dimensional  spectrum of the space-time  noise  field for a 
+sparse line array,”J. Acoust.  SOC.  Amer., 
+vol. 55,  pp. 1034-1041, 
+1974. 
+A. Papoulis, Probability, Random Variables and Stochastic Pro- 
+cesses. New York: McGraw-Bill, 1965. 
+W. B . Davenport, Jr., Probability and Random Processes. New 
+York: McCraw-Hill, 1970. 
+G. M. Jenkins  and  D. G. Watts, Spectral Analysis and Its Applica- 
+tions. San Francisco, CA: Holden-Day, 1968. 
+C.  Eckart, “Optimal  rectifier  systems for the  detection of  steady 
+signals,” Univ. 
+California, Scripps Inst. Oceanography, 
+Marine 
+Physical Lab.  Rep SI0 12692, SI0 Ref 52-11,1952. 
+H. Akaike  and Y. Yamanouchi, “On the statistical  estimation of 
+frequency  response  function,” 
+Ann. of Inst. Statist.  Math., 
+C. H. Knapp,  “Optimum linear filteringfor  multi-element  arrays,” 
+Electric Boat 
+Divjsion, Groton, CT, Rep. U417-66-031, 
+Nov. 
+1966. 
+A. B. Nuttall  and D. W. EIyde, “A unified  approach to  optimum 
+and suboptimum processing for arrays,” Naval Underwater Sys- 
+tems Center, New London Lab., New 
+London, C T , Rep. 992, 
+Apr. 1969. 
+P.  R.  Roth, “Effective measurements using digital signal  analysis,” 
+IEEE  Spectrum,vol. 8,pp. 62-70,Apr.  1971. 
+E. J. Hannan and P. J. Thomson, “The estimation of coherence 
+and  group  delay,” Biometrika, vol. 58,  pp.  469-481,1971. 
+G. C. Carter, A. H. Nuttall, and 
+P. G. Cable, “The smoothed 
+coherence transform,” 
+Proc. IEEE (Lett.), vol. 61, pp. 1497- 
+1498,  Oct.  1973. 
+E. J. 
+Hannan and 
+P. J. Thomson, “Estimating group delay,” 
+Biometrika,vol. 60,pp.  241-253,1973. 
+A. V. Oppenheim and R. W. Schafer, Digital Signal Processing. 
+Englewood Cliffs, NJ: Prentice-Hall, 1975. 
+G . C. Carter and 
+C. B. Knapp, “Coherence and 
+its estimation 
+via the partitioned modified chirp-2-transform,” 
+IEEE Trans. 
+Acoust.,  Speech, Signal  Processing (Special Issue on 1974 Arden 
+House Workshop on Digital Signal Processing), vol. ASSP-23, 
+pp.257-264,June1975. 
+H.  L.  Van Trees, Detection, Estimation and Modulation Theory, 
+Part I. New York: Wiley, 1968. 
+G. C. Carter, 
+A. A. 
+Nuttall, and 
+P. G. Cable, “The smoothed 
+coherence  transform 
+(SCOT),”  Naval 
+Underwater  Systems 
+Center, New London Lab.,  New 
+London,  CT,  Tech. 
+Memo 
+D. W. Hyde and A. H. Nuttall, “Linear pre-filtering to enhance 
+correlator  performance,” 
+Naval Underwater  Systems  Center, 
+New London Lab., New London,  CT,  Tech. Memo 2020-34-69, 
+Feb.  27,1969. 
+A. B. Nuttall, %e-filtering 
+to enhance clipper correlator per- 
+formance,” Naval Underwater  Systems  Center, New London  Lab., 
+New London,CT,Tech. Memo TC-11-73,  July 10,1973. 
+L. H. Koopmans, The Spectral Analysis of Time Series. New 
+York:  Academic, 1974. 
+V O ~ .  1 4 , ~ ~ . 
+23-56,1963. 
+TC-159-72, Aug. 8,1972. 
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 06:17:42 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 8 ---
+IEEE TRANSACTIONS ON ACOUSTICS, SPEECH, AND SIGNAL PROCESSING, VOL. ASSP-24,  NO. 
+4, AUGUST 1976 
+327 
+[20] R.  K.  Otnes  and 
+L. Enochson,  Digital 
+Time Series  Analysis,  Fourier  transfrom  processing,” 
+IEEE Trans. Audio  Electro- 
+New York: Wiley, 1972. 
+ 
+acoust., 
+vol. AU-21,pp. 
+ 
+337-344,Aug. 
+ 
+1973. 
+[21] V. H. MacDonald and P.  M. 
+Schultheiss,  “Optimum 
+passive 
+[23] D. Signori, J. L. Freeh,  and C.  Stradling,  personal  communica- 
+bearing  estimation,” J. Acoust. SOC. Amer., vol. 46,  pp.  37-43, 
+1969. 
+ 
+[24] 
+B. V. Hamon 
+ 
+and 
+ 
+E. 
+J. Hannan, 
+ 
+“Spectral 
+ 
+estimation 
+of time 
+tion. 
+[22]  G.  C.  Carter, 
+C. H.  Knapp,  and 
+A. H. Nuttall,  “Estimation  of  delay  for  dispersive  and  non-dispersive  systems,” 
+J. Royal  Stat. 
+the magnitude-squared  coherence 
+function via overlapped  fast 
+SOC. Ser. C (Appl.  Statist.), vol. 23,  pp.  134-142,1974. 
+Signal  Ana-lysis  by  Homomorphic  Prediction 
+Abstract-Two commonly used 
+signal analysis techniques are linear 
+prediction and homomorphic filtering. Each has particular advantages 
+and limitations. This paper considers 
+several ways of combining these 
+methods to capitalize on the advantages of both. The resulting tech- 
+niques,  referred to collectively as homomorphic  prediction,  are  poten- 
+tially useful for pole-zero  modeling and inverse  filtering  of  mixed  phase 
+signals. Two  of  these  techniques  are  illustrated  by  means  of  synthetic 
+examples. 
+INTRODUCTION 
+T 
+WO classes of signal processing techniques which have 
+been applied to a variety of problems are homomorphic 
+filtering or cepstral analysis [ 11 , [2] and linear predic- 
+tion or 
+predictive deconvolution [3] -[SI . Separately, each 
+has particular advantages and limitations. It appears possible, 
+however, to combine them into new methods of analysis 
+which embody the advantages of both. In this paper we dis- 
+cuss  several  ways of doing this. 
+Linear prediction is directed primarily at modeling a signal  as 
+the response of an all-pole system. Its chief advantage over 
+other identification methods is that for signals  well matched to 
+the model it provides an accurate representation with  a small 
+number of 
+easily calculated parameters. However, in situa- 
+tions where spectral zeros are important linear prediction is 
+less satisfactory. Furthermore, it assumes that the signal is 
+either minimum phase or maximum phase, but not 
+mixed 
+phase. Thus, for example, linear prediction has been highly 
+successful for speech coding [3], [SI, [6] since an all-pole 
+Manuscript received April 
+3, 1975; revised September 30, 1975 and 
+February 3, 1976. This work was supported in part by the Advanced 
+Research  Projects 
+Agency monitored  by  the 
+ONR under  Contract 
+N00014-75-C-0951 and 
+in part by the 
+National Science Foundation 
+under  Grant  ENG71-02319-A02. The work  of G. Kopec was supported 
+by the Fannie and John 
+Hertz Foundation. The work of J. Tribolet 
+was supported  by  the  Instituto  de Alta  Cultura,  Portugal. 
+The authors are with the Department 
+of Electrical Engineering and 
+Computer Science, Research Laboratory 
+of Electronics, Massachusetts 
+Institute of Technology,  Cambridge, MA 02139. 
+minimum phase representation is often  adequate  for t h s pur- 
+pose. It has also been applied in the analysis of seismic data, 
+although limited by the fact that such data often involve a 
+significant mixed phase component. 
+Homomorphic filtering was developed as a general method 
+of separating signals which have been nonadditively combined. 
+It has been used in speech analysis 
+to estimate vocal tract 
+transfer characteristics [7] -[9] and is currently being evalu- 
+ated in seismic data processing as a way  of isolating the impulse 
+response of the earth’s crust from the source function [IO] - 
+[ 121 . Unlike linear prediction,  homomorphic analysis  is not a 
+parametric technique and does not presuppose a specific 
+model. Therefore, it is effective on a wide class of signals, 
+including those which are mixed phase and those characterized 
+by both poles and zeros. However, the absence of an under- 
+lying model also means that homomorphic analysis does not 
+exploit as much  structure in a signal as does linear prediction. 
+Thus, it may be far less efficient than an appropriate para- 
+metric technique when  dealing with highly structured  data. 
+The  basic 
+strategy for combining linear prediction with 
+cepstral analysis is to use homomorphic processing to trans- 
+form a general signal into one or more other signals whose 
+structures are consistent with  the assumptions of linear predic- 
+tion. In this way the generality of homomorphic analysis is 
+combined with  the efficiency of linear prediction.  In  the  next 
+section we briefly review some 
+of the properties of homo- 
+morphic analysis that suggest this approach. We then discuss 
+several  specific  ways of combining the  two techniques. 
+HOMOMORPHIC 
+SIGNAL PROCESSING 
+Homomorphic signal processing is based on the trazsforma- 
+tion of a signal x(n) as depicted in Fig. 1. Letting X(z) and 
+X(z) denote the z transforms of x^(n) and x(n), the system 
+D* [*I is defined by  the relation 
+2 ( z ) = log X(z) 
+(1) 
+where the complex logarithm of X(z) is appropriately defined 
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 06:17:42 UTC from IEEE Xplore.  Restrictions apply. 

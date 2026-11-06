@@ -1,0 +1,746 @@
+
+=== PDF PAGE 1 ===
+IEEE TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING, VOL. 16, NO. 8, NOVEMBER 2008                                             1479
+
+ Disambiguation of TDOA Estimation for Multiple
+       Sources in Reverberant Environments
+                             Jan Scheuing and Bin Yang, Senior Member, IEEE
+
+
+
+  Abstract—This paper presents a novel approach to estimate   either under the ideal assumption that each source is exclusively
+the time difference of arrival (TDOA) for multiple sources in   active during some time intervals [6]–[8] or by a blind source
+reverberant environments. It resolves ambiguities in TDOA esti-                                                                separation [9], [10]. Another completely different idea is to
+mation caused by multipath propagation and multiple sources.
+                                                           scan the volume of interest for possible sources by maximizing,By exploiting two TDOA constraints, the raster condition and the
+zero cyclic sum condition, we are able to identify and reject the    e.g., the steered response power (SRP) [11].
+echo path TDOAs and to assign the direct path TDOAs correctly     In this paper, we present a novel approach for disambiguation
+to different sources. For the latter purpose, an efﬁcient algorithm   of TDOA estimation in multipath multisource environments
+for the synthesis of approximately consistent TDOA graphs has                                           (DATEMM) [12], [13]. It is based on a fairly simple observation
+been developed. A real experiment demonstrates the superior
+                                                               of two TDOA constraints implying information redundancy.performance of our algorithms.
+                                             By applying these constraints to TDOA estimates derived
+  Index Terms—Disambiguation of TDOA estimation in multi-   from, e.g., GCC, the ambiguity of TDOA estimation can be
+path multisource environments (DATEMM), multiple sources,
+                                                                signiﬁcantly reduced. The ﬁrst constraint is that the extremum
+raster matching, reverberant environments, synthesis of consis-
+tent graphs, time difference of arrival (TDOA) ambiguity, TDOA   positions of a cross-correlation between two microphone sig-
+estimation, zero cyclic sum matching.                              nals appear in a well-deﬁned distance which can be predicted
+                                                      from the extremum positions of the corresponding autocor-
+                                                                     relations of the microphone signals. Under ideal conditions,
+                               I. INTRODUCTION                     combining the cross-correlation with the autocorrelations will
+                                                            uniquely identify the desired direct path TDOA and reject all
+                                                      ambiguous cross-correlation extrema caused by echo paths. The
+    HE ESTIMATION of time difference of arrival (TDOA)   second TDOA constraint is the zero cyclic sum of TDOAs over
+     from the signals of a microphone array plays an important   any number of microphones as long as the TDOAs originateT
+role for many applications like acoustic source localization and  from the same sources and the same propagation paths. This
+beamforming [1], [2]. Two approaches are well known for this   provides an useful mean to assign TDOA estimates to different
+task: generalized cross-correlation (GCC) and blind estimation   sources.
+of the room impulse response. In the former case, the TDOA     In Section II, we formulate the signal model and the TDOA
+estimate is the peak position in the cross-correlation between   estimation problem. Then we analyze different TDOA ambi-
+two microphone signals [3], [4]. In the latter case, the room   guities in Section III and show the basic ideas of DATEMM in
+impulse responses are estimated by an adaptive eigenvalue   Section IV. In Section V, we present an algorithm exploiting
+decomposition [5]. Both approaches have been approved in   the information redundancy contained in the autocorrelation of
+many single source scenarios. However, the TDOA estimation   the microphone signals. By using a so-called raster matching
+remains a difﬁcult problem for multiple sources in reverberant   approach, we show how to identify and reject the echo path
+environments because the multipath propagation, the presence  TDOAs. Section VI formulates the problem of combining
+of multiple sources, and periodic signals make the TDOA  TDOA estimates of different microphone pairs in the frame-
+estimation ambiguous.                                  work of consistent TDOA graph. Based on the zero cyclic
+  One idea to combat this problem is to extend the single  sum constraint, we search for groups of matching TDOAs by a
+source impulse response technique [5] to the multiple source   synthesis of consistent TDOA graphs. We present an efﬁcient
+case by splitting the multi-input multi-output system to several   synthesis algorithm based on consistent triples. Section VII
+single-input multi-output systems. Usually, this  is achieved   describes a real experiment to locate multiple sources in re-
+                                                               verberant environments. It demonstrates the effectiveness and
+                                                                    localization accuracy of our algorithms.
+  Manuscript received August 06, 2007; revised July 22, 2008. Current version
+published October 17, 2008. The associate editor coordinating the review of this
+manuscript and approving it for publication was Dr. Hiroshi Sawada.
+   J. Scheuing was with the Chair of System Theory and Signal Processing,                                II. SIGNAL MODEL
+University of Stuttgart, 70550 Stuttgart, Germany. He is now with Bosch
+Engineering GmbH, 74232 Abstatt, Germany (e-mail: jan.scheuing@LSS.uni-
+stuttgart.de).                                    We assume   acoustic sources and   microphones. We also
+  B. Yang is with the Chair of System Theory and Signal Processing, University  assume a linear channel from source   to microphone   con-
+of Stuttgart, 70550 Stuttgart, Germany (e-mail: bin.yang@LSS.uni-stuttgart.
+de).                                                               taining a total number of      propagation paths. Neglecting
+   Digital Object Identiﬁer 10.1109/TASL.2008.2004533                   noise and assuming omnidirectional characteristics of sources
+
+                                                        1558-7916/$25.00 © 2008 IEEE
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:41 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 2 ===
+1480                                         IEEE TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING, VOL. 16, NO. 8, NOVEMBER 2008
+
+
+and microphones, the discrete-time signal of the  th microphone
+is given by
+
+
+
+                                                              (1)
+
+
+        is the signal of source   .      and       are the ampli-
+tude and (integer) delay of path  between source  and micro-
+phone   , respectively. All delays       are sorted in ascending
+order, i.e.,                 for           . The TDOA between path
+  of microphone  and path   of microphone  for source   is     Fig. 1. Assuming a direct path (solid) and an echo path (dashed) from the
+                                                                            source to each of the two microphones, four TDOA values corresponding to four
+                                                                          hyperbola (dotted) are possible. Only the hyperbola of the direct path TDOA
+                                                              (2)  n     passes the source location.
+
+We assume that the line-of-sight propagation condition is sat-
+isﬁed for all pairs of source and microphone. Hence, all direct                                                                               If       is zero mean and white, the cross-correlation
+paths exist and are denoted by the path index          ; otherwise,                                                                         between the two microphone signals
+a localization would be hardly possible.                                                       and       will show      extrema at the TDOA positions
+  The goal of TDOA estimation is to estimate a source TDOA
+vector
+
+                                                                                                                                  (5)
+                                                              (3)
+                                        We are only interested in the direct path TDOA
+                                                                                                               . All other      TDOA values involve at least one echoof length      for each source   subject to four requirements.
+                                                             path and are called echo path TDOAs. They correspond to wrong   •  All TDOAs in    should originate from direct paths only.
+                                                            hyperbola of possible source location as shown in Fig. 1. The   •  All TDOAs in    should originate from the same source.
+                                                       problem is how to determine which of the       extrema in   • The vector     should be as complete as possible (few
+                                                                 the cross-correlation        represents the desired direct path    missing elements).
+                                            TDOA.   • The TDOA estimation should be computationally as efﬁ-
+     cient as possible.
+                                                          C. Multiple Source Ambiguity
+While the last two requirements represent soft wishes, the ﬁrst
+two requirements are mandatory because otherwise we would    The third TDOA ambiguity is due to multiple sources. As-
+obtain a wrong source position estimation. Unfortunately, a  suming a direct path propagation of    source signals, the  th
+number of reasons make the TDOA estimation ambiguous and   microphone signal is
+difﬁcult. Below, three different types of TDOA ambiguity are
+analyzed using simple scenarios [12]. For notational conve-                                                                                                                                  (6)
+nience, we drop the index   or   in (1) if we consider only one
+source or one path.
+                                                            Here,     denotes the direct path delay from source   to micro-
+                        III. TDOA AMBIGUITIES                  phone   . If all source signals are zero mean, white, and uncor-
+                                                                       related, the cross-correlation        will show   extrema at the
+A. Ambiguity Due to Periodic Signals                TDOA positions
+
+  The ﬁrst ambiguity is well known. Speech signals contain
+                                                                                                                                  (7)
+voiced segments which show a high periodicity. The same also
+happens for many natural and machine sounds. The periodic
+                                                   The difﬁculty is to assign them correctly to the   sources such
+extrema in the autocorrelation of the source signals will also
+                                                                      that TDOAs of the same source are grouped together as in (3).
+appear in the cross-correlation of the microphone signals, even
+                                             By considering          microphone pairs where each pair
+for a single source without multipath propagation. GCC [4] have
+                                                                  contributes    extrema, there are      different possibilities to
+been proposed to combat this problem.
+                                                                 construct one length- TDOA vector whose each element can
+                                                                take    possible TDOA values. Any erroneous combination ofB. Multipath Ambiguity
+                                          TDOAs will likely cause a phantom source; see Fig. 2.
+  The second TDOA ambiguity is caused by the multipath     In practice, all three types of ambiguity occur simultaneously,
+propagation. For a single source signal          propagating  making the TDOA estimation and grouping even more difﬁcult.
+on    paths to microphone   , we obtain the signal               Fig. 3 shows the generalized cross-correlation PHAT [4] of two
+                                                       microphone signals as two speakers talked simultaneously in
+                                                              (4)   a medium-reverberant room; see Section VII for more details
+                                                           about the experiment. Since the GCC shows many peaks, it is
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:41 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 3 ===
+SCHEUING AND YANG: DISAMBIGUATION OF TDOA ESTIMATION FOR MULTIPLE SOURCES                                                           1481
+
+
+                                                                                                                         ,                           . They coincide with the differences
+                                                               of the cross-correlation extremum positions
+
+
+
+
+
+                                                                                                                                  (9)
+
+Fig. 2.  Combination of TDOAs originating from different sources causes a   for any direct or echo path   . This condition is referred to as the
+phantom source.                                                     raster condition. Since the direct path always has the shortest
+                                                                   delay,            , and       in (9) are positive. This implies for the
+                                                                    ﬁrst sensor   that the cross-correlation extremum       of the
+                                                        echo path    is always right to the extremum       of the di-
+                                                                      rect path 0. In contrast, for the second sensor   , the extremum
+                                                                      of the echo path    is left to the extremum       of the
+                                                                      direct path 0. In Fig. 4, the relationships in (9) are illustrated by
+                                                           arrows below           . The arrows have a length equal to
+Fig. 3.  Generalized cross-correlation of two microphone signals for two
+sources in a reverberant room.                                        or          . The arrow direction is deﬁned in such a way that the
+                                                         arrow        of the ﬁrst sensor   points from left to right and
+                                                                 the arrow       of the second sensor  points from right to left,
+                                                                    respectively. Combined with the previous observation of “echo
+                                                             path extremum is right/left to direct path extremum for senor
+                                                                                         ,” we conclude that each arrow points from the direct path ex-
+                                                    tremum to the echo path extremum for the corresponding sensor.
+                                                                    Clearly, the direct path TDOA        is that extremum in
+                                                      which shows only arrow tails and no arrowheads. This raster
+                                                         matching approach combines the extremum positions of both
+Fig. 4.  Relationship between extremum positions in auto- and cross-correla-
+tion.                                                             auto- and cross-correlations and enables us to identify the de-
+                                                                    sired direct path TDOA       even in a reverberant environ-
+                                                           ment.
+not trivial to estimate the two direct path TDOAs (indicated by
+dashed lines) and to assign them correctly to both sources.       B. Zero Cyclic Sum Condition
+
+                                                     The second important observation is as follows. For each
+         IV. PRINCIPLES OF TDOA DISAMBIGUATION                                                               subset of microphones                              and
+                                                                 the same number  of corresponding  direct  or echo  paths
+A. Raster Condition
+                                                                                                                               , the following zero cyclic sum condition
+  Below, we present a novel approach DATEMM [12] to re-
+solve these TDOA ambiguities. It is based on two simple obser-
+vations. The ﬁrst one is the relationship between the extremum
+positions in the cross-correlation and autocorrelation of the mi-
+crophone signals. For simplicity, we consider the single source
+and two path scenario in Fig. 1 again. Fig. 4 shows the four ex-                                                           (10)
+tremum positions in the cross-correlation           . It also shows
+the extremum positions of the two autocorrelations            always holds for TDOAs originating from the same source
+                  and                                                 . Obvi-   [14]. In (10), each path delay       occurs two times with
+ously, the cross-correlation extrema appear in well-deﬁned dis-   opposite signs. If the cyclic sum is not zero, either 1) different
+tances which can be predicted by the extremum positions in the   paths for the same microphone are used or 2) different sources
+autocorrelations.                                                are involved. This zero cyclic sum matching allows us to group
+  Let                                   TDOA estimates of different microphone pairs according to
+                                                                        their sources and hence to avoid phantom sources like in Fig. 2.
+                                                                  In DATEMM, we use two additional criteria for TDOA dis-
+                                                              (8)   ambiguation.
+                                                                              • The direct path amplitudes       in (1) are always positive.
+be two microphone signals. If        is zero mean and white,       Hence, we only search for the maxima instead of extrema
+the autocorrelations       and       show, in addition to the        in the cross-correlation        [15].
+zero-lag extrema      and          , four other extrema at the po-      • Due to the triangular inequality, each direct path TDOA
+sitions                                    ,                               , and              between two microphones can never exceed in magnitude
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:41 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 4 ===
+1482                                         IEEE TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING, VOL. 16, NO. 8, NOVEMBER 2008
+
+
+                                                            Second, the raster condition (9) is not satisﬁed exactly due to
+                                                               estimation errors and quantized time delays. Instead of a perfect
+                                                                       raster match, we tolerate an approximate raster match
+
+
+                                                                                                                        (12)
+                                                      where the so called tolerance width of raster match (TWRM)
+                                                                                          is typically in the order of a few samples. In addition,
+                                             we introduce a quality value        for each TDOA estimate
+                                                                                                                         . In the case of GCC for TDOA estimation, it is deﬁned
+                                                     by
+Fig. 5. Number of direct path and echo path hits. The desired direct path TDOA
+n     has the highest number of direct path hits (arrow tails) 4.
+
+
+     the distance between the two microphones divided by the
+    speed of sound. Any TDOA estimate beyond this geomet-
+      rical upper bound is discarded.
+
+                   V. RASTER MATCHING
+                                                                                                                        (13)
+  In the following, we assume that a set of TDOA estimates
+    has been computed for each microphone pair     by GCC.   with                 . For each TDOA estimate                 , its initial
+In the ideal case,     contains all    direct path TDOAs of      quality value is the positive cross-correlation amplitude             .
+sources and no echo path TDOAs. In reality, estimation errors    It is then increased or decreased during the subsequent raster
+will cause both false detection (echo path TDOA accepted) and   matching. The sets
+miss detection (direct path TDOA rejected). While a false de-
+tection is typically caused by echo paths, a miss detection of a
+source is usually due to the weak amplitude of that source signal.
+In general, a miss detection is more critical than a false detec-                                                               contain those autocorrelation extremum positions from    and
+tion in our application. While a rejected direct path TDOA is                                                         which match a pair of cross-correlation TDOA estimates
+lost for ever, echo path TDOAs in    can still be identiﬁed by                                                                             in the sense of (12).               is a nonnegative sym-
+DATEMM. Hence, we strongly recommend an overestimation                                                              metric function with the width              . It is called the tolerance
+            for the initial TDOA estimation.                                                                function of raster match (TFRM) and assigns a high/low score
+  In addition, we also compute the autocorrelations of all mi-                                                                    to a good/bad raster match. One simple example is the triangular
+crophone signals. The positive positions of the strongest auto-                                                               function
+correlation extrema of the microphone signal        are col-
+lected in the set        . They are used to identify the echo path                                                  if                                                                                                                        (14)
+TDOAs in       . In a ﬁrst attempt, the raster condition in (9) mo-                                                  if
+tivates a search for all pairs of TDOAs        whose differ-                                                   The sign function          in (13) adds/subtracts a weighted
+ence matches an autocorrelation extremum position                                                        magnitude of the involved autocorrelation extremum         or
+                                                                     to/from the quality value          if     is likely a direct/                with                                   (11)
+                                                        echo path TDOA. This can be easily seen from Fig. 4 whether
+If such a pair has been found, that TDOA assigned to an arrow-      corresponds to an arrow tail (          for     or
+head can be rejected immediately as Fig. 4 illustrates. Unfor-   for     ) or an arrowhead.
+tunately, this hard decision would not work in practice due to    The ﬁnal decision about the TDOA estimate     is based on
+several reasons.                                                 the ﬁnal quality value of
+   First, the raster condition (9) is necessary but not sufﬁcient.
+                                                                              a direct path TDOA, if
+It is theoretically possible that two TDOA estimates from               is viewed as                                       (15)
+                                                                          an echo path TDOA, otherwise
+caused by different paths or different sources match one of the
+autocorrelation extremum positions. If we erroneously reject a   All direct path TDOA estimates are collected in a reduced set
+direct path TDOA too early based on the matching of only one          . We used the threshold                             in (15).
+pair of TDOAs, this direct path TDOA is lost in all future steps.   This choice is intentionally conservative in order to ensure that
+In order to prevent this from happening, we propose to count  no direct path TDOAs are rejected at this early step. Echo path
+all direct path hits (arrow tails) and echo path hits (arrowheads).  TDOAs which are still contained in    can be detected by using
+Fig. 5 shows the number of direct path and echo path hits in a   the zero cyclic sum condition in the next section.
+scenario with one direct and two echo paths between one source
+                                                                          VI. CONSISTENT TDOA GRAPHSand each of the two microphones   ,  . In this case, the desired
+direct path TDOA         is that cross-correlation maximum po-      Starting from the sets     of direct path TDOA estimates de-
+sition with the highest direct path hits 4.                       termined in the previous section, we now apply the zero cyclic
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:41 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 5 ===
+SCHEUING AND YANG: DISAMBIGUATION OF TDOA ESTIMATION FOR MULTIPLE SOURCES                                                           1483
+
+
+
+
+
+                                                                                        Fig. 7.  Six independent triples sharing a common reference node   .
+
+
+
+
+
+                                                                                         Fig. 8.  Six independent triples without a common reference node.
+
+
+
+Fig. 6.  Fully connected consistent TDOA graph with seven nodes and the re-
+                                                       any reference node. Let the time potential of the reference nodelated source TDOA vector n  .
+                                                        be zero. The time potentials of the remaining       nodes are
+                                                             then determined by their TDOAs relative to the reference node.
+                                                               In order to check the consistency of the graph, we only need
+sum condition (10) to examine which of the TDOA estimates of
+                                                                    to compare the remaining       edge weights between these
+different microphone pairs belong together to the same source.
+                                                               nodes with the corresponding potential differences. This
+We study this combination problem in the framework of consis-
+                                                                leads to
+tent graphs.
+
+                                                                                                                        (16)
+A. TDOA Graph
+
+  As shown in Fig. 6, the content of a source TDOA vector      operations. It can be shown that this is also the minimum com-
+deﬁned in (3) can be visualized by a weighted directed graph.   plexity of consistency check.
+It is called a TDOA graph. Each node represents a microphone      Alternatively, we can check the consistency of        inde-
+and each directed edge between two nodes has a weight corre-   pendent triples; see Fig. 7. A triple is a three-node subgraph.
+sponding to the TDOA value between these two microphones.   Since the consistency check of a triple requires two operations,
+The edge direction is given by the order of microphones in the   the total complexity is                                                              .
+cross-correlation. A change of the edge direction has the effect  The advantage of this approach over the time potential one is
+of a sign change of its weight. For simplicity, we use integer   that there is no need to deﬁne a reference node. Instead of the
+TDOA values for illustration. However, the concept of TDOA   six independent triples in Fig. 7 sharing a common reference
+graphs applies to real-valued weights as well.                   node, we can also check the six independent triples in Fig. 8
+ A fully connected TDOA graph corresponds to a source   without a reference node. It can be shown that the remaining
+TDOA vector of length         . For incomplete graphs, some                        dependent triples need not to be studied
+vector elements are missing. The aim of this section is to   further since their consistency follows immediately from that of
+compose TDOA graphs with the highest number of nodes and   the independent triples.
+the maximum degree of connections from the sets of TDOA
+estimates       .                                             C. Strategies of Graph Synthesis
+ A TDOA graph consisting of exact TDOA values is always
+                                                         Given the sets     of direct path TDOA estimates for the mi-
+consistent in the sense that the sum of all edge weights along any
+                                                         crophone pair         , there exist different strategies to synthesize
+closed path is zero according to the zero cyclic sum condition
+                                                           a TDOA graph. The brute force approach tries all possible com-
+(10). This is very similar to Kirchhoff’s second law for electrical
+                                                                 binations of TDOA values for     edges. Since a TDOA graph
+circuits (voltage graphs). The difference is that we are interested
+                                                         can be incomplete, we consider            possibilities for the
+in the synthesis instead of analysis of consistent graphs. In the
+                                                        edge            different edge weights and the case of a missing
+graph theory, a closed path with a zero sum of weights is some-
+                                                              edge. The total number of possible TDOA graphs is the product
+times called a zero-cost cycle. Thus, a consistent graph only con-
+                                                               of           for all     edges with
+tains zero-cost cycles. Unfortunately, the problem of synthesis
+of consistent graphs has never been addressed in the literature
+to our knowledge. This is the reason why we have to develop                                                           (17)
+efﬁcient synthesis algorithms by ourselves.
+
+                                                          For          microphones and        TDOA estimates
+B. Consistency Check of a TDOA Graph
+                                                                    for each microphone pair, the number of TDOA graphs to be
+  Below, we ﬁrst analyze the complexity of different strategies   checked for consistency is
+to check the consistency of a given TDOA graph. We assume a                 . This is unacceptable for real-time applications.
+fully connected graph with    nodes and      edges. For sim-    One possibility to reduce the complexity is the use of the time
+plicity, we count each addition or comparison as one operation.   potential approach introduced in the previous subsection. This
+  In analogy to electrical voltage and potential, we can deﬁne   requires the choice of a common reference node for all sources.
+a time potential at each node as its TDOA value with respect to   Obviously, a reference node should be connected to all other
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:41 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 6 ===
+1484                                         IEEE TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING, VOL. 16, NO. 8, NOVEMBER 2008
+
+
+
+
+
+Fig. 9.  Incomplete TDOA graphs make a choice of a common reference node
+for all sources difﬁcult.                                                                                   Fig. 10.  Both the microphone l and the mirrored microphone ~l cause a consis-
+                                                                                        tent TDOA graph in b) and c).
+
+nodes in order to determine their time potential. This is, how-
+ever, difﬁcult in practice since TDOA graphs are often incom-                         TABLE I
+plete. Due to miss detection of TDOA, different edges in TDOA               PROCEDURE OF THE SYNTHESIS ALGORITHM
+graphs of different sources are missing as illustrated in Fig. 9 for
+source  and   . For source   , node 1 is a good reference node
+since it is connected to all other nodes. The complete TDOA
+graph as shown can thus be synthesized. In contrast, node 1
+is a bad reference node for source   since it is only connected
+to three nodes. Hence, only the bold subgraph containing four
+nodes can be synthesized; the other TDOA estimates are wasted.
+The situation becomes even worse if we choose any other ref-
+erence node than node 1. For this reason, we do not follow the
+time potential approach. Instead, we propose a synthesis algo-
+rithm based on consistent triples.                   TDOA triples and graphs whose cyclic sum of TDOAs is ap-
+                                                            proximately zero. In analogy to the tolerance function of raster
+D. Consistent Triples                                                      match             in Section V, we also introduce a nonnega-
+ A TDOA triple involves three nodes and three edges. It is    tive, symmetric, and smoothly decreasing tolerance function of
+consistent if its cyclic sum of edge weights is zero. Note that   triple match (TFTM)             to take the approximate con-
+besides the desired direct path TDOA triples, other combina-   sistency into account. The width of                is character-
+tions of TDOAs can also form a consistent triple. There are   ized by the parameter tolerance width of triple match (TWTM)
+two reasons for this phenomenon of false consistency. First, the                  . As for             in (14), the choice of               is
+zero cyclic sum condition (10) is necessary but not sufﬁcient for  up to the user.
+TDOAs originating from a common source. Theoretically, sce-
+                                                             E. Efﬁcient Synthesis Algorithmnarios are possible where TDOAs of different sources   ,   , and
+  satisfy                                                    Below, we present an efﬁcient algorithm for the synthesis
+                                                               of approximately consistent TDOA graphs based on consistent
+                                                         (18)   triples. The starting point is the sets of TDOA estimates     for
+                                                                               all microphone pairs          . We assume that each TDOA esti-
+Of course, the probability of this occurrence is small for ran-                                                      mate          has a corresponding quality value           .
+domly placed sources.                                                              Table I illustrates the basic procedure of our synthesis algo-
+  The second, more critical situation is the mirrored micro-                                                                  rithm. In the ﬁrst step S1, we search for all approximately con-
+phone as shown in Fig. 10. The microphone  is close to a wall.                                                                        sistent TDOA triples. For each microphone triple               , let
+When we model sound propagation and reﬂection by acoustic                                                                 denote the set of approximately consistent TDOA triples
+rays like the image source method [16], a reﬂecting wall has
+the same effect on a microphone signal as a corresponding mir-                        with
+rored microphone   . Clearly, both the direct path graph b) and                                                                                                                        (20)
+the graph c) in Fig. 10 containing two echo path TDOAs
+and          are consistent because of                     The total number of TDOA triples to be checked is
+
+                                           for any          (19)
+                                                                                                                        (21)
+
+This false consistency cannot be identiﬁed at this stage. We will
+see in Section VII that the residual error in the source position   This number can be further reduced if the TDOA sets are stored
+estimation will help us to resolve this ambiguity.                as sorted lists. Since the number of consistent TDOA triples is
+  Another problem is that a TDOA triple is never exactly con-  much smaller than the total number of possible TDOA triples
+sistent in practice because TDOA estimates are quantized and
+noisy. As a consequence, we look for approximately consistent                                                           (22)
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:41 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 7 ===
+SCHEUING AND YANG: DISAMBIGUATION OF TDOA ESTIMATION FOR MULTIPLE SOURCES                                                           1485
+
+
+
+
+
+Fig. 11.  Three consistent triples with pairwise common edge weights are com-
+bined to a consistent quadruple.
+
+
+                                                                                   Fig. 12.  Combining quadruples with a common initial triple (bold line) results
+the complexity of our synthesis algorithm is signiﬁcantly re-    in a star graph. Then the star graph is completed by matching triples (dotted
+                                                                                               line).
+duced.
+  In step S2, we compute a quality value
+
+
+
+                                                         (23)
+
+for each consistent TDOA triple from          . It takes both the
+preciseness of the zero cyclic sum match and the quality values
+of the TDOA estimates into account. The larger the value is, the
+higher the quality of the TDOA triple
+  Then we choose that TDOA triple
+with the highest triple quality as the initial triple for our syn-
+thesis algorithm at step S3. For each of the remaining “fourth”
+microphones                                                  , we try to extend
+the initial TDOA triple to a consistent TDOA quadruple in-
+volving the four microphones            at step S4. We search    Fig. 13. When combining quadruples to a star graph, echo path triples result
+                                                                                     in different star graphs.
+for at least two other TDOA triples in the new sets          ,
+         , and      with pairwise common edge weights. If, for
+example, the triples                                and                                                                    for triples which connect the nodes           . Each processed star
+                           have common edge weights                                                          graph returns a ﬁnal TDOA graph which hopefully combines all
+                                                                      direct path TDOAs from the same source. All triples used in a
+                                                              synthesized TDOA graph   are summarized in a set    with
+we build a fully connected consistent TDOA quadruple by com-                          .
+bining these three triples; see Fig. 11.                      One important feature of our synthesis algorithm is that no
+  We repeat the synthesis of quadruples for all         fourth   further consistency check is necessary during the synthesis
+nodes. Those fourth nodes         for which a complete con-   process. Starting from (approximately) consistent triples, our
+sistent quadruple has been successfully composed are collected   synthesis algorithm guarantees by construction that each closed
+in a new set   with                        . The consistent quadruples   path and each subgraph of the resulting TDOA graph are
+with the common initial triple        form a consistent but not   (approximately) consistent.
+fully connected star graph at step S5. Fig. 12 shows such a star
+                                                                         F. Multiple Sourcesgraph for       on the left-hand side. The missing     edges
+among the     fourth nodes can be completed by triples at step     After the synthesis of one or several TDOA graphs, we have
+S6 which have two edges in common with the star graph. One   to initialize the search for a new graph. In order to avoid the
+such completing triple from        is shown in Fig. 12. Clearly,   synthesis of identical graphs, those TDOA triples which have
+any other matching triple from      or      can also be used   already been used in existing TDOA graphs are not considered
+for this purpose.                                               as initial triples. Among the remaining consistent TDOA triples,
+  Remember that, due to consistent echo path TDOA triples  we again select that with the highest quality as the initial triple
+like in Fig. 10(c), different star graphs for the same initial triple  and precede as before. The complete synthesis algorithm is ter-
+are possible. Fig. 13 illustrates this phenomenon for           minated, if each triple has been used in a TDOA graph or if the
+nodes. Starting with the boldface initial triple, four quadruples   remaining triples cannot be combined even to quadruples. These
+have been synthesized for the remaining three nodes           .   isolated triples are rejected since a three-dimensional source lo-
+While the nodes  and  each produce only one quadruple, the   calization requires at least four microphones.
+ﬁrst two quadruples caused by the fourth node  may originate     In practice, the number of TDOA graphs returned by the
+from the true microphone and its mirror. At this position, we are   above described synthesis algorithm is larger than the true
+not able to decide which one is the correct one. Hence, we ac-  number of sources, mainly due to echo path triples. Typically,
+cept all four quadruples and combine them to two star graphs as  TDOA graphs corresponding to true source positions are highly
+shown in Fig. 13. Then we complete these star graphs by looking   connected while erroneous graphs caused by echo path triples
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:41 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 8 ===
+1486                                         IEEE TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING, VOL. 16, NO. 8, NOVEMBER 2008
+
+
+
+
+
+       Fig. 14.  Position of microphones ( ) and sources ( ) in the lab.
+
+
+
+
+
+                                                                                                  Fig. 16. One block of eight microphone signals.
+
+
+
+            Fig. 15. Room impulse response measured in the lab.
+                                                               as shown in Fig. 14 to record the speech signals. The micro-
+                                                      phone signals are sampled at 96 kHz and processed by a Linux
+                                           PC (kernel 2.6, dual-core CPU at 2.8 Hz). This high samplinghave a small number of nodes and edges. This motivates the
+                                                                      rate corresponds to a ﬁne range quantization of 3.6 mm at theintroduction of the connectivity    for each synthesized graph.
+                                                       sound speed of 343 m/s.It measures the degree of connection of the graph and how good
+the zero cyclic sum condition is satisﬁed for each valid triple                                                             B. TDOA Estimation of a Single Signal Block
+
+                                                     Our experiment is based on a block length of 4096 samples.
+                                                           This corresponds to a speech frame of approximately 43 ms.
+                                                         (24)   Fig. 16 shows one block of eight microphone signals. During
+The maximum value of    is                                     . The larger   this time, the source signals contain a fricative [f] of one speaker
+   is, the higher the connectivity of the graph. Our experiments  and a diphthong [au] of the other speaker.
+show a signiﬁcant gap in   between correct and erroneous     For each signal block, we calculated        autocorrelations
+TDOA graphs in most cases. Hence, the number of high-con-  and             generalized cross-correlations (GCC-PHAT)
+nectivity graphs can be used to estimate the number of sources   [4]. For each GCC           , we selected the 15 strongest maxima
+if it is unknown.                                         and stored their positions in        . For each autocorrelation
+                                                                                                                     , the positions of the four strongest extrema were col-
+                VII. EXPERIMENTAL RESULTS                   lected in       . Then we applied the raster matching as described
+                                                                    in Section V to       . This reduces the total number of TDOA
+A. Localization System                                         estimates for all microphone pairs from                    to
+                                                            148. The exact number of desired TDOAs for two sources is  We evaluated our proposed algorithms for TDOA estimation
+                                                                                                                           . The reason for our intentional overestimation is thein a real-time demonstration system for multiple speaker local-
+                                                               conservative detection in (15) in order to avoid miss detections.ization. Our small rectangular acoustic lab is shown in Fig. 14. It
+                                                 As one example, we consider the cross-correlation betweenhas the size m  m   m. The ﬂoor and the wooden walls are
+                                                       microphone 1 and 2. The microphones have a distance 1.87 m,covered by a thin carpet. The ceiling is an acrylic glass. Fig. 15
+                                                            corresponding to an upper bound of             samples forshows a measured room impulse response. The reverberation
+                                                                 the TDOA. From the source and microphone positions, we cal-time is           ms.        speech signals are played back
+                                                                culated the true direct path TDOAs to 25.8 and 326.7 samples.from two loudspeakers at the position
+                                                   The cross-correlation          is shown in Fig. 17 with
+                                                         (25)
+
+in meters. Due to fans and illumination, there is a weak back-                                                           (27)
+ground noise. The signal-to-noise ratio (SNR) is roughly 50 dB.
+        capacitive microphones are randomly placed at the po-  The autocorrelation extrema are located at
+sitions
+                                                                                                                        (28)
+
+
+                                               By applying the raster matching, we found a number of
+                                                         (26)  TDOA pairs which match certain autocorrelation extremum
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:41 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 9 ===
+SCHEUING AND YANG: DISAMBIGUATION OF TDOA ESTIMATION FOR MULTIPLE SOURCES                                                           1487
+
+
+
+
+
+ Fig. 17.  Cross-correlation between microphone 1 and 2 and its 15 maxima.
+
+
+
+
+
+Fig. 18.  Pairs of TDOAs whose distances match autocorrelation extremum po-
+sitions.                                                                                    Fig. 19.  Synthesized approximately consistent TDOA graphs.
+
+
+positions from                  . They are depicted in Fig. 18. If we   a wall; see Fig. 10. Which graph is the correct one cannot be
+only choose the TDOA without arrowheads, there would be just   answered here. In the next section, we will resolve this ambi-
+one valid TDOA at the position 438 which does not correspond   guity by using the residual TDOA error after source position
+to any of the true source positions. By using the quality value   estimation.
+       in (13) with            and the detection rule in (15),   A similar explanation applies to graph IV. It is a modiﬁcation
+the set      is reduced to                                        of graph I caused by a mirrored microphone. The triple (4,6,8)
+                                                                               is identical in both graphs. The sensor 7 in graph IV represents
+                                                           a mirror of the true microphone 7 in graph I.
+                                                         (29)
+
+Obviously, eight echo path TDOAs have been rejected, while   C. Source Position Estimation and Accuracy
+the true direct path TDOAs 21 and 327 are still contained in
+                                                                All TDOA estimates in graphs I–III are converted to distances      .
+                                                     by using the sound speed of 343 m/s. We used the simple spher-  Now we combine the seven selected TDOA candidates from
+                                                                         ical interpolation (SI) method [17] to estimate the position of    with those of the other microphone pairs by synthesizing
+                                                                 the two sources. Microphone 7 served as the reference sensorconsistent graphs. We used                while searching
+                                                                    for the SI method. Correspondingly, only 6, 5, and 4 TDOA es-for consistent triples. Our synthesis algorithm as proposed in
+                                                                timates with respect to microphone 7 from graph I to III areSection VI returned 17 approximately consistent TDOA graphs
+                                                          used in source localization. The estimated source positions forwith the following connectivity values: 18.2, 12.2, 8.9, 3.9, 3.8,
+                                                                 the three TDOA graphs are3.7, 3.3, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 2.9, 2.7, 2.5 as deﬁned
+in (24). The ﬁrst four graphs are shown in Fig. 19. We only
+study graph I to III further. The other graphs contain only four
+connected nodes like graph IV and will be discarded due to
+their low connectivity.
+  Graph I connects seven of the eight microphones. A total                                                           (30)
+number of 21 TDOA estimates ﬁt together to one big approxi-   Clearly,   and     are good estimates for   and    in (25),
+mately consistent graph corresponding to one source position.   although further improvement could be achieved by using the
+Graphs II and III are quite similar. They connect six and ﬁve   complete TDOA graph.    does not correspond to any source
+microphones,  respectively.  Interestingly, both graphs share   position since graph II contains echo path TDOAs caused by a
+the same TDOA values between microphone 1, 2, 7, and 8.   mirrored microphone.
+They seem to originate from the same second source. Only the   We introduce two accuracy measures for the source localiza-
+TDOAs involving sensor 3 are different in both graphs. The   tion. The residual position error
+explanation is that sensor 3 is in one graph the true microphone
+and in the other graph the mirrored microphone with respect to                                                           (31)
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:41 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 10 ===
+1488                                         IEEE TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING, VOL. 16, NO. 8, NOVEMBER 2008
+
+
+
+                      TABLE II
+            COMPARISON OF LOCALIZATION ACCURACIES
+
+
+
+
+
+is simply the norm of the difference between the true source
+position vector   and its estimate    . It is, however, only com-    Fig. 20. Number of brute force graphs versus number of consistent triples.
+putable in simulations since it requires the knowledge of the true
+source position. The residual TDOA error is deﬁned as
+                                                                estimates with microphone 7 being the reference sensor. The
+                                                             source position estimates are
+
+                                                         (32)
+
+                                                                                                                        (33)
+  is the TDOA vector estimate from a synthesized TDOA graph.  We also implemented the SRP-PHAT method in [11]. After a
+It is the input for computing the source position estimate   . Then   time-consuming full search of the SRP spectrum with a spatial
+we calculate the expected TDOA vector  from the source po-   resolution of 2 cm, the two maxima for the same signal block
+sition  and the known microphone positions. Since, in general,  was found at
+  and  have a varying (but equal) vector length    depending
+on the synthesized TDOA graph, we normalize         against
+        .                                                                                                                  (34)
+  Notice that, in contrast to       ,    can be computed for any    Its computation time is about several thousand times of that of
+TDOA vector   in practice since it does not need the true source   our algorithm (assuming efﬁcient C implementations in both
+position. Taking the fact into account that   is a function of the   cases) even for our small lab. Table II summarizes the residual
+true microphone positions while   depends on the implicitly   position and residual TDOA error for these two methods.
+available microphone positions in a TDOA graph, the residual   Clearly, our algorithm outperforms both of them.
+TDOA error     actually compares the implicit microphone po-
+sitions in the TDOA graph with the true ones. If   contains di-   E. Evaluation of Continuous Localization
+rect path TDOA estimates only, the value of      is small. If,     In a continuous operation of our localization system, the av-
+however,   also contains echo path TDOAs caused by mirrored   erage CPU load is about 40%. For each signal block of length
+microphones or TDOAs of different sources,     will become  43 ms, the average computation time of our complete localiza-
+large.                                                              tion algorithm consisting of
+  Table II shows both accuracies of our algorithm for the signal      •  preprocessing like voice activity detection,
+block in Fig. 16. Indeed,     of graph II is much larger than      •  cross- and autocorrelations,
+that of graph I and III as expected because the implicit sensor 3      •  raster matching,
+in graph II is a mirrored microphone. We see that the residual      •  synthesis of consistent graphs,
+TDOA error     after source position estimation provides an ad-      •  source position estimation,
+ditional mean to resolve the ambiguity of TDOA graphs. It can    is roughly 17 ms. The main computational effort is the calcula-
+also be used to estimate the number of sources if it is unknown.    tion of the cross- and autocorrelations. This low complexity is
+  In order to study the robustness of our method with respect to   mainly due to the signiﬁcant reduction of ambiguous TDOAs
+noise, we added additional white noise to the loudspeaker sig-  by raster matching and the synthesis of consistent graphs.
+nals. For the same signal block as before, the estimated source      Fig. 20 illustrates the efﬁciency of the synthesis of consistent
+positions vary up to 1 cm for an SNR of up to 20 dB. Up to   graphs. Each point represents one signal block. The abscissa de-
+15 dB, both sources were still detected. If we further reduce the   notes the total number of possible graphs              for this
+SNR, the sets of GCC-PHAT maxima often do not contain the   block according to (17) if we perform a brute force search. The
+true TDOA values, and thus no consistent TDOA graphs can be   ordinate shows the number of consistent triples for this block
+constructed anymore.                                    which are used in the synthesis of consistent graphs. For the par-
+                                                                        ticular signal block we studied in this section, the total number
+D. Comparison to Other Localization Methods                                                               of 148 TDOA estimates after the raster matching would lead to
+  We also compared our algorithm to other localization tech-                              different brute force graphs. Our ap-
+niques. We applied two different approaches to the same signal   proach ﬁnds only 153 consistent TDOA triples.
+block. First, we simply selected the two largest maxima of GCC-     In order to simplify the evaluation of the accuracy of a contin-
+PHAT for each microphone pair and assigned them manually   uous localization, we replaced the speech source signals by two
+to the two sources, assuming that we know a priori the true   white noise signals. This ensures a constant number of simul-
+TDOAs. We applied the same SI method to all seven TDOA   taneously active sources for each signal block and there is no
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:41 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 11 ===
+SCHEUING AND YANG: DISAMBIGUATION OF TDOA ESTIMATION FOR MULTIPLE SOURCES                                                           1489
+
+
+
+                                                                                          [3] W. R. Hahn and S. A. Tretter, “Optimum processing for delay-vector
+                                                                                        estimation in passive signal arrays,” IEEE Trans. Inf. Theory, vol.
+                                                                                       IT-19, no. 5, pp. 608–614, Sep. 1973.
+                                                                                          [4] C. H. Knapp and G. C. Carter, “The generalized correlation method
+                                                                                              for estimation of time delay,” IEEE Trans. Acoust., Speech, Signal,
+                                                                                           Process., vol. ASSP-24, no. 4, pp. 320–327, Aug. 1976.
+                                                                                          [5]  J. Benesty, “Adaptive eigenvalue decomposition algorithms for pas-
+                                                                                             sive acoustic source localization,” J. Acoust. Soc. Amer., vol. 107, pp.
+                                                                              384–391, 2000.
+                                                                                          [6] Y. Huang,  J. Benesty, and  J. Chen, “A blind channel identiﬁca-
+                                                                                        tion-based two-stage approach to seperation and dereverberation of
+                                                                                speech signals in a reverberant environment,” IEEE Trans. Speech
+                                                                             Audio Process., vol. 13, no. 5, pp. 882–895, Sep. 2005.
+                                                                                          [7] Y. Huang, J. Benesty, and J. Chen, “Speech acquisition and enhance-
+                                                                         ment in a reverberant, cocktail-party-like environment,” in Proc. IEEE
+                                                                          ICASSP, 2006, pp. V-25–V-28.
+                                                                                          [8] R. Nickel and A. Iyer, “A novel approach to automated source separa-
+                                                                                              tion in multispeaker environments,” in Proc. IEEE ICASSP, 2006, pp.
+                                                                           V-629–V-632.
+                                                                                          [9] H. Buchner, R. Aichner, and W. Kellermann, “Blind source separation
+                                                                                              for convolutive mixtures: A uniﬁed treatment,” in Audio Signal Pro-
+                                                                                       cessing for Next-Generation Multimedia Communication Systems, Y.
+Fig. 21.  Residual position errors     in cm for source a (solid) and source b                                                                    Huang and J. Benesty, Eds.  Norwell, MA: Kluwer, 2004.
+(dotted) in a continuous localization. (a) Our method. (b) SRP-PHAT.                                                                                  [10] R. Aichner, H. Buchner, S. Wehr, and W. Kellermann, “Robustness
+                                                                                        of acoustic multiple-source localization in adverse environments,” in
+                                                                                     Proc. 7. ITG-Fachtagung Sprach-Kommunikation, 2006, CD-ROM.
+need to estimate the number of sources. The experimental setup       [11]  J. H. DiBiase, H. F. Silverman, and M. Brandstein, “Robust localization
+                                                                                              in reverberant rooms,” in Microphone Arrays, M. Brandstein and D.
+and the algorithms are exactly the same as before. Fig. 21 shows          Ward, Eds.  New York: Springer-Verlag, 2001, ch. 8.
+the residual position error of both sources for a total number of       [12]  J. Scheuing and B. Yang, “Disambiguation of TDOA estimates in
+                                                                                        multi-path multi-source environments (DATEMM),” in Proc. IEEE121 blocks. Apart from a few outliers, the localization accuracy                                                                          ICASSP, 2006, vol. 4, pp. 837–840.
+of our method in (a) is around 5 cm. This is pretty good since       [13]  J. Scheuing and B. Yang, “Efﬁcient synthesis of approximately con-
+the loudspeakers have a membrane diameter of roughly 5 cm.              sistent graphs for acoustic multi-source localization,” in Proc. IEEE
+For the SRP-PHAT method, we only performed a local search          ICASSP, 2007, vol. 4, pp. 501–504.
+                                                                                  [14] R. O. Schmidt, “A new approach to geometry of range difference lo-
+for each source within a cube of edge length 60 cm around the             cation,” IEEE Trans. Aerospace Electron. Syst., vol. AES-8, no. 6, pp.
+true source position to reduce the computation time. The spatial           821–835, Nov. 1972.
+resolution of the SRP-PHAT search is again 2 cm. The localiza-       [15] Y. Lin, D. D. Lee, and L. K. Saul, “Nonnegative deconvolution for
+                                                                                  time of arrival estimation,” in Proc. IEEE ICASSP, 2004, vol. II, pp.
+tion accuracy is shown in (b). GCC-PHAT is not evaluated in           377–380.
+this continuous localization due to its difﬁculty of assigning the       [16]  J. B. Allen and D. A. Berkley, “Image method for efﬁciently simulating
+                                                                               small-room acoustics,” J. Acoust. Soc. Amer., vol. 65, pp. 943–949,cross-correlation maxima to different sources.
+                                                                                 1979.
+                                                                                  [17]  J. O. Smith and J. S. Abel, “Closed-form least-squares source location
+                      VIII. CONCLUSION                                      estimation from range-difference measurements,” IEEE Trans. Acoust.,
+                                                                                   Speech, Signal Process., vol. ASSP-35, no. 12, pp. 1661–1669, Dec.
+  In this paper, we have presented a novel approach for TDOA           1987.
+disambiguation. By using additional extremum positions of au-
+                                                                                     Jan Scheuing received the Dipl.-Ing. and Ph.D. de-
+tocorrelations of the microphone signals, we have developed a                                                                                                       grees in electrical engineering from the Universität
+raster matching algorithm to identify and reject wrong TDOA                                 Stuttgart, Stuttgart, Germany, in 2001 and 2007, re-
+estimates caused by the echo paths. Based on the zero cyclic sum                               spectively.
+                                                                                                           In 2002, he joined the research team at Chair of
+condition of TDOAs originating from the same source, we have                                                                                         System Theory and Signal Processing, Universität
+formulated the TDOA disambiguation problem in the frame-                                 Stuttgart. Since 2007, he has been a System Engineer
+work of consistent graphs. We have developed an efﬁcient syn-                                 at Bosch Engineering GmbH, Abstatt, Germany. His
+                                                                                                        research interests include time delay estimation and
+thesis algorithm of TDOA graphs based on consistent triples.                                                                                                    speaker localization.
+We also introduced different levels of quality for TDOA esti-
+mate, TDOA triple, TDOA graph, and residual TDOA error.
+Finally, the efﬁciency and the real-time capability of our algo-
+rithms are demonstrated in a real experiment. We believe that                        Bin Yang (SM’06) received the Dipl.-Ing. and Ph.D.
+our algorithms can also be combined with other localization                            degrees  in  electrical engineering from the Ruhr
+                                                                                                        University Bochum, Bochum, Germany, in 1986 and
+techniques like the impulse response estimation and SRP search.                           1991, respectively.
+                                                                                  From 1996 to 2001, he was a Senior Researcher
+                                                                                       on mobile communications at Inﬁneon Technologies,
+                   REFERENCES                                                                                        Germany. Since 2001, he has been a Professor and
+     [1] M. S. Brandstein and H. F. Silverman, “A practical methodology for                         head of the Chair of System Theory and Signal Pro-
+        speech source localization with microphone arrays,” Comput. Speech,                             cessing of Universität Stuttgart, Stuttgart, Germany.
+        Lang., vol. 11, pp. 91–126, 1997.                                                         His research interests include signal processing for
+     [2] W. L. Kellermann, “Acoustic echo cancellation for beamforming mi-                                localization, emotion recognition, array processing,
+        crophone arrays,” in Microphone Arrays, M. Brandstein and D. Ward,   automotive safety systems, blind methods, etc.
+        Eds.  New York: Springer-Verlag, 2001, ch. 13.                         Dr. Yang is a member of EURASIP and VDE.
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:46:41 UTC from IEEE Xplore. Restrictions apply.

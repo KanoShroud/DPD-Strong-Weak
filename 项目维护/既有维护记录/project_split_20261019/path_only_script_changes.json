@@ -1,0 +1,78 @@
+[
+  {
+    "file": "F:\\DPD_WeakSource_Localization\\paper\\scripts\\prepare_assignment_cost.py",
+    "source_sha256": "9a4aeb95389b69f04487e874e827ff7f7849dc283afc87cf47645acde4827011",
+    "migrated_sha256": "672028e77afe0d03d055f4ef04f1711b4357d6f49ae07cd55e80e0852439b5ee",
+    "changes": [
+      [
+        "from pathlib import Path",
+        "from pathlib import Path\nfrom relocated_evidence import local_path"
+      ],
+      [
+        "p = Path(p).resolve(strict=True)",
+        "p = local_path(p)"
+      ],
+      [
+        "folder = Path(ptr['out']).resolve(strict=True)",
+        "folder = local_path(ptr['out'])"
+      ]
+    ]
+  },
+  {
+    "file": "F:\\DPD_WeakSource_Localization\\paper\\scripts\\analyze_contribution_closeout.py",
+    "source_sha256": "45b8262156bed23be7af4539d281c27bd45d02c84796dc7823d75a93a6af39dd",
+    "migrated_sha256": "598c750b6ec73f94ba81261d5f56acc3c57cabd21c35ea836aebf1bd838cb891",
+    "changes": [
+      [
+        "from pathlib import Path",
+        "from pathlib import Path\nfrom relocated_evidence import local_path"
+      ],
+      [
+        "assert sha(Path(name)) == digest",
+        "assert sha(local_path(name)) == digest"
+      ]
+    ]
+  },
+  {
+    "file": "F:\\DPD_WeakSource_Localization\\paper\\scripts\\validate_assignment_cost.py",
+    "source_sha256": "3cc5e58280023855c17dbd9714d56cb0fb93274a0ab272681241fbcf99be3185",
+    "migrated_sha256": "b1bccba519fe4a4de14a037ef9a93f8058d8da9e59b040f1bb6229ba5fdaae0f",
+    "changes": [
+      [
+        "from pathlib import Path",
+        "from pathlib import Path\nfrom relocated_evidence import local_path"
+      ],
+      [
+        "hashlib.sha256(Path(p).read_bytes())",
+        "hashlib.sha256(local_path(p).read_bytes())"
+      ]
+    ]
+  },
+  {
+    "file": "F:\\DPD_WeakSource_Localization\\paper\\scripts\\validate_contribution_closeout.py",
+    "source_sha256": "bb4e90efa1f6a7a656f0e42a961271040ca63d48c79ddea1c23a938c122d6708",
+    "migrated_sha256": "e66d11a4f32c10f181675ed52786df5269ebf2a9a9664c134362a27ec9174ca4",
+    "changes": [
+      [
+        "from pathlib import Path",
+        "from pathlib import Path\nfrom relocated_evidence import local_path"
+      ],
+      [
+        "import hashlib",
+        "import hashlib\nimport argparse"
+      ],
+      [
+        "def main():",
+        "def main():\n    parser = argparse.ArgumentParser()\n    parser.add_argument('--out', default='qa/contribution_closeout_20261019')\n    args = parser.parse_args()"
+      ],
+      [
+        "hashlib.sha256(Path(path).read_bytes())",
+        "hashlib.sha256(local_path(path).read_bytes())"
+      ],
+      [
+        "out = PAPER / 'qa/contribution_closeout_20261019'",
+        "out = PAPER / args.out"
+      ]
+    ]
+  }
+]

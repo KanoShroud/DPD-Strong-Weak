@@ -1,0 +1,68 @@
+Y. Zeng et al.: QNOMP: A Quasi-Newton-Based Joint Multipath Optimization Method
+
+
+
+directional cosine of the angle-of-arrival (AoA) φi for the i-th    OMP is a computationally efficient on-grid method for
+path. More precisely, the steering vector aθ(θ) is defined as:      sparsity selection and channel estimation. Given M  pilot
+                                                       symbols and the corresponding LS estimate h′, we introduce
+         aθ(θ) = h1, e−j2πθ, · · · , e−j2π(N−1)θiT ,       (3)    a standard grid in the delay and angular domains as
+
+where θ = d/λ · cos φ, with d being the antenna spacing, λ                    0                                                                  τ = 1τdft · [0, 1, . . . , M −1],being the carrier wavelength, and φ being the AoA. Assuming
+                                                                    θ0 = 1θdft · [−N/2, . . . , N/2 −1],          (8)d = λ/2 as adopted in this paper, we have θ ∈[−1/2, 1/2]
+and φ ∈[0, π]. The frequency response vector is defined as:
+                                                                    respectively, where the grid spacing 1τdft =  1/(M1f ),
+                                     =  1/N. Define the sensing matrix A(τ 0, θ0) =       aτ(τ) = h 1, e−j2πτ1f , . . . , e−j2πτ(M−1)1f iT .         1θdft
+                                                               [aτ(τi0 ) ⊗aθ(θ0j )]i=0:M−1,j=−N/2:N/2−1 ∈CNM×NM. The
+The  joint  frequency-antenna  impulse  response  can  be   OMP  algorithm  solves  the  on-grid  counterpart  of  the
+expressed by combining the steering and frequency response     optimization problem in (7):
+vectors as a(τi, θi) =  aτ(τi) ⊗aθ(θi) ∈CNM. Let β =
+[β1, . . . , βL] ∈CL denote the complex gain vector. The                1                                                            Lon =                                                     min                                                                               ∥h′ −A(τ 0, θ0)β∥22    s.t. β is sparse.   (9)
+                                                               β                                                            σ 2complete channel response h = [hT1, hT2, . . . , hTM]T ∈CNM
+can be compactly expressed as:
+                                                   The algorithm initializes the residual vector r = h′ and empty
+                   L
+                                                             estimated parameter sets ˆτ = ˆθ = ∅. In each OMP iteration,
+          h = X βia(τi, θi) = A(τ, θ)β,            (4)
+                                                                                              it estimates the delay and angle of a new path, which is added
+                    i=1
+                                                                   to the corresponding parameter set. Specifically, it finds the
+where τ  =   [τ1, · · · , τL]T, θ  =   [θ1, · · · , θL]T  are    column of A(τ 0, θ0) that is maximally correlated with r, i.e.,
+real-valued vectors in RL, and the sensing matrix A(τ, θ) =     finding the index (i, j) =  argmaxi,j rH(aτ(τ i                                                                                                                      0 ) ⊗aθ(θ0j )) .
+[a(τ1, θ1), · · · , a(τL, θL)] ∈CNM×L contains the concate-                                                   The parameter sets  ˆτ,  ˆθ are then updated as  ˆτ ←   ˆτ ∪
+nated steering vectors.                                                0                                                                 {τ i },   ˆθ ←    ˆθ ∪{θ0j }. Based on the current estimates  Let x =   [x1, x2, . . . , xM]  ∈ CM  denote the  pilot
+                                                                           the path gains β are obtained via least squaressequence.The received signal y = [yT1, . . . , yTM]T ∈CNM         ˆτ and  ˆθ,
+                                                                                                          ˆβ =  A(ˆτ, ˆθ)†h′, where † denotes the Moore-can be expressed in matrix form as y = diag(x ⊗1N)h + w,     estimation
+where w ∼CN(0, σ 2INM) is complex AWGN.                Penrose pseudoinverse. The residual vector is updated as r ←
+                                                                     h′ −A(ˆτ, ˆθ) ˆβ. This process iterates until a stopping criterion  Assuming |xi| = 1, the least squares (LS) estimate of h
+based on the observation y is given by:                                is met, with the number of iterations Np corresponding to the
+                                                             estimated number of propagation paths.
+       h′ = diag(x ⊗1N)−1y = h + diag(x ⊗1N)−1w    (5)    OMP is a greedy algorithm that estimates the delay and
+     = h + w′,   w′ ∼CN(0, σ 2INM).              (6)     angle of one path per iteration. However, this sequential
+                                                               estimation of individual paths does not guarantee a joint
+  The super-resolution recovery of channel states involves                                                            optimal solution over all multipath components. Moreover,
+estimating the parameters (β, τ, θ). These estimates enable                                                                the  resolution of OMP  is  limited by  the  grid spacing
+the extrapolation of the channel state to unobserved frequency   1τ                                                                                                dft and 1θdft, and the actual path parameters (τi, θi) maybands using the multipath model in (2).                                                                deviate from the predefined discrete grid points (τ 0, θ0). This
+                                                                 grid mismatch degrades super-resolution and extrapolation
+III. SUPER-RESOLUTION ALGORITHM: QNOMP
+                                                           performance.
+By exploiting the inherent sparsity of multipath channels, the
+                                                     To address these limitations, we propose a two-stage
+channel parameters can be estimated by solving the following
+                                    QNOMP strategy. The strategy comprises an on-grid multi-
+sparse optimization problem based on h′ from (5):
+                                                                 resolution sparsity selection stage with local refinement,
+            1                                            followed by an off-grid joint optimization stage leveraging   min L =                 ∥h′ −A(τ, θ)β∥22,    s.t. β is sparse    (7)
+     τ,θ,β           σ 2                                                                the BFGS method. These two stages are performed in an
+                                                                 interleaved fashion to enhance both estimation accuracy andTo solve this problem, we propose a two-stage algorithm.
+                                                           computational efficiency.In the first stage (non-standard on-grid stage), we determine
+the sparsity and obtain rough parameter estimates using an
+enhanced OMP-type method. This stage incorporates a multi-     A. ON-GRID MULTI-RESOLUTION OMP FOR SPARSITY
+resolution on-grid sparsity selection strategy followed by    SELECTION
+a rapid off-grid refinement. The second stage (the off-grid    To obtain more accurate estimates of the delay and angle,
+stage) employs the BFGS quasi-Newton method to refine   we first apply a locally refined multi-resolution technique
+all parameters  jointly  for enhanced  accuracy. We  refer     within each OMP  iteration. The OMP estimates  ˆτ 0 =
+to the complete two-stage approach as the Quasi-Newton     τ i0 , ˆθ0 = θ0j  serve as the initial guesses for this procedure.
+Orthogonal Matching Pursuit (QNOMP) algorithm.            Given the estimates  ˆτ n, ˆθn after the n-th refinement step,
+
+
+VOLUME 13, 2025                                                                                                         212655

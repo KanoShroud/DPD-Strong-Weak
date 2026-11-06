@@ -1,0 +1,31 @@
+[PDF p.2] Building upon these insights, this letter proposes a hybrid DPD method designed for low-cost, wide-area surveillance systems using fixed receivers and time delay information. The proposed approach combines sparse correlation-domain delay mapping with a continuous-domain refinement mechanism. Specifically, it constructs high-resolution delay spectra via sparse recon- struction, interpolates them into a differentiable representation, and applies gradient-guided updates to iteratively refine emit- ter positions. This fusion of discrete and continuous inference obtains sub-grid localization accuracy, bypassing grid limita- tions and achieving both robustness and efficiency in low SNR environments where conventional methods fail.
+
+[PDF p.2] Cross-domain fusion approaches represent another line of advancement, with methods [9] and [10] extracting positional constraints across the signal, correlation, and spatial domains. While these approaches offer improved localization accuracy compared to frequency-domain counterparts, their computa- tional burden escalates rapidly with grid resolution due to the complexity of cost functions.
+
+[PDF p.2] To establish the spatial-domain mapping, we first discretize the spatial region into Gu grid points. Each grid point gu maps to a corresponding delay-difference vector in the correlation domain:
+
+[PDF p.2] To fully exploit inter-station information, we obtain P unique combinations by pairing all sensor stations without repetition. For the p-th pair sensors indexed by {l, m}, the cross-power spectral density is computed as:
+
+[PDF p.2] between the emitter position u and the l-th sensor position pl. 𝐒(𝜔) ∈ℂ𝑁and 𝐖𝑙(𝜔) ∈ℂ𝑁denote the discrete Fourier transform of s(t) and the independent observation noise, respec- tively. 𝜔= [𝜔1, 𝜔2, ..., 𝜔𝑁]T are N discrete frequency components, where 𝜔𝑛= 2𝜋𝑓𝑠(𝑛−1)∕𝑁.
+
+[PDF p.2] 𝑙= (‖𝐠𝑢−𝐩𝑚‖ −‖𝐠𝑢−𝐩𝑙‖)∕𝑐. Under the spa- tial sparsity of the emitter, τg exhibits inherent sparsity. Let the delay-difference range be discretized into Gτ grid points Ω = {𝜏1, 𝜏2, ..., 𝜏𝐺𝜏}. The sparse reconstruction model for the p-th sensor pair in (2) is:
+
+[PDF p.2] 𝑚and the time delay difference τp = τm −τl. And Rss(ω) denotes the source signal’s autocorrelation matrix in the frequency-domain. Rw represents the noise covari- ance. The derived measurements {𝐑𝑝}𝑃
+
+[PDF p.3] 1350911x, 2025, 1, Downloaded from https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/ell2.70447 by Readcube-Labtiva, Wiley Online Library on [08/10/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+[PDF p.3] Finally, an adaptive step-size search based on the Armijo criterion is employed in the spatial domain to ensure convergence of the cost function, enabling sub-grid accurate direct localization. The parameter 0.1 in the Armijo line search condition is chosen following common practice in the optimization literature [11], balancing convergence speed and computational cost. Since the cost function C(u) is constructed from cubic spline interpolants, its gradient ∇C(u) is Lipschitz continuous. Consequently, the Armijo line search method used in Equation (14) guarantees that ||∇C(u(k))||2 →0 as k →∞, ensuring convergence to a stationary point.
+
+[PDF p.3] The cross-correlation measurements of each sensor pair are iteratively reconstructed through the efficient fixed-point EM algorithm to obtain the final sparse delay-difference spectrum: {̂𝐑𝑝
+
+[PDF p.3] The overall flow of the proposed algorithm is illustrated in Figure 2, which provides a comprehensive overview of the algo- rithm’s structure and the interconnections between its various steps.
+
+[PDF p.3] which extends the discrete representation into a globally smooth form and eliminates grid discretization effects. By mapping delay differences to the spatial domain, a global spatial cost function is formulated as
+
+[PDF p.4] The overall complexity of the proposed algorithm consists of the time complexity T and the space complexity M. The time complexity involves three stages: (1) signal pre-processing: Per- forming N-point FFT for L sensors and computing cross-spectra for P station pairs results in O(LNlog N), where theO(PN)term is negligible underN ≫P; (2) sparse spectral reconstruction: Each pair of stations per iteration requires a matrix multiplication of O(G2
+
+[PDF p.4] The simulation setup consists of four stationary sensors arranged in a 1 km×1 km square, monitoring an emitter randomly located within the surveillance area, such as 𝐮= [53.5, −86.5]T. The emitter’s parameters are set as fs = 100MHz and fc = 1GHz. Three benchmark methods are considered: TDOA-WLS in [2], DPD- SML in [3], and DPD-Sparse in [9]. All compared algorithms utilize a multiresolution grid search over a 200m × 200m area with an initial grid spacing of 5 m. The proposed method integrates sparsity priors and gradient-driven iteration, starting from a coarser initial resolution of 10 m.
+
+[PDF p.4] 𝜏𝑁). The spline interpolation in Equation (10) significantly reduces Gτ, and the proposed fast-converging optimization algorithm keeps the number of iterations very small. Regarding space complexity, memory usage is mainly due to the storage of frequency-domain signals and over-complete dictionary, giving M = O(LN + GτN).
+
+[PDF p.5] An efficient DPD method is proposed, leveraging sparse struc- tures in the cross-correlation domain and gradient-driven refine- ment to achieve accurate and efficient emitter localization. By avoiding grid resolution limitations and accelerating conver- gence, the proposed method enhances both localization accuracy and efficiency. Simulation results demonstrate that the proposed approach significantly outperforms conventional and sparse DPD methods under low-SNR conditions. And the proposed method maintains superior localization performance while reducing runtime across varied sample sizes. Overall, this letter offers a competitive solution for real-time passive localization in challenging environments.

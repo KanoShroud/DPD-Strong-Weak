@@ -1,0 +1,1007 @@
+
+=== PDF PAGE 1 ===
+IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 24, NO. 8, AUGUST 2025                                                              6551
+
+   Cooperative Direct Localization in Multipath
+   Environments Using Binary Sparse Modeling
+        and Cayley–Menger Determinantlg
+
+                    Shiva Akbari   , Member, IEEE, and Shahrokh Valaee   , Fellow, IEEE
+
+
+
+
+  Abstract—This paper studies direct localization which is a tech-   the literature [1], [3], including Wi-Fi, Bluetooth, and Ultra-
+nique used for positioning a source by directly searching within a  WideBand (UWB) technologies.
+planar grid. In this paper, we have developed an effective method                                              Among these techniques, Wi-Fi-based indoor positioning is
+involving sparse signal recovery using the ℓ0-pseudo-norm. Our
+                                                                     particularly prevalent due to the convenience of existing hard-novel contribution focuses on a cooperative direct localization
+technique  that takes  into account the ambiguity caused by  ware infrastructure. Speciﬁcally, utilizing OFDM and MIMO
+reﬂections in the multipath environment. Speciﬁcally, we have   systems in the IEEE 802.11a/n protocol allows the extraction
+factored in the distances between the source and the anchors   of Channel State Information (CSI) from commercial Wi-Fi
+using a mathematical  relationship  called  the Cayley-Menger                                                              devices [4], [5]. CSI provides detailed information on phase
+determinant. This determinant acts as a crucial component in
+                                                       and amplitude across multiple subchannels, offering a morederiving accurate range estimates. This relationship is added as
+an additional constraint to the sparse recovery problem which   comprehensive understanding of signal propagation. Conse-
+is NP-hard. To solve this NP-hard problem, we have employed a   quently, CSI has become a widely used feature for achieving
+binary programming relaxation technique. Experiments reveal   high-precision  localization  in Wi-Fi-based  applications. In
+that our proposed approach signiﬁcantly reduces localization                                                         CSI-based localization techniques, the CSI  is processed to
+errors when compared to traditional direct localization methods.
+                                                                    extract key localization parameters like angle-of-arrival (AoA)This suggests that our cooperative direct localization method
+holds great potential for enhancing the accuracy and reliability  and time-of-ﬂight (ToF) or to directly estimate the location of
+of location estimation in challenging, multi-path scenarios.        the device.
+                                                               Current  literature provides several methods and systems  Index Terms—Direct localization, sparse recovery, compressed
+sensing, binary programming, Cayley-Menger determinant.        for CSI-Based  Positioning. A category  of  these methods
+                                                             uses a two-step approach by utilizing CSI to ﬁrst estimate
+                                                               intermediate variables such as AoA and ToF or both and next                           I. INTRODUCTION
+                                                                    localize the user by triangulation or trilateration. To estimate
+    EXT  generations  of  wireless  networks  promise  to                                                                these intermediate variables, different algorithms have been
+       facilitate widespread communication and offer highlyN                                                        proposed. Methods such as MUSIC [6] and ESPRIT [7], along
+accurate  location-based  services.  Meeting  the  increasing                                                           with their variations [8], [9], [10], [11], fall into this group.
+demands of next-generation wireless applications like multi-                                                          Subspace-based methods like MUSIC and ESPRIT rely on
+sensory extended reality (XR), connected robots, and wireless                                                        computing the covariance matrix, necessitating a substantial
+brain-computer interactions requires both the transmitter and                                                     amount of data snapshots. Recently, authors of [8] proposed
+receiver to have knowledge of their relative positions and                                                           a subspace-based method to estimate AoA and ToF from a
+orientations. Consequently, localization is expected to play a                                                      smoothed CSI matrix, utilizing standard, commodity off-the-
+crucial role in the next generations of wireless systems [1].                                                                    shelf Wi-Fi radios with submeter median accuracy.
+  Many location-based services have indoor applications. In                                                           Another set of localization methods exploits signal sparsity
+indoor environments, signal transmission faces challenges such                                                                    in various domains, such as the angular or spatial domain [12],
+as multipath interference, shadowing, power attenuation, and                                                                     [13], [14], [15], [16], [17], [18]. These methods operate on
+transmission delays. While the Global Navigation Satellite                                                                 the fact that the received signal components originate from
+System (GNSS)  is effective outdoors,  it struggles to pro-                                                           a sparse subset of grid points within the domain of interest.
+vide high-precision indoor positioning [2], [3]. Consequently,                                                   To recover the signal, sparse signal recovery techniques are
+various indoor positioning methods have been proposed in                                                      employed to solve an undersampled system of equations [12].
+  Received 29 July 2024; revised 3 January 2025 and 14 March 2025;  The sparsity of the signal is often represented using an ℓ0-
+accepted 19 March 2025. Date of publication 1 April 2025; date of current   pseudo-norm formulation, which is a computationally NP-hard
+version 14 August 2025. The associate editor coordinating the review of this   problem [13]. To solve the NP-hard sparse recovery problem,
+article and approving it for publication was H. Chen. (Corresponding author:
+Shiva Akbari.)                                                     the literature suggests using an ℓ1 relaxation [19]. While ℓ1
+  The  authors  are  with  the  Electrical  and  Computer  Engineering   relaxation convexiﬁes the problem and reduces computational
+Department, University of Toronto, Toronto, ON M5S 3G4, Canada (e-mail:   complexity,  it may introduce some bias  into the solution
+shiva.akbari@mail.utoronto.ca).
+   Digital Object Identiﬁer 10.1109/TWC.2025.3554614                     [20]. An alternative approach involves binary relaxation of
+
+            1536-1276 © 2025 IEEE. All rights reserved, including rights for text and data mining, and training of artiﬁcial intelligence and
+                           similar technologies. Personal use is permitted, but republication/redistribution requires IEEE permission.
+                                  See https://www.ieee.org/publications/rights/index.html for more information.
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:45:44 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 2 ===
+6552                                                         IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 24, NO. 8, AUGUST 2025
+
+
+the signal, which remains NP-hard [21]. However, efﬁcient   characteristics  of  the  surroundings based on  the  Cayley-
+branch-and-bound and  annealing-based  solvers have been  Menger  determinant  [28].  This  determinant  captures  the
+developed to address this type of problem.                       relationships between pairwise distances of anchors and the
+  Authors of [15], [16], and [17] have focused on signal   distances between the user and each anchor in the 2D plane. To
+sparsity in the angular domain. In these methods, ﬁrst, the   solve the localization problem, we employ a sparse recovery
+AoA  is estimated by solving the sparse recovery problem   approach with binary  relaxation over  the ℓ0-pseudo-norm
+and next the location is estimated by triangulation. However,   constraint.
+these two-step approaches are usually suboptimal [22], [23].     While  the  preliminary  results  of  this  research  were
+To avoid this suboptimality, a direct localization method has   published in [29], this paper makes several signiﬁcant con-
+been introduced [24]. This approach determines the location   tributions that extend and enhance the initial ﬁndings:
+of the user directly from the received signal, bypassing the     1) Enhanced  Methodology: We  provide  a  comprehen-
+intermediate parameter estimation like AoA or ToF.                   sive  explanation  of  the methodology  introduced  in
+  The concept of direct localization was ﬁrst developed in         [29], including the theoretical foundations and practical
+[25], where the authors proposed a one-step approach based        implementation details.
+on estimating the eigen structure of the received signal spectral     2) Geometric Constraint Robustness: We delve into the
+density matrix. Several decades  later, in [24], a technique         robustness of the proposed geometric constraint with
+known as direct position determination (DPD) was introduced.         respect  to  estimation  errors,  highlighting how  these
+DPD  involves deﬁning a mathematical  cost  function and         constraints can improve the accuracy and reliability of
+performing a two-dimensional search over known source loca-         the localization results.
+tions for matched-ﬁeld processing. In [26], DPD was extended     3) Extended  Simulations: We  conduct  extensive  simu-
+to handle multiple signal sources, although  it assumed no          lations  to thoroughly assess the performance of the
+signal reﬂections or multipath interference. Subsequently, in        proposed method in various controlled scenarios, offer-
+[27], a maximum likelihood estimation algorithm called direct         ing deeper insights into its strengths and limitations.
+location estimation (DLE) was introduced for dense multipath     4) Real-World Data Evaluation: We validate the proposed
+environments. This method  relied on a Gaussian approxi-       method using real-world data collected in typical indoor
+mation but required  prior knowledge of the power delay          settings, demonstrating  its  practical  applicability and
+proﬁle. More recently, Garcia [14] presented a method called         effectiveness in real-life environments.
+direct source localization (DiSouL), which jointly processes                                                     The rest of this paper is structured as follows. Section II
+data from  all antenna arrays using a compressed sensing                                                              provides a  detailed  description of  the main mathematical
+framework. They used an ℓ1-norm relaxation technique to                                                            concepts used in this study. In Section  III, we present the
+solve the problem, incorporating multipath components by                                                          environment and the system model. Section IV outlines the
+matched ﬁltering to estimate reﬂection characteristics.                                                       methodology and problem formulation. In Section V, we
+  Existing direct localization methods face several drawbacks,                                                             analyze the robustness of the deﬁned geometric constraint.
+such as sensitivity to multipath interference and reliance on                                                              Section VII showcases the performance evaluation of the
+Gaussian approximations or prior knowledge of the power                                                          proposed method. Section VIII discusses the limitations of
+delay proﬁle [24], [26], [27]. Additionally, as mentioned ear-                                                                 the current work and outlines promising directions for future
+lier, while sparse recovery methods using ℓ1-norm relaxation                                                                  research. Finally, Section IX provides concluding remarks.
+are popular in localization due to  their reduced computa-                                                                 Notations: Non-bold Italic letters x are used for scalars.
+tional complexity, they often introduce bias and compromise                                                      Bold lowercase x is used for column vectors, and bold upper-
+recovery accuracy [20]. In contrast, binary relaxation, while                                                             case X is used for matrices. Throughout the paper, det(X)
+computationally challenging (NP-hard), provides a more accu-                                                            denotes the determinant of matrix X. diag(X) returns the
+rate representation of the sparsity of the problem and avoids                                                             diagonal elements of matrix X. The inverse of matrix X is
+the bias introduced by the ℓ1-norm relaxation and efﬁcient                                                               represented by X−1 and XT  is the transpose of matrix X. In
+solvers are available for this problem.                                                                                             p1                                                                   addition, ℓp for 0 < p shows the norm p, ||x||p = (P xpi )  of  One of the major contributions of this work is the incor-
+                                                                vector x and the ℓ0- pseudo norm, ||x||0, depicts the number
+poration of geometric constraints to mitigate the challenges                                                               of non-zero elements of vector x. Also, 1(x) represents the
+posed by multipath interference. By leveraging the Cayley-
+                                                              binary version of vector x, 1 is the identity vector and ℜ(.)
+Menger determinant, which models the spatial relationships
+                                                     shows the real-part of a complex number.
+between anchors and the user, the proposed method effectively
+constrains the solution space to physically feasible locations.
+                                                                                                        II. BACKGROUNDThis geometric constraint is not only computationally efﬁcient
+but also robust to the errors introduced by signal reﬂections,     In this section, we provide an explanation of the necessary
+thereby signiﬁcantly reducing localization inaccuracies caused   elements used for solving the location estimation problem in a
+by multipath components.                                     multipath environment with a geometric approach. The main
+  This paper introduces a novel cooperative direct localization   concepts used in solving this problem are the Cayley-Menger
+method designed speciﬁcally for multipath 2D environments.   determinant and Sparse modeling. The Cayley-Menger deter-
+To  effectively account  for  reﬂections within  the environ-   minant provides a geometric foundation by leveraging spatial
+ment, we constrain the search space using the geometric   relationships  between  points,  ensuring  robustness  against
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:45:44 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 3 ===
+AKBARI AND VALAEE: COOPERATIVE DIRECT LOCALIZATION IN MULTIPATH ENVIRONMENTS                                                     6553
+
+
+multipath interference and maintaining geometric consistency.   tool for localization, network topology analysis, and motion
+Sparse modeling, on the other hand, focuses on efﬁciently   planning in multi-dimensional environments. These applica-
+reconstructing signals by exploiting sparsity, enabling accu-   tions build upon its fundamental mathematical properties, as
+rate estimation even from limited and noisy measurements.   outlined in Theorems 1 and 2.
+Together, these two concepts combine geometric precision
+with computational efﬁciency, creating a powerful framework
+                                                             B. Sparse Modelingfor solving the direct localization problem. These two concepts
+are introduced in more detail in this section.                    Sparse modeling is a concept used in various ﬁelds such as
+                                                       machine learning, signal processing, and statistics. It mainly
+                                                                deals with the efﬁcient representation and recovery of data thatA. The Cayley-Menger Determinant
+                                                                               is inherently sparse, meaning most of its components are zero
+  The Cayley-Menger determinant is a fundamental concept
+                                                               or negligible. In sparse modeling, the goal is to identify and
+in distance geometry [28]. It is a generalization of Heron’s
+                                                           use this sparsity to simplify data representation, reduce noise,
+formula to compute the volume of a multi-dimensional sim-
+                                                       and enhance estimation accuracy [32].
+plex. This mathematical concept establishes a link between
+                                                              Sparse modeling employs a variety of techniques to achieve
+the distances between points  in space and the geometric
+                                                                 efﬁcient data representation and recovery, each tailored to
+characteristics of that space. Essentially it enables us to gain
+                                                            speciﬁc constraints. For example, Lasso (L1 regularization)
+knowledge about how points are arranged in space based on
+                                                           encourages sparsity in linear models by penalizing large coef-
+their mutual distances. Let us explore this concept in greater
+                                                                   ﬁcients, while Orthogonal Matching Pursuit (OMP) [33] and
+depth, starting with the basic framework.
+                                                             Basis Pursuit [34] aim to ﬁnd the sparsest solution under linear
+  1) Understanding the Cayley-Menger Matrix: The foun-
+                                                                     constraints. These techniques enable exponential reductions in
+dation of the Cayley-Menger method  lies in the use of a
+                                                                 the number of required measurements compared to traditional
+matrix known as the Cayley-Menger matrix denoted as C.
+                                                       methods like the Shannon-Nyquist theory [32]. They have
+Consider we have the set of points {a1, a2, · · · , an}. The                                                        been pivotal in applications such as compressed sensing in
+Cayley-Menger matrix of these n points has dimensions of
+                                                          medical imaging, where they allow reconstruction of high-
+(n + 1) × (n + 1) and exhibits a structure;
+                                                                   quality images from limited measurements, and dictionary
+            0     d(a1, a2)2  · · · d(a1, an)2 1          learning in signal processing, which  is used for tasks like
+             d(a2, a1)2     0        · · · d(a2, an)2 1            feature extraction and denoising.
+                                                                  In addition to feature selection, sparse modeling is used in    C =                                                                                             ...                                                    ...                                  ...        ...                          ...
+                                                        compressed sensing, a technique for efﬁciently reconstructing
+             d(an, a1)2 d(an, a2)2 · · · d(an, an)2 1                                                                                                                                                                                                       signals or images from a limited number of measurements.
+               1        1        · · ·     1     0
+                                                           This has applications in image processing, medical imaging,
+  In this matrix:                                         and more, where  it allows for data acquisition with fewer
+  • d(ai, aj)  represents  the  Euclidean  distance  between   resources or reduced data transmission [35].
+     points  ai and  aj, where  i and  j belong  to  the  set     Sparse modeling has expanded beyond signal recovery to
+     {1, 2, · · · , n}.                                      encompass various areas, including sparse nonlinear regres-
+  • The determinant  of  this  matrix, denoted  as det(C),   sion (e.g., Generalized Linear Models), sparse probabilistic
+     carries vital geometric information about the spatial con-   networks (e.g., Markov and Bayesian networks), sparse matrix
+     ﬁguration of the points.                                      factorization  (e.g.,  dictionary  learning), and  sparse PCA
+                                                       and nonnegative matrix factorization. These techniques ﬁndIn the context of a 2D plane, this determinant is not merely a
+                                                                  applications  in diverse ﬁelds such as astronomy, physics,mathematical abstraction but directly relates to the area of the
+                                                              geophysics, speech processing, and robotics [35].triangle formed by three points. Speciﬁcally, it is proportional
+to four times the area of this triangle, making  it a practical
+tool for geometry analysis.                                                                   III. SYSTEM MODEL
+  Theorem 1 and Theorem 2 summarize the properties of the
+                                                             A. The 2-D Multipath EnvironmentCayley-Menger determinant. Their proofs can be found in [28].
+  Theorem 1: Consider a set of n points {a1, a2, . . . , an} in     This system model explores the localization of a single
+m-dimensional space. If n ≥m + 2, then the Cayley-Menger   source within a two-dimensional (2)-D) multipath environ-
+matrix C is singular, i.e det(C) = 0.                         ment, depicted in Fig. 1. The scenario includes Na anchors
+  Theorem 2: Consider a set of n points {a1, a2, . . . , an} in  and a single mobile source to be localized. The anchors are
+m-dimensional space. If n ≥m+1, the rank of Cayley-Menger   positioned at known coordinates [˜x(a), ˜y(a)], a = 1, 2, . . . , Na,
+matrix C is at most m + 1.                                  while the source  is situated at the point  [˜xs, ˜ys] which  is
+  The Cayley-Menger determinant is widely used in appli-  unknown. Each anchor is equipped with an Ne-element uni-
+cations such as wireless communication, sensor networks,  form linear array (ULA) and operates with Ns sub-carriers.
+and robotics, where it facilitates spatial analysis and ensures  The source emits signals in all directions, and the received
+geometric consistency [30], [31]. Its ability to derive geometric   signal at each anchor is composed of a line-of-sight (LoS)
+relationships from distance measurements makes it a valuable  component and, at most, Nm reﬂections.
+
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:45:44 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 4 ===
+6554                                                         IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 24, NO. 8, AUGUST 2025
+
+
+                                                                  signal component that helps in localization. However, our task
+                                                                               is complicated by the presence of signal reﬂections.
+                                                             Unlike the LoS signal component, the behavior of signal
+                                                               reﬂections is characterized by a higher degree of unpredictabil-
+                                                                                     ity. Reﬂections originate from diverse and random locations
+                                                                    distributed across the environment. Furthermore, the interac-
+                                                                    tions among these reﬂected signal components are complex.
+                                                           This inherent complexity introduces a level of ambiguity into
+                                                           our source localization problem, which can have the effect
+                                                               of diminishing the precision and accuracy of our location
+                                                                  estimation.
+                                                     To overcome  this  inherent  ambiguity, we  turn  to  the
+                                                        geometry of the environment. Speciﬁcally, we exploit the
+                                                       Cayley-Menger determinant, a mathematical tool well-suited
+Fig. 1. A sample system model with three anchors and a single source.       to  capture  the geometric  relationships between  points  in
+                                                           space based on their distances. By utilizing these geometric
+B. Received Signal Model at Anchors                                                                 observations, we can distinguish the complex interactions of
+  The received waveform at the a-th anchor is a complex   reﬂections and frame our source localization challenge as a
+vector ya of dimensions NsNe × 1, and it can be expressed   task of recovering sparse signals.
+as:                                                               In the following sections, we will explore this approach
+                   P
+                                                                    in more  detail. We  will explain how  the Cayley-Menger
+             ya = X a(θpa, rpa)spa + na,               (1)                                                             determinant helps us to understand the spatial connections
+                    p=1
+                                                       between anchors, the source, and reﬂections. Additionally, we
+where,sPa ∈C represents the complex signal amplitude of the   will describe the method we used to ﬁnd the source location
+p-th path, na ∈CNsNe×1 denotes the complex white Gaussian   in the presence of signal reﬂections.
+noise vector, θpa is the AoA of the p-th path and rpa is the range
+of the p-th path at anchor a, and a(θpa, rpa) ∈CNsNe×1 is the   A. Range Accordance Function
+complex array steering vector, deﬁned as follows:                 In this section, we introduce an important concept called the
+                                                         accordance function concerning range estimates. An accor-
+      a(θ, r) = [1, Γθ, · · · , ΓNe−1θ      , Ωr, · · · , ΩrΓNe−1θ      ,                                                         dance function is a mathematical function that evaluates to
+                        · · · , ΩNs−1r      , · · · , ΩNs−1r   ΓNe−1θ     ]T          (2)   zero  for a speciﬁc  set  of  values  (in  this  context, range
+                                                                 estimates) and takes non-zero values otherwise. To illustrateIn this equation:
+                     d                                                          its practical application, we begin by considering a scenario
+                   λ sin(θ), where d  represents the antenna  • Γθ =  e−j2π                                                           with three anchors and the objective of localizing a single
+     spacing, λ is the wavelength, and θ is the AoA.
+                                                                 source. Our problem unfolds within a two-dimensional (2)-D)
+  • Ωr = e−j2π∆fr/C, where ∆f is the sub-carrier frequency                                                            environment, as depicted in Fig. 1. For the sake of simplicity
+     spacing, and C is the speed of light.
+                                                                    in the rest of this paper, we denote d(ai, aj) with dij and
+  The steering vector a(θ, r) captures the directional and                                                               d(s0, ai) by d0i. In this setting, we construct the Cayley-
+distance characteristics of the incoming signals, incorporat-                                                   Menger matrix, denoted as C, which takes the form of a 5×5
+ing phase information related to both AoA and propagation                                                                matrix:
+distance.                                                 0  d201 d202 d203 1 
+  This model provides the foundation for localization in a                        d201  0  d212 d213 1
+2-D multipath environment based on the received signals at          C =  d202 d212  0  d223 1
+the anchors, taking into account the effects of reﬂections and                        d203 d213 d223  0  1                                                                                                                                                                                                                                                                                                                                   
+noise.                                                                     1  1  1  1  0
+                                                              This matrix  encapsulates  the  relationships between  the
+                   IV. METHODOLOGY                       distances involving the source (s0) and the three anchors
+  Our goal  is  to accurately estimate  the  location of  the   (a1, a2, a3). The purpose of the Cayley-Menger matrix  is
+                                                                    to  assist  in resolving the ambiguity introduced by  signalsource within the given multipath environment. Achieving this
+                                                               reﬂections in our localization problem.objective involves processing the received signals at all the
+                                                    Now, let us deﬁne the vector d0 as follows:anchors within this environment. To facilitate this process,
+we use a structured planar grid that spans over the whole                 d0 = [d201, d202, d203, 1]T ,
+environment. Using this grid, we assume that the source must
+                                                                   Clearly, matrix C takes on the structure:
+be situated at one of the grid points.
+   Crucially, we exploit the fact that the Line of Sight (LoS)                                                                                                    0        ... dT0
+component of the received signal for each anchor originates                                          C =   . . . · . . .                       (3)
+exclusively from the grid point that corresponds to the actual                                                                                                                                                                                    ,source location. This direct LoS path offers a straightforward                         d0     ... E
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:45:44 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 5 ===
+AKBARI AND VALAEE: COOPERATIVE DIRECT LOCALIZATION IN MULTIPATH ENVIRONMENTS                                                     6555
+
+
+where:                                                     white Gaussian noise vector. Therefore, the support set of the
+                0  d212 d213 1                        vector ζa has only one element and the support set of ˙ζa has
+                       d212  0  d223 1                            at most Nm elements. To be more speciﬁc,          E =
+                       d213 d223  0  1                                                                 .
+                      1  1  1  0                                                        ||ζa||0 = 1                        (8)
+
+It is evident that E corresponds to the 4 × 4 Cayley-Menger  and
+matrix for the simplex formed by the anchors which is a full                                  ||˙ζa||0 ≤Nm                      (9)
+rank matrix.
+                                                                    in which Nm is the maximum number of reﬂections in the  Subsequently, in Theorem 3, we present the range accor-
+                                                            environment. There are several source enumeration methodsdance function derived from the spatial conﬁguration within
+                                                                    to estimate this number. These methods include minimumour environment.
+  Theorem 3: For Na = 3 anchors and a source in a 2-   descriptor length (MDL), Akaike information criteria (AIC),
+D plane, the equation d0 T E−1d0 = 0 holds true for the   etc [36].
+distances between the source and anchors.                        Additionally, to enforce the principle that LoS components
+  Proof: The proof of Theorem 3 is given in Appendix A.□   from  all anchors should converge to a single location and
+                                                                    to reduce the ambiguity caused by the multipath reﬂections,   Essentially, Theorem 3 offers a mathematical understand-
+                                             we incorporate the range accordance function introduced ining of how distances between the source and anchors in a
+                                                   Theorem 3. It is important to note that Theorem 3 is originally2-D plane relate. This understanding forms the basis of our
+                                                            formulated for scenarios with three anchors. In cases wheresource localization approach, assisting us in dealing with the
+                                             we have more anchors (Na > 3), we extend this criterion tochallenges posed by signal reﬂections.
+                                                           apply to all combinations of three anchors. This leads to the
+                                                             following condition:
+B. Problem Formulation
+                                                       • For  all combinations of three anchors represented as
+  In this section, we explain the steps of our problem for-                                                                                    (i, j, k), where i, j, k belong to the set of all anchors (La)
+mulation. We ﬁrst describe how we build our over-complete                                                           and  i̸ = j̸ = k, we require:
+dictionary and then we form our optimization problem.
+  1) Building an Over-Complete Dictionary: Our localiza-                          d(i,j,k)Tg    E−1(i,j,k)d(i,j,k)g   = 0           (10)
+tion method  begins by  considering a  set  of  grid  points
+                                                                    in which E(i,j,k) is the 4 × 4 Cayley-Menger matrix for theof size G overlaid on the environment, denoted as S =
+                                                           conﬁguration of anchors i, j and k deﬁned as follows:{ˆp1, ˆp2, · · · , ˆpG}. Each grid point ˆpi =  [ˆx(i), ˆy(i)]T  repre-
+sents a potential source location. To determine the source                    0  d2ij d2ik 1
+position, we evaluate the incoming angles of  arrivals and                             d2ij  0  d2jk 1
+ranges of the received signal at each anchor with respect to                      E(i,j,k) =                                                                                    d2ik d2jk  0  1              (11)
+these grid points.                                                               1  1  1  0
+  For anchor a, we compute the incoming waveform angle
+θ(i)a  and the corresponding range r(i)a  from a source located at  and d(i,j,k)g      is a 4 × 1 vector deﬁned as follows:
+grid point i using the following equations:
+                                                                                             d(i,j,k)g   = [r(g)2i    , r(g)2j    , r(g)2k    , 1]T           (12)
+                           ˆy(i) −˜y(a)    π
+   θ(i)a = arctan        +   −πI(ˆx(i) < ˜x(a))   (4)  where g is the location of the grid point that the source is                          ˆx(i) −˜x(a)     2
+                                                      assumed to be located on.
+    q
+    r(i)a =    (ˆy(i) −˜y(a))2 + (ˆx(i) −˜x(a))2                 (5)    The Cayley-Menger matrix plays a pivotal role in address-
+                                                              ing multipath ambiguity by capturing geometric relationships
+Here,  ˜x(a) and  ˜y(a) represent the coordinates of anchor a,                                                       between points in space based on their distances. Although
+and  ˆx(i) and  ˆy(i) represent the coordinates of grid point  i.                                                   Theorem 3 indicates that the constraint dT0 E−1d0 = 0 holds
+Moreover, I(.) is a function that returns 1 if ˆx(i) < ˜x(a) and                                                                    for any position in 2D space, this should not be miscon-
+0 otherwise.                                                                 strued as diminishing  its  utility. Instead,  this constraint  is
+  Based on this grid, we construct an over-complete dictionary                                                                    crucial for maintaining geometric consistency among distance
+Φa of size NsNe × G for each anchor a:                                                         measurements, which is vital in distinguishing between true
+  Φa = [a(θ(1)a  , r(1)a  ), a(θ(2)a  , r(2)a  ), · · · , a(θ(G)a   , r(G)a   )]    (6)   source positions and spurious ones caused by multipath effects.
+                                             By enforcing this constraint, the proposed method leverages
+where a(θ, r) is deﬁned as in (2).                               the inherent geometric structure of the environment, thereby
+  2) Forming the Sparse Recovery Problem: Using the over-   reducing the search space for the source location and enhanc-
+complete dictionary, we model the NsNe × 1 received signal   ing the robustness of the localization process against multipath
+at anchor a, denoted as ya, as follows:                           interference.
+                                                     The range accordance function, on the other hand, ensures              ya = Φa(ζa + ˙ζa) + na                (7)
+                                                                      that the LoS paths from  all anchors converge to a single
+Here, ζa represents the LoS component of the signal,  ˙ζa   location. This is a powerful geometric constraint that directly
+represents the multipath component, and na is the complex   integrates into the localization process, addressing multipath
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:45:44 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 6 ===
+6556                                                         IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 24, NO. 8, AUGUST 2025
+
+ambiguities more effectively than traditional Bayesian meth-   in which Dil, l = 1, 2, 3 is a 4×G matrix that is 0 everywhere
+ods or group Compressed Sensing (CS) algorithms, which   except for its l-th row which is [r(1)2i    , r(2)2i    , · · · r(G)2i     ] and e4 =
+typically focus on ensuring that LoS channels share the same   [0, 0, 0, 1]T .
+support. By embedding these geometric constraints within     While converting the original problem to a binary program-
+the optimization framework, the proposed method capitalizes  ming problem,  it is important to recognize that the binary
+on the spatial relationships between anchors and the source,   representation conﬁnes the solutions  to a large ﬁnite  set.
+ensuring that all measurements are consistent with a single,   However, this transformation does not inherently ensure that
+true source position. This holistic approach provides a more   the original problem and its binary counterpart will share the
+robust solution for dealing with multipath effects, offering a  same support. Recent research by Rahman et  al. [21] has
+reliable and precise localization even in complex and cluttered   identiﬁed necessary conditions on the dictionary design that
+environments.                                             can ensure the binary approximation of a sparse modeling
+  To estimate the source location, we need to recover the sup-   problem leads to optimal signal support recovery and the
+port of the vector ζa. Thus, given the discussed constraints, we   binary equivalence.
+can form the following sparse recovery optimization problem:    To ensure the binary approximation in sparse signal recov-
+       Na                                                   ery is both accurate and effective, speciﬁc conditions must
+ min X ||ya −Φa(ζa + ˙ζa)||22                          be satisﬁed. The distribution of eigenvalues within the Gram
+ ζa, ˙ζa   a=1                                                 matrix of the dictionary  is  critical. A uniform eigenvalue
+                                                                     distribution implies that the condition number approaches one,    s.t.   ||ζa||0 = 1,
+                                                          enhancing the numerical stability and ﬁdelity of the signal
+            ||˙ζa||0 ≤Nm,  a ∈La,                                                                   representation.
+         d(i,j,k)Tg    E−1(i,j,k)d(i,j,k)g   = 0   ∀i, j, k ∈La, i̸ = j̸ = k   A tight frame, characterized by an over-complete dictionary
+                                Φ with uniformly distributed eigenvalues,  is essential. The                              ∀g ∈S             (13)
+                                                                 dictionary should have the following features:
+  Problem (13) described above  falls into the category of     1) Equal Eigenvalues: All eigenvalues of ΦHΦ should be
+mixed-integer nonlinear programming, characterized by  its        uniform to ensure the condition number approaches 1.
+ℓ0- pseudo-norm constraints. This problem is classiﬁed as an        This will ensure the stability and ﬁdelity and reduce the
+NP-hard problem due to  its combinatorial nature. In order          artifacts [37].
+to be able  to  practically solve  this problem, we need  to     2) Speciﬁc Atom Structure: The atoms within the dictio-
+use approximation methods. A widely adopted approach for        nary must align with the system model to maintain
+addressing such complexities involves  substituting the ℓ0-         the integrity of the signal mapping. The alignment of
+pseudo- norm with the ℓp-norm (0 < p ≤1). In the case         dictionary atoms with the system model ensures optimal
+where p = 1, the problem becomes a convex optimization        performance [38].
+problem and is call basis pursuit (BP) which is investigated   These conditions ensure the binary approximation retains high
+thoroughly in previous research [32].                            ﬁdelity to the original signal characteristics, providing a robust
+                                                                  solution for sparse signal support recovery and reducing the
+                                                                 likelihood of spurious artifacts in sparse vector estimation [39].
+C. Binary Approximation for the Sparse Recovery Problem
+                                                     To design a grid for a tight frame, we deﬁne an over-
+  In  this  section, we propose a binary approximation  to   complete dictionary, Φ, over this grid for all the anchors as
+problem (13). We ﬁrst present the binary equivalent of prob-   follows:
+lem (13) and then discuss the conditions under which this                Φ1  0   · · ·  0 
+approximation will recover the signal support of the inverse                        0 Φ2 · · ·  0
+                                         Φ =                                  (16)problem.                                                                                                                                                                                                                                                                                                                                                                                                                                                             ...                 ...   ...                ...  The binary equivalent of problem (13) is deﬁned as:                                                                                                                         
+                                                                          0  0   · · · ΦNa
+       Na                                             where Φa, ∀a ∈La is the NsNe ×G overcomplete dictionary
+ min X ||ya −Φa(ξa + ˙ξa)||22                               for each anchor. For a tight frame, all the eigenvalues of ΦHΦ
+ ξa,˙ξa   a=1
+                                                           should be equal. We have GNa atoms and there are a total of
+    s.t.   ||ξa||0 = 1,                                           NsNeNa eigenvalues, so the eigenvalues of ΦHΦ should all
+            ||˙ξa||0 ≤Nm,  a ∈La,                            be G/NsNe.
+          ˆd(i,j,k)T0    E−1(i,j,k)ˆd(i,j,k)0   = 0   ∀i, j, k ∈La, i̸ = j̸ = k      In practice, achieving a tight frame requires (i) all eigen-                                                               values to be equal and  (ii) the structure of the atoms to
+       ξa ∈{0, 1}G,                                    conform to the system model. When these conditions are met,
+          ˙ξa ∈{0, 1}G                                    (14)   the binary programming problem will lead to optimal signal
+                                                                 support. This approach leverages the efﬁciency of modern
+In problem (14), ξa = 1(ζa̸ = 0) and ˙ξa = 1(˙ζa̸ = 0). Also,   binary programming solvers, such as branch-and-bound based
+ˆd(i,j,k)0      will be deﬁned as follows:                              solvers like Gurobi and annealing-based solvers. In this paper,
+                                             we use Fujitsu Computing as a Service Digital Annealer(DA)
+               ˆd(i,j,k)0   = Di1ξi + Dj2ξj + Dk3ξk + e4        (15)   [40] to solve the binary programming problem 14. DA  is
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:45:44 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 7 ===
+AKBARI AND VALAEE: COOPERATIVE DIRECT LOCALIZATION IN MULTIPATH ENVIRONMENTS                                                     6557
+
+
+a computer architecture speciﬁcally designed to solve Ising   E. Complexity Analysis
+model problems efﬁciently.                                                                Solvers  based on  annealing  techniques  are  frequently
+                                                      employed to tackle problems related to the Ising model. These
+D. Transformation Into an Ising Model                         solvers make effective use of the Markov Chain Monte Carlo
+                                          (MCMC) sampling methods. In MCMC, the goal is to estimate
+  The Ising model is a mathematical framework originally                                                                    quantities or distributions by generating random samples. Each
+developed in the ﬁeld of statistical physics. It serves as a way                                                        sample depends only on the previous one, and the mechanism
+to describe how the spins (or magnetic moments) of atoms                                                           governing transitions between samples is designed to gradually
+interact within a physical system [41]. In this model, when                                                          approach equilibrium in the steady state of the system. Within
+the system reaches its equilibrium state, it exhibits the lowest                                                                 the Ising model context, this equilibrium probability is deﬁned
+possible energy conﬁguration. The primary objective of the                                                     by the Gibbs (Boltzmann) distribution:
+Ising model is to achieve this equilibrium state by minimizing
+the energy of the system. This energy minimization process is                        1
+                                                        P(x|b, W, β) =                        b, W)).   (23)fundamental to understanding the behavior of spin systems in                   Z(b, W, β)exp(−βE(x;
+various physical contexts. This energy is formulated by:
+                                                               In (23), β = 1/kBT, kB is the Boltzman constant and T is
+                K     K K                      the temperature and Z(b, W, β) is the normalizing factor.
+       E(z; b, W) = − X bizi − X X Wi,jzizj.    (17)    One common MCMC method used in the Ising model
+                         i=1       i=1 j=1                          is the Gibbs sampling. In the Gibbs sampling, we proceed
+                                                     by randomly selecting one spin at a time. For each spin,
+Here, zi represents binary variables, and E(z; b, W) corre-
+                                             we  calculate  the  probability  of  it  taking  the value 1  orsponds to the objective function. This transformation allows
+                                                     0 based on the existing states of the other spins and theus to leverage the capabilities of the DA to efﬁciently solve
+                                                                  prevailing temperature. The updated state of the selected spinthe problem.
+                                                                               is then determined according to these calculated probabilities.  In problem (14), the objective function and constraints are
+                                        We repeat this process iteratively until the system convergeseither linear or quadratic, and the variables of interest are
+                                                           towards the equilibrium probability described earlier.binary. In order to use DA, we need to transform our binary
+                                                           Another efﬁcient MCMC sampling approach for Ising mod-program into an Ising model problem. To transform problem
+                                                                       els is the Metropolis-Hastings algorithm, which operates as(14) to an Ising model format, we use the steps in [16] to
+                                                                 follows:determine the weight matrix W and the bias vector b. The
+2G × 1 binary vector za here contains both ξa and ˙ξa. To    • We evaluate the change in energy resulting from ﬂipping
+be more speciﬁc, za = [ξa, ˙ξa]T . Now let us ﬁrst deﬁne a       a randomly chosen spin.
+2G × 2G auxiliary matrix Waˆ   as follow:                    • We compute the probability of accepting this change. If
+                                                                      the energy change is negative, we adopt the change with
+     "ΦHa Φa + γg Pi,j∈La DaT1 E−1a,i,jDa1   0  #               certainty. If it is positive, we accept it with a probability
+ Waˆ =                      i̸=j̸=a                         (18)                                                                     proportional to the exponential of the negative change in
+                    0          ΦHa Φa                                                               energy (exp(−β∆E)).
+Then the 2G × 2G weight matrix Wa and the 2G × 1 bias    • This algorithm is repeated until the convergence to the
+vector ba for each anchor can be calculated as follows:             equilibrium state distribution is achieved
+                                              When  utilizing the MCMC algorithms,  like Metropolis-
+         Wa = Waˆ  −diag(Wa)ˆ                 (19)                                                               Hastings, we need to determine the acceptance rate for the
+                                                          proposed conﬁgurations, which depends on the energy dif-
+and
+                                                               ference between the current conﬁguration and the proposed
+ ba = −2[ℜ{yHa Φa}, ℜ{yHa Φa}]T + γ1 + vec(diag(Wa))ˆ       change in the spin state. The computational complexity of this
+                                                         (20)   process scales with the size of the connection weight matrix
+                          W and the bias vector b. Consequently, if our model consists
+Now, if we deﬁne z = [z1, · · · , zNa]T , then the corresponding   of 2NaG binary variables, the computational complexity of
+2GNa×2GNa weight matrix W and the 2GNa×1 bias vector   our algorithm becomes approximately O(G2Na)2  [42].
+b are:
+              W1  0   · · ·  0 
+                                                               V. ROBUSTNESS OF THE ACCORDANCE FUNCTION                     0 W2 · · ·  0
+                                                                  In this section, we are going to analyze the robustness of      W =                    ...                     ...   ...                  ...                 (21)                                                                                                                          the introduced accordance function with respect to errors in
+                     0   0   · · · WNa
+                                                               estimating the location. Without loss of generality, we consider
+and                                                        a case that we have three anchors in the environment and a
+            b = [b1, b2, · · · , bNa]T               (22)   source to localize. Assume a neighboring grid point s′0 has
+                                                        been estimated as the location of the user instead of its original
+Using (21) and (22), we can form the Ising model problem   location s0. We show the distance between anchor  i and s′0
+and use DA to solve it.                                   and s0 with d′0i, d0i, respectively.
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:45:44 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 8 ===
+6558                                                         IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 24, NO. 8, AUGUST 2025
+
+
+  Consider the following  relation between ranges of  this        VI. DERIVATION OF THE CRAM´ER-RAO BOUND
+estimated location, d′01, d′02, and d′03 and the true ranges d01,
+                                                     The Cram´er-Rao Bound (CRB) establishes the theoretical
+d02 and d03 as follows:
+                                                           lower limit for the variance of unbiased estimators in 2D
+                              ′2
+                  d01 = d201 + η1                         source localization. The parameters of interest are the source
+                              ′2                  d                         02 = d202 + η2                          coordinates p =  [xs, ys]T , where (xs, ys) represents the
+                              ′2                              unknown source location. Each anchor has known coordinates                  d03 = d203 + η3                   (24)                                                             (xa, ya), with Na denoting the total number of anchors. The
+where ηi  is deﬁned as the error in estimating the square   range and AoA at anchor a are deﬁned as:
+of the distance when a neighboring grid point  is chosen.
+                                                                                                            ys −yaConsequently, ηi is directly associated with the resolution of   r = p(xs −xa)2 + (ys −ya)2,  θ = arctan                   .
+the grid.                                                                                           xs −xa
+  The structure of the Cayley-Menger matrix considering the
+                                                     The Fisher Information Matrix (FIM) is expressed as:
+point s′0 is:
+                                     ′2   ′2   ′2
+               0 d01 d02 d03 1                                    Na                                                                      2
+                   d′201  0  d212 d213 1                     F = X JTa Ja + Fconstraints,                                                                     σ2
+                                                                           a=1             C′ =  d′202 d212  0  d223 1                                                                                          d′203 d213 d223  0  1                  where σ2  is the variance of the Gaussian noise, Ja  is the
+                     1  1  1  1  0                                                            Jacobian matrix  for anchor  a, and  Fconstraints  incorporates
+Generally, due to the  fact  that  s′0  is not a LoS location,   geometric and sparsity constraints [43], [44]. The Jacobian
+the probability that the determinant of C′ becomes zero is   matrix for anchor a is:
+very low. However, in the case of ambiguity, because  s′0                           xs−xa  ys−ya
+is considered to be the location of the user det(C′) = 0.                 Ja =      r     cos(θ)r      .
+                                                                                         −sin(θ)r      rAccording to this fact, we can ﬁnd a relationship between
+the errors so that in that case this accordance function will
+                                                     To account for geometric consistency, the Range Accor-
+not resolve the ambiguity of the reﬂections. The following
+                                                         dance Function is introduced as:
+theorem will summarize this relationship.
+  Theorem 4: The accordance function introduced in Theo-                                                                                        haccordance(p) = dT0 E−1d0 = 0,
+rem 3 will not resolve the ambiguity of reﬂections if the error
+of range estimates satisﬁes the following equation:           where d0 = [d201, d202, d203, 1]T  is the vector of squared dis-
+                ηT Aη + bT η = 0                 (25)   tances between the source and three selected anchors, and E
+                                                                               is the Cayley-Menger matrix:
+in which η = [η1, η2, η3]T , and
+                                                        0  d212 d213 1 b = [2d223(d213 + d212 −d223), 2d213(d212 + d223 −d213),
+                                                                                 d212  0  d223 1
+                                                                                 d213 d223  0  1     2d212(d213 + d223 −d212)]T                              E =                                                                                                                                                           .
+        −2d223     d223 + d213 −d212 d223 + d212 −d213                           1  1  1  0
+ A =  d223 + d213 −d212    −2d213     d213 + d212 −d223                                  
+        d223 + d212 −d213 d213 + d212 −d223    −2d212           The gradient of this constraint contributes to the FIM as:
+                                                         (26)                            T
+                                                                        ∂d0                  ∂d0
+  Proof: The proof of Theorem 4 is given in Appendix B.□              Fconstraints = 4       E−1 d0dT0 E−1       ,
+                                                           ∂p               ∂p
+  Equation  (25)  describes a  quadric  surface  in  a  three-
+dimensional  Euclidean  space,  where  its  geometric  form   where:
+depends on the parameters d12, d13, and d23. This surface               2(xs −x1) 2(ys −y1)
+may exhibit as various types of quadrics, including ellipsoids,              ∂d0     2(xs −x2) 2(ys −y2)
+                                            =
+hyperboloids (of one or two sheets), cones, or degenerate           ∂p     2(xs −x3) 2(ys −y3)                                                                                                                                                                                               .
+forms, determined by the eigenstructure of matrix A. Specif-                         0         0
+ically, in (25), matrix A is characterized by a null eigenvalue
+and two additional eigenvalues, functions of d12, d13, and d23.    The CRB is obtained as the inverse of the FIM. Therefore,
+  Furthermore, as ηi, i = 1, 2, 3 associates with the resolution   the expression for the CRB is:
+of the grid, Theorem 4 proposes an optimization criterion
+                                                              Na                T               !−1for  grid conﬁguration  to minimize the ambiguity  in  grid          2              ∂d0                 ∂d0
+                                             F−1 =  X JTa Ja+4       E−1 d0dT0 E−1              .point  selection, inﬂuenced by the accordance function. In         σ2           ∂p               ∂p
+                                                                 a=1
+scenarios allowing anchor repositioning, this equation provides
+a heuristic for reducing ambiguity probabilities linked to the     This formulation incorporates the effects of geometric con-
+accordance function. Optimally, reducing the volumetric extent   sistency and  sparsity  constraints, providing the  theoretical
+of the quadric surface governed by equation (25) directly   lower bound on the variance of unbiased estimators in multi-
+correlates with enhanced precision of the accordance function.   path environments.
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:45:44 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 9 ===
+AKBARI AND VALAEE: COOPERATIVE DIRECT LOCALIZATION IN MULTIPATH ENVIRONMENTS                                                     6559
+
+
+            VII. PERFORMANCE EVALUATION
+
+  This section presents a comprehensive performance eval-
+uation of the  localization method proposed  in  this  study.
+To evaluate the effectiveness of our approach, we compare
+its performance with existing benchmarks from the  litera-
+ture. Our method leverages geometric information within the
+environment to mitigate the ambiguities posed by multipath
+reﬂections, thereby enhancing the accuracy and robustness of
+source localization.
+
+
+A. Benchmarks for Comparison
+
+  We consider a number of benchmark methods for compar-
+ison:                                                                             Fig. 2.  Comparison of the ECDF of the proposed method, [8], [14], [15],
+                                                                                      [17], [18], [27] and [45] for the scenario with three anchors.
+  1) BSS Method [45]: This study introduces a Binary Struc-
+      tured Sparsity (BSS) approach tailored for multi-anchor
+      localization issues, particularly designed for handling   B. Simulation Setup
+      multipath effects. The novelty of BSS method lies in    To conduct our experiments, we generate received signals
+        its  structured  sparsity  constraint, ensuring  consistent   for the anchors using the WIM2 simulator [46]. This simulator
+      origination of LoS signal components from a single grid  employs the WINNER II channel model, a geometry-based
+      point across all anchors.                                    stochastic channel model, to simulate communication chan-
+  2) ℓ0-CS-DL Method [18]: This method is a direct localiza-   nels between anchors and the source. This model accurately
+      tion approach that processes received signals at all base   captures various multipath scenarios.
+       stations, focusing solely on the Line-of-Sight (LoS) path   We explore two scenarios to assess our method’s perfor-
+     and ignoring reﬂections. It employs a binary relaxation  mance:
+      technique to approximate the compressed sensing for-                                                                  1) Scenario 1: Three anchors were placed in a 20m ×
+      mulation.                                              20m room at coordinates [0m, 20m], [20m, 15m], and
+  3) ℓ1-CS-DL Method  [14]:  This  method  jointly  pro-                                                           [12m, 0m]. These  anchors were  oriented  at  angles
+      cesses received signals from multiple anchors within              2π        5π            5π
+                                                                           0, 0, 3   ,  0, 0, 4   , and  0, 0, 3   relative to the global
+     a compressed sensing framework.  It uses an ℓ1-norm                                                                    coordinate system (GCS).
+      relaxation method to solve the sparse recovery problem.                                                                  2) Scenario 2: This setup involved four anchors in the same
+  4) Maximum Likelihood Direct Location Estimation (ML-                                              20m × 20m room. The anchors were located at coordi-
+    DL)  [27]: This method  utilizes maximum-likelihood                                                                      nates [0m, 20m], [20m, 20m], [20m, 0m], and [0m, 0m],
+      estimation over a grid to directly estimate the location                                3π        5π       −π
+                                                                      oriented at angles  0, 0, 4   ,  0, 0, 4   ,  0, 0,  4   and
+      of the source in a multipath environment. It relies on             π
+                                                                           0, 0, 4   relative to the GCS.
+     known values of AoA and ToA at grid points to compute
+                                                               In our scenarios, all the anchors are equipped with uniform
+      the likelihood of the received signal at each access point.
+                                                                      linear arrays and operate at 5.25 GHz. All the anchors are
+     This algorithm assumes knowledge of statistical channel
+                                                          equipped with a Uniform Linear Array (ULA) consisting of 10
+      properties.
+                                                           elements each. The transmitter was positioned at coordinates
+  5) SpotFi [8]: SpotFi incorporates super-resolution algo-
+                                                       [7m, 8m] within the  test  area, and a  total of 800  signal
+      rithms  to accurately estimate the AoA of multipath
+                                                             snapshots were collected for analysis. The dictionary for this
+     components, delivering high precision even with a lim-
+                                                             study was constructed using a non-uniform grid comprising
+      ited number of antennas. It identiﬁes the LoS component
+                                                     400  points. All experiments are conducted using the DA
+     by applying advanced ﬁltering and estimation methods.
+                                                          environment prepared for the research use which is a powerful
+  6) RoArray [15]: RoArray utilizes sparse recovery tech-
+                                                                 solver for binary programming problems. In cases where DA
+      niques and coherent processing across time, frequency,
+                                                                               is not available, commercial optimization tools like Gurobi or
+     and  spatial dimensions.  It employs a sparse grid in
+                                                      CPlex can be employed.
+      the spatial domain to generate detailed AoA spectra,
+     enhancing precision.
+                                                          C. Simulation Results  7) CAIM [17]: The CAIM method operates in the cor-
+      relation domain, transforming nearﬁeld signals into a     For the ﬁrst scenario, Fig. 2 illustrates the empirical cumu-
+       virtual farﬁeld model, allowing iterative reﬁnement of   lative distribution function (ECDF) of localization errors for
+    AoA estimates even when the planar wavefront assump-   our proposed method, BSS [45], ℓ0-CS-DL [18], ℓ1-CS-DL
+      tion  is  violated. After  estimating AoAs  at  multiple   [14], ML-DL [27], CAIM [17], RoArray [15] and SpotFi
+      access points, triangulation determines the source loca-   [8]. Our method exhibits a median accuracy of approximately
+      tion by solving the geometric intersection of bearing   0.77 m, outperforming the benchmarks with median accura-
+      lines derived from these estimates.                         cies 0.98 m, 1.03 m, 2.13 m, 2.64 m, 2.22 m, 2.35 m, 2.56 m,
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:45:44 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 10 ===
+6560                                                         IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 24, NO. 8, AUGUST 2025
+
+
+
+
+
+Fig. 3.  Comparison of the ECDF of the proposed method, [8], [14], [15],    Fig. 5.  Comparison of the probability of submeter accuracy vs the number
+[17], [18], [45] and [27] for the scenario with four anchors.                    of antenna elements for the proposed method, [8], [14], [15], [17], [18], [27]
+                                                                     and [45] for the scenario with four anchors.
+
+
+
+
+
+Fig. 4. Comparison of the probability of submeter accuracy vs SNR for the                                                                                   Fig. 6.  Comparison of the probability of submeter accuracy vs the number
+proposed method, [8], [14], [15], [17], [18], [45] and [27] for the scenario                                                                               of NLoS elements for the proposed method, [8], [14], [15], [17], [18], [27]
+with four anchors.                                                                     and [45] for the scenario with four anchors.
+
+
+for BSS, ℓ0-CS-DL, ℓ1-CS-DL, ML-DL, CAIM, RoArray and   Higher SNR leads to improved quality of received signal
+SpotFi respectively.                                      and thus having a better estimate of NLoS paths. Therefore,
+   Fig. 3 presents the ECDF of localization errors for the same   the accuracy for all methods is enhanced, with our proposed
+methods in the second scenario. Because of the increase in  method consistently outperforming the benchmarks.
+the number of anchors and therefore having more data to      Fig. 5 investigates how the number of antenna elements
+process, the accuracy of all methods increases. In this case,   inﬂuences the probability of achieving sub-meter accuracy
+the proposed method in this study achieves a median accuracy   for the second scenario. Increasing the number of antenna
+of around 0.56 m, while BSS, ℓ0-CS-DL, ℓ1-CS-DL, ML-   elements enhances angular resolution and accuracy for  all
+DL, CAIM, RoArray and SpotFi achieve median accuracies   methods, with our proposed method exhibiting superior per-
+of 0.65 m, 0.71 m, 1.43 m, 1.89 m, 1.52 m, 1.57 m and   formance.
+1.71 m, respectively.                                                Fig. 6 examines how the number of NLoS elements inﬂu-
+  To have a better understanding of the ECDF of the methods,   ences the probability of achieving sub-meter accuracy. For this
+we will examine how the accuracy of our approach and the   experiment, in the WIM II simulator, we changed the number
+benchmarks varies when errors are within a sub-meter range.   of NLoS elements from 3 to 16. Increasing the number of
+We explore the probability of sub-meter error for the second  NLoS elements increases the error of location estimation; we
+scenario with respect to parameters such as SNR, the number   can see that our method is less affected by this change and
+of antenna elements, and the number of non-line-of-sight   can resolve the ambiguity caused by the NLoS component of
+(NLoS) paths in the environment.                               the signal compared to the benchmarks.
+   Fig. 4 demonstrates  the impact of  signal-to-noise  ratio      Fig. 7 compares the theoretical localization accuracy limit,
+(SNR) on the probability of achieving sub-meter accuracy.   represented by the CRB, with the actual localization accuracy
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:45:44 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 11 ===
+AKBARI AND VALAEE: COOPERATIVE DIRECT LOCALIZATION IN MULTIPATH ENVIRONMENTS                                                     6561
+
+
+
+
+
+                                                                                   Fig. 8. Map of the indoor hall.
+
+
+
+
+
+Fig. 7. RMSE performance comparison for the proposed localization method,
+[8], [14], [15], [17], [18], [27] and [45] in different scenarios.
+
+
+measured as the Root Mean Squared Error (RMSE) for various
+methods across different SNR levels. The data was simulated
+in a scenario where four anchors were placed in a 20 m×20 m
+                                                                                   Fig. 9. Map of the indoor corridor.
+room, with  localization accuracy measured under varying
+SNR. As the SNR improves, the RMSE  for  all methods
+decreases, indicating enhanced localization accuracy.                                                                 the Nexmon CSI Extractor Tool [5] for CSI data collection.
+  Notably,  the Geo-ℓ0-CS-DL method  closely approaches                                                               In addition, we employed a Raspberry Pi4 as our transmitter.
+the CRB, demonstrating superior performance and improved                                                    Once the routers and Raspberry Pi4 are set up in the test
+precision as the SNR increases. Similarly, the ML-DL and ℓ0-                                                            environment, we commence collecting CSI data. Our objective
+CS-DL methods also achieve relatively low RMSE, though                                                                               is to determine the location of the Raspberry Pi4, which is
+they remain slightly above the Geo-ℓ0-CS-DL. In contrast,                                                           connected to a network or router. The Raspberry Pi4 sends
+methods such as SpotFi and RoArray exhibit consistently                                                           ping packets at a rate of 100 Hz, and these packets are gathered
+higher RMSE values, reﬂecting lower localization accuracy.                                                     by the ASUS routers, which are operating in the monitor mode.
+This means that as the signal quality improves, our method is                                                   The routers monitor the wireless channel, extract, and store the
+able to estimate locations more accurately and approaches the                                                   CSI information from the packets sent by the Raspberry Pi4
+theoretical optimal accuracy deﬁned by the CRB.                                                               as packet capture (pcap) ﬁles. Each experimental run involved
+  However, a small gap remains between the Geo-ℓ0-CS-                                                                 the Raspberry Pi4 transmitting packets for a duration of 300
+DL method and the CRB due to practical constraints in the                                                              seconds.
+simulated environment. The CRB represents the theoretical                                                                                          It is important to note that the receivers and the transmitter
+lower bound under ideal conditions, whereas real-world fac-                                                                 are not synchronized. As a result, the CSI phase is affected by
+tors such as multipath interference and measurement noise                                                                       carrier frequency offset (CFO) and symbol timing offset (STO)
+introduce estimation errors. In particular, NLoS components in                                                                       distortions. To address these phase distortions, we remove the
+the received signal can slightly degrade accuracy, even though                                                                       linearity of the CSI phase across subcarriers, a process known
+our method effectively mitigates their impact. Additionally, the                                                               as phase cleaning [11]. This procedure does not impact AoA
+ﬁnite grid resolution used in sparse recovery introduces minor                                                                estimates but introduces bias in ToA estimates.
+quantization errors, and the binary relaxation applied in the                                                                  2) Results: We conducted experiments with real data col-
+optimization process leads to slight deviations from the theo-                                                                  lected as described in the previous section. For this set of
+retical bound. Despite these factors, our method consistently                                                              experiments, we considered two different scenarios:
+achieves near-optimal accuracy and outperforms conventional
+                                                                  1) The indoor hall scenario: In this setup, as illustrated
+localization techniques, demonstrating its robustness in prac-
+                                                                          in Fig. 8, we have positioned four anchors at known
+tical scenarios.
+                                                                        locations inside a large indoor area measuring 40m×7m.
+                                                                       Inside this space, there is a transmitter. Our main goal is
+D. Experimental Results                                                                          to locate the exact position of this transmitter by jointly
+  1) Experimental Setup: We  utilized ASUS RT AC86U        analyzing the data received by these anchors. The indoor
+routers equipped with three antennas as our receiver access         area is quite open with a tall ceiling, which means that
+points. These routers operate in the 2.4 GHz frequency range         the ﬁxed anchors pick up only a few signal reﬂections
+and support a 20 MHz bandwidth. The separation between       from the structures and objects in the surroundings.
+adjacent antennas on these routers is 8.7 cm. They employ     2) The indoor corridor scenario: The experiments in this
+the IEEE802.11ac MU-MIMO protocol and are equipped with         scenario were carried out in a narrow indoor corridor
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:45:44 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 12 ===
+6562                                                         IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 24, NO. 8, AUGUST 2025
+
+
+
+                                                                           TABLE I
+                                                         COMPARISON OF THE AVERAGE PROCESSING TIME OF GEO-ℓ0-CS DL,
+                                                      BSS [45], ℓ0-CS DL [18], ℓ1-CS DL [14], CAIM [17], ROARRAY
+                                                                                                    [15], SPOTFI [8], ML-DL [27]
+
+
+
+
+
+Fig. 10.  Comparison of the ECDF of the proposed method, [8], [14], [15],
+[17], [18], [27] and [45] for the indoor hall scenario.
+
+
+
+
+
+                                                             E. Overall Evaluation
+
+                                                              Table I provides a comprehensive overview of the process-
+                                                              ing times associated with  all methodologies. To ensure an
+                                                                 equitable assessment, we executed each algorithm multiple
+                                                             times and computed the mean processing time. As depicted
+                                                                    in Table I, the ℓ1-CS DL method stands out with the longest
+                                                              processing time. This primarily stems from its utilization of
+                                                           a second-order cone programming approach, which neces-
+                                                                          sitates the computation of a substantially larger number of
+                                                                  variables compared to our proposed method. Consequently,
+Fig. 11.  Comparison of the ECDF of the proposed method, [8], [14], [15],   this increased computational complexity results in a longer
+[17], [18], [27] and [45] for the indoor corridor scenario.                  processing time ML-DL is the most efﬁcient due to having
+                                                           a closed-form answer, while RoArray exhibits the slowest
+                                                         performance due to  its comprehensive processing  strategy.
+     measuring 2.5 m in width and 30m in length. Within  Methods like ℓ0-CS DL and BSS strike a balance between
+       this setup, we placed three anchors and a transmitter,   speed and computational complexity, making them practical
+      as shown in Fig. 9. This conﬁned space caused signals   for scenarios where moderate efﬁciency and accuracy are
+      to bounce off the structures and objects present in this   required. Additionally, the method proposed in this paper has
+      corridor. The number of reﬂections in this setup is higher   a longer processing time due to the additional constraints to
+      than that in the indoor hall scenario.                      resolve the ambiguity of the NLoS paths.
+For these scenarios, our proposed Geo-ℓ0-CS-DL method is     In Fig. 12, we assess the performance of these methods
+compared with the benchmarks. Fig. 10 illustrates the ECDF   across four different scenarios by plotting a bar graph depict-
+of localization errors in the indoor hall scenario for these   ing the average localization error for all benchmarks. Two of
+methods, where our approach achieved a median accuracy of   these scenarios are depicted in Fig. 9 and Fig. 8. Additionally,
+approximately 0.78m compared to 0.94 m, 1.10 m, 1.56 m,  we considered two case studies, both of them involving the
+1.80m, 1.58 m, 1.64m and 1.72m for BSS, ℓ0-CS-DL, ℓ1-  same indoor hall shown in Fig. 8 but with three anchors instead
+CS-DL, ML-DL, CAIM, RoArray, and SpotFi, respectively.    of four for one case and also with ﬁve anchors for the other
+  In Fig. 11, we display the ECDF of localization errors for   case. It is important to emphasize that the localization error
+the mentioned methods in the indoor corridor scenario. Our    is inﬂuenced by various environmental factors, including the
+method achieved a median accuracy of roughly 0.93 meters.  number of anchors and the speciﬁc environment. As depicted
+In comparison, the BSS method had an accuracy of 1.03m,   in Fig. 12, the average localization error for all benchmarks is
+the ℓ0-CS-DL method yielded an accuracy of 1.15 meters,   lower in the indoor hall compared to the indoor corridor. This
+ℓ1-CS-DL achieved 1.63 meters, ML-DL resulted in 1.92   difference can be attributed to the fact that the geometry of the
+meters. Moreover, CAIM, RoArray and SpotFi reached an   hall results in fewer signal reﬂections compared to the indoor
+accuracy of 1.67 m, 1.71 meters and 1.84 meters, respectively.   corridor. Moreover, in cases with fewer anchors within the
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:45:44 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 13 ===
+AKBARI AND VALAEE: COOPERATIVE DIRECT LOCALIZATION IN MULTIPATH ENVIRONMENTS                                                     6563
+
+
+                                                                         Finally, the method relies on precise knowledge of anchor
+                                                                  positions  and  assumes  a  sparse  multipath  environment.
+                                                               Incorporating dynamic anchor conﬁgurations or  additional
+                                                            environmental characteristics, such as power delay proﬁles,
+                                                           could further improve adaptability. These extensions are left
+                                                                    for future exploration that can further enhance the model to
+                                                           handle more complex localization scenarios.
+
+
+                                                                           IX. CONCLUSION
+
+                                                                  In this research paper, we introduce a novel method for
+                                                                 precise location estimation within a multipath environment
+                                                                characterized by signal reﬂections. Conventional approaches
+                                                                      that solely rely on considering the direct line-of-sight paths
+                                                               of signals may introduce uncertainties in achieving accurate
+                                                                  position determinations. To address this challenge, we have
+Fig. 12. Comparison of the average localization error of the proposed method,   introduced a specialized mathematical tool known as the accor-
+[8], [14], [15], [17], [18], [27], and [45] in different scenarios.
+                                                         dance function. This function aids in enhancing the accuracy
+                                                               of signal range estimation. It is derived through the application
+                                                               of the Cayley-Menger determinant, a mathematical frameworksame setup, the average localization error tends to be greater.
+                                                                      that enables us to comprehend the spatial arrangement ofThis is because of the fact that a greater number of anchors
+                                                           anchors and the user within the environment by analyzing theirequates to a more extensive dataset for analysis, leading to
+                                                              pairwise distances. Consequently, the localization problem inimproved localization accuracy.
+                                                           a multipath environment transforms into a sparse recovery
+                                                       problem with added geometric constraints. We reformulate
+         VIII. LIMITATIONS AND FUTURE WORK              this problem as a quadratic unconstrained binary optimization
+                                                           problem, amenable to solution through binary programming
+  The proposed method in this paper demonstrates signiﬁ-                                                                  solvers like Gurobi or DA. In addition, we study the robustness
+cant advancements in direct localization. Nevertheless, several                                                               of this added constraint to error in range estimates. This study
+limitations and opportunities for future research remain. The                                                     shows that if the errors in range estimates describe a quadric
+algorithm assumes LoS propagation with at least three anchors,                                                                    surface, then  this constraint cannot resolve the estimation
+and  its performance may degrade in scenarios with partial                                                              ambiguity. By implementing this approach and conducting
+or no LoS due to multipath interference. Addressing these                                                               empirical experiments, our ﬁndings demonstrate a substantial
+scenarios could involve robust outlier detection, weighting                                                       enhancement in the precision of location estimates, signifying
+mechanisms based on signal quality, or hybrid models combin-                                                                 the efﬁcacy of our proposed methodology.
+ing LoS and NLoS constraints [47]. Additionally, if more than
+three LoS anchors are available, subsets of three anchors can
+                                                                 APPENDIX A
+be selected at a time to estimate the location of the source,
+                                                            PROOF OF THEOREM 3
+with the results averaged across all combinations (n choose
+3). This approach can improve robustness and accuracy by      First, we introduce Lemma 1, which plays an important
+reducing the impact of errors from any particular subset of   role in our analysis. This lemma allows us to compute the
+anchors.                                                     determinant of a matrix efﬁciently when its structure conforms
+  The grid-based approach assumes the position of the source   to a speciﬁc format described in this lemma:
+aligns with predeﬁned grid points, which may lead to off-    Lemma 1: Consider a n × n matrix B with the following
+grid errors. Strategies such as adaptive grid reﬁnement could   structure:
+                                                              mitigate this limitation. The multipath reﬂections in the current                           0        ... xT
+framework are modeled as originating from random locations             B =   . . . · . . .to ensure generalizability, but real-world reﬂections are inﬂu-                                                                                                                                       x        ... Aenced by the geometry of the environment and materials.
+Incorporating contextual information, such as ﬂoor plans or  where x is a row vector and A is a (n−1)×(n−1) invertible
+reﬂective surface properties, could enhance accuracy.           matrix. Then, the determinant of B can be expressed as:
+  Furthermore, while the method is limited to 2D scenarios,
+extending it to 3D environments would require modiﬁcations                det(B) = −det(A)xT A−1x
+to the Cayley-Menger determinant and optimization frame-                                                                Proof: According to the assumption of this lemma, A is
+work, addressing challenges such as increased complexity and                                                                        invertible, so its determinant is also non-zero. Therefore, based
+the need for additional anchors. Similarly, adapting the method                                                     on Schur’s determinant [48] formula  for a block matrix,
+for multi-source scenarios would involve handling overlapping                                                     det(B) is given as follows:
+multipath reﬂections and reformulating the sparse recovery
+problem to account for multiple supports.                             det(B) = det(A) det(0 −xT A−1x)
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:45:44 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 14 ===
+6564                                                         IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 24, NO. 8, AUGUST 2025
+
+Because x is a (n−1)×1 vector and A−1 is a (n−1)×(n−1)     According to the relation of d′20i, i = 1, 2, 3 and d20i, i =
+matrix, xT A−1x is a scalar and thus det(0 −xT A−1x) =   1, 2, 3 which is deﬁned in (24), we can say that:
+−xT A−1x. So,□                                                       ′T                                                                                    ˜d0 A˜d′0 + bT ˜d′0 + c
+             det(B) = −det(A)xT A−1x                                     = (˜d0 + η)T A(˜d0 + η) + bT (˜d0 + η) + c = 0    (31)
+
+  Proof: In order to prove Theorem 3, we ﬁrst construct                                                      where ˜d0 = [d201, d202, d203]T and η = [η1, η2, η3]T .
+the 5 × 5 Cayley-Menger matrix, C for the four points (3                                                          However, due to the fact that ˜d0 captures the true conﬁgu-
+anchors and the source) in the environment. As mentioned in                                                                    ration of the user and anchors we know that:
+Section IV, this matrix has the structure introduced in Lemma
+1. To be more speciﬁc:                                                                  ˜dT0 A˜d0 + bT ˜d0 + c = 0              (32)
+
+                                               Therefore, to satisfy (29), ηT Aη + bT η = 0 which is the                        0        ... dT0                                                             equation of a quadric surface in a 3D space.□
+           C = . . . · . . . ,                  (27)                       d0     ... E                                ACKNOWLEDGMENT
+
+in which:                                             The authors would like to thank Fujitsu Ltd. and Fujitsu
+               d0 = [d201, d202, d203, 1]T ,                    Consulting (Canada) Inc. for providing ﬁnancial support and
+                                                              access to Digital Annealer at the University of Toronto.
+and
+                0  d212 d213 1 
+                                                                 REFERENCES                       d212  0  d223 1          E =
+                       d213 d223  0  1                                 [1]   S. E. Trevlakis et al., “Localization as a key enabler of 6G wireless                                                                 .                                systems: A comprehensive survey and an outlook,” IEEE Open J. Intell.                      1  1  1  0
+                                                                   Comun. Soc., vol. 4, pp. 2733–2801, 2023.
+  According to Theorem 1, with n = 4 and m = 2, the deter-    [2]  H. Liu, H. Darabi, P. Banerjee, and J. Liu, “Survey of wireless indoor
+                                                                                      positioning techniques and systems,” IEEE Trans. Syst., Man, Cybern.
+minant of C is equal to zero. Furthermore, we observe that the        C, Appl. Rev., vol. 37, no. 6, pp. 1067–1080, Nov. 2007.
+matrix E is a full-rank Cayley-Menger matrix corresponding    [3]  W. Liu et  al., “Survey on CSI-based indoor positioning systems and
+to the simplex formed by the anchors. This can be shown,         recent advances,” in Proc. Int. Conf. Indoor Positioning Indoor Navigat.
+                                                                                      (IPIN), Sep. 2019, pp. 1–8.
+by either determining the reduced row echelon form (RREF)    [4]   F. Gringoli, M. Schulz,  J. Link, and M. Hollick, “Free your CSI:
+of E or considering Theorem 2. As a full-rank matrix, E is     A channel  state information  extraction platform  for modern Wi-Fi
+invertible, and its determinant is non-zero.                                   chipsets,” in Proc. 13th Int. Workshop Wireless Netw. Testbeds, Exp.
+                                                                                     Eval. Characterization, Oct. 2019, pp. 21–28.
+   Utilizing Lemma  1, we can  establish  the  relationship    [5]   F.  Gringoli, M.  Cominelli, A. Blanco, and  J. Widmer, “AX-CSI:
+between the determinants of C and E, expressed as:                   Enabling CSI extraction on commercial 802.11ax Wi-Fi platforms,”
+                                                                                           in Proc. 15th ACM Workshop Wireless Netw. Testbeds, Experim. Eval.
+            det(C) = −det(E)d0 T E−1d0           (28)         CHaracterization, Jan. 2022, pp. 46–53.
+                                                                                     [6]  R. Schmidt, “Multiple emitter location and signal parameter estimation,”
+Since we already know that det(C) = 0 and det(E)̸ = 0, it       IEEE Trans. Antennas Propag., vol. AP-34, no. 3, pp. 276–280, Mar.
+             T                                                            1986.follows that d0 E−1d0 = 0, as stipulated by Theorem 3.□      [7]  R. Roy and T. Kailath, “Esprit-estimation of signal parameters via
+                                                                                            rotational invariance techniques,” IEEE Trans. Acoust., Speech, Signal
+                                                                                        Process., vol. 37, no. 7, pp. 984–995, Jul. 1989.
+                  APPENDIX B                                    [8]  M. Kotaru, K. Joshi, D. Bharadia, and S. Katti, “SpotFi: Decimeter level
+              PROOF OF THEOREM 4                                   localization using WiFi,” in Proc. ACM Conf. Special Interest Group
+                                                                       Data Commun., Aug. 2015, pp. 269–282.
+  Proof: Assume s′0 is the estimated location of the user which    [9]    J. Xiong and K. Jamieson, “ArrayTrack: A ﬁne-grained indoor loca-
+satisﬁes the geometrical constraint in (13). Thus                           tion system,” in Proc. USENIX Symp. Netw. Syst. Design Implement.,
+                                                                                 Apr.  2013,  pp. 71–84.  [Online].  Available:  https://www.usenix.org/
+                           ′T                                                     conference/nsdi13/technical-sessions/presentation/xiong
+               d0 E−1d′0 = 0                   (29)    [10] M. T. Rahman, N. Tadayon, S. Han, and S. Valaee, “LocHunt: Angle of
+                                                                                                arrival based location estimation in harsh multipath environments,” in
+in which:                                                                       Proc. IEEE Global Commun. Conf. (GLOBECOM), Dec. 2018, pp. 1–6.
+                0  d212 d213 1                              [11] N. Tadayon, M. T. Rahman, S. Han, S. Valaee, and W. Yu, “Decimeter
+                       d212  0  d223 1                                  ranging with channel state information,” IEEE Trans. Wireless Commun.,
+                       d213 d223  0  1                                                          ,                           [12] C. Feng, W. S. A. Au, S. Valaee, and Z. Tan, “Received-signal-strength-          E =                                                           vol. 18, no. 7, pp. 3453–3468, Jul. 2019.
+                      1  1  1  0                                 based indoor  positioning using compressive  sensing,” IEEE Trans.
+                                                                           Mobile Comput., vol. 11, no. 2, pp. 1983–1993, Dec. 2012.
+and                                                                           [13] A. Bazzi, D. T. M. Slock, L. Meilhac, and S. Panneerselvan, “A
+                  d′0 = [d′201, d′202, d′203, 1]T ,                              comparative study of sparse recovery and compressed sensing algorithms
+                                                                               with application to AoA estimation,” in Proc. IEEE 17th Int. Workshop
+If we expand (29), we reach the following quadratic equation:         Signal Process. Adv. Wireless Commun. (SPAWC), Jul. 2016, pp. 1–5.
+                                                                               [14] N. Garcia, H. Wymeersch, E. G. Larsson, A. M. Haimovich, and
+                       ˜d′T0 A˜d′0 + bT ˜d′0 + c = 0              (30)       M.Process.,Coulon,vol.“Direct65, no.localization10, pp. 2475–2487,for massiveMayMIMO,”2017.IEEE Trans. Signal
+                                                                               [15] W. Gong and J. Liu, “RoArray: Towards more robust indoor localization
+in which ˜d′0 = [d′201, d′202, d′203]T , c = −2d212d223d213and matrix         using sparse recovery with commodity WiFi,” IEEE Trans. Mobile
+A and vector b are deﬁned in (26).                                     Comput., vol. 18, no. 6, pp. 1380–1392, Jun. 2019.
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:45:44 UTC from IEEE Xplore. Restrictions apply.
+
+=== PDF PAGE 15 ===
+AKBARI AND VALAEE: COOPERATIVE DIRECT LOCALIZATION IN MULTIPATH ENVIRONMENTS                                                     6565
+
+
+
+[16]  S. Han, M. T. Rahman, and S. Valaee, “Angle of arrival and time of    [31] U. A. Khan, S. Kar, and  J. M. F. Moura, “Linear theory for self-
+     ﬂight estimation as an ising energy minimization problem,” in Proc.          localization: Convexity, barycentric coordinates, and Cayley–Menger
+    IEEE 31st Annu. Int. Symp. Pers., Indoor Mobile Radio Commun., Aug.         determinants,” IEEE Access, vol. 3, pp. 1326–1339, 2015.
+     2020, pp. 1–6.                                                           [32]  I. Rish and G. Grabarnik, Sparse Modeling: Theory, Algorithms, and
+[17]  S. Akbari and S. Valaee, “CAIM: Cooperative angle of arrival estimation         Applications. Boca Raton, FL, USA: CRC Press, 2014.
+     using the  ising model,”  in Proc. IEEE Globecom Workshops (GC    [33]  T.  T. Cai and L. Wang, “Orthogonal matching  pursuit  for sparse
+     Wkshps), Dec. 2021, pp. 1–6.                                                    signal recovery with noise,” IEEE Trans. Inf. Theory, vol. 57, no. 7,
+[18]  S. Akbari and S. Valaee, “Direct localization: An ising model approach,”         pp. 4680–4688, Jul. 2011.
+      in Proc. ICASSP  - IEEE Int. Conf. Acoust., Speech Signal Process.    [34]  S. Chen and D. Donoho, “Basis pursuit,” in Proc. 28th Asilomar Conf.
+     (ICASSP), May 2022, pp. 5138–5142.                                            Signals, Syst. Comput., 1994, pp. 41–44.
+[19] E.  J. Candes and M. B. Wakin, “An  introduction  to compressive    [35]  J. Mairal, “Sparse modeling for image and vision processing,” Found.
+     sampling,” IEEE Signal Process. Mag., vol. 25, no. 2, pp. 21–30, Mar.        Trends Comput. Graph. Vis., vol. 8, nos. 2–3, pp. 85–283, 2014.
+     2008.                                                                    [36]  S. Valaee and P. Kabal, “An information theoretic approach to source
+[20] E. T. Northardt,  I. Bilik, and Y.  I. Abramovich, “Spatial compres-        enumeration in array signal processing,” IEEE Trans. Signal Process.,
+      sive sensing  for  direction-of-arrival estimation with bias mitigation          vol. 52, no. 5, pp. 1171–1178, May 2004.
+      via expected likelihood,” IEEE Trans. Signal Process., vol. 61, no. 5,    [37] M. Wagner, Y. Park, and P. Gerstoft, “Gridless DOA estimation and root-
+     pp. 1183–1195, Mar. 2013.                                  MUSIC for non-uniform linear arrays,” IEEE Trans. Signal Process.,
+[21] M. T. Rahman and S. Valaee, “Location estimates from channel state          vol. 69, pp. 2144–2157, 2021.
+     information via binary programming,” IEEE Trans. Signal Process.,    [38] H. Zamani, H. Zayyani, and  F. Marvasti, “An  iterative  dictionary
+      vol. 70, pp. 5265–5278, 2022.                                                 learning-based algorithm for DOA estimation,” IEEE Commun. Lett.,
+[22] Q. H. Spencer, B. D. Jeffs, M. A. Jensen, and A. L. Swindlehurst,          vol. 20, no. 9, pp. 1784–1787, Sep. 2016.
+     “Modeling the statistical time and angle of arrival characteristics of an    [39] Y.  Liu, Z.-W. Tan, A. W. H. Khong, and H.  Liu, “An  iterative
+     indoor multipath channel,” IEEE J. Sel. Areas Commun., vol. 18, no. 3,         implementation-based approach for joint source localization and asso-
+     pp. 347–360, Mar. 2000.                                                           ciation under multipath propagation environments,” IEEE Trans. Signal
+[23]  S. Azzouzi, M. Cremer, U. Dettmar, R. Kronberger, and T. Knie, “New         Process., vol. 71, pp. 121–135, 2023.
+     measurement results for the localization of UHF RFID transponders    [40] H. Nakayama, J. Koyama, N. Yoneoka, and T. Miyazawa, “Description:
+     using an angle of arrival (AoA) approach,” in Proc. IEEE Int. Conf.         Third generation  digital annealer technology,”  Fujitsu  Ltd., Tokyo,
+     RFID, Apr. 2011, pp. 91–97.                                                  Japan, 2021.
+[24] A.  J.  Weiss,  “Direct  position  determination  of narrowband  radio    [41] D. J. MacKay, Information Theory, Inference and Learning Algorithms.
+     frequency  transmitters,” IEEE Signal Process.  Lett.,  vol. 11, no. 5,        Cambridge, U.K.: Cambridge Univ. Press, 2003.
+     pp. 513–516, May 2004.                                                 [42] M. Aramon, G. Rosenberg, E. Valiante, T. Miyazawa, H. Tamura,
+[25] M.  Wax  and  T.  Kailath,  “Optimum  localization  of  multiple        and H. G. Katzgraber, “Physics-inspired optimization  for quadratic
+     sources  by   passive   arrays,”  IEEE   Trans.   Acoust.,   Speech,         unconstrained problems using a digital annealer,” Frontiers Phys., vol. 7,
+     Signal     Process.,      vol. ASSP-31,     no. 5,     pp. 1210–1217,          p. 48, Apr. 2019.
+     Oct. 1983.                                                               [43]  J. D. Gorman and A. O. Hero, “Lower bounds for parametric esti-
+[26] K. Papakonstantinou and D. Slock, “Direct location estimation using        mation with  constraints,” IEEE  Trans.  Inf. Theory,  vol. 36,  no. 6,
+     single-bounce NLOS time-varying channel models,” in Proc. IEEE 68th         pp. 1285–1301, Nov. 1990.
+     Veh. Technol. Conf., Sep. 2008, pp. 1–5.                                  [44] E.  Nitzan,  T.  Routtenberg,  and  J.  Tabrikian,  “Cram´er-rao bound
+[27] O.   Bialer,   D.   Raphaeli,   and   A.    J.   Weiss,  “Maximum-        under norm constraint,” IEEE Signal Process.  Lett.,  vol. 26, no. 9,
+      likelihood   direct   position   estimation   in   dense   multipath,”         pp. 1393–1397, Sep. 2019.
+    IEEE   Trans.   Veh.   Technol.,   vol. 62,   no. 5,   pp. 2069–2079,    [45]  S. Akbari and S. Valaee, “Binary group sparsity in multi anchor direct
+      Jun. 2013.                                                                           localization,” in Proc. IEEE 9th Int. Workshop Comput. Adv. Multi-
+[28] L. M. Blumenthal, Theory and Applications of Distance Geometry,        Sensor Adapt. Process. (CAMSAP), Dec. 2023, pp. 136–140.
+      vol. 242. New York, NY, USA: Chelsea, 1970.                           [46]  P. Bultitude, Y. de Jong and T. Rautiainen, “IST-4-027756 WINNER
+[29]  S. Akbari and  S.  Valaee, “A geometric approach  for  cooperative           II D1.1.2 V1.2 WINNER II channel models,” EBITG, TUI, UOULU,
+      direct   localization,”   in  Proc.  IEEE  34th  Annu.   Int.  Symp.       CU/CRC, NOKIA, Tech. Rep., Sep. 2007.
+      Pers.,  Indoor  Mobile  Radio  Commun.  (PIMRC),  Sep.  2023,    [47] M. T. Rahman, S. Han, N. Tadayon, and S. Valaee, “Ising model formu-
+     pp. 1–6.                                                                              lation of outlier rejection, with application in WiFi based positioning,”
+[30] A. Paul, M. Islam, M. Ferdousur, and A. Rahman, “Localization of          in Proc. IEEE Int. Conf. Acoust., Speech Signal Process. (ICASSP), May
+     mobile submerged sensors using Lambert-W function and Cayley-        2019, pp. 4405–4409.
+     menger determinant,” Int. J. Adv. Comput. Sci. Appl., vol. 11, no. 2,    [48]  F. Zhang, The Schur Complement and its Applications, vol. 4. Cham,
+     2020.                                                                       Swizerland: Springer, 2006.
+
+
+
+
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:45:44 UTC from IEEE Xplore. Restrictions apply.

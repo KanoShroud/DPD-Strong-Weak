@@ -1,0 +1,392 @@
+Hypothesis testing when a nuisance parameter is present only under
+                 the alternative - linear model case
+
+                             By ROBERT B. DAVIES
+                      Statistics Research Associates Limited
+                PO Box 12 649, Thorndon, Wellington, New Zealand
+                            robert@statsresearch.co.nz
+
+
+
+
+                                       Summary
+
+The results of Davies (1977, 1987) are extended to a linear model situation with
+unknown residual variance.
+    Some key words: Change point; F -process; Frequency component; Hypothesis
+test; Nuisance parameter; t-process; Two-phase regression; Up-crossing.
+
+                                  1. Introduction
+
+Davies (1977, 1987) introduced a method for testing a hypothesis in the presence
+of a nuisance parameter, θ, which enters into the model only under the alternative.
+Examples 1 and 3 in the second paper were concerned with detecting a discrete fre-
+quency component and detecting a change in slope. Both are of the form in which we
+observe Y1 , . . . , Yn , denoted by a column vector, Y , which are independently normally
+distributed with variance σ2 and mean
+
+                                 E(Y ) = Xγ + W (θ)ξ,                                 (1)
+
+where X is an n×s matrix and W (θ) is an n×p matrix function of the scalar nuisance
+parameter θ ∈ [L, U]. The column vectors γ and ξ are unknown parameters. The
+objective is to test the hypothesis ξ = 0 against the alternative that at least one
+element of ξ is nonzero. If p = 1 we may be interested in testing ξ = 0 against the
+one-sided alternative ξ > 0. If ξ = 0 then θ does not enter into the model, so the
+model is of the general form considered by Davies (1977, 1987).
+    This paper extends the results of Davies (1977, 1987) to the situation when the
+residual variance σ2 is unknown and n is too small for it to be estimated accurately.
+This requires us, in particular, to replace the Gaussian and χ2 processes by t and F
+processes.
+    The main results are given in §2, the application to the examples in §3, and the
+derivation of the results in the Appendix. The notation is similar to that in Davies
+(1987). In particular, Y 0 denotes the transpose of a vector Y and kY k its L2 norm.
+
+
+
+
+                                            1
+                                   2. Main Results
+
+Assume that q = n − s − p > 0 and that the matrix (X, W (θ)) is of full rank. For
+each θ carry out a QR factorisation of (X, W (θ)) (Golub & Van Loan, 1996, p. 223)
+or some other orthogonalisation procedure so that
+                                                         
+                        S      ¡            ¢      G H(θ)
+                     P (θ)  X W (θ) =  0 J(θ)  ,                           (2)
+                      Q(θ)                         0    0
+
+where (S 0 , P (θ)0 , Q(θ)0 )0 is an orthogonal matrix and G, H(θ) and J(θ) are s × s, s× p
+and p×p matrices. The s×n matrix S is independent of θ whereas the p×n and q ×n
+matrices P (θ) and Q(θ) will usually depend on θ. The QR factorisation (2) provides
+a convenient way of calculating the orthogonal components, SY and Z(θ) = P (θ)Y ,
+of the data vector Y corresponding to X and W (θ) and the component corresponding
+to the residuals R(θ) = Q(θ)Y . Then, for each θ,
+
+                                           kZ(θ)k2 /p
+                                   F (θ) =                                             (3)
+                                           kR(θ)k2 /q
+
+will have an F distribution with p and q degrees of freedom when ξ = 0. If θ were
+known then the usual test of the hypothesis ξ = 0 would reject the hypothesis when
+(3) was large. Suppose the elements of P (θ) and Q(θ) are continuous functions of θ ∈
+[L, U] and have continuous derivatives except possibly for a finite number of jumps.
+Then we will say that (3) is an F process with p and q degrees of freedom. If p = 1
+then we will say
+                                            Z(θ)
+                                 t(θ) =           1                               (4)
+                                        kR(θ)k /q 2
+is a t process with q degrees of freedom. Here, Z(θ) is regarded as a scalar. If θ were
+known then the usual test of the hypothesis ξ = 0 against the one-sided alternative
+ξ > 0 would reject the hypothesis when (4) was large. This is assuming that we have
+chosen the signs of the elements of P (θ) so that large values of Z(θ) correspond to
+large values of ξ.
+    When θ was not known, the approach of Davies (1977, 1987) would be to use the
+maximum with respect to θ of either (3) or (4) as the test statistic. The remainder of
+this section is concerned with calculating approximations to the distributions of these
+maxima. As in Davies (1977, 1987), these approximations are based on the expected
+number of upcrossings by (3) or (4), regarded as a stochastic process indexed by θ,
+of the critical value.
+    Define an analogue of the Beta distribution,
+
+                                  β(θ) = kZ(θ)k2 /D2 ,                                 (5)
+
+where D2 = kZ(θ)k2 + kR(θ)k2 = kY k2 − kSY k2 . Hence F (θ) = qβ(θ)/[p{1 − β(θ)}].
+    Let A(θ) = P (θ){∂P 0 (θ)/∂θ}, B(θ) = {∂P (θ)/∂θ}{∂P 0 (θ)/∂θ}. Let η(θ) be a
+column vector whose elements are centred normal random variables with variance-
+covariance matrix given by B(θ) − A0 (θ)A(θ).
+
+                                            2
+   The main result, derived in the Appendix, is that
+                                                                  Z U
+                                             1 1
+               pr[ sup {β(θ)} > u] ≤ 1 − Iu ( p, q) +                      ψ(u, θ)dθ,   (6)
+                  L≤θ≤U                      2  2                   L
+
+where Iu denotes the incomplete Beta function (Abramowitz & Stegun, 1972, formula
+26.5.1) and
+
+                            u(p−1)/2 (1 − u)(q−1)/2 Γ( 12 p + 12 q)E{kη(θ)k}
+                ψ(u, θ) =                  1                                       .    (7)
+                                     (2π) 2 Γ( 12 p + 12 )Γ( 12 q + 12 )
+
+Then the analogue of (3·2, 3·3) of Davies (1987) is
+                                                  Z U
+         pr[ sup {F (θ)} > u] ≤ pr(Fp,q > u) +        ψ{up/(q + up), θ}dθ,              (8)
+             L≤θ≤U                                         L
+
+where Fp,q denotes an F random variable with p and q degrees of freedom. When
+p = 1, the analogue of formula (3·7) of Davies (1977) is
+                                                 Z
+                                                1 U
+           pr[ sup {t(θ)} > u] ≤ pr(tq > u) +        ψ{u2 /(q + u2 ), θ}dθ, (9)
+              L≤θ≤U                             2 L
+
+where tq denotes a t random variable with q degrees of freedom. For the reasons noted
+in Davies (1977, 1987) we expect these bounds to be very tight in most situations
+for probabilities less than 0.2. They will, therefore, be good for evaluating statistical
+significance.
+    To evaluate (6), (8) or (9) we need a way of calculating
+                                   Z U
+                                       E{kη(θ)k}dθ.                                 (10)
+                                      L
+
+Let λ1 (θ), . . . , λp (θ) be the eigenvalues of B(θ) − A0 (θ)A(θ). Davies (1987) gives
+formulae for calculating E{kη(θ)k} from λ1 (θ), . . . , λp (θ). For example, if p = 1,
+                                1                                                1
+then E{kη(θ)k} = (2λ1 /π) 2 . If p = 2 and λ1 ≥ λ2 then E{kη(θ)k} = (2λ1 /π) 2 E(1 −
+λ2 /λ1 ), where E denotes the complete elliptic integral of the second kind (Abramowitz
+& Stegun, 1972, formula (17.3.3)).
+    It follows from Theorem A3 in the Appendix that these eigenvalues are the squares
+of the singular values of
+                                           ∂W (θ)
+                                      Q(θ)        J(θ)−1 ,                         (11)
+                                             ∂θ
+where W is defined in (1) and J and Q in (2). Formula (11) can be calculated as
+part of the QR factorisation and then the integration (10) carried out numerically.
+Alternatively, one can use the nonzero eigenvalues of L(∂W/∂θ)M(∂W 0 /∂θ)L, where
+L = Q0 Q = I − (X, W ){(X, W )0 (X, W )}−1 (X, W )0 and M = (J 0 J)−1 is the lower
+right hand p × p submatrix of {(X, W )0 (X, W )}−1 . This completes the discussion of
+the exact bounds on the probability distributions of the maxima of (3) and (4).
+    Formulae (2·4) and (3·4) of Davies (1987) introduced an approximate method for
+finding (10). A corresponding method could be based on the total variation of some
+
+                                               3
+function of β(θ). Theorem A4 suggests that an appropriate function is the arcsine
+                                                                            1
+square-root transformation. Let V denote the total variation of arcsin{β(θ) 2 }; that
+is
+         Xm ¯                                    ¯ Z U¯                   ¯
+             ¯             1                   1 ¯    ¯              1    ¯
+    V=       ¯arcsin{β(θi ) } − arcsin{β(θi−1 ) }¯ =
+                           2                   2      ¯∂ arcsin{β(θ) }/∂θ¯ dθ,
+                                                                     2
+
+         i=1                                                   L
+
+
+where θ1 , . . . , θm−1 denote the successive turning points of β(θ), with θ0 = L and
+θm = U.
+    Corresponding expressions for (3) and (4) are the total variation of respectively
+                      1               1
+arctan[{pF (θ)/q} 2 ] and arctan{q− 2 t(θ)}. Then, according to formula (A5),
+                Z U                            1
+                                 (2π) 2 Γ( 12 p + 12 )Γ( 12 q + 12 )
+                   E{kη(θ)k}dθ =                                     E(V).
+                 L                       Γ( 12 p)Γ( 12 q)
+
+This suggests
+                                   1
+                             (2π) 2 Γ( 12 p + 12 )Γ( 12 q + 12 )
+                                                                 V
+                                     Γ( 12 p)Γ( 12 q)
+as an estimate of (10), leading to the following approximate significance probability
+corresponding to (8):
+
+                                       u(p−1)/2 (1 − u)(q−1)/2 Γ( 12 p + 12 q)
+                pr(Fp,n−p > M) +                                               V,   (12)
+                                                   Γ( 12 p)Γ( 12 q)
+
+where u = Mp/(q + Mp) and M is the maximum of the F process. If p = 1 and we
+want a one-sided test the corresponding term for (9) is
+
+                                         (1 − u)(q−1)/2 Γ( 12 q + 12 )
+                      pr(tq > M) +                    1                  V,
+                                                   2π 2 Γ( 12 q)
+
+where u = M2 /(q + M2 ) and M is the maximum of the t process.
+
+                                       3. Examples
+
+I applied the method to Examples 1 and 3 in Davies (1987), allowing a nonzero mean
+in Example 3. However, in contrast to Davies (1987), I calculated the integral (10)
+numerically using (11) rather than analytically. Simulation revealed generally good
+agreement with the theoretical values for both the more accurate (8) and approximate
+(12) calculations of the levels of significance for 20%, 5%, 1% and 0.2% levels with
+10 ≤ n ≤ 200 and a variety of values of L and U. For small values of n the approximate
+test became slightly conservative but would still be usable. In contrast, the formulae
+of Davies (1977, 1987) did not give satisfactory results when an estimated value of σ
+was used for values of n ≤ 50 but were reasonably satisfactory for n ≥ 100 in the case
+of Example 1. In the case of Example 3 the results were unsatisfactory for n ≤ 200.
+    Table 1 shows the actual significance levels found by simulation for the discrete
+frequency test, Example 3, in Davies (1987) for various values of sample size, n, and
+
+                                               4
+nominal significance level. The number of simulations was 100,000. The approximate
+test uses formula (12) and the accurate test uses formula (8). Both of these tests
+show a satisfactory agreement with the nominal significance level. The chi-squared
+versions use formula (3·2) of Davies (1987). The A version divides each S(θ) value
+by the variance of the raw data and the B version by the residual mean square after
+the frequency component corresponding to θ has been fitted. Neither is satisfactory,
+particularly for small values of the significance level even when n = 200.
+
+            Table 1. Actual significance levels for discrete frequency test
+
+           n            nominal significance level    20      5       1      0.2
+
+           10           approximate test             19.5    4.4    0.80    0.13
+                        accurate test                19.7    4.8    0.95    0.17
+                        chi-sq test - A               3.2    0.0    0.00    0.00
+                        chi-sq test - B              66.5   40.3   24.56   15.87
+
+           50           approximate test             19.4    5.0    0.93    0.18
+                        accurate test                19.2    4.9    0.92    0.18
+                        chi-sq test - A              13.0    2.2    0.21    0.01
+                        chi-sq test - B              33.5   12.3    3.82    1.21
+
+           200          approximate test             18.5    4.8    0.96    0.17
+                        accurate test                18.3    4.7    0.94    0.17
+                        chi-sq test - A              15.6    3.6    0.60    0.09
+                        chi-sq test - B              23.1    6.8    1.58    0.34
+
+                                       Appendix
+
+                              Derivation of main results
+
+    Assume that P (θ) and Q(θ) defined in §2 are continuous with continuous deriv-
+atives except possibly for a finite number of jumps in the derivative at fixed values
+of θ. For simplicity assume that σ = 1 and drop explicit references to θ. Let η =
+∂Z/∂θ − A0 Z and T = ∂β/∂θ = 2Z 0 (∂Z/∂θ)/D2 = 2Z 0 η/D2 since A = P (∂P/∂θ)0 is
+skew-symmetric.
+
+Theorem A1. The expected number of up-crossings of the level u by the process β(θ)
+defined in formula (5) over the range [L, U] is
+                                   Z U
+                                       ψ(u, θ)dθ,                             (A1)
+                                       L
+
+where ψ is as in (7).
+   Proof. The proof is similar to that of Davies (1987, Theorem A·1). Following
+Sharpe (1978, §3), the expected number of up-crossings of the level u is given by (A1)
+with
+                           ψ(u) = E(T 1T >0 |β = u)f(u),
+
+                                             5
+where f (u) is the density function of β. That is
+                                    up/2−1 (1 − u)q/2−1 Γ( 12 p + 12 q)
+                          f (u) =                                       .
+                                              Γ( 12 p)Γ( 12 q)
+The variance matrix of (Z 0 , η0 )0 is diag(I, B−A0 A), so that the definition of η conforms
+to that given in §2. Also η is independent of Z and so is a linear function of R = QY .
+Hence,
+                            ½                                           ¾
+                               E(Z 0 η1Z 0 η>0 |R, kZk)        2      2
+                ψ(u) = 2E                                 | kZk  = uD     f(u)
+                                             D2
+                            µ                            ¶
+                               cη kZk           2      2
+                     = 2E                 | kZk = uD f (u)
+                                  D2
+                                             µ                   ¶
+                           1            1       cη
+                     = 2u 2 (1 − u) 2 E            | kZk2 = uD2 f(u),
+                                               kRk
+                                                              1
+where cη = E(Z 0 η1Z 0 η>0 |R, kZk)/ kZk = 12 kηk π− 2 Γ( 12 p)/Γ( 12 p + 12 ) as in Davies
+(1987). Now η is a linear function of R and so η/ kRk is independent of kRk by
+Basu’s lemma (Lehmann, 1983, p. 46). R is independent of Z and so η/ kRk is
+independent of kRk and kZk and hence also of D. Hence,
+                  1         1                            1         1
+       ψ(u) = 2u 2 (1 − u) 2 E(cη / kRk)f(u) = 2u 2 (1 − u) 2 E(cη )f(u)/E(kRk).
+                  1
+Also E(kRk) = 2 2 Γ( 12 q + 12 )/Γ( 12 q) and the result follows. ¤
+
+Corollary A1. A bound on the probability pr[{sup β(θ)} > u] is given by (6).
+   Proof. This follows by an argument similar to that in Davies (1977). ¤
+   Worsley (1994) considers versions of t and F processes and has a theorem related
+to our Theorem A1, for multi-dimensional θ. A generalisation of Worsley’s result
+would be the way to proceed if we needed to extend our results to allow for multi-
+dimensional θ.
+
+Theorem A2. The nonzero eigenvalues of B − A0 A are the squares of the nonzero
+singular values of (11).
+  Proof. Note that P 0 P + Q0 Q + S 0 S = I. Also, QP 0 = 0 so that ∂Q/∂θP 0 +
+Q∂P 0 /∂θ = 0. Similarly S∂P 0 /∂θ = 0 and ∂Q/∂θS 0 = 0. Then
+                      ∂P              ∂P 0   ∂P 0             ∂P 0   ∂P 0 ∂P 0
+       B − A0 A =        (I − P 0 P )      =    (Q Q + S 0 S)      =    (Q Q)    .
+                      ∂θ              ∂θ     ∂θ               ∂θ     ∂θ       ∂θ
+Diﬀerentiate QW = 0 to find ∂Q/∂θ(P 0 P + Q0 Q + S 0 S)W + Q∂W/∂θ = 0. Hence
+Q∂P 0 /∂θJ = Q∂W/∂θ and the result follows. ¤
+   Now consider the quick way of estimating (10). This is based on the total variation,
+V, of an monotonically increasing function, m, of β(θ). Thus
+                         Z U                   Z U
+                    V=       |∂m(β)/∂θ| dθ =       |m1 (β)T | dθ,
+                                L                        L
+
+where m1 denotes the first derivative of m.
+
+                                                 6
+Theorem A3. An unbiased estimator of (10) is given by
+                                      1
+                                    π 2 Γ( 12 p + 12 )Γ( 12 q + 12 )
+                                          1                                V,                 (A2)
+                                      2 2 E(K)Γ( 12 p)Γ( 12 q)
+
+where
+                         K = m1 (kZk2 /D2 ) kRk kZk /D2 .
+   Proof.
+                                                ¯      ¯
+              E(|m1 (β)T |) = 2E{m1 (kZk2 /D2 ) ¯Z 0 η ¯ /D2 }
+                                                  ¯       ¯
+                            = 2E{m1 (kZk2 /D2 )E(¯Z 0 η¯ |R, kZk)/D2 }
+                            = 4E{m1 (kZk2 /D2 )cη kZk /D2 }
+                                      1
+                                    2 2 E(K)E(kηk)Γ( 12 p)Γ( 12 q)
+                            =                 1                                 ,             (A3)
+                                          π 2 Γ( 12 p + 12 )Γ( 12 q + 12 )
+
+since E(|Z 0 η| |R, kZk) = 2cη kZk, the ratio η/ kRk is independent of (kRk , Z) and
+D2 = kRk2 + kZk2 . Integrate over θ and the result follows. ¤
+    We would like to choose the function m to minimise the variance (A2). It does
+not seem likely that there would be a simple formula for this variance. However, we
+can calculate the variance of
+                            1
+                          π 2 Γ( 12 p + 12 )Γ( 12 q + 12 )
+                                1                                  |m1 (β)T | ,               (A4)
+                            2 2 E(K)Γ( 12 p)Γ( 12 q)
+
+which leads to (A2) when integrated over θ. Since the correlation structure of (A4) is
+unlikely to be sensitive to the choice on m, we might expect minimising the variance
+of (A4) to come close to minimising the variance of (A2).
+                                                                                               1
+Theorem A4. The variance of (A4) is minimised by choosing m(x) = arcsin(x 2 ).
+With this choice of m
+
+                                                        Γ( 12 p)Γ( 12 q)
+                 E(|m1 (β)T |) =                    1                               E(kηk).   (A5)
+                                              (2π) 2 Γ( 12 p + 12 )Γ( 12 q + 12 )
+
+   Proof. Using an argument similar to that used in Theorem A3, we have
+
+             E{m1 (β)T }2 = 4E[m1 (kZk2 /D2 )2 E{(Z 0 η)2 |R, kZk}/D4 ]
+                            = 4E(K 2 )E(kηk2 )/(pq),                                          (A6)
+
+since E{(Z 0 η)2 |R, kZk} = E(Z12 / kZk2 ) kηk2 kZk2 = kηk2 kZk2 /p. To minimise the
+variance of (A4) it is suﬃcient to minimise the ratio of (A6) to the square of (A3).
+This can be done by choosing var(K) = 0; for example, we can take K = 12 . This
+                             1
+implies that m(x) = arcsin(x 2 ). Formula (A5) follows from (A3). ¤
+
+
+
+                                                         7
+                                   References
+
+Abramowitz, M. & Stegun, I. A. (1972). Handbook of Mathematical Functions with
+  Formulas, Graphs, and Mathematical Tables. New York: Dover.
+Davies, R.B. (1977). Hypothesis testing when a nuisance parameter is present only
+  under the alternative. Biometrika 64, 247-54.
+Davies, R.B. (1987). Hypothesis testing when a nuisance parameter is present only
+  under the alternative. Biometrika 74, 33-43.
+Lehmann, E.L. (1983). Theory of Point Estimation. New York: Wiley.
+Golub, G.H. & Van Loan, C.F. (1996). Matrix Computations, 3rd ed. Baltimore:
+  Johns Hopkins University Press.
+Sharpe, K. (1978). Some properties of the crossings process generated by a stationary
+  chi-squared process. Adv. Appl. Prob. 10, 373-391.
+Worsley, K.J. (1994). Local maxima and the expected Euler characteristic of ex-
+  cursion sets of χ2 , F and t fields. Adv. Appl. Prob. 26, 13-42.
+
+
+
+
+                                         8
+

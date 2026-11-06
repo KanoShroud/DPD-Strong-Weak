@@ -1,0 +1,143 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>部署与多径歧义核验</title><style>
+:root{--ink:#193b43;--muted:#5c7175;--teal:#14746b;--paper:#f5f5ef;--line:#d7e2dd;--soft:#e8f1eb}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.85 "Segoe UI","Microsoft YaHei",sans-serif}a{color:var(--teal);text-underline-offset:4px;overflow-wrap:anywhere}a:hover{color:#0e4944}a:focus-visible,summary:focus-visible{outline:3px solid #b07e32;outline-offset:4px}.wrap{max-width:1120px;width:calc(100% - 64px);margin:auto}header{padding:32px 0 26px}header .eyebrow{color:var(--teal);font-size:13px;letter-spacing:.12em}h1{font-size:clamp(30px,4vw,48px);line-height:1.3;max-width:900px;margin:20px 0}header p{max-width:830px;font-size:18px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:26px 0 8px}.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:19px 23px}.stat b{font-size:28px;display:block}.stat span{font-size:13px;color:var(--muted)}nav{position:sticky;top:0;z-index:2;background:#f5f5eff5;border-block:1px solid var(--line);backdrop-filter:blur(8px)}nav .wrap{display:flex;gap:22px;overflow-x:auto;white-space:nowrap;padding-block:13px}nav a{text-decoration:none;font-size:14px;color:var(--ink)}main{padding-bottom:36px}main>h2{font-size:27px;line-height:1.45;margin:52px 0 18px;padding-top:12px;border-top:2px solid var(--teal)}p{margin:14px 0}main>p:first-child{color:var(--muted);font-size:13px}main>p:nth-child(2){font-size:20px;background:var(--soft);padding:22px 26px;border-radius:14px}blockquote{margin:20px 0;padding:18px 25px;background:var(--soft);border-left:4px solid var(--teal);border-radius:0 12px 12px 0}blockquote p{margin:0;font-size:19px}strong{font-weight:650}ol,ul{padding-left:26px}li+li{margin-top:12px}main>ol>li{padding:5px 0}table{width:100%;border-collapse:collapse;font-size:14px;background:white}th,td{text-align:left;vertical-align:top;padding:15px 18px;border-bottom:1px solid var(--line);min-width:160px}th{background:var(--soft)}tr:last-child td{border:0}.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:13px;margin:18px 0}details{background:#fff;border:1px solid var(--line);border-radius:12px;margin:12px 0}summary{padding:18px 22px;cursor:pointer;font-weight:650;line-height:1.6}summary:hover{background:#f0f6f1;border-radius:12px}.paper-body{padding:0 23px 18px;border-top:1px solid var(--line)}.paper-body p:first-child{font-size:15px}.paper-body p{margin:16px 0 0}.source-list ul{padding:0 30px 20px 45px;font-size:14px}.source-list span{color:var(--muted);white-space:nowrap}pre{overflow-x:auto;max-width:100%;padding:22px;border:1px solid var(--line);border-radius:13px;background:white;font:14px/1.9 Consolas,"Microsoft YaHei",monospace}code{overflow-wrap:anywhere;font-size:13px}footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--muted);font-size:13px}.pill{display:inline-block;border-radius:6px;background:var(--soft);color:var(--teal);font-size:12px;padding:4px 9px;margin-right:7px}.pill.amber{background:#f6ecd7;color:#855c28}#motion{scroll-margin-top:90px}
+@media(max-width:680px){.wrap{width:calc(100% - 32px)}header{padding-top:23px}.stats{gap:8px}.stat{padding:14px 11px}.stat b{font-size:23px}.stat span{font-size:12px}nav .wrap{gap:19px}main>h2{font-size:23px;margin-top:38px}main>p:nth-child(2),blockquote{padding:17px 19px;font-size:18px}summary{padding:16px}th,td{padding:13px;min-width:145px}pre{font-size:12px;padding:15px}}
+@media print{nav{position:static}details:not([open])>.paper-body{display:block}summary{list-style:none}.wrap{width:100%}.stats{break-inside:avoid}body{background:white}h2{break-after:avoid}}
+
+main{padding-top:16px}main>p:nth-child(2){font-size:14px;background:none;padding:0}h1{font-size:clamp(27px,4vw,38px)}.top{padding-top:25px}.intro{padding:20px;border-left:4px solid #177e80;background:#e6efea;border-radius:0 12px 12px 0}.table-wrap{overflow:auto}td{min-width:120px}summary{cursor:pointer;font-weight:650;padding:18px 0}details{border-top:1px solid #d4dfdc;margin-top:24px}code{overflow-wrap:anywhere}footer{padding:24px 0 50px;color:#627575}</style></head><body><div class="wrap top"><a href="../准入报告.html">← 文献准入总报告</a> · <a href="部署与多径歧义报告.html">本轮执行报告</a><p class="intro">已知哪四站直达：合理部署能解决一类双解。<br>不知道哪四站直达：错误路径组合仍可能对应另一个位置。</p></div><main class="wrap"><h1>合理部署解决了一层歧义，路径归属仍需核验</h1>
+<p>2026-10-25｜五站、每源四直达、未知波形、无地图。完成部署与路径解释核验，未启动定位性能实验。</p>
+<h2>先看结论</h2>
+<p><strong>你的判断抓住了多径的重要困难：错误路径也可能对应一个看似合理的假位置。</strong> 本轮进一步把它与上一轮的纯几何双解分开了。</p>
+<ul>
+<li>同高或统一斜平面部署，配合“无人机在安装面上方”，在非退化且直达集合正确时可以排除上下镜像双解。</li>
+<li>但不知道哪一个站缺直达时，本批仍找到换一套路径归属的合法假位置；有一对位置相距约74.99m，五站双源IQ相同到数值精度。</li>
+<li>这是当前自由反射延迟/增益模型中的明确反例，不是定位算法的失败率，也不是所有真实低空环境都不可定位。</li>
+</ul>
+<h2>1 本轮怎么执行</h2>
+<p>沿用五站平面位置，分别检查原屋顶高差、同高安装和统一斜平面。每种部署使用4个预先固定平面位置×3个高度×5种缺直达站×3档反射绕行长度，共180条源级路径条件；总计540条。先登记合同，再运行，没有按算法成绩挑选位置。</p>
+<p>每条条件枚举全部五种四直达集合及其合法位置根，回代未平方距离差，检查剩余站反射长度是否大于直线距离。已给定源分组和精确到达长度，这是信息更充分的几何检查，不冒充盲分离。全部真位置恢复、根回代、输入身份和IQ等价检查通过；本批没有奇异线性系统。</p>
+<h2>2 部署核验结果</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>部署</th>
+<th align="right">已知直达集合：半空间内有其他解</th>
+<th align="right">未知集合：半空间内有其他解</th>
+<th align="right">已知集合：工作域内有其他解</th>
+<th align="right">未知集合：工作域内有其他解</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>同高平面</td>
+<td align="right">0/180</td>
+<td align="right">54/180</td>
+<td align="right">0/180</td>
+<td align="right">3/180</td>
+</tr>
+<tr>
+<td>统一斜平面</td>
+<td align="right">0/180</td>
+<td align="right">54/180</td>
+<td align="right">0/180</td>
+<td align="right">3/180</td>
+</tr>
+<tr>
+<td>原屋顶高差</td>
+<td align="right">69/180</td>
+<td align="right">111/180</td>
+<td align="right">33/180</td>
+<td align="right">37/180</td>
+</tr>
+</tbody></table></div>
+<p>工作域在运行前固定为平面坐标±700m、参照面上方0—150m；不是围绕假解位置事后裁剪。斜平面只是解析部署对照，不代表已实测地形。各列可以重合，不应相加。</p>
+<p><strong>这些数字是确定性条件计数，不是独立重复试验的概率或算法成功率。</strong> 同高已知支持的唯一性另有满秩条件下的代数推导，而未知支持的计数只描述这批检查。</p>
+<h2>3 看一个具体假位置</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>原解释</th>
+<th>替代解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>源1位置（m）</td>
+<td>(-460, -120, 34)</td>
+<td>(-470.400, -122.731, 108.211)</td>
+</tr>
+<tr>
+<td>直达站（本表从1编号）</td>
+<td>2、3、4、5</td>
+<td>1、2、3、5</td>
+</tr>
+<tr>
+<td>唯一反射站</td>
+<td>1</td>
+<td>4</td>
+</tr>
+<tr>
+<td>反射超额长度</td>
+<td>10m</td>
+<td>0.057208m</td>
+</tr>
+<tr>
+<td>LOS路径系数模平方之和</td>
+<td>4.00</td>
+<td>3.04</td>
+</tr>
+<tr>
+<td>NLOS路径系数模平方</td>
+<td>0.04</td>
+<td>1.00</td>
+</tr>
+</tbody></table></div>
+<p>第二个源保持不变。两种解释都在上述工作域内，直达系数能量合计均大于反射。但替代解释有一条反射比其中一条直达强，且反射绕行仅约5.7cm。<strong>它满足当前“总体直达占主导、路径增益未知”的模型；不满足更强的“每条直达必然强于每条反射”规则。</strong> 当前没有采用后一规则，不能不加说明地拿它排除反例。</p>
+<p>按候选位置同步改变未知波形的时间原点及反射延迟，可保持完整观测不变。原合成相对差1.245e-14；独立按频域传递因子重建后相对差6.084e-15。这不是只让一张空间谱相近。</p>
+<p>替代解释中改变归属的那条反射链路，已通过一次镜面反射的长度和反射定律检查；没有验证一组共享建筑墙面能同时解释全部链路。因此，这一结果针对独立反射参数模型，不用来断言现实街区的歧义出现率。</p>
+<h2>4 文献与你的理解怎样对应</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>原文</th>
+<th>对多径困难的描述</th>
+<th>需要注意的适用条件</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="https://doi.org/10.1109/TASL.2008.2004533">Scheuing &amp; Yang，2008</a>，§VI-D、Fig.10</td>
+<td>反射路径形成的错误TDOA图也可能通过几何循环检查，称为“虚假一致性”</td>
+<td>一致性通过并不等于真位置；后续定位残差有时仍能消歧</td>
+</tr>
+<tr>
+<td><a href="https://doi.org/10.1109/ACCESS.2018.2889958">Du等，2019</a>，引言、§III-E</td>
+<td>多径相关函数多峰、路径关联困难；另有因目标退化产生的虚假极值</td>
+<td>有些假峰是评分范数/归一化问题，不是另一物理位置真的等价</td>
+</tr>
+<tr>
+<td><a href="https://doi.org/10.1109/TSP.2017.2666779">Garcia等，2017</a>，§III-A</td>
+<td>联合利用LOS指向共同位置、NLOS作为局部分量的结构</td>
+<td>使用阵列方向信息及已知波形，不能直接等同单天线盲定位</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/abs/1505.03193">Garcia等，2015预印本</a>，Assumption 3、Theorem 1</td>
+<td>明确假设：只有真位置与足够多的源路径一致</td>
+<td>路径几何唯一性是保证的前提，而非算法对任意多径自动解决</td>
+</tr>
+</tbody></table></div>
+<p>直观例子是墙面反射像一面镜子：反射折线路径有时可以当成从“镜像源”直达的路径。但多个站可能看见不同反射面，也混有直达，不能说所有假峰都是同一个镜像源。</p>
+<h2>5 现在应怎样推进</h2>
+<p>这轮并非又否定了一个部署：<strong>它把已知集合的几何问题与未知路径归属问题分开了。</strong> “合理部署＋上方空间”值得保留，但还不能据此放行单一真位置的性能比较。</p>
+<p>下一步应先明确对“少量反射”的物理约束究竟是什么。若继续采用当前自由路径模型，可先研究可辨识条件与多解管理；若采用可验证的共享环境或路径结构，则需先论证它为什么能提供额外信息。不能为了删除本例临时添加最小绕行、幅度排序或缩窄飞行高度。</p>
+<p>没有启动新算法、正式性能批次或修改论文；也未据本次标准几何推导宣称新的理论贡献。</p>
+<details><summary>展开：复现材料、工程修复与验证</summary>
+
+<ul>
+<li><a href="%E6%89%A7%E8%A1%8C%E5%90%88%E5%90%8C.md">运行前合同</a> · <a href="%E6%8E%A8%E5%AF%BC%E4%B8%8E%E6%96%87%E7%8C%AE%E5%AF%B9%E5%BA%94.md">推导与原文页码</a> · <a href="check_deployment.py">枚举源码</a> · <a href="replay_report.py">独立重放源码</a></li>
+<li><a href="run_20261025_142854_848860/result.json">原始结果JSON</a> · <a href="run_20261025_142854_848860/all_candidates.csv">全部候选CSV</a> · <a href="run_20261025_142854_848860/independent_replay.json">独立重放审计</a> · <a href="run_20261025_142854_848860/preflight.json">输入身份</a></li>
+<li>首次运行<code>run_20261025_142832_742287</code>在CSV写入时失败：共面与非共面求解器的诊断字段不同。仅改为字段并集后，同参数在<code>run_20261025_142854_848860</code>重新执行；失败尝试保留，不作为通过证据。</li>
+<li>独立重放重新检查全部候选原距离差；最大残差3.876e-09m。原始数据与求解输入SHA保持不变。</li>
+<li>脚本内部枚举约0.458s，不是完整定位算法的耗时。</li>
+<li>原三个直达和四个直达核验报告保留，不用最新结果覆盖历史结论的适用范围。</li>
+</ul>
+</details>
+</main><footer class="wrap">2026-10-25 · 本页说明模型与机制核验，不是性能排行榜。原始结果和失败尝试均保留。</footer></body></html>

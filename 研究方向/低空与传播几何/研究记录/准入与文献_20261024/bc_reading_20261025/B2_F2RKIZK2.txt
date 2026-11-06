@@ -1,0 +1,1764 @@
+
+=== PDF PAGE 1 ===
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 65, NO. 10, MAY 15, 2017
+2475
+Direct Localization for Massive MIMO
+Nil Garcia, Member, IEEE, Henk Wymeersch, Member, IEEE, Erik G. Larsson, Fellow, IEEE,
+Alexander M. Haimovich, Fellow, IEEE, and Martial Coulon
+Abstract—Large-scale MIMO systems are well known for their
+advantages in communications, but they also have the potential for
+providing very accurate localization, thanks to their high angular
+resolution. A difﬁcult problem arising indoors and outdoors is
+localizing users over multipath channels. Localization based on
+angle of arrival (AOA) generally involves a two-step procedure,
+where signals are ﬁrst processed to obtain a user’s AOA at
+different base stations, followed by triangulation to determine the
+user’s position. In the presence of multipath, the performance of
+these methods is greatly degraded due to the inability to correctly
+detect and/or estimate the AOA of the line-of-sight (LOS) paths.
+To counter the limitations of this two-step procedure which is
+inherently suboptimal, we propose a direct localization approach
+in which the position of a user is localized by jointly processing the
+observations obtained at distributed massive MIMO base stations.
+Our approach is based on a novel compressed sensing framework
+that exploits channel properties to distinguish LOS from non-LOS
+signal paths, and leads to improved performance results compared
+to previous existing methods.
+Index Terms—MIMO, multipath channels, position measure-
+ment, 5G mobile communication, direction-of-arrival estimation,
+navigation, antenna arrays, signal processing algorithms, com-
+pressed sensing, sparse matrices, parameter estimation, base
+stations.
+I. INTRODUCTION
+M
+ASSIVE MIMO, a leading 5G technology [1], relies
+on the use of a large number of antennas at the base
+station. It has many advantages in cellular communications, in-
+cluding increased spectral efﬁciency, high directivity, and low
+complexity [2], [3]. While research on massive MIMO has
+Manuscript received July 4, 2016; revised December 4, 2016 and January 20,
+2017; accepted January 23, 2017. Date of publication February 9, 2017; date of
+current version March 10, 2017. The associate editor coordinating the review of
+this manuscript and approving it for publication was Dr. Ashish Pandharipande.
+This work was supported in part by the European Research Council under
+Grant 258418 (COOPNET) and in part by the EU HIGHTS project (High
+precision positioning for cooperative ITS applications) under Grant MG-3.5a-
+2014-636537.
+N. Garcia and H. Wymeersch are with the Department of Signals and Sys-
+tems, Chalmers University of Technology, Gothenburg 41296, Sweden (e-mail:
+nil.garcia@gmail.com; henkw@chalmers.se).
+E. G. Larsson is with the Division of Communication Systems, Depart-
+ment of Electrical Engineering (ISY), Link¨oping University, Link¨oping 58183,
+Sweden (e-mail: erik.g.larsson@liu.se).
+A. M. Haimovich is with the Center for Wireless Communications and Signal
+Processing Research, ECE Department, New Jersey Institute of Technology,
+Newark, NJ 07102, USA (e-mail: haimovic@njit.edu).
+M. Coulon is with the IRIT/INP-ENSEEIHT, University of Toulouse,
+Toulouse 31071, France (e-mail: martial.coulon@enseeiht.fr).
+Color versions of one or more of the ﬁgures in this paper are available online
+at http://ieeexplore.ieee.org.
+Digital Object Identiﬁer 10.1109/TSP.2017.2666779
+focused mainly on communications, it is also an enabler for
+high-accuracy localization [4]. For instance, a ﬁnger-printing
+localization solution is proposed in [5] for locating multiple
+users by means of distributed massive MIMO. A personal mo-
+bile radar with millimeter-wave massive arrays is proposed in
+[6] and used for simultaneous localization and mapping (SLAM)
+in [7].
+MIMO localization has received signiﬁcant treatment in the
+technical literature, generally harnessing angle-of-arrival (AOA)
+estimation. Typically, a source emits a signal, and then in a
+two-step localization approach, the AOAs are measured at all
+base stations, and then, the source’s location is found by tri-
+angulation. In benign open-air applications, where such meth-
+ods are referred to as bearings-only target localization (BOTL)
+good performance can be observed [8]–[10]. However, in dense
+multipath environments, such as urban areas or inside build-
+ings, the AOA estimates are biased in general. For that reason,
+pure AOA-based techniques [11] have not been very popular in
+harsh multipath environments, due to large localization errors
+[5]. Massive arrays offer the possibility of precisely estimat-
+ing the AOAs of the individual multipath components thanks to
+their high angular resolution [12], [13]. Nonetheless, measuring
+multiple AOAs at each base station requires identiﬁcation of the
+AOA of the line-of-sight (LOS) paths. A possible strategy is
+to select the strongest arrival as LOS [14]. However, the LOS
+path may be damped or obstructed as it is often the case indoors
+[15], [16]. Another option is to combine all estimated AOAs
+in a fusion center and perform data association [17], but this is
+an NP-hard problem for which the optimal solution cannot be
+computed efﬁciently.
+An alternative way to tackle localization problems, is to use
+a direct localization approach [18]. Contrary to traditional tech-
+niques, the location of the source is estimated directly from the
+data, without estimating intermediate parameters, such as the
+AOAs of the LOS paths. The concept of direct localization was
+ﬁrst introduced in [19], [20], and later applied to AOA-based
+localization [21] and, more recently, to hybrid AOA–TOA (time-
+of-arrival) localization [18], [22]. However, all these methods
+were designed for pure LOS environments. Some direct localiza-
+tion techniques [23], [24] targeted to multipath scenarios exist in
+the literature, but they are not tailored to AOA information and
+massive arrays. A requirement of direct localization is that the
+signals, or a function of them, are sent to a fusion center that es-
+timates the source’s locations. In general, it is easier to achieve
+such a topology indoors as the distances are smaller. In the
+case of cellular networks, cloud radio access networks (C-RAN)
+[25], [26] may provide the required infrastructure. C-RAN is a
+1053-587X © 2017 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.
+See http://www.ieee.org/publications standards/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:36 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 2 ===
+2476
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 65, NO. 10, MAY 15, 2017
+novel architecture for wireless cellular systems whereby the base
+stations relay the received signals to a central unit which per-
+forms all the baseband processing.
+Our main contribution is a novel localization technique, called
+Direct Source Localization (DiSouL), that jointly processes
+the snapshots of data acquired at each base station in order
+to directly estimate the location of the source. Thanks to the
+high angular resolution of the massive arrays, the AOAs of
+the LOS paths can be used to precisely estimate the location
+of the source. DiSouL relies on a new compressive sensing
+framework1 which exploits the fact that LOS components must
+originate from a common location whereas NLOS components
+have arbitrary AOAs. Contrary to previous AOA-based exist-
+ing methods which assume that the LOS path is the strongest,
+this property enables DiSouL to infer the source position from
+the LOS AOAs even when the LOS paths are weaker than the
+NLOS paths. In comparison to ranging-based methods, DiSouL
+does not require large signal bandwidths in order to position
+a source accurately. To improve the signal-to-noise-ratio, DiS-
+ouL preprocesses the received signals with a matched ﬁlter,
+and then, samples at one time instant. We show how to de-
+termine such sampling instant at each base station based on a
+variation of the threshold matched ﬁlter [28]. In addition, two
+mechanisms are presented to lower the computational burden
+and increase the accuracy. The ﬁrst variation uses coarse TOA
+estimates at each base station to narrow the search area, while
+the second mechanism relies on a modiﬁed version of the grid
+reﬁnement procedure [29]. Finally, to validate the theory, nu-
+merous numerical results are provided, showing that DiSouL
+can achieve sub-meter accuracy with high probability which is
+sufﬁcient for many applications (e.g., positioning of users in cel-
+lular networks, personal navigation, etcetera). In summary the
+contributions are:
+r A novel localization technique for massive MIMO sta-
+tions based on AOA information and assisted with TOA
+estimates.
+r The mathematical formulation of a framework that enables
+the detection and estimation of LOS and NLOS paths with-
+out formulating a data-association problem.
+r A simple generalization of the threshold matched ﬁlter for
+TOA estimation for arrays of antennas.
+r A grid reﬁnement procedure for lowering the computa-
+tional complexity of the proposed localization technique.
+Notation: ∥· ∥1, ∥· ∥2 and ∥· ∥2,1 denote the ℓ1-norm, ℓ2-
+norm and ℓ2,1-norm, respectively, and ∥· ∥0 is the pseudo-ℓ0-
+norm which counts the number of non-zero elements.
+II. SYSTEM MODEL
+We consider a two-dimensional scenario with one user (or
+source) and L massive MIMO base stations equipped with ar-
+rays of Sl antennas each. The user is located at p = [px, py]T
+in an area R known a priori, the center of gravity of the sta-
+tions’ arrays are located at ˜pl = [˜px
+l , ˜py
+l ]T and assumed to be in
+the far ﬁeld with respect to the source. All arrays are equipped
+1Brieﬂy introduced in the conference paper [27] but without mathematical
+justiﬁcation and for the case of TOA-based localization instead.
+with fully digital processing, i.e., one radio frequency base-
+band chain per antenna [30], [31]. We denote by al (θ) the
+array response vector at base station l for a ray impinging
+with angle θ. The array response implicitly accounts for the
+array conﬁguration and the antenna pattern of each antenna
+element.
+The source broadcasts a known signal s(t) with half-power
+bandwidth B, which propagates through the multipath environ-
+ment, resulting in a received signal at base station l given by
+zl(t) = zLOS
+l
+(t) + zNLOS
+l
+(t) + nl(t)
+0 ≤t < Tobs,
+(1)
+where
+zLOS
+l
+(t) = αl al (θl(p)) s(t −τl(p))
+(2)
+zNLOS
+l
+(t) =
+Pl
+
+m=1
+αm
+l al(θm
+l )s(t −τ m
+l ),
+(3)
+in which Tobs is the observation time, each component of nl(t)
+is white Gaussian noise with spectral density N0, αl is an un-
+known complex scalar, θl and τl are the angle of arrival (AOA)
+and time of arrival (TOA), all related to the line of sight (LOS)
+path, while αm
+l , θm
+l , and τ m
+l
+are the channel gain, AOA, and
+TOA of the m-th NLOS component, for the Pl NLOS path.
+All these parameters are unknown. The signal is narrowband
+with respect to the arrays, i.e., at each array l the ampli-
+tudes {αl}, {αm
+l } do not change across antennas. The LOS
+parameters τl(p) and θl(p) are related to the source position
+through
+τl(p) = ∥p −˜pl∥/c
+(4)
+θl(p) = arctan
+py −˜py
+l
+px −˜px
+l
+
++ π · 1 (px < ˜px
+l ) ,
+(5)
+where c is the speed of light, while the range of the arctangent
+function is −π/2 ≤arctan(x) <+π/2, the angle is computed
+with respect to the x-axis and anticlockwise, and 1(P) is one
+if the logical expression P is true2. Let ˜pl,a = [˜px
+l,a, ˜py
+l,a]T be
+the position of antenna a at BS l, relative to the array’s cen-
+ter of gravity. For arrays without mutual antenna coupling and
+isotropic antennas, the array response al(θ) for a given AOA θ
+admits the following close-form expression
+[al (θ)]a = exp
+2πi
+λ ˜pT
+l,a
+ cos(θ)
+sin(θ)
+
+,
+(6)
+where [·]a denotes the a-th component, i is the imaginary unit
+and λ is the wavelength of the carrier. In practice, for non-ideal
+arrays with mutual coupling and different antenna gains, al(θ) is
+not computed mathematically but is measured during the array
+calibration process. The collection of vectors al(θ) for different
+directions θ is often referred to as the array manifold.
+Deﬁne
+the
+emitted
+signal
+autocorrelation
+rs(t) =
+ Tobs
+0
+s∗(τ −t)s(τ) dτ. We generate a discrete-time obser-
+2The summand π · 1
+px < ˜px
+l
+	
+is added for resolving the ambiguity caused
+by the fact that arctan(y/x) = arctan(−y/−x).
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:36 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 3 ===
+GARCIA et al.: DIRECT LOCALIZATION FOR MASSIVE MIMO
+2477
+vation, by applying a matched ﬁlter (MF)3
+zMF
+l
+(t) =
+
+ Tobs
+0
+s∗(τ −t)zl(τ) dτ
+= αl rs (t −τl(p)) al (θl(p))
++
+Pl
+
+m=1
+αm
+l rs (t −τ m
+l ) al (θm
+l ) + nMF
+l
+(t),
+(7)
+and sampling at time tl,
+¯zl = zMF
+l
+(tl) = ¯αl al (θl(p)) +
+Pl
+
+m=1
+¯αm
+l al (θm
+l ) + ¯nl
+(8)
+where ¯αl = rs(tl −τl(p))αl, ¯αm
+l
+= rs(tl −τ m
+l )αm
+l
+and ¯nl ∼
+CN(0, σ2I) where σ2 = N0 because, without loss of gen-
+eralization, the pulse energy is normalized to one (rs(0) =
+
+|s(τ)|2dτ = 1). The signals in (8) are the input of the pro-
+posed method. Contrary to beamforming applications, and sim-
+ilar to direction-of-arrival techniques, the observations across
+each array ¯zl are not weighted and linearly combined into one
+output. Such weights would ﬁx the array beampattern and are
+usually designed to make the array point into one or multiple
+directions. In our case, since no beamforming is performed, the
+arrays do not have a “favored direction”. In regards to the source,
+we assume that it has an omnidirectional antenna, in which case
+the transmitted energy would be the same towards all BSs.
+In order to ensure that ¯αl̸ = 0, the signals must be sampled at
+a time where the energy of the LOS pulse is not zero (i.e. while
+rs(tl −τl(p))̸ = 0). In addition to the sampling times, we will
+also compute an upper bound on the TOA of the LOS paths at
+each base station that will enhance the proposed method, which
+for brevity are simply called TOA estimates. In a nutshell, the
+objective of our work is to determine the sampling times and the
+TOA estimates from {zMF
+l
+(t)}L
+l=1, and then, determine p from
+{¯zl}L
+l=1.
+III. PROPOSED METHOD
+A. Principle
+The proposed method exploits the high angular resolution of
+massive arrays, enabling detection and estimation of the AOAs
+of the distinct multipath arrivals. The TOA estimates are not
+used for precise localization, but rather as constraints, limiting
+the source location in a convex set (see Fig. 1 for a visual
+example). By processing the snapshots ¯zl at all base stations
+jointly, we are able to separate the LOS paths from the NLOS
+paths. The proposed method exploits the information carried by
+the LOS paths in order to position the user with high accuracy.
+The implicit assumption here is that, in each BS, the LOS path
+is present. A method for coping with scenarios where some BS
+are in NLOS is explained in Section IV-C. Roughly speaking,
+3Performing the matched ﬁltering requires perfect knowledge of the pulse
+shape s(t). In practice, if the antennas and hardware have an entirely all-pass
+(frequency-ﬂat) frequency response, or the pulse shape is slightly changed due
+to obstacles in the path of the LOS, then the signal-to-noise-ratio will decrease
+but the number of multipath components will remain the same.
+Fig. 1.
+Example scenario with four base stations. The white circle around
+each base station excludes the near ﬁeld region. Each TOA leads to a red disc,
+the intersection of which is the feasible area. The blue and black lines represent
+the true bearing lines of the NLOS and LOS paths, respectively.
+the procedure of DiSouL is as follows. Determine a coarse
+positively biased estimate of the TOA at each base station, and
+use these to narrow the search area to a convex set containing the
+source. Then, using the signal model (8), we formulate a convex
+optimization problem, directly providing an estimate of p. In
+contrast to indirect approaches, where AOAs are estimated ﬁrst
+and the source location is determined afterwards, we do not have
+to deal with an NP-hard data-association problem. We bypass
+this problem, as only position p is estimated and not AOAs of
+the LOS paths. While the TOA estimates need to be an upper
+bound on LOS TOAs, i.e. positively biased, the sampling should
+happen at an instant where the energy of the LOS arrival is
+maximized with respect to the energy from the NLOS arrivals.
+Thus, in general the sampling times will be smaller than the
+TOA estimates. The proposed technique is designed for a single
+user, although it could possibly be extended to multiple users. In
+systems operating under an orthogonal multiple access (OMA)
+scheme (e.g., TDMA, FDMA, synchronous CDMA), the signals
+of each user could be ﬁltered out from the rest and treated
+separately.
+B. TOA Assistance
+A delay estimation technique is described for computing
+coarse TOA estimates {ˆτl}L
+l=1, which are then used to reduce
+the search area. Nonetheless, other delay estimation techniques
+are possible and may lead to better results. We rely on a gener-
+alization of the threshold MF [28] for multiple antennas. This
+technique has the advantage of being relatively simple, but more
+importantly, in the presence of multipath, due to the fact that
+multipath components overlap in time, it generates positively
+biased TOA estimates as required by our method. Note that the
+poor time resolution is not a concern because the goal of the
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:36 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 4 ===
+2478
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 65, NO. 10, MAY 15, 2017
+proposed method is to resolve the LOS from the NLOS compo-
+nents in the ‘angular domain’ rather than the time domain. The
+threshold MF ﬁrst applies a matched ﬁlter to the received signals
+(7), and then seeks the ﬁrst peak that exceeds a properly chosen
+threshold. By ignoring the part of the signals below the thresh-
+old, the threshold MF avoids false detections due to the noise,
+and by selecting the ﬁrst peak above the threshold, it obtains
+a better estimate of the LOS TOA than, for instance, selecting
+the strongest peak. We propose a simple generalization of this
+approach from the single-antenna case to the case of arrays with
+multiple antennas.
+Let zNC
+l
+(τ) be the non-coherent aggregation of the observed
+signals at all antennas after matched ﬁltering:
+zNC
+l
+(t) =
+zMF
+l
+(t)
+2
+2 ,
+(9)
+where zMF
+l
+(t) was introduced in (7). The TOAs {ˆτl}L
+l=1 are
+estimated by selecting the ﬁrst peak4 that exceeds a certain
+threshold:
+ˆτl = ﬁnd-1st-peak
+
+zNC
+l
+(t) : zNC
+l
+(t) ≥η
+
+.
+(10)
+In practice, values of zNC
+l
+(t) may only be available at discrete
+instants. In such case the location of the peak may be obtained by
+parabolic ﬁtting [32]. Following [28], the threshold is selected
+so that the probability of early false alarm is very low. An
+early false alarm event is deﬁned as detecting a peak due to
+noise before the true TOA of the LOS path. Since the threshold
+MF ignores second and later peaks (above the threshold), the
+following expression on the probability of false alarms only
+considers those peaks happening before the LOS TOA. When
+the false alarm probability is small, it can be approximated
+as [28]
+PFA ≈1 + (1 −qnoise)NTOA −1
+NTOA qnoise
+,
+(11)
+where NTOA = Tobs/Tcorr and Tcorr is the waveform correlation
+time, which for most types of waveforms, is well approximated
+by the inverse of the bandwidth Tcorr = 1/B. The term qnoise
+is deﬁned as the probability that the noise in absence of signal
+exceeds threshold η
+qnoise = Prob
+nMF
+l
+(t)
+2
+2 ≥η
+
+= 1 −F2Sl
+2η
+σ2
+
+,
+(12)
+where Sl is the number of antennas at BS l, σ2 is the noise
+variance at each antenna, and Fk(x) be the cumulative distri-
+bution function of the Chi-squared distribution with k degrees
+of freedom evaluated at x. The threshold η resulting in the de-
+sired PFA can be found by performing a one-dimensional search
+of (11).
+Assuming all TOA estimates are positively biased, then we
+can create a set
+F = {π ∈R2 : ∥π −pl∥2 ≤c ˆτl, ∀l}
+(13)
+4A peak is a local maximum of zNC
+l
+(t).
+and narrow the search area to R ∩F instead of R. In the un-
+likely event that not all TOA estimates are positively biased, it is
+possible that F = ∅. In such a case, we expand F by increasing
+all TOA estimates by a constant value v until F̸ = ∅. We have
+chosen v = 1/B, where B is the signal bandwidth, though the
+value of v turns out to not be critical for the localization per-
+formance. Reducing the search area has two beneﬁts. On one
+hand it lowers the computational complexity of the optimization
+problem that is proposed in the next section. On the other hand it
+can positively affect the accuracy of the localization procedure.
+C. Sampling Times
+The outputs of the matched ﬁlters (8) at all base stations (8)
+are sampled at times {tl}L
+l=1. Contrary to the estimation of the
+TOAs {ˆτl}L
+l=1, the goal is to sample {zMF
+l
+(t)}L
+l=1 at an instant
+where there is as little as possible NLOS interference and as
+much as possible energy from the LOS component. One solution
+would be to sample at the same time than the TOA estimates,
+however, due to their bias, we will rarely sample at the time of
+maximum LOS energy, and moreover, the NLOS interference
+may be very large as well. We propose an alternative strategy,
+which has been veriﬁed numerically to lead to better results in
+Section VI for the propagation conditions under consideration.
+The idea is to use the same threshold matched ﬁlter for TOA
+estimation, but instead of selecting the time of the ﬁrst peak, we
+select the instant when the received signal crosses the threshold
+for the ﬁrst time, i.e.,
+tl = min
+
+t : zNC
+l
+(t) ≥η
+
+.
+(14)
+Comparing the expression of the sampling time to that of the
+TOA estimate (10), it follows that tl ≤ˆτl for all l.
+D. Localization
+To solve the localization problem, we rely on tools from
+compressive sensing. Speciﬁcally, we propose a grid-based ap-
+proximate solution to the problem of localizing a source on a
+continuous map which exploits the notion of sparsity and row-
+sparsity [33]. To this end, ﬁrst we introduce a uniform grid of
+Q locations
+L = {π1, . . . , πQ} ⊂R ∩F,
+(15)
+and a uniform grid of Ml angles for each base station array
+Al = {ϑ1, . . . , ϑM l } ⊂[0, 2π).
+(16)
+The main assumption here is that the source is positioned on
+a grid location, and that the AOAs of the NLOS paths are
+also in the grid of angles. While beamforming suffers from
+the Rayleigh resolution limit [34], which is independent of the
+SNR, an advantage of sparsity-based techniques is that they
+can resolve multipath components within a Rayleigh cell (i.e.,
+achieve super-resolution) [29], [35], [36].
+Let X ∈CQ×L be a matrix whose entry on row q, column l
+is denoted by xql and represents the complex gain of a LOS path
+from grid location πq to base station l. Let yml be the complex
+gain of a NLOS path arriving at the l-th base station with angle
+ϑm. Then, by deﬁnition, only one row in X is different from
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:36 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 5 ===
+GARCIA et al.: DIRECT LOCALIZATION FOR MASSIVE MIMO
+2479
+zero, and yml̸ = 0 only if ϑm is equal to the AOA of a NLOS path
+at base station l. Thus, if the grids are dense enough, X is row-
+sparse and yl is sparse for all l. It is well known in the compres-
+sive sensing literature [37], that row sparsity can be induced by
+minimizing the ℓ2,1-norm, i.e. ∥X∥2,1 = Q
+q=1
+L
+l=1 |xql|2,
+and that sparsity can be induced by minimizing the ℓ1-norm, i.e.
+∥yl∥1 = M l
+m=1 |yml| where yl = [y1l, . . . , yM l l]T. Thus, with
+all this in mind, we propose to solve the following optimization
+problem
+min
+X,yl
+w∥X∥2,1 +
+L
+
+l=1
+∥yl∥1
+(17a)
+s.t.
+L
+
+l=1
+∥¯zl −ˆzl∥2
+2 ≤ϵ
+(17b)
+ˆzl =
+Q
+
+q=1
+xqlal (θl(πq)) +
+M
+
+m=1
+ymlal (ϑm) , ∀l. (17c)
+This is a second-order cone program (SOCP) for which very
+efﬁcient solvers exist. The optimization variables are X and
+{yl}L
+l=1. The vector ˆzl as deﬁned in (17c) is a reconstruction
+of ¯zl for a given choice of X and {yl}L
+l=1. The parameter ϵ
+establishes the maximum allowed mismatch between the obser-
+vations and the reconstruction.
+Intuitively, problem (17) seeks the sparsest number of source
+locations and NLOS paths that can describe the observations
+{¯zl}. Precisely, minimizing ∥X∥2,1, induces a sparse number
+of source locations (hopefully a single location), and minimizing
+L
+l=1 ∥yl∥1, induces a sparse number of NLOS paths. These are
+two different types of sparsity, and therefore, in order to combine
+them together some kind of balancing coefﬁcient or weight w
+needs to be added. Intuitively, the parameter w ensures that not
+all signal energy is assigned to only LOS or NLOS components.
+In particular, if w = 0, the objective function is not penalized
+by ﬁlling matrix X with non-zeros, thus, the reconstruction will
+always favor a representation based on LOS paths rather than
+NLOS paths. On the contrary, if w →∞, then the objective
+function will highly penalize any non-zero in matrix X, thus,
+the reconstruction will always favor a representation based on
+NLOS paths. Thus, it is clear than in our multipath scenario,
+consisting of LOS and NLOS paths, if a suitable w exists, it
+must be larger than 0 and ﬁnite. Below suitable choices for ϵ
+and w are proposed.
+Remark: While this technique searches a source on a plane,
+it can be generalized to a three-dimensional search, at a cost of
+computational complexity. It is also possible that the technique
+may improve its robustness against multipath because in two
+dimensions two distinct NLOS bearing lines always intersect
+but in three dimensions they generally do not.
+IV. PARAMETER SELECTION
+In this section, we motivate the choice for ϵ and w in the opti-
+mization problem of Section III-D. The choices do not guarantee
+recovery of the correct position and are derived under simpliﬁed
+assumptions.
+A. Setting the Parameter ϵ
+The parameter ϵ in (17) deﬁnes the allowed mismatch between
+the observations and the reconstruction. Typically, ϵ is a bound
+on the noise. Since the noise is Gaussian, it is unbounded, and
+instead ϵ is chosen so that it is a bound with high probability, i.e.
+Prob
+ L
+
+l=1
+∥¯nl∥2 ≤ϵ
+
+= γ.
+(18)
+where γ is, for example, 0.99. Because ¯nl are random white
+Gaussian vectors of length Sl, it follows that the error normal-
+ized by the noise variance 2σ−2 L
+l=1 ∥¯nl∥2 is a Chi-squared
+random variable with 2 L
+l=1 Sl degrees of freedom. Let Fk(x)
+be the cumulative distribution function of the Chi-squared
+distribution with k degrees of freedom evaluated at x and
+F −1
+k (y) its inverse function evaluated at y. Then, the value of
+ϵ can be computed as
+ϵ = σ2
+2 F −1
+2  L
+l = 1 Sl (γ) .
+(19)
+In low SNR conditions, it is possible that the aggregated
+energy of all snapshots is not larger than ϵ, i.e.
+L
+
+l=1
+∥¯zl∥2
+2 ≤ϵ,
+(20)
+making problem (17) have the trivial all-zeros solution, thus,
+failing to estimate the location of the source. In this case we
+propose to simply look up the location whose LOS components
+correlate the most with the snapshots:
+ˆp = arg max
+π∈L
+L
+
+l=1
+aH
+l (θl(π)) ¯zl
+2
+∥al (θl(π))∥2
+2
+.
+(21)
+B. Setting the Parameter w
+In order to obtain an expression for w, we will not prove that
+the AOAs are correctly recovered by solving (17), but rather
+that, under proper selection of w, if the AOAs are correctly
+recovered, then they can also be correctly identiﬁed as either
+LOS or NLOS. The key property that will dictate the value of
+w, and in turn estimate the correct source location is based on
+the following deﬁnition.
+Deﬁnition 1 (consistent location): A location π is consistent
+with L paths, if the AOAs of the direct paths between π and the
+base stations are true AOAs, i.e.
+θl(π) ∈Θl
+for l = 1, . . . , L,
+(22)
+where Θl is the set of true AOAs at base station l
+Θl =
+
+θl(p), θ1
+l , . . . , θPl
+l
+
+.
+(23)
+By deﬁnition, the true source location p is consistent with
+the L paths because the LOS components travel in a straight
+line. To ﬁnd a criterion for the weight, we restrict ourselves to
+a simpliﬁed version of the problem and then later evaluate the
+criterion in a more realistic setting. Our analysis on the weight
+criterion is limited through the three following assumptions.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:36 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 6 ===
+2480
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 65, NO. 10, MAY 15, 2017
+A1) Besides the source location p, no other location is con-
+sistent with L paths.
+A2) The grids L and {Al}L
+l=1 are sufﬁciently dense to con-
+tain the source location p and all AOAs, respectively.
+A3) Denoting by ˆΘl the estimated AOAs at base station
+l, i.e.
+ˆΘl = {θl(πq) : xql̸ = 0} ∪{ϑml : yml̸ = 0} ,
+(24)
+then ˆΘl = Θl, ∀l. In other words, the solution of (17)
+is able to recover the true AOAs. This assumption is
+reasonable in high SNR conditions.
+These assumptions are only used for deriving a suitable value
+of w. In practice, in realistic multipath environments, some of
+these assumptions may break down. Thus, in Section VI, the
+proposed method is tested versus a realistic indoor multipath
+channel model, and shown to recover the user position with
+sub-meter accuracy and high probability.
+Lemma 1: Assume A2) and A3). If w >
+√
+L −1, then any
+estimated location output by problem (17) is consistent with L
+paths (in the sense of Deﬁnition 1).
+Proof: See Appendix A.
+■
+Lemma 2: Assume A2) and A3). If w <
+√
+L, then problem
+(17) outputs at least one location (i.e. X̸ = 0).
+Proof: See Appendix B.
+■
+The two lemmas lead directly to the following theorem, which
+guarantees the correct recovery of the source location.
+Theorem 1: If Assumptions A1), A2), and A3) hold, then
+a sufﬁcient condition for the correct recovery of the source
+location is
+√
+L −1 < w <
+√
+L.
+(25)
+Proof: If w <
+√
+L, by Lemma 2 al least one estimated lo-
+cation is output by problem (17). Moreover, if w >
+√
+L −1,
+by Lemma 1 any estimated location is consistent with L paths.
+However, according to Assumption A1), only the location of
+the source is consistent with L paths, thus completing the
+proof.
+■
+C. The Case of Non-LOS
+In practice, BSs may be in non-line-of-sight (NLOS) because
+the LOS paths are blocked or attenuated (making the LOS path
+pass undetected). The proposed technique relies on the presence
+of the L LOS paths for achieving high precision localization,
+and it may break down when the base stations are in NLOS.
+If the weight in (17a) is chosen according to Lemma 1, any
+location estimate output by problem (17) must be consistent
+with L paths. However, if one base station is in NLOS, then the
+source will only be consistent with L −1 paths, and therefore,
+the location of the source will not be a solution to (17). Thus,
+adjusting the weight requires a priori knowledge of the number
+of LOS base stations. We can adjust the weight as follows. Let
+L∗be the number of base stations in LOS with the source, and
+let ˆL be an estimate of L∗. Obviously, L∗≤L. Furthermore,
+assume no other location besides the location of the source is
+consistent with L∗paths. We start by assuming that all base
+stations are in LOS, i.e. ˆL = L, set the weight according to
+Algorithm 1: Direct Localization.
+1: set ˆL = L and ˆp = ∅
+2: set ϵ according to (19)
+3: if L
+l=1 ∥¯zl∥2
+2 > ϵ then
+4:
+while ˆp = ∅and ˆL > 1 do
+5:
+set w =
+ˆL −0.5
+6:
+solve (17) to obtain X and yl, ∀l
+7:
+if (X ≡0) then
+8:
+ˆL ←ˆL −1
+9:
+else
+10:
+ˆq = arg maxq ∥Xq,:∥2
+11:
+ˆp = πˆq
+12:
+end if
+13:
+end while
+14: else
+15:
+estimate ˆp by (21)
+16: end if
+Theorem 1, and solve problem (17). According to Lemma 1, the
+location of the source will be estimated only if it is consistent
+with ˆL paths. If L∗< ˆL, the solver will return X = 0. When
+this event is detected, ˆL can be reduced and (17) solved again.
+This procedure can be repeated as shown in Algorithm 1. Note
+that if X̸ = 0, the location with strongest gains is returned as
+the estimate ˆp (see lines 10–11). Theoretically speaking, since
+two non-parallel paths always intersect on the plane, to ensure
+that we can distinguish LOS from NLOS paths, and in turn,
+recover the user position, the number of LOS BSs should be
+L∗≥3. However, when the LOS paths are the strongest, we
+have veriﬁed numerically, that the user can be recovered with
+L∗= 2 as well.
+Based on the choices for ϵ and w, Algorithm 1 summarizes
+the proposed solution strategy.
+V. GRID REFINEMENT
+Dense grids of locations and angles are necessary to achieve
+ﬁne resolution, but making the grids too dense results in large
+computation time. The computational complexity of solving
+(17) scales as O((QL + 
+l Ml)3.5) [38], where Q and M are
+the number grid locations and angles respectively, and L is
+the number of base stations. This motivates an adaptive grid-
+reﬁnement strategy originally proposed in [29]. The idea behind
+the grid reﬁnement approach is to start with a coarse grid of
+locations and angles; subsequently, the grid is reﬁned around
+the estimated locations and angles and the optimization problem
+(17) is solved again. This procedure can be repeated until a
+certain grid resolution has been achieved or a stopping criterion
+has been met. Thus, the beneﬁts of grid reﬁnement are two-fold:
+lower computational complexity and ﬁne grid resolution.
+In comparison to previous grid reﬁnement approaches [29],
+[39], ours is more complex due to the two different types of
+grids used to describe the observed data. At iteration k of the
+grid reﬁnement process, we will denote the position grid by L(k)
+and the angle grid (for base station l) by A(k)
+l
+. At iteration k = 0,
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:36 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 7 ===
+GARCIA et al.: DIRECT LOCALIZATION FOR MASSIVE MIMO
+2481
+the grids are uniform over R ∩F and [0, 2π), respectively. The
+resolutions in L(0) and A(0)
+l
+are set to πres ∈R+ and ϑres ∈R+,
+respectively. Deﬁne the following operators:
+grid(ˆΠ, δ) = {π ∈R2 : π = ˆπ + [i˜j]Tδ,
+ˆπ ∈ˆΠ, i, j ∈{−2, −1, 0, 1, 2}}
+(26)
+grid(ˆΘl, δ) = {θ ∈[0, 2π) : θ = ˆθ + iδ,
+ˆθ ∈ˆΘl, i ∈{−2, −1, 0, 1, 2}}.
+(27)
+We can then set L(k) = grid(ˆΠ, πres/2k) and A(k)
+l
+= grid(ˆΘl,
+ϑres/2k) ∪{[θl (π)]ϑres/2k : π ∈ˆΠ}, where [x]y rounds x to the
+nearest multiple of y. Each successive grid of locations and an-
+gles includes the estimated points and their neighboring points.
+In this case we have chosen to include twenty-four and four
+neighbor points for the position grid and angle grid, respec-
+tively, but other choices of neighbors are possible as well. In
+addition, the grid of angles also incorporates the angles related
+to the estimated locations. It has been empirically veriﬁed that
+this is necessary for the correct performance of this grid reﬁne-
+ment approach.
+Because at each step the previously estimated points are in-
+cluded in the next grid, the solution at step k is a feasible solution
+at step k + 1. This ensures that the optimum value of the op-
+timization problem (17) cannot increase as iterations progress.
+Since the objective function is bounded from below by zero,
+by the monotone convergence theorem [40], the grid reﬁnement
+procedure must converge. In practice, the reﬁnement process
+is halted when the progress between two consecutive steps is
+negligible. Denote as f (k)
+opt the optimum value of problem (17)
+at step k, then the grid reﬁnement is stopped at step k if
+f (k−1)
+opt
+−f (k)
+opt
+
+f (k−1)
+opt
+< β,
+(28)
+where β is a small value, e.g., β = 10−3.
+A. The DiSouL Algorithm
+The summary of the DiSouL algorithm is now presented,
+comprising the basic Algorithm 1, as well as the TOA assistance
+of Section III-B and the grid reﬁnement of Section V.
+VI. NUMERICAL RESULTS
+In this section, we illustrate the performance of the localiza-
+tion method and compare it to other existing techniques. Unless
+otherwise stated, all numerical examples are run using the fol-
+lowing parameters. The source is positioned randomly within
+an area of size 100 × 100 m. Four base stations are positioned
+at the corners; if the origin of the coordinate system is taken to
+be in the middle of the area, the base stations are at coordinates
+[45 m, 45 m], [45 m, −45 m], [−45 m, 45 m] and [−45 m,
+−45 m]. The carrier frequency is 7 GHz and the wavelength 43
+mm. Every base station is equipped with a 70-antenna uniform
+circular array (UCA) [41] with a radius of 24 cm because it
+makes the inter antenna spacing equal to half wavelength. We
+Fig. 2.
+The left ﬁgure plots the LOS and NLOS paths and the right ﬁgure
+plots the bearing lines (BLs). The top left corner base station only receives the
+LOS path.
+opt for UCAs instead of uniform linear arrays (ULAs) because
+for the same number of antennas and equal inter antenna spac-
+ing, their far ﬁeld region [42] starts at a much shorter distance
+(11 m for a UCA and 51 m for a ULA), and contrary to ULAs,
+UCAs have equal angular resolution towards all directions on
+the plane. Also, we simulate four base stations because it makes
+positioning a bit more robust to multipath than using only three
+base stations5 while keeping the number of BSs to a reasonable
+number. The initial grid resolutions of DiSouL are πres = 5 m
+and ϑres = 5.71◦.
+A. Validation of Theorem 1
+To illustrate Theorem 1, we synthesize a set of snapshots (8)
+according to the scenario plotted in Fig. 2 and ignore any time
+delay information. The source is positioned at [18 m,31 m] and a
+reﬂector is positioned at [25 m,−7 m]. As visualized in Fig. 2, all
+base stations receive a LOS component, and except for the top
+left base station, they also receive a NLOS component bounced
+from the reﬂector. From Fig. 2, it is apparent that the source
+location is consistent with 4 paths, the reﬂector is consistent
+with 3 paths, and all other locations in that area are consistent
+with 2 paths or less. We hypothesize that for a sufﬁciently ﬁne
+grid, and for a sufﬁciently high SNR, the probability of recov-
+ering the correct source location will be high if the weight is
+picked according to Theorem 1. The SNRl for the snapshots (8)
+is deﬁned as SNRl = Sl E{|¯αl|2}/E{∥¯nl∥2
+2} = E{|¯αl|2}/σ2
+and is equal for all base stations SNRl = SNR. Every data point
+in Fig. 3 is generated by running 100 Monte Carlo runs, where
+at each run the signal strengths and phases of all multipath com-
+ponents are randomized according to Rayleigh and uniform dis-
+tributions, respectively. The location of the source is estimated
+by running Algorithm 2, wherein the solution to optimization
+problem (17) is obtained by the solver Mosek [43]. Fig. 3 plots
+the empirical probability that the localization error is smaller
+than 1m as a function of w2. According to Theorem 1, a suf-
+ﬁcient condition for recovering the location of
+the source
+is that the square of the weight satisﬁes L −1 ≤w2 ≤L. The
+ﬁgure shows that, in this case, for L = 4, the range of values
+5Because on a plane two non-parallel straight lines always intersect, three is
+the minimum number of BSs needed in order to discriminate LOS from NLOS
+paths.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:36 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 8 ===
+2482
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 65, NO. 10, MAY 15, 2017
+Fig. 3.
+Probability of sub-meter accuracy versus the choice of the weight for
+the scenario in Fig. 2. Probability estimated by Monte Carlo simulation where
+the random parameters are the signal strengths and phases. In grey the area
+comprising the tested values of w satisfying Theorem 1.
+Algorithm 2: Grid reﬁnement.
+1: given a coarse grids of locations L(0) and angles
+A(0)
+l
+, ∀l
+2: set k = 0
+3: while (28) not satisﬁed do
+4:
+solve (17) with L = L(k) and Al = A(k)
+l
+5:
+extract locations ˆΠ = {π(k)
+q
+∈L(k) : ∥x(k)
+q
+∥2̸ = 0}
+6:
+extract angles ˆΘl = {ϑ(k)
+ml ∈A(k)
+l
+: y(k)
+ml̸ = 0}, ∀l
+7:
+increase k
+8:
+set L(k) = grid(ˆΠ, πres/2k)
+9:
+trim grid of locations L(k) through TOA assistance
+10:
+set
+A(k)
+l
+= grid(ˆΘl, ϑres/2k) ∪{[θl (π)]ϑres/2k : π ∈ˆΠ}
+11: end while
+Algorithm 3: DiSouL.
+1: set η using (11) for the desired PFA (e.g., PFA = 10−2)
+2: estimate TOAs {ˆτl}L
+l=1 using (10)
+3: create initial grid of locations L(0) and angles A(0)
+l
+, ∀l
+4: trim grid of locations through TOA assistance
+5: compute sampling times {tl}L
+l=1 using (14)
+6: obtain the snapshots of data by applying MF and
+sampling at instants {tl}L
+l=1 as in (8)
+7: estimate source location ˆp by Algorithm 1 where line 1
+is replaced with Algorithm 2
+w2 ∈[3, 4] yields the correct source location with sub-meter
+accuracy with probability 1 for a sufﬁcient high SNR.
+B. Localization Performance in Realistic Multipath Channel
+In this section, we perform Monte Carlo simulations in which
+DiSouL is compared to indirect and direct localization tech-
+niques:
+1) SR-LS [44], using TOA obtained by the time delay es-
+timator of Section III-B. SR-LS takes as inputs a set of
+ranges (related to the TOAs by the speed of light) obtained
+at distributed BSs and outputs the user position by solving
+a least-squares (LS) ﬁt. Because the maximum likelihood
+(ML) solution does not lead to a convex optimization
+problem, the LS solution is only an approximation.
+2) IV [10], using AOA information, obtained by applying
+beamforming [45] on the snapshots (8) and selecting the
+angle associated with the strongest peak. IV is a closed-
+form estimator that uses the AOAs measured at distributed
+BSs to triangulate the user position. In pure LOS envi-
+ronments, IV is consistent and asymptotically (with the
+number of BSs) unbiased.
+3) The Stansﬁeld estimator [8], using hybrid TOA-AOA. The
+Stansﬁeld estimator is sometimes described as an AOA-
+based only estimator. It uses coarse range estimates in
+order to approximate the AOA-based ML estimator (in
+absence of multipath) by a closed-form solution. Its for-
+mula is a reﬁned version of IV.
+4) DPD [18], a direct localization hybrid TOA-AOA tech-
+nique, operating directly on the received signals (1)–(3).
+DPD is essentially the ML estimator for a pure LOS
+environment when directly operating on the received sig-
+nals. Since the received signals depend on the user position
+through their AOAs and TOAs, DPD is the optimal hybrid
+technique in absence of multipath. In practice it requires
+computing a ﬁgure of merit for each grid location on the
+map, and the one yielding the largest value is the user’s po-
+sition estimate. Due to this two-dimensional search, it is,
+in general, more computationally expensive than indirect
+techniques.
+The AOAs for IV and the Stansﬁeld estimator are estimated by
+performing beamforming. More sophisticated AOA estimation
+techniques, such as MUSIC [46], are not applicable because
+they require multiple snapshots and break down in the presence
+of multiple correlated arrivals such as is the case of multipath.
+A high precision alternative to beamforming is ℓ1-SVD [29].
+However, we have observed in our numerical results that ℓ1-
+SVD performs similar to beamforming due to the fact that the
+AOA estimation errors are caused by peak ambiguities and not
+the lack of angular resolution. Thus, errors happen mostly when
+the LOS component is attenuated or blocked by obstacles.
+The source emits a Gaussian pulse s(t) at 7 GHz carrier
+frequency. We simulate the received signal at each antenna after
+down-conversion to baseband and sampling. An oversampling
+factor of 3 is used. It is a assumed a half power bandwidth of
+B = 30 MHz and 10 log10
+E
+N0 = 10 dB, where E = E |αl|2 is
+the energy of the received LOS component before sampling (2)
+(same energy for all l) and N0 is the noise spectral density at
+each antenna.
+Every data point in the ﬁgures is generated by running 1000
+Monte Carlo runs. The parameters randomized at each Monte
+Carlo run are the multipath channels, the noise and the position
+of the user. The parameters of the multipath channel (1) are
+generated according to the statistical indoor channel model in
+[15], the user position is drawn from the uniform distribution
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:36 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 9 ===
+GARCIA et al.: DIRECT LOCALIZATION FOR MASSIVE MIMO
+2483
+Fig. 4.
+Cumulative density function of the localization error for E/N0 =
+10 dB and B = 30 MHz.
+Fig. 5.
+Probability of sub-meter precision vs. E/N0 for B = 30 MHz.
+over the search area, and the noise is independent and identically
+Gaussian distributed. In regards to the indoor multipath channel,
+the parameters’ values are those of the Clyde building: cluster
+decay rate is 34ns, ray decay rate is 29ns, cluster arrival rate is
+1/17ns, ray arrival rate is 1/5ns and angular variance is 26◦. On
+the average, at every base station, 99.9% of the energy in the
+snapshot (8) is contained in 8 discrete multipath arrivals, which,
+in general, have closely spaced AOAs.
+Fig. 4 plots the cumulative density function of the localization
+error. Clearly, DiSouL achieves high precision accuracy with
+high probability, followed by DPD and the two-step approaches.
+To gain a more in-depth understanding, we will focus on the
+performance of the estimators at sub-meter errors, as a function
+of E/N0, bandwidth, number of antennas, channel properties,
+and calibration errors.
+In Fig. 5, the probability of sub-meter precision is shown
+as a function of E/N0. Note that DiSouL outperforms all
+other techniques for most E/N0 values. The TOA-based SR-
+LS performs poorly due to the positive bias of the TOA esti-
+mates. The AOA-based estimators can slightly improve on this
+performance, but are still worse than both direct localization
+approaches. As E/N0 increases, we sample the snapshots at
+the time of crossing a threshold rather than at the peak (see
+Section III-B), which reduces the amount of NLOS multipath
+Fig. 6.
+Probability of sub-meter precision vs. bandwidth for E/N0 = 10 dB.
+Fig. 7.
+Probability of sub-meter precision vs. number of antennas at each
+base station for E/N0 = 10 dB and B = 30 MHz. The diameter of all BSs
+UCAs grows linearly with the number of antennas according to the formula
+0.5π−1λSl. For 10 antennas the diameter is 7 cm and for 120 antennas is
+82 cm.
+components that are included into the snapshots, but the re-
+sulting ratio between LOS energy and noise is more or less
+independent of E/N0. Thus, the beneﬁt of increased E/N0 is
+that we detect the signals sooner, thus diminishing the number of
+NLOS components making into the snapshots. In the low SNR
+regime (less than −5 dB in the ﬁgure), DiSouL is outperformed
+by DPD because the threshold matched ﬁlter used for sampling
+the signals and estimating the TOA may fail to detect any signal.
+Fig. 6 plots the probability of sub-meter accuracy versus sig-
+nal bandwidth. All techniques beneﬁt from an increase of band-
+width. On the one hand, it is well known that a larger bandwidth
+results in better TOA estimates. On the other hand, since the
+pulse width is inversely proportional to the bandwidth, a larger
+bandwidth results in a shorter pulse. Hence, fewer NLOS mul-
+tipath components are included into the snapshots (8), thus,
+decreasing the risk of errors in the AOA estimation.
+Fig. 7 evaluates the probability of sub-meter accuracy versus
+the number of antennas in each base station. To keep the sep-
+aration between two neighboring antennas in each UCA equal
+to λ
+2 , the diameter of the array in BS l is increased with the
+number of antennas according to the formula
+λ
+2 sin(π/Sl ) . For ten
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:36 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 10 ===
+2484
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 65, NO. 10, MAY 15, 2017
+Fig. 8.
+Probability of sub-meter precision vs. ray mean arrival time for
+E/N0 = 10 dB and B = 30 MHz.
+or more antennas, the expression of the diameter is well approx-
+imated by λSl
+2π , meaning that the array size grows proportionally
+to the number of antennas Sl, which is directly related to the
+angular resolution. This improvement in angular resolution al-
+lows DiSouL to resolve more multipath arrivals more precisely,
+and consequently, improve its localization accuracy as observed
+in Fig. 7. Between 10 and 80 antennas, DiSouL’s probability
+of sub-meter accuracy improves linearly with the number of
+antennas, and then it saturates. A perfect probability of 1 is
+not achieved because the assumptions made by DiSouL (see
+Section IV-B) may not always hold true in the simulated mul-
+tipath channel. On the contrary, the probability of sub-meter
+accuracy for the indirect techniques remains approximately the
+same. In particular, because SR-LS is purely TOA-based, the
+improvement in angular resolution has no impact. The other
+two indirect techniques, IV and Stansﬁeld, improve very little
+because most of their errors are due to selection of the wrong
+path as LOS.
+In Fig. 8, we tune some of the channel parameters controlling
+the rate of arrivals. In the statistical multipath channel model of
+[15], the times of arrival of the NLOS components are modeled
+by two parameters: the cluster arrival rate λ and the ray arrival
+rate λ. The measured values for the Clyde building of these
+two parameters were 1/λ = 17 ns and 1/λ = 5 ns. In order to
+study the localization accuracy as a function of the ray arrival
+time, in Fig. 8, 1/λ is varied between 5 ps and 5 μs while
+λ =
+5
+17 λ. As the ray inter-arrival time increases, the multipath
+channel becomes less dense. For very high inter-arrival times,
+the channel can be considered almost pure LOS, and as expected
+all techniques improve their localization accuracy.
+In Fig. 9, we study the effect of calibration errors on the arrays,
+more speciﬁcally, the degradation in localization accuracy due
+to mismatches between the true and nominal gains/phases of the
+antennas. Based on the model in [47], the true array response ˜al
+is given by
+[˜al (θ)]a = gl,aeiφl , a [al (θ)]a ,
+(29)
+where al is the nominal (i.e., the array response used by DiSouL)
+array response (6), and gl,a ≥0 and φl,a represent the unknown
+gains and phases, respectively, of the antennas. The gains (in
+Fig. 9.
+Contour plot of DiSouL’s probability of sub-meter precision vs. gain
+and phase mismatches on the antennas of all BSs. SNR and bandwidth set to
+E/N0 = 10 dB and B = 30 MHz, respectively.
+TABLE I
+AVERAGE EXECUTION TIMES OF THE MULTIPLE LOCALIZATION TECHNIQUES
+dB) and phases of all antennas are drawn independently from
+Gaussian distributions, i.e. 20 log10 gl,a ∼N(¯gdB , σ2
+dB ) and
+φl,a ∼N(0, σ2
+φ), where ¯gdB = −ln(10)
+40
+σ2
+dB because it makes
+E gl,a = 1. When the nominal array response matches the true
+one (i.e., σdB = σφ = 0), the probability of sub-meter accuracy
+is approximately 0.8. Obviously, as larger gain and phase errors
+occur at all antennas, the performance of DiSouL degrades. The
+probability of sub-meter accuracy drops from 0.8 to 0.7 at 38◦
+phase standard deviation (in the absence of gain mismatches),
+or at 6 dB gain standard deviation (in the absence of phase
+mismatches). Thus, DiSouL is remarkably robust to calibration
+errors.
+Lastly, Table I plots the execution times of all techniques in
+a regular 3.6 GHz desktop computer. All stations are equipped
+with 70-antenna arrays. Due to the joint processing of the data
+at all base stations, the execution times of the direct techniques
+are much larger than those of the indirect techniques. In par-
+ticular, DiSouL is substantially more computationally intensive
+than the other techniques because it needs to solve a relatively
+large optimization problem multiple times. Instead of using an
+off-the-shelf solver [43], it may be worth developing/using an
+algorithm that exploits the sparsity of the signals.
+VII. CONCLUSIONS
+This paper tackled the problem of narrowband localization
+in the presence of multipath, through a direct localization ap-
+proach in a massive MIMO setting. We propose an original
+compressive sensing approach for the localization of sources
+emitting known narrow-band signals. Due to the high angular
+resolution of massive arrays, it is possible to estimate the AOAs
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:36 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 11 ===
+GARCIA et al.: DIRECT LOCALIZATION FOR MASSIVE MIMO
+2485
+of the multipath components. By jointly processing snapshots
+of several widely distributed arrays, we are able to estimate the
+source location precisely without explicitly estimating the LOS
+AOAs, and therefore, avoiding the challenging data associa-
+tion problem. The proposed technique, called DiSouL, achieves
+sub-meter localization with high probability in dense multipath
+environments with narrow-band signals. DiSouL requires no
+statistical channel knowledge except for the noise variance and
+therefore it is suitable for any multipath environment. Coarse
+TOA estimates at each array are used to reduce the execution
+time and enhance the localization accuracy. Numerical simu-
+lations have revealed that DiSouL is also remarkably robust
+to calibration errors. The large gain in accuracy comes with
+higher computational complexity compared to previous existing
+techniques.
+APPENDIX A
+PROOF OF LEMMA 1
+We aim to prove that under A2) and A3), if w >
+√
+L −1,
+then any estimated location is consistent with L paths (in the
+sense of Deﬁnition 1). Here the point is that it is more costly
+(in terms of the objective function) to explain an observation as
+L NLOS angles, than as one position with L associated LOS
+angles, and this is so exactly when w >
+√
+L −1.
+Let X and {y}L
+l=1 be a solution from (17) with cost C1, and
+let π1 be an estimated location (i.e.
+L
+l=1 |x1l|2̸ = 0). Then
+ˆzl can be expressed as
+ˆzl = x1lal (θl(π1)) + y1lal (ϑ1l) + el,
+l = 1, . . . , L, (30)
+where ϑ1l = θl(π1) and el is placeholder of all the terms in the
+reconstruction ˆzl that are not related to the location π1 or angle
+ϑ1l
+el =
+
+q>1
+xqlal (θl(πq)) +
+
+m>1
+ymlal (ϑml)
+l = 1, . . . , L.
+(31)
+Now, if ∥x1∥0 = L, then π1 is consistent with L paths in
+the sense of Deﬁnition 1 due to Assumption A3). Here, x1 =
+[x11 · · · x1L]T and ∥· ∥0 is the ℓ0-norm which counts the number
+of estimated elements. Hence, we must prove that w >
+√
+L −1
+implies ∥x1∥0 = L. The proof is by contradiction.
+Assume that
+∥x1∥0 < L.
+(32)
+This means that the position is consistent with less than L paths.
+Now we have another competing reconstruction X′, {y′}L
+l=1
+and
+ˆzl = (x1l + y1l)
+
+
+
+.=y ′
+1 l
+al (ϑ1l) + el
+for l = 1, . . . , L,
+(33)
+with x′
+1 = 0 and cost C2. Since X and {y}L
+l=1 are optimal,
+C1 ≤C2. Consider now the two assignments (30) and (33).
+Ignoring any common coefﬁcients, the cost of (30) is
+C1 = w
+
+
+
+
+L
+
+l=1
+|x1l|2 +
+L
+
+l=1
+|y1l|
+(34)
+whereas the cost of (33) is
+C2 =
+L
+
+l=1
+|y′
+1l| =
+L
+
+l=1
+|x1l + y1l| ≤
+L
+
+l=1
+|x1l| +
+L
+
+l=1
+|y1l| .
+(35)
+Since C1 ≤C2,
+w
+
+
+
+
+L
+
+l=1
+|x1l|2 ≤
+L
+
+l=1
+|x1l| .
+(36)
+Deﬁne the vector function 1x whose l-th entry is 1 if x1l̸ = 0,
+and 0 otherwise, and denote by ˜x the element-wise absolute
+value of x1, i.e. ˜xl = |x1l|. Then, ∥x1∥1 = 1T
+x ˜x, so from the
+Cauchy-Schwarz inequality, it follows immediately that
+∥x1∥1 ≤
+
+∥x1∥0∥x1∥2.
+(37)
+Putting everything together, we ﬁnd the following contradiction
+w∥x1∥2
+(36)
+≤∥x1∥1
+(37)
+≤
+
+∥x1∥0∥x1∥2
+(32)
+≤
+√
+L −1∥x1∥2
+(a)
+< w∥x1∥2,
+(38)
+where (a) is due to the fact that w >
+√
+L −1. Hence, w >
+√
+L −1 implies ∥x1∥0 = L.
+APPENDIX B
+PROOF OF LEMMA 2
+If no location were found, for each possible location just
+enough “mass” from each NLOS detected observation could
+be moved, in a certain way, over to LOS; the new cost cannot
+exceed the nominal cost if w <
+√
+L.
+The proof is by contradiction. Assume that w <
+√
+L and that
+there is no estimated location output by problem (17), so that
+xql = 0, ∀q, l. Then,
+ˆzl =
+
+m
+ymlal (ϑml)
+l = 1, . . . , L.
+(39)
+Assume without loss of generality that ϑ1l = θl(p). By
+Assumption A3), θl(p) ∈ˆΘl, so that y1l̸ = 0, which leads to
+the following decomposition
+ˆzl = y1lal (ϑ1l) +
+
+m>1
+ymlal (ϑ)
+l = 1, . . . , L.
+(40)
+We consider a competing decomposition X′, {y′}L
+l=1, for which
+x′
+ql̸ = 0 for some q, l. In particular, π1 = p; then
+ˆzl = x′
+1lal (θl(π1)) + (y1l −x′
+1l)
+
+
+
+.=y ′
+1 l
+al (ϑ1l)
++
+
+m>1
+y′
+mlal (ϑml)
+l = 1, . . . , L,
+(41)
+where y′
+ml = yml for all l and m > 1. Ignoring common
+terms, we can associate a cost C1 and C2 with (40) and (41),
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:36 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 12 ===
+2486
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 65, NO. 10, MAY 15, 2017
+respectively, where
+C1 =
+L
+
+l=1
+|y1l|
+(42)
+C2 = w
+
+
+
+
+L
+
+l=1
+|x′
+1l|2 +
+L
+
+l=1
+|y1l −x′
+1l| .
+(43)
+If we select x′
+1l such that |x′
+1l| = minl |y1l| and ∠x′
+1l = ∠y1l,
+and utilize the fact that C1 ≤C2, we have
+L
+
+l=1
+|y1l| ≤w
+√
+L min
+l
+|y1l| +
+L
+
+l=1
+|y1l| −L min
+l
+|y1l|,
+(44)
+implying that w
+√
+L −L ≥0, which contradicts w <
+√
+L.
+REFERENCES
+[1] T. S. Rappaport et al., “Millimeter wave mobile communications for 5G
+cellular: It will work!” IEEE Access, vol. 1, pp. 335–349, May 2013.
+[2] E. G. Larsson, O. Edfors, F. Tufvesson, and T. Marzetta, “Massive MIMO
+for next generation wireless systems,” IEEE Commun. Mag., vol. 52, no. 2,
+pp. 186–195, Feb. 2014.
+[3] W. H. Chin, Z. Fan, and R. Haines, “Emerging technologies and research
+challenges for 5G wireless networks,” IEEE Wireless Commun., vol. 21,
+no. 2, pp. 106–112, Apr. 2014.
+[4] A. Guerra, F. Guidi, and D. Dardari, “Position and orientation error bound
+for wideband massive antenna arrays,” in Proc. IEEE Int. Conf. Commun.
+Workshop, 2015, pp. 853–858.
+[5] V. Savic and E. G. Larsson, “Fingerprinting-based positioning in dis-
+tributed massive MIMO systems,” in Proc. IEEE 82nd Veh. Technol. Conf.,
+2015, pp. 1–5.
+[6] F. Guidi, A. Guerra, and D. Dardari, “Personal mobile radars with
+millimeter-wave massive arrays for indoor mapping,” IEEE Trans. Mobile
+Comput., vol. 15, no. 6, pp. 1471–1484, Jun. 2016.
+[7] F. Guidi, A. Guerra, and D. Dardari, “Millimeter-wave massive arrays
+for indoor SLAM,” in Proc. IEEE Int. Conf. Commun. Workshops, 2014,
+pp. 114–120.
+[8] M. Gavish and A. J. Weiss, “Performance analysis of bearing-only target
+location algorithms,” IEEE Trans. Aerosp. Electron. Syst., vol. 28, no. 3,
+pp. 817–828, Jul. 1992.
+[9] L. M. Kaplan, Q. Le, and P. Moln´ar, “Maximum likelihood methods
+for bearings-only target localization,” in Proc. IEEE Int. Conf. Acoust.,
+Speech, Signal Process., vol. 5, 2001, pp. 3001–3004.
+[10] K. Do˘ganc¸ay, “Passive emitter localization using weighted instrumental
+variables,” Signal Process., vol. 84, no. 3, pp. 487–497, 2003.
+[11] S. Azzouzi, M. Cremer, U. Dettmar, R. Kronberger, and T. Knie, “New
+measurement results for the localization of UHF RFID transponders using
+an angle of arrival (AOA) approach,” in Proc. IEEE Int. Conf. RFID, 2011,
+pp. 91–97.
+[12] A. Hu, T. Lv, H. Gao, Z. Zhang, and S. Yang, “An ESPRIT-based approach
+for 2-D localization of incoherently distributed sources in massive MIMO
+systems,” IEEE J. Sel. Topics Signal Process., vol. 8, no. 5, pp. 996–1011,
+Oct. 2014.
+[13] T. Lv, F. Tan, H. Gao, and S. Yang, “A beamspace approach for 2-D lo-
+calization of incoherently distributed sources in massive MIMO systems,”
+Signal Process., vol. 121, pp. 30–45, 2016.
+[14] R. Klukas and M. Fattouche, “Line-of-sight angle of arrival estimation in
+the outdoor multipath environment,” IEEE Trans. Veh. Technol., vol. 47,
+no. 1, pp. 342–351, Feb. 1998.
+[15] Q. H. Spencer, B. D. Jeffs, M. A. Jensen, and A. L. Swindlehurst, “Mod-
+eling the statistical time and angle of arrival characteristics of an in-
+door multipath channel,” IEEE J. Sel. Areas Commun., vol. 18, no. 3,
+pp. 347–360, Mar. 2000.
+[16] S. Sen, J. Lee, K.-H. Kim, and P. Congdon, “Avoiding multipath to revive
+inbuilding wiﬁlocalization,” in Proc. 11th Annu. Int. Conf. Mobile Syst.,
+Appl. Serv., 2013, pp. 249–262.
+[17] K. R. Pattipati, S. Deb, Y. Bar-Shalom, and R. B. Washburn Jr., “A new
+relaxation algorithm and passive sensor data association,” IEEE Trans.
+Autom. Control, vol. 37, no. 2, pp. 198–213, Feb. 1992.
+[18] A. J. Weiss, “Direct position determination of narrowband radio frequency
+transmitters,” IEEE Signal Process. Lett., vol. 11, no. 5, pp. 513–516,
+May 2004.
+[19] M. Wax, T.-J. Shan, and T. Kailath, “Location and the spectral density
+estimation of multiple sources,” DTIC, Fort Belvoir, VA, USA, Tech.
+Rep. AFOSR-TR-83-0323, 1982.
+[20] M. Wax and T. Kailath, “Optimum localization of multiple sources by
+passive arrays,” IEEE Trans. Acoust., Speech, Signal Process., vol. 31,
+no. 5, pp. 1210–1217, Oct. 1983.
+[21] M. Wax and T. Kailath, “Decentralized processing in sensor arrays,” IEEE
+Trans. Acoust., Speech, Signal Process., vol. 33, no. 5, pp. 1123–1129,
+Oct. 1985.
+[22] A. J. Weiss and A. Amar, “Direct position determination of multiple radio
+signals,” EURASIP J. Appl. Signal Process., vol. 2005, no. 1, pp. 37–49,
+2005.
+[23] J. C. Chen, R. E. Hudson, and K. Yao, “Maximum-likelihood source
+localization and unknown sensor location estimation for wideband sig-
+nals in the near-ﬁeld,” IEEE Trans. Signal Process., vol. 50, no. 8,
+pp. 1843–1854, 2002.
+[24] O. Bialer, D. Raphaeli, and A. J. Weiss, “Maximum-likelihood direct
+position estimation in dense multipath,” IEEE Trans. Veh. Technol., vol. 62,
+no. 5, pp. 2069–2079, Aug. 2013.
+[25] “C-RAN: The road towards green RAN,” White Paper, China Mobile, Oct.
+2011.
+[26] J. Wu, S. Rangan, and H. Zhang, Green Communications: Theoretical
+Fundamentals, Algorithms and Applications. Boca Raton, FL, USA: CRC
+Press, 2012.
+[27] N. Garcia, A. M. Haimovich, J. A. Dabin, M. Coulon, and M. Lops,
+“Direct localization of emitters using widely spaced sensors in multipath
+environments,” in Proc. IEEE 48th Asilomar Conf. Signals, Syst. Comput.,
+2014, pp. 695–700.
+[28] D. Dardari, C.-C. Chong, and M. Z. Win, “Threshold-based time-of-arrival
+estimators in UWB dense multipath channels,” IEEE Trans. Commun.,
+vol. 56, no. 8, pp. 1366–1378, Aug. 2008.
+[29] D. Malioutov, M. C¸ etin, and A. S. Willsky, “A sparse signal reconstruction
+perspective for source localization with sensor arrays,” IEEE Trans. Signal
+Process., vol. 53, no. 8, pp. 3010–3022, Aug. 2005.
+[30] F. Rusek et al., “Scaling up MIMO: Opportunities and challenges with
+very large arrays,” IEEE Signal Process. Mag., vol. 30, no. 1, pp. 40–60,
+Jan. 2013.
+[31] J. Vieira et al., “A ﬂexible 100-antenna testbed for massive MIMO,” in
+Proc. IEEE Globecom Workshops, 2014, pp. 287–293.
+[32] I. Cespedes, Y. Huang, J. Ophir, and S. Spratt, “Methods for estimation
+of subsample time delays of digitized echo signals,” Ultrasonic Imag.,
+vol. 17, no. 2, pp. 142–171, 1995.
+[33] J. A. Tropp, “Algorithms for simultaneous sparse approximation. Part II:
+Convex relaxation,” Signal Process., vol. 86, no. 3, pp. 589–602, 2006.
+[34] S. T. Smith, “Statistical resolution limits and the complexiﬁed Cram´er-
+Rao bound,” IEEE Trans. Signal Process., vol. 53, no. 5, pp. 1597–1609,
+May 2005.
+[35] E. J. Cand`es and C. Fernandez-Granda, “Towards a mathematical theory of
+super-resolution,” Commun. Pure Appl. Math., vol. 67, no. 6, pp. 906–956,
+2014.
+[36] J.-J. Fuchs, “Multipath time-delay detection and estimation,” IEEE Trans.
+Signal Process., vol. 47, no. 1, pp. 237–243, Jan. 1999.
+[37] L. Jacob, G. Obozinski, and J.-P. Vert, “Group lasso with overlap and graph
+lasso,” in Proc. 26th Annu. Int. Conf. Mach. Learn., 2009, pp. 433–440.
+[38] M. S. Lobo, L. Vandenberghe, S. Boyd, and H. Lebret, “Applications of
+second-order cone programming,” Linear Algebra Appl., vol. 284, no. 1,
+pp. 193–228, 1998.
+[39] M. M. Hyder and K. Mahata, “Direction-of-arrival estimation using a
+mixed norm approximation,” IEEE Trans. Signal Process., vol. 58, no. 9,
+pp. 4646–4655, Sep. 2010.
+[40] E. Schechter, Handbook of Analysis and Its Foundations. New York, NY,
+USA: Academic Press, 1996.
+[41] J.-J. Fuchs, “On the application of the global matched ﬁlter to DOA
+estimation with uniform circular arrays,” IEEE Trans. Signal Process.,
+vol. 49, no. 4, pp. 702–709, Apr. 2001.
+[42] Standard Test Procedures for Antennas, IEEE Standard 149–1979.
+[43] MOSEK ApS, “The MOSEK optimization toolbox for MATLAB man-
+ual, version 7.1 (revision 51).” [Online]. Available: http://mosek.com.
+Accessed on: Mar. 20, 2016.
+[44] A. Beck, P. Stoica, and J. Li, “Exact and approximate solutions of source
+localization problems,” IEEE Trans. Signal Process., vol. 56, no. 5,
+pp. 1770–1778, May 2008.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:36 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 13 ===
+GARCIA et al.: DIRECT LOCALIZATION FOR MASSIVE MIMO
+2487
+[45] L. C. Godara, “Application of antenna arrays to mobile communications.
+II. Beam-forming and direction-of-arrival considerations,” Proc. IEEE,
+vol. 85, no. 8, pp. 1195–1245, Aug. 1997.
+[46] R. O. Schmidt, “Multiple emitter location and signal parameter esti-
+mation,” IEEE Trans. Antennas Propag., vol. 34, no. 3, pp. 276–280,
+Mar. 1986.
+[47] B. Friedlander, “A sensitivity analysis of the MUSIC algorithm,” IEEE
+Trans. Acoust., Speech, Signal Process., vol. 38, no. 10, pp. 1740–1751,
+Oct. 1990.
+Nil Garcia (S’14–M’16) received the Engineering
+degree in telecommunications from the Polytechnic
+University of Catalonia, Barcelona, Spain, in 2008,
+and the double Ph.D. degree in electrical engineering
+from New Jersey Institute of Technology, Newark,
+NJ, USA, and from the National Polytechnic Insti-
+tute of Toulouse, Toulouse, France, in 2015.
+He is currently a Postdoctoral Researcher of com-
+munication systems in the Department of Signals
+and Systems, Chalmers University of Technology,
+Gothenburg, Sweden. In 2009, he was an Engineer
+in the Centre National d’´Etudes Spatiales (CNES). In 2008 and 2009, he had
+internships in CNES and NASA. His research interests include the areas of
+localization, intelligent transportation systems, and 5G.
+Henk Wymeersch (S’01–M’05) received the Ph.D.
+degree in electrical engineering/applied sciences
+from Ghent University, Ghent, Belgium, in 2005.
+He is currently a Professor of communication
+systems in the Department of Signals and Systems,
+Chalmers University of Technology, Gothenburg,
+Sweden. Prior to joining Chalmers, he was a Post-
+doctoral Researcher from 2005 until 2009 in the
+Laboratory for Information and Decision Systems,
+Massachusetts Institute of Technology. His current
+research interests include cooperative systems and
+intelligent transportation.
+Prof. Wymeersch served as an Associate Editor for IEEE COMMUNICATION
+LETTERS (2009–2013), IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS
+(since 2013), and IEEE TRANSACTIONS ON COMMUNICATIONS (since 2016).
+Erik G. Larsson (S’82–M’87–F’13) received the
+Ph.D.degree from Uppsala University,Uppsala,Swe-
+den, in 2002.
+He is currently a Professor of communica-
+tion systems at Link¨oping University, Link¨oping,
+Sweden. He was with the Royal Institute of Technol-
+ogy (KTH), Stockholm, Sweden; the University of
+Florida, Gainesville, FL, USA, the George Washing-
+ton University, Washington, DC, USA, and Ericsson
+Research, Stockholm. In 2015, he was a Visiting Fel-
+low at Princeton University, USA, for four months.
+He has coauthored some 130 journal papers on these topics, he is a coauthor
+of the two Cambridge University Press textbooks Space-Time Block Coding for
+Wireless Communications (2003) and Fundamentals of Massive MIMO (2016).
+He is a coinventor on 16 issued and many pending patents on wireless tech-
+nology. His main professional interests include within the areas of wireless
+communications and signal processing.
+Dr.
+Larssonwas
+an
+Associate
+Editor
+for,
+among
+others,
+the
+IEEE TRANSACTIONS
+ON COMMUNICATIONS (2010–2014) and the IEEE
+TRANSACTIONS ON SIGNAL PROCESSING (2006–2010). From 2015 to 2016, he
+served as the Chair of the IEEE Signal Processing Society SPCOM technical
+committee, and in 2017 he is the Past Chair of this committee. From 2014 to
+2015, he served as the Chair of the steering committee for the IEEE WIRELESS
+COMMUNICATIONS LETTERS. He was the General Chair of the Asilomar Confer-
+ence on Signals, Systems and Computers in 2015, its Technical Chair in 2012.
+He is a Member of the IEEE Signal Processing Society Awards Board during
+2017–2019. He received the IEEE Signal Processing Magazine Best Column
+Award twice, in 2012 and 2014, and the IEEE ComSoc Stephen O. Rice Prize
+in Communications Theory in 2015.
+Alexander M. Haimovich (S’82–M’87–F’13) received the B.Sc. degree in
+electrical engineering from the Technion—Israel Institute of Technology, Haifa,
+Israel, in 1977, the M.Sc. degree in electrical engineering from Drexel Univer-
+sity, Philadelphia, PA, USA, in 1983, and the Ph.D. degree in systems from the
+University of Pennsylvania, Philadelphia, PA, USA, in 1989.
+From 1983 to 1990, he was a Design Engineer and a Staff Consultant at AEL
+Industries. He served as a Chief Scientist at JJM Systems from 1990 until 1992.
+Since 1992, he has been on the faculty at New Jersey Institute of Technology,
+where he currently serves as the Ying Wu Chair and Distinguished Professor in
+the Department of Electrical and Computer Engineering. He also serves as the
+Director of the Elisha Bar-Ness Center for Wireless Information Processing. His
+research interests include MIMO radar, active and passive localization, signal
+intelligence, sensor networks, and wireless networks.
+Martial Coulon received the Ing´enieur degree in
+computer science and applied mathematics from EN-
+SEEIHT (Toulouse Engineering School), Toulouse,
+France, and the M.Sc. degree in signal processing
+from the National Polytechnic Institute of Toulouse
+(INPT), Toulouse, both in 1996. He received the
+Ph.D. degree from INPT, in 1999.
+Since 2013, he has been a Full Professor in the
+Department of Communications Systems, University
+of Toulouse, (INPT-ENSEEIHT), and a member of
+the IRIT laboratory (CNRS). His research activities
+are centred around statistical signal processing and communications systems,
+with a particular interest to change-point detection, Bayesian inference, spread
+spectrum systems, multiuser detection, and cognitive radio.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:36 UTC from IEEE Xplore.  Restrictions apply. 

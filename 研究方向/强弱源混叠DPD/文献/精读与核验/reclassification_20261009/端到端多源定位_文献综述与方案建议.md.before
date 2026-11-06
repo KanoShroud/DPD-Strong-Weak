@@ -1,0 +1,559 @@
+# 多源 DPD／TDOA／被动定位：文献对照与可验证的创新方案
+
+> **当前主线：在少量同步单天线站点的短时混合IQ中，保留强弱重叠源的有效位置候选，通过联合连续精修改善弱源恢复与计算成本。** R6支持当前搜索存在损失；相似方法是基线和方法来源。贡献可以是相同可靠性下更省计算，或相同预算下更少漏弱源，不要求全局最优证明。
+
+## 1. 研究范围与阅读方式
+
+本文面向少量同步单天线站点、未知发射波形的多源RF被动定位，先研究已知两源的候选发现与连续求解，再扩展源数、频谱和位置对应。文献整理截至2026-10-09；前期完成Zotero相关分类及引用链初筛，本次结合新增离网、连续求解和快速搜索全文更新。
+
+编号表共101项（100篇论文、1项专利），原R01—R85保持不变，R86—R101为新增16篇正式PDF全文评估。R66仍为摘要，R57保留历史作者稿阅读记录、当前库内无完整PDF；R70已核读作者接受稿正文。其他阅读版本及外置补充材料是否取得逐项标明，不能把“有PDF”直接记成“全部附件均已读”。另保留10篇未完成全文评估的未编号延伸文献。
+
+逐篇证据见[文献精读结果.csv](文献精读结果.csv)，[原37篇详版](文献精读结果_详版.csv)保留历史笔记。效果栏转述作者结果，不代表本项目已复现。
+
+### 1.1 如何判断一篇论文是否适合比较
+
+核心文献按“候选发现／连续精修／联合更新／计算成本”组织，同时保留接收配置、实际输入和迁移条件。该流程不是方法分类全集；还需区分联合似然、贝叶斯联合估计、协方差拟合、贪心消除、区域覆盖及整图加速，避免只沿NOMP引用链选择对照。其他文献按用途压缩或归档：
+
+- **直接基线候选**：观测模型接近，仍须核对源数、信道与计算预算。
+- **条件适用**：满足原有条件时可比较，例如可分循环频率、单源或运动历史。
+- **需重推适配**：思想可借鉴，但观测接口或可辨条件需要重新推导。
+- **仅机制**：主要借鉴方法设计，原论文的精度不用于同条件排名。
+
+研究用途与适用等级分开标记，同一篇文献可有多个用途：
+
+| 研究用途 | 阅读时回答的问题 |
+| --- | --- |
+| 任务近邻 | 已有任务或联合输出与我们接近到什么程度，还缺哪项实际能力 |
+| 性能对照 | 哪些方法适合原样使用或做合理适配，作为系统或模块比较的代表 |
+| 方法来源 | 哪些表示、物理接口、训练或关联设计可以借鉴 |
+| 场景扩展 | 增加运动、传播失配、局部污染等条件时，哪些工作值得继续使用 |
+
+三级精读等级表示研究优先级，不表示阅读完成度；摘要近邻也可能需要优先补全文。逐篇用途见第2章与CSV的“研究用途”列。用途允许交叉；“性能对照”包含条件适用和机制适配候选，具体选择见§6，不等于首轮全部实现。
+
+K表示信源数；DPD直接利用接收信号估计位置；TDOA是到达时间差；DOA只估方向；RSS是接收功率。这些量及相干IQ不是等价输入。标题链接指向原论文或专利，最后一列保留全文版本、证据位置和可用的Zotero检索key。R53为出版商完整网页，R55补读在线授权文本，R56已核读正式期刊版；有全文不等于库内一定有PDF。
+
+### 1.2 阵列方法能否迁移到多站单天线
+
+声学与RF标签不能代替模型比较。先检查方法真正使用的信息：单麦的跨站时差通常可借鉴，多阵元角度、语音先验、已知导频和运动历史则需要单独处理。实值声音的半谱公式迁移到复IQ时，应重写双边频谱和幅相关系；R59阵列部分本身使用光速，不能笼统归为声学方法。
+
+判断的第一步，是检查位置变量出现在模型的哪一部分：
+
+$$
+\mathbf x_l(f)=\sum_k g_{lk}\,\mathbf a_l(\theta_{lk})\,S_k(f)e^{-j2\pi f\tau_l(\mathbf p_k)}+\mathbf n_l(f).
+$$
+
+令每站阵元数为1，站内角度响应可能变为常数，但跨站时延项不一定消失。**只依赖角度响应的方法不能原样迁移；保留跨站延迟的方法可以继续推导，但仍需验证可辨性。** 还应检查跨站相关是否被丢弃、同步与带宽是否足够、逐频任意增益是否吸收了时延，以及快拍、秩和源数条件是否成立。不能把“公式还含位置”当作“多个源一定能分开”。
+
+“单个阵列”不一定是每站多天线。R52把空间分离的全向标量传感器组成网络，其球面时延模型可与多个单天线站点对应；全网的near-field也不等于单根RF天线的反应近场。R51/R52的AP机制应与仅靠站内角度响应的方法分开判断。
+
+迁移难度按实际模型判断。有的方法需要重建物理接口，有的只需替换导向模型、调整输入并重新训练。二者都可以提供有用的适配，但应如实说明改动规模及作用。
+
+### 1.3 本研究采用的创新判断标准
+
+按“具体场景—关键假设—迁移障碍—针对性改动—验证结果”判断贡献。场景适配、任务扩展和系统整合都可以成立，不要求每个部件或定位原理全新。应用需求只能说明问题值得研究；还需说明针对性适配怎样改善明确场景下的可靠性、精度或成本。已有方法能工作，不等于这些取舍已经没有改善空间。
+
+| 判断项 | 需要说明什么 |
+| --- | --- |
+| 现实需求 | 为什么需要少量单天线站点、有限观测和逐源频谱—位置对应 |
+| 已有能力 | 最接近文献已经完成什么，在我们的观测和任务条件下还缺什么 |
+| 适配或扩展 | 哪些改动保留时延信息、改善源身份关联，或增加有实际用途的输出 |
+| 实际收益 | 联合质量、弱源可靠性、观测需求或在线成本中，至少有一项值得采用的收益 |
+
+场景名称和输出头数量本身不说明价值。新增输出若解决了实际缺失，并与原任务可靠对应，可以构成任务扩展；已有思想通过必要适配解决新场景问题，也可以形成贡献。相似文献用于确定可借鉴内容和比较对象，不据此直接否定路线。具体贡献以验证结果为准。
+
+### 1.4 迁移判断与证据强度
+
+研究用途说明“这篇文献怎样帮助我们”，迁移判断说明“在候选场景中怎样使用”。二者分开记录。
+
+| 迁移判断 | 含义 |
+| --- | --- |
+| 可直接使用 | 定位核心或指定组件的模型适用，主要需校准参数；不表示已完成全部联合任务 |
+| 常规适配即可 | 替换导向模型、调整输入、重新训练或接入常规前后端，可先建立合理代表 |
+| 需针对性改造 | 原方法依赖的信息缺失，或关键假设确实不成立，需要改变表示、统计量或求解方式 |
+| 尚待核验 | 缺少模型推导或同条件实验，当前不能确定常规适配是否足够 |
+
+判断范围和条件见逐篇说明。原文没有测试某个条件，不等于方法不能迁移；已有传播模型过于简化，也不等于网络在新模型上重训后仍无效。模型适用与实际质量达标分别核验。CSV的“迁移判断”“关键障碍与依据”对应本候选场景，文献原始事实仍以模型、实验及证据定位列为准。
+
+判断时区分四层证据：现实需求说明问题值得做；原文未验证说明适用性尚待核验；普通适配不足需要同条件实验；针对性改动的收益通过同等可靠性或同等预算比较确认。不要求已有方法完全失效，也不要求所有部件全新。
+
+## 2. 文献表与阅读顺序
+
+编号用于稳定引用，顺序表示当前阅读优先级。核心32项保留详细对照；按需借鉴53项压缩为模型、方法与用途；拓展16项保留题录和启用条件。各表“顺序”与CSV一致，全文笔记均保留在CSV。分级不等于论文质量，也不等于必须逐篇复现。
+
+### 2.1 核心文献：32项
+
+#### 2.1.1 候选发现
+
+| 顺序／编号、作者、标题 | 期刊／会议 | 接收配置与输入 | 场景、条件与问题 | 核心方法 | 作者报告的效果与边界 | 对当前研究的启示 | 全文与证据位置 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 5 · R87 · Aliabadi、Chen等 · [High dynamic range gridless DOA estimation for s<br>ingle-snapshot sparse automotive MIMO radar](https://doi.org/10.1109/GeMiC71240.2026.11516433) | 2026 17th German Microwave Confe<br>rence (GeMiC)，2026 | 汽车稀疏MIMO雷达；单个距离—多普勒单<br>元；单快拍强弱目标 | 2352个虚拟阵元；每个方向分量一个复系数；稀疏<br>阵列导向响应；GLRT估计；BIC判断分量拆分 | 几何匹配粗搜索；Gauss–Newton/LM连续更新；RELAX<br>循环精修及联合幅度重估；BIC拆分合并候选 | 给定大型阵列条件下恢复强弱目标；明确把强源离网<br>残余与弱源遮蔽联系起来；大型阵列相干增益不能移<br>植为四站性能；基线未覆盖充分NOMP/RELAX；拆分实<br>现细节有限 | 强源误差、弱源遮蔽、候选拆分与联合精修已有直接<br>先例；比较适配后的可靠性—成本收益 | 正式PDF全文4页；CH2UQCV7；§<br>II-D、§III-B；PDF第3页Fig.2<br>–3 |
+| 11 · R72 · Mamandipoor、Ramasamy、Madhow · [Newtonized Orthogonal Matching Pursuit:<br>Frequency Estimation over the Continuum](https://doi.org/10.1109/TSP.2016.2580523) | IEEE Transactions on Signal<br>Processing，2016 | 复正弦序列；可选已知压缩测量；复数<br>据与连续参数原子 | 带噪复正弦混合的连续频率估计，源数未知。 粗网格失配和贪<br>心选择累积误差 | 过采样网格发现新分量，Newton连续精修，循环修正已有分量，再联合<br>最小二乘重估幅度。 | 作者实验中精修与反馈减少网格误差和早期决策累积；初始化未靠<br>近真峰时，局部精修仍有困难。 | 建立普通循环NOMP参照，区分网格量化误差和候选吸引域遗漏；适配<br>后的收益不能全归为新机制。 | 正式期刊PDF16页正文及附录已读<br>；UY79JRU2；§III算法；§IV过采<br>样与局部精修；§VI-A、VI-C初始<br>化和早期决策；§VI动态范围；附<br>录I–II。 |
+| 12 · R74 · Shah、Semper、Khan等 · [Newtonized Orthogonal Matching Pursuit for<br>High-Resolution Target Detection in Sparse<br>OFDM ISAC Systems](https://doi.org/10.1109/TVT.2025.3573165) | IEEE Transactions on Vehicular<br>Technology，2025 | 单天线双基地雷达；已知OFDM参考形成<br>的通道估计 | 稀疏OFDM双基地感知，强车辆和弱行人回波检测。 强回波离网<br>残余遮挡弱回波 | 二维粗搜索发现路径，局部及多路径联合Newton精修，联合幅度重估；<br>采用Hessian近似降低成本。 | 其Fig.3条件下完整恢复所支持的强弱比约23 dB，超过所比OMP等<br>方法；更大功率差仍会失败。该数值不是本项目性能。 | 直接说明相似方法仍有条件边界；借鉴强弱恢复与过采样消融，比较<br>适配后成本和召回。 | TVT正式期刊PDF15页正文及附录已<br>读；2025年正式版；YLYHM96E；§<br>II模型；§III联合Newton；§IV<br>Fig.3、Fig.8；§V实测；Appendix<br>A。 |
+| 13 · R94 · Wu、Tu等 · [Efficient 2-D direction of arrival estimation us<br>ing adaptive grid integrated dictionaries](https://doi.org/10.1109/JSEN.2025.3564909) | IEEE Sensors Journal，2025 | 二维DOA；区域字典、未知源数与单快拍 | 积分阵列响应代表角度区域，再自适应缩小区域；<br>以功率与噪声估计筛选 | 区域积分字典、噪声门限筛选、ADMM细化和梯度字典学<br>习 | 缓解单格点字典失配，减少初始网格规模；含单快拍<br>示例；区域门限仍可能删弱源；式(9)维度/逆及跨快<br>拍约束需核对，不可照抄 | 为候选覆盖提供独立于NOMP的区域思路；比较区域响<br>应与粗网格Top-K，而非宣称必保弱峰 | 正式PDF全文10页；4RZQF2WU；<br>区域字典；式(9)、(14)；ADMM<br>和自适应更新；数值实验 |
+| 18 · R60 · Nunes 等 · [A Steered-Response Power Algorithm Employing<br>Hierarchical Search for Acoustic Source<br>Localization Using Microphone Arrays](https://doi.org/10.1109/TSP.2014.2336636) | IEEE Transactions on Signal<br>Processing，2014，62(19): 5171<br>–5183 | 声学标量阵列；空间位置搜索；<br>GCC-PHAT与位置区域对应的时差区间 | 单声源位置搜索，以区域而非单一格点汇总SRP信息， 减少粗网<br>格遗漏与精细搜索成本。 SRP逐点网格计算成本高，粗网格又可<br>能漏掉高评分位置。 | 构造区域响应并实施层级／分支定界搜索；在所列无混响条件下讨论<br>最优区域保留。 | 作者在16麦克风实测中报告相近搜索运算预算下较低位置误差；无<br>混响模型证明保留最优区域。正文明确指出混响下定理1/2不再成<br>立。 | 区域搜索方法来源；几何覆盖可借鉴，保证范围按原目标和新推导分<br>别报告。 | 正式期刊全文13页； 6V5XUY5T；<br>定理1–3及附录； 关键公式已核<br>对 |
+| 19 · R75 · Nateev、Dvorkind、Cohen · [Direct Positioning With Efficient Search for a<br>Passive Multistatic Radar](https://doi.org/10.1109/RadarConf2663773.2026.11675331) | undefined，2026 | 多照射源、一个参考／监视接收机；<br>CAF时延—多普勒图 | 多个已知位置的照射源、一个接收机和多个运动反射目标。 高<br>维细网格搜索过重、粗网格漏覆盖 | 先把CAF响应适度展宽，以粗体素覆盖搜索区域，再对保留体素细分。 | 作者示例中理论候选规模从约1.9×10^11降到1.5×10^6；覆盖推导<br>不等于弱目标检测保证或完整耗时。 | 研究候选保留时必须对照的机制来源；核对宽化后的弱峰损失与投影<br>分母。 | 正式会议PDF6页正文已读；<br>2HLGQAX9；§II CAF模型；§III式(<br>9)覆盖；§IV式(22)峰值损失与数<br>值例。 |
+| 32 · R66 · Dang、Zhu · [An iteratively reweighted steered response<br>power approach to multisource localization<br>using a distributed microphone network](https://doi.org/10.1121/10.0024764) | The Journal of the Acoustical<br>Society of America，2024，155(<br>2):1182– 1197 | 分布式麦克风网络；节点结构待全文<br>核对；逐轮加权的SRP与时频观测 | 短分析区间内强源主导，弱源可能无法形成明显空间峰。 多源<br>定位中强弱不均衡与部分源漏检。 | 摘要明确以相干性和SNR选时频单元，找到主导源后利用通道间相位差<br>删除其贡献单元，再定位剩余源。 | 仅保留摘要／书目层面的方向判断；性能数值与条件尚未全文核<br>实。 | 逐轮重加权与弱源恢复的重要近邻；现仅摘要，补足全文前保留优先<br>核验，不据此推断不可迁移。 | 仅摘要，未全文核读； MXPVSZ9G<br>； 库内无完整PDF |
+
+#### 2.1.2 连续精修
+
+| 顺序／编号、作者、标题 | 期刊／会议 | 接收配置与输入 | 场景、条件与问题 | 核心方法 | 作者报告的效果与边界 | 对当前研究的启示 | 全文与证据位置 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 · R52 · Chen、Hudson、Yao · [Maximum-likelihood source localization and<br>unknown sensor location estimation for<br>wideband signals in the near-field](https://doi.org/10.1109/TSP.2002.800420) | IEEE TSP，2002，50(8)，1843–<br>1854 | 分布式全向标量传感器；宽带共同波形<br>＋球面传播时延 | 随机分布的全向标量传感器接收多个近场宽带源；实验为声学<br>，也研究未知传感器位置校准。 已知，且源数小于传感器数。<br>宽带多源位置/波形联合估计及传感器位置校准 | 逐频伪逆估计未知源谱，消元后最大化联合投影能量；双源先强后弱<br>初始化，再固定其他源更新一个位置。单源未知增益可用变换数据矩<br>阵的最大奇异值处理。 | 声学采样率1 kHz，含200样本观测例；五传感器示例及不同传感<br>器数比较。双源例为等功率相干源，比较统一增益及实际空间损<br>耗下的增益失配。 AML在给定声学实验中优于两步LS和宽带 MUSIC<br>；双源AP少量迭代收敛。多源情况下将非均匀增益当作均匀增益<br>会产生定位偏差。 | 当前盲宽带物理参照。充分AP／AML与联合源谱重估建立可达性能，<br>再比较候选保留机制的成本与收益。 | 12页正式PDF全文； Zotero<br>YX23XVTW； 第1844–1846页式(1)<br>–(13)，第 1851页图9–10，附录<br>B |
+| 2 · R51 · Ziskind、Wax · [Maximum likelihood localization of multiple<br>sources by alternating projection](https://doi.org/10.1109/29.7543) | IEEE TASSP，1988，36(10)，<br>1553–1560 | 单个阵列／标量通道；复快拍＋已知导<br>向响应 | 无源传感器阵列接收多个未知窄带源；重点演示远场方向估计<br>，也讨论相干源和少快拍。 已知，且源数小于传感器数；未知<br>源数另引其他文献。 降低多源ML高维搜索成本，处理少快拍和<br>相干源 | 先用伪逆消去未知波形，再最大化观测在候选信号子空间上的投影能<br>量。初始化逐个加入源；更新某源时，将候选导向向量对其余源投影<br>并归一化，再搜索该源参数。 | 前三阵元例为两个等功率源，比较SNR、快拍数、角间隔和相干性<br>；另有七阵元四源例。主要结果由100次Monte Carlo得到。 给定<br>实验中ML/AP较MUSIC在低中SNR、少快拍和相干源下更好； 通常少<br>量迭代收敛。原文明确不保证一般情况下收敛到全局最大值。 | 投影消元和循环位置更新的基础来源；连续精修沿用已有优化思想，<br>新收益需来自场景对应的具体处理。 | 8页正式PDF全文； Zotero<br>IJ7MDHV3； 第1555–1556页式(9)<br>–(23)，§V–VI |
+| 3 · R07 · Wang 等 · [TDOA-Based Direct Position Determination<br>Method with Parametric Dictionary Learning](https://doi.org/10.1109/JSEN.2026.3693237) | IEEE Sensors Journal，2026 | 多站单天线；跨站TDOA；频域混合信号 | 四个静止单天线站、同步 LOS 观测；未知信道增益和离网位置<br>；算法输入源数 N 网格不准、信道参数未知导致定位偏差 | 稀疏贝叶斯学习联合估计位置—频率系数、信道参数和网格偏移 | 仿真报告相对所选稀疏方法改善精度与收敛；未由我们复现 | 直接单天线离网稀疏近邻；优先建立小规模适配，比较候选覆盖、弱<br>源召回和完整成本。无需先复现全部图表。 | **有，Zotero 全文**； 5VI34FEP<br>； 信号模型、Algorithm 1、数值<br>实验 |
+| 10 · R73 · Tang、Jiang、Zhang · [Block Newtonised Orthogonal Matching Pursuit<br>for Off-Grid DOA Estimation in the Presence of<br>Unknown Mutual Coupling](https://doi.org/10.1049/sil2.12068) | IET Signal Processing，2021 | 单个多阵元ULA；窄带复快拍与角度响<br>应块 | 未知互耦的窄带均匀线阵，多快拍DOA估计。 互耦未知和离网误<br>差 | 块OMP发现角度，Newton精修，循环反馈更新已选角度，再联合重估所<br>有系数块。 | 作者仿真支持对互耦和离网误差的改善；未验证四站短记录未知宽<br>带源。 | 当前最重要的优化机制对照之一。保留其发现—精修—重估流程，在<br>本项目目标上建立适配版。 | 正式期刊PDF8页正文已读；<br>BSLTUBKT；§2块模型；§3式(11)–<br>(12)及Newton／循环更新；§4仿真<br>。 |
+| 20 · R61 · Xiao、Yu、Chen · [Efficient Direct Localization Based on<br>Sparsity-Gradient Hybrid Optimization](https://doi.org/10.1049/ell2.70447) | Electronics Letters，2025， 61<br>:e70447 | 多站单天线；单源；互相关域稀疏估计<br>和连续位置评分 | 四个固定标量接收站定位一个未知源，存在未知复链路增益。<br>直接定位空间网格搜索成本高，稀疏时延表示需要离网位置精<br>修。 | 相关域稀疏贝叶斯重建时差谱，三次样条插值，再用梯度和Armijo线搜<br>索精修位置。 | 作者仿真展示精度与运行时间折中优于其对照；不能据此认定多<br>源投影评分也能同样优化。 | 插值和连续梯度精修的简单参照；用于判断收益是否只是更充分的普<br>通优化。 | 正式期刊全文5页； V9PFYCWQ； §<br>2–4； 插值与梯度步骤 |
+| 21 · R63 · Yan、Wu、Iyengar · [Robustness Analysis and New Hybrid Algorithm<br>of Wideband Source Localization for Acoustic<br>Sensor Networks](https://doi.org/10.1109/TWC.2010.06.090515) | IEEE Transactions on Wireless<br>Communications， 2010，9(6):<br>2033–2043 | 分布式声学标量传感器；未知宽带波形<br>的多站观测与已知响应 | 近场多源宽带定位，在位置精度、初始化可靠性和计算量之间<br>折中。 EM依赖初值，细网格AP计算量较大。 | 较粗AP提供初始化，再用EM精化，分析位置与源谱估计误差。 | 作者报告混合求解可在其条件下折中精度与计算量；不代表任意<br>初始化、多源连续目标全局最优。 | AP初始化＋EM精修的传统混合求解来源，保留初值敏感性和完整耗时<br>。 | 正式期刊全文11页及附录；<br>X7E4J6JY； 式(8)、AP/EM与仿真 |
+
+#### 2.1.3 联合更新与弱源恢复
+
+| 顺序／编号、作者、标题 | 期刊／会议 | 接收配置与输入 | 场景、条件与问题 | 核心方法 | 作者报告的效果与边界 | 对当前研究的启示 | 全文与证据位置 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 4 · R88 · Möderl、Westerkam等 · [A block-sparse bayesian learning algorithm with <br>dictionary parameter estimation for multi-sensor<br> data fusion](https://doi.org/10.23919/FUSION65864.2025.11124160) | 2025 28th International Conferen<br>ce on Information Fusion (FUSION<br>)，2025 | 多传感器多字典融合；多雷达连续位置估<br>计 | 不同组使用不同参数化字典，共享位置支撑，组间<br>允许不同幅度与噪声；通过稀疏分量增删处理 | 块SBL联合更新连续字典参数、稀疏方差和噪声；增删<br>候选；Cholesky低秩递推降低代价 | 改善近邻目标分辨及数据融合；正式版包含四目标、<br>多雷达、距离相关路径损耗；实际实验使用已知雷达<br>波形；新候选仍依赖网格初始化；多组方差更新直接<br>求高阶多项式根不适合大量频点 | 核心非NOMP竞争路线；将频率作为观测组、位置共享<br>、未知源谱作为系数，核验低成本适配 | 正式PDF全文8页；CEZ49XVH；§<br>III–V；式(16)–(17)；§V-B <br>Fig.4–5 |
+| 6 · R92 · Pote、Rao等 · [Theory and practice of light-weight sequential S<br>BL algorithm: an alternative to OMP](https://doi.org/10.1109/TSP.2025.3600492) | IEEE Transactions on Signal Proc<br>essing，2025 | 稀疏恢复、线谱及二维谐波；连续参数估<br>计 | Type-II随机似然；稀疏方差控制候选贡献；固定<br>字典及连续扩展；主要已知K | 贝叶斯归一化选择准则、秩一递推；连续Newton与回溯<br>；循环更新位置和方差 | 以接近OMP的递推开销改善特定相关字典条件；连续<br>版本与NOMP比较；不是所有场景全局保证；已有LS-O<br>MP/ORMP及本项目AP也包含归一化，不能混淆对照 | 比较直接强源消除与保留估计不确定性的处理；作为<br>轻量贝叶斯代表，不重复堆NOMP变体 | 正式PDF全文15页；XQSDX7A4；<br>顺序SBL推导；连续与多快拍扩<br>展；双源理论条件和数值实验 |
+| 14 · R58 · Diaz-Guerra、Beltran · [Source cancellation in cross-correlation<br>functions for broadband multisource DOA<br>estimation](https://doi.org/10.1016/j.sigpro.2019.107442) | Signal Processing，2020， 170:<br>107442 | 声学标量传感器阵列；任意几何；宽<br>带CC/GCC及候选跨传感器时延 | 强弱宽带源定位，包括白噪声源、独立语音、相关语音及混响<br>实录；不要求时频稀疏。 强源掩盖弱源，相关源产生交叉峰；<br>简单抹峰可能丢失弱源信息。 | 由相关矩阵正交投影推导CC的延迟加减组合；给出完整式和省略部分<br>项的低成本近似，可接SRP或SRP-PHAT，再逐源寻找和消除。 | 作者报告相对普通SRP/SRP-PHAT增加约5–10 dB动态范围；完整式<br>与截断式的优劣依波形和PHAT而变。消除直达方向后反射峰仍可<br>能先于弱源出现 。 | 优先核验的强弱源抑制对照。固定合理搜索比较消除机制，另固定评<br>分比较搜索，避免混淆两类收益。 | 正式期刊全文12页； C7UPZY7R；<br>§2、4.1、5–6； 式(15)–(18) |
+| 15 · R57 · Mantzel、Romberg、Sabra · [Round-robin multiple-source localization](https://doi.org/10.1121/1.4835795) | The Journal of the Acoustical<br>Society of America，2014，135(<br>1):134– 147 | 声学标量阵列／已知传播场；单频或<br>宽带复观测与候选传播响应 | 固定海洋波导中的多个强弱源，接收阵列与传播响应已知。理<br>论区分未知源谱的逐频处理和已知相对源谱的宽带相干处理。<br>强源及其位置误差遮蔽弱源；过宽或过高秩的零陷又会损失弱<br>源。 | 轮流定位与联合幅度重估；对强源位置邻域的响应协方差取有限秩子<br>空间实施稳健投影，分析残余强源、弱源保留与噪声；附录还讨论保<br>留目标区能量的优化。 | 作者仿真显示稳健轮流消除可恢复被强源遮挡的源；合适投影秩<br>依赖条件，稳健版本并非每组条件都最好。 | 若主张位置不确定性下的稳健抑强，应比较其有限秩投影机制。先检<br>查RF响应知识与四站剩余维数，不将其海洋仿真视作同条件RF结果。 | 历史作者稿全文记录； 本轮仅摘<br>要，库内无PDF； 2WZ659B6； §II<br>及附录（历史依据） |
+| 22 · R53 · Amar、Weiss · [A decoupled algorithm for geolocation of<br>multiple emitters](https://doi.org/10.1016/j.sigpro.2007.03.008) | Signal Processing，2007，87(<br>10)，2348–2359 | 多站阵列；单天线宽带需核验；混合<br>复频谱＋跨频共享复增益 | 多个地理分离接收站，每站配置阵列；多个未知波形发射源，<br>站内近似平面波，全网保留球面时延。 给定Q。 降低未知波形<br>和未知复增益下的多源联合定位成本 | 给定位置和增益，用伪逆拟合源频谱；重构并扣除其他源；通过最大<br>特征值搜索更新当前源位置，并用特征向量更新增益，循环至收敛。 | 主要为四站、每站三阵元、单频系数J=1、50个独立段；另有五阵<br>元圆阵与三源例。位置初值为真位置加尺度100 m的高斯扰动； 每<br>个SNR做50次试验。 所列实验中少量迭代接近CRB；代价逐步下降<br>，但一般只保证到达局部极小值，表现依赖初值。 | 若研究链路失配或自适应抑制，应保留传统联合估计增益的能力；与<br>R07按成本和模型选一个优先适配，不要求先复现全篇。 | 出版商完整网页全文及附录；<br>Zotero IQN2U4Q8，附件AX3XPRTA<br>， 非PDF；§2–4与式(13)–(23) |
+| 23 · R02 · Tirer、Weiss · [High Resolution Direct Position Determination<br>of Radio Frequency Sources](https://doi.org/10.1109/LSP.2015.2503921) | IEEE Signal Processing Letters<br>，2016，23(2)，192– 196 | 两者均支持；跨站频域复协方差；单天<br>线仍保留 TDOA | **支持分布式单传感器，也支持阵列**；静止未知波形源； 分<br>段观测估计各频率的跨站协方差不预先给定源数，减轻单源扫<br>描在多源干扰下的偏差 | DPD-HR 将 MVDR 用于联合多站观测；对各频率协方差求逆，再形成位<br>置谱；由谱峰定位，建议后接 CFAR 判定源数 | 四单传感器、双源、6 段×64 Fourier 系数、250 次 Monte Carlo<br>；低中 SNR 优于所比 DPD-SML 和 MUSIC+MDL，高 SNR 单传感器<br>例中 MUSIC 更好；未给完整 CFAR 计数评价 | 保留多站单天线与未知增益谱法基线地位。当前特定实现或R6的AP搜<br>索结果不能替代其能力评价；先校准总记录、分段、加载与搜索，再<br>比较弱源恢复和完整成本。 | **有，Zotero 正式全文**；<br>Q7FCKSDN； §II–IV，第193–195<br>页，式(14)、( 18)、(27)–(28)<br>，图2–4 |
+| 26 · R01 · Weiss、Amar · [Direct Position Determination of Multiple<br>Radio Signals](https://doi.org/10.1155/ASP.2005.37) | EURASIP Journal on Applied<br>Signal Processing，2005，37–<br>49 | 多站阵列；阵列响应＋跨站延迟；多站<br>复信号 | 多接收站阵列；多个同信道 RF 信号；分别讨论已知和未知波<br>形分站估参数后再配对会丢失联合几何信息 | 把多站观测放在同一个位置模型下处理；针对不同波形条件采用子空<br>间／似然求解 | 理论与仿真支持多源直接定位；不等于在任意同频、短观测条件<br>下都能分开 | 借鉴多站联合建模和未知波形消除，作为RF时延接口的推导基础。原<br>阵列配置需核对退化条件；贡献可落在单天线条件下的有效适配与联<br>合输出。 | **有，Zotero 正式全文**；<br>ID3FDGNH； §2–4、附录A–D； [公开PDF](https://asp-eurasipjournals.springeropen.com/counter/pdf/10.1155/ASP.2005.37.pdf) |
+| 27 · R08 · Knapp、Carter · [The Generalized Correlation Method for<br>Estimation of Time Delay](https://doi.org/10.1109/TASSP.1976.1162830) | IEEE Transactions on Acoustics<br>, Speech, and Signal<br>Processing，1976，24( 4)，320<br>–327 | 两路标量传感器；两路波形的互谱／<br>TDOA | 两传感器、共同信号＋互不相关噪声；ML推导使用平稳高斯模<br>型和足够长观测有噪声和未知谱条件下估计时差，兼顾峰宽与<br>稳定性 | 统一普通相关、Roth、SCOT、PHAT、Eckart、HT；HT相当于按相位估<br>计可靠性加权PHAT，低 SNR 下与Eckart相联系 | 给出局部时延方差及CRLB关系；明确不涵盖短观测下的错误峰，<br>并未完成系统性的方差 Monte Carlo 验证 | 借鉴PHAT、SCOT等权重，建立可解释的相关前端。多源任务还需保留<br>多个时差候选并完成关联；用作简单加权或两步系统对照，而非独立<br>完成全部联合任务。 | **有，Zotero 正式全文**；<br>9FN6KMSU； 表I，第321–326页，<br>式(45b)、(51) –(52)及讨论 |
+| 28 · R04 · Xia 等 · [TDOA Based Direct Positioning of Co-Channel<br>Signals Using Cyclic Cross-Spectral Functions](https://doi.org/10.1109/LCOMM.2023.3347620) | IEEE Communications Letters，<br>2024，28，303–307；2023 在线 | 多站单天线；循环互谱＋跨站时延 | 同中心频率、时频重叠的独立 BPSK 源，**符号率／循环频率<br>不同**；同步分布式接收机在同信道强弱源干扰下估计源数并<br>逐源定位 | 对循环谱幅度阈值取峰估计循环频率和源数；按循环频率切片， 做跨<br>站相位匹配，再随机采样迭代缩小位置范围 | 仿真比较 SNR、SIR 和源数；室外五站双源、GPS同步、50次实验<br>，表II报告平均误差15.3 m，对照两步法23.6 m；指标公式有疑<br>点，见第3节，不能与本项目 RMSE 直接排名 | 核验同类RF源的循环特征是否能可靠区分。若足够可分，保留其计数<br>—分离—定位流程；若不足，再研究不依赖该分离条件的处理。 | **有，Zotero 正式全文**；<br>YWUTRNXK； §II–III，式(5)–(<br>13)，§IV-B及表 II，第304–307<br>页 |
+| 29 · R44 · Tengan等 · [Multi-Source Direction-of-Arrival Estimation<br>Using Steered Response Power and Group-Sparse<br>Optimization](https://doi.org/10.1109/TASLP.2024.3419417) | IEEE/ACM TASLP，2024，32，<br>3517–3531 | 单个多麦克风阵列；互谱／SRP→方向<br>—频率组稀疏拟合 | 多个远场宽带声源，圆形麦克风阵列；不同功率、近角度、噪<br>声、混响和有限帧数。 最终按给定源数J取J个峰；组稀疏求解<br>不等于完整盲计数。 近源空间谱难分辨与迭代成本 | 求解非负组平方根Lasso，用ADMM估计方向—频率系数；SRP采样网格<br>可比最终方向网格更粗。 | 作者报告近源和混响条件改善，有限迭代可降低成本；不同源数<br>或场景下不总优于GSPICE。 | 保留不依赖单源主导单元的传统联合拟合路线；与AP/AML互补。方向<br>字典改位置时延字典后，应核对短窗统计、源间相关和PHAT谱解释。 | **有，全文已阅读**； 4NR4RZTD<br>； 正式全文15页； 第3519页式(6<br>)–(7)，第3521–3522 页式(28)<br>–(34)、Algorithm 1，第 3523页<br>脚注3，第3527页功率比实验，第<br>3529–3530页附录。 |
+| 30 · R59 · DeLude、Srinivasa、Karnik、Hood、<br>Davenport、 Romberg · [Iterative Broadband Source Localization](https://doi.org/10.1109/JSAIT.2023.3317094) | IEEE Journal on Selected Areas<br>in Information Theory， 2023，<br>4:453–469 | 单通道频带估计／多传感器远场阵列<br>；有限记录的未知带限波形与 Slepian<br>子空间 | 有限窗宽带源定位，包括频带重建、强弱源和多传感器角度估<br>计。单通道部分与阵列部分的可分条件不同。 傅里叶表示的有<br>限窗泄漏会掩盖弱宽带源， 单纯窄带谱线模型不合适。 | 将OMP/CoSaMP类迭代扩展到宽带子空间，估计中心频率／带宽并联合<br>重估系数；多传感器部分联合考虑方向。 | 作者报告Slepian表示比DFT表示更能抑制泄漏并恢复弱频带；阵列<br>部分验证方向与频带联合估计。未验证四站近场、同频强弱源及<br>未知链路的完整组合。 | 有限窗路线的重要来源。先确认搜索充分后的模型误差，再比较普通<br>窗口修正和其适配；联合时延与截取约束的改动需证明额外收益。 | 正式期刊全文17页； 9LA8KRFN；<br>§III–VII及附录； 阵列实验§VII |
+| 31 · R34 · Chen、Mao、Zhao · [Direct Localization of Emitters Based on<br>Sparse Bayesian Learning](https://doi.org/10.1109/TVT.2019.2910831) | IEEE TVT，2019，68(6)，5769–<br>5781 | 多站阵列；两种AOA模型；另有AOA＋跨<br>站TDOA 频域模型 | 未知波形、未知信道、空间稀疏；混合模型跨频共享增益字典<br>含未知信道时，怎样稳定做多源稀疏定位 | 联合更新稀疏先验、噪声与增益；每轮交替刷新后验，保证所用目标<br>不增 | 四站、主要每站8阵元、双源仿真；部分近源／少快拍优于LASSO<br>和子空间对照，但计算更重；无单天线验证 | 借鉴稀疏位置、增益和噪声交替更新。仅保留跨站时延的模型适合继<br>续推导单天线版本；联合稀疏性能比较可优先选R07等更接近的代表<br>。 | 有，13页全文核读； XHNGKJXX；<br>第5771页三模型，第5773页<br>Algorithm 1第14行，第5775页式(<br>45)，第5776–5779页仿真 |
+
+#### 2.1.4 计算成本
+
+| 顺序／编号、作者、标题 | 期刊／会议 | 接收配置与输入 | 场景、条件与问题 | 核心方法 | 作者报告的效果与边界 | 对当前研究的启示 | 全文与证据位置 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 7 · R98 · Wang、Hao等 · [A computationally efficient direct position dete<br>rmination algorithm based on OFDM system](https://doi.org/10.1109/LCOMM.2022.3231548) | IEEE Communications Letters，202<br>3 | 多站同步单天线；OFDM单源DPD | 未知波形与已知导频两分支；跨频固定未知链路复<br>增益；单源 | 未知分支对站间频域乘积做FFT预计算相关响应；按候<br>选TDOA查表构造小矩阵，再计算最大特征值 | 保持接近原单源ML的性能并减少重复位置计算；仍有<br>时差采样与查表误差；单源评分并非多源投影目标的<br>现成解法 | 提高为整图加速核心来源；不能因OFDM标题误判必须<br>已知波形 | 正式PDF全文5页；LYYLFSNH；§<br>III-A式(7)–(15)；Algorithm <br>1；已知/未知波形分支 |
+| 8 · R89 · Monnoyer、Feuillen等 · [Grid hopping in sensor networks: acceleration st<br>rategies for single-step estimation algorithms](https://doi.org/10.1109/TSP.2024.3465842) | IEEE Transactions on Signal Proc<br>essing，2024 | 传感器网络单步估计；单目标雷达/角度<br>及TDOA示例 | 几何位置映射到低维传感参数；预计算相关响应后<br>插值；主要单目标 | 在观测参数域预计算响应，以多种插值策略快速映射到<br>完整位置网格，避免逐位置重复内积 | 降低完整网格计算量；给出插值、几何及网格误差分<br>析；不是多源投影评分的现成算法；单目标误差结论<br>不能变成联合多源全局保证 | 先检查完整细网格是否已可低成本计算，再决定是否<br>需要复杂候选淘汰 | 正式PDF全文16页；RL8Z6PDW；<br>算法及插值分析章节；§V-B TD<br>OA |
+| 9 · R65 · Dietzen、De Sena、van Waterschoot · [Scalable-Complexity Steered Response Power<br>Based on Low-Rank and Sparse Interpolation](https://doi.org/10.1109/TASLP.2024.3496317) | IEEE/ACM Transactions on Audio<br>, Speech, and Language<br>Processing，2024，32:5024–<br>5039 | 近场4个分布式单麦；远场6 元阵列；<br>频率加权互谱到位置图的线性映射，支<br>持近场和远场时差；实值声音的共轭<br>对称性用于半谱表达，附录给出双边<br>形式。 | 近场分布式麦克风和远场阵列；构造整张细网格SRP图，定位实<br>验为单源。 位置响应计算成本高，需要可调的精度与成本折<br>中。 | 将SRP矩阵分为采样矩阵与插值矩阵，前者可用iFFT；对插值矩阵做截<br>断S VD或保留最大元素的稀疏近似，以精度换计算成本。 | 作者报告相对频域SRP可降低2–3个数量级的映射计算量。少麦克<br>风、大孔径更适合稀疏插值；小孔径或较多麦克风更适合低秩近<br>似，收益依几何而变。 | 完整细网格加速的优先代表。适配复IQ／投影评分后检查弱峰保留率<br>和排序，不仅看图重建误差。 | 正式期刊全文16页及附录；<br>SWIZLTWJ； §II–V； 式(51)–(<br>62)、(69)–(78) |
+| 16 · R78 · Zhang、Pu、Zhou等 · [Efficient Position Determination Using<br>Low-Rank Matrix Completion](https://doi.org/10.1109/ICSIDP62679.2024.10868130) | undefined，2024 | 5个固定单天线站；未知RF混合模型的<br>单源GLRT评分图 | 多个固定同步单天线站定位一个未知波形RF源。 细网格逐点评<br>分成本高 | 随机计算部分网格评分，用核范数和ADMM／奇异值阈值补全整张位置图<br>，再取峰。 | 作者设定中约5倍提速；主要验证单峰图，不保证多源微弱窄峰。 | 作为整图加速优先对照，与R65区分映射近似和评分图补全；评价弱<br>峰保留而非只报图MSE。 | 正式会议PDF5页正文已读；<br>9YQ2ME82；§II观测和GLRT；§III<br>核范数／ADMM；§IV时间与精度。 |
+| 17 · R84 · Dong、Pu、Zhou等 · [Deep Tensor Completion for Fast Direct<br>Position Determination](https://doi.org/10.1109/ICASSP55912.2026.11462366) | undefined，2026 | 分布式接收机；单运动源；稀疏采样的<br>DPD似然张量 | 单个运动RF源的位置—速度四维直接定位。 四维细网格计算成<br>本 | DNN从稀疏评分恢复结构化张量因子，再寻找状态峰值。 | 作者报告明显计算降低，定位仍有相对完整网格的精度代价；结构<br>化学习比通用图重建更能保留峰值。 | 若采用网络加速定位谱，必须对照其思路；先用R65／R78非神经方法<br>，再评价学习增益。 | 库内正式会议正文已读（前轮阅读<br>）；9UZL9WAX；§2 DPD张量；§3结<br>构化分解与网络；§4仿真。 |
+| 24 · R32 · Hao、Wan · [An Efficiency-Improved TDOA-Based Direct<br>Position Determination Method for Multiple<br>Sources](https://doi.org/10.1109/ICASSP.2019.8683421) | ICASSP，2019，4425–4429 | 多站单天线，原文明示每站一个传感<br>器；多站多频联合协方差／噪声子空间<br>； 跨站TDOA | 多个未知波形源、频率间共享复信道增益；按给定／另估源数<br>划分子空间保持多源分辨力，同时减少每个搜索点的计算 | 将未知增益转成线性相关条件；用矩阵行列式接近零形成位置谱， 替<br>代逐点最小特征值运算 | 四站双源、1280段×32个傅里叶系数、200次Monte Carlo；另有八<br>站三源示例；精度接近EIGEN；运算加速主要是矩阵核比较 | 效率方向需与经过优化的矩阵核和搜索比较；先在相同总观测内核验<br>分段、协方差秩及源数条件，不能直接沿用原文大量分段。当前每点<br>计算加速与避免漏掉窄峰是两个问题。 | 有，5页全文核读； DCYWE4Y6；<br>第4426页§2／式(8)，第4427页式(<br>15)–(20)，第4428页实验 |
+| 25 · R33 · Zhu 等 · [An Improved TDOA-based DPD Method via<br>Multiple-frequency Function Fusion](https://doi.org/10.1109/ICSIP55141.2022.9886640) | ICSIP，2022，217–221 | 多站单天线／单传感器；各频率跨站协<br>方差和噪声子空间； TDOA | 多源模型；分段估计协方差；各频率共享站间增益；选较高能<br>量频点大型时空协方差代价高，多频信息利用不足 | 堆叠各频率的噪声子空间约束，消去公共增益，得到小矩阵求逆的位<br>置谱，再取K个峰 | 四站仿真和单源实测；实测32508点、9个选定频点；报告精度与<br>成本改善；未系统验证未知K或实测多源 | 多频统计量降维与位置搜索成本的已有参照。当前搜索方向需区分每<br>点计算加速与避免漏峰；对齐观测分段、未知增益及全搜索区。 | 有，5页全文核读； IYWA3KWL；<br>第218页式(1)–(3)，第219–220<br>页式(13)–(22)，第220–221页<br>实验 |
+
+### 2.2 按需借鉴：53项
+
+先按当前问题选读，不要求立即复现。R70、R82用于候选机制，R35/R69用于联合搜索；计数、关联和学习论文在完整任务扩展时启用。
+
+| 顺序／编号、作者、标题 | 期刊／会议 | 接收配置与输入条件 | 可借鉴的方法 | 当前用途与迁移条件 | 全文与证据位置 |
+| --- | --- | --- | --- | --- | --- |
+| 33 · R82 · Li、Dong、Shi等 · [An Enhanced Direct Position Determination of<br>Non-Circular Sources via Sparse Bayesian<br>Inference and Grid Refinement Strategy](https://doi.org/10.1016/j.dsp.2024.104564) | Digital Signal Processing，<br>2024 | 多站多阵元ULA；非圆扩展阵列统计 | SBI粗选峰，在候选框内网格细分，更新主要支撑的离网偏移。 | 是候选保留设计的重要提醒。比较扩大Top-K和普通细分；原图主要体<br>现对比OffG曲线退化，不误写成增强算法弱源失效。 | 正式期刊PDF12页正文及附录已读<br>；2I9WHNLD；Remark 1非圆相位；<br>Remark 4初始网格；§5.3第9页与<br>Fig.14；Appendices A–B。 |
+| 34 · R70 · Wang 等 · [Off-grid sparse Bayesian learning for direct<br>localization of cyclostationary sources with<br>adaptive grid refinement](https://doi.org/10.1109/TWC.2026.3738889) | IEEE Transactions on Wireless<br>Communications， 2026，在线发<br>表 | 多站多阵元循环共阵列；需要循环选择性 | 层级SBL估计位置支撑；在高概率网格附近生成多尺度候选，用局部<br>边际目标选点、分配功率并合并近点；二阶Taylor离网更新，随后重<br>建并扣除循环交叉项。 | 借鉴候选插入、替换和合并；需要与普通Top-K细化比较。原文没有测<br>试弱峰遗漏，不能据此宣称该机制失败。 | 作者接受稿正文已核读；DUZWQM3B<br>；§III、Algorithm 1与数值实验 |
+| 35 · R35 · Hao、Wan · [Importance sampling based direct maximum<br>likelihood position determination of multiple<br>emitters using finite measurements](https://doi.org/10.1016/j.sigpro.2021.108111) | Signal Processing，2021，186，<br>108111 | 多站阵列；AOA＋延迟；**已知发射波形**与<br>混合观测 | Pincus积分形式＋重要性采样；可分解提议分布减轻采样负担， 用<br>完整似然修正权重 | 借鉴高维联合重要抽样及候选分组，评价有限预算的覆盖；原ML参考的<br>真值邻近初始化不能进入部署对照。 | 有，11页全文及附录A核读；<br>FHDNNWB3； PDF第2页式(3)后假设<br>，第3–5页式 (13)–(43)，第7页<br>§8，第10页附录 |
+| 36 · R69 · Wang、Tan、Lohan、Valkama、Wan · [Maximum Likelihood Direct Position Determination<br>of Multiple Sources With Channel State<br>Information](https://doi.org/10.1109/TVT.2025.3538794) | IEEE Transactions on Vehicular<br>Technology，2025 | 8个同步RF传感器；已知OFDM序列估计出的多<br>站多子载波CSI作为观测；路径复增益b_ql未<br>知，通过集中似然消去。CSI不等于已知逐路<br>径增益。 | 将粗谱峰分为单源区和多近源区，用围绕中心的源组构造重要分布，<br>生成位置样本，再按集中似然加权估计位置。 | 借鉴候选分组和重要抽样，先替换为盲多源似然；检查弱源未成粗峰时<br>截断区域的覆盖，不把渐近论述当有限预算保证。 | 正式期刊全文6页； MK7DSBT3； §<br>II–III、算法1； 外置补充未取<br>得 |
+| 37 · R77 · Fan、Liu、Guo等 · [A Sparse Representation Direct Position<br>Determination Method Based on Iterative Local<br>Search](https://doi.org/10.1007/s00034-024-02937-2) | Circuits, Systems, and Signal<br>Processing，2025 | 移动多阵元ULA；多历元窄带协方差 | OMP选支撑，再在每个支撑附近九个网格点中选择使联合残差更小的<br>替换点。 | 作为候选替换的简单参照，检验新机制是否超过普通九点替换与扩大候<br>选数。 | 正式期刊PDF21页正文已读；<br>8GCSWS5T；§2模型；§3.2式(21)九<br>点邻域；§4实验。 |
+| 38 · R85 · Li、Li、Zhang等 · [Gridless Maximum Likelihood One-Bit Direct<br>Position Determination](https://doi.org/10.1109/LSP.2024.3491020) | IEEE Signal Processing Letters<br>，2024 | 3个标量接收站；已知OFDM导频的1-bit观测 | 改进MM代理函数，使每轮位置更新有闭式解，减少迭代内网格搜索。 | 作为连续优化方法来源，说明可用现成优化思想形成适度贡献，不必要<br>求全局保证。 | 库内正式期刊正文已读（前轮阅读<br>）；外置补充未核读；62T6T2NB；<br>§II模型；§III MM与初始化；§IV<br>实验；外置补充未核读。 |
+| 39 · R80 · Chai、Yin、Hu等 · [Direct Position Determination of Wideband Source<br>over Multipath Environment: Combining Taylor<br>Expansion and Subspace Data Fusion in the<br>Cross-Spectrum Domain](https://doi.org/10.3390/s25164967) | Sensors，2025 | 4个固定单天线站；互谱／参考自谱比值 | 子空间融合形成粗位置谱，再用Taylor展开作连续位置修正。 | 借鉴连续精修和多径扩展；不要把路径数量误写成源数。 | 正式期刊PDF16页正文已读；<br>CX82UIQA；§2模型；§3第5页参考<br>站假设；Taylor步骤及仿真／实测<br>章节。 |
+| 40 · R81 · Simon、Zachár · [Fast and Fault-Tolerant Passive Hyperbolic<br>Localization Using Sensor Consensus](https://doi.org/10.3390/s24092891) | Sensors，2024 | 多标量到时传感器；给定到时与站址 | 建立区域共识数上界，以分支定界搜索最大一致传感器集合。 | 区域证明可作为增强，不能把其单事件上界直接套入归一化投影评分。 | 正式期刊PDF22页正文已读；<br>IYLFKFJJ；共识定义与区域上界章<br>节；分支定界证明；仿真／UWB／<br>枪声实验。 |
+| 41 · R79 · Zhang、Mao、Shi等 · [An Analytical Subspace-Based Robust Sparse<br>Bayesian Inference Estimator for Off-Grid TDOA<br>Localization](https://doi.org/10.1016/j.dsp.2017.06.012) | Digital Signal Processing，<br>2017 | 分布式标量接收站；已经提取的无序多TDOA | 解析稀疏贝叶斯估计结合SVD降噪，再用最小二乘校正离网位置。 | 未来扩展两步定位和关联时使用；不能以真实TDOA作当前完整系统对照<br>。 | 正式期刊PDF11页正文及文内附录<br>已读；外置附录B未取得；<br>E4DUX8UV；§2观测及峰重叠假设；<br>§3解析估计／离网校正；§4实验；<br>文内Appendix A；外置Appendix B<br>未取得。 |
+| 42 · R83 · Shi、Zhang、Li等 · [Direct Localization of High-Order QAM Sources<br>With Multiple Anchors: Dual Atomic Norm<br>Minimization Framework](https://doi.org/10.1109/TWC.2025.3599530) | IEEE Transactions on Wireless<br>Communications，2026 | 多个多阵元锚点；QAM四阶累积量／虚拟阵列 | 简化四阶统计和Toeplitz结构，求解对偶原子范数问题，再扫描地理<br>位置谱。 | 保留为条件方法来源，防止把标题中的原子范数等同于已解决盲强弱多<br>源搜索。 | 正式期刊PDF17页正文已读；外置<br>证明未取得；2025在线／2026卷期<br>；YSMGTJV8；§II–IV；式(34)、<br>Algorithm 2；§V-B样本数；实测<br>章节；外置补充证明未取得。 |
+| 43 · R38 · Bicer、Laneman · [Spatially Distributed Task-Oriented Compression<br>for Multi-Emitter Localization and<br>Characterization with Spectral Overlap](https://doi.org/10.48550/arXiv.2606.01446) | arXiv，2026，v2（预印本） | 多站单天线；短时复IQ的STFT；位置仅由接收<br>功率差提供 | 每站独立CNN编码STFT实虚部，拼接潜变量后由MLP输出无序源集合<br>；用排列不变匹配联合监督存在性、频谱参数和位置。 | 四接收机RF、未知源数与频谱—位置联合输出的高度相似任务先例。其<br>无传播时延／相位模型不等于TDOA已解决，也不证明网络不能重新训练<br>迁移。若比较联合输出，使用同一物理数据并补齐传统级联的轻量关联<br>。 | **有，全文已阅读**； 63EINJP4<br>； 全文6页； §III式(7)–(10)为<br>无时延模型和压缩接口，§IV式(<br>16)–(21)为槽位与匹配，§V实验<br>及局限； Zotero 63EINJP4。 |
+| 44 · R45 · Yang、Liu、Pang、Li · [Multiple Sound Source Counting and Localization<br>Based on TF-Wise Spatial Spectrum Clustering](https://doi.org/10.1109/TASLP.2019.2915785) | IEEE/ACM TASLP，2019，27(8)，<br>1241–1255 | 单个圆形多麦克风阵列；时频空间谱＋逐源关<br>联与计数 | 外层逐个检测源，内层按已有方向重新分配所有时频空间谱并更新<br>方向；避免早期错误分配一直保留。 | 只有诊断支持候选/观测归属错误时，才优先采用其迭代关联机制；先<br>量化RF中单源主导单元是否足够，不能把站间主导源交换当作已证实瓶<br>颈。 | **有，全文已阅读**； 88U3NJW4<br>； 正式全文15页； 第1244–1245<br>页式(11)、(15)、(17)； 第1247<br>–1248页式(24)–(31)； 第1249<br>页观测与指标； 第1253页实测与<br>成本。 |
+| 45 · R39 · Wechsler、Mack、Habets · [End-to-End Signal-Aware Direction-of-Arrival<br>Estimation Using Weighted Steered-Response Power](https://doi.org/10.23919/EUSIPCO55093.2022.9909962) | EUSIPCO，2022，41–45 | 单个多麦克风阵列；学习频率掩码＋SRP物理<br>方向谱 | 提出功率最小化损失PML，以真方向处的空间谱归一化后抑制其他方<br>向，使梯度经过SRP训练掩码。 | 确认可靠性或选频确为瓶颈后，作为公共任务驱动加权的适配代表；逐<br>源化还应超过规则和传统联合拟合，不能只与无权重扫描比较。 | **有，全文已阅读**； T2DRK9G5<br>； 全文5页； 第42页式(2)–(5)<br>、第43页§IV单目标设置、第44页<br>掩码差异、第45页多目标展望。 |
+| 46 · R43 · Yang、Fan、Yuan、Xie · [NeuralMUSIC: A Hybrid Neural-Subspace Framework<br>for Robot Sound Source Localization](https://doi.org/10.48550/arXiv.2606.18664) | IROS 2026已录用；arXiv v3 | 单个多麦克风阵列；学习协方差→MUSIC→公<br>共频率融合 | 神经协方差、源数分类、物理MUSIC谱和频率注意力融合；通过掩蔽<br>通道重建做自监督预训练。 | 未知K、学习协方差及物理融合已有先例；若后续研究短记录统计学习<br>，可作适配候选，先验证计数及RF响应条件。 | **有，全文已阅读**； GGGVGTEU<br>； 全文13页； 第4页式(15)、(19<br>)–(25)，第5–8 页表I–IV，第9<br>–13页附录，表VI； IROS录用状<br>态见arXiv v3页面。 |
+| 47 · R42 · Salvati、Drioli、Foresti · [Exploiting CNNs for Improving Acoustic Source<br>Localization in Noisy and Reverberant Conditions](https://doi.org/10.1109/TETCI.2017.2775237) | IEEE TETCI，2018，2(2)，103–<br>116 | 单个多麦克风阵列；逐频MVDR空间谱→CNN权<br>重→宽带谱 | 把逐频物理位置谱的可靠性变成分类／回归任务；标签由真实方向<br>与单频取峰误差计算。 | 作为定位谱可靠性学习的公共处理参照；先确认错误峰或统计波动是当<br>前失败原因，再评价逐源权重的额外收益。 | **有，全文已阅读**； EA73S2P4<br>； 正式全文14页； 第106页式(5)<br>、第107页式(8)–(11)、 第113页<br>实测表IX/X、第114页结论。 |
+| 48 · R41 · Chen、Lee、Rao、Garudadri · [A DNN Based Normalized Time-Frequency Weighted<br>Criterion for Robust Wideband DoA Estimation](https://doi.org/10.1109/ICASSP49357.2023.10096809) | ICASSP，2023 | 单个多麦克风阵列；学习时频权重＋归一化导<br>向矢量匹配 | 提出无需特征分解的归一化时频加权准则；系统比较权重后处理与<br>MUSIC、主特征向量、SRP等后端的关系。 | 用于核对学习权重与物理后端是否匹配；改后端须重新校准或训练，不<br>把接口错配当作已有方法能力不足。 | **有，全文已阅读**； 3UEZVTPR<br>； 全文5页； §4.1式(5)–(6)与<br>定理1； §4.2表1； §5明确I=1和<br>后处理对照。 |
+| 49 · R40 · Wang、Zhang、Wang · [Robust Speaker Localization Guided by Deep<br>Learning-Based Time-Frequency Masking](https://doi.org/10.1109/TASLP.2018.2876169) | IEEE/ACM TASLP，2019，27(1)，<br>178–188 | 多麦克风阵列／双耳；逐通道掩码加权互谱、<br>协方差和导向矢量 | 比较掩码加权GCC-PHAT、扫描信噪比和导向矢量匹配；用掩码估计<br>目标与噪声协方差。 | 借鉴通道掩码乘积和归一化接口。只有站点可靠性差异造成具体恢复错<br>误时，才扩展逐源站对权重；加权不会自动分开同一频点中的源。 | **有，全文已阅读**； CVR6SN65<br>； 全文11页； 第179–181页式(4<br>)–(9)及PHAT抵消讨论；第183–<br>187页实验和局限。 |
+| 50 · R27 · Ding 等 · [MMSE-based Distributed Direct Position<br>Determination in Single-hop Sensor Networks](https://doi.org/10.1109/TVT.2026.3654660) | IEEE TVT，2026；本地为16页录<br>用作者版 | 多站单天线；跨站复频谱TDOA；频率检测＋相<br>位补偿 | Burg谱检测选频→环邻域多峰粗搜索／聚类→位置与相位的扩散梯<br>度精修 | 借鉴完整传统流程中的选频、粗搜索和参数精修。作为后续系统对照时<br>对齐站数、记录和频谱重叠条件；我们的收益可体现为联合输出、弱源<br>可靠性或成本。 | 有，全文核读； VR5LN49L； PDF<br>第3–9页式(20)–(50)、<br>Algorithm 3，第10–15页实验／<br>结论 |
+| 51 · R62 · Zhou、Yuan、Li、Greco、Gini、Yi · [Direct Localization With Direct-Path<br>Interference for Reference Channel-Free<br>Distributed Passive Radars](https://doi.org/10.1109/TSP.2025.3595854) | IEEE Transactions on Signal<br>Processing，2025，73:4379–<br>4396 | 多站单天线被动雷达；已知照射源位置；未<br>知照射波形、强直达波和弱目标回波的混合<br>观测 | EM/SAGE与坐标更新联合估计波形、链路和位置，扣除直达干扰后用<br>Newton类步骤更新位置，并推导CRLB。 | 借鉴波形后验、联合更新和残余机制分析；不要将已知照射源或已知统<br>计量偷偷带入本项目基线。 | **库内正文全文已阅读； 补充证<br>明未取得**； §II模型、§III–IV<br>联合估计、§V实验及多目标讨论<br>； Zotero FAKCC2ZI / PDF<br>9FX7UXQF |
+| 52 · R64 · Lu Lu、Wu、Yan、Iyengar · [Robust Expectation-Maximization Algorithm for<br>Multiple Wideband Acoustic Source Localization<br>in the Presence of Nonuniform Noise Variances](https://doi.org/10.1109/JSEN.2010.2050311) | IEEE Sensors Journal，2011，<br>11(3):536–544 | 分布式声学标量传感器； 站间噪声不同；未<br>知源波形、站点噪声方差； 算法设链路增益<br>为1 | 以EM联合更新源分量、位置与非均匀噪声方差，并与集中似然近似<br>方法比较。 | 可靠性学习前先比较观测驱动的噪声估计、白化与EM；避免用真实噪声<br>知识只增强本方法。 | 正式期刊全文9页； 3YIWDH7W；<br>p.540单位增益； EM及仿真； 关<br>键公式已核对 |
+| 53 · R67 · Dang、Herzog、Chetupalli、Habets、Liu<br>· [SepLocNet: Multi-speaker localization with<br>separation-guided TDOA estimation in wireless<br>acoustic sensor networks](https://doi.org/10.1016/j.apacoust.2024.110488) | Applied Acoustics，2025， 231:<br>110488 | 8个双麦节点；节点间可异步；每节点两个同<br>步麦克风，节点间可异步，源数已知；分离<br>直达语音，用GCC-PHAT估节点内TDOA，将比<br>值掩码沿时间求和形成频率占用关联特征。 | DC-SepFormer估每个源的双通道直达波形；GCC-PHAT估TDOA；频率占<br>用特征构造关联代价，差分凸优化与局部匈牙利匹配降低关联成本<br>，最后用单源物理解算器定位。 | 借鉴分离后保留时差及辅助关联。先量化完全重叠RF中关联特征是否可<br>辨，不以语音网络的成功或失败替代RF验证。 | 正式期刊全文14页及附录；<br>44CNZJSJ； §2–6； 式(9)–(13)<br>、表4 |
+| 54 · R68 · Tang 等 · [Direct Localization of Strong and Weak Sources<br>with a Moving Array](https://doi.org/10.1109/ICTC61510.2024.10602269) | ICTC，2024:24–29 | 移动多阵元圆阵；5个观测位置；每位置M阵<br>元圆阵，Q源且Q<M；在协方差上加入候选虚<br>拟源，比较较小特征值变化，再融合多个位<br>置的谱。 | 候选源协方差扰动与噪声子空间不变性构造定位谱，多位置融合后取<br>峰。 | 可借鉴弱峰突出及多位置融合思路；若要用于静态四站，必须另建保留<br>跨站时延的统计量与秩条件。 | 会议全文6页； RGK8SPA2； §II–<br>IV； Q<M与式(7)–(17) |
+| 55 · R55 · 谢坚等 · [一种强弱信号的直接定位与信源数估计方法](https://patents.google.com/patent/CN112578335B/zh) | 发明专利，2021公开／2023授权；<br>CN112578335A/B | 多站阵列；逐频协方差＋特征波束 | 对特征向量形成的空间谱做Capon最优权归一化，逐个寻找显著峰；<br>无需先知道强源方向，不采用反复重构扣除。 | 避免把强弱源或联合计数定位写成首次提出；可借鉴逐成分评分与停止<br>规则，但应重新校准虚警和漏检。 | 在线13页授权文本全文，含说明书<br>、 权利要求和附图； Zotero<br>2CNNHFES为知网页面； 式(17)、§<br>[0097]–[0108]和表1 |
+| 56 · R50 · Oispuu、Nickel · [Direct detection and position determination of<br>multiple sources with intermittent emission](https://doi.org/10.1016/j.sigpro.2010.05.010) | Signal Processing，2010，90(<br>12)，3056–3064 | 移动单阵列、多天线、多批观测；各批阵列<br>复观测与协方差；方向响应随平台位置变化 | 比较Capon与确定性ML，消去未知波形后联合拟合；AP逐源更新并对<br>其他源置零陷；DDPD按残差检验递增总源数 | 间歇发射、联合ML与残差计数的重要边界参照。当前投影核心已有更接<br>近的R51/R52，优先用其核对单天线宽带基线；R50用于计数条件和时间<br>活动扩展。 | **有，全文9页已阅读**；<br>IMURV42Q； 3059页A1–A4，3061<br>页式(29)–(34)， 3063–3064页<br>初始化、计数条件与图6–7 |
+| 57 · R56 · Fan等 · [Fast Direct Localization for Millimeter Wave<br>MIMO Systems via Deep ADMM Unfolding](https://doi.org/10.1109/LWC.2023.3243157) | IEEE Wireless Communications<br>Let ters，2023，12(4):748–752 | 各接收站多天线；用户单天线；合作导频＋<br>阵列AoA稀疏字典 | 用联合l1/l2,1约束区分LoS/NLoS成分；推导近端ADMM，再按层学习<br>步长、惩罚及权重。根据估计链路成分选择可能有LoS的基站，修正<br>位置评分。 | 若当前物理模型已适用但需要更少迭代，可比较规则调参、普通优化与<br>少参数展开；先证明同预算的质量或成本收益。 | 正式期刊全文5页； A6PNQGMU； §<br>II、III； 算法1、表I |
+| 58 · R17 · Shmuel 等 · [SubspaceNet: Deep Learning-Aided Subspace<br>Methods for DoA Estimation](https://doi.org/10.1109/TVT.2024.3496119) | IEEE Transactions on Vehicular<br>Technology，2025， 74(3)，4962<br>–4976；2024 在线 | 单个多天线阵列；替代协方差→DOA | 网络生成“有利于测角”的替代协方差，通过可微 Root-MUSIC 用<br>角度误差训练 | 借鉴按最终定位任务学习中间统计量，减少短记录统计估计的波动。将<br>阵列DOA接口改为跨站时延模型，并评价其对多源恢复和成本的帮助。 | **有，Zotero 正式期刊全文**；<br>PAU6R735； 第4965页§III-A，第<br>4967页式(16) –(17)，第4969页§<br>IV-B，第4973页图10 |
+| 59 · R25 · Subramanian 等 · [Deep learning based multi-source localization<br>with source splitting and its effectiveness in<br>multi-talker speech recognition](https://doi.org/10.1016/j.csl.2022.101360) | Computer Speech & Language，<br>2022，75，101360 | 多麦克风阵列；相位／通道相位差→逐源DOA | 用映射或隐空间掩码拆分源表示，以角度监督及排列处理训练； 可<br>接波束形成 | 借鉴从混合观测拆出逐源表示及排列匹配。由已知K语音DOA扩展到未知<br>K的RF频带与位置输出，重点解决源身份一致性和重叠弱源恢复。 | 有，全文核读； R2VR8A8X； PDF<br>第3–6页§2、第7–12页实验／结<br>论，表2、6 |
+| 60 · R18 · Du 等 · [An envelope separation aided multi-task learning<br>model for blind source counting and localization](https://doi.org/10.1109/ICASSP55912.2026.11464467) | ICASSP，2026 | 其他：一阶Ambisonics；多通道声场／声源包<br>络 | 学习逐源 attractor，预测存在性、包络和三维坐标，并联合匹配<br>训练；坐标同时确定方向和距离 | 借鉴逐源表示和集合匹配，把包络任务改为RF频带描述，并连接时延定<br>位。重点验证未知源数下的漏检与属性—位置对应，新增输出以实际用<br>途和联合质量体现贡献。 | **有，Zotero 全文**； 458R87T4<br>； §2.3.2式(5)、多任务损失与实<br>验部分 |
+| 61 · R49 · Hartanto、Sakti、Shinoda · [MSDET: Multitask Speaker Separation and<br>Direction-of-Arrival Estimation Training](https://doi.org/10.21437/Interspeech.2024-2537) | Interspeech，2024，2170–2174 | 单个多麦克风阵列；混合谱→逐源频谱与DOA<br>联合输出 | 在Dense-UNet与TF-GridNet上加入逐源DOA头；联合分离与方向损失<br>，并按DOA进行训练输出配对。 | 借鉴逐源频谱与空间属性的匹配训练。将固定双语音源扩展到未知K的<br>RF频带—位置集合，重点评价可靠对应和弱源恢复，完整波形重构按应<br>用需要决定。 | **有，全文已阅读**； I8SECA55<br>； 全文5页； 第2171页§3逐源输<br>出和损失，第 2172页实验，第<br>2173页表3–6与结论。 |
+| 62 · R46 · Mandel、Weiss、Ellis · [Model-Based Expectation-Maximization Source<br>Separation and Localization](https://doi.org/10.1109/TASL.2009.2029711) | IEEE TASLP，2010，18(2)，382<br>–394 | 双通道麦克风／双耳；相位差与幅度差→EM参<br>数与逐源软掩码 | EM的E步软分配观测，M步更新逐源空间参数；加入背景成分和幅度<br>差先验，逐步放开跨频参数以稳定初始化。 | 作为轻量非神经软分配参考，检查单源主导条件和未知K扩展。用它区<br>分关联本身的收益与学习可靠性的额外价值。 | **有，全文已阅读**； JUHLJTTN<br>； 正式全文13页； 第383页WDO及<br>评价范围，第385页式(9)–(14)<br>和已知K，第386页软分配与背景<br>成分，第390–391页初始化。 |
+| 63 · R37 · Lv 等 · [DNN-Aided Distributed Direct Position<br>Determination for UAV Cluster](https://doi.org/10.1109/TVT.2023.3295411) | IEEE TVT，2023，72(12)， 16839<br>–16844 | 多个UAV单通道接收节点；站对互相关幅度→<br>单峰sinc参数→ TDOA几何位置目标 | 三个DNN估相关峰的幅度、宽度、时延，形成解析位置代价，再梯度<br>下降求坐标 | 借鉴相关函数的紧凑学习表示和解析位置求解。多源任务需从单峰表示<br>扩展为多峰或逐源表示，检验保存信息的质量以及完整在线成本。 | 有，6页全文核读； DMRA6CF8；<br>第16840–16842页式(6)–(19)、<br>Algorithm 1，第16842–16844页<br>实验 |
+| 64 · R11 · Yu 等 · [Ghost Discrimination Method for Broadband Direct<br>Position Determination Based on Frequency<br>Coloring Technology](https://doi.org/10.3390/jmse12122182) | Journal of Marine Science and<br>Engineering，2024，12， 2182 | 多站阵列；站内DOA；各站协方差块对角拼接 | 不直接把所有子带谱加成灰度图，而用颜色保留频率差异，识别不<br>一致的交点 | 借鉴利用频谱差异识别假目标的思路，将频谱—位置对应作为实际任务<br>。原阵列方位交点与本项目相干DPD伪峰不同，需使用跨站时延构造关<br>联得分。 | **有，Zotero 正式全文，18页**<br>； XKG3IIB9； §2.2、§3.2、<br>Algorithm 1、§4.1D 第13页、§<br>4.2 |
+| 65 · R14 · Xia 等 · [An End-to-End Deep Neural Network for Passive<br>Positioning of Emitters and Receivers With<br>Variable Numbers](https://doi.org/10.1109/TCCN.2025.3564488) | IEEE Transactions on Cognitive<br>Communications and Networking<br>，2026，12；2025 在线 | 多站单天线／运动平台；时频幅度、站位及运<br>动参数； TDOA/FDOA背景 | 时频幅度＋站位等参数，零填充、位置／置信度输出、按距离排序<br>训练 | 借鉴存在性与位置联合输出，支持可变源数系统设计。运动参数、尺度<br>和输入条件与本项目不同；扩展到静止短时IQ及频谱—位置配对可形成<br>任务适配。 | **有，Zotero 全文**； V36JNX8H<br>； §III、§V-B/D、§VII |
+| 66 · R09 · Flood、Elvander · [Multi-Source Localization and Data Association<br>for Time-Difference of Arrival Measurements](https://eurasip.org/Proceedings/Eusipco/Eusipco2024/pdfs/0000111.pdf) | EUSIPCO，2024，111–115 | 多站标量量测后端；已提取的多源TDOA | 用少量时差生成位置候选，再用最优传输把时差分配给候选，最后<br>精修 | 借鉴几何一致性和位置精修，为级联补上时差—源关联。接入同一混合<br>IQ的时差前端后才构成完整性能对照；关联机制可直接启发我们的频谱<br>—位置匹配。 | **有，Zotero 正式全文**；<br>6YQ38NQH； §III–VI，式(3)–(7<br>)； [作者代码](https://github.com/gabrielleflood/omt-based-toda-localization) |
+| 67 · R30 · Chen 等 · [Direct Multi-Emitter Tracking Based on the<br>Generalized Labeled Multi-Bernoulli Filter](https://doi.org/10.1109/TSP.2025.3595842) | IEEE TSP，2025，73，3316–<br>3330 | 多站单天线／单通道；混合复波形→延迟补偿<br>Gram矩阵； 历史轨迹 | 给各位置假设对齐多站波形，用非中心复Wishart似然更新带标签随<br>机有限集；分组粒子更新信道参数 | 已有单天线混合信号的源数和轨迹联合估计，可借鉴集合评价和源身份<br>管理。它使用历史与出生先验，本项目聚焦单次短观测及频谱—位置绑<br>定。 | 有，15页正文全文核读；<br>WVMGAX2F； 第3318页A1–A3，第<br>3321页式(25)– (31)，第3325–<br>3328页实验； 独立补充证明未取<br>得 |
+| 68 · R19 · Yin 等 · [Multiple Emitters Direct Tracking With<br>Distributed Single-Sensors: Improved Particle<br>Filter Based on Multiple-Frequency Fusion](https://doi.org/10.1109/TAES.2025.3555214) | IEEE TAES，2025，61(4)，9539<br>–9549 | 多站单天线；跨站TDOA；多频协方差／噪声子<br>空间 | 将多个频率的噪声子空间合成位置谱，用它更新多组粒子，并分频<br>带重采样 | 借鉴多频位置谱的组织方式。粒子跟踪使用历史信息，当前先研究单次<br>短观测；若后续加入运动，再比较历史对计数、关联和位置的改善。 | 有，全文核读； 3RWSCK7C； 第<br>9541–9543页式(21)–(28)、§IV<br>– V |
+| 69 · R03 · Ouyang 等 · [Direct TDOA geolocation of multiple<br>frequency-hopping emitters in flat fading<br>channels](https://doi.org/10.1049/iet-spr.2016.0299) | IET Signal Processing，2017，<br>11(1)，80–85 | 多站单天线；跨站时延；跳频复观测 | 单源 LS/ML 消去未知波形和增益，得到相关矩阵最大特征值； 多源<br>部分逐峰选择，并把分辨椭圆内谱值置零 | 借鉴相关位置谱与逐峰抑制，形成低成本多源处理流程。数据具备跳频<br>结构时可作性能对照；未知源数和频谱—位置绑定需补齐。 | **有，Zotero 正式全文**；<br>DX5GM94C； §4.1式(20)–(31)、§<br>4.2式(32)、§ 4.3、§5 |
+| 70 · R28 · Nanzer 等 · [Bandpass Signal Design for Passive Time Delay<br>Estimation](https://doi.org/10.1109/ACSSC.2016.7869537) | Asilomar，2016，1086–1091 | 其他：时延估计理论／模板观测；带通信号<br>频谱及相关峰；非多站位置算法 | 用修正Ziv–Zakai界分析模糊区与高SNR区，再以相关＋连续时延精<br>修验证 | 借鉴有效带宽和相关旁瓣的分析，解释为什么定位权重与频谱报告可能<br>不同。其发射谱设计不能直接给出接收权重的最优结论，但可指导诊断<br>和评价。 | 有，全文核读； 4633YKRM； 第<br>1087–1091页§II–V，式(5)、(15<br>)、 (25)，图3–5 |
+| 71 · R23 · Zhang 等 · [Direct Position Determination Method Based on<br>Sparse Spectrum Data](https://doi.org/10.1109/ICASSP55912.2026.11462936) | ICASSP，2026，21601–21605 | 多个运动单天线站；TDOA/FDOA；保留部分DFT<br>频点 | 用选频矩阵直接压缩延迟／多普勒算子，计算压缩数据的DPD目标，<br>不重建完整波形 | 借鉴高能量选频和通信—计算取舍，构造低成本公共选频规则。原方法<br>含运动且为单源，当前先迁移选频机制，再检查重叠弱源是否被遗漏。 | 有，全文核读； 9H4AH2MH； 第<br>21602–21604页，§III–IV、表I |
+| 72 · R22 · Dominguez · [Pairwise Neural Cross-Correlation for Accurate<br>Estimates in Low SNR](https://doi.org/10.1109/MILCOM64451.2025.11310550) | MILCOM，2025，1327–1334 | 多站单天线；逐站对处理；复IQ→神经变换→<br>互相关／TDOA | 共享网络变换两路IQ，以变换信号和另一原始信号的互相关构造峰<br>位置监督 | 借鉴复IQ共享变换与相关峰监督。多源扩展应保留多个有效峰并减少强<br>源主导，再评价弱源漏检、错误峰和后续关联；无需重新发明相关器。 | 有，全文核读； SZF7BFJ7； §III<br>–IV、表II/IV，第1332页； [作者代码](https://github.com/WDot/pncciq) |
+| 73 · R20 · Li 等 · [High Accuracy Source Localization Based on<br>Parallel Factor Analysis of TDOA in the Cross<br>Correlation Domain](https://doi.org/10.1109/TCOMM.2025.3534582) | IEEE TCOM，2025，73(9)，7090<br>–7104；页码按PDF | 多站单天线；互谱张量→TDOA或直接位置谱 | 互谱共轭扩展后做PARAFAC，提取延迟结构；另构造多频DPD准则 | 借鉴互谱张量和多站时差提取，可作为单源或已分离源的定位后端。用<br>于混叠多源前须解决归属问题，多径处理作为条件扩展。 | 有，全文核读； YNYYLNVP； 第<br>7092页模型、第7096页式(37)、<br>第7101–7102页实测与多源讨论 |
+| 74 · R16 · Berg 等 · [Extending GCC-PHAT using Shift Equivariant<br>Neural Networks](https://doi.org/10.21437/Interspeech.2022-524) | Interspeech，2022，1791–1795 | 两麦克风；两路波形→学习过滤→GCC-PHAT | 两路使用同一个时移等变网络过滤，再做 GCC-PHAT；多相关通道汇<br>合 | 借鉴共享、时移等变处理，减少网络预处理对时差信息的破坏。由声学<br>单源扩展到复IQ和多源相关峰时，分别检查相位结构、峰选择和定位收<br>益。 | **有，Zotero 正式会议全文**；<br>BFFH4F5C； 第1792页式(7)、第<br>1794页表1–2； [会议PDF](https://www.isca-archive.org/interspeech_2022/berg22_interspeech.pdf) |
+| 75 · R12 · Chen 等 · [A Direct Position-Determination Approach for<br>Multiple Sources Based on Neural Network<br>Computation](https://doi.org/10.3390/s18061925) | Sensors，2018，18(6)，1925 | 多站阵列；阵列角度响应／接收数据 | 分区检测→过滤区域外信号→坐标回归 | 借鉴分区检测、过滤和坐标回归，降低全域求解成本。面向单天线需更<br>换物理输入，并处理同一区域多源和未知数量；这些适配的用途由完整<br>系统结果说明。 | **有，Zotero 正式全文**；<br>KUD7F69K； §3.2、§4.7表3、§<br>4.10及§5 |
+| 76 · R05 · Liu 等 · [Direct Position Determination for Multiple<br>Signals Without Prior Knowledge of Source Number](https://doi.org/10.1109/LWC.2025.3576170) | IEEE Wireless Communications<br>Letters，2025，14(8)，2591–<br>2595 | 多站阵列；站内DOA响应；时延相关矩阵 | 构造多个非零时延的时空相关矩阵，利用联合对角化结构形成二维<br>位置谱，再取局部峰 | 借鉴非零时延统计和未知参数消除，探索短观测下的构谱方式。原模型<br>依赖阵列角度响应，需改为跨站时延；谱形成和源数判决分别设计。 | **有，Zotero 正式全文**；<br>Q4R9KK25； §II式(1)–(9)、§III<br>式(28)–(35)、 Algorithm 1、§<br>IV |
+| 77 · R29 · You · [Direct Position Determination in Presence of<br>Uncertain Propagation Loss](https://doi.org/10.1109/TVT.2025.3609715) | IEEE TVT，2026，75(3)，5151–<br>5155；2025在线 | 多站单天线；含运动及静止实验；TDOA/FDOA<br>＋RSS先验；复波形 | 交替估计位置、路径损耗指数与相对衰落，并分析有／无信道先验<br>的界 | 若后续确认传播损耗失配是主要困难，再提高该方向的实施优先级。未<br>知链路参数已有研究，必须区分精确、估计和分布先验提供的收益。 | 有，全文核读； GIXM3KVY； 第<br>5151–5155页式(2)–(16)、<br>Algorithm 1、表I及图1–4 |
+| 78 · R13 · Wei 等 · [A Neural Network-Based DPD Algorithm For Low SNR<br>And Off-Grid](https://doi.org/10.1109/SAM68950.2026.11687963) | IEEE Sensor Array and<br>Multichannel Signal Processing<br>Workshop（SAM）， 2026 | 多站阵列；阵列协方差特征 | 融合协方差多尺度特征，直接回归坐标 | 借鉴协方差编码和离网坐标回归。原方法使用阵列且固定源数，本项目<br>需跨站时延表示与可变数量输出；作为结构参考，优先采用已有更完整<br>方案中的有效部件。 | **有，Zotero 全文**； 4CII8PPP<br>； 网络结构和仿真部分 |
+| 79 · R86 · Yin、Yang等 · [Resolution enhanced newtonized orthogonal matchi<br>ng pursuit solver for compressive beamforming](https://doi.org/10.1016/j.apacoust.2022.108884) | Applied Acoustics，2022 | 声学近场平面；36麦克风阵列；窄带互谱矩阵；球<br>面传播exp(-jkr)/r；互谱矩阵和已知接收几何 | OMP初始位置；逐源互谱消除和位置标记优化；Newton<br>精修；联合最小二乘幅度重估 | 借鉴候选初始化修复；不新增一个与现有NOMP高度重复的完<br>整复现任务；需从单频互谱和密集麦克风改为频率相关的跨<br>站时延字典，保留未知逐源频谱 | 正式PDF全文5页；ZR7Z3JA7；§<br>2.2.2；§3–4；PDF第2–5页 |
+| 80 · R90 · Fan、Liu等 · [Self-calibrated direct position determination ba<br>sed on global-local hybrid optimization](https://doi.org/10.1109/LCOMM.2026.3675651) | IEEE Communications Letters，202<br>6 | 移动圆阵、多历元；阵列幅相误差自校准；10/15<br>阵元UCA；10/20历元；MUSIC噪声子空间及跨历元<br>共享阵列误差 | PSO全局初始化及位置排斥；交替幅相校准；无排斥项<br>的拟Newton局部精修 | 借鉴全局—局部求解，不能把原阵列模型直接设M=1用作静<br>态TDOA基线；M=1使原角度响应失去信息；需替换为跨站时<br>延目标 | 正式PDF全文5页；TRNR93MD；§<br>II式(1)–(5)；§III式(10)–(<br>15)；§IV |
+| 81 · R91 · Xu、Zhu等 · [CFAR based NOMP for line spectral estimation and<br> detection](https://doi.org/10.1109/TAES.2023.3282610) | IEEE Transactions on Aerospace a<br>nd Electronic Systems，2023 | 线谱估计与雷达多目标检测；未知噪声和源数；复<br>指数原子；扩展至多维、多快拍及压缩观测 | 先形成较充分候选；软CFAR排序后逐个删除、循环精修<br>，按残差补充；避免同时删除强目标分裂分量 | 未知K阶段的优先参考；候选决策允许修正，重新校准位置<br>域固定虚警水平；改为位置几何及系数块后，检测统计量与<br>多重搜索虚警须重建 | 正式PDF全文20页；XWI8HEAU；A<br>lgorithm 2；式(36)；§IV-D/E |
+| 82 · R95 · Gong、Zhang等 · [A fast direct locator for radiation source based<br> on composite convolution neural network](https://doi.org/10.1049/ell2.13271) | Electronics Letters，2024 | 三个同步单天线RF接收站；已知一源或两源；3×2<br>56接收序列，100 MHz采样、10 MHz带宽BPSK；LOS<br>及简化衰落 | 复合CNN从接收序列直接回归源位置 | 原E2E路线的直接场景近邻；当前物理求解路线仅保留按需<br>学习对照；需统一IQ表示、数据分布与K输出；重训能否改<br>善弱源需实验 | 正式PDF全文5页；YUSHJS6G；模<br>型与网络部分；实验设置和双源<br>比较 |
+| 83 · R96 · Feng、Huang等 · [Efficient direct position determination using fr<br>obenius norm approximation](https://doi.org/10.1049/ell2.12479) | Electronics Letters，2022 | 多站直接定位；单源和双源示例；SML/MUSIC/MVDR<br>位置相关矩阵；跨站频域统计同时含阵列响应 | Frobenius范数近似最大特征值类评分，再用Gauss–Ne<br>wton连续优化 | 作为目标函数近似的成本参考，独立检查弱峰保留；不能用<br>来混淆搜索归因；保留跨站时延的模型可继续推导M=1；近<br>似误差对弱源影响需检查 | 正式PDF全文3页；Z46LIKRB；Fr<br>obenius近似与GN推导；单源/双<br>源数值实验 |
+| 84 · R97 · Li、Li等 · [Direct localization of wideband sources using di<br>stributed arrays: a subspace focusing and dimens<br>ion reduction approach](https://doi.org/10.1016/j.sigpro.2025.109902) | Signal Processing，2025 | 多站多阵元宽带源定位；跨频子空间聚焦至参考频<br>率，剖面消去每站自由复增益 | 子空间聚焦、维度约简、MUSIC位置搜索 | 仅借鉴宽带融合；不能把原算法直接设M=1作为适用基线；<br>需保留跨频时延与增益约束并重建统计量；不是简单替换阵<br>元数 | 正式PDF全文9页；UGLUGE3Z；§<br>4.3式(35)–(40)，PDF第5页；<br>数值实验 |
+| 85 · R100 · Zhang、Zeng等 · [Iterative strong targets cancellation for multi-<br>target detection in JRC systems](https://doi.org/10.1109/LCOMM.2025.3542371) | IEEE Communications Letters，202<br>5 | OFDM通感雷达；强弱目标及直达泄漏；已知共同发<br>射参考；目标表现为时延/多普勒分量 | 强分量相位补偿后跨子载波/符号平均并扣除，循环检<br>测弱目标 | 低成本消除方法来源；与R58区分参考波形和投影条件；独<br>立未知发射源没有共同已知参考；需检查短窗、离网与弱源<br>损伤 | 正式PDF全文5页；783XFI7E；§<br>II–IV；PDF第3页式(12)；仿真<br>和实测 |
+
+### 2.3 拓展储备：16项
+
+这些文献不再承担当前主问题的核心论证。保留原编号、CSV精读记录及Zotero题录；出现对应需求时再使用。
+
+| 顺序／编号、作者、标题 | 期刊／会议 | 暂缓原因与启用条件 | 全文与证据位置 |
+| --- | --- | --- | --- |
+| 86 · R06 · Zhang 等 · [Direct position determination based on rotating<br>single-baseline interferometer for multiple time–<br>frequency aliased sources](https://doi.org/10.1016/j.cja.2025.103767) | Chinese Journal of Aeronautics，<br>2026，39(2)， 103767；2025 在线 | 依赖旋转基线和运动形成的角度信息；当前固定单天线不使用这类额外观测。<br>出现对应扩展需求时再使用。 | **有，Zotero 全文**； 25UPVNQV；<br>模型假设 A3、方法与仿真部分 |
+| 87 · R10 · Ospel、Mikus · [Multi-Sensor Multi-Source Localization under Clutter<br>and Uncertainty](https://doi.org/10.1109/TSP.2026.3685137) | IEEE Transactions on Signal<br>Processing，2026 | 侧重已检测事件的杂波／关联；当前核心是混合IQ中的候选发现，关联代表优先<br>R09。 出现对应扩展需求时再使用。 | **有，Zotero 全文**； FQ963MZG；<br>模型、组合选择与实测数据实验 |
+| 88 · R15 · Zhang 等 · [A Lightweight End-to-End Multi-Source Localization<br>Framework in Urban Environments via Local Radio Map<br>Construction](https://doi.org/10.1109/TCCN.2026.3727490) | IEEE Transactions on Cognitive<br>Communications and Networking，<br>2026 | RSS与城市无线电地图路线；传播和输入层级不同，留作地图扩展。 出现对应扩<br>展需求时再使用。 | **有，Zotero 全文**； 9XQ98WD7；<br>DCS/PIMS、实验设置与消融 |
+| 89 · R21 · Fabiani 等 · [Joint Spectrogram Separation and TDOA Estimation using<br>Optimal Transport](https://doi.org/10.23919/EUSIPCO63237.2025.11226045) | EUSIPCO，2025，221–225 | 功率谱图分离与最优输运；当前相干投影搜索不以此为主，分离扩展再读。 出<br>现对应扩展需求时再使用。 | 有，全文核读； BYZSIZUG； 第222<br>–224页式(2)–(8)、§V； [会议全文](https://eurasip.org/Proceedings/Eusipco/Eusipco2025/pdfs/0000221.pdf) |
+| 90 · R24 · Zhou 等 · [A Riemannian Manifold-Based Spatio-Temporal Joint<br>Interference Mitigation Method for Direct Position<br>Determination](https://doi.org/10.1109/LWC.2026.3732731) | IEEE WCL，2026，15，5397– 5401 | 阵列时空干扰抑制，关注持续目标与间歇干扰；当前先研究独立强弱源。 出现<br>对应扩展需求时再使用。 | 有，全文核读； 7HZIALP7； 第5398<br>–5400页式(3)–(8)、(19)、 (21)<br>–(23)与仿真 |
+| 91 · R26 · Xia 等 · [A TDOA Localization Method of HF Source Based on<br>Dual-branch CNN and Transfer Learning](https://doi.org/10.1109/LWC.2025.3623182) | IEEE WCL，2025在线；本地为录用<br>作者版 | HF天波传播偏差与迁移学习；LOS短时候选搜索不采用其通道条件。 出现对应扩<br>展需求时再使用。 | 有，全文核读； GLWY7FK3； 作者版<br>第2–5页模型、网络、实测及表III |
+| 92 · R31 · Li 等 · [Multi-TDOA Estimation and Source Direct Position<br>Determination Based on Parallel Factor Analysis](https://doi.org/10.1109/JIOT.2022.3228810) | IEEE IoTJ，2023，10(8)，7405 –<br>7415 | 单源多站对的张量处理；与R20部分重复，当前先保留R20作为代表。 出现对应<br>扩展需求时再使用。 | 有，11页全文核读； JXFE2X2D； 第<br>7407页式(1)，第7409–7410页式 (<br>23)–(32)，第7413–7414页实测 |
+| 93 · R36 · Si 等 · [TDOA-Based Passive Localization for Multidisjoint<br>Sources Without Time Synchronization](https://doi.org/10.1109/JSEN.2025.3619052) | IEEE Sensors Journal，2025， 25(<br>24)，44289–44304 | 异步时差和时钟偏置；当前站点同步，留待异步扩展。 出现对应扩展需求时再<br>使用。 | 有，16页全文核读； 75I3Q2AJ； 第<br>44292页式(3)–(5)，第44294页式(<br>26)–(27)，第44297–44298页<br>Algorithm 1，第44299–44302页实<br>验 |
+| 94 · R47 · Segman、Picard、Talmon · [Riemannian Covariance Enhancement for Robust Direct<br>Position Determination Under Intermittent Interference](https://doi.org/10.1109/OJSP.2026.3733589) | IEEE OJSP，2026，录用作者版 | 阵列协方差与间歇干扰；当前不把这类污染作为主困难。 出现对应扩展需求时<br>再使用。 | **有，全文已阅读**； MJYT2G3U；<br>全文18页及附录； 第3页式(1)、(5)<br>，第4–7页式(12) –(30)，第9–13<br>页实验，附录B/C扰动界，附录D第<br>16页式(70)。 |
+| 95 · R48 · Fang、Li、Zhao、Xu · [Multi-Source Weighted Localization Based on Cascaded<br>DOA-TDOA](https://doi.org/10.3390/s26051614) | Sensors，2026，26(5)，1614 | DOA分离后接TDOA，需要站内多阵元；四站单天线无法直接使用其分离前端。 出<br>现对应扩展需求时再使用。 | **有，全文已阅读**； 33YW7637；<br>全文14页； 第3页§2已知K与阵列配<br>置，第5–7 页DOA匹配与MVDR，第9<br>页D-GDOP， 第10页Algorithm 1，第<br>11–12页仿真。 |
+| 96 · R54 · Sun等 · [Successive interference cancellation-based direct<br>position determination for multi-interference<br>localization via single LEO satellite](https://doi.org/10.1038/s44459-026-00078-3) | npj Wireless Technology， 2026，<br>2，77 | 单卫星多历元与Doppler信息；强弱消除机制已有AP／R58更近参照。 出现对应<br>扩展需求时再使用。 | 14页正式PDF全文； Zotero<br>EFGDMZH2； 第3–5页模型/初值，第<br>8–11页实测及限制，第13页式(16)<br>–(18) |
+| 97 · R71 · Teng、Yuan · [Enhancing Localization Accuracy via Score-Based<br>Interference Suppression](https://doi.org/10.1109/LWC.2026.3708142) | IEEE Wireless Communications<br>Letters，2026 | 大规模阵列中学习干扰先验、定位单个服务目标；当前少站盲多源条件不同。<br>出现对应扩展需求时再使用。 | 正式期刊全文5页； FHJY6X6X； §II<br>–IV； 式(14)、图4–5 |
+| 98 · R76 · Hao、Wan · [Sparse Bayesian Inference-Based Direct Off-Grid<br>Position Determination in Multipath Environments](https://doi.org/10.1109/LWC.2021.3057502) | IEEE Wireless Communications<br>Letters，2021 | 转为多径扩展阅读，不列当前核心基线。不能误写为仅利用AOA，其字典仍含时<br>延。 | 正式期刊PDF5页正文已读；2ENUNLHX<br>；§II时延—角度字典；§III SBI与<br>网格更新；§IV实验。 |
+| 99 · R93 · Han、Liu等 · [Two-dimensional multi-snapshot newtonized orthog<br>onal matching pursuit for DOA estimation](https://doi.org/10.1016/j.dsp.2021.103313) | Digital Signal Processing，2022 | 与已有NOMP方法重复；多快拍共享字典不能直接当作宽带多字典；二维导<br>数和多快拍实现的拓展参考，不增加独立复现任务 | 正式PDF全文16页；V8KVZ8DE；<br>二维精修推导；§7实测及源数<br>高估说明 |
+| 100 · R99 · Jin、He等 · [An indoor direct localization method utilizing s<br>tructural sparsity and low-rankness with grid re<br>finement](https://doi.org/10.1109/JIOT.2025.3559125) | IEEE Internet of Things Journal<br>，2025 | 多任务对应各站，不是多个独立发射源；M=1失去原角度信息；留作多径/<br>链路污染扩展，不列为当前强弱混叠核心对照 | 正式PDF全文17页；368F6YF3；<br>观测模型；ADMM与网格细化；仿<br>真/实测；文内附录 |
+| 101 · R101 · Zhang、Jiang等 · [Newtonalized orthogonal matching pursuit for mix<br>ed far-field and near-field source localization](https://doi.org/10.1109/ICASSP48485.2024.10448001) | ICASSP 2024 - 2024 IEEE Internat<br>ional Conference on Acoustics, S<br>peech and Signal Processing (ICA<br>SSP)，2024 | 与现有NOMP流程重复；近场距离信息来源不同于跨站TDOA；保留为NOMP近<br>远场拓展，不增加当前复现负担 | 正式PDF全文5页；JGB6822A；模<br>型、近远场分类及Newton更新；<br>仿真实验 |
+
+### 2.4 优先阅读路径
+
+| 当前要解决的环节 | 优先顺序 | 阅读重点 |
+| --- | --- | --- |
+| 建立不同原理的参照 | R52 → R51 → R07 → R88 → R92；贪心代表选R73并参考R87 | 联合似然、参数字典、多字典贝叶斯与贪心方法分别选代表 |
+| 分清消除与搜索 | R58 → R57；结合R53 | 强源残余、弱源损伤、联合重估 |
+| 比较搜索与计算 | R98 → R89 → R65 → R78；区域搜索参考R60/R75 | 先查FFT预计算和完整细图成本，再决定是否需要候选淘汰 |
+| 设计候选改动 | 按需读R94 → R87 → R82 → R70 → R77，联合搜索补R35/R69 | Top-K截断、局部插入、候选替换和覆盖 |
+| 完整系统与场景扩展 | 按§2.2—2.3及第3章选择 | 计数、关联、学习先验及额外观测条件 |
+
+### 2.5 延伸文献：尚未完成全文评估
+
+以下10项尚未完成全文评估，不计入101项编号文献。经典时延界两篇保留为理论阅读；未知信号感知、神经ToA/TDoA和子空间重构按需核验；移动跟踪、1-bit、天波及发射波形设计列为拓展。未读全文不等于低价值。
+
+| 标题及入口 | 初筛判断与暂不作为核心基线的原因 | 阅读状态／Zotero key |
+| --- | --- | --- |
+| [Passive moving emitter localization and tracking via robust PCA](https://doi.org/10.1109/RadarConf2663773.2026.11674976) | 移动接收与超窄带运动源跟踪；先验和信息来源不同于静止短时多站混合IQ | 有PDF；摘要／局部初筛，非全文核读；ES2EKGUY |
+| [Enhanced direct position determination of multiple sources based on 1-bit sparse bayesian learning](https://doi.org/10.1109/JSEN.2025.3605149) | 1-bit量化＋SBL是通信压缩问题；当前不采用1-bit观测，暂不作为同观测基线；不能仅凭标题确认单天线适用 | 有PDF；摘要／局部初筛，非全文核读；TZKIAJWN |
+| [Sensing with unknown signals: ISAC enabled distributed passive sensing for multi-target detection and localization](https://doi.org/10.1109/TNSE.2026.3670825) | 未知照射信号的多目标反射感知，不等于多个独立主动发射源；需另查可辨识条件 | 有PDF；摘要／局部初筛，非全文核读；FMIC6M65 |
+| [High-frequency skywave source geolocation using deep learning-based TDOA estimation and bias-regularized semidefinite programming with field evaluation](https://doi.org/10.3390/s26092755) | HF天波传播失配与实测校正，当前LOS混合RF问题不同；与R26归为迁移方向 | 有PDF；摘要／局部初筛，非全文核读；FXRXS3VA |
+| [ToA and TDoA estimation using artificial neural networks for high-accuracy ranging](https://doi.org/10.1109/JSAC.2023.3322803) | 高精度ToA/TDoA测距学习；仍需核对波形知识与多源条件，不把测距直接等同非合作混合定位 | 有PDF；摘要／局部初筛，非全文核读；HSQ7IHP6 |
+| [Lightweight and computationally efficient direct localization based on subspace reconstruction](https://doi.org/10.1109/TVT.2025.3636667) | 子空间重构降低定位计算；摘要所述UAV阵列场景需检查阵列响应及跨站时延，尚未完成适配判断 | 有PDF；摘要／局部初筛，非全文核读；V9TCYNMP |
+| [An improved deep learning-assisted TDOA estimation method for high-frequency skywave signals in ionospheric channels](https://doi.org/10.1109/ICSPS66615.2025.11347663) | HF电离层通道的学习时差前端；后续若做天波／实测迁移再与R26联合精读 | 有PDF；摘要／局部初筛，非全文核读；4RPYPH9Y |
+| [SNR-adaptive ranging waveform design based on ziv-zakai bound optimization](https://doi.org/10.1109/LSP.2023.3320893) | 根据SNR设计测距发射波形；被动接收不能自由设计源波形，不能直接用作接收权重最优性证明 | 有PDF；摘要／局部初筛，非全文核读；2QAV2M6C |
+| [Fundamental limitations in passive time delay estimation–part I: narrow-band systems](https://doi.org/10.1109/TASSP.1983.1164061) | 窄带被动时延界的经典来源；精度—歧义取舍可先读R28；该经典全文尚未完成评估 | 有PDF；摘要／局部初筛，非全文核读；CIR7IX9U |
+| [Fundamental limitations in passive time-delay estimation–part II: wide-band systems](https://doi.org/10.1109/TASSP.1984.1164429) | 宽带被动时延界的经典来源；与上一条共同作为后续理论推导阅读清单 | 有PDF；摘要／局部初筛，非全文核读；75ZENVQL |
+
+## 3. 已有方法的能力、条件与迁移判断
+
+### 3.1 候选发现：离网误差不等于候选遗漏
+
+粗网格确实可能造成off-grid问题，但应把三种现象分开。它们可能同时出现，处理方式却不同。
+
+| 现象 | 具体含义 | 已有方法与当前关注点 |
+| --- | --- | --- |
+| 网格量化／字典失配 | 已找到正确区域，但真位置不在网格上 | R07、R72/R73、R80/R85等用连续修正减小偏差；不必一直加密全域网格 |
+| 候选区域遗漏 | 粗网格没有采到窄峰，或正确区域被Top-K筛掉 | 局部精修没有合适初值；R60/R75处理区域覆盖，R70/R82采用候选细化，仍需检查低分区域是否被保留 |
+| 强源拟合残余 | 强源位置、波形或链路估计不准，残余遮住弱源 | R51/R52、R57/R58、R72–R74通过联合重估、循环修正或消除处理；搜索与消除需要分开归因 |
+
+R72的NOMP已将“粗网格发现—连续精修—循环反馈—联合幅度重估”连起来，且测试了不同分量强度。R74进一步研究强车辆与弱行人RF回波，其方法仍有功率差和初始化边界。已有方法能够改善问题，并不表示问题已在所有观测和成本条件下解决。
+
+R70与R82说明自适应网格和局部候选更新已有先例。R82的Remark 4要求初始网格足够密；§5.3将某离网方法的退化推测为仅更新前Q个峰的影响。这里既不能把作者推测写成已证实原因，也不能把对比算法的退化写成该文增强方法已在强弱场景失败。
+
+本项目重点检查：**正确区域是否进入候选、进入后能否连续精修、强源修正后能否重新发现弱源。** 当前归一化分母随位置变化，需要适配导数和搜索规则，但这一点本身不构成新贡献。
+
+R87已经研究强源离网误差遮蔽弱源，并结合候选拆分和循环精修；R86修复合并主瓣导致的初始化偏差。R94以区域积分响应代替孤立格点，提供另一种候选覆盖思路，但门限筛选仍可能删弱源。三者分别代表候选拆分、初始化修复和区域表示，不等于已经解决本项目的短窗盲多源问题。
+
+### 3.2 连续精修：优先建立充分的非神经参照
+
+| 方法族 | 已有能力 | 在本项目中的使用方式 |
+| --- | --- | --- |
+| AP／AML：R51/R52，混合求解R63 | 消去未知波形，固定其他源更新一个位置；粗初始化接连续优化 | 作为当前物理模型的首要参照；核对初值、停止、增益和全搜索区 |
+| NOMP／Block-NOMP：R72/R73 | 新分量发现、局部Newton、循环反馈和联合系数重估；R73处理未知系数块 | 将角度／频率参数改为位置，把每源未知量改为逐频源谱块 |
+| 参数字典与离网SBL：R07、R34、R70/R82 | 稀疏支撑、链路或网格偏移联合更新 | R07为单天线场景的重要近邻；阵列版本只借鉴适用组件 |
+| 连续局部更新：R61/R80/R85 | 梯度、Taylor或MM减少迭代内细网格计算 | 用作简单且充分优化的精修代表；原单源、参考信号或量化似然另行对齐 |
+| 支撑替换／联合抽样：R77、R35/R69 | 替换早期错误候选，或用重要抽样求解联合目标 | R77原文只换九个离散邻点；R35/R69保留优化价值，但重建盲多源似然 |
+
+本项目的每个位置对应多个未知频率系数，普通NOMP的单复幅度原子不能原样使用。R73先消去系数块再精修的结构更接近当前问题。需要推导位置梯度、病态条件和接受准则；这属于必要适配，适配后是否值得采用由性能和成本决定。
+
+连续算法仍依赖候选。更好的局部优化器不能自动找回从未进入搜索的区域。反过来，若扩大初值或普通循环更新已取得同等效果，就不把该效果归到新的候选机制。
+
+### 3.3 联合更新：减少强源残余并保持弱源信息
+
+R51/R52已覆盖未知波形消元和逐源AP，R53进一步估计链路与源谱；R72–R74也强调发现新分量后重新更新已有分量。联合更新已有充分方法来源，本研究可围绕其在短时盲多源条件下的使用方式形成改进。
+
+| 路线 | 可以借鉴什么 | 需要保留的条件 |
+| --- | --- | --- |
+| R57稳健轮流定位 | 用位置邻域响应构造有限秩零陷，平衡强源残余与弱源损伤 | 原传播场已知；少站下扩大投影秩可能消耗弱源信息 |
+| R58宽带互相关消除 | 将相关矩阵投影写成时延组合，不要求时频稀疏 | 适配复IQ、跨站幅相和球面时延；完整式、截断式和PHAT分别核对 |
+| R74强弱RF回波NOMP | 连续修正强分量、联合更新幅度，再检测弱分量 | 已知共同OFDM信号；不能直接用于多个独立未知波形 |
+| R44组稀疏联合拟合 | 估计与方向／位置关联的频率系数 | 不相关源统计与短记录估计质量；最终取峰K另行处理 |
+| R04循环特征定位 | 可分循环频率下分离同频RF源，含实测依据 | 循环特征可分时纳入比较，不把所有同频源都视为不可分 |
+
+频率权重会同时作用于同一频点的多个分量；完全重叠时，单纯带限不能直接分源。传统联合拟合的系数也能承载源的频谱结构，原文只报告位置不等于无法增加频谱输出。
+
+R02继续作为支持单天线、未知链路的高分辨谱法参照。必须对齐总记录、分段、加载和搜索；当前实现失效不能替代对该方法族的判断。
+
+R88将多字典连续参数、稀疏强度和噪声联合更新，正式版包含多雷达四目标及距离相关路径损耗；不能概括为只验证单目标。可将频率作为观测组、共享位置并估计逐源频谱，但大量频率组下的更新成本和跨站增益约束需重新设计。R92提供轻量贝叶斯递推，适合比较硬消除与保留参数不确定性的处理；其相对普通OMP的归一化优势不能直接当作相对现有归一化AP评分的优势。
+
+### 3.4 计算成本：分别比较少算网格与快速算完整图
+
+| 路线 | 代表文献 | 当前应检查什么 |
+| --- | --- | --- |
+| 区域覆盖与粗细搜索 | R60、R75；R81为共识目标的分支定界 | 粗筛是否保留弱峰所在区域；区域覆盖、可靠检测和全局保证分别报告 |
+| 完整细网格映射加速 | R65，及R32/R33的每点计算简化 | 预计算和在线成本；复IQ与投影目标适配后是否保持弱峰 |
+| 低秩评分图补全 | R78 | 单源图的低秩性是否延续到多源投影图，随机采样会否漏掉窄峰 |
+| 学习式张量补全 | R84 | 原单峰加低秩背景假设如何适应多峰；训练投入、未见几何及弱峰保留 |
+| 连续求解与减少无效更新 | R61/R63、R72–R74、R35/R69/R85 | 初值与联合更新成本，有限预算下的可靠性，失败与超时都计入 |
+
+R65降低的是完整细网格映射成本，R78减少实际评分点数，R84增加了学习先验，三者不能只比较图重建MSE。低幅弱峰被抹掉时，全图平均误差仍可能很小。
+
+R75利用参考通道的CAF和已知照射源几何；R81处理给定到时的共识计数。它们的区域界有借鉴价值，不能直接变成当前投影似然的保证。区域上界和停止误差可以增强论文，但不是研究成立的前提。
+
+R98的未知波形分支通过站间频域乘积及FFT预计算相关响应，R89从低维参数域插值到完整位置图。二者应与R65一起提前核验，不能把OFDM标题解释为必须已知导频。R96用范数近似改变评分，其收益需和同评分加速分开归因；这些单源结果均不自动成为多源投影评分的性能保证。
+
+### 3.5 观测条件与RF迁移
+
+| 关键条件 | 相关来源 | 对当前方案的影响 |
+| --- | --- | --- |
+| 分布式标量、未知波形 | R52、R02、R07、R78 | 最接近当前信息条件；分别核对源数、增益及多源能力 |
+| 已知参考／共同波形 | R74/R75、R35/R69/R76/R85 | 可以迁移优化思想，但不能把参考除法后的通道估计当作盲混合IQ |
+| 站内阵列或非圆／高阶统计 | R73、R70/R82/R83 | 重建多站时延响应；不能保留原阵列自由度后宣称单天线同条件优势 |
+| 已检测时差／到时 | R79/R81及关联文献 | 前端弱峰漏检要计入，不能输入真实时差 |
+| 有限观测窗 | R52/R53、R59 | 先比较共同有效区间、裁剪、加窗和已有有限窗处理；模型方向按诊断启动 |
+| 不同噪声和未知链路 | R64、R07/R53 | 噪声白化与链路知识分别对齐；未知增益必须有跨频约束 |
+| 语音、运动和地图先验 | R18/R25/R49/R67、R14/R19/R30、拓展文献 | 作为对应模块或场景来源，不用于静止短时单天线的直接性能排名 |
+
+逐站、逐源、逐频的任意复增益可能吸收时延相位。增益估计要有跨频共享或有依据的平滑结构，并固定尺度／相位基准。采样同步、接收机相位校准和传播增益也分别定义。
+
+四站逐频自由源谱模型在四个候选响应列满秩时可拟合任意观测。未知K不能只靠残差持续下降来增加源数。这是当前模型的秩条件，不是所有方法统一最多只能定位三个源。
+
+R90依赖移动阵列角度响应；R97按式(35)–(40)聚焦并剖面消去自由复增益，M=1时原定位准则退化；R99是单标签、多阵列、多径，不能把多任务理解为独立多发射源。R100使用共同已知OFDM参考，有限和消除关系不对任意离网时延严格成立。上述方法需要改变关键模型，不能只修改阵元数；R98保留跨站时延，迁移条件与它们不同。
+
+### 3.6 计数、频谱对应和学习组件的后续用途
+
+R14/R18/R38/R49提供可变源数、逐源表示和联合输出；R09/R11/R45/R46/R67提供关联或分离思路，R50区分间歇发射状态与总源集合。这些文献仍有价值，当前先完成已知两源的定位机制。
+
+随后再加入未知K、空场、三源及频谱—位置对应，并保留“传统定位＋轻量关联”对照。属性完全相同的源按无序集合评价，不人为制造配对错误。
+
+现有E2E系统作为基线。R17/R39–R43等学习统计量或权重的工作在相应瓶颈出现时再使用。网络可以依靠先验或计算摊销带来收益，不需要先证明某个环节只能用深度学习。
+
+## 4. 具体场景、关键困难与研究目标
+
+### 4.1 实际需求与观测范围
+
+同频干扰排查需要发现容易被强信号遮住的发射源。R04的同频RF实测、R50的间歇发射，以及ITU-R的[Spectrum monitoring evolution](https://www.itu.int/dms_pub/itu-r/opb/rep/R-REP-SM.2355-2-2023-PDF-E.pdf)提供需求背景；R74进一步说明强弱RF分量恢复有实际用途，但其回波模型不同。
+
+当前研究固定为少量同步单天线站点、一次短时混合复IQ、独立未知波形和重叠频谱。先采用已知两源、匹配传播响应，随后逐项放宽。短截获可以对应间歇发射和共同可用记录受限，但项目的具体采样点数尚不是已落实的业务硬约束。没有明确处理时限时，以可靠性—耗时—内存曲线评价。
+
+目前以仿真为主。实际性由需求来源、合理物理模型和独立条件验证支撑；实测能力不写入已经完成的结果。
+
+### 4.2 当前主问题
+
+> 少量同步单天线站点接收短时混合IQ时，在给定计算预算下，提高强弱重叠源的恢复可靠性，并降低位置联合精修的代价。
+
+核心关注两个量：弱源候选是否被保留，以及最终恢复所需的计算。已有方法能成功定位时，仍可比较同等可靠性下能否更省计算；预算相同时，则比较能否少漏弱源。
+
+| 目标 | 需要得到的结果 |
+| --- | --- |
+| 分清原因 | 将网格失配、候选遗漏、强源残余和信息不足分开 |
+| 建立合理参照 | 充分AP／AML、R07、多字典SBL、一个块NOMP适配及整图加速代表 |
+| 形成专用处理 | 根据失效机制选择候选保留、联合不确定性处理或评分加速中的一项改动 |
+| 证明有用 | 相同可靠性下降低成本，或相同成本下提高弱源召回，并报告适用范围 |
+
+不同站点由不同源主导仍作为分层条件，不预设它是主要失效原因。联合DPD并非各站独立取最强观测后拼接。
+
+### 4.3 项目证据与待检验机制
+
+R6保持新投影评分不变、更充分搜索后恢复了部分原失败，剩余错误位置也存在真位置评分更高的情况。这支持当前搜索有损失。R6使用挑选出的长窗诊断条件，尚不能替代完整检查集、原短记录或独立条件验证；R3针对旧DPD／HR谱的结论也不能直接转移到新评分。
+
+强源误差与候选遗漏是否共同限制弱源，是下一步待检验机制。真位置得分高于算法输出，只说明有更好的位置未找到，不说明整个连续多源目标的全局最优一定在真位置。
+
+精确实验事实见[实验结果记录](实验结果记录.md)，执行与授权见[当前任务](当前任务.md)，历史诊断方法见[实现文档6.18](统一端到端模型研究.md#618-g8-r6统一投影流程剩余失败诊断)。
+
+### 4.4 研究gap的工作定义
+
+当前候选缺口是：**在盲多源、短记录和明确计算预算下，常用候选选择与连续更新的组合仍有可以改善的弱源可靠性—成本取舍。**
+
+NOMP、参数字典学习和自适应网格已经覆盖其中的重要部分。本研究不主张首次离网定位，也不要求已有方法完全失效。若针对性候选机制通过普通适配无法同样有效地获得，并在独立条件下带来有用改善，就可以形成贡献。收益大小和适用范围由比较决定。
+
+## 5. 方法方案：候选发现、连续精修与联合更新
+
+### 5.1 在同一物理模型上建立连续求解参照
+
+用站点数$M$、源数$K$表示逐频观测：
+
+$$
+\mathbf x_f=A_f(\mathbf p,g)\mathbf s_f+\mathbf n_f,\qquad
+[A_f]_{mk}=g_{mk}e^{-j2\pi f\tau_m(\mathbf p_k)}.
+$$
+
+给定响应和白噪声时，先按R51/R52建立：
+
+$$
+\min_{\mathbf p,\{\mathbf s_f\}}\sum_f\|\mathbf x_f-A_f(\mathbf p)\mathbf s_f\|_2^2,\qquad
+\hat{\mathbf s}_f=A_f^\dagger\mathbf x_f.
+$$
+
+固定其余源响应$A_{-,f}$，令$P_{-,f}=I-A_{-,f}A_{-,f}^\dagger$，候选源解释的能量为：
+
+$$
+\Delta J(\mathbf p)=\sum_f
+\frac{|(P_{-,f}\mathbf a_f(\mathbf p))^H(P_{-,f}\mathbf x_f)|^2}
+{\|P_{-,f}\mathbf a_f(\mathbf p)\|_2^2}.
+$$
+
+按登记的数值规则处理病态与分母退化。匹配增益与未知增益分别评价，后者明确跨频约束。有限窗或非白噪声改变观测假设时，同时调整似然和基线。
+
+实现充分AP更新，并借鉴R73建立块NOMP适配：从残差发现位置，连续精修，循环更新已有源，联合重估逐频系数。采用观测产生的多初值和目标改善接受准则；真位置不能进入部署初始化。先检查单个组件的一致性，再比较定位性能。
+
+R88/R92作为不同于NOMP的贝叶斯参照，先核对多频共享位置、逐源系数块与增益约束。整图预计算按§5.4提前做成本筛查；若已足够便宜，不预设候选淘汰为核心方法。以下候选改动仅在诊断支持后选用。
+
+### 5.2 针对候选遗漏，先选择一项改动
+
+优先测试“根据几何、有效带宽和投影响应变化决定候选保留与局部采样”的机制。粗网格得分低不必立即永久删除该区域；根据残差变化重新检查仍可能包含有效响应的区域。
+
+| 可选处理 | 作用 | 最简单的对照 |
+| --- | --- | --- |
+| 调整局部采样步长 | 减少窄峰被网格跨过 | 固定细网格、普通多层网格、增加初值 |
+| 残差重新搜索并补充候选 | 强源修正后重新发现弱源 | 普通循环NOMP、同次数全域残差搜索 |
+| 候选替换与恢复 | 纠正早期错误选择，避免Top-K一次截断决定全部结果 | 扩大Top-K、R77式邻域支撑替换、随机补点 |
+
+先选最有效且成本清楚的一项，不把所有机制叠加后统称创新。候选规则只利用观测、几何和已估参数；真实弱源位置仅用于事后判定是否覆盖。
+
+若采用几何或响应变化准则，应说明它怎样影响漏搜概率或实际覆盖。区域上界可以在后续补充；没有严格界时，如实作为启发式方法验证，不要求整个多源问题的全局最优证明。
+
+### 5.3 将候选机制与联合连续精修连接起来
+
+发现新源后，重新优化已有源的位置和逐频系数，再形成下一轮残差。检查强源位置变化、残余能量、弱源候选覆盖和重复候选是否同步改善。
+
+至少拆开以下比较：
+
+1. 普通候选＋普通连续精修。
+2. 改进候选＋同一连续精修。
+3. 普通候选＋联合循环更新。
+4. 改进候选＋联合循环更新。
+
+这些是模块归因，不代表四个独立新算法。与普通循环NOMP、增加初值和扩大Top-K分别比较；保持相同评分来判断搜索收益。研究R58消除机制时，则固定合理搜索策略与预算，区分消除收益。
+
+### 5.4 提前检查完整位置图加速
+
+优先适配R65的插值计算和R78的低秩补全；若采用学习，再加入R84。固定输入、候选分辨率与终止条件，检查弱峰保留、峰位置、排序、最终集合误差和完整耗时。
+
+图重建误差与弱峰恢复分别报告。投影目标随已选源变化时，统计重复预计算和更新成本；几何变化需要重建映射时也计入。全图方法已足够快时，可以直接使用，并判断候选机制是否还带来额外收益。
+
+### 5.5 先验证短记录，再扩展完整任务
+
+先已知两源，返回原短记录，并设置长记录对照。固定弱源带内SNR改变强源功率，配对改变网格偏移、站点几何和频谱重叠。先回答短记录中是否仍能可靠保留并精修弱源。
+
+随后加入未知K、空场和三源，校准新增源停止、重复候选与虚警。最后恢复频谱—位置对应，保留“传统定位＋轻量关联”对照。源谱系数、频带占用和定位权重分别定义；未知链路下不把未标定系数直接当作真实发射功率。
+
+学习模块按需要进入：候选排序、观测可靠性或固定迭代步数的计算摊销都可以研究。与非学习替代比较，说明训练先验和离线成本；既有E2E模型继续作为系统基线。
+
+### 5.6 备选方向与实现核验
+
+只有搜索充分后仍出现可归因的短窗拟合偏差，才转向共享带限波形、传播时延和各站截取窗口的联合模型。先比较裁剪、加窗、补零以及R52/R53/R59的直接适配，再判断新的窗口处理是否必要。未知链路、多径和异步逐项增加，不同时改变主问题。
+
+实现时核对时延符号、分数时延、双边复频谱、相位基准、投影幂等和数值病态。检查候选覆盖、选错候选和精修破坏三个环节；不使用真位置窗口限制搜索。实现一致性检查不作为定位性能证据。
+
+## 6. 最小对照集合与公平比较
+
+### 6.1 第一轮的强代表
+
+| 代表 | 对应能力 | 实现范围 |
+| --- | --- | --- |
+| R51/R52的充分AP／AML | 当前未知波形联合目标的可达性能 | 合理初值、连续更新、联合系数重估；R63可提供混合求解思路 |
+| R73块NOMP适配，结合R72/R74/R87 | 逐源发现、连续精修和循环反馈 | 使用本项目时延模型和逐频系数块，登记与原算法的差异 |
+| R07参数字典学习；R88多字典SBL | 联合稀疏与连续参数估计 | 先选择最适用的贝叶斯代表；对齐源数、频率分组和增益先验；R92作为低成本扩展 |
+| 一种代表性加速方法 | 有限成本下保留有效候选 | 先核验R98/R89/R65完整图加速，再按瓶颈选R78或R60/R75；不要求全部实现 |
+| R58宽带消除 | 区分搜索与强源处理的收益 | 适配完整互相关消除，必要时比较低成本近似 |
+
+R02保留为高分辨谱法背景参照，分段和加载要合理。R57仅在稳健投影成为主张时展开，R59仅在有限窗方向启动后展开。阅读了更多论文不等于必须全部复现。
+
+### 6.2 按贡献补充对照
+
+| 主张 | 需要排除的简单解释 |
+| --- | --- |
+| 候选保留更可靠 | 只是扩大Top-K、增加初值或加密网格 |
+| 联合精修改善弱源 | 只是普通循环NOMP／AP或多算几轮 |
+| 相同可靠性下降低成本 | 对照未优化，或未计预处理和预计算 |
+| 学习补全有效 | 非神经插值／低秩补全已经同样有效 |
+| 有限窗建模更准确 | 普通裁剪、加窗、补零已能解释改善 |
+
+只要求覆盖核心能力的强代表。比较适用条件和实际收益，不要求所有文献方法都失败；未实现的方法不纳入性能胜出范围。
+
+### 6.3 观测、先验与系统比较
+
+| 层次 | 对齐内容 | 允许变化 |
+| --- | --- | --- |
+| 模块比较 | 同一IQ、评分及与该模块无关的后端 | 候选或精修等指定模块 |
+| 完整系统 | 总观测、搜索区、可用先验、硬件与预算 | 各方法合理的原生初始化、计数与求解 |
+| 真值辅助诊断 | 明示真实K、位置、频带或链路 | 仅用于分解原因，不参与部署排名 |
+
+采样点数不能当作独立空间快拍数。已知精确增益、由观测估计增益和统计先验分别比较；共同参考波形是额外信息。R74/R69等不能借用参考信号后与盲IQ方法直接排名。
+
+两步TDOA方法从同一混合IQ提取多时差，并计入漏检与关联。完整传统系统不必经过本项目候选模块；联合输出比较补齐轻量频谱—位置关联。
+
+### 6.4 计数和搜索公平性
+
+已知K定位与未知K检测分别报告。CFAR或残差阈值在开发数据校准，包含空场；自适应全域搜索后的最大评分分布不能直接套用固定单点检验。
+
+所有方法有合理初始化、停止和调参机会。记录失败、超时、未收敛以及预算截断。小规模充分搜索作为参考解时说明精度范围，不直接称连续全局真解。搜索没找到好解与观测不支持弱源分别判断。
+
+### 6.5 完整成本
+
+计时包含IQ／FFT、统计量、候选生成、精修、联合系数重估、计数、关联和数据搬运。冷启动、缓存复用和离线预计算分开，报告时间与内存；观测时长与计算时延也分别报告。
+
+核心结果用两种口径：同等弱源可靠性下比较成本，同等成本下比较弱源召回和集合误差。没有稳定优势的组件采用简单版本。学习方案另报数据生成、训练、调参成本及未见波形／几何表现。
+
+## 7. 验证顺序与判断规则
+
+### 7.1 执行顺序
+
+| 顺序 | 要做什么 | 要回答什么 |
+| --- | --- | --- |
+| 1 | 建立充分AP、R07/多字典SBL和一个块NOMP代表；同步检查R98/R89/R65整图成本 | 不同原理的普通适配能改善多少，成本多大；同评分搜索与换评分比较分开 |
+| 2 | 配对改变强源估计误差和候选筛选，真值仅作诊断 | 残余与候选遗漏是否分别或共同影响弱源 |
+| 3 | 按诊断选择候选保留、联合不确定性处理或评分加速中的一项改动 | 相比对应方法的普通适配，改动是否有针对性收益 |
+| 4 | 连接联合更新，复核完整成本与弱峰保留 | 是否提高可靠性—成本表现 |
+| 5 | 原短记录、不同网格偏移、几何、功率差和重叠条件 | 收益是否超出长窗挑选案例 |
+| 6 | 固定方案后独立验证，再扩展未知K与频谱对应 | 能否形成完整可用系统 |
+
+这是研究设计。代码入口、数据清单、资源预算和正式运行方案仍需在执行文档中落实，不能把本次文档更新记为新实验。
+
+强弱比扫描固定弱源带内SNR，并另设固定总功率对照。网格平移不改变真实场景；强源误差控制要与纯候选变化配对。分开部分／完全重叠、独立／相关波形、同一强源主导／站间主导源变化。
+
+### 7.2 指标与独立验证
+
+主报弱源召回、包含漏检与虚警的集合误差、完整耗时与内存。未知K时固定虚警水平；已知K诊断另报强弱源恢复率、尾部误差和预算内最优目标值。
+
+过程指标包括：连续精修前后的弱源候选覆盖率、精修成功率、重复候选、强源残余以及最终弱源恢复。近似图另报弱峰位置、幅值与排序，不只统计整图MSE。失败样本不能从RMSE或成功率分母中删除。
+
+先在开发数据固定最小有用改善、可接受退化和预算，再用未见几何、波形及随机实现确认。使用配对重复和按场景／布局重采样的置信区间；学习方案另报训练seed差异。封存test不参与方案选择。
+
+### 7.3 继续、简化或转向
+
+| 验证结果 | 决定 |
+| --- | --- |
+| 相同可靠性下明显更省计算，或相同预算下更少漏弱源 | 保留该贡献，明确条件和收益 |
+| 已有方法也有效，但专用处理仍改善成本或稳定性 | 研究继续，贡献落在针对性适配和可验证改进 |
+| 普通适配与新方法效果、成本相当 | 采用简单版本，停止该项改进主张 |
+| 只有普通加密网格或增加初值带来改善 | 记为基线修复，继续判断是否还有值得研究的成本问题 |
+| 搜索充分后仍有明确窗口误差 | 启动有限窗备选方向 |
+| 观测信息不足 | 调整观测或目标范围，不能靠增加网络容量补回信息 |
+
+### 7.4 论文证据
+
+论文围绕一个具体问题、一项主要改动和相应验证展开。方法部件可以来自已有文献；需要清楚说明为何在当前条件下这样组合或修改，以及相较合理适配获得什么收益。
+
+面向SCI二区及以上目标，重点补足问题机制、强代表比较、消融、独立条件和完整成本。区域上界、停止误差或理论分析按能够证明的范围提供，不把全局最优证明设为必需。当前以仿真支撑，不预先承诺期刊分区或录用。
+
+## 8. 研究主张与路线
+
+研究目标是**短时盲多源观测下，兼顾弱源候选保留、连续定位精度和计算成本**。核心文献围绕候选发现、连续精修、联合更新与计算成本组织；其他工作按计数关联、学习组件或场景扩展保留。
+
+执行路线为：**不同原理的适用参照与整图成本筛查 → 分清主要失效机制 → 一项针对性改动及联合更新 → 短记录和独立条件 → 未知K及频谱—位置对应。** 不提前把NOMP或候选淘汰锁定为最终方法。
+
+当前可检验的贡献表述是：针对少量同步单天线站的强弱重叠RF源，在明确预算和观测条件下，通过与失效机制对应的候选处理、联合估计或计算加速，改善弱源恢复的可靠性—成本取舍。R6提供搜索损失证据；具体方法、机制和改善幅度由后续实验确认。
+
+相似工作是方法来源和比较对象。已有方法成功不否定研究价值；没有额外收益时采用已有方法。端到端网络、严格区域界和有限窗重建都作为按需工具，不预设为论文必须采用的路线。

@@ -1,0 +1,838 @@
+--- PDF PAGE 1 ---
+IEEE TRANSACTIONS ON ACOUSTICS, SPEECH, AND SIGNAL PROCESSING, VOL. 36, NO. IO, OCTOBER 1988 
+1553 
+Maximum Likelihood Localization of 
+Multiple Sources by Alternating 
+Projection 
+Abstract-We present a novel and efficient algorithm for computing 
+the exact maximum likelihood estimator of the locations of multiple 
+sources in passive sensor arrays. The estimator is equally well appli- 
+cable to the case of coherent signals appearing, for example, in mul- 
+tipath propagation problems, and to the case of a single snapshot. Sim- 
+ulation results that demonstrate the performance of the algorithm ate 
+included. 
+I. INTRODUCTION 
+HE localization of radiating sources by passive sensor 
+T 
+arrays is one of the central problems in radar, sonar, 
+radio-astronomy , and seismology. The simplest, yet not 
+degenerate, problem in this context is the estimation of 
+the directions-of-arrival of narrow-band sources with the 
+same known center frequency, which are located in the 
+far field of an array composed of sensors with arbitrary 
+locations and arbitrary directional characteristics. 
+This problem has received considerable attention in the 
+last 30 years, and a variety of techniques for its solution 
+have been proposed. The Maximum Likelihood (ML) 
+technique was one of the first to be investigated [ 141, [9]. 
+Nonetheless, because of the high computational load of 
+the multivariate nonlinear maximization problem in- 
+volved, it did not become popular. Instead, suboptimal 
+techniques with reduced computational load have domi- 
+nated the field. The better known ones are the Minimum 
+Variance method of Capon [3], the MUSIC method of 
+Schmidt [ 131 and Bienvenu and Kopp [ 11, and the related 
+Minimum Norm method of Reddi [ 1 13 and Kumaresan and 
+Tufts [8]. For a review of these and related techniques, 
+the reader is referred to [6], [lo], and [5]. 
+The performance of these techniques is inferior to that 
+of the ML technique. The difference in the performance 
+is especially conspicuous in the threshold region, namely, 
+when the signal-to-noise ratio is small, or alternatively, 
+when the number of samples (“snapshots”) is small. 
+Moreover, these techniques cannot handle the case of 
+coherent signals. This case appears, for example, in spec- 
+ular multipath propagation problems and, therefore, it is 
+of great practical importance. The preprocessing spatial 
+Manuscript received October 7, 1986; revised February 25, 1988. 
+The authors are with RAFAEL, P.O. Box 2250, Haifa 31021, Israel 
+IEEE Log Number 8822828. 
+smoothing techniques proposed to cope with this problem 
+[4], [12] remedy the situation only partially. 
+Yet another difference between the ML and these sub- 
+optimal techniques is their performance in the case that 
+the number of snapshots is smaller than the number of 
+sensors as happens, for example, in the case of a single 
+snapshot. Again, while the ML technique handles this case 
+without any difficulty, the suboptimal techniques fail 
+completely. 
+In this paper we present a novel and computationally 
+attractive method for computing the ML estimator. It is 
+based on an iterative technique referred to as “Alternating 
+Projection” (AP), that transforms the multivariate nonlin- 
+ear maximization problem into a sequence of much sim- 
+pler one-dimensional maximization problems. 
+The paper is organized as follows. In Section 11, we 
+formulate the problem. In Section I11 and Section IV, re- 
+spectively, we derive the ML estimator and present the 
+AP algorithm. Computer simulations that demonstrate the 
+performance of the ML estimator, as computed with the 
+AP algorithm, in comparison with the Cramer-Rao lower 
+bound and the MUSIC algorithm are presented in Section 
+V. Our concluding remarks are given in Section VI. 
+11. PROBLEM FORMULATION 
+Consider an array composed of p sensors with arbitrary 
+locations and arbitrary directional characteristics, and as- 
+sume that q narrow-band sources, centered around a 
+known frequency, say wo, impinge on the array from lo- 
+cations el, - - - , 8,. 
+Since narrow-bandedness in the sensor array context 
+means that the propagation delays of the signals across 
+the array are much smaller than the reciprocal of the band- 
+width of the signals, it follows that the complex envelopes 
+of the signals received by the array can be expressed as 
+where x( t ) is the p X 1 vectors 
+and a ( @ k ) is the “steering vector” of the array toward 
+0096-3518/88/1000-1553$01 .OO O 1988 IEEE 
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 04:33:06 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 2 ---
+1554 
+IEEE TRANSACTIONS ON ACOUSTICS. SPEECH, AND SIGNAL PROCESSING, VOL. 36, NO. 10. OCTOBER 1988 
+direction 0, 
+ever, to the case of fully correlated signals and to the case 
+of a single snapshot). Assumptions A1 and A2 are needed 
+to guarantee the uniqueness of the solution [19]. Assump- 
+tions A3 and A4 are the conventional assumptions for the 
+= [al 
+e-j,,,,r,(en) . . . up(0,) ,-j,,,,Tp(ek)l 
+T . 
+( 1 .c) 
+9 
+, 
+Here T denotes the transpose, and 
+xi ( t ) = the signal received by the ith sensor, 
+sk ( t ) = the signal emitted by the kth source as re- 
+ceived at the reference point, 
+ai (0,) = the amplitude response of the ith sensor to a 
+wavefront impinging from location Ok, 
+T~ (0,) = the propagation delay between the reference 
+point and the ith sensor for a wavefront im- 
+pinging from location 0,, and 
+ni ( t ) = the noise at the ith sensor. 
+The vector of the received signals x ( t ) can be ex- 
+pressed more compactly as 
+x ( t ) = A ( @ ) ~ ( t ) 
++ n ( t ) 
+( 2 . 4 
+A ( @ ) = [ 4 0 , ) , - , ~(e,)] 
+(2.b) 
+where A ( 0 ) is the p x q matrix of the steering vectors 
+and s ( t ) is the q X 1 vector of the signals 
+noise in sensor arrays, made to facilitate the application 
+of the Maximum Likelihood (ML) technique. As we shall 
+see, in case these assumptions do not hold, the estimator 
+to be derived is still meaningful: it coincides with the 
+Least-Squares (LS) estimator. 
+111. THE MAXIMUM LIKELIHOOD 
+ESTIMATOR 
+In this section we derive the Maximum Likelihood 
+(ML) estimator of the source locations. The derivation 
+follows that in [16] (see also [2]). 
+Unlike the common approach in the sensor array liter- 
+ature, we do not regard the signals as sample functions of 
+random processes. Instead, we regard them as unknown 
+deterministic sequences. Although this is done mainly be- 
+cause it allows, as we shall show, certain computational 
+simplifications, it also has some interesting advantages 
+when the signals waveforms are of interest. 
+Under assumptions A4 and A5, it follows from (1) that 
+the joint density function of the sampled data is given by 
+1 
+M 
+s ( t ) = [ s * ( t ) , * 
+> s,(t)l'. 
+( 2 . 4 
+, tu denote the time instants at which the 
+= FI a det [a2Z] 
+Let t, , - - 
+snapshots are taken. The sampled data can then be ex- 
+pressed as 
+X = A ( @ ) S + N 
+(3'a) 
+where det [ ] denotes the determinant. Thus, the log like- 
+where X and N are the p X M matrices 
+lihood, ignoring constant terms, is given by 
+and S is the q X M matrix 
+s = [ S ( t l ) ? * 
+7 S ( t M ) ] . 
+( 3 . 4 
+The localization problem is to estimate the locations 0 I, 
+. . . , 0, of the sources from the M samples ("snap- 
+shots") of the array x ( t l ) , * 
+To solve this problem, we make the following assump- 
+tions regarding the array, the signals, and the noise. 
+A 1 : The number of signals is known and is smaller than 
+the number of sensors, namely, q < p . 
+A2: Every set of p steering vectors is linearly indepen- 
+dent. 
+A3: The noise { n ( t ) } is stationary and ergodic com- 
+plex valued Gaussian process of zero mean and 
+variance matrix a2Z, where u2 is an unknown sca- 
+lar and Z is the identity matrix. 
+A4: The noise samples { n ( t i ) 1 are statistically inde- 
+pendent. 
+The assumption that the number of signals is known 
+was made to simplify the exposition. The case of un- 
+known number of signals is dealt with in [18] (see also 
+[ 171 for a different method which is not applicable, how- 
+, x ( t M ) . 
+To compute the Maximum Likelihood (ML) estimator 
+we have to maximize the log likelihood with respect to 
+the unknown parameters. Fixing 0 and S, and then max- 
+imizing with respect to u2, we get 
+l
+M
+ 
+62 = - 
+Mp i = l c Ix(ti) - A ( @ ) s(ti)I2. 
+(6) 
+Substituting this result back into the log-likelihood func- 
+tion, ignoring constant terms, we get that the ML esti- 
+mator is obtained by solving the following maximization 
+problem: 
+(7) 
+Since the logarithm is a monotonic function, the above 
+maximization problem is equivalent to the following min- 
+imization problem: 
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 04:33:06 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 3 ---
+ZISKIND AND WAX: ML LOCALIZATION 
+1555 
+which is the Least Squares (LS) criterion for the estima- 
+tion problem at hand. 
+To carry out this minimization, we fix 0 and minimize 
+with respect to S. This yields the well-known solution 
+(9) 
+Substituting (9) into (8) we obtain the following min- 
+sl(t,) = ( A H ( @ ) 
+A ( @ ) ) - ’ A H ( @ ) 
+x ( t t ) 
+where H denotes the Hermitian conjugate. 
+imization problem: 
+M 
+min c Ix(tl) - A ( O ) ( A H ( O ) 
+A ( @ ) ) - ’ A H ( @ ) x(t,> 1’. 
+( 10) 
+@ 
+r = l 
+This can be rewritten as 
+M 
+@ 
+r = l 
+2 
+min 
+I X ( i l ) - P A ( @ ) x ( t i ) l 
+(1l.a) 
+where PA(@) 
+is the projection operator onto the space 
+spanned by the columns of the matrix A ( O), 
+PA(@) = A ( @ ) ( A H ( @ ) 
+A ( @ ) ) - ’ A H ( @ ) . (1l.b) 
+Thus, the maximum likelihood estimate of the param- 
+eter 0 is obtained by maximizing the log-likelihood func- 
+tion 
+M 
+~ ( 0 ) 
+= r = l Ip,-i(@) 
+.(ti> 1’. 
+(12) 
+This estimator has an appealing geometric interpreta- 
+tion. Notice, from (l), that in the absence of noise the 
+vector x ( t ) stays in the q-dimensional space spanned by 
+the columns of A(@), referred to as the “signal sub- 
+space,” while the presence of noise may cause x ( t ) to 
+wander away from this subspace. From (12) it follows 
+that the Maximum Likelihood estimator is obtained by 
+searching over the array manifold for those q steering vec- 
+tors that form the q-dimensional signal subspace which is 
+“closest” to the vectors { x( t ) >, 
+where closeness is mea- 
+sured by the modulus of the projection of the vectors onto 
+this subspace. 
+A different form of (12), which is found to be more 
+suitable for our purposes, is obtained by rewriting it as 
+L ( @ ) = tr [PA(@)RI 
+(13.a) 
+where tr[ ] is the trace of the bracketed matrix, and R is 
+the sample covariance matrix 
+(13.b) 
+An interesting interpretation of (13), which sheds some 
+light on the relation between the Maximum Likelihood 
+estimator and the MUSIC estimator of Schmidt [ 131 and 
+Bienvenu and Kopp 111, and the Minimum Norm esti- 
+mator of Reddi [ 113 and Kumaresan and Tufts 181, is ob- 
+tained by casting (13) in terms of the eigenstructure of R. 
+Let 6, 2 62 2 
+- 2 6, and uI, 
+, up denote the 
+eigenvalues and eigenvectors, respectively, of R. From 
+l
+M
+ 
+R = - C x ( t l ) x H ( t , ) . 
+M i = l 
+the spectral 
+can express 
+representation theorem of matrix theory, we 
+R as 
+P 
+R = 
+~ ; U , U ? . 
+(14) 
+i = 1 
+With this representation, using the properties of the 
+projection and trace operators, we can rewrite (13) as 
+P 
+L ( @ ) = i = l 6; IPA(@)Ui(’. 
+(15) 
+This expression shows that the Maximum Likelihood 
+estimator, unlike the MUSIC and the Minimum Norm es- 
+timators, involves all the eigenvalues and the eigenvec- 
+tors of R; the larger the eigenvalue the more important it 
+is that the projection of the corresponding eigenvector onto 
+the signal subspace be maximized. 
+The maximization of the log-likelihood, (13), is a non- 
+linear, multidimensional maximization problem, and as 
+such is computationally expensive. Moreover, in many 
+cases, the array manifold, {ace)}, is given as a table, 
+referred to as the “calibration table,” thus rendering all 
+the conventional gradient-type maximization techniques 
+unapplicable. In the next section we present a rather sim- 
+ple and efficient multidimensional maximization tech- 
+nique “tailored” for the problem at hand. 
+IV. THE ALTERNATING 
+PROJECTION 
+ALGORITHM 
+In this section we present an efficient algorithm for 
+computing the ML estimator. The algorithm is based on 
+a maximization technique, referred to as Alternating 
+Maximization, which we apply in conjunction with a 
+computationally efficient projection-matrix decomposi- 
+tion scheme. 
+A. The Alternating Maximization Technique 
+The Alternating Maximization (AM) is a conceptually 
+simple technique for multidimensional maximization. The 
+technique is iterative; at every iteration a maximization is 
+performed with respect to a single parameter while all the 
+other parameters are held fixed. That is, the value of 0, 
+at the ( k + 1 )th iteration is obtained by solving the fol- 
+lowing one-dimensional maximization problem: 
+arg max tr [P[A(&i:$, 
+( 16.a) 
+e l k + { ) = 
+0, 
+where e{:,’ 
+denotes the (q - 1 ) X 1 vector of the pre- 
+computed parameters, 
+= 
+- . , e!”’,, e!?,, - , ea)] (16.b) 
+( 1 ) 
+and arg maxe, f( 0,) denotes the value of 0, that attains 
+the maximum off( 0;). 
+Intuitively, the algorithm climbs the peak of L ( 0 ) 
+along lines parallel to the axes, as shown schematicaly in 
+Fig. 1. The rate of climb depends, of course, on the struc- 
+ture of L ( 0 ) in the proximity of the peak. Since a max- 
+imization is performed at every iteration, the value of the 
+maximized function, L ( @ ) , cannot decrease. As a result, 
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 04:33:06 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 4 ---
+1556 
+IEEE TRANSACTIONS ON ACOUSTICS, SPEECH, AND SIGNAL PROCESSING, VOL. 36, NO. IO. OCTOBER 1988 
+our problem, we have 
+82 t 
+q01 
+(2) A(41 
+8, 
+8, 8, 
+Fig. 1. Successive iterations of the AM algorithm in the maximization of 
+a 2-dimensional function. 
+the algorithm is bound to converge to a local maximum. 
+Depending on the initial condition, the local maximum 
+may or may not be the global one. 
+As the initialization step is so critical to the global con- 
+vergence, it is a key element in the algorithm. The fol- 
+lowing rather simple initialization procedure gave excel- 
+lent results in the extensive set of simulations we have run 
+for different scenarios. 
+We start by solving the problem for a single source. In 
+this case we get 
+8‘1’) = arg max tr [ P , ( ~ , ) R ] . 
+(17) 
+81 
+where b( ei, e[!]) is the unit vector 
+and 1) 1) denotes the norm. 
+C. The Algorithm 
+Using the notation 
+( i ) = [e\”, . . . , e!!),], 
+(23) 
+the AP algorithm we have described above can be sum- 
+marized as follows: 
+INITIALIZATION: 
+For-i = 1 to q do 
+e!’) = arg max bH(ei, el!,’) Rb(ei, e{!,’> 
+8i 
+Next, we solve the second source, assuming the first 
+source is at 8 
+End; 
+0 +- kandO 7 
+i; 
+MAIN LOOP: 
+arg max tr [P[a(blo) ),a(e2)1Rl. 
+( 18) 
+Repeat until I 
+- 
+I < E 
+e p = 
+e2 
+for all i (i = 1, 
+k + k + l ; 
+i + ( i + 1)modq 
+Forh = 1 t o q d o 
+* , q ) : 
+C!ntinuing 
+in this fashion, at the ith iteration we solve 
+for 8 io), 
+with all the other sources being at their precom- 
+puted value;. The proce$ure is continued until all the ini- 
+tial values 8 j0), * - - , e?) are computed. 
+elk’ = G ( k - 1 ’ . 
+h
+?
+ 
+= arg max bH(ei, 6$],’> 
+R b ( e i , e[!,’); 
+B. Projection-Matrix Decomposition 
+8i 
+The AM algorithm reduces the number of evaluations 
+of L ( 0 ) with respect to an exhaustive search. Neverthe- 
+less, the computational load at every iteration is still sub- 
+stantial since matrix inversion and multiplications are in- 
+volved. To simplify the computation at each iteration, we 
+introduce a basic property of projection matrices, known 
+as the projection-matrix update formula. 
+Let B and C be two arbitrary matrices with the same 
+number of rows, and let P[E,c, denote the projection-ma- 
+trix onto the columns space of the augmented matrix [B, 
+C ] . It is well known that 
+P [ B , C ] = PB + p C ~ 
+(19.a) 
+where CE denotes the residual of the columns of C when 
+projected on B, 
+c, = (1 - PB)C. 
+(19.b) 
+Applying the projection-matrix update formula (19) to 
+End; 
+V. SIMULATION 
+RESULTS 
+In order to demonstrate the performance of the (ML) 
+estimator computed by the AP algorithm, we compare it 
+to the Cramer-Rao lower bound and with the suboptimal 
+MUSIC algorithm in several simulated experiments. 
+In all the first four experiments, the array was linear 
+and uniform with three isotropic sensors spaced half a 
+wavelength apart. The array beamwidth, defined as the 
+reciprocal of its length in wavelengths, was therefore 57”. 
+The sources were two equal power narrow-band emitters, 
+and the noise was additive and uncorrelated from sensor 
+to sensor and with the signals. 
+In every experiment we performed 100 Monte-Carlo 
+runs and computed the root-mean-square (rms) error for 
+each direction-of-arrival. 
+In the first experiment we simulated two uncorrelated 
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 04:33:06 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 5 ---
+ZISKIND AND WAX: ML LOCALIZATION 
+1557 
+8 . 
+6 . 
+W 
+W 
+[z 
+(3 
+W n 
+4 . 
+Y 
+a 
+a 
+0 
+K 
+W 
+2 
+v) 
+5 
+[z 
+0 . 
+2 . 0 
+I . 6 
+- 
+1 . 2 
+W 
+W 
+(3 
+W 
+a 
+n - 
+0 . 8 
+a 
+a 
+0 
+U 
+W 
+0 . 4 
+0 . 0 
+I O 
+S N A P S H O T S 
+I 
+I 
+I 
+I 
+I 
+I 
+I 
+I 
+I 
+I 
+I O 
+15 
+2 0 
+25 
+3 0 
+S N R ( d b ) 
+Fig. 2. Two equal power uncorrelated emmiters, located at 0" and 20", 
+impinging on a linear uniform array with three sensors spaced half a 
+wavelength apart. The array beamwidth is 57". The number of snapshots 
+is 10. 
+. MUSIC 
+S N R = 
+2 0 ( d b 1 
+C R 
+\\ 
+I 
+I I
+l
+l
+ 
+6 
+10 
+2 0 
+30 40 
+60 
+100 
+' 2 0 0 
+1000 
+Fig. 3. Same scenario as in Fig. 2. The SNR is 20 dB. 
+1 
+I 
+1 
+I
+1
+ 
+l
+l
+l
+l
+ 
+I 
+I 
+1 
+I
+1
+1
+1
+1
+l
+ 
+S N A P S H O T S 
+emitters impinging from 0" and 20". The number of snap- 
+shots taken was 10. Fig. 2 shows the resulted rms error 
+(in degrees) of the first source as a function of the SNR, 
+defined as SNR = 10 log (s2/02), where s2 and a* are 
+the average power of the signals and the noise, respec- 
+tively. The improved performance of the ML estimator at 
+low and moderate SNR is evident. 
+In the second experiment, the scenario was the same as 
+in the first one, except that this time we fixed the SNR to 
+20 dB. Fig. 3 shows the resulted rms error of the first 
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 04:33:06 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 6 ---
+1558 
+IEEE TRANSACTIONS ON ACOUSTICS, SPEECH, AND SIGNAL PROCESSING, VOL. 36, NO. IO, OCTOBER 1988 
+3. 0 
+2 . 5 
+2 . 0 
+W 
+W 
+0 
+W 
+1 . 5 
+a 
+n 
+1 . 0 
+a 
+0 
+a 
+W a 
+v) 
+0 . 5 
+5 
+a 
+0 . 0 
+8 . 
+6 . 
+W 
+W a 
+a 
+W 
+4 . 
+n 
+v 
+a 
+0 
+oz 
+a 
+W 
+2 . 
+UJ 
+5 
+a 
+0 . 
+MUSIC 
+S N R = 20 (db) 
+I 
+I 
+I 
+I 
+I 
+1 
+I 
+I 
+1 
+J 
+0 
+200 
+400 
+600 
+00 0 
+I O 0 0 
+S N A P SH 0 TS 
+Fig. 4. Two equal power uncorrelated emitters, located at 0" and 5", im- 
+pinging on the same array as in Fig. 2. The SNR is 20 dB. 
+IO 
+S N A P S H O T S 
+I 
+I 
+I 
+I 
+I 
+I 
+I 
+I 
+I 
+1 
+I O 
+I S 
+2 0 
+2s 
+3 0 
+S N R (dbl 
+Fig. 5. Same scenario as in Fig. 3, bi 
+source as a function of the number of snapshots. Again, 
+note the improved performance of the ML estimator. 
+In the third experiment, the two emitters were located 
+at 0" and 5" and the SNR was again 20 dB. Fig. 4 shows 
+the substantially improved performance of the ML esti- 
+mator. The somewhat larger deviation from the Cramer- 
+Rao bound in this case is explained by the fact that the 
+bound is known to be not tight in the threshold region. 
+ut the two sources are fully correlated. 
+In the fourth experiment, we simulated the coherent 
+signals case. The scenario was as in the first experiment, 
+except that this time the two sources were fully corre- 
+lated. Fig. 5 shows the results as a function of the SNR. 
+When compared to Fig. 3, about 10 percent degradation 
+is observed. In contrast, the MUSIC algorithm failed 
+completely in this case. 
+In the fifth experiment, we simulated a completely dif- 
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 04:33:06 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 7 ---
+ZlSKlND AND WAX: ML LOCALIZATION 
+5 L - 
+\ 
+MUSIC 
+1559 
+4 SIGNALS 
+SNR= 2 0 ( d b ) 
+a 
+a 
+0 
+U 
+W 
+t 
+0 . 0 
+I 
+I 
+I 
+I 
+I 
+I 
+1 
+1 
+0 . 
+1 0 0 . 
+200 
+3 0 0 . 
+4 0 0 . 
+500 
+SNAPSHOTS 
+Fig. 6. Four equal power uncorrelated emitters, located at -8", - l o , 5", 
+and 15", impinging on a uniform linear array with seven sensors spaced 
+half a wavelength apart. The array beamwidth is 19". The SNR is 20 
+dB . 
+ferent scenario. The array consisted of seven isotropic 
+sensors spaced half a wavelength apart (array beamwidth 
+of 19"), and the number of emitters was four. The emit- 
+ters were of equal power and uncorrelated. Their direc- 
+tions-of-arrival were -8", - 1 ", 5 " , and 15". The SNR 
+was 20 dB. Fig. 6 shows the resulted rms error of the 
+emitter arriving from 5" as a function of the number of 
+snapshots. 
+In the extensive set of simulations we have run, the 
+number of iterations to convergence almost never ex- 
+ceeded 7, with the average being between 4 and 5. For 
+example, typical iteration sequences in the first experi- 
+ment are 8", l l " , 5 " , 16", lo, 20" for 15 dB SNR, and 
+9", 13", 3", 18", 0", 20" for the 20 dB S N R . To bring 
+another example, typical sequences in the third experi- 
+ment are 3", 2", 4", 0", 6" for 100 snapshots, and 3", 
+l o , 5 " , 0" for 1000 snapshots. 
+VI. CONCLUDING 
+REMARKS 
+We have presented a novel and efficient algorithm, re- 
+ferred to as AP, for computing the ML estimator of the 
+locations of multiple sources in passive sensor arrays. The 
+algorithm is equally applicable to the case of coherent sig- 
+nals and to the case of a single snapshot. 
+The algorithm is iterative; the maximum of the likeli- 
+hood function is computed by successive approximations. 
+The convergence of the algorithm to the global maximum 
+was demonstrated for a variety of scenarios. Evidently, 
+the key to this global convergence is the initialization 
+scheme. 
+The complexity involved in each iteration is modest. 
+Moreover, the numerically and computationally trouble- 
+some eigendecomposition of the sample-covariance ma- 
+trix is avoided. 
+In spite of the excellent global convergence of the al- 
+gorithm in the extensive set of simulations, no guarantee 
+for global convergence can be given in general. This lim- 
+itation is common to all the "deterministic hill climbing" 
+techniques. The recently introduced ' 'randomized hill 
+climbing" technique referred to as ''Simulated Anneal- 
+ing" [7] is more promising from this respect, although 
+even for this scheme global convergence is not guaranteed 
+ACKNOWLEDGMENT 
+The authors are grateful to B. Porat for his help in the 
+computations of the Cramer-Rao lower bounds, and to 
+the anonymous reviewers for their valuable comments 
+which helped to improve the exposition. 
+[201. 
+REFERENCES 
+[l] G . Bienvenu and L. Kopp "Adaptivity to background noise spatial 
+coherence for high resolution passive methods," in Proc. ICASSP80, 
+[2] J. Boheme, "Estimating the source parameters by maximum likeli- 
+hood and nonlinear regression," in Proc. ICASSP84, 1984, pp. 7.3.1- 
+7.3.4. 
+[3] J . Capon, "High-resolution frequency-wavenumber spectrum analy- 
+sis,'' Proc. IEEE, vol. 57, pp. 1408-1418, 1969. 
+[4] J. E. Evans, J. R. Johnson, and D. F. Sun, "Application of advanced 
+signal processing techniques to angle of arrival estimation in ATC 
+navigation and surveillance systems," Rep. 582 Lincoln Lab., 
+M.I.T., 
+Cambridge, MA, 1982. 
+1980, pp. 307-310. 
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 04:33:06 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 8 ---
+1560 
+IEEE TRANSACTIONS ON ACOUSTICS, SPEECH, AND SIGNAL PROCESSING, VOL. 36, NO. IO. OCTOBER 1988 
+S. Haykin, “Radar array processing for angle of arrival estimation,” 
+in Array Signal Processing, S . Haykin, Ed. 
+Englewood Cliffs, NJ: 
+Prentice-Hall, 1984, pp. 194-292. 
+D. H. Johnson, “The application of spectral estimation methods to 
+bearing estimation problems,” Proc. IEEE, vol. 70, pp. 1018-1028, 
+1982. 
+S. Kirkpatric, C. D. Gellat, and M. Vecchi, “Optimization by sim- 
+ulated annealing,” Science, vol. 220, no. 5598, pp. 671-680, 1983. 
+R. Kumaresan and D. W. Tufts, “Estimating the angles of amval of 
+multiple plane waves,” IEEE Trans. Aerosp. Electron. Syst., vol. 
+W. S . Ligget, “Passive sonar: Fitting models to multiple time-se- 
+ries,” in NATO ASI on Signal Processing, J. W. R. Griffiths et al., 
+Eds. 
+N. L. Owsley, “Sonar array processing,” in Array Signal Process- 
+ing, S . Haykin, Ed. Englewood Cliffs, NJ: Prentice-Hall, 1984, pp. 
+S. S. Reddi, “Multiple source location- A digital approach,” IEEE 
+Trans. Aerosp. Electron. Syst., vol. AES-15, pp. 95-105, 1979. 
+T.-J. Shan, M. Wax, and T. Kailath, “On spatial smoothing for di- 
+rection-of-arrival estimation of coherent sources,” IEEE Trans. 
+Acoust., Speech, Signal Processing, vol. ASSP-33, pp. 806-811, 
+1985. 
+R. 0. Schmidt, “Multiple emitter location and signal parameter es- 
+timation,” IEEE Trans. Antennas Propagat., vol. AP-34, pp. 276- 
+280, 1986. 
+F. C. Schweppe, “Sensor array data processing for multiple signal 
+sources,” IEEE Trans. Inform. Theory, vol. IT, 14, pp. 294-305, 
+1968. 
+G. Strang, Linear Algebra and Its Applications. 
+New York: Aca- 
+demic, 1980. 
+M. Wax, “Detection and estimation of superimposed signals,” Ph.D. 
+dissertation, Stanford Univ., Stanford, CA, 1985. 
+M. Wax and T. Kailath, “Detection of signals by information theo- 
+retic criteria,” IEEE Trans. Acoust., Speech, Signal Processing, vol. 
+AES-19, pp. 134-139, 1983. 
+New York: Academic, 1973, pp. 327-345. 
+115-193. 
+ASSP-32, pp. 387-392, 1985. 
+[IS] M. Wax and I. Ziskind, “Detection of coherent and noncoherent sig- 
+nals by the MDL principle,” submitted to IEEE Trans. Acoust., 
+Speech, Signal Processing. 
+1191 -, 
+“On unique localization of multiple sources in passive sensor 
+arrays,” submitted to IEEE Trans. Acoust., Speech, Signal Process- 
+ing. 
+[20] I. Ziskind and M. Wax, “Maximum likelihood localization of di- 
+versed polarized sources by simulated annealing,” submitted to IEEE 
+Trans. Antennas Propagat. 
+Ilan Ziskind was born in Haifa, Israel, on Janu- 
+ary 7, 1937. He received the B.Sc. degree from 
+the Technion, Israel Institute of Technology, 
+Haifa, Israel, in 1962, the M.Sc. degree from the 
+University of Michigan, Ann Arbor, in 1963, and 
+the Ph.D. degree from Cornell University, Ithaca, 
+NY, in 1974. 
+From 1964 to 1965 he was with Burrough Cor- 
+poration. In 1965 he joined RAFAEL. Between 
+1974 to 1976 he was the Head of the Systems 
+Analysis and Simulation Section. Between 1977 
+to 1980 he was the Head of Signal Processing Group. In 1980 he was a 
+Visiting Scientist at Bell Northern Research Laboratones, Montreal, P.Q., 
+Canada. Since 1981 he has been involved in research and development of 
+adaptive systems, radar subsystem, and emitter localization techniques. 
+Mati Wax (S’81-M’85) for a photograph and biography, see p. 588 of the 
+April 1988 issue of this TRANSACTIONS. 
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 04:33:06 UTC from IEEE Xplore.  Restrictions apply. 

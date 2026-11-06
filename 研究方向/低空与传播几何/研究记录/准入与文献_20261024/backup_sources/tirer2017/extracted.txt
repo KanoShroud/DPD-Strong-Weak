@@ -1,0 +1,1404 @@
+
+=== PDF PAGE 1 ===
+Signal Processing 141 (2017) 288–298 
+Contents lists available at ScienceDirect 
+Signal Processing 
+journal homepage: www.elsevier.com/locate/sigpro 
+High resolution localization of narrowband radio emitters based on 
+doppler frequency shifts  
+Tom Tirer ∗, Anthony J. Weiss 
+The School of Electrical Engineering, Tel Aviv University, Tel Aviv 69978, Israel 
+a r t i c l e 
+i n f o 
+Article history: 
+Received 4 December 2016 
+Revised 8 May 2017 
+Accepted 14 June 2017 
+Available online 15 June 2017 
+Keywords: 
+Direct position determination 
+Emitter localization 
+Maximum likelihood 
+Minimum variance distortionless response 
+(MVDR) 
+a b s t r a c t 
+The localization of stationary narrowband radio emitters using multiple moving receivers is considered. 
+Most of the methods addressing this problem are based on two processing steps. In the ﬁrst step, each 
+receiver independently extracts signal measurements at several locations along its trajectory. Such mea- 
+surements are the Doppler frequency shift or the frequency difference from a reference receiver. In the 
+second step, these measurements are used for geolocation. On the other hand, the direct position de- 
+termination method advocates using the observations from all the receivers together in order to esti- 
+mate the location in a single step. This single-step method is known to outperform two-step methods 
+when the signal to noise ratio is low. In this paper, we propose a direct-position-determination-based 
+method for Doppler-based localization of multiple emitters that transmit unknown signals. The method 
+can only be used for narrowband signals, namely, the signals’ bandwidth must be small compared to the 
+inverse of the propagation time between the receivers. The method does not require knowledge of the 
+number of emitters. It is based on minimum-variance-distortionless-response considerations to achieve a 
+high resolution estimator that requires only a two-dimensional search for planar geometry, and a three- 
+dimensional search for the general case. 
+© 2017 Elsevier B.V. All rights reserved. 
+1. Introduction 
+Passive geolocation based on the Doppler effect attracts much 
+interest in radar, sonar, satellite positioning and navigation. We fo- 
+cus on locating stationary radio frequency transmitters by multiple 
+moving receivers. The motion of a receiver in the presence of an 
+emitter induces a frequency shift that depends on the radial ve- 
+locity of the receiver towards (or away from) the emitter and on 
+the signal central frequency (assuming that the central frequency 
+is much larger than the bandwidth). Therefore, if the receivers lo- 
+cation and velocity along their trajectory are known, as well as the 
+central frequency, then the emitter location can be estimated. 
+Common localization methods for single emitter use two pro- 
+cessing steps. In the ﬁrst step, each receiver independently esti- 
+mates signal parameters at several locations along its trajectory. 
+Such parameters are the Doppler frequency shift [1] or the fre- 
+ This research was supported by Israel Science Foundation (grants 503/15 , 
+965/15 ) and the Institute for Future Technologies Research named for the Medvedi, 
+Shwartzman and Gensler. The work of T. Tirer was supported in part by a fellowship 
+through the Yitzhak and Chaya Weinstein Research Institute for Signal Processing, 
+Tel Aviv University . 
+∗Corresponding author. 
+E-mail addresses: tirer.tom@gmail.com (T. Tirer), ajw@eng.tau.ac.il (A.J. Weiss). 
+quency difference with respect to a reference receiver [2,3] , also 
+known as differential Doppler (DD) or frequency difference of ar- 
+rival (FDOA). In the second step the location of the transmitter is 
+estimated based on the results of the ﬁrst step. From estimation 
+theory point of view, these methods are sub-optimal, since the pa- 
+rameters estimation in the ﬁrst phase ignores the constraint that 
+all measurements must be consistent with a geolocation of a sin- 
+gle point emitter. Furthermore, in case of multiple emitters, the 
+problem of associating estimated parameters with their relevant 
+sources arises. 
+The Direct Position Determination (DPD) approach in the con- 
+text of stationary sensor arrays was proposed in [4] for a single 
+emitter and in [5] for multiple emitters whose number is known. 
+DPD methods were later proposed for Doppler-based localization, 
+as we discuss here, for narrowband signals [6] and for wideband 
+signals [7] , but only for a single emitter. The latter methods have 
+not yet been extended to multiple emitters. The DPD uses the data 
+collected by all receivers at all interception intervals to formulate a 
+cost function that depends only on the location of sources. There- 
+fore, it enables direct estimation of the locations in a single step. 
+The DPD inherently overcomes the parameters-sources association 
+problem that was previously mentioned, and was shown to outper- 
+form two-step methods in low signal to noise ratio (SNR) scenar- 
+ios. The DPD technique requires the transmission of the received 
+http://dx.doi.org/10.1016/j.sigpro.2017.06.019 
+0165-1684/© 2017 Elsevier B.V. All rights reserved. 
+
+
+=== PDF PAGE 2 ===
+T. Tirer, A.J. Weiss / Signal Processing 141 (2017) 288–298 
+289 
+signals (possibly sampled) to a central processing location, unlike 
+most of the two-step methods, that require only the transmission 
+of the intermediate parameters. However, note that some two-step 
+methods which are based on cross-correlation, like the differential 
+Doppler, also require the transfer of raw data when the transmit- 
+ted signal waveform is unknown. 
+Recently a new approach was proposed for high resolution di- 
+rect position determination based on angle of arrival (AOA) and 
+time of arrival (TOA) [8–10] . In the current work we extend 
+the approach to Doppler-based localization. This extension is not 
+straightforward, as discussed in Section 3.2 . Our proposed method 
+advocates using a high resolution spectral based method instead 
+of using the single emitter Maximum Likelihood (ML) estimator, 
+in order to increase accuracy and resolution for multiple emit- 
+ters scenario, but still keep the estimator computationally attrac- 
+tive. We use Minimum Variance Distortionless Response (MVDR) 
+considerations [11] , or more precisely, generalized-MVDR consider- 
+ations [12] , in order to create a high resolution estimator that can 
+localize multiple dense emitters that transmit unknown narrow- 
+band signals. Since prior knowledge of the number of emitters is 
+not required for application of MVDR, an initial step of model order 
+determination [13] is avoided. Recall that order determination is 
+prone to errors in certain cases such as small number of snapshots, 
+low SNR or dense sources. Wrong order may signiﬁcantly deterio- 
+rate the performance of algorithms that use it as an input, such 
+as the well known MUSIC [14] . The proposed method generates a 
+spectrum (heat map) over a two-dimensional space, if the emitters 
+are conﬁned to a known plane, or over a three-dimensional space 
+in the general case, with peaks at points where emitters are likely 
+to be located. 
+To summarize, the main contribution of this manuscript is 
+the development of a computationally eﬃcient DPD method 
+for Doppler-based localization of multiple stationary narrowband 
+emitters. Previous Doppler-based localization methods considered 
+only a single emitter. In addition, we propose a modiﬁed algorithm 
+to enhance the robustness of the new estimator to observations 
+with low signal power. 
+The remainder of the paper is organized as follows. 
+Section 2 deﬁnes the problem at hand. In Section 3 several 
+DPD algorithms are proposed. Our main contributions are given in 
+Sections 3.2 and 3.3 . In Section 4 we provide simulation results of 
+the different DPD methods. Finally, discussion and conclusions are 
+included in Section 5 . 
+2. Problem formulation 
+Consider a stationary radio emitter and L moving receivers. The 
+receivers are assumed to be synchronized in time and frequency. 
+The emitter’s location is denoted by the vector of coordinates p . 
+Each receiver intercepts the transmitted signal at K short intervals 
+along its trajectory. The position and velocity vectors of the ℓ th re- 
+ceiver at the k th interval are denoted by p ℓ , k and v ℓ , k , respec- 
+tively, and assumed to be constant during the interval. The trans- 
+mitted signal is assumed to be narrowband, such that its complex 
+envelope is the same at all receivers. This places a restriction on 
+the receivers spatial separation for a given signal bandwidth. De- 
+note the signal bandwidth by B , the maximal propagation time and 
+spatial separation between the receivers by τ and d , respectively, 
+and the propagation speed by c , we have the following narrowband 
+constraint 
+B ≪1 /τ = c/d. 
+(1) 
+The nominal carrier frequency f c is assumed to be known to the 
+receivers, and therefore down conversion is possible. The complex 
+signal observed by the ℓ th receiver at the k th interception interval 
+is 
+r ℓ,k (t) = αℓ,k s k (t)e i 2 π f ℓ,k (p ) t + w ℓ,k (t) , 0 ≤t ≤T 
+(2) 
+where T is the observation time interval, αℓ , k is an unknown com- 
+plex scalar representing the channel effect, s k ( t ) is the unknown 
+signal envelope during the k th interception interval, w ℓ,k (t) is a 
+white, zero mean, proper, complex Gaussian noise, and f ℓ , k ( p ) is 
+the Doppler frequency shift observed by the ℓ th receiver during 
+the k th interval, given by 
+f ℓ,k (p ) = f c 
+v T 
+ℓ,k (p −p ℓ,k ) 
+c∥ p −p ℓ,k ∥ . 
+(3) 
+More details about the observed frequency and the down conver- 
+sion process are given in [6] . Note that unknown frequency shifts 
+due to source instability can be included in the unknown signal. 
+We also remark that since the location of each receiver may greatly 
+change between interception intervals, it is more natural to assume 
+that the unknown channel effect changes, and therefore the idea of 
+coherent summation of intervals [15] is not applicable. 
+The down converted signal is sampled at times t n  nT s , where 
+n = { 0 , . . . , N −1 } and T s = T /N. The sampled signal is denoted by 
+r ℓ , k [ n ]  r ℓ , k ( nT s ). Using similar deﬁnitions as [6] , the model (2) can 
+be written in a vector form as 
+r ℓ,k = αℓ,k A ℓ,k (p ) s k + w ℓ,k , 
+(4) 
+where 
+r ℓ,k ≜ 
+r ℓ,k [0] , . . . , r ℓ,k [ N −1] T , 
+w ℓ,k ≜ 
+w ℓ,k [0] , . . . , w ℓ,k [ N −1] T , 
+s k ≜ [ s k [0] , . . . , s k [ N −1] ] 
+T , 
+A ℓ,k (p ) ≜ diag 
+1 , e i 2 π f ℓ,k (p ) T s , . . . , e i 2 π f ℓ,k (p )(N−1) T s 
+. 
+(5) 
+The notation diag { x 1 , . . . , x n } stands for a diagonal matrix with 
+{ x 1 , . . . , x n } on the main diagonal. 
+To conclude, the problem at hand now is to use the observa- 
+tions given in Eq. (4) in order to ﬁnd the location of the transmit- 
+ter. Moreover, we aim to ﬁnd a high resolution algorithm, capable 
+of successfully localizing spatially dense emitters. We remind the 
+reader that the unknown parameters are { αℓ , k }, { s k } and p . 
+3. DPD algorithms 
+3.1. Single source maximum likelihood estimation 
+We start with developing the single source DPD Maximum Like- 
+lihood estimator. We will formulate it differently than [6] , by op- 
+timizing the ML criterion ﬁrst with respect to the signal, and only 
+then with respect to the channel parameters. Later, we will use 
+some of the intermediate results obtained in this development. We 
+start with collecting the observations from all the receivers 
+r k ≜ 
+r T 
+1 ,k , . . . , r T 
+L,k 
+T , 
+w k ≜ 
+w T 
+1 ,k , . . . , w T 
+L,k 
+T , 
+αk ≜ α1 ,k , . . . , αL,k 
+T , 
+A k (p , αk ) ≜ 
+⎡ 
+⎣ 
+α1 ,k A 1 ,k (p ) 
+. . . 
+αL,k A L,k (p ) 
+⎤ 
+⎦ . 
+(6) 
+We can write (4) as 
+r k = A k (p , αk ) s k + w k . 
+(7) 
+
+
+=== PDF PAGE 3 ===
+290 
+T. Tirer, A.J. Weiss / Signal Processing 141 (2017) 288–298 
+Note that without loss of generality we can assume that ∥ αk ∥ 2 = 
+L 
+
+ 
+ℓ =1 
+| αℓ,k | 2 = 1 , since the missing factor will be included in the un- 
+known vector s k . Therefore, note that 
+A H 
+k (p , αk ) A k (p , αk ) = I N , 
+(8) 
+where I N denotes the N × N identity matrix. 
+Since the noise samples are independent, identically dis- 
+tributed, proper, complex Gaussian variables, the Maximum Like- 
+lihood estimator coincides with the Least Squares (LS) estimator 
+(assuming that the noise variance is known, and equal at all re- 
+ceivers). The single source ML estimator is obtained by minimizing 
+the following cost function 
+Q SML ≜ 
+K 
+ 
+k =1 
+∥ r k −A k (p , αk ) s k ∥ 2 . 
+(9) 
+The minimizer with respect to s k is given by 
+ˆ 
+s k = 
+A H 
+k (p , αk ) A k (p , αk ) −1 A H 
+k (p , αk ) r k 
+= A H 
+k (p , αk ) r k 
+(10) 
+where we used (8) . Substituting ˆ 
+s k into (9) , using (8) again and 
+simplifying, gives 
+Q SML = 
+K 
+ 
+k =1 
+(∥ r k ∥ 2 −
+A H 
+k (p , αk ) r k 
+2 ) . 
+(11) 
+Instead of minimizing (11) we can maximize 
+˜ 
+Q SML ≜ 
+K 
+ 
+k =1 
+A H 
+k (p , αk ) r k 
+2 . 
+(12) 
+From the structures of r k and A k ( p , αk ) in (5), (6) note that 
+˜ 
+Q SML = 
+K 
+ 
+k =1 
+N−1 
+ 
+n =0 
+a H 
+k (n, p , αk ) ˜ 
+r k [ n ] 
+2 , 
+(13) 
+where 
+˜ 
+r k [ n ] ≜ 
+r 1 ,k [ n ] , . . . , r L,k [ n ] T , 
+(14) 
+a k (n, p , αk ) ≜ k (n, p ) αk , 
+(15) 
+k (n, p ) ≜ diag 
+e i 2 π f 1 ,k (p ) nT s , . . . , e i 2 π f L,k (p ) nT s 
+. 
+(16) 
+The criterion (13) can be written as 
+˜ 
+Q SML = 
+K 
+ 
+k =1 
+N−1 
+ 
+n =0 
+a H 
+k (n, p , αk ) ˜ 
+R k (n ) a k (n, p , αk ) , 
+(17) 
+where 
+˜ 
+R k (n ) ≜ ˜ 
+r k [ n ] ˜ 
+r H 
+k [ n ] . 
+(18) 
+Substituting (15) in (17) we get 
+˜ 
+Q SML = 
+K 
+ 
+k =1 
+N−1 
+ 
+n =0 
+αH 
+k H 
+k (n, p ) ˜ 
+R k (n ) k (n, p ) αk . 
+(19) 
+Finally, maximization with respect to αk , subject to ∥ αk ∥ = 1 , re- 
+sults in a criterion that depends only on p 
+˜ 
+Q SML (p ) = 
+K 
+ 
+k =1 
+λmax 
+ N−1 
+ 
+n =0 
+H 
+k (n, p ) ˜ 
+R k (n ) k (n, p ) 
+
+, 
+(20) 
+where λmax ( ·) denotes the largest eigenvalue of the operand. The 
+estimated emitter’s position ˆ 
+p is the maximizer of (20) . In case of 
+several emitters, (20) can still be calculated, and the locations are 
+estimated from its maxima. However, in this case, the estimates 
+are not likely to coincide with the multi-source ML estimator that 
+requires a heavy multi-dimensional search. 
+From the obtained solution we see the advantage of DPD over 
+traditional two-step methods. While in two-step methods each re- 
+ceiver independently estimates the Doppler frequency shift, or uses 
+only one reference receiver to estimate their frequency difference 
+(differential Doppler), the DPD approach treats all the receivers as 
+a sensor array with time-dependent array response 
+˜ 
+r k [ n ] = a k (n, p , αk ) s k [ n ] + ˜ 
+w k [ n ] , 
+(21) 
+where 
+˜ 
+w k [ n ] ≜ 
+w 1 ,k [ n ] , . . . , w L,k [ n ] T . 
+(22) 
+The last remark implies that applying array processing methods 
+may be worthwhile. 
+3.2. High resolution algorithm 
+As we previously mentioned, we are interested in high resolu- 
+tion algorithm. From the discussion that ended the previous sub- 
+section, as well as from the form of the ML cost function in (17) , 
+we consider the use of the MVDR concept to improve the reso- 
+lution of the estimator. However, applying this concept requires 
+having different snapshots of observations that correspond to the 
+same steering vector a k ( n , p , αk ). To be precise, we need J snap- 
+shots of the form of (21) 
+˜ 
+r k [ n, j] = a k (n, p , αk ) s k [ n, j] + ˜ 
+w k [ n, j] , 
+j = 1 , . . . , J. 
+(23) 
+The trivial way to obtain the necessary observations is to visit the 
+same places with the same velocities several times. However, this 
+is not practical in the majority of the cases. Moreover, since the 
+MVDR is sensitive to model errors in the steering vectors [16,17] , 
+the repetitions on the track should be nearly identical. Therefore 
+this method is impractical. We now turn to investigating alterna- 
+tive methods for obtaining the snapshots. 
+The ﬁrst candidate method is partition of each interception in- 
+terval into J sections, with N / J time samples at each (assuming that 
+N / J is an integer). This method was used in [8] to obtain snapshots. 
+However, while Tirer and Weiss [8] considered a stationary conﬁg- 
+uration, here the phase due to the Doppler effect is accumulated 
+across sections. Sticking to the single emitter model, the observa- 
+tion of the ℓ th receiver at the j th section of the k th interval is given 
+by 
+r ℓ,k [ n, j] = e i ( j−1) φℓ,k (p ) a (ℓ ) 
+k (n, p ) s k [ n, j] + w ℓ,k [ n, j] 
+φℓ,k (p ) ≜ 2 π f ℓ,k (p ) NT s /J, 
+n = 0 , . . . , N/J −1 , j = 1 , . . . , J, 
+(24) 
+where a (ℓ ) 
+k (n, p ) (we dropped its dependency on αℓ , k ) is the ℓ th 
+element of a k ( n , p , αk ) and for simplicity we used the sloppy no- 
+tations 
+r ℓ,k [ n, j] ≜ r ℓ,k [( j −1) N/J + n ] , 
+w ℓ,k [ n, j] ≜ w ℓ,k [( j −1) N/J + n ] , 
+s k [ n, j] ≜ s k [( j −1) N/J + n ] . 
+(25) 
+It is clear that for a location hypothesis p we can easily elim- 
+inate the additional phase by dividing r ℓ , k [ n , j ] by e i ( j−1) φℓ,k (p ) . 
+Moreover, since the noise has circular distribution, such division 
+will not change the noise distribution. However, the single emitter 
+scenario is not interesting when the goal is to improve the res- 
+olution. Assuming that there is another emitter, located at ˜ 
+p , its 
+spatial signature (i.e., dependency of the observation on its loca- 
+tion) would still vary between the J modiﬁed observations accord- 
+ing to e i ( j−1)(φℓ,k ( ˜ 
+p ) −φℓ,k (p )) . This phenomenon can be interpr eted as 
+
+
+=== PDF PAGE 4 ===
+T. Tirer, A.J. Weiss / Signal Processing 141 (2017) 288–298 
+291 
+Fig. 1. Band-pass ﬁltering of frequency-shifted signals. 
+interference nonstationarity, which is known to severely degrade 
+the performance of adaptive beamforming methods such as MVDR 
+[18–20] . Therefore, the ﬁrst candidate method is ruled out. 
+The second candidate method is passing the observations 
+through a ﬁlter bank. For theoretic justiﬁcation, consider the use 
+of J ideal band-pass ﬁlters, where the bandwidth of the j th ﬁlter is 
+given by B j . If the constraint 
+B j ≫ f 
+ f ≜ max 
+ℓ,k { | f ℓ,k (p ) −f 1 ,k (p ) | } 
+(26) 
+is satisﬁed, then the signal part of the outputs of the j th band-pass 
+ﬁlter to the inputs { r ℓ,k (t) } L 
+ℓ =1 deﬁned in (2) practically differs only 
+in the factor αℓ , k and in the frequency shift f ℓ , k ( p ). The concept is 
+illustrated in Fig. 1 and further detailed in Appendix A . Therefore, 
+the output of the j th ﬁlter to the signal observed by the ℓ th re- 
+ceiver at the k th interception interval is well approximated by 
+r ℓ,k (t; j) = αℓ,k s k (t; j)e i 2 π f ℓ,k (p ) t + w ℓ,k (t; j) , 
+0 ≤t ≤T , 
+(27) 
+where the ﬁltered signal s k ( t ; j ) and the ﬁltered noise w ℓ,k (t; j) 
+have reduced bandwidth. As mentioned in Appendix A , the sig- 
+nal’s spectrum does not have to be ﬂat, but rather stable in fre- 
+quency bands of size f at the edges of the ﬁlter. Therefore, the 
+approximation is valid for more ill-behaved spectra as the margin 
+of (26) grows. Note that for non-overlapping ﬁlters of bandwidth 
+B j = B/J (where B is the bandwidth of the signal), if the sam- 
+pling frequency is B / J , then the noise samples are still uncorrelated. 
+However, we remark that it is possible to use overlapping ﬁlters in 
+order to increase their number for locating more sources or to in- 
+crease their passband for satisfying (26) . In this case the outputs of 
+the ﬁlters may be correlated, but the MVDR approach is still appli- 
+cable. Indeed, in our numerical examples, overlapping ﬁlters give 
+better results. Note also that we are not interested in reconstruct- 
+ing the signal, so using non-ideal ﬁlters is permitted as long as the 
+outputs of the same ﬁlter to signals from different receivers (for 
+the same interval) approximately differ only by αℓ , k and e i 2 π f ℓ,k (p ) t . 
+Lastly, in order to decrease f it is proposed that the receivers 
+move in a single, but not necessarily ﬁxed, formation. However, it 
+is also allowed that all of them move towards (or away from) the 
+region of interest from different directions, as long as large Doppler 
+shifts with opposite sign at different receivers (for the same inter- 
+val) are prevented. The constraint (26) may sound demanding, but 
+it is satisﬁed in many practical trajectories, as shown in Section 4 . 
+Using the proposed method, we can make the following deﬁni- 
+tions 
+˜ 
+r k [ n, j] ≜ 
+r 1 ,k (nT s ; j) , . . . , r L,k (nT s ; j) T , 
+˜ 
+w k [ n, j] ≜ 
+w 1 ,k (nT s ; j) , . . . , w L,k (nT s ; j) T , 
+s k [ n, j] ≜ s k (nT s ; j) . 
+(28) 
+Now all the terms in (23) are well deﬁned, and we can deﬁne the 
+following sample covariance matrix 
+ˆ 
+R k (n ) ≜ 1 
+J 
+J 
+ 
+j=1 
+˜ 
+r k [ n, j] ˜ 
+r H 
+k [ n, j] . 
+(29) 
+For a location hypothesis p , consider the weight vector z k ( n , p , αk ) 
+for combining the elements of ˜ 
+r k [ n, j] . From (23) it is clear that 
+the classical KN distortionless constraints are 
+z H 
+k (n, p , αk ) a k (n, p , αk ) = 1 , 
+k = 1 . . . K, n = 0 . . . N −1 . 
+(30) 
+However, since we are only interested in the source location and 
+not in the signal itself, we propose to drop the distortionless 
+constraints in order to increase the degrees of freedom used for 
+noise and interference reduction. Hence, we propose to obtain the 
+weights in the following way. Deﬁne 
+¯a k (p , αk ) ≜ 
+a T 
+k (0 , p , αk ) . . . a T 
+k (N −1 , p , αk ) T , 
+¯a 
+p , { αk } K 
+k =1 
+
+≜ 
+¯a T 
+1 (p , α1 ) . . . ¯a T 
+K (p , αK ) T , 
+(31) 
+and 
+¯R k ≜ blkdiag 
+ˆ 
+R k (0) , . . . , ˆ 
+R k (N −1) 
+, 
+ˆ 
+R ≜ blkdiag 
+¯R 1 , . . . , ¯R K 
+
+, 
+(32) 
+where the notation blkdiag { X 1 , . . . , X n } stands for a block diag- 
+onal matrix with { X 1 , . . . , X n } on the main diagonal. Obtain the 
+weights using the following optimization problem 
+z opt = argmin 
+z 
+z H ˆ 
+R z 
+s.t. z H ¯a 
+p , { αk } K 
+k =1 
+
+= KN. 
+(33) 
+The weight vector z opt minimizes the total output energy (summed 
+over all k , n ) from sources at all locations except p , and there- 
+fore it is expected to yield high resolution. In more details, note 
+that the constraint in Eq. (33) is the sum of the KN distortionless 
+constraints in (30) . Thus, it provides a way to save (at least some 
+of) the power from the location hypothesis p , without the restric- 
+tion of maintaining the signal values s k [ n , j ]. The advantage can be 
+seen from two points of view. First, as mentioned above, we re- 
+duce the number of the constraints by KN −1 , thus we increase 
+the degrees of freedom of z opt used for noise and interference re- 
+duction. Second, the new constraint can be thought of as an over- 
+all gain budget that can be divided along time and interceptions. 
+Thus, the resulting spectrum is expected to emphasize true emit- 
+ter locations from which consistent energy emission is observed, 
+and to attenuate other locations, such as locations between close 
+emitters, which are likely to show some inconsistency. 
+Eq. (33) describes minimization of a quadratic function under 
+a linear constraint, and can be solved using the complex gradient 
+operator [21] . The solution is given by 
+z opt = KN 
+ˆ 
+R −1 ¯a 
+p , { αk } K 
+k =1 
+
+¯a H 
+p , { αk } K 
+k =1 
+
+ˆ 
+R −1 ¯a 
+p , { αk } K 
+k =1 
+. 
+(34) 
+Now, we proceed by maximizing (with respect to p , { αk } K 
+k =1 ) the 
+following beamforming criterion 
+˜ 
+Q HR ≜ z H 
+opt ˆ 
+R z opt . 
+(35) 
+Substituting (34) into (35) and ignoring the constant factor we 
+get 
+˜ 
+Q HR = 
+1 
+¯a H 
+p , { αk } K 
+k =1 
+
+ˆ 
+R −1 ¯a 
+p , { αk } K 
+k =1 
+. 
+(36) 
+
+
+=== PDF PAGE 5 ===
+292 
+T. Tirer, A.J. Weiss / Signal Processing 141 (2017) 288–298 
+Using the deﬁnitions in (31) and (32), (36) can be written as 
+˜ 
+Q HR = 
+1 
+K 
+
+ 
+k =1 
+N−1 
+
+ 
+n =0 
+a H 
+k (n, p , αk ) ˆ 
+R −1 
+k (n ) a k (n, p , αk ) 
+. 
+(37) 
+Substituting (15) in (37) gives 
+˜ 
+Q HR = 
+1 
+K 
+
+ 
+k =1 
+αH 
+k 
+ N−1 
+
+ 
+n =0 
+H 
+k (n, p ) ˆ 
+R −1 
+k (n ) k (n, p ) 
+
+αk 
+. 
+(38) 
+Finally, maximization with respect to αk , subject to ∥ αk ∥ = 1 , re- 
+sults in a criterion that depends only on p 
+˜ 
+Q HR (p ) = 
+1 
+K 
+
+ 
+k =1 
+λmin 
+ N−1 
+
+ 
+n =0 
+H 
+k (n, p ) ˆ 
+R −1 
+k (n ) k (n, p ) 
+, 
+(39) 
+where λmin ( ·) denotes the smallest eigenvalue of the operand. Note 
+that the eigenvalues are calculated for L × L matrices, where usu- 
+ally L is rather small. The locations of the emitters are estimated 
+from the maxima of (39) . 
+3.3. Robust high resolution algorithm 
+As shown in Section 4 , the proposed estimator (39) yields very 
+high resolution. However, from (37) it can be concluded that it 
+is sensitive to time intervals in which the signal is suppressed. 
+Analytically, if the power of the signal is low at all frequencies 
+at time sample ˜ 
+n of the k th interception interval, then the term 
+η˜ 
+n ≜ a H 
+k ( ˜ 
+n , p , αk ) ˆ 
+R −1 
+k ( ˜ 
+n ) a k ( ˜ 
+n , p , αk ) is high, and the denominator 
+of (37) is increased. However, note that since ˆ 
+R k (n ) is composed of 
+terms that reﬂect the energy of several different frequency bands, 
+the described scenario can happen only when the signal is low for 
+a signiﬁcantly long time interval and not in instantaneous power 
+drops. In order to mitigate this risk, we propose the following al- 
+gorithm. 
+Initialize two predeﬁned parameters, γ ∈ (0, 1) and W , which 
+are the percent of time samples to be used and the number of el- 
+ements for temporal averaging, respectively. Instead of calculating 
+˜ 
+Q HR (p ) using (39) , calculate Q HR (p ) using Algorithm 1 . For brevity 
+we omitted the special treatment (like reﬂection) that should be 
+made for samples at the boundaries of the time interval. The quan- 
+tity d n in Algorithm 1 can be interpreted as an estimation of ηn 
+(which is required since αk is unknown). 
+The tuning of the predeﬁned parameters has been accom- 
+plished using computer simulations. Increasing W gives better re- 
+sults for medium and low SNR, but contaminates more elements 
+of { d n } with samples from the low power interval, and thus re- 
+quires decreasing γ . Therefore, since N is limited, the value of 
+W should be restricted. Numerical results show that choosing W 
+about twice the accepted length (in samples) of low power inter- 
+val and γ < N−W 
+N , gives good results for a wide range of SNR. Note 
+that even though Q HR (p ) is calculated using only ⌊ γ N ⌋ time sam- 
+ples (per interception interval), it is expected to yield better per- 
+formance than using ⌊ γ N ⌋ general samples in (39) , since these are 
+more reliable observations. Therefore, generally there is no need to 
+increase N . 
+To conclude Section 3 , we proposed a novel DPD method for lo- 
+calization of multiple narrowband radio emitters based on Doppler 
+frequency shifts. We used a generalization of the MVDR as an ar- 
+ray processing technique for high resolution, but it is straightfor- 
+ward to use MUSIC [14] instead. The deﬁciencies of MUSIC are the 
+requirement to estimate the model order and its signiﬁcant perfor- 
+mance degradation when the number of snapshots is small (in our 
+case it means that we will need more ﬁlters), as can be concluded 
+from the work in [8] . We stress that the phenomenon that was de- 
+scribed in Section 3.3 would be relevant also when using MUSIC. 
+Algorithm 1: Robust high resolution spectrum calculation. 
+Evaluate :  ˆ 
+R −1 
+k (n ) K,N−1 
+k =1 ,n =0 according to (29); 
+Deﬁne a desired grid with G points: p 1 , p 2 , . . . , p G ; 
+for i ← 1 to G do 
+Q ← 0 ; 
+for k ← 1 to K do 
+{ d n } N−1 
+n =0 ← 0 ; 
+{ D n } N−1 
+n =0 ← 0 L ×L ; 
+for n ← 0 to N −1 do 
+Evaluate : k (n, p i ) according to (16); 
+D n ← H 
+k (n, p i ) ˆ 
+R −1 
+k (n ) k (n, p i ) ; 
+end 
+for n ← 0 to N −1 do 
+d n ← λmin 
+
+n + W/ 2 
+
+ 
+m = n −W/ 2 
+D m 
+
+; 
+end 
+Sort : { d n } N−1 
+n =0 ; 
+χ ← indices of the lowest ⌊ γ N ⌋ elements; 
+Q ← Q + λmin 
+ 
+ 
+n ∈ χ
+D n 
+
+; 
+end 
+Q HR (p i ) ← 1 /Q 
+end 
+4. Numerical results 
+In this section we examine the performance of the proposed 
+method (39) , denoted by DPD-HR, and compare it with the sin- 
+gle emitter ML estimator (20) , denoted by DPD-SML, and with the 
+Cramér–Rao lower bound (CRLB), detailed in Appendix B . Note that 
+using different sets of ﬁlters for our method leads to different es- 
+timators. We examine how the ﬁltering affects the performance of 
+DPD-HR in Example 1 below. Calculating all the covariance matri- 
+ces (29) and their inverses in advance, for a small number of re- 
+ceivers both DPD-HR and DPD-SML estimators have computation 
+load of O(GKN) , where G is the number of grid points. Therefore, 
+we compare the estimators for the same value of N . 
+We focus on the position root mean square error (RMSE) de- 
+ﬁned by 
+RMSE = 
+ 
+1 
+N exp 
+N exp 
+ 
+i =1 
+∥ ˆ 
+p (i ) −p ∥ 2 , 
+(40) 
+where N exp is the number of Monte Carlo trials and ˆ 
+p (i ) is the es- 
+timated emitter position at the i th trial. To obtain statistical results 
+we used N exp = 100 . Denoting the number of emitters by Q , the es- 
+timated positions are the Q , or less, highest peaks of the spectrum. 
+We leave the detection problem for future research. All the spec- 
+trums are presented in linear scale. 
+4.1. Example 1 
+Consider four receivers, moving in diamond formation with di- 
+agonals of 1 and 2 Km, circling the origin with radius of 22 Km 
+and speed of 300 m/s, and two emitters located at (−1 . 5 , 0) and 
+(1.5, 0) Km, transmitting unknown ﬂat narrowband Gaussian sig- 
+nals with equal power. The signals bandwidth is B = 10 KHz and 
+the carrier frequency is f c = 2 . 5 GHz. The propagation speed is as- 
+sumed to be c = 3 · 10 8 m/s. The receivers have K = 10 different 
+interception intervals of 38.4 ms each, uniformly distributed along 
+the trajectory. In each interception interval the down-converted 
+signal is sampled at 10 KHz (by complex sampling). We refer to 
+
+
+=== PDF PAGE 6 ===
+T. Tirer, A.J. Weiss / Signal Processing 141 (2017) 288–298 
+293 
+Table 1 
+RMSE [m] of DPD-HR vs. J, for Different Sets of Filters. 
+J 
+1 
+2 
+3 
+4 
+5 
+Option 1 
+2047 
+17.4 
+7.9 
+10.3 
+7.1 
+Option 2 
+2047 
+25.2 
+14.1 
+18.7 
+17.5 
+Table 2 
+Chosen Sets of Filters for DPD-HR. 
+Set Id 
+Type 
+Order 
+Cutoff frequencies [/ Nyquist rate] 
+LPF 
+3 
+0.7 
+1 
+BPF 
+6 
+0.15, 0.85 
+HPF 
+3 
+0.3 
+LPF 
+10 
+0.33 
+2 
+BPF 
+20 
+0.33, 0.67 
+HPF 
+10 
+0.67 
+this geometry as GEOMETRY1. The DPD-HR estimator passes the 
+sampled signal through J digital ﬁlters and uses the resulted out- 
+puts. The DPD-SML estimator uses the original sampled signal. In 
+order to reduce computational complexity we use only every 3rd 
+sample, so N = 128 . For each emitter, the channel attenuation is 
+selected at random from a normal distribution with mean one and 
+standard deviation 0.1, and the channel phase is selected at ran- 
+dom from a uniform distribution over [0, 2 π]. These parameters 
+are then used for all trials. 
+We start with examining the effect of the number of ﬁlters and 
+their attributes on the performance of the proposed method. We 
+consider two options for sets of J digital Chebyshev type I ﬁlters 
+with peak-to-peak ripple of 0.5 dB. Option 1 consists of overlap- 
+ping ﬁlters, each of bandwidth 0.7 B . The ﬁrst and the last ﬁlters 
+are LPF and HPF of order 3. The rest are BPFs of order 6. The pass- 
+band of the j th ﬁlter (normalized by B ) is given by 
+
+0 . 3 j −1 
+J −1 , 0 . 7 + 0 . 3 j −1 
+J −1 
+
+, j = 1 . . . J. 
+(41) 
+Option 2 consists of ﬁlters with non overlapping passbands and 
+steeper roll-off, each of bandwidth B / J . The ﬁrst and the last ﬁlters 
+are LPF and HPF of order 10. The rest are BPFs of order 20. Table 1 
+shows the RMSE of DPD-HR for the source at (−1 . 5 , 0) Km, for dif- 
+ferent values of J , at SNR of 30 dB. Since the conﬁguration is sym- 
+metric, similar results were received for the second source. Note 
+that for J < L the matrix ˆ 
+R k (n ) , deﬁned in (29) , is singular, there- 
+fore we use small diagonal loading in order to invert it. Moreover, 
+for J = 1 no ﬁltering is done. It is clear that even a small number 
+of ﬁlters give good results, as long as J is not less than the num- 
+ber of sources. For Option 1, using more than 3 ﬁlters does not 
+improve the performance much or at all. For Option 2, using more 
+than 3 ﬁlters deteriorates the performance. Therefore, we use J = 3 
+for the rest of this section. For clarity, the chosen sets of ﬁlters are 
+given in Table 2 . We denote by DPD-HRX the estimator obtained 
+by (39) using the ﬁlters of set X. 
+Next, we varied the SNR between −10 dB and 30 dB. Fig. 2 
+shows the spectrums of DPD-SML and DPD-HR1 for one realization 
+at SNR of 30 dB. The sharp peaks of the DPD-HR1 spectrum are 
+visible, while the DPD-SML failed in resolving the emitters. Fig. 3 
+shows the RMSE for the source at (−1 . 5 , 0) Km. It can be clearly 
+seen that the performance of both DPD-HR1 and DPD-HR2 is su- 
+perior to the DPD-SML. As demonstrated also in Table 1 , DPD-HR1 
+exhibits better performance than DPD-HR2, and gets quite close to 
+the CRLB as the SNR grows. Presumably, extending the bandwidth 
+of the ﬁlters (and thus increasing the margin of (26) ) improves the 
+results, even though the ﬁltered signals become more correlated. 
+Note that at very high SNR (e.g., 30 dB) the gap between DPD-HR1 
+and the CRLB slightly increases. The reason is that the CRLB as- 
+sumes that the approximate model (4) holds precisely, while in our 
+simulations the delays may lead to different complex envelopes at 
+different receivers. When (1) holds with large margin these differ- 
+ences are small, however, their effect on the performance is still 
+noticeable at very high SNR. 
+Next, by removing the source at (1.5, 0) Km, we conﬁrmed that 
+our method performs well also for a single emitter. The results are 
+shown in Fig. 4 . The RMSE of DPD-SML converges to the CRLB as 
+the SNR increases, except at very high SNR, again, due to the fact 
+that the CRLB follows the approximate model, and the simulated 
+data follow the physical model. Note that DPD-HR1 exhibits only a 
+negligible performance degradation compared to DPD-SML. 
+Next, for SNR of 30 dB, we examined how the RMSE of a source 
+ﬁxed at (−1 . 5 , 0) Km is affected by its spatial separation from a 
+second source. The location of the second source was varied along 
+the x axis. The results are shown in Fig. 5 . It is clear that DPD-HR1 
+outperforms the other estimators at all values of separation. The 
+DPD-SML has a large error even when the sources are fairly dis- 
+tant, due to a bias, resulting from the presence of the other source. 
+Since DPD-HR2 uses ﬁlters of smaller bandwidth, it is more sensi- 
+tive to increases in f (recall constraint (26) ). This may explain the 
+signiﬁcant increase in the RMSE of DPD-HR2 when the right emit- 
+ter is far from the origin. 
+From this point on we examine only DPD-HR1, since it seems 
+to yield better performance than DPD-HR2, and for brevity denote 
+it only by DPD-HR. 
+We turn to examining the RMSE for different number and du- 
+rations of interceptions, i.e. different values of K and T . We con- 
+sider again GEOMETRY1 (i.e. sources at (−1 . 5 , 0) and (1.5, 0) Km), 
+and ﬁx the SNR level to 30 dB. First, we varied the duration T . 
+Still, in order to reduce computational complexity we used only 
+N = 128 uniformly spaced samples from each interception inter- 
+val. The results are shown in Fig. 6 . It can be seen that increas- 
+ing the intervals improves the performance of both estimators. At 
+some point DPD-SML also resolves the sources, but its performance 
+is still inferior to DPD-HR. The improvement follows from the fact 
+that extending the interception intervals increases the effect of the 
+Doppler frequency shift on the observed signal, i.e. the accumu- 
+lated phase due to the Doppler shift is increased, which facilitates 
+Doppler-based localization. This is similar to an improvement in 
+delay-based localization due to larger signal bandwidth. Next, for 
+T = 38 . 4 ms, as before, we varied the number of interceptions K . 
+We kept the interception intervals uniformly spaced along the cir- 
+cular trajectory. The results are shown in Fig. 7 . Contrary to the 
+previous experiment, this time the effect on the RMSE is very 
+small. The performance of DPD-HR is signiﬁcantly improved only 
+until K = 4 , and the DPD-SML fails in resolving the sources for all 
+values of K . Presumably, the incoherent processing of the intervals 
+(due to the unknown channel effect at each interval, as mentioned 
+in Section 2 ) is the reason that this strategy for increasing the data 
+record is less effective than extending the interception durations. 
+An interesting observation, which is worth mentioning, is that 
+increasing T improved the performance, even though the changes 
+in the position and radial velocity of the receivers during each in- 
+terval became larger (contrary to the assumption of constant p ℓ , k 
+and v ℓ , k ). However, we do note that it is possible to ﬁnd examples 
+for which it is unjustiﬁed to assume constant position and veloc- 
+ity of the receivers during the intervals, e.g. when the receivers 
+are very close to the emitters. Nevertheless, if the trajectory of 
+the receivers is known with good resolution, our DPD algorithms 
+can be easily adapted to these cases. The only modiﬁcation is in 
+the matrix k ( n , p ), deﬁned in (16) . Note that the entries on the 
+diagonal of k ( n , p ) equal the accumulated phases at time sam- 
+ple n due to the Doppler effect for a location hypothesis p , under 
+the assumption that the receivers position and velocity are con- 
+stant. Therefore, updating these phases according to the movement 
+
+
+=== PDF PAGE 7 ===
+294 
+T. Tirer, A.J. Weiss / Signal Processing 141 (2017) 288–298 
+Fig. 2. DPD-SML and DPD-HR1 spectrums, ﬁrst example. 
+Fig. 3. RMSE vs. SNR for two emitters scenario, ﬁrst example. 
+Fig. 4. RMSE vs. SNR for single emitter scenario, ﬁrst example. 
+of the receivers allows dropping the assumption that the position 
+and velocity are ﬁxed. Note that in two-step methods such an easy 
+modiﬁcation is not possible, since these methods require a single 
+estimate for the Doppler shift in each interception interval. This is 
+another advantage of DPD over two-step methods, though it was 
+not given attention in previous literature. 
+Finally, we demonstrate the sensitivity of DPD-HR to time in- 
+tervals in which the signal power is low, and the mitigation of 
+this deﬁciency by the estimator described in Algorithm 1 , denoted 
+by DPD-HRrob. Obviously, the phenomenon does not affect single 
+emitter localization, so we focus again on the setting of GEOM- 
+Fig. 5. RMSE vs. distance between sources, ﬁrst example. 
+Fig. 6. RMSE vs. T for two emitters scenario, ﬁrst example. 
+ETRY1. For the emitter located at (1.5, 0) Km, we zeroed 7.5 ms 
+(equivalent to 25 of the 128 time samples being used) of the sig- 
+nal during every interception interval. We set W = 50 and γ = 0 . 5 
+for DPD-HRrob. Fig. 8 shows the spectrums of DPD-HR and DPD- 
+HRrob for one realization at SNR of 30 dB and for one realization 
+at SNR of 10 dB. DPD-HRrob succeeds in locating the intermittent 
+emitter, contrary to DPD-HR. 
+4.2. Example 2 
+In the previous example both constraints (1) and (26) were sat- 
+isﬁed by wide margins. Next we demonstrate that DPD-HR out- 
+performs DPD-SML even in tougher cases. Consider four receivers 
+
+
+=== PDF PAGE 8 ===
+T. Tirer, A.J. Weiss / Signal Processing 141 (2017) 288–298 
+295 
+Fig. 7. RMSE vs. K for two emitters scenario, ﬁrst example. 
+moving from left to right with speed of 300 m/s. The initial lo- 
+cations are (−10 , 6) , (−9 , 7) , (−9 , 8) and (−10 , 9) Km. The re- 
+ceivers intercept the signal simultaneously every 2.5 Km at dif- 
+ferent K = 9 locations. Consider two emitters located at (−0 . 4 , 0) 
+and (0.4, 0) Km, transmitting narrowband Gaussian signals, as de- 
+scribed in the previous example, except for the central frequency, 
+which is now 2 GHz. The processing and length of the interception 
+intervals are also the same as before, and so is the distribution of 
+the channel parameters. The geometry is shown in Fig. 9 a. In the 
+current example, f is 408 Hz and the maximal propagation time 
+between the receivers is 10 usec, while the bandwidth of the ﬁl- 
+ters is 7 KHz and the inverse of the bandwidth of the signal is 100 
+usec, so the two constraints are satisﬁed only by an order. 
+We varied the SNR between −10 dB and 30 dB. Fig. 10 shows 
+the RMSE for the source at (−0 . 4 , 0) Km. This time both estima- 
+tors were able to resolve the emitters, but it is clear that DPD-HR 
+is more accurate. Again, the gap from the CRLB is expected since 
+the CRLB assumes that the approximate model (4) holds precisely, 
+while the simulated data take into account the delays between re- 
+ceivers. When we added another emitter, located at (0 , −0 . 4) Km, 
+DPD-SML failed in resolving the sources. Fig. 11 shows the spec- 
+trums of DPD-SML and DPD-HR for one realization at SNR of 30 dB. 
+4.3. Example 3 
+Assuming that the location of a cluster of sources is roughly 
+known, the narrowband signal’s complex envelope can be equal at 
+all receivers even if they are widely separated, as long as the clus- 
+ter is approximately between them, and (26) can be satisﬁed if all 
+the receivers move with the same orientation - towards the clus- 
+ter or away from it. Consider the geometry in Fig. 9 b, where two 
+emitters are located at (−0 . 4 , 0) and (0.4, 0) Km, two receivers 
+are moving from left to right with initial locations of (−10 , 10) , 
+(−9 , 11) Km, and two receivers are moving from right to left with 
+initial locations of (11 , −11) , (10 , −10) Km. The speed of all re- 
+ceivers is 300 m/s, and they intercept the signal simultaneously 
+every 2.5 Km at different K = 9 locations. The transmitted signals 
+are as before. The central frequency is 0.1 GHz. The processing and 
+length of the interception intervals are also the same as before, and 
+so is the distribution of the channel parameters. 
+Fig. 12 shows the spectrums of DPD-SML and DPD-HR for one 
+realization at SNR of 30 dB. Once again only DPD-HR succeeds in 
+resolving the emitters. 
+5. Discussion and conclusions 
+Doppler-based location estimation of stationary narrowband 
+radio-frequency emitters, observed by multiple moving receivers 
+is discussed. We show that the DPD approach enables using ar- 
+ray processing methods even for single sensors in situations that 
+have not been associated with array processing so far, provided 
+that several (even few) snapshots that maintain the spatial signa- 
+ture can be obtained, and that the nuisance parameters, associated 
+with different channel effect at each receiver, can be eﬃciently es- 
+timated. 
+We proposed a technique that combines the DPD approach and 
+a generalization of the MVDR concept, and produces a high res- 
+olution spectrum for multiple sources localization. The proposed 
+estimator can be implemented without knowing or estimating the 
+number of sources (except that the number of ﬁlters should not 
+be less that the number of sources). Numerical examples showed 
+that for multiple sources the performance of our method is supe- 
+rior to the state-of-the-art Doppler-based DPD method. For a single 
+source, only a negligible degradation was observed. We also pro- 
+Fig. 8. DPD-HR and DPD-HRrob spectrums, ﬁrst example. 
+
+
+=== PDF PAGE 9 ===
+296 
+T. Tirer, A.J. Weiss / Signal Processing 141 (2017) 288–298 
+Fig. 9. Examples 2 and 3 geometries, emitter is marked by a star and interception point is marked by a triangle. 
+Fig. 10. RMSE vs. SNR for two emitters scenario, second example. 
+posed a modiﬁed version of the estimator which is more robust to 
+time intervals in which the signal is suppressed. 
+An interesting question for further research is how to choose 
+the set of ﬁlters for our method. We obtained better results for 
+wide and overlapping ﬁlters, but in general the choice may depend 
+on the characteristics of the signals. 
+Appendix A. Ideal band-pass ﬁltering of frequency-shifted 
+signals 
+Let S 1 ( f ) be the Fourier transform of the observed signal at a 
+given receiver, and let S 2 ( f ) = S 1 ( f − f ) be the Fourier transform 
+of the observed signal at a different receiver, where f denotes 
+the differential Doppler (assumed to be positive). Filtering these 
+signals by an ideal band-pass ﬁlter whose cutoff frequencies are f 1 
+and f 2 ( f 1 < f 2 ), we get the following outputs in time domain 
+s 1 (t) = 
+ f 2 
+f 1 
+S 1 ( f )e i 2 π ft df, 
+s 2 (t) = 
+ f 2 
+f 1 
+S 1 ( f − f )e i 2 π ft df 
+= e i 2 π ft 
+ f 2 − f 
+f 1 − f 
+S 1 (ξ )e i 2 πξt dξ. 
+(A.1) 
+Therefore 
+s 2 (t) = e i 2 π ft (s 1 (t) + δ(t)) , 
+δ(t) ≜ 
+ f 1 
+f 1 − f 
+S 1 (ξ )e i 2 πξt dξ −
+ f 2 
+f 2 − f 
+S 1 (ξ )e i 2 πξt dξ. 
+(A.2) 
+Assuming that the signal is random with ﬂat spectral density in 
+the frequency range [ f 1 − f, f 2 ] , the energy ratio between s 1 ( t ) 
+and δ( t ) is given by 
+E {∥ s 1 (t) ∥ 2 } 
+E {∥ δ(t) ∥ 2 } = f 2 −f 1 
+2 f . 
+(A.3) 
+Fig. 11. DPD-SML and DPD-HR spectrums after adding a third emitter, second example. 
+
+
+=== PDF PAGE 10 ===
+T. Tirer, A.J. Weiss / Signal Processing 141 (2017) 288–298 
+297 
+Fig. 12. DPD-SML and DPD-HR spectrums, third example. 
+Therefore, if f 2 −f 1 ≫ f, the approximation s 2 ( t ) ≈e i 2 πft s 1 ( t ) 
+holds with high probability. In practice the signal’s spectrum does 
+not have to be ﬂat, but rather stable in the frequency bands [ f 1 −
+ f, f 1 ] and [ f 2 − f, f 2 ] . 
+Appendix B. Derivation of the Cramér–Rao bound 
+In this appendix the CRLB is derived for an expansion of the 
+model (4) to the case of Q transmitters, assuming that Q is known. 
+The extended model is given by 
+r ℓ,k = 
+Q 
+ 
+q =1 
+α(q ) 
+ℓ,k A (q ) 
+ℓ,k (p (q ) ) s (q ) 
+k + w ℓ,k , 
+(B.1) 
+where the superscript q attributes elements to the q th transmitter. 
+Since the unknown parameters of different transmitters appear in 
+different terms we can use some results from [6] . However, since 
+the derivatives in [6] are not written explicitly, we repeat the cal- 
+culation in more details which are necessary for the extension. De- 
+ﬁne 
+r ≜ 
+r T 
+1 , 1 , . . . , r T 
+L, 1 , . . . , r T 
+L,K 
+T , 
+w ≜ 
+w T 
+1 , 1 , . . . , w T 
+L, 1 , . . . , w T 
+L,K 
+T , 
+b (q ) ≜ (α(q ) 
+1 , 1 , . . . , α(q ) 
+L, 1 , . . . , α(q ) 
+L,K 
+T , 
+S (q ) ≜ blkdiag 
+I L  s (q ) 
+1 , . . . , I L  s (q ) 
+K 
+
+, 
+A (q ) ≜ blkdiag 
+A (q ) 
+1 , 1 , . . . , A (q ) 
+L, 1 , . . . A (q ) 
+L,K 
+
+, 
+(B.2) 
+where the notation  stands for the Kronecker product. Now all 
+the observations are collected to a single KLN × 1 vector 
+r = 
+Q 
+ 
+q =1 
+A (q ) (p (q ) ) S (q ) b (q ) + w. 
+(B.3) 
+Next, collect all the signal samples of the q th emitter 
+s (q ) ≜ (s (q ) 
+1 ) T , . . . , (s (q ) 
+K ) T T . 
+(B.4) 
+Concatenating the real and imaginary parts of s ( q ) we get 
+ˇs (q ) ≜ 
+Re { s (q ) } T , Im { s (q ) } T T . 
+(B.5) 
+Doing the same for b ( q ) we get 
+ˇb (q ) ≜ 
+Re { b (q ) } T , Im { b (q ) } T T . 
+(B.6) 
+Collect together parameters of different emitters 
+¯p ≜ (p (1) ) T , . . . , (p (Q) ) T T , 
+¯b ≜ ( ˇb (1) ) T , . . . , ( ˇb (Q) ) T T , 
+¯s ≜ ( ˇs (1) ) T , . . . , ( ˇs (Q) ) T T . 
+(B.7) 
+Finally, the parameter vector of the model in (B.1) is given by 
+ψ ≜ 
+¯p T , ¯b T , ¯s T T . 
+(B.8) 
+The Fisher information matrix (FIM) of the parameter vector ψ can 
+be partitioned into blocks associated with the different combina- 
+tions of the components in (B.8) 
+J( ψ ) ≜ 
+⎡ 
+⎣ 
+J ¯p ¯p 
+J ¯p ¯b 
+J ¯p ¯s 
+J T 
+¯p ¯b 
+J ¯b ¯b 
+J ¯b ¯s 
+J T 
+¯p ¯s 
+J T 
+¯b ¯s 
+J ¯s ¯s 
+⎤ 
+⎦ . 
+(B.9) 
+Each block in (B.9) can be further partitioned into Q 2 blocks asso- 
+ciated with different combinations of emitters, for example 
+J ¯p ¯s ≜ 
+⎡ 
+⎣ 
+J p (1) ˇs (1) 
+. . . 
+J p (1) ˇs (Q) 
+. . . 
+. . . 
+. . . 
+J p (Q) ˇs (1) 
+. . . 
+J p (Q) ˇs (Q) 
+⎤ 
+⎦ . 
+(B.10) 
+The observations vector r is a proper, complex Gaussian, random 
+vector whose mean and covariance are given by 
+m ( ψ ) ≜ 
+Q 
+ 
+q =1 
+A (q ) (p (q ) ) S (q ) b (q ) , 
+ ≜ σ 2 I KLN , 
+(B.11) 
+where σ 2 is the known noise variance. The entries of the FIM in 
+this case are given by [22] 
+
+J( ψ ) 
+n,m = 2 
+σ 2 Re 
+ ∂m ( ψ ) 
+∂ψ n 
+H ∂m ( ψ ) 
+∂ψ m 
+ 
+. 
+(B.12) 
+Deﬁne 
+B (q ) ≜ blkdiag α(q ) 
+1 , . . . , α(q ) 
+K 
+
+, 
+˙ 
+A (q ) ≜ 
+∂A (q ) 
+∂x , ∂A (q ) 
+∂y 
+
+, 
+(B.13) 
+we can calculate the derivatives that are necessary for obtaining 
+J ( ψ) 
+∂m ( ψ ) 
+∂p (q ) = ˙ 
+A (q ) 
+I 2  S (q ) b (q ) 
+, 
+∂m ( ψ ) 
+∂ ˇb (q ) = 
+A (q ) S (q ) , i A (q ) S (q ) 
+, 
+
+
+=== PDF PAGE 11 ===
+298 
+T. Tirer, A.J. Weiss / Signal Processing 141 (2017) 288–298 
+∂m ( ψ ) 
+∂ ˇs (q ) = 
+A (q ) 
+B (q )  I N 
+
+, i A (q ) 
+B (q )  I N 
+
+. 
+(B.14) 
+Since both the channel coeﬃcients and the signal are unknown, it 
+is possible to estimate each of them only up to a complex scalar 
+factor. Hence, for each emitter and interception interval, two free- 
+dom degrees, e.g. all rows and columns associated with the real 
+part and imaginary part of the channel coeﬃcient at the ﬁrst re- 
+ceiver, should be removed from J ( ψ) in order to make it invertible. 
+The CRLB for the estimation of ¯p is obtained by the 2 Q × 2 Q upper 
+left block of J −1 ( ψ ) . This concludes the derivation. 
+References 
+[1] P.C. Chestnut , Emitter location accuracy using TDOA and differential Doppler, 
+IEEE Trans. Aerosp. Electron. Syst. 18 (1982) 214–218 . 
+[2] M. Wax , The joint estimation of differential delay, Doppler, and phase (cor- 
+resp.), IEEE Trans. Inf. Theory 28 (5) (1982) 817–820 . 
+[3] S. Stein , Differential delay/Doppler ML estimation with unknown signals, IEEE 
+Trans. Signal Process. 41 (8) (1993) 2717–2719 . 
+[4] A.J. Weiss , Direct position determination of narrowband radio frequency trans- 
+mitters, IEEE Signal Process. Lett. 11 (5) (2004) 513–516 . 
+[5] A .J. Weiss , A . Amar , Direct position determination of multiple radio signals, 
+EURASIP J. Appl. Signal Process. 2005 (1) (2005) 37–49 . 
+[6] A . Amar , A .J. Weiss , Localization of narrowband radio emitters based on 
+Doppler frequency shifts, IEEE Trans. Signal Process. 56 (11) (2008) 5500–5508 . 
+[7] A.J. Weiss , Direct geolocation of wideband emitters based on delay and 
+Doppler, IEEE Trans. Signal Process. 59 (6) (2011) 2513–2521 . 
+[8] T. Tirer , A.J. Weiss , High resolution direct position determination of radio fre- 
+quency sources, IEEE Signal Process. Lett. 23 (2) (2016) 192–196 . 
+[9] T. Tirer , A.J. Weiss , Performance analysis of a high-resolution direct position 
+determination method, IEEE Trans. Signal Process. 65 (3) (2017) 544–554 . 
+[10] L. Tzafri , A.J. Weiss , High-resolution direct position determination using MVDR, 
+IEEE Trans. Wireless Commun. 15 (9) (2016) 6449–6461 . 
+[11] J. Capon , High-resolution frequency-wavenumber spectrum analysis, Proc. IEEE 
+57 (8) (1969) 1408–1418 . 
+[12] D.W. Rieken , D.R. Fuhrmann , Generalizing MUSIC and MVDR for multiple non- 
+coherent arrays, IEEE Trans. Signal Process. 52 (9) (2004) 2396–2406 . 
+[13] M. Wax , T. Kailath , Detection of signals by information theoretic criteria, IEEE 
+Trans. Acoust., Speech, Signal Process. 33 (2) (1985) 387–392 . 
+[14] R.O. Schmidt , Multiple emitter location and signal parameter estimation, IEEE 
+Trans. Antennas Propag. 34 (3) (1986) 276–280 . 
+[15] J. Li , L. Yang , F. Guo , W. Jiang , Coherent summation of multiple short-time sig- 
+nals for direct positioning of a wideband source based on delay and Doppler, 
+Digit. Signal Process. 48 (2016) 58–70 . 
+[16] H. Cox , Resolving power and sensitivity to mismatch of optimum array proces- 
+sors, J. Acoust. Soc. Am. 54 (3) (1973) 771–785 . 
+[17] C. Vaidyanathan , K.M. Buckley , Performance analysis of the MVDR spatial spec- 
+trum estimator, IEEE Trans. Signal Process. 43 (6) (1995) 1427–1437 . 
+[18] J.R. Guerci , Theory and application of covariance matrix tapers for robust adap- 
+tive beamforming, IEEE Trans. Signal Process. 47 (4) (1999) 977–985 . 
+[19] J. Riba , J. Goldberg , G. Vázquez , Robust beamforming for interference rejection 
+in mobile communications, IEEE Trans. Signal Process. 45 (1) (1997) 271–275 . 
+[20] S. Vorobyov , A.B. Gershman , Z.-Q. Luo , N. Ma , et al. , Adaptive beamforming 
+with joint robustness against mismatched signal steering vector and interfer- 
+ence nonstationarity, IEEE Signal Process. Lett. 11 (2) (2004) 108–111 . 
+[21] D. Brandwood , A complex gradient operator and its application in adaptive ar- 
+ray theory, in: Proceedings of the Institution of Electrical Engineers F, 130, IET, 
+1983, pp. 11–16 . 
+[22] H.L. Van Trees , Detection, Estimation, and Modulation Theory, John Wiley & 
+Sons, 2004 . 

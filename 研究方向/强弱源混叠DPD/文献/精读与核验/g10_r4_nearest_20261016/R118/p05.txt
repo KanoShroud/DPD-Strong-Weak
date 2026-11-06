@@ -1,0 +1,61 @@
+                                                                                          Y. Zeng et al.: QNOMP: A Quasi-Newton-Based Joint Multipath Optimization Method
+
+
+Algorithm 1 On-Grid Multi-resolution OMP Procedure         optimization over the delay and angle parameters only:
+  1: Input: Residual vector r, OMP grid spacing 1τdft, 1θdft
+                                                                        1                         2    and  initial estimates  ˆτ 0,  ˆθ0, refinement rates k1, k2,          min L(τ, θ) =      h′ −A(τ, θ)ˆβ(τ, θ)    .    (11)
+   maximum number of iterations nmax                                       τ,θ         σ 2                         2
+  2: Output: Refined estimates ˆτ and ˆθ
+  3: Initialize: ˆτ = ˆτ 0, ˆθ = ˆθ0, n = 1                  We adopt the BFGS algorithm [57], a widely used quasi-
+  4: while n ≤nmax do                                Newton method, to solve the continuous optimization prob-
+  5:     Construct refined grids ˜τ and ˜θ using (10)             lem. The BFGS method iteratively approximates the inverse
+  6:    Compute Rij = rH(aτ(˜τi) ⊗aθ( ˜θj))                   Hessian matrix using past gradient information, thereby
+  7:     Find (i, j) = argmaxi,j  Rij over the refined grids       avoiding the computationally expensive matrix inversion
+  8:     Update ˆτ ←˜τi, ˆθ ←˜θj                                 operation. The resulting update rule can be expressed as
+  9:    n ←n + 1                                              follows:
+ 10: end while
+ 11: return ˆτ, ˆθ                                                 xn+1 = xn + αnHngn,
+                                                                               [δgn]THnδgn    δxn[δxn]T
+                                                      Hn+1 = Hn +  1 +                        ·
+                                                                                      [δgn]Tδxn     [δgn]Tδxn
+a locally refined grid is constructed as:                                    −δxn[δgn]THn + Hnδgn[δxn]T ,
+                                                                                          [δgn]Tδxn           1τ                          dft      n     n       ˜τ = ˆτ +     [−k1, . . . , 0, . . . , k1] ∈R2k1+1,                                                                   (12)             kn+11
+           1θ
+       ˜θ n = ˆθn +                         dft [−k2, . . . , 0, . . . , k2] ∈R2k2+1,    (10)    where xn = [τ n, θn], δxn = xn+1 −xn and δgn = gn+1 −gn.
+             kn+12                                                In  (12), the vector gn  represents the gradient of the
+                                                                 objective function with respect to the concatenated parameter
+where the  integers k1, k2 ≥  1 denote the refinement                                                               vector x = [τ, θ] at the n-th iteration point (τ n, θn). The
+rates. The refined estimates are then obtained as  ˆτ n+1 =
+ n                                                               step size αn > 0 is determined via the Armijo line search
+˜τi , ˆθn+1 =   ˜θnj , where the indices  (i, j) are determined     rule [57]. The matrix Hn ∈R2k×2k approximates the inverse
+by  (i, j) =   argmaxi,j |rH(aτ(˜τin ) ⊗aθ( ˜θnj ))|. Although    Hessian matrix. We derive the derivatives aτ(·)′, aθ(·)′ and
+iterative refinement can theoretically achieve arbitrarily high                                                                   related expressions as follows:
+precision, empirical results show that one or two iterations
+are generally sufficient to achieve practical accuracy.                 aτ(·)′ = aτ(·) ⊙[0, −j2π1f , · · · , −j2π1f (M −1)]T ,
+  Since the local refinement grid in each iteration has a fixed
+                                                                             aθ(·)′ = aθ(·) ⊙[0, −j2π, · · · , −j2π(N −1)]T ,size of J = (2k1+1)(2k2+1), this local refinement procedure
+improves the resolution of delay and angle estimates to     ∇τA = [aτ(τi)′ ⊗aθ(θi)]i=1:k,
+1τdft/kn1 and 1θdft/kn2  at an additional computation cost of     ∇θA = [aτ(τi) ⊗aθ(θi)′]i=1:k,
+O(nJ +nJ(M +N)+nMN(k1+k2)). In contrast, conventional                   2                                               ℜ ˆβ ∗⊙∇τAH(A ˆβ −h′) ,                                                                                          2OMP is still constrained to the resolutions of 1τdft and 1θdft.        gn,τ = ∇τL = σ
+The local refinement procedure is summarized in Algorithm 1                                                                   2
+                                                                                                                                        ,        (13)                                                                          gn,θ = ∇θL =   2 ℜ ˆβ ∗⊙∇θAH(A ˆβ −h′)                                                              σ
+  Similar to the conventional OMP approach, our proposed
+on-grid procedure refines the delay and angle estimates     All expressions are evaluated a (τ, θ) =  (τ n, θn), and
+for one path at a time, while retaining the parameters of       ˆβ ∗denotes the complex conjugate of ˆβ. To initialize the
+previously estimated paths.                                           iteration, the on-grid estimates (ˆτ, ˆθ) obtained from the OMP
+                                                                stage provide the initial values for (τ, θ). The initial inverse
+B. OFF-GRID BFGS PARAMETER OPTIMIZATION              Hessian approximation H0  is typically initialized as the
+The on-grid stage yields estimates of  τi and  θi on the     identity matrix I2k. The complete off-grid BFGS refinement
+discretized grids ˜τ n, ˜θ n. However, the true parameter values     algorithm is summarized in Algorithm 2.
+τi, θi may lie off the grid. To mitigate such off-grid mismatch,       Unlike the on-grid module, which optimizes parameters
+we reformulate the estimation problem by treating τ, θ in (7)     path-by-path, the off-grid BFGS refinement at the k-th itera-
+as continuous variables, which are then optimized using the     tion jointly optimizes the delays and angles of all k estimated
+BFGS quasi-Newton method.                                    paths. This joint estimation not only enhances the accuracy
+  At the k-th OMP  iteration, k propagation paths have     of individual path parameters derived from the on-grid stage
+been identified, with delay  ˆτ ∈Rk and angle  ˆθ ∈Rk.     but also refines the entire set of multipath parameters in
+Note that for any given (τ, θ), the complex gains β can    a globally consistent fashion, thereby mitigating potential
+be directly estimated via least squares as ˆβ = ˆβ(τ, θ) =    non-convergence issues inherent to sequential optimization
+A†(τ, θ)h′. This reduces the original problem to a continuous     approaches.
+
+
+212656                                                                                                              VOLUME 13, 2025

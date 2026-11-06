@@ -1,0 +1,42 @@
+Y. Zeng et al.: QNOMP: A Quasi-Newton-Based Joint Multipath Optimization Method
+
+
+
+
+
+   FIGURE 2. Performance evaluation in multipath channels: Scenario 1 with sparse delays (C1 = 2) and Scenario 2 with dense delays (C1 = 1.5).
+   Subplots (a)(b)(c) show channel estimation, extrapolation, and delay estimation errors for Scenario 1; subplots (d)(e)(f) show the corresponding
+    errors for Scenario 2.
+
+
+ˆτk is matched to the component in ˆτ that is closest to the true    The constant C1 controls the path density, with smaller
+delay τk in the normalized delay–angle space. Specifically,     values indicating closer spacing. The channel gains follow
+the matching is performed as follows:                   β = ej2πφ, where each φk  i.i.d.∼Uniform[0, 1]. We evaluate
+                                 (ˆτj −τk)2     (ˆθj −θk)2                    both channel estimation performance (with k =  1) and
+     j∗= arg min      +             , ˆτk = ˆτj∗.            extrapolation performance (with k =  2). Average NMSE
+                                 j   (1τdft)2     (1θdft)2                                                              values are computed over 100 Monte Carlo trials at different
+  For any estimated path where ∥ˆτk −τk∥> 1τdft, the   SNR levels.
+reconstruction for that path is considered failed, and the       For QNOMP,  the  local  refinement  rates  are  set  to
+corresponding error  is  set to the fixed value 1τdft. The     k1 = k2 = 10 with nLR = 1 refinement step. The BFGS
+estimation error is further compared with the Cramér–Rao     iteration counts are nin = 3 and nout = 40. For NOMP, we set
+bound (CRB).                                             Rs = 1, Rc = 3, and include an additional cyclic optimization
+  All experiments are conducted using MATLAB R2022b on     of nout = 40 iterations following the same procedure as in
+a PC with an i5-13500H processor. The computational time   QNOMP. The grid size for conventional OMP and NOMP is
+of each algorithm is measured in terms of CPU time.            0.11τ,θdft .
+  We summarize the simulation parameters for the three      Numerical experiments consider two scenarios with differ-
+experimental scenarios addressed in the following subsec-     ent path densities. Scenario 1 uses C1 = 2, corresponding
+tions — including the simulated sparse multipath scenario,     to relatively sparse path spacing, while Scenario 2 employs
+the angular block scenario, and the 3GPP CDL channel    C1 = 1.5, creating a denser distribution. Fig. 2 shows the
+scenario —  in  Table  2.  Additional  configurations  not   NMSE performance for CSI and delay estimation across
+mentioned  in  the  table  are  detailed  in  their  respective     these scenarios.
+subsections.                                        As shown in Fig. 2, QNOMP and the LOX method based on
+                                    QNOMP achieve comparable performance, both outperform-
+A. SIMULATED MULTIPATH PROPAGATION SCENARIO         ing other approaches. MUSIC and ESPRIT exhibit degraded
+We evaluate algorithm performance using a one-dimensional    performance in dense path scenarios. OG-ISTA and AST
+sparse multipath propagation model (considering only the    show similar results, consistent with AST representing the
+frequency domain)  with M  =   100  subcarriers and     continuous limit of LASSO. EM-IF-SBL converges more
+N = 1 antenna. The model comprises 7 paths with delays τk     slowly in sparse scenarios but performs better in dense
+for k = 1, . . . , 7, evenly spaced such that τk+1−τk = C11τdft.     environments.
+
+
+VOLUME 13, 2025                                                                                                         212663

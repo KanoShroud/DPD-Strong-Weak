@@ -1,0 +1,67 @@
+IEEE TRANSACTIONS ON MOBILE COMPUTING, VOL. 23, NO. 12, DECEMBER 2024                                                                   14055
+
+   A Binary Structured Sparsity Approach for
+         Multi-Anchor Direct Localization
+
+                 Shiva Akbari    , Student Member, IEEE, and Shahrokh Valaee    , Fellow, IEEE
+
+
+
+  Abstract—Structured sparsity improves on traditional sparse   In open spaces, Global Navigation Satellite Systems (GNSS)
+modeling by suggesting that only a limited number of input vari-   provide reliable positioning solutions. However, indoor envi-
+ables is needed to describe the output variable. These methods go                                                         ronments present unique obstacles that disrupt effective local-
+a step further by incorporating structured patterns in variable
+                                                                       ization. These challenges include multipath interference, whereselection, such as groups or networks of input variables. This
+paper introduces a novel binary approximation method leveraging   signals bounce off various surfaces, creating multiple signal
+structured sparsity to enhance multi-anchor direct localization per-   paths; shadowing caused by obstructions that block signal paths;
+formance. By reformulating the sparse recovery as a quadratic un-  power attenuation leading to signal weakening over distances or
+constrained binary optimization (QUBO) problem, we address the                                                       due to obstructions; and transmission delays, which can affect
+signiﬁcant computational complexity inherent in NP-hard prob-
+                                                                 the timing accuracy of signal reception [2], [3].lems. Employing compressed sensing and binary programming,
+our method reduces approximation errors and ensures that the     Given these challenges, there has been a signiﬁcant focus in
+line-of-sight component is consistently identiﬁed from a coherent   researchondevelopingandreﬁningindoorpositioningtechnolo-
+grid point among anchors, thus enhancing localization accuracy.   gies. These technologies aim to overcome the limitations faced
+Our ﬁndings demonstrate a signiﬁcant improvement in the accu-                                                     by GNSS in indoor settings and provide accurate and reliable
+racy of direct localization methods, underscoring the potential of
+                                                                  location information. Some of the prominent technologies beingstructured sparsity and QUBO formulation to advance localization
+technologies in multipath environments.                         explored include Wi-Fi, which is ubiquitous in indoor settings
+                                                       and can be utilized for positioning through signal strength and
+  Index Terms—Binary programming, direct localization, group
+                                                               othernetworkcharacteristics.Bluetoothtechnology,particularlyLASSO, sparse modeling, structured sparsity.
+                                                           with the advent of Bluetooth Low Energy (BLE), offers another
+                               I. INTRODUCTION                      avenue for indoor localization, capitalizing on its low power
+                                                        consumption and widespread integration in consumer devices.   HE future of wireless networks extends beyond just con-
+                                                        Ultra-WideBand (UWB) is also gaining attention due to its high      nectivity and data transmission. The upcoming era of wire-T                                                       accuracy in distance measurements and its ability to penetrateless networks is set to revolutionize communication technology
+                                                           through obstacles, making it particularly suitable for complexby integrating advanced location-based services, crucial for
+                                                             indoor environments [1], [3].emerging applications like multisensory extended reality (XR),
+                                                             Wi-Fi-based indoor positioning has gained prominence asinterconnected robotics, and wireless brain-computer interfaces.
+                                                           a promising solution for indoor localization, leveraging theCentral to these advancements is the accurate determination of
+                                                               ubiquity of Wi-Fi infrastructure coupled with technological ad-relative positions and orientations of transmitters and receivers.
+                                                           vancements. The integration of Orthogonal Frequency-DivisionThis capability is fundamental for enhancing user experiences
+                                                             Multiplexing (OFDM) and Multiple Input Multiple Outputin XR, improving navigation and coordination in robotics, and
+                                             (MIMO) systems, as per the IEEE 802.11a/n standards, hasproviding precise control in brain-computer interfaces. It em-
+                                                        been instrumental in this regard. These technologies enable thephasizes spatial intelligence and location awareness as pivotal
+                                                                  extraction of Channel State Information (CSI) from commercialelements for technological innovation and the development of
+                                                        Wi-Fi devices, a signiﬁcant step in indoor positioning [4], [5].new applications [1].
+                                                   CSI offers detailed insights into signal propagation, including  The advancements  in  wireless networks  are  especially
+                                                          phase and amplitude variations across multiple subchannels,crucial in indoor environments, where the challenges for accu-
+                                                      which are crucial for understanding how Wi-Fi signals behaverate localization are signiﬁcantly different from outdoor settings.
+                                                       and propagate in complex indoor environments.
+                                                     The mixture of OFDM and MIMO technologies in Wi-Fi
+  Manuscriptreceived17February2024;revised12June2024;accepted30July   systems provides a robust framework for indoor positioning.
+2024. Date of publication 6 August 2024; date of current version 5 November
+2024. This work was supported in part by Fujitsu Ltd. and in part by Fujitsu  OFDM facilitates efﬁcient high-speed data transmission across
+Consulting (Canada) Inc. for access to Digital Annealer at the University of   multiple carrier frequencies, minimizing the risk of signal in-
+Toronto. Recommended for acceptance by S. Mazuelas. (Corresponding author:                                                                    terference. MIMO technology, on the other hand, employsShiva Akbari.)
+  The authors are with the Edward S. Rogers  Sr. Department of Elec-   multiple antennas at both the transmitter and receiver ends,
+trical & Computer Engineering, University of Toronto, 10 King’s College   enhancing signal quality and data throughput through spatial
+Rd, Toronto ON M5S 3G8, Canada (e-mail: shiva.akbari@mail.utoronto.ca;   diversity [4], [5]. This combination not only improves the overall
+valaee@ece.utoronto.ca).
+   Digital Object Identiﬁer 10.1109/TMC.2024.3439099                  performance and reliability of Wi-Fi-based indoor positioning
+
+
+                     1536-1233 © 2024 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.
+                                   See https://www.ieee.org/publications/rights/index.html for more information.
+
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:02:23 UTC from IEEE Xplore. Restrictions apply.

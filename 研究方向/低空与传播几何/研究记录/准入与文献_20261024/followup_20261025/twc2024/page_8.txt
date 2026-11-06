@@ -1,0 +1,69 @@
+AKBARI AND VALAEE: DECIMETER LEVEL COOPERATIVE DIRECT LOCALIZATION WITH ISING MODEL APPROACH                                 14401
+
+
+estimates the location of the user without directly estimating
+LoS AoA. The authors used an ℓ1-norm relaxation to transform
+the NP-hard compressed sensing problem into a second-order
+cone programming problem.
+  The second benchmark we are considering is a maximum
+likelihood  direct  location  estimation (ML-DLE) proposed
+in [22]. In this method, the authors came up with a simple
+method that utilizes maximum-likelihood estimation over the
+grid  to  directly estimate the  location of the source  in a
+multipath environment. They compute the likelihood of the
+received signal at each access point given the known values
+of the AoA and ToA on a grid point. This algorithm needs
+statistical channel knowledge.
+  We  also  compared  our  method  with  the  traditional
+                                                                                   Fig. 2.  The grid of size 𝐺= 400 designed based on Alternating projectionmaximum-likelihood-based   indirect   location   estimation
+                                                                                algorithm.
+method (ML-ILE) [55]. In this method, first, the AoA of the
+received signal at each access point is estimated using the
+maximum likelihood estimator. Next, the location of the user
+is evaluated with triangulation.
+
+
+A. Experimental Setup
+
+  We use ASUS RT_AC86U routers with three antennas as
+our receiver access points. The ASUS RT_AC86U routers
+work in 2.4 𝐺𝐻𝑧and support a 20𝑀𝐻𝑧bandwidth. The dis-
+tance between two adjacent antennas of an ASUS RT_AC86U
+router  is 8.7 𝑐𝑚. These  routers run IEEE802.11ac MU-
+MIMO protocol and are equipped with Nexmon CSI Extractor
+Tool [56]  for gathering the CSI information. In addition,
+we use Raspberry Pi4 as our transmitter.
+  After  setting up  the  routers and Raspberry Pi4  in  the                                                                                   Fig. 3.   ECDF of localization error for ℓ0-CS DLE, ℓ1-CS DLE [23],
+environment, we can start collecting CSI data. Our goal is  ML-DLE [22], and ML-ILE [55] for the simulated environment.
+to localize the Raspberry Pi4, which  is associated with a
+network or a router. The Raspberry Pi4 sends ping packets at
+100𝐻𝑧. These packets are collected by ASUS routers which   This model follows a statistical approach, capturing various
+                                                           channel parameters based on empirical distributions extractedare programmed in the monitor mode. The routers monitor the
+                                                      from extensive measurement campaigns.wireless channel and then extract and store the CSI from the
+                                                     The Winner  II channel model generates channel realiza-packets transmitted by the Raspberry Pi4 as the packet capture
+                                                                    tions by summing contributions from individual rays, each(pcap)  files. For each experiment, Raspberry Pi4 generates
+                                                                characterized by specific parameters including delay, powerpackets for 300 seconds.
+                                                       and  angle-of-arrival.  These  parameters  are  stochastically  We should note that the receivers and the transmitter are
+                                                             determined, ensuring that the model captures the statisticalnot synchronized. Therefore, the CSI phase is distorted by
+                                                                   variations observed in real-world propagation scenarios. Addi-the carrier frequency offset (CFO) and symbol timing offset
+                                                                         tionally, the model supports both LoS and NLoS conditions,(STO). To compensate for these phase distortions, the linearity
+                                                     making it suitable for indoor and outdoor environments alike.
+of the CSI phase across subcarriers can be removed [57]. This
+                                                            For our  simulations, we  consider a 20𝑚× 20𝑚area.
+phase cleaning procedure does not affect the AoA estimates,
+                                                               In  this  area, three access points are located in the room
+while it leads to a bias on the ToF estimates.
+                                                           with coordinates [0𝑚, 20𝑚], [20𝑚, 15𝑚], [12𝑚, 0𝑚] and with
+                                                                     orientations, [0, 0, 2𝜋3 ], [0, 0, 5𝜋4 ], [0, 0, 5𝜋3 ] with respect to the
+B. Simulation Results                                                               global coordinate system (GCS). The access points operate in
+  In this section, we study the performance of the proposed   2.4 GHz and are equipped with a ULA with 10 elements.
+localization method by comparing it to the benchmarks. For   Within this space, the transmitter is located at [7𝑚, 8𝑚], and
+these evaluations, we generate the received signal for each  800 snapshots are collected for analysis. The non-uniform
+access point using WIM2 simulator [58]. The channel model   grid described in Section III that we used for building our
+used in  this simulator  is the WINNER  II channel model.   dictionary is of size 𝐺= 400 and it is demonstrated in Fig. 2.
+This model can produce different multipath scenarios, such as      Fig. 3 compares the empirical cumulative distribution func-
+indoor and urban environments. The Winner II channel model,   tion (ECDF) of the localization error of the proposed method
+which is a geometry-based stochastic channel model designed   in this paper and the benchmarks. In this figure, the SNR
+to represent the effects of multipath propagation accurately.    is 20𝑑𝐵. The median accuracy of our method, ℓ0-CS DLE,
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:02:33 UTC from IEEE Xplore. Restrictions apply.

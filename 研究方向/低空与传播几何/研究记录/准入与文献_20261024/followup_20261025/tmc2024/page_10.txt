@@ -1,0 +1,50 @@
+14064                                                              IEEE TRANSACTIONS ON MOBILE COMPUTING, VOL. 23, NO. 12, DECEMBER 2024
+
+
+is a measure of how much information an observable random                                                  xi∗−xa d                                                                                 cos θi∗a + (ˆyi∗−ya)Δf (ns −1)variable has about an unknown parameter that impacts the  −ˆ       −1)                                                                                        ri∗a   λ(k               C
+probability of that random variable. Therefore, To determine the
+CRB, it is essential to compute the Fisher Information Matrix        Na Ne                                                        1        4π2    xi∗−xa d(FIM). The FIM is deﬁned as the covariance of the gradient of  =        −ˆ       −1) cos θi∗a                                                        σ2                                                                                         ri∗2a            ri∗a   λ(k                                                             a=1 k=1the log-likelihood function with respect to the parameters. The
+formula for the FIM is as follows:                                                                 2
+                                    + (ˆyi∗−ya)Δf                                                                             (ns −1)                           (32)              J(¯η) = E{∇¯ηLy(¯η)∇¯ηLy(¯η)H}                                               C
+          = −E{∇¯η∇H¯η Ly(¯η)}               (28)                                                                    Similarly, J˜xu ˜yu and J˜yu˜xu are equal and are calculated in the
+where ∇¯η = [∂/∂˜xu, ∂/∂˜yu]T . In this case, the matrix J(¯η) is   following fashion:
+a 2 × 2 matrix with the following form:                             1 ∂μ(¯η)H ∂μ(¯η)
+                                                                          J˜xu ˜yu =
+                                                            σ2   ∂˜xu     ∂˜yu                                 J˜xu˜xu   J˜xu ˜yu
+                  J(¯η) =                           .             (29)
+                                  J˜yu˜xu   J˜yu ˜yu                       1 Na Ne  j2π                         d                                  =               Ω(ns−1)H                                                                                  Γ(k−1)H                                                                               −ˆyi∗−ya   −1)                                                                                                                                 θi∗a                                                                                                                     ri∗a                                                       σ2                                                                                                   ri∗a                                 ri∗a   λ(kSubsequently, we need to compute each component of the ma-                                                             a=1 k=1
+trix J(¯η). We start by assuming uniform noise covariance, i.e.
+                                                                                                             Γ(k−1)Σ = σ2I. Under this assumption, the second derivative of the   cos θi∗a                                                                                                                                                              θi∗a                                      + (ˆxi∗−xa)Δf (ns −1)    −j2π Ω(ns−1)ri∗alog-likelihood function Ly(¯η) with respect to ¯ηk and ¯ηl can be              C                    ri∗a
+expressed as:
+                                                        ˆxi∗−xa d                                                                          −1)               ∂2            2    ∂μH(¯η) ∂μ(¯η)               −1) cos θi∗a + (ˆyi∗−ya)Δf (ns                                                           λ(k               C   J¯ηk,¯ηl = −E        Ly(¯η) =  ℜ                             .            ri∗a
+                     ∂¯ηk¯ηl          σ2       ∂¯ηk      ∂¯ηl
+                                                        (30)  = J˜yu˜xu                                                (33)
+To compute CRB, we need to calculate the elements of the FIM
+matrix according to (30). Note that here μ(¯η) =   i∈NZ φ¯ηi . We  The CRB of localization error in this context can be deﬁned as
+start by calculating the ﬁrst element J˜xu˜xu:                      follows:
+        1 ∂μ(¯η)H ∂μ(¯η)                         CRB = trace(J−1(¯η)) = J−111 + J−122 .        (34)
+J˜xu˜xu =
+        σ2   ∂˜xu    ∂˜xu                                                        Here,theCRBisrepresentedasthesumoftwospeciﬁcelements,
+   1 Na Ne  j2π                     yi∗−˜ya d         namely J−111 and J−122 . These elements are the diagonal entries=               Ω(ns−1)H                          Γ(k−1)H                 −ˆ       −1)   of the inverse of the FIM, denoted by J−1.                                          θi∗a                              ri∗a   σ2                     ri∗a                                 ri∗a   λ(k      a=1 k=1                                                     The expression for J−111  is given by,
+
+                                                                                                                 J˜yu ˜yu                                        Ω(ns−1)                                                 Γ(k−1)                                                                                                                                                                      .         (35)cos θi∗a + (ˆxi∗−˜xa)Δf (ns −1)    −j2π                                                                        θi∗a                 J−111 =                                                              ri∗a            C                    ri∗a                                                   J˜xu˜xuJ˜yu ˜yu −J˜xu ˜yuJ˜xu ˜yu
+                + (ˆxi∗−˜xa)Δf (ns −1) −ˆyi∗−˜ya d  −1) cos θi∗a                                     Similarly, the expression for J−122  is,          ri∗a   λ(k               C                                                            J˜xu˜xu
+                                                            J−122 =                                         .         (36)
+      Na Ne                                                                                    J˜xu˜xuJ˜yu ˜yu −J˜xu ˜yuJ˜xu ˜yu
+   1        4π2     yi∗−˜ya d=        −ˆ       −1) cos θi∗a                                                               In these equations, J˜xu˜xu, J˜yu ˜yu, and J˜xu ˜yu are speciﬁc ele-   σ2                 ri∗2a            ri∗a   λ(k      a=1 k=1
+                                                       ments of the FIM, representing the precision of estimates in
+                             2                                      different dimensions. The CRB, therefore, provides a measure
++ (ˆxi∗−˜xa)Δf (ns −1)                               (31)   of the lowest variance that any unbiased estimator can achieve,
+        C
+                                                       and these equations describe how  it is calculated from the
+Also, the element J˜yu ˜yu is computed as follows:               components of the FIM in this speciﬁc scenario.
+                                                                Proposition 1: Assuming ri∗a ≫1, a = 1, 2, . . . , Na, we can
+        1 ∂μ(¯η)H ∂μ(¯η)                                approximate the CRB as follows:J˜yu ˜yu =
+        σ2   ∂˜yu     ∂˜yu
+                                                                   kCRB
+     Na                                  CRB ≈  Na   1                                                                                                                                 )2                                         d         Ne  j2π                                                                                                                   a                                                                a=1                                                                                sin2 θi∗a   Naa=1 cos2 θi∗a −(  Naa=1 sin θi∗a cos θi∗=                 Ω(ns−1)H                          Γ(k−1)H                                     −1)                 −ˆxi∗−xa                                          θi∗a                             ri∗a                                                                                                                        (37)  σ2                    ri∗a                                                        ri∗a   λ(k     a=1         k=1
+                                                          where:
+                           −j2π                                                                               σ2 C2                                        Ω(ns−1)                                                Γ(k−1) cos θi∗a + (ˆyi∗−ya)Δf (ns −1)                                                                                                                        (38)                                                              ri∗a                                                                       θi∗a               kCRB =            C                    ri∗a                                  4π2NeNa(Δf)2(ns −1)2
+
+
+        Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:02:23 UTC from IEEE Xplore. Restrictions apply.

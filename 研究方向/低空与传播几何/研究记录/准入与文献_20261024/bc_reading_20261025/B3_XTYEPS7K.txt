@@ -1,0 +1,4450 @@
+
+=== PDF PAGE 1 ===
+Received November 12, 2018, accepted December 20, 2018, date of publication January 7, 2019, date of current version January 23, 2019.
+Digital Object Identifier 10.1109/ACCESS.2018.2889958
+Unified Subspace Fitting Framework and Its
+Performance Analysis for Direct Position
+Determination in the Presence of
+Multipath Propagation
+JIANPING DU1,2, HONGYI YU1,2, DING WANG
+1,2, DALONG ZHANG
+3, AND GUANGYI LIU1,2
+1National Digital Switching System Engineering and Technological Research Center, Zhengzhou 450002, China
+2Zhengzhou Institute of Information Science and Technology, Zhengzhou 450002, China
+3School of Information Engineering, Zhengzhou University, Zhengzhou 450000, China
+Corresponding author: Ding Wang (wang_ding814@aliyun.com)
+This work was supported in part by the National Natural Science Foundation of China under Grant 61201381, Grant 61401513, and Grant
+61501517, and in part by the China Postdoctoral Science Foundation under Grant 2016M592989.
+ABSTRACT The cost functions and their performances of direct position determination (DPD) methods in
+the presence of multipath propagation are investigated. We ﬁrst establish a general DPD (GDPD) model in
+the presence of multi-path propagation and point out that the existing cost functions cannot get the emitter
+positions correctly because of the singularity of the manifold matrix in a multipath propagation scenario.
+Eight cost functions are developed for the GDPD model and formulated in a uniﬁed subspace ﬁtting (USF)-
+based framework, which provides insight into their algebraic and asymptotic relations. Moreover, we derive
+the closed-form expressions of the asymptotic distributions of the estimation errors, which are optimized by
+those cost functions. Besides, the optimal cost function for achieving an optimal asymptotic performance is
+derived based on the optimization theory. Finally, the numerical simulations and Cramér–Rao lower bound
+are provided to verify the analytical results and show that: 1) the cost functions which work well in the single-
+path DPD model cannot ﬁnd the emitters correctly in a multipath scenario; 2) the signal subspace ﬁtting
+cost functions and noise subspace ﬁtting cost functions, which are proposed in this paper, ﬁnd the emitters
+accurately in the multipath propagation scenarios; 3) the optimal-weighted-subspace-ﬁtting cost function
+holds the best asymptotic performance under the USF framework; and 4) the asymptotic performance of a
+multiple dimension cost function is better than a 1D cost function.
+INDEX TERMS Asymptotic distribution, direct position determination, multipath propagation, subspace
+ﬁtting, maximum likelihood, multiple signal classiﬁcation, weighted subspace ﬁtting.
+I. INTRODUCTION
+Most of the position systems are designed for the LoS
+(Line-of-Sight) emitters, such as GPS (Global Position Sys-
+tem), LoRa (Long Range) positioning system. The research
+about NLoS (None-Line-of-Sight) emitters positioning has
+attracted much attention in recent years. Aero platforms
+(satellite, EWA: Early Warning Air-plane, etc.) are adopted
+to extend the positioning area for the positioning of NLoS
+emitters. We are interested in the positioning of NLoS emit-
+ters assisted by aero platforms (UAV: Unmanned Aerial Vehi-
+cle, satellite, etc.) in this paper. There are two ways to get
+NLoS emitter positions, the ﬁrst is to sample directly and
+synchronously on aero platforms (e.g. WSN: Wireless Sensor
+Network), and the second is to forward the signal to the
+receivers without any processing except frequency-shifting
+and power ampliﬁcation (e.g. satellite). Compared with the
+ﬁrst scheme, the transponders in the second scheme only need
+forwarding the received signal to the receivers, and does not
+need transmitting the sampled data to the positioning center
+(See FIGURE 1).
+Additional communication overhead and synchronization
+cost are not required for transponders in the second scheme,
+and it is important for a transponder which is installed on a
+UAV or satellite.
+Multipath propagation is the most difﬁcult problem in this
+positioning system. The signals received by each antenna are
+VOLUME 7, 2019
+2169-3536 
+ 2019 IEEE. Translations and content mining are permitted for academic research only.
+Personal use is also permitted, but republication/redistribution requires IEEE permission.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.
+6889
+
+
+=== PDF PAGE 2 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+FIGURE 1. Position System assisted with transponders .
+the superposition of multiple delay and frequency-shifting
+signals (See FIGURE 1). Most of existing positioning meth-
+ods are designed by developing statistical measurements to
+against multi-path effects. For example, using CAF (Cross
+Ambiguity Function) method to estimate time-frequency dif-
+ference, using Received Signal Strength Indication (RSSI)
+ﬁngerprinting to match energy intensity, and using UWB
+(Ultra Wide Bandwidth) signal to separate difference paths
+from received signal. The common feature of these methods
+is to reduce the inﬂuence of secondary path on main path, and
+then locate it as a single path location problem.
+When CAF is adopted for estimating the time-frequency
+difference in the presence of multipath propagation, multiple
+peaks will be generated because of the multi-path propaga-
+tion. The matching problem between peaks of the CAF and
+their relevant paths difference will be very difﬁcult. In addi-
+tion, in a low SNR scenario, the two-step positioning method
+may not be able to accurately estimate the time-frequency
+difference.
+Unlike existing methods to reduce multipath interference,
+the Direct Position Determination (DPD) method makes use
+of the multipath propagation to improve the reliability and
+availability of the position system. DPD can theoretically
+achieve a better positioning performance. Du et al. [1] estab-
+lished a GDPD (General Direct Positioning Determination)
+mathematical model and algorithm of forwarding positioning
+system, and compared the positioning performance of differ-
+ent cost functions by Monte Carlo simulation, but theoretical
+analyses of cost functions are absent.
+DPD methods obtain the emitter positions directly for
+achieving better performances [2]–[7] than two-step position-
+ing methods. A DPD method uses the observations from all
+sensors together, and establishes a cost function that depend
+only on the emitter for achieving a global optimal estimations.
+DPD methods overcome the problem of associating esti-
+mated parameters with their relevant sources, and are shown
+to outperform two-step methods (TDOA: Time-Difference-
+Of-Arrival, FDOA: Frequency-Difference-Of-Arrival, DOA:
+Direction-Of-Arrival etc.), especially in low Signal-to-Noise
+Ratio (SNR) scenarios [8], [9]. The key idea of a DPD method
+is that the two-step optimizations (measure estimations and
+position optimizations) are combined into a one-step opti-
+mization (position optimizations) to obtain a theoretical opti-
+mal solution.
+In DPD methods, The Maximum Likelihood (ML) and
+MUltiple SIgnal Classiﬁcation (MUSIC) are widely used as
+cost functions. A DPD method with an ML cost function
+mainly focuses on the positioning of known waveform sig-
+nals. ML establishes a likelihood function of the received
+signals, which determined only by emitter positions, as the
+cost function, and obtains the maximum likelihood estimate
+of the emitter positions. A DPD method with a MUSIC
+cost function is mainly for the unknown waveform signal
+positioning, and the cost function is formed by maximizing
+the projection of the array manifold vectors onto the signal
+subspace. Weiss et al. compared the positioning performances
+of different cost functions by numerical simulation in [10].
+The results shown that when the number of snapshots was
+sufﬁcient, ML and MUSIC can effectively close with Cramér-
+Rao Lower Bound (CRLB). A Signal Subspace Projection-
+MUltiple SIgnal Classiﬁcation (SSP-MUSIC) cost function
+is developed in their works. The SSP-MUSIC maximized the
+array manifold projection onto the signal subspace for achiev-
+ing the optimal estimations of emitter position. In a direction
+ﬁnding application, since the path attenuation of each antenna
+has been calibrated in advance, the maximization of the signal
+subspace projection is equivalent with the minimization of
+the Noise Subspace Projection-MUSIC (NSP-MUSIC) of the
+array manifold space. A GDPD model which took the multi-
+path propagation into account was established in [1]. Amar
+and Weiss pointed out that the cost function, proposed in [10],
+which works well for single-path propagation DPD method,
+would be failed in ﬁnding the emitter positions. In a multi-
+path propagation scenario, the array manifold matrix would
+be singular or nearly singular when there are two or more
+paths with the same propagation delays from the candidates
+to receiving stations. In this case, the difference between an
+SSP-MUSIC cost function and a NSP-MUSIC cost function
+turns to be signiﬁcant, and fake solutions will be ﬁnd for those
+candidates. Although existing literatures have found that per-
+formances of different cost functions are different, there are
+few theoretical analyses on the performance of different cost
+functions. The performances of those cost functions were
+veriﬁed by Monte Carlo simulations rather than a theoretical
+analysis in the existing literatures. A cost function is regarded
+as a reasonable cost function, if the error covariance matrix
+closes to the CRLB with the increases of snapshots number.
+There have been many results about the asymptotic per-
+formance for the single parameter estimation problem in the
+direction ﬁnding application. The main research results of
+the existing literature are concentrated in three areas: (1) the
+asymptotic distribution analysis of DOA estimation errors
+for speciﬁc signals, (2) the asymptotic distribution analysis
+of DOA estimation errors with model errors, and (3) the
+asymptotic distribution analysis of DOA estimation errors
+under Subspace Fitting framework.
+Most of existing studies focused on the asymptotic distri-
+bution analysis of DOA estimation error for speciﬁc signals.
+Hamza and Buckley [11] analyzed the effects of a limited
+number of snapshots on a general class of multiple dimension
+6890
+VOLUME 7, 2019
+
+
+=== PDF PAGE 3 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+signal subspace estimation methods. Kaveh and Barabell [12]
+analyzed the statistical performance of the music and the
+minimum-norm algorithms in resolving plane waves in noise.
+Li et al. [13] and Dauxois et al. [14] studied the asymp-
+totic performance by Principal Component Analysis (PCA)
+method for non-circular signals in the presence of circu-
+lar white Gaussian noise. Wang and Kaveh [15], [16] pre-
+sented an analytical evaluation of detection and estimation
+performances of narrow-band signal and coherent wide-band
+system subspace processing for multiple source direction
+ﬁnding. An asymptotic analysis was presented of a class of
+high-resolution estimators for resolving correlated and coher-
+ent plane waves in noise for direction ﬁnding application
+in [17]. Stoica and Nehorai [18] proposed a numerical and
+analytical study of conditional and unconditional DOA esti-
+mation. An analytical performance evaluation of the errors
+of the direction-of-arrival estimates obtained by the MUSIC
+algorithm for uncorrelated sources was studied by Porat and
+Friedlander [19], [20]. Delmas and Meurisse [21] studied the
+asymptotic performance of direction ﬁnding algorithms with
+temporally correlated narrowband signal. Zhou et al. [22]
+analyzed the asymptotic performance of DOA estimation
+based on the G-MUSIC algorithm for a single source using
+RLA (Random-Linear-Array).
+The asymptotic distribution of DOA estimation error in the
+presence of model errors has also attracted the interest of
+some scholars. Swindlehurst and Kailath [23], [24] studied
+the performance of subspace algorithms for the situations on
+which the noise covariance and array response are perturbed
+from their assumed values. Ferreol et al. [25] proposed an
+asymptotic performance analysis of subspace DOA estima-
+tion in the presence of modeling errors.
+Some literatures focused on the asymptotic distribution of
+DOA estimation error under the Subspace Fitting framework.
+Ottersten et al. [26] proposed an asymptotic analysis of the
+ML and Weighted Subspace Fitting (WSF) methods for the
+deterministic emitter signals. Five methods of DOA estima-
+tion which were derived from ML principle and analytic
+results on their theoretical performance levels were proposed
+by Stotica and Sharman [27]. Moulines and Cardoso [28] and
+Cardoso and Moulines [29] derived and worked out closed-
+form expressions of the asymptotic covariance of MUSIC-
+like DOA estimates based on two fourth-order cumulate
+matrices. Bengtsson and Ottersten introduced a general class
+of Subspace Fitting (SF) algorithms for consistent estima-
+tion of parameters from a possibly full-rank data model.
+The asymptotic performances of the algorithms are analyzed,
+and an optimally weighted algorithm is derived in [30].
+Ottersten et al. [31], [32] proposed several estimation meth-
+ods as solutions to different versions of a basic subspace
+ﬁtting problem, and the asymptotic performance of the multi-
+dimensional subspace ﬁtting methods was investigated. They
+studied the asymptotic robustness of sensor array process-
+ing methods further, and pointed out that the asymptotic
+properties of essentially all DOA estimation methods based
+on a multidimensional search, depend only on the second
+order properties of the emitter signals in [33]. Stoical and
+Nehorai [34], [35] analyzed the asymptotic distribution of the
+MUSIC algorithm for the single parameter estimation prob-
+lem in the direction ﬁnding application. The minimization
+of NSP-MUSIC was adopted as the cost function in their
+works. The asymptotic distribution neglected the terms with
+O(1/N), and it was only a upper bound of the asymptotic
+distribution.
+Viberg et al. [36], [37] introduced a Weighted Subspace
+Fitting (WSF) method. Viberg analyzed the asymptotic dis-
+tribution of the ML, Multiple Dimension-MUSIC (MD-
+MUSIC), and WSF for the direction ﬁnding problem, and
+obtained the optimal weights of a WSF for achieving the best
+asymptotic distribution performance. Authors derived a close
+form of the asymptotic performance of a signal subspace
+ﬁtting MUSIC cost function. The asymptotic distribution
+performances of an MD-MUSIC and an ML were com-
+pared by numerical simulations. Numerical simulation results
+showed that the asymptotic distribution performance of an
+MD-MUSIC method was worse than an ML method. It was
+unexpected since the One Dimension-MUSIC (1D-MUSIC)
+was known to have the same asymptotic performance as the
+ML for uncorrelated sources [34]. An MD-MUSIC method
+not only takes the correlation between sources signals into
+account, but also extends the searching dimensions, and it
+theoretically obtains a better performance than a 1D-MUSIC
+method. However, reasons of the unexpected result was not
+analyzed further in their works.
+Viberg and Ottersten [36] maximized the projection onto
+the signal subspace to obtain the emitter position. It is well
+known that the SSP-MUSIC is a simpliﬁed version of the
+NSP-MUSIC. Obviously, an SSP-MUSIC holds a worse per-
+formance than an NSP-MUSIC. It is regrettable that Stoica
+did not give the asymptotic distribution result of an NSP-
+MUSIC with O(1/N), and did not compare the asymptotic
+distribution performance between an NSP-MUSIC and an
+ML theoretically. It is necessary to analyses the second
+moment statistical properties of eigen-vectors for getting an
+O(1/N) asymptotic distribution performance. If an eigen-
+value is different with other eigenvalues (eigenvalues related
+to the signal subspace), the second moment statistical prop-
+erties of the eigen-vector correspond to the eigenvalue have
+been well studied in [38] and [39], and the results are adopted
+for getting the asymptotic distribution properties of an SSP-
+MUSIC in [36]. However, the eigenvalues correspond to the
+noise subspace are multiple roots, and there are few results
+on the second moment statistical properties of eigen-vectors
+corresponding to the multiple roots. Arie et al. pointed out
+that the classical derivation of the asymptotic efﬁciency uses a
+ﬁrst-order perturbation analysis, relying on a ‘‘small-errors’’
+assumption, which under sub-asymptotic conditions turns
+inaccurate, rendering the ML generally biased and inefﬁcient.
+A tensor formulation of higher-order derivatives to derive
+a tractable formulation of a higher (up to the third) order
+perturbation analysis was proposed for predicting the bias and
+Mean Squared Error (MSE) matrix of the ML of parameter
+VOLUME 7, 2019
+6891
+
+
+=== PDF PAGE 4 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+vectors in general non-linear models under sub-asymptotic
+conditions in [40].
+The above literatures focused on the asymptotic perfor-
+mance for the direction ﬁnding application. It was assumed
+that the path attenuations were well calibrated or known
+precisely in advance. However, the path attenuations are
+unknown in a GDPD application, and some simpliﬁcation
+methods in the existing literatures can not work well in a
+GDPD model.
+The motivation of this paper is to develop the cost func-
+tions for the DPD method in multipath propagation scenar-
+ios, and to analysis the asymptotic distribution of those cost
+functions. A GDPD positioning model in the presence of
+multi-path propagation is established as the base positioning
+model. We develop eight cost functions under the Uniﬁed
+Subspace Fitting (USF) framework, and derive the closed-
+form expressions of asymptotic distributions of those cost
+functions. MUSIC and ML cost functions are uniﬁed into the
+Weighted Signal Subspace Fitting (WSSF) framework, and
+the optimal weights of a WSSF cost function for achieving the
+optimal asymptotic performance is derived base on algebra
+and optimization theories. Finally, the asymptotic distribution
+performances of different cost functions and the CRLB of the
+position estimations are compared by numerical simulations.
+This paper is organized as: First, a GDPD model in pres-
+ence of multi-path propagation is established in the section 2;
+Then, A geometric understanding of USF and eight cost
+functions are proposed in section 3 and section 4; Next,
+the asymptotic distribution properties of Multiple Dimension
+functions and CRLB are studied in section 5; Afterwards,
+The optimal weights are optimized for achieving the best
+asymptotic distribution performance in the section 6; Finally,
+a numerical simulation is taken to verify above results in the
+section 7 and a conclusion is proposed in the section 8.
+II. GDPD MODEL IN THE PRESENCE OF MULTI-PATH
+PROPAGATION
+The GDPD model in presence of multi-path propagation
+follows the model in [1], [41], and [42]. For the convenience
+of reading, we give the relevant variables descriptions and
+formulas again.
+Consider D emitters are located at pe, and L passive
+transponders are placed at pt, where
+pe = [pT
+e (1), pT
+e (2), . . . , pT
+e (D)]T ,
+(1)
+pt = [pT
+t (1), pT
+t (2), . . . , pT
+t (L)]T ,
+(2)
+and pe(d)
+≜
+[pe(d, x), pe(d, y), pe(d, z)]T and pt(ℓ)
+≜
+[pt(ℓ, x), pt(ℓ, y), pt(ℓ, z)]T are the 3D coordinates of emit-
+ter positions and transponder positions. The signals trans-
+mitted by the emitters are reﬂected by the transponders
+and intercepted by N receiving arrays. The raw signal
+samples are transferred ‘‘in-band’’ (i.e., as multipath), and
+required tightly synchronized in time and frequency [41].
+Each array includes M antennas, and the centers of arrays
+are located at pr
+=
+[pT
+r (1), pT
+r (2), . . . , pT
+r (N)]T , and
+pr(N) ≜[pr(n, x), pr(n, y), pr(n, z)]T . It is assumed that the
+locations of transponders and receivers are known a pri-
+ori(e.g. transponders are installed on UAVs whose positions
+are known a priori), but the signal waveforms are unknown.
+The scenario is depicted in ﬁgure 2 [1].
+FIGURE 2. Multiple-path positioning problem with static
+transponders/receivers.
+Denote the signal propagation delay between the dth emit-
+ter and the ℓth transponder by ¯τd,ℓ=
+1
+c ∥pe(d) −pt(ℓ)∥F.
+Let ˜τℓ,n,m = 1
+c ∥pr(n, m) −pt(ℓ)∥F denotes the propagation
+delay between the ℓth transponder and the mth antenna in the
+nth receiver, where c = 3 × 108 m/s, and pr(n, m) is the
+position of the mth antenna in the nth array. Denote
+˜τ ℓ,n = [˜τℓ,n,1, ˜τℓ,n,1, . . . , ˜τℓ,n,M]T ,
+(3)
+where ˜τ ℓ,n is an M ×1 vectors which represents the Delay Of
+Arrical (DOA) from the transponder ℓto the receiving array n.
+The path attenuation from the dth emitter to the nth
+receiver array which reﬂected by the ℓth transponder is
+denoted by αd,ℓ,n. We assume that the receiving arrays have
+been corrected for all antennas, and each antenna in an array
+shares the same path attenuation.
+We assume that the path attenuations, αd,ℓ,n, remains con-
+stant during the observation time interval and the noise level
+σ is known. The frequency-domain model for the kth Discrete
+Fourier Transform (DFT) coefﬁcient of the nth receiving
+array is given by:
+rn(k) =
+L
+X
+ℓ=1
+D
+X
+d=1
+αd,ℓ,n˜aℓ,n(k)e−iωk ¯τℓ,d sd(k) + n(k),
+(4)
+˜aℓ,n(k) = e−iωk ˜τ ℓ,n,
+(5)
+sd(k) = ˜sd(k)e−iωktd
+(6)
+ωk = 2πk
+T , 0 ≤k ≤K −1,
+(7)
+where td is the unknown transmit time of the emitter d, ˜sd(k)
+is the kth Fourier coefﬁcient of the dth source signal ˇsd(t), t ∈
+[0, T]. rn(k) and n(k) are M × 1 vectors of the kth Fourier
+coefﬁcients of ¯rn(t) and ¯n(t), t ∈[0, T]. ˜aℓ,n(k) is an M × 1
+vector, and it denotes the generalized array response of the
+nth receiver at frequency ωk.
+Denote the unknown parameter vector θ = [pT
+e , ¯αT ]T ,
+where pe are emitter positions vector, and ¯α are path
+6892
+VOLUME 7, 2019
+
+
+=== PDF PAGE 5 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+attenuations vector. Make (4) into matrix form
+r(k) = A(k, θ)s(k) + n(k)
+(8)
+where
+r(k) ≜[rT
+1 (k), rT
+2 (k), . . . , rT
+N(k)]T ,
+(9)
+rT
+n (k) = [rT
+n1(k), rT
+n2(k), . . . , rT
+nM(k)]T ,
+(10)
+A(k, θ) ≜0(pe, k)α,
+(11)
+0(pe, k) ≜˜A(˜τ, k)V(¯τ, k),
+(12)
+˜A(˜τ, k) =
+
+
+˜A1(˜τ, k)
+0
+. . .
+0
+0
+˜A2(˜τ, k)
+. . .
+0
+...
+...
+...
+...
+0
+0
+. . .
+˜AN(˜τ, k)
+
+, (13)
+˜An(˜τ, k) = [˜a1,n(k), ˜a2,n(k), . . . , ˜aL,n(k)],
+(14)
+where ˜aℓ,n(k) ≜˜aℓ,n(˜τ ℓ,n, k).
+V(¯τ, k) = IN ⊗¯V(¯τ, k),
+(15)
+¯V(¯τ, k) = [ ¯V1(¯τ, k), ¯V2(¯τ, k), . . . , ¯VD(¯τ, k)],
+(16)
+¯Vd(¯τ, k) = diag([e−iωk ¯τd,1, e−iωk ¯τd,2, . . . , e−iωk ¯τd,L]),
+(17)
+α =
+
+
+α1
+α2
+...
+αN
+
+,
+(18)
+αn =
+
+
+α1n
+0
+. . .
+0
+0
+α2n
+. . .
+0
+...
+...
+...
+...
+0
+0
+. . .
+αDn
+
+,
+(19)
+αdn = [αd1n, αd2n, . . . , αdLn]T ,
+(20)
+s(k) ≜[s1(k), s2(k), . . . , sD(k)]T ,
+(21)
+where ⊗is the kronecker product, and IN is an identify matrix
+with size of N × N.
+The covariance matrix of received data is
+R(k) = E{r(k)rH(k)}
+= A(k, θ)P(k)AH(k) + σ 2(k)I,
+(22)
+where P(k) ≜s(k)sH(k), and R(k) is estimated by
+ˆR(k) = 1
+J
+J
+X
+j=1
+rj(k)rH
+j (k).
+(23)
+Denote the eigenvectors of ˆR(k) by ˆU(k).
+ˆU(k) ≜[ ˆUs, ˆUn],
+(24)
+where ˆUs(k) = [ˆus(1), ˆus(2), . . . , ˆus(D)] is consisted by
+eigenvectors correspond to the maximal Dth eigenvalues
+ˆ3s = [ˆλ1, ˆλ2, . . . , ˆλD]T , and ˆUn(k) = [ˆun(D + 1), ˆun(D +
+2), . . . , ˆun(NM)] is consisted by the other NM −D eigenvec-
+tors ˆ3n = [ˆλD+1, ˆλD+2, . . . , ˆλNM]T .
+III. A GEOMETRIC UNDERSTANDING OF USF
+The Subspace Fitting (SF) approach was ﬁrst described for
+single parameter estimation by Schmidt [43], [44] and for-
+malized by Cadzow [45]. Based on the works of Schmidt
+and Cadzow, we extend the SF approach for single parameter
+model to the GDPD model and named Uniﬁed Subspace
+Fitting Framework (USF). The differences between the USF
+and the SF are: (1) the dimension of unknown parameters is
+increased; (2) the array manifold matrix may be singular due
+to multipath propagation. Conclusions that are applicable in a
+single parameter SF approach turns to be no longer applicable
+in a USF framework because of the differences. Therefore,
+it is necessary to study the theories and methods of USF
+framework.
+A USF cost function measures the geometric relations
+between the subspace spanned manifold vectors, the signals
+subspace and the noise subspace. In order to give readers a
+more intuitive understanding of USF framework, we propose
+a geometric interpretation of USF framework.
+A. POSITIONING PROBLEM
+Denote θ∗as the true value of unknown parameters. It is seen
+from (8) that each snapshot r(k) from the array is just a linear
+combination of the columns of A(k, θ∗), In other words,
+each observation is constrained to lie in the d-dimensional
+subspace of CMN deﬁned by the d columns of A(k, θ∗).
+A geometric schematic of Subspace Fitting Framework is
+given in FIGURE 3.
+FIGURE 3. Geometric interpretation of positioning problem.
+Assume that there are three receivers and two emitters.
+200 observations are collected by each receiver which are
+denoted by ri
+=
+[r1,i, r2,i, r3,i]T , i
+=
+1, 2, . . . , 200.
+An observation vector ri corresponds to a dot in the
+FIGURE 3. Substitute the true parameters θ∗into the man-
+ifold matrix A(k, θ∗), and columns of A(k, θ∗) are denoted
+as a∗
+1 and a∗
+2.
+From (8), the received signals are represented by
+ri = s1,ia∗
+1 + s2,ia∗
+2 + ni,
+(25)
+VOLUME 7, 2019
+6893
+
+
+=== PDF PAGE 6 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+where s1,i and s2,i are the ith samples of source 1 and source 2,
+i = 1, 2, . . . , 200. the received signal ri is a linear combina-
+tion of a∗
+1 and a∗
+2, so the dots in FIGURE 3 are distributed
+around the subspace spanned by a∗
+1 and a∗
+2.
+Parameters estimation problem for signal model (25) is
+to ﬁnd the optimal vectors a∗
+1 and a∗
+2 which are determined
+by the unknown parameters θ. From a geometric point of
+view, it is to search for the optimal plane which is determined
+by θ, so that the dots are near the plane. We should design
+a reasonable cost function to measure the performance of a
+parameter vector θ to obtain θ∗.
+B. MAXIMUM LIKELIHOOD
+The most intuitive approach is to ﬁt a plane, which is spanned
+by a1(θ) and a2(θ) over the dots and minimize the ﬁtting
+error:
+ˆθ = arg min gm(θ) = ∥ri −s1,ia1(θ) −s2,ia2(θ)∥2
+F,
+(26)
+where ∥·∥F means the Frobenius norm. The cost function (26)
+is known as the ML method if the noise is the AWGN. If the
+source signal waveforms are unknown, s1,i and s2,i in (26) are
+required to be optimized. There will be a large scale searching
+to obtain the waveforms parameters.
+C. SIGNAL SUBSPACE PROJECTION
+If s1,i and s2,i are incoherent over i, the PCA (Principal
+Component Analysis) method can ﬁnd the optimal ﬁtting
+plane of programming (26) without the optimization of signal
+waveforms. Eigenvectors, correspond to the largest two eigen
+values of the covariance matrix of received signals, span the
+signal subspace (the yellow plane in FIGURE 4), and the
+noise subspace is orthogonal with the signal subspace.
+FIGURE 4. Geometric interpretation of 1D-SP-MUSIC.
+If we search a(θ) along the array manifold space (the red
+curve), and maximize the projection of a(θ) onto the signal
+subspace (the green vector):
+ˆ[θ] = arg max gps(θ) = ∥a(θ)us∥2
+F,
+(27)
+we can ﬁnd local optimal solutions at ˆa1 and ˆa2 which follow
+ˆa1 →a∗
+1 and ˆa2 →a∗
+2. The cost function which maximizes
+the projections onto the signal subspace one by one is known
+as the One Dimension-SSP-MUSIC (1D-SSP-MUSIC).
+If we serach a(θ) along the array manifold space, and
+minimize the projection onto the noise subspace (the purple
+vector):
+ˆ[θ] = arg min gpn(θ) = ∥a(θ)un∥2
+F.
+(28)
+We can ﬁnd local optimal solutions at ˆa1 and ˆa2 which follow
+ˆa1 →a∗
+1 and ˆa2 →a∗
+2. The cost function which minimizes
+the projections onto the noise subspace one by one is known
+as the One Dimension-NSP-MUSIC (1D-NSP-MUSIC).
+Remark: If the length of a(θ) has been normalized to 1,
+the maximization of the projection onto the signal subspace
+is equivalent with the minimization of the projection onto the
+noise subspace, that is 1D-SSP-MUSIC is equivalent with
+1D-NSP-MUSIC is the length of manifold vector has been
+normalize to 1.
+D. SIGNAL SUBSPACE FITTING
+If we search a1(θ) and a2(θ) simultaneously, and ﬁt the
+subspace which is spanned by a1(θ),a2(θ) (the blue plane
+in FIGURE 5) to the signal subspace (the yellow plane in
+FIGURE 5), it is named as Signal Subspace Fitting (SSF)
+method.
+FIGURE 5. Geometric interpretation of SSF.
+In the SSF method, ﬁtting the plane spanned by a1(θ) and
+a2(θ) to the plane spanned by u1 and u2 is equivalent to
+measuring the coplanarity of those vectors, where u1 and u2
+is the eigen vectors corresponds to λ1 and λ2. If ud, d =
+1, 2, is a linear combination of a1(θ) and a2(θ), vector ud
+is in the plane spanned by a1(θ) and a2(θ). In the Multiple
+Dimension-Signal Subspace Fitting (MD-SSF), we measure
+the coplanarity of the ﬁtting by
+ˆ[θ] = arg min gs(θ) = ∥Us −A(θ)T∥2
+F,
+(29)
+where A(θ) = [a1(θ), a2(θ)], Us = [u1, u2], and T is 2 × 2
+linear transform matrix.
+6894
+VOLUME 7, 2019
+
+
+=== PDF PAGE 7 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+If the manifold vector a(θ) is in the plane spanned by u1
+and u2, a(θ) = UsT. However, if a(θ) satisﬁes a(θ) = UsT,
+a(θ) not always in the plane spanned by u1 and u2. If a(θ) = 0
+and T = 0, the equation is satisﬁed, but we do not ﬁnd the true
+manifold vector. We can not minimize ∥a(θ)−UsT∥to obtain
+the true manifold vector unless constrains ∥a(θ)∥F = 1.
+Since the lengths of the column vectors in Us have been
+normalized to 1, we can get the true manifold subspace A(θ)
+without the normalization of column vectors of matrix A(θ).
+If we search a manifold vector a(θ) in the array manifold
+space, the cost function turns to be a One Dimension-SSF
+(1D-SSF) cost function:
+ˆ[θ] = arg min gs(θ) = ∥Us −a(θ)T∥2
+F,
+(30)
+and there are two local optimal solutions of programming (30)
+which corresponds to ˆa1(θ) and ˆa2(θ).
+The geometric understanding of min gs,1(θ) = ∥u1 −
+a(θ)t1∥F in (30) is to minimize distance between u1 and
+scaled a(θ). if the manifold subspace is orthogonal with
+the signal subspace, the projection of u1 onto the manifold
+subspace is the optimal estimation of a(θ)t1, and it is the true
+estimation parameters vector θ∗.
+Since the manifold subspace can not always be orthogonal
+with the signal subspace, 1D-SSF is a simpliﬁed version of
+MD-SSF, and holds a worse performance than an MD-SSF.
+E. NOISE SUBSPACE FITTING
+If we search a subspace which is spanned by a1(θ), a2(θ)
+and measure the orthogonality with the noise subspace, it is
+named as Noise Subspace Fitting (NSF) method.
+In a direction ﬁnding application, the cost function of a
+MUSIC method is
+ˆθ = arg max g1(θ) =
+1
+aH(θ)UnUHn a(θ).
+(31)
+From a geometric point of view, the MUSIC method searches
+the manifold vector a(θ) who has the minimal projection
+length onto the noise subspace. Since aH(θ)a(θ) = 1 always
+holds, the orthogonality of the two subspaces is correctly
+deﬁned by aH(θ)UsUH
+s a(θ).
+In a single path propagation DPD model, the cost function
+of a MUSIC method is
+ˆθ = arg max g2(θ) =
+1
+αHA(θ)UnUHn AH(θ)α ,
+(32)
+where α is the unknown path attenuations column vector,
+A(θ) is a diagonal matrix with full rank. From a geometric
+point of view, αHA(θ)UnUH
+n AH(θ)α is the projection length
+of vector αHA(θ) onto vector Un. Since the length of vector
+αHA(θ) is αHA(θ)AH(θ)α = αHα = 1, the orthogonality
+of the two subspaces is correctly deﬁned by the MUSIC cost
+function.
+MUSIC cost functions (32) for DPD method are widely
+used in the existing literatures [2], [3], [5], [8], but it will be
+failed in a multipath propagation scenario.
+In
+a
+multipath
+propagation
+positioning
+application,
+the matrix A(θ) turns to be a diagonal block matrix.
+The matrix A(θ) will be singular if there are two differ-
+ent paths from an emitter to a receiving antenna with the
+same propagation delay. In this case, we can not guarantee
+that the length of manifold vector is 1, or even ∃α makes
+αHA(θ)AH(θ)α = 0. The manifold vector space will be a
+surface rather than a curve (the red surface in FIGURE 6).
+FIGURE 6. Geometric interpretation of NSF.
+In a GDPD application, NSP-MUSIC only ﬁnds the array
+manifold vector whose projection length is zero because that
+its own length is zero, instead of ﬁnding the array manifold
+vector who orthogonal to the noise subspace. In this paper,
+we normalize the length of a(θ) to 1 in the cost function to
+overcome the problem of NSP-MUSIC:
+¯a(θ) ≜
+a(θ)
+∥a(θ)∥F
+,
+(33)
+Following the principle that if a space A is orthogonal with
+a anther space B, a is orthogonal with b, where a is any
+vector in space A, and b is any vector in B, We measure the
+orthogonality of the subspace spanned by A(θ) and the noise
+subspace by:
+ˆθ = arg min gn = ∥¯AH(θ)Un∥2
+F,
+(34)
+where ¯A(θ) ≜[¯a1, ¯a2]. Since ¯ad has been normalized to
+1, and ∥¯un∥F = 1, ∥¯ad ¯un∥2
+F measures the orthogonality of
+those vectors correctly in a GDPD model in the presence of
+multipath propagation.
+IV. COST FUNCTIONS OF USF
+We have studied the intuitive geometric interpretations of
+USF in section III. We will propose general models of cost
+functions under the USF framework in this section.
+A. SIGNAL SUBSPACE FITTING METHOD
+The basic Signal Subspace Fitting (SSF) method is posed as
+[ˆθ, ˆT] = arg min ¯s(θ, T) = ∥Us −A(θ)T∥2
+F.
+(35)
+The columns of Us span the signal subspace, θ is the unknown
+parameters vector and A(θ) is the array manifold matrix
+VOLUME 7, 2019
+6895
+
+
+=== PDF PAGE 8 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+which determined by θ. ∥· ∥F is the Frobenius norm of
+a matrix. The SSF method ﬁts the manifold matrix A(θ)
+to the signal subspace Us by optimizing θ and T, and the
+ﬁtting Root-Mean-Square Error (RMSE) is deﬁned as the
+cost function of an SSF method.
+The optimization of programming (35) is separable in θ
+and T. For a ﬁxed θ, By substituting the pseudo-inverse solu-
+tion, ˆT = A+(θ)Us, back into (35), we obtain the following
+equivalent programming
+ˆθ = arg max C1(θ) = tr{PA(θ)UsUH
+s },
+(36)
+where PA(θ) ≜A(θ)A+(θ) is the projection matrix that
+projects onto the subspace spanned by the columns of A(θ),
+and A+(θ) ≜[AH(θ)A(θ)]−1AH(θ)is the pseudo-inverse of
+A(θ). (36) is a uniﬁed cost function of the Subspace Fitting
+Model, and the different deﬁnitions of Us and A(θ) lead to
+the different cost functions.
+1) ONE DIMENSION-SIGNAL SUBSPACE FITTING
+For the uncorrelated D source signals scenario, there are D
+intersections between the manifold subspace and the signal
+subspace. If we search the vector in the manifold space over
+the available region, and we can ﬁnd D vectors witch lie on
+the signal subspace. One Dimension-Signal Subspace Fitting
+(1D-SSF) method searches the optimal manifold vector in the
+manifold space one by one to obtain the D emitter positions.
+The combinations of multiple emitters are not taken into
+account in this method. Set Us ≜ˆUs(k), A(θ) ≜a(k, θ) in the
+(35), where a(k, θ) is a column of A(k, θ), 1D-SSF is deﬁned
+as:
+[ˆθ, ˆT] = arg min ¯s1(θ, T) =
+K
+X
+k=1
+∥ˆUs(k) −a(k, θ)T(k)∥2
+F,
+(37)
+where θ ≜[pe, α], a(k, θ) corresponds to the manifold vector
+of parameters θ. Substitute the optimal estimation of T(k)
+into (37), and follows (36)
+ˆθ = arg max s1(θ) =
+K
+X
+k=1
+tr{Pa(k, θ) ˆUs(k) ˆUH
+s (k)},
+(38)
+where Pa(k, θ) ≜a(k, θ)a+(k, θ) is the projection matrix of
+a(k, θ), and a+(k, θ) ≜
+
+aH(k, θ)a(k, θ)
+−1 aH(k, θ) is the
+pseudo-inverse of a(k, θ).
+2) MULTIPLE DIMENSIONS-SIGNAL SUBSPACE FITTING
+All emitters are taken into account in the Multiple Dimen-
+sions Signal Subspace Fitting (MD-SSF) cost function. The
+manifold matrix A(θ) ≜A(k, θ) is a MN × D matrix. Set
+Us ≜
+ˆUs(k), and adopt the subspace ﬁtting formulation,
+the method is posed as:
+[ˆθ, ˆT] = arg min ¯s2(θ, T) =
+K
+X
+k=1
+∥ˆUs(k) −A(k, θ)T(k)∥2
+F.
+(39)
+Substitute the optimal estimation of T(k) into (39)
+ˆθ = arg max s2(θ) =
+K
+X
+k=1
+tr{PA(k, θ) ˆUs(k) ˆUH
+s (k)}, (40)
+where
+ˆUs(k)
+is
+deﬁned
+in
+(24),
+and
+PA(k, θ)
+≜
+A(k, θ)A+(k, θ) is the projection matrix of A(k, θ), and
+A+(k, θ) ≜
+
+AH(k, θ)A(k, θ)
+−1 AH(k, θ) is the pseudo-
+inverse of A(k, θ).
+3) ONE DIMENSION-WEIGHTED SIGNAL SUBSPACE FITTING
+Set Us ≜ˆUs(k)W1/2(k), and A(θ) ≜a(k, θ), where a(k, θ)
+is a column of A(k, θ), the cost function of a Weighted Signal
+Subspace Fitting (1D-WSSF) is deﬁned by:
+[ˆθ, ˆT] = arg min ¯s3(θ, T)
+=
+K
+X
+k=1
+∥ˆUs(k)W1/2(k) −a(k, θ)T(k)∥2
+F.
+(41)
+Substitute the optimal estimation of T(k) into (41):
+ˆθ =arg max s3(θ)=
+K
+X
+k=1
+tr{Pa(k, θ) ˆUs(k)W(k) ˆUH
+s (k)},
+(42)
+where Pa(k, θ) has been deﬁned in 1D-SSF, W1/2(k) is a
+diagonal matrix with size of D × D, and the dth element in
+the diagonal is the weight of the dth eigenvector in the signal
+subspace (d = 1, 2, . . . , D).
+4) MULTIPLE DIMENSION WEIGHTED SIGNAL SUBSPACE
+FITTING
+Set Us ≜
+ˆUs(k)W1/2(k), and A(θ) ≜A(k, θ), the cost
+function of Multiple Dimension Weighted Signal Subspace
+Fitting (MD-WSSF) is deﬁned by:
+[ˆθ, ˆT] = arg min ¯s4(θ, T)
+=
+K
+X
+k=1
+∥ˆUs(k)W1/2(k) −A(k, θ)T(k)∥2
+F.
+(43)
+Substitute the optimal estimation of T(k) into (43):
+ˆθ =arg max s4(θ)=
+K
+X
+k=1
+tr{PA(k, θ) ˆUs(k)W(k) ˆUH
+s (k)}, (44)
+where PA(k, θ) = A(k, θ)A+(k, θ), and W1/2(k) has been
+deﬁned in 1D-WSSF.
+5) DETERMINISTIC MAXIMUM LIKELIHOOD
+We choose Us ≜r(k), A(θ) ≜A(k, θ) and T = S(k) in (35),
+and it gives the Deterministic Maximum Likelihood (DML)
+cost function. For an AWGN channel, cost function of the
+DML method is
+[ˆθ, ˆS] = arg min ¯s5(θ, S)=
+K
+X
+k=1
+∥r(k)−A(k, θ)s(k)∥2
+F.
+(45)
+6896
+VOLUME 7, 2019
+
+
+=== PDF PAGE 9 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+Follows with (36),
+ˆθ = arg max s5(θ) =
+K
+X
+k=1
+tr{PA(k, θ)r(k)rH(k)}
+=
+K
+X
+k=1
+tr{PA(k, θ) ˆR(k)},
+(46)
+where PA(k, θ) = A(k, θ)A+(k, θ), The ML method ﬁts a
+3D + DNL-dimensional subspace spanned by the columns of
+A(k) to the received data r(k).
+B. NOISE SUBSPACE FITTING METHOD
+Since the noise subspace of the received signals is orthogonal
+with the signal subspace, ﬁtting the manifold space onto
+the signal subspace is equivalent to minimize the manifold
+projection length onto the noise subspace.
+The angle between a(k, θ) and un(k, i) is:
+cos(βi) =
+∥aH(k, θ)un(k, i)∥F
+∥a(k, θ)∥F∥un(k, i)∥F
+,
+(47)
+where a(k, θ) is a vector in the manifold matrix, and un(k, i)
+is the ith column of Un(k). If cos(βi)
+=
+0, the vector
+a(k, θ) is orthogonal with un(k, i). If the space A(k, θ) is
+orthogonal with the space Un(k), each vector in the space
+A(k, θ) is orthogonal with all vectors in the space Un(k).
+In a direction ﬁnding application or a single path DPD
+application, ∀θ, ∥a(k, θ)∥F
+= 1, and ∥un(k, i)∥F
+= 1.
+In this case, the measurement of the orthogonality is
+simpliﬁed as
+cos(βi) = aH(k, θ)un(k, i).
+(48)
+The NSF methods for direction ﬁnding or single-path prop-
+agation applications minimize cos(βi) over θ, and get the
+optimal estimation of θ:
+ˆθ = arg min n(θ) = ∥aH(k, θ)un(k, i)∥2
+F.
+(49)
+However, the length of a manifold vector in a GDPD model
+can not always keep 1 [1]. In a scenario with multipath prop-
+agation, ∃θ and d, makes the length of the dth column vector
+in the manifold matrix A(k, θ) satisﬁes ∥ad(k, θ)∥= 0,
+and leads to ∥ˆuH
+n (k, i)ad(k, θ)∥
+=
+0, ∀i. In this case,
+programming (49) reaches the minimum value, since ∥·
+∥F
+≥0. However, θ is a fake solution (In FIGURE 3,
+the
+manifold
+curve
+intersects
+the
+signal
+space
+near
+to zero).
+The length of a manifold vector should be normalized in
+the Noise Subspace Fitting method to avoid ﬁnding the fake
+solutions.
+1) ONE DIMENSION-NOISE SUBSPACE FITTING
+One Dimension-Noise Subspace Fitting (1D-NSF) method
+normalize the length of all vectors in the manifold matrix,
+and minimize the manifold vector projection length onto the
+noise subspace.
+ˆθ = arg min ¯u1(θ)
+=
+K
+X
+k=1
+MN−D
+X
+i=1
+∥ˆuH
+n (k, i)a(k, θ)∥2
+F
+∥a(k, θ)∥2
+F
+=
+K
+X
+k=1
+∥ˆUH
+n (k)a(k, θ)∥2
+F
+∥a(k, θ)∥2
+F
+=
+K
+X
+k=1
+aH(k, θ) ˆUn(k) ˆUH
+n (k)a(k, θ)
+aH(k, θ)a(k, θ)
+,
+=
+K
+X
+k=1
+tr
+n
+Pa(k, θ) ˆUn(k) ˆUH
+n (k)
+o
+.
+(50)
+2) MULTIPLE DIMENSION-NOISE SUBSPACE FITTING
+Multiple Dimension-Noise Subspace Fitting (MD-NSF)
+method normalize the length of all vectors in the manifold
+matrix, and minimize the manifold matrix projection length
+onto the noise subspace.
+ˆθ = arg min ¯u2(θ)
+=
+K
+X
+k=1
+MN−D
+X
+i=1
+D
+X
+d=1
+∥ˆuH
+n (k, i)ad(k, θ)∥2
+F
+∥ad(k, θ)∥2
+F
+=
+K
+X
+k=1
+D
+X
+d=1
+∥ˆUH
+n (k)ad(k, θ)∥2
+F
+∥ad(k, θ)∥2
+F
+=
+K
+X
+k=1
+D
+X
+d=1
+aH
+d (k, θ) ˆUn(k) ˆUH
+n (k)ad(k, θ)
+aH
+d (k, θ)ad(k, θ)
+=
+K
+X
+k=1
+D
+X
+d=1
+tr
+n
+Pa(k, d, θ) ˆUn(k) ˆUH
+n (k)
+o
+.
+(51)
+3) MULTIPLE DIMENSION-WEIGHTED NOISE
+SUBSPACE FITTING
+Weight the D manifold vectors as:
+ˆθ = arg min ¯u3(θ)
+=
+K
+X
+k=1
+MN−D
+X
+i=1
+D
+X
+d=1
+∥ˆuH
+n (k, i)ad(k, θ)w
+1
+2
+d ∥2
+F
+∥ad(k, θ)∥2
+F
+=
+K
+X
+k=1
+D
+X
+d=1
+∥ˆUH
+n (k)ad(k, θ)w
+1
+2
+d ∥2
+F
+∥ad(k, θ)∥2
+F
+=
+K
+X
+k=1
+D
+X
+d=1
+wd
+aH(k, θ) ˆUn(k) ˆUH
+n (k)ad(k, θ)
+aH
+d (k, θ)ad(k, θ)
+=
+K
+X
+k=1
+D
+X
+d=1
+wdtr
+n
+Pa(k, d, θ) ˆUn(k) ˆUH
+n (k)
+o
+.
+(52)
+C. UNIFIED SUBSPACE FITTING COST FUNCTION FAMILY
+The MUSIC method is the most commonly used cost function
+in the DPD framework for unknown waveform signals. In a
+VOLUME 7, 2019
+6897
+
+
+=== PDF PAGE 10 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+single path propagation positioning application, the length
+of a manifold vector is constrained to 1, and the existing
+cost functions ignore the lengths of manifold vectors. Weiss
+et al. simpliﬁed the Noise Subspace Projection to the Signal
+Subspace Projection further for reducing the computational
+complexity.
+We pointed out that the length of a manifold vector can not
+be ignored in a GDPD model in the presence of multipath
+propagation, and proposed 8 cost functions which can be
+used in a GDPD model. The eight cost functions are listed
+in Table 1.
+TABLE 1. Unified subspace fitting (USF) cost functions.
+The USF framework is divided into the Signal Subspace
+Fitting (SSF) methods and the Noise Subspace Fitting (NSF)
+methods. If a column vector of the manifold matrix is adopted
+to measure the relation of the array manifold space and
+the signal/noise subspace, it is named 1D-Subspace Fitting
+method, otherwise, it is named MD-Subspace Fitting method.
+V. ASYMPTOTIC DISTRIBUTION ANALYSIS
+We will analysis the asymptotic distributions of the estima-
+tion errors which are optimized by those cost functions in this
+section.
+For a 3D geolocation application, there are 3 + LN
+unknown parameters of each emitter, and they are organized
+in a vector which is denoted as
+ˆθ =
+
+ˆpT
+e (x)
+ˆpT
+e (y)
+ˆpT
+e (z)
+ˆαT
+1
+ˆαT
+2
+. . .
+ˆαT
+L
+
+≜[ˆθ
+T
+1 , ˆθ
+T
+2 , . . . , ˆθ
+T
+3+LN]T ,
+(53)
+where
+ˆpe(ν) ≜[ˆpe(ν, 1), ˆpe(ν, 2), · · · , ˆpe(ν, D)]T ,
+(54)
+ˆαℓ≜[ˆαT
+ℓ,1, ˆαT
+ℓ,1, · · · , ˆαT
+ℓ,N]T ,
+ˆαℓ,n ≜[ˆαℓ,1,1, ˆαℓ,1,2, · · · , ˆαℓ,1,N]T ,
+(55)
+ν ∈{x, y, z}, and ˆθi is a D×1 column vector, which represents
+the ith unknown parameter vector.
+A. ASYMPTOTIC DISTRIBUTION OF THE MD-WSSF
+The cost function of MD-WSSF is deﬁned in (44), and the
+asymptotic distribution of an MD-WSSF cost function is
+given by Theorem 1.
+Theorem 1: Assume that W(k), k = 1, 2, . . . , K, are Her-
+mitian positive deﬁnite matrices. ˆθ and θ0 are the optimal
+solution and true values of programming (44). The normal-
+ized estimation error,
+√
+J(ˆθ −θ0), is asymptotically normal
+distributed with zero mean and covariance matrix 6, which
+is given by:
+6 = ( ¯C′′)−1Q( ¯C′′)−1,
+(56)
+¯C′′ = −2
+K
+X
+k=1
+Re
+n
+F(k, θ) ⊙[13+LN ⊗ET (k)]
+o
+,
+(57)
+Q = 2
+K
+X
+k=1
+σ 2
+k Re{F(k, θ) ⊙[13+LN ⊗GT (k)]},
+(58)
+F(k, θ) = AH
+θ (k)P⊥
+A(k)Aθ(k),
+(59)
+Aθ(k) =
+
+Aθ1(k), Aθ2(k), . . . , Aθ3+LN (k)
+
+,
+(60)
+Aθi(k) =
+∂a1(k)
+∂θi(1) , ∂a2(k)
+∂θi(2) , . . . , ∂aD(k)
+∂θi(D)
+
+,
+(61)
+G(k, θ) ≜A+(k)Us(k)W(k)3s(k) ˜3
+−2(k)
+× W(k)Us(k)HA+H(k),
+(62)
+E(k, θ) ≜A+(k)Us(k)W(k)UH
+s (k)A+H(k),
+(63)
+3s(k) ≜diag[λ1(k), λ2(k), . . . , λD(k)],
+(64)
+˜3(k) ≜[3s(k) −σ 2
+k I],
+(65)
+where ad(k) is the dth column of A(k, θ), λd(k) is the dth
+eigenvalue of the covariance matrix R, σk is the noise stan-
+dard deviation of frequency ωk. 13+LN is a (3+LN)×(3+LN)
+matrix with all ones, I is a D × D identity matrix.
+Proof:
+Since ˆθ the optimal solution of program-
+ming (44), we have C′(ˆθ) = 0. The ﬁrst order of Taylor series
+expansion of C′(ˆθ) around the true θ0 leads to
+0 = C′(θ0) + C′′(θξ)(ˆθ −θ0),
+(66)
+where θξ is a point on the line segment joining θ0 and ˆθ.
+Denote the limiting second order derivative of C(θ) by
+¯C′′(θ) ≜lim
+J→∞C′′(θ).
+(67)
+Since
+∥C′′(θξ) −¯C′′(θ)∥F
+≤∥C′′(θξ) −C′′(θ0)∥F + ∥C′′(θ0) −¯C(θ0)∥F.
+(68)
+Reference [36, Th. 1] proved that ˆθ obtained from (44) con-
+verges w.p.1 to θ0 as J →∞. Since C′′(θ) is continuous
+by assumption, the ﬁrst term on the right side ∥C′′(θξ) −
+C′′(θ0)∥F →0 because of the limiting deﬁnition of (67).
+Consequently, C′′(θξ) →¯C′′(θ0) w.p.1. and we assume
+that ¯C′′(θ0) is invertible. For large J we then have
+ˆθ −θ0 = −{ ¯C′′(θ0)}−1C′(θ0) + o(C′(θ0)).
+(69)
+The ﬁrst order deviation of the cost function C′(θ0) has
+been deﬁned in (197), and the second order deviation C′′(θ0)
+deﬁned in (215).
+It follows from Lemma 4 that for large number of snapshots
+J, the estimated ˆUs(k) = Us(k) + op(J−1/2), and we get the
+ηth element of C′(θ0):
+Cη(θ0) = 2
+K
+X
+k=1
+D
+X
+d=1
+Re[wdH(k)UH
+s (k)
+×A+H(θ0, k)AH
+η (θ0, k)P⊥
+A(θ0, k)ˆus,d(k)]
++ op(J−1/2),
+(70)
+6898
+VOLUME 7, 2019
+
+
+=== PDF PAGE 11 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+where ˆus,d(k) is the dth column of ˆUs(k). Deﬁne the signal
+space estimation error vector ˜us,d(k) ≜ˆus,d(k)−us,d(k), and
+notice that P⊥
+A(k, θ0)us,d(k) = 0, d = 1, 2, . . . , D, the (70)
+turns to be:
+Cη(θ0) = 2
+K
+X
+k=1
+D
+X
+d=1
+Re
+h
+wdH(k)UH
+s (k)
+×A+H(θ0, k)AH
+η (θ0, k)
+×P⊥
+A(θ0, k)˜us,d(k)
+i
++ op(J−1/2).
+(71)
+Since ˜us,d(k) is asymptotically normal, the gradient,
+C′(θ0), is also asymptotically normal:
+√
+JC′(θ0) ∈AsN(0, Q),
+(72)
+where AsN(·) means the Asymptotically Normal Distribu-
+tion,and the ηth row and ξth column element of matrix Q is
+deﬁned by:
+Qηξ = lim
+J→∞J · E
+
+CηCξ
+	
+.
+(73)
+The normalized estimation error,
+√
+J(ˆθ −θ0), is asymp-
+totically normal distributed with zero mean and covariance
+matrix 6, which is given by:
+6 = ( ¯C′′)−1Q( ¯C′′)−1.
+(74)
+Substitute (71) into (73) as:
+Qηξ = 4 lim
+J→∞J · E
+
+
+
+K
+X
+ki=1
+D
+X
+di=1
+Re
+
+9ξ,di(k1)˜us,di(ki)
+
+·
+K
+X
+kj=1
+D
+X
+dj=1
+Re
+
+9η,dj(kj)˜us,dj(kj)
+
+
+
+,
+(75)
+where
+9ξ,di(k)
+≜
+wH
+di(k)UH
+s (k)A+H(k)AH
+ξ (k)P⊥
+A(k),
+9η,dj(k)
+≜
+wH
+dj(k)UH
+s (k)A+H(k)AH
+η (k)P⊥
+A(k).
+Since
+Re{x}Re{y} = 1
+2Re(xyT + xyH),
+(75) turns to be
+Qηξ = 2 lim
+J→∞
+K
+X
+k=1
+D
+X
+di=1
+D
+X
+dj=1
+× Re
+n
+J9ξ,di(k)E[˜us,di(k)˜uT
+s,dj(k)]9T
+η,dj(k)
++ J9ξ,di(k)E[˜us,di(k)˜uT
+s,dj(k)]9H
+η,dj(k)
+o
+.
+(76)
+Apply Lemma 4 to (76)
+Qηξ = 2
+K
+X
+k=1
+D
+X
+di=1
+Re
+n
+−
+D
+X
+dj=1
+dj̸=di
+h
+3(λdi, λdj, k)9ξ,di(k)us,dj(k)uT
+s,di(k)9T
+η,dj(k)
+i
++
+D
+X
+d=1
+d̸=di
+h
+3(λdi, λd, k)9ξ,di(k)us,d(k)uH
+s,d(k)9H
+η,dj(k)
+i
++3(λdi, σ 2
+k , k)9ξ,di(k)Un(k)UH
+n (k)9H
+η,dj(k)
+o
+,
+(77)
+where 3(λi, λj, k) ≜
+λi(k)λj(k)
+[λi(k)−λj(k)]2 .
+Since P⊥
+A(k)us,d(k) = 0, we get uT
+s,d(k)P⊥T
+A (k) = 0, and
+uH
+s,d(k)P⊥H
+A (k) = 0. Equation (77) turns to be
+Qηξ = 2
+K
+X
+k=1
+D
+X
+d=1
+Re
+n
+3(λd, σ 2
+k , k)9ξ,d(k)
+Un(k)UH
+n (k)9H
+η,d(k)
+o
+.
+(78)
+Noting that
+P⊥
+A(k)Un(k)UH
+n (k) = P⊥
+A(k)[I −Us(k)UH
+s (k)]
+= P⊥
+A(k),
+(79)
+Qηξ = 2
+K
+X
+k=1
+σ 2
+k Re
+
+tr[Dξη(k)G(k, θ)]
+	
+, (80)
+where
+Dξη(k) ≜AH
+ξ (k)P⊥
+A(k)Aη(k);
+(81)
+G(k, θ) ≜A+(k)Us(k)W(k)3s(k) ˜3
+−2(k)
+× W(k)Us(k)HA+H(k);
+(82)
+3s(k) ≜diag[λ1(k), λ2(k), . . . , λD(k)];
+(83)
+˜3(k) ≜3s(k) −σ 2
+k I.
+(84)
+The matrix form of (80) is
+Q = 2
+K
+X
+k=1
+σ 2
+k Re{F(k, θ) ⊙[13+LN ⊗GT (k)]},
+(85)
+where 13+LN is a (3 + LN) × (3 + LN) matrix with all ones,
+and F(k, θ) is deﬁned in (211)
+Substitute Q(θ0) in (85) and ¯C′′(θ0) in (215) into (69):
+√
+J(ˆθ −θ0) ∈AsN(0, 6),
+(86)
+where 6 = ( ¯C′′)−1Q( ¯C′′)−H.
+Theorem 1 is the base theorem for the asymptotic dis-
+tribution analysis of the SSF framework, and it gives the
+asymptotic distribution performance of an MD-WSSF cost
+function with O(J−1).
+B. ASYMPTOTIC DISTRIBUTION OF MD-SSF
+If the weights of the signal subspace are same, that is Wk = I,
+MD-WSSF degenerates to MD-SSF. Substitute Wk = I into
+theorem 1, and get the asymptotic distribution of an MD-SSF
+estimator from theorem 2.
+Theorem 2: The MUSIC (Wk = I) estimation errors ˆθ −θ
+are asymptotically (for large J) joinly Gaussian distributed
+VOLUME 7, 2019
+6899
+
+
+=== PDF PAGE 12 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+with zero means and the asymptotically covariances are given
+in (56),(57),(58) with
+G(k, θ) = [A2(k)S(k)A2(k)]−1
++ σ 2[A2(k)SH(k)A2(k)S(k)A2(k)]−1, (87)
+E(k, θ) = [AH(k)A(k, θ)]−1.
+(88)
+where A2(k) ≜AH(k)A(k, θ).
+Proof: The covariance of received signals is
+A(k, θ)S(k)AH(k) + σ 2
+k I
+= R(k)
+= Us(k)3s(k)UH
+s (k) + Un(k)3n(k)UH
+n (k)
+= Us(k)3s(k)UH
+s (k) + σ 2
+k Un(k)UH
+n (k).
+(89)
+Denote ˜3(k) ≜3s(k) −σ 2
+k I,
+A(k, θ)S(k)AH(k) = Us(k) ˜3(k)UH
+s (k);
+(90)
+˜3(k) = UH
+s (k)A(k, θ)S(k)AH(k)Us(k);
+(91)
+[UH
+s (k)A(k, θ)]−1 ˜3(k)[AH(k)Us(k)]−1 = S(k);
+(92)
+AH(k)Us(k) ˜3
+−1(k)UH
+s (k)A(k, θ) = S−1(k).
+(93)
+˜3
+−1(k) = [AH(k)Us(k)]−1S−1(k)[UH
+s (k)A(k, θ)]−1;
+˜3
+−2(k) =
+n
+[AH(k)Us(k)]−1S−1(k)[UH
+s (k)A(k, θ)]−1o2
+;
+(94)
+AH(k)Us(k) ˜3
+−2(k)UH
+s (k)A(k, θ)
+= S−1(k)[UH
+s (k)A(k, θ)]−1[AH(k)Us(k)]−1S−H(k);
+= S−1(k)[AH(k)Us(k)UH
+s (k)A(k, θ)]−1S−H(k).
+(95)
+Since
+PA(k)Us(k) = Us(k);
+A(k, θ)[AH(k)A(k, θ)]−1AH(k)Us(k) = Us(k);
+UH
+s (k)A(k, θ)[AH(k)A(k, θ)]−1AH(k)Us(k) = ID;
+AH(k)Us(k)UH
+s(k)A(k, θ) = AH(k)A(k, θ).
+(96)
+substitute (96) into (95)
+AH(k)Us(k) ˜3
+−2(k)UH
+s (k)A(k, θ)
+= S−1(k)[AH(k)A(k, θ)]−1S−H(k).
+(97)
+Notice that
+3s(k) ˜3
+−2(k)
+= diag
+(
+λ1(k)
+[λ1(k)−σ 2
+k ]2 ,
+λ2(k)
+[λ2(k)−σ 2
+k ]2 , . . . ,
+λD
+[λD(k)−σ 2
+k ]2
+)
+= diag
+"
+1
+λ1(k) −σ 2
+k
+,
+1
+λ2(k) −σ 2
+k
+, . . . ,
+1
+λD(k) −σ 2
+k
+#
++ diag
+(
+σ 2
+k
+[λ1(k)−σ 2
+k ]2 ,
+σ 2
+k
+[λ2(k)−σ 2
+k ]2 , . . . ,
+σ 2
+k
+[λD(k)−σ 2
+k ]2
+)
+= ˜3
+−1(k) + σ 2
+k ˜3
+−2(k).
+(98)
+Substitute (98) and W(k) = I into (62), and apply (93)(97)
+G(k, θ) = [A2(k)]−1S−1(k)[A2(k)]−1
++ σ 2
+k [A2(k)]−1S−1(k)[A2(k)]−1S−H(k)[A2(k)]−1
+= [A2(k)S(k)A2(k)]−1
++ σ 2
+k [A2(k)SH(k)A2(k)S(k)A2(k)]−1.
+(99)
+where A2(k) ≜AH(k)A(k, θ). Substitute (96) into (210)
+E(k, θ) = A+(k)Us(k)UH
+s (k)A+H(k)
+= A+(k)A+H(k)
+= [AH(k)A(k, θ)]−1.
+(100)
+From Theorem 1, the normalized estimation error,
+√
+J(ˆθ −
+θ), is asymptotically normal distributed with zero mean and
+covariance matrix 6, which is given by:
+6 = ( ¯C′′)−1Q( ¯C′′)−1;
+(101)
+¯C′′ = −2
+K
+X
+k=1
+Re
+n
+F(k, θ) ⊙[13+LN ⊗ET (k)]
+o
+;
+(102)
+Q = 2
+K
+X
+k=1
+σ 2
+k Re{F(k, θ) ⊙[13+LN ⊗GT (k)]}.
+(103)
+where G(k, θ) is deﬁned in (99), E(k, θ) is deﬁned in (100),
+and F is deﬁned in (59)
+C. ASYMPTOTIC DISTRIBUTION OF DML
+From another point of view, DML can be regarded as a WSSF
+method from Lemma 1 in Appendix A .
+Follow from Theorem 1, substitute the weight matrix of a
+DML estimator W(k) = ˜3(k) into Theorem 1, and get the
+asymptotic distribution of a DML estimator from Theorem 3.
+Theorem 3: The ML (W(k) = ˜3(k)) estimation errors ˆθ −
+θ are asymptotically (for large J) joinly Gaussian distributed
+with zero means and the asymptotically covariances are given
+in (56),(57),(58) with
+G(k, θ) = S(k) + σ 2
+k [AH(k)A(k, θ)]−1,
+(104)
+E(k, θ) = S(k).
+(105)
+Proof: Substitute W(k) = ˜3(k) into (62)
+G(k, θ) = A+(k)Us(k) ˜3(k)3s(k) ˜3
+−2(k) ˜3(k)Us(k)HA+H(k)
+= A+(k)Us(k)3s(k)Us(k)HA+H(k)
+= A+(k)Us(k)[ ˜3(k) + σ 2
+k I]Us(k)A+H(k)
+= A+(k)Us(k) ˜3(k)Us(k)A+H(k)
++ σ 2
+k A+(k)Us(k)Us(k)A+H(k)
+= A+(k)Us(k) ˜3(k)Us(k)A+H(k)
++ σ 2
+k [AH(k)A(k, θ)]−1.
+(106)
+From (93), we get
+AH(k)Us(k) ˜3
+−1(k)UH
+s (k)A(k, θ) = S−1(k)
+˜3
+−1(k) = [AH(k)Us(k)]−1S−1(k)[UH
+s (k)A(k, θ)]−1
+˜3(k) = UH
+s (k)A(k, θ)S(k)AH(k)Us(k).
+(107)
+6900
+VOLUME 7, 2019
+
+
+=== PDF PAGE 13 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+Substitute (107) into the ﬁrst item of the right part in (106)
+A+(k)Us(k) ˜3(k)Us(k)A+H(k)
+= A+(k)Us(k)UH
+s (k)A(k, θ)S(k)
+AH(k)Us(k)Us(k)A+H(k)
+= S(k).
+(108)
+Substitute (108) into (106)
+G(k, θ) = S(k) + σ 2
+k [AH(k)A(k, θ)]−1.
+(109)
+Substitute W(k) = ˜3(k) into (210)
+E(k, θ) ≜A+(k)Us(k) ˜3(k)UH
+s (k)A+H(k) = S(k).
+(110)
+D. ASYMPTOTIC DISTRIBUTION OF 1D-NSF
+Theorem 4: The asymptotically covariance of the estima-
+tion errors of a 1D-NSF cost function is the same as that of a
+1D-SSF cost function.
+Proof: The cost function of 1D-NSF is
+ˆθ = arg min ¯u1(θ)
+=
+K
+X
+k=1
+tr
+n
+Pa(k, θ) ˆUn(k) ˆUH
+n (k)
+o
+=
+K
+X
+k=1
+tr
+n
+Pa(k, θ)
+h
+I −ˆUs(k) ˆUH
+s (k)
+io
+=
+K
+X
+k=1
+tr {Pa(k, θ)}−
+K
+X
+k=1
+tr
+n
+Pa(k, θ) ˆUs(k) ˆUH
+s (k)
+o
+. (111)
+Since
+tr{Pa(k, θ)}
+= tr
+n
+a(k, θ)[aH(k, θ)a(k, θ)]−1aH(k, θ)
+o
+= tr
+n
+aH(k, θ)a(k, θ)[aH(k, θ)a(k, θ)]−1o
+= 1.
+(112)
+Move the constant term in the (111)
+ˆθ = arg max ˜u1(θ) =
+K
+X
+k=1
+tr
+n
+Pa(k, θ) ˆUs(k) ˆUH
+s (k)
+o
+.
+(113)
+It is the same as the programming (38) of 1D-SSF.
+E. ASYMPTOTIC DISTRIBUTION OF MD-WNSF
+The cost function of an MD-WNSF is given by
+ˆθ = arg min ¯u3(θ)
+=
+K
+X
+k=1
+D
+X
+d=1
+wd
+aH
+d (k, θ) ˆUn(k) ˆUH
+n (k)ad(k, θ)
+aH
+d (k, θ)ad(k, θ)
+,
+=
+K
+X
+k=1
+D
+X
+d=1
+wdtr
+n
+Pa(k, θ, d) ˆUn(k) ˆUH
+n (k)
+o
+,
+=
+K
+X
+k=1
+( D
+X
+d=1
+wdtr{Pa(k, θ, d)}
+−
+D
+X
+d=1
+wdtr
+h
+Pa(k, θ, d) ˆUs(k) ˆUH
+s (k)
+i)
+,
+(114)
+where Pa(k, θ, d) ≜aH
+d (k, θ)[aH
+d (k, θ)ad(k, θ)]−1aH
+d (k, θ)
+denotes the projection matrix of ad(k, θ), and
+tr{Pa(k, θ, d)}
+= tr
+n
+ad(k, θ)[aH
+d (k, θ)ad(k, θ)]−1aH
+d (k, θ)
+o
+= tr
+n
+aH
+d (k, θ)ad(k, θ)[aH
+d (k, θ)ad(k, θ)]−1o
+= 1.
+(115)
+PD
+d=1 wd = 1, substitute (115) into (114), and move the
+constant items in the (114):
+ˆθ = arg max u3(θ)
+=
+K
+X
+k=1
+( D
+X
+d=1
+wdtr
+h
+Pa(k, θ, d) ˆUs(k) ˆUH
+s (k)
+i)
+.
+(116)
+The cost function of 1D-SSF is given by
+ˆθ = arg max s4(θ) =
+K
+X
+k=1
+tr{Pa(k, θ) ˆUs(k) ˆUH
+s (k)}.
+(117)
+Replace A(k, θ) by a(k, θ) and set W(k) = ID in Theo-
+rem 1, we will get the asymptotic distribution of a 1D-SSF
+cost function. From (116), the asymptotic distribution of an
+MD-NWNSF can be derived from the conclusion of 1D-SSF.
+Theorem 5: The asymptotically covariance of the estima-
+tion errors of cost function
+ˆθd = arg max zd = Cd(θd)
+(118)
+is deﬁned by
+6d(θ∗
+d) = C′′
+d(θ∗
+d)−1Qd(θ∗
+d)C′′
+d(θ∗
+d)−1.
+(119)
+where C′
+d(θ∗
+d) and C′′
+d(θ∗
+d) is the ﬁrst and second deriva-
+tive the cost function Cd(θ∗
+d) around the true θ∗
+d. Qd(θ∗
+d) is
+the covariance matrix of the random vector
+√
+JC′
+d(θ∗
+d), and
+C′
+di(θ∗
+d) is independent with C′
+dj(θ∗
+d) if i̸ = j. The asymptoti-
+cally covariance of the estimation errors of cost function
+ˆθ = arg max V =
+D
+X
+i=1
+wdCd(θd)
+(120)
+is given by
+6v(θ∗) = V(θ∗)−1 ¯Q(θ∗)V(θ∗)−1,
+(121)
+where
+θ = [θT
+1 , θT
+2 , . . . , θT
+D]T ,
+V(θ∗) ≜
+D
+X
+d=1
+wdV′′
+d(θ∗
+d),
+(122)
+¯Q(θ∗) ≜
+D
+X
+d=1
+wd ¯Qd(θ∗
+d),
+(123)
+VOLUME 7, 2019
+6901
+
+
+=== PDF PAGE 14 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+where the element at row d +Di and column d +Dj of matrix
+V′′
+d(θ∗
+d) is the element at row i and column j of matrix C′′
+d(θ∗
+d),
+and the other elements are 0. The element at row d + Di and
+column d + Dj of matrix ¯Q′′
+d(θ∗
+d) is the element at row i and
+column j of matrix Q′′
+d(θ∗
+d), and the other elements are 0.
+Proof: The ﬁrst order derivative of V is
+V′(θ∗) =
+D
+X
+i=1
+wdV′
+d(θ∗),
+(124)
+where the element at row d + Di of V′
+d(θ∗) is the element at
+row i of C′
+d(θ∗
+d), and the other elements of V′
+d(θ∗) are 0;
+The second derivative of V is
+V′′(θ) =
+D
+X
+i=1
+wdV′′
+d(θ∗),
+(125)
+where the element at row d +Di and column d +Dj of matrix
+V′′
+d(θ∗) is the element at row i and column j of matrix C′′
+d(θ∗
+d),
+and the other elements are 0.
+Since C′
+di(θdi) is independent with C′
+dj(θ∗
+dj) if di̸ = dj,
+the covariance matrix of the random vector
+√
+JV′(θ∗) is
+¯Q(θ∗) =
+D
+X
+i
+wdQd(θ∗
+d).
+(126)
+The asymptotically covariance of the estimation errors of
+cost function ˆθ = arg max V = PD
+i=1 wdCd(θ) is
+6v(θ∗) = V(θ∗)−1 ¯Q(θ∗)V(θ∗)−1,
+(127)
+where V(θ∗) ≜PD
+d=1 wdC′′
+d(θ∗
+d), ¯Q(θ∗)≜PD
+d=1 wdQd(θ∗
+d).
+The asymptotic distribution of MD-WSSF has been studies
+in Theorem 1, and that of a 1D-SSF can be derived easily from
+the Theorem. Substitute items in the asymptotic distribution
+analysis of a 1D-SSF cost function C′′
+d(θ∗
+d)−1 and Qd(θ∗
+d)
+into Theorem 5, we will get the asymptotic distribution of
+an MD-WNSF cost function.
+F. CRLB ANALYSIS
+We studied the asymptotic distribution of MD-WSSF,
+MD-SSF, DML, and MD-WNSF in Theorem 1, Theorem 2,
+Theorem 3 and Theorem 5. The CRLB of the parameters
+estimation is given in this section.
+Theorem 6: The signal model is deﬁned as (8). The CRLB
+of the emitter position parameters and path attenuations is
+given by
+CRLB(θ)
+= σ 2
+2
+( K
+X
+k=1
+Re
+n
+F(k, θ) ⊙
+n
+13+LN ⊗[s(k)sH(k)]
+oo)−1
+,
+(128)
+where 13+LN is a (3 + LN) × (3 + LN) matrix with all ones,
+and
+F(k, θ) = AH
+θ (k)P⊥
+A(k)Aθ(k),
+(129)
+where Aθ(k) was deﬁned in (60).
+Proof:
+Stoica and Nehorai [34] proposed the CRLB
+result in the application of direction ﬁnding, and Du et al. [1]
+analyzed the CRLB of multiple emitters positioning in the
+presence of multi-path propagation. We study the CRLB of
+path attenuations and the position estimations in this section.
+The unknown parameter vector for a multiple unknown
+waveform signals positioning application is denoted as
+¯θ = [¯s(1), ˜s(1), ¯s(2), ˜s(2), . . . , ¯s(K), ˜s(K), θ]T , where ¯s(k) =
+[¯s1(k), ¯s2(k), . . . , ¯sD(k)] are real parts of D signals at fre-
+quency k and ˜s(k) are imaginary parts, θ is deﬁned in (53).
+Follow from the Appendix C, the Fisher Information
+Matrix of the observed data is
+I¯θ =
+
+
+G(1)
+0
+· · ·
+0
+- - -
+V(1)
+0
+G(2)
+· · ·
+0
+- - -
+V(2)
+...
+...
+...
+...
+- - -
+...
+0
+0
+· · ·
+G(K)
+- - -
+V(K)
+- - - - - - - - - - - - - - - - - - - - - - - - - - -
+- - -
+- - - - - - -
+VH(1)
+VH(2)
+· · ·
+VH(K)
+- - -
+Iθθ
+
+
+(130)
+≜
+ G
+V
+VH
+Iθθ
+
+,
+(131)
+where G(k, θ) ≜
+ I¯s¯s(k) I¯s˜s(k)
+IH
+¯s˜s(k) I˜s˜s(k)
+
+, V(k) =
+ I¯sθ(k)
+I˜sθ(k)
+
+. The
+CRLB of θ is
+CRLB−1(θ) = Iθθ −VHG−1V,
+(132)
+Since G is a block diagonal matrix,
+VHG−1V =
+K
+X
+k=1
+VH(k)G−1(k)V(k).
+(133)
+The second derivative of Log-likelihood function were
+derived in Appendix C
+Iθθ = 2
+σ 2
+K
+X
+k=1
+Re
+n
+SH(k)AH
+θ (k)Aθ(k)S(k)
+o
+; (134)
+S(k) = I3+LN ⊗S(k);
+(135)
+S(k) = diag{s(k)};
+(136)
+V(k) =
+
+
+2
+σ 2 Re
+n
+AH(k)Aθ(k)S(k)
+o
+−2
+σ 2 Im
+n
+AH(k)Aθ(k)S(k)
+o
+
+;
+(137)
+G(k, θ) =
+ Re{H(k)}
+−Im{H(k)}
+Im{H(k)}
+Re{H(k)}
+
+;
+(138)
+H(k) = 2
+σ 2 AH(k)A(k, θ).
+(139)
+where I3+LN is a (3 + LN) × (3 + LN) identify matrix. Since
+G−1(k) =
+ Re{H−1(k)}
+Im{H−1(k)}
+−Im{H−1(k)}
+Re{H−1(k)}
+
+,
+(140)
+VH(k)G−1(k)V(k)
+= 2
+σ 2 Re
+n
+SH(k)AH
+θ (k)A(k, θ)[A2(k)]−1
+AH(k)Aθ(k)S(k)
+o
+.
+(141)
+6902
+VOLUME 7, 2019
+
+
+=== PDF PAGE 15 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+CRLB of θ is
+CRLB−1(θ) = Iθθ −VHG−1V,
+= 2
+σ 2 Re
+n
+SH(k)AH
+θ (k)P⊥
+A(k)Aθ(k)S(k)
+o
+= 2
+σ 2 Re
+n
+[AH
+θ (k)P⊥
+A(k)Aθ(k)]
+⊙
+n
+13+LN ⊗[s(k)sH(k)]
+oo
+.
+(142)
+where
+P⊥
+A(k) = I −PA(k),
+(143)
+PA(k) = A(k, θ)[AH(k)A(k, θ)]−1AH(k),
+(144)
+F(k, θ) ≜AH
+θ (k)P⊥
+A(k)Aθ(k)
+(145)
+and 13+LN is a (3 + LN) × (3 + LN) matrix with all ones.
+Denote,
+CRLB−1(θ)
+= 2
+σ 2
+K
+X
+k=1
+n
+Re
+n
+F(k) ⊙
+n
+13+LN ⊗[s(k)sH(k)]
+ooo
+. (146)
+We discussed the asymptotic distribution of MD-WSSF,
+MD-NSF, MD-SSF and DML in this section, and the CRLB
+of the unknown parameters was studied in addition.
+VI. THE OPTIMAL WEIGHTS OF THE MD-WSSF
+The asymptotic distribution properties were given in the
+above Theorems. The DML and MD-SSF are regarded as
+special cases in the WSF framework. The optimal weights
+of a WSSF framework are optimized in this section.
+Theorem 7: For all Hermitian matrices W(k)
+6[ ˜3
+2(k)3−1
+s (k)] ≤6(W(k)),
+(147)
+where 6 is deﬁned in (56)
+Proof: Set W(k) = ˜3
+2(k)3−1
+s (k), and substitute it into
+Theorem 1:
+E(k, θ) = A+(k)Us(k) ˜3
+2(k)3−1
+s (k)UH
+s (k)A+H(k),
+(148)
+G(k, θ) = A+(k)Us(k) ˜3
+2(k)3−1
+s (k)Us(k)HA+H(k)
+= E(k, θ),
+(149)
+6[ ˜3
+2(k)3−1
+s (k)] = ( ¯C′′)−1Q( ¯C′′)−1,
+(150)
+(151)
+where
+¯C′′ = −2
+K
+X
+k=1
+Re
+n
+F(k, θ) ⊙[13+LN ⊗ET (k)]
+o
+,
+(152)
+Q = 2
+K
+X
+k=1
+σ 2
+k Re{F(k, θ) ⊙[13+LN ⊗ET (k)]}.
+(153)
+Since the noise is AWGN, denote σk = σ, k = 1, 2, . . . , K,
+6[ ˜3
+2(k)3−1
+s (k)]
+= σ 2
+2
+( K
+X
+k=1
+Re {F(k, θ) ⊙{13+LN ⊗H(k)}}
+)−1
+,
+(154)
+where H(k)
+≜
+[A+(k)Us(k) ˜3
+2(k)3−1
+s (k)UH
+s (k)A+H(k)].
+Follow from Lemma 5
+6(W)
+≥σ 2
+2
+( K
+X
+k=1
+Re
+n
+F(k, θ)⊙{13+LN ⊗[E(k)G−1(k)E(k)]}
+o)−1
+,
+(155)
+where
+E(k, θ)G−1(k)E(k, θ)
+= A+(k)Us(k)W(k)UH
+s (k)A+H(k)
+× [A+(k)Us(k)W(k)3s(k) ˜3
+−2(k)W(k)Us(k)HA+H(k)]−1
+× A+(k)Us(k)W(k)UH
+s (k)A+H(k)
+= A+(k)Us(k) ˜3
+2(k)3−1
+s (k)UH
+s (k)A+H(k).
+(156)
+Substitute (156) into (155)
+6(W) ≥σ 2
+2
+( K
+X
+k=1
+Re {F(k, θ) ⊙{13+LN ⊗[H(k)]}}
+)−1
+= 6[ ˜3
+2(k)3−1
+s (k)].
+(157)
+We can get the optimal weights of an MD-WSSF cost
+function from Theorem 7. Substitute the optimal weights
+Wk = ˜3
+2(k)3−1
+s (k) into the cost function of a MD-WSSF
+estimator, and get the best asymptotic distribution perfor-
+mance in the WSSF framework.
+VII. NUMERICAL SIMULATIONS
+Some numerical examples are presented in this section
+to
+compare
+the
+performances
+of
+the
+discussed
+cost
+functions. The simulation scenarios in this paper fol-
+low from [1]. Three emitters are located at [0, 0, 0],
+[100, 0, 0] and [0, 100, 0], and four receiving arrays are
+located at [2200, −2100, 0], [3300, 600, 0], [3100, −700, 0],
+and [2300, 2500, 0]. Four transponders are located at
+[−1210, 100, 200],[100, 1120, 200],
+(−200, −1040, 200)
+and [970, 160, 200] to transmit the signals. The layout of
+elements in the scenario are given in FIGURE 7 (All are
+measured in km).
+Each receiving array is a Uniform Circular Array (UCA)
+with eight antennas and radius of 30 m. The band width
+is 8 kHz. The carrier frequency is 10 MHz. The complex-
+valued signal frequency coefﬁcients subject to ∥sd∥2
+F = 1.
+The path attenuation coefﬁcients are drawn from a uniform
+VOLUME 7, 2019
+6903
+
+
+=== PDF PAGE 16 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+FIGURE 7. Scenario Layout.
+distribution between 0 and 1. The SNR is deﬁned in terms of
+‘‘Post Processing SNR’’, which is given by
+SNR ≜
+E
+nPK
+k=1 ∥A(k)s(k)∥2
+F
+o
+Kσ 2
+.
+(158)
+Root-Mean-Squared Error (RMSE) of the estimated posi-
+tion is given by
+RMSE(pe) ≜
+sPNs
+i=1 ∥ˆpe −pe∥2
+F
+NsD
+,
+(159)
+where Ns is the number of Monte-Carlo runs (Ns is set as
+200 in this section), D is the number of emitters, pe are the real
+emitter positions and ˆpe are the estimated emitter positions.
+An scalar quantity of the error covariance matrix corre-
+sponding to RMSE is deﬁned as
+6(pe) ≜
+r
+tr{6(pe)}
+D
+.
+(160)
+A. SPATIAL SPECTRUM OF 1D-NSF AND 1D-MUSIC
+We compare the spatial spectrum of a 1D-NSF cost func-
+tion and that of a 1D-MUSIC. The 1D-MUSIC cost func-
+tion was proposed by Weiss [2], and it was widely used in
+the existing DPD methods. The 1D-MUSIC method maxi-
+mizes the manifold projection length onto the signal subspace
+(1D-SSP-MUSIC) or minimizes the manifold projection
+length onto the noise subspace (1D-NSP-MUSIC) without
+normalizations.
+Because the cost function of a 1D-NSF and the cost func-
+tion of a 1D-SSF are equivalent, only the spatial spectrum
+of the 1D-NSF cost function is given. Since it is a three-
+dimensional emitters position searching problem, the spatial
+spectrum should be a three-dimensional function. Only a slice
+of z = 0 in the three-dimensional spatial spectrum is given
+for a more intuitive comparison (See FIGURE 8, FIGURE 9,
+FIGURE 10, and FIGURE 11 ).
+FIGURE 8. Spatial spectrum of 1D-SSP-MUSIC (SNR = 10dB).
+FIGURE 9. Spatial spectrum of 1D-NSP-MUSIC (SNR = 10dB).
+Since 1D-SSP-MUSIC and 1D-NSP-MUSIC do not nor-
+malize the length of the manifold vector, and they can not
+ﬁnd emitters correctly. Three peaks can be clearly found in
+the spatial spectrum of the 1D-NSF method, and each of them
+corresponds to an emitter location.
+B. STANDARD DEVIATIONS VERSUS SNR
+We have got the theoretical asymptotic distribution perfor-
+mances of DPD methods in section 4. The asymptotic perfor-
+mances of them are compared in FIGURE 12.
+The number of snapshots J is 1000 and the number
+of frequency K is 32 in the numerical simulation. From
+FIGURE 12, the Multiple Dimension-Optimal Weighted Sig-
+nal Subspace Fitting (MD-OWSSF) cost function gets the
+best performance than other cost functions. The Maximum
+Likelihood (ML) cost function had a better performance than
+the Multiple Dimension-Signal Subspace Fitting (MD-SSF)
+6904
+VOLUME 7, 2019
+
+
+=== PDF PAGE 17 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+FIGURE 10. Spatial spectrum of 1D-NSP (SNR = 10dB).
+FIGURE 11. Spatial spectrum of 1D-NSP (SNR = 10dB, 3D view).
+FIGURE 12. Standard deviations of DPD cost functions versus SNR
+(theoretical result).
+cost function. The multiple dimension cost functions get
+better performances than one dimension cost functions in the
+numerical simulation.
+C. STANDARD DEVIATIONS VERSUS NUMBER
+OF SNAPSHOTS
+The asymptotic distribution of DPD methods are analyzed in
+this section. FIGURE 13 gives standard deviations of DPD
+cost functions versus the number of snapshots.
+FIGURE 13. Standard deviations of DPD cost functions versus the number
+of snapshots (SNR = −30dB).
+From FIGURE 13, the error standard deviations decrease
+with the increase of the number of snapshots. Because of
+the limitation of paper length, the theoretical comparison
+analysis of different cost functions is not discussed here. The
+numerical simulation results can only show the performance
+comparison of those methods in this scenario, and the simula-
+tion results can not apply to other scenarios. However, the the-
+oretical asymptotic performances of those cost functions pro-
+posed in this paper can get the asymptotic performances for
+a given scenario.
+D. PERFORMANCES AND THE NUMBER
+OF RECEIVING STATIONS
+In
+the
+positioning
+system
+described
+in
+this
+paper,
+the more receiving stations, the higher positioning accuracy.
+FIGURE 14 shows the performance comparison of different
+cost functions when there is only one receiving stations (The
+receiving station is placed at [2200, −2100, 0]km).
+When there is only one receiving station, the positioning
+performance decreases compared to that of the four receiving
+stations in FIGURE 12. The OWSSF cost function is less
+affected by the decrease of the number of receiving stations
+than other cost functions.
+E. PERFORMANCES AND THE NUMBER OF EMITTERS
+When transponders and receiving stations are ﬁxed, the fewer
+emitter, the higher positioning accuracy. FIGURE 15 shows
+the performance comparison of different cost functions
+when there is only one emitter (The emitter is placed at
+[0, 0, 0]km).
+When there is only one emitter, performances of all cost
+functions are improved, and the performances difference of
+VOLUME 7, 2019
+6905
+
+
+=== PDF PAGE 18 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+FIGURE 14. Performances of one receiving station.
+FIGURE 15. Performances of one emitter.
+FIGURE 16. Performances of the minimum system.
+those cost functions are not signiﬁcant. It is because that
+an MD-SSF method degenerates to a 1D-SSF method when
+there is only one emitter.
+F. PERFORMANCES OF THE MINIMUM SYSTEM
+The minimum system consists of one emitter, three transpon-
+ders and one receiving station. FIGURE 16 shows the
+positioning performance of different cost functions for
+the minimum system (Three transponders are placed at
+[−1210, 100, 200], [200, 1120, 200], [−200, −1040, 200],
+one emitter is placed at [0, 0, 0], and one receiving station
+is placed at [2200, −2100, 0](km)).
+As can be seen from FIGURE 16, all cost functions have
+the same positioning performance at the minimum system,
+and all are close to CRLB.
+VIII. CONCLUSIONS
+This paper attempts to collect the General Direct Position
+Determination (GDPD) cost functions in a uniﬁed frame-
+work. Some algebraic asymptotic distribution conclusions are
+presented in the uniﬁed framework. The main contributions
+of this paper are:
+We analyzed the reason why the existing Direct Position
+Determination (DPD) cost function can not be used in a
+multipath propagation scenario, and proposed eight cost func-
+tions for DPD model with multipath propagation. The eight
+cost functions were collected in a Uniﬁed Subspace Fitting
+(USF) framework for the General Direct Position Deter-
+mine (GDPD) model. Furthermore, the USF framework was
+divided into Signal Subspace Fitting (SSF) framework, and
+Noise Subspace Fitting (NSF) framework. MD-MUSIC and
+DML were studied as special cases of a Multiple Dimension-
+Weighted Signal Subspace Fitting (MD-WSSF) method.
+A uniﬁed derivation of the asymptotic distribution prop-
+erties of MD-WSSF cost functions for GDPD model was
+proposed. The second moment of the signal subspace eigen-
+vectors were adopted to analysis the covariance matrix of
+the estimations which were optimized by an MD-WSSF cost
+function. Besides, the estimation covariance matrices of the
+Deterministic Maximum Likelihood (DML) and the Multiple
+Dimension-SSF (MD-SSF) were derived from the uniﬁed
+derivation process. The Cramér-Rao Lower Bound (CRLB)
+in presence of multi-path propagation was derived. It was
+assumed that the noise levels were known in advance, but the
+complex source signal waveforms and the path attenuations
+were unknown in the model. Some algebraic Lemmas were
+proposed and proved to assistant the derivation of the CRLB.
+We compared the asymptotic distribution performances of
+cost functions in the USF framework by numerical simu-
+lations. The numerical simulation results showed that the
+Multiple Dimension-Optimal Weighted Signal Subspace Fit-
+ting (MD-OWSSF) cost function holds the best asymptotic
+distribution performance in the USF framework.
+We discussed the asymptotic distribution properties of dif-
+ferent cost functions in this paper, but a theoretical analysis of
+performance comparisons has not been done yet. We would
+keep on investigating in the asymptotic distribution perfor-
+mance comparisons in the future work.
+6906
+VOLUME 7, 2019
+
+
+=== PDF PAGE 19 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+APPENDIX A
+BASIC LEMMAS
+We introduce some Lemmas ﬁrstly:
+Lemma 1: The Deterministic ML method has the same
+asymptotic distribution as the following estimator:
+ˆθ = arg min ¯m(θ) =
+K
+X
+k=1
+∥ˆUs(k) ˜3
+1
+2
+k −A(k, θ)T(k)∥2
+F
+= arg max m(θ) =
+K
+X
+k=1
+tr{PA(k, θ) ˆUs(k) ˜3(k) ˆUH
+s (k)},
+(161)
+where ˜3(k) = 3s(k) −σ 2
+k I.
+Proof: The Deterministic ML criterion function is
+ˆθ = arg max s5(θ) =
+K
+X
+k=1
+tr{PA(k, θ) ˆR(k)},
+(162)
+where
+ˆR(k) = ˆUs(k) ˆ3s(k) ˆUH
+s (k) + ˆUn(k) ˆ3n(k) ˆUH
+n (k).
+(163)
+Since ˆ3n(k) can be replaced by σ 2
+k I without affecting the
+asymptotic properties [34]. (163) turns to be
+ˆR(k) = ˆUs(k) ˆ3s(k) ˆUH
+s (k) + σ 2
+k ˆUn(k) ˆUH
+n (k)
+= ˆUs(k) ˆ3s(k) ˆUH
+s (k) + σ 2
+k [I −ˆUs(k) ˆUH
+s (k)]
+= σ 2
+k I + ˆUs(k)[ ˆ3s(k) −σ 2
+k I] ˆUH
+s (k).
+(164)
+Substitute (164) into (162)
+ˆθ = arg max s5(θ) =
+K
+X
+k=1
+tr{PA(k, θ)σ 2
+k
++ PA(k, θ) ˆUs(k)[ ˆ3s(k) −σ 2
+k I] ˆUH
+s (k)},
+(165)
+and notice that the ﬁrst item in the cost function:
+tr{PA(k, θ)σ 2
+k }
+= σ 2
+k tr{A(k, θ)[AH(k, θ)A(k, θ)]−1AH(k, θ)}
+= σ 2
+k tr{AH(k, θ)A(k, θ)[AH(k, θ)A(k, θ)]−1}
+= σ 2
+k D,
+(166)
+is a constant item, and remove it from the objective function
+ˆθ = arg max m(θ)
+=
+K
+X
+k=1
+tr{PA(k, θ) ˆUs(k)[ ˆ3s(k) −σ 2
+k I] ˆUH
+s (k)}.
+(167)
+By [36, Lemma 5], replacement of the weighting matrix
+ˆW(k) = ˆ3s(k) −σ 2
+k I by W(k) = 3s(k) −σ 2
+k I does not
+change the asymptotic distribution of the estimate.
+Lemma 2: A is a complex matrix with size of N × N, and
+C is a Hermitian matrix with size of N × N, then
+tr[(A + AH)C] = 2Re{tr[AC]}.
+(168)
+Proof:
+Denote an is the nth row of A, cn is the nth
+column of C, and ¯cn is the nth row of C.
+A =
+
+
+a1
+a2
+...
+aN
+
+,
+(169)
+C =
+ c1
+c2
+· · ·
+cN
+
+=
+
+
+¯c1
+¯c2
+...
+¯cN
+
+.
+(170)
+The left term of (168) is expanded as
+tr[(A + AH)C] = tr[AC] + tr[AHC],
+(171)
+where
+tr[AC] =
+N
+X
+n=1
+ancn,
+(172)
+tr[AHC] = tr[CAH]
+=
+N
+X
+n=1
+(¯cnaH
+n ).
+(173)
+Since C is a Hermitian matrix, ¯cn = cH
+n .
+tr[AHC] =
+N
+X
+n=1
+(¯cnaH
+n ) =
+N
+X
+n=1
+(cH
+n aH
+n ) = {tr[AC]}H.
+(174)
+Substitute (174) into (171)
+tr[AC] + tr[AHC] = tr[AC] + {tr[AC]}H
+= 2Re{tr[AC]}.
+(175)
+Lemma 3: A,B,C are real symmetric matrices. Denote
+U =
+ A
+B
+B
+C
+
+,
+(176)
+Matrix C−(BA−1B) is a semi-deﬁnite matrix, if U is a semi-
+deﬁnite matrix,
+Proof: Denote
+V =
+ I
+0
+0
+C −BA−1B
+
+.
+(177)
+Since
+"
+A−1
+2
+0
+−BA−1
+I
+#  A
+B
+B
+C
+ "
+A−1
+2
+0
+−BA−1
+I
+#T
+=
+ I
+0
+0
+C −BA−1B
+
+,
+(178)
+U and V are congruence. If U is a semi-deﬁnite matrix, V is
+a semi-deﬁnite matrix too. ∀x ∈R
+x(C −BA−1B)xT
+=
+ 0
+x   I
+0
+0
+C −BA−1B
+  0
+xT
+
+.
+(179)
+Since V is a semi-deﬁnite matrix, x(C−BA−1B)xT ≥0, and
+C −BA−1B is a semi-deﬁnite matrix
+VOLUME 7, 2019
+6907
+
+
+=== PDF PAGE 20 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+APPENDIX B
+DERIVATIVES OF AN MD-WSSF COST FUNCTION
+The cost function of an MD-WSSF method is deﬁned as
+ˆθ = arg max C7(θ)
+=
+K
+X
+k=1
+tr{PA(k, θ) ˆUs(k)W(k) ˆUH
+s (k)}.
+(180)
+A. THE FIRST DERIVATIVES OF A MANIFOLD MATRIX
+The unknown parameter vector is deﬁned as (53). Denote θη
+as the ηth element of θ, The ﬁrst order deviation of A(k, θ) is
+denoted by
+Aη(k) ≜∂A(k, θ)
+∂θη
+.
+(181)
+If θη is an position real parameter
+∂A(k, θ)
+∂θη
+= ˜A(k, θ)∂V(k, θ)
+∂θη
+α,
+(182)
+where
+∂V(k, θ)
+∂θη
+= IN ⊗
+"
+0, . . . , ∂¯Vd(k, θ)
+∂θη
+, . . . , 0
+#
+,
+∂¯Vd(k, θ)
+∂θη
+= diag
+∂e−iωk ¯τ1d
+∂θη
+, ∂e−iωk ¯τ2d
+∂θη
+, . . . , ∂e−iωk ¯τLd
+∂θη
+
+.
+If θη = αd,ℓ,n is a path attenuation parameter with complex
+value which represents to the path attenuation from emitter d,
+relayed by transponder ℓ, to the receiver array n.
+∂A(k, θ)
+∂θη
+= A(k, θ)V(k, θ) ∂α
+∂θη
+,
+(183)
+where
+∂α
+∂θη
+= Idℓn,
+(184)
+where the ith row, jth column of Idℓn is deﬁned as
+Idℓn(i, j) =
+1
+i = (n −1)LD + (d −1)L + ℓ, j = d;
+0
+else.
+(185)
+B. THE FIRST DERIVATIVES OF A MANIFOLD VECTOR
+The dth column of A(k, θ) is
+ad(k, θ) = ˜A(k, θ)Vd(k, θ)αd,
+(186)
+where Vd(k, θ)=IN ⊗¯Vd(k, θ), αd = [αT
+d1, αT
+d2, . . . , αT
+dN]T .
+If θη = pd,ζ are position parameters (ζ ∈{1, 2, 3} which
+represents coordinates x, y, z) of emitter d,
+∂ad(k, θ)
+∂pd,ζ
+= ˜A(k, θ)∂Vd(k, θ)
+∂pd,ζ
+αd,
+(187)
+where
+∂Vd(k, θ)
+∂pd,ζ
+= IN ⊗∂¯Vd(k, θ)
+∂pd,ζ
+,
+(188)
+∂¯Vd(k, θ)
+∂pd,ζ
+= diag
+∂e−iωk ¯τ1,d
+∂pd,ζ
+, ∂e−iωk ¯τ2,d
+∂pd,ζ
+, . . . ,∂e−iωk ¯τL,d
+∂pd,ζ
+
+.
+(189)
+where ¯τℓ,d is the propagation delay from the emitter d to the
+transponder ℓ, and η = 3(ζ −1) + d.
+If θη = αd,ℓ,n are path attenuation parameters
+∂ad
+∂αd,ℓ,n
+= ˜AVd
+∂αd
+∂αd,ℓ,n
+,
+(190)
+where
+∂αd
+∂αd,ℓ,n
+= [0, . . . , 1
+| {z }
+(n−1)L+ℓ
+, 0, . . . , 0]T ,
+(191)
+and η = 3 + (n −1)L + ℓ.
+C. THE FIRST DERIVATIVES OF THE PROJECTION MATRIX
+Denote the ﬁrst partial derivative of the projection matrix
+PA(k, θ) with respect to independent variable θη by
+PAη(k, θ) ≜∂PA(k, θ)
+∂θη
+= ∂A(k, θ)
+∂θη
+A(k, θ)+ + A(k, θ)∂A(k, θ)+
+∂θη
+,
+(192)
+The ﬁrst order derivative of the pseudo-inverse of A(k, θ):
+∂A(k, θ)+
+∂θη
+= [A(k, θ)HA(k, θ)]−1AH
+η (k, θ)P⊥
+A(k, θ)
+−A(k, θ)+Aη(k, θ)A(k, θ)+.
+(193)
+Substitute (193) into (192):
+PAη(k, θ) = A(k, θ)+HAH
+η (k, θ)P⊥
+A(k, θ)
++P⊥
+A(k, θ)Aη(k, θ)A(k, θ)+.
+(194)
+D. THE FIRST DERIVATIVE OF THE COST FUNCTION
+The cost function is deﬁned in (180). Denote Cη as the ηth
+component of the gradient C′(θ0) and θ0 are the true values
+of the unknown parameters:
+Cη =
+K
+X
+k=1
+Cη(k, θ),
+(195)
+where
+Cη(k, θ) = tr{PAη(k, θ) ˆUs(k)W(k) ˆUH
+s (k)}.
+(196)
+Substitute (194) into (196)
+Cη(k, θ) = 2Re
+n
+tr
+h
+W(k) ˆUH
+s (k)A(k, θ)+H
+AH
+η (k, θ)P⊥
+A(k, θ) ˆUs(k)
+io
+.
+(197)
+E. THE SECOND DERIVATIVE OF A PROJECTION MATRIX
+∂2PA(k, θ)
+∂θη∂θξ
+=
+n
+PA⊥
+ξ (k, θ)Aη(k, θ)A+(k, θ)
++ PA⊥(k, θ)Aηξ(k, θ)A+(k, θ)
++PA⊥(k, θ)Aη(k, θ)A+
+ξ (k, θ)
+o
++ {· · · }H ,
+(198)
+6908
+VOLUME 7, 2019
+
+
+=== PDF PAGE 21 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+where {· · · }H means that the same expression appears again
+with complex conjugate and transpose. and
+Aη(k, θ) ≜∂A(k, θ)
+∂θη
+;
+Aξ(k, θ) ≜∂A(k, θ)
+∂θξ
+;
+Aηξ(k, θ) ≜∂2A(k, θ)
+∂θη∂θξ
+;
+A+
+ξ (k, θ) ≜∂A+(k, θ)
+∂θξ
+;
+PA⊥
+ξ (k, θ) ≜∂P⊥
+A(k, θ)
+∂θξ
+.
+(199)
+Substitute (193) and (194) into (198):
+∂2PA(k, θ)
+∂θη∂θξ
+=
+n
+−PA⊥(k, θ)Aξ(k, θ)A+(k, θ)Aη(k, θ)A+(k, θ)
+−A+H(k, θ)AH
+ξ (k, θ)PA⊥(k, θ)Aη(k, θ)A+(k, θ)
++ PA⊥(k, θ)Aηξ(k, θ)A+(k, θ)
++ PA⊥(k, θ)Aη(k, θ)[A2(k, θ)]−1AH
+ξ (k, θ)PA⊥(k, θ)
+−PA⊥(k, θ)Aη(k, θ)A+(k, θ)Aξ(k, θ)A+(k, θ)
+o
++ {· · · }H.
+(200)
+F. THE SECOND DERIVATIVE OF THE MD-WSSF
+COST FUNCTION
+The element in the ηth row ξth column of C′′, evaluated in θ0
+is given by
+Cηξ(θ0) = lim
+N→∞
+K
+X
+k=1
+tr
+∂2PA(k, θ0)
+∂θη∂θξ
+ˆUs(k)W(k) ˆUs(k)H
+
+.
+(201)
+Apply (200) to (201) and PA⊥Us(k) = 0:
+Cηξ =
+K
+X
+k=1
+tr
+∂2PA(k, θ0)
+∂θη∂θξ
+Us(k)W(k)Us(k)H
+
+= −
+K
+X
+k=1
+tr
+n
+[AH
+ξ (k, θ)PA⊥(k, θ)Aη(k, θ)
++ AH
+η (k, θ)PA⊥(k, θ)Aξ(k, θ)]
+A+(k, θ)Us(k)W(k)UH
+s (k)A+H(k, θ)
+o
+.
+(202)
+Apply Lemma 2 in Appendix B
+Cηξ = −2
+K
+X
+k=1
+Re
+n
+tr
+h
+AH
+ξ (k, θ)PA⊥(k, θ)Aη(k, θ)
+A+(k, θ)Us(k)W(k)UH
+s (k)A+H(k, θ)
+io
+.
+(203)
+The second derivative matrix of C(k, θ) is denoted as
+C′′(k, θ)=
+
+
+C′′
+1,1(k, θ)
+· · ·
+C′′
+1,3+LN(k, θ)
+...
+...
+...
+C′′
+3+LN,1(k, θ)
+· · ·
+C′′
+3+LN,3+LN(k, θ)
+
+,
+(204)
+where
+C′′
+i,j(k, θ) ≜
+"
+∂C(k, θ)
+∂θT
+i
+#H ∂C(k, θ)
+∂θT
+j
+.
+(205)
+Denote ξ is an unknown parameter in θi corresponding to the
+βth emitter, and η is an unknown parameter in θj correspond-
+ing to the γ th emitter. We have
+Aξ(k, θ) = [0, · · · , 0, ∂aβ(k, θ)
+∂ξ
+|
+{z
+}
+i columns
+, 0, · · · , 0];
+(206)
+Aη(k, θ) = [0, · · · , 0, ∂aγ (k, θ)
+∂η
+|
+{z
+}
+j columns
+, 0, · · · , 0].
+(207)
+where aβ(k, θ) and aγ (k, θ) are the βth and the γ th columns
+of A(k, θ). Denote
+Dξ,η(k, θ) ≜AH
+ξ (k, θ)PA⊥(k, θ)Aη(k, θ)
+=
+
+
+
+0
+0
+0
+0
+dβ,γ
+i,j (k, θ)
+0
+0
+0
+0
+
+
+,
+(208)
+where dβγ
+i,j (k, θ)
+=
+∂aH
+β (k,θ)
+∂ξ
+PA⊥∂aγ (k,θ)
+∂η
+. Dξη(k, θ) is a
+matrix with all zeros except the element in the row i column j.
+Substitute (208) into (203), and denote the βth row γ th
+column element of Ci,j(k, θ) as Cβ,γ
+i,j (k, θ).
+Cξ,η = Cβγ
+i,j = −2
+K
+X
+k=1
+Re
+h
+tr
+n
+Dβγ
+i,j (k, θ)E(k, θ)
+oi
+=
+K
+X
+k=1
+Re
+h
+dβ,γ
+i,j (k, θ)eγ,β(k, θ)
+i
+,
+(209)
+where eγ,β(k, θ) the element at row γ column β of E(k, θ),
+and
+E(k, θ) ≜A+(k, θ)Us(k)W(k)UH
+s (k)A+H(k).
+(210)
+where
+F(k, θ) = AH
+θ (k, θ)PA⊥(k, θ)Aθ(k, θ).
+(211)
+Matrix F is denoted as
+F(k, θ) =
+
+
+F1,1(k, θ)
+· · ·
+F1,3+LN(k, θ)
+...
+...
+...
+F3+LN,1(k, θ)
+· · ·
+F3+LN,3+LN(k, θ)
+
+,
+(212)
+VOLUME 7, 2019
+6909
+
+
+=== PDF PAGE 22 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+where the ith row j column block matrix Fi,j(k, θ) is deﬁned
+as
+Fi,j(k, θ) ≜
+
+Aθi(k, θ)
+H PA⊥(k, θ)Aθj(k, θ),
+(213)
+where Aθi(k, θ) and Aθj(k, θ) are deﬁned in (206) and (207);
+the βth row γ th column element of Fi,j(k, θ) is denoted
+as f β,γ
+i,j
+(k, θ). Since (213) and (208), we get f β,γ
+i,j
+(k, θ) =
+dβ,γ
+i,j (k, θ). Substitute (213) into (209)
+Cξ,η(k, θ) = −2Re
+h
+f β,γ
+i,j
+(k, θ)eγ,β(k, θ)
+i
+,
+(214)
+Make (214) into matrix form
+C′′(k, θ) = −2Re
+n
+F(k, θ) ⊙[13+LN ⊗ET (k, θ)]
+o
+, (215)
+where ⊙represents the Hadamard-Schur product, ⊗is the
+Kronecker product, 13+LN is a (3 + LN) × (3 + LN) matrix
+with all ones.
+G. THE SECOND DERIVATIVE OF MD-NSF
+The element in the ηth row ξth column of C′′, evaluated in θ0
+is given by
+Cηξ(θ0) = lim
+N→∞
+K
+X
+k=1
+tr
+∂2PA(k, θ0)
+∂θη∂θξ
+ˆUn(k) ˆUn(k)H
+
+. (216)
+Apply (200) to (216) and AH(k, θ0)Un(k) = 0:
+Cηξ =
+K
+X
+k=1
+tr
+∂2PA(k, θ0)
+∂θη∂θξ
+Un(k)Un(k)H
+
+=
+K
+X
+k=1
+tr
+n
+[Aη(k, θ0)E(k, θ0)AH
+ξ (k, θ0)
++ Aξ(k, θ0)E(k, θ0)AH
+η (k, θ0)]
+PA⊥(k, θ0)Un(k)UH
+n (k)PA⊥(k, θ0)
+o
+.
+(217)
+where E(k, θ0) ≜[A(k, θ0)HA(k, θ0)]−1. Since
+PA⊥(k, θ0)Un(k) = [I −PA(k, θ0)]Un(k)
+= Un(k),
+(218)
+PA⊥(k, θ0)Un(k)UH
+n (k)PA⊥(k, θ0) = Un(k)UH
+n (k),
+(219)
+apply Lemma 2 in Appendix B, (217) turns
+Cηξ = 2
+K
+X
+k=1
+Re
+n
+tr
+n
+Aη(k, θ0)E(k, θ0)AH
+ξ (k, θ0)
+Un(k)UH
+n (k)
+oo
+= 2
+K
+X
+k=1
+Re
+n
+tr
+n
+AH
+ξ (k, θ0)Un(k, θ0)UH
+n (k)Aη(k, θ0)
+E(k, θ0)}} ,
+(220)
+Make (220) into matrix from:
+C′′(k, θ0) = −2Re
+n
+F(k, θ0) ⊙[13+LN ⊗ET (k, θ0)]
+o
+,
+(221)
+where
+F(k, θ0) = AH
+θ (k, θ0)Un(k)UH
+n (k)Aθ(k, θ0),
+(222)
+E(k, θ0) = [AH(k, θ0)A(k, θ0)]−1.
+(223)
+APPENDIX C
+FISHER INFORMATION MATRIX
+The log-likelihood function of the observations is
+log[p(r|¯θ)] = KMN log(πσ 2)
++ 1
+σ 2
+K
+X
+k=1
+||r(k) −A(k, θ)s(k)||2.
+(224)
+Move the constant item
+L = −1
+σ 2
+K
+X
+k=1
+[r(k) −A(k, θ)s(k)]H[r(k) −A(k, θ)s(k)].
+(225)
+A. THE FIRST DERIVATIVES OF THE LOG-LIKELIHOOD
+FUNCTION
+If ¯θi is a real value parameter, the ﬁrst derivative of the log
+likelihood function is:
+∂L
+∂¯θi
+= 1
+σ 2
+K
+X
+k=1
+∂[A(k, θ)s(k)]H
+∂¯θi
+e(k, θ)
++eH(k, θ)∂[A(k, θ)s(k)]
+∂¯θi
+
+= 2
+σ 2
+K
+X
+k=1
+Re
+∂[A(k, θ)s(k)]H
+∂¯θi
+e(k, θ)
+
+,
+(226)
+where e(k, θ) = r(k) −A(k, θ)s(k).
+If ¯θj is an imaginary value parameter, the ﬁrst derivative of
+the log likelihood function is
+∂L
+∂¯θj
+= 1
+σ 2
+K
+X
+k=1
+(
+−i∂[A(k, θ)s(k)]H
+∂¯θj
+e(k, θ)
++ ieH(k, θ)∂[A(k, θ)s(k)]
+∂¯θj
+)
+= 2
+σ 2
+K
+X
+k=1
+Im
+(
+∂[A(k, θ)s(k)]H
+∂¯θj
+e(k, θ)
+)
+,
+(227)
+B. THE SECOND DERIVATIVES OF THE LOG-LIKELIHOOD
+FUNCTION
+Notice the following results:
+
+
+
+Re(x)Re(yT ) = 1
+2[Re(xyT ) + Re(xyH)];
+Im(x)Im(yT ) = −1
+2[Re(xyT ) −Re(xyH)];
+Re(x)Im(yT ) = 1
+2[Im(xyT ) −Im(xyH)].
+(228)
+6910
+VOLUME 7, 2019
+
+
+=== PDF PAGE 23 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+If ¯θi and ¯θj are real parameters, the second derivatives are:
+∂2 L
+∂θi∂θj
+= 4
+σ 4
+K
+X
+k1=1
+K
+X
+k2=1
+Re
+∂[A(k1)s(k1)]H
+∂¯θi
+e(k1)
+
+×Re
+(
+∂[A(k2)s(k2)]H
+∂¯θj
+e(k2)
+)T
+= 2
+σ 4
+K
+X
+k1=1
+K
+X
+k2=1
+(
+Re
+∂[A(k1)s(k1)]H
+∂¯θi
+[e(k1)eT (k2)] ∂[A(k2)s(k2)]HT
+∂¯θj
+)
++Re
+(
+∂[A(k1)s(k1)]H
+∂¯θi
+[e(k1)eH(k2)]∂[A(k2)s(k2)]
+∂¯θj
+))
+.
+(229)
+The ﬁsher information matrix corresponding to θi and θj
+which are real value parameters
+Iij = E
+(
+∂2 L
+∂¯θi∂¯θj
+)
+= 2
+σ 4
+K
+X
+k1=1
+K
+X
+k2=1
+×
+(
+Re
+(
+∂[A(k1)s(k1)]H
+∂¯θi
+E{e(k1)eT(k2)}∂[A(k2)s(k2)]HT
+∂¯θj
+)
++Re
+(
+∂[A(k1)s(k1)]H
+∂¯θi
+E{e(k1)eH(k2)}∂[A(k2)s(k2)]
+∂¯θj
+))
+.
+(230)
+Since E{e(k1)eT (k2)} = 0, ∀k1, k2; E{e(k1)e(k2)H} =
+0, ∀k1̸ = k2, and E{e(k, θ)eH(k, θ)} = σ 2I
+Iij = 2
+σ 2
+K
+X
+k=1
+Re
+(
+∂[A(k, θ)s(k)]H
+∂¯θi
+∂[A(k, θ)s(k)]
+∂¯θj
+)
+.
+(231)
+If ¯θi and ¯θj are imaginary parameters, the second deriva-
+tives are:
+∂2 L
+∂¯θi∂¯θj
+= 2
+σ 4
+K
+X
+k1=1
+K
+X
+k2=1
+×
+(
+−Re
+(
+∂[A(k1)s(k1)]H
+∂¯θi
+e(k1)eT (k2)∂[A(k2)s(k2)]HT
+∂¯θj
+)
++ Re
+(
+∂[A(k1)s(k1)]H
+∂¯θi
+e(k1)eH(k2)∂[A(k2)s(k2)]
+∂¯θj
+))
+.
+(232)
+The ﬁsher information matrix corresponding to ¯θi and ¯θj
+which are imaginary value parameters:
+Iij = 2
+σ 2
+K
+X
+k=1
+Re
+(
+∂[A(k, θ)s(k)]H
+∂¯θi
+∂[A(k, θ)s(k)]
+∂¯θj
+)
+.
+(233)
+If ¯θi is a real value parameter and ¯θj is an imaginary parameter,
+the second derivative are:
+∂2 L
+∂¯θi∂¯θj
+= 2
+σ 4
+K
+X
+k1=1
+K
+X
+k2=1
+×
+(
+Im
+(
+∂[A(k1)s(k1)]H
+∂¯θi
+e(k1)eT (k2)∂[A(k2)s(k2)]HT
+∂¯θj
+)
+−Im
+(
+∂[A(k1)s(k1)]H
+∂¯θi
+e(k1)eH(k2)∂[A(k2)s(k2)]
+∂¯θj
+))
+.
+(234)
+The ﬁsher information matrix corresponding to ¯θi and ¯θj
+which ¯θi is a real parameter and ¯θj is an imaginary value
+parameter:
+Iij = −2
+σ 2
+K
+X
+k=1
+Im
+(
+∂[A(k, θ)s(k)]H
+∂¯θi
+∂[A(k, θ)s(k)]
+∂¯θj
+)
+.
+(235)
+C. ELEMENTS OF THE FISHER INFORMATION MATRIX
+Iθθ ≜E
+∂L
+∂θ
+H ∂L
+∂θ
+
+= 2
+σ 2
+K
+X
+k=1
+Re
+∂[A(k, θ)s(k)]H
+∂θ
+∂[A(k, θ)s(k)]
+∂θ
+
+= 2
+σ 2
+K
+X
+k=1
+Re
+n
+SH(k)AH
+θ (k, θ)Aθ(k, θ)S(k)
+o
+, (236)
+where S(k) = I3+LN ⊗S(k), S(k) = diag{s(k)}.
+I¯sθ(k) ≜E
+ ∂L
+∂¯s(k)
+H ∂L
+∂θ
+
+= 2
+σ 2
+K
+X
+k=1
+Re
+∂[A(k, θ)s(k)]H
+∂¯s(k)
+∂[A(k, θ)s(k)]
+∂θ
+
+= 2
+σ 2
+K
+X
+k=1
+Re
+n
+AH(k, θ)Aθ(k, θ)S(k)
+o
+,
+(237)
+I˜sθ(k) ≜E
+ ∂L
+∂˜s(k)
+H ∂L
+∂θ
+
+= −2
+σ 2
+K
+X
+k=1
+Im
+∂[A(k, θ)s(k)]H
+∂[˜s(k)i]
+∂[A(k, θ)s(k)]
+∂θ
+
+= −2
+σ 2
+K
+X
+k=1
+Im
+n
+AH(k, θ)Aθ(k, θ)S(k)
+o
+,
+(238)
+I¯s¯s(k) ≜E
+ ∂L
+∂¯s(k)
+H ∂L
+∂¯s(k)
+
+= 2
+σ 2
+K
+X
+k=1
+Re
+∂[A(k, θ)s(k)]H
+∂¯s(k)
+∂[A(k, θ)s(k)]
+∂¯s(k)
+
+= 2
+σ 2
+K
+X
+k=1
+Re
+n
+AH(k, θ)A(k, θ)
+o
+,
+(239)
+VOLUME 7, 2019
+6911
+
+
+=== PDF PAGE 24 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+I¯s˜s(k) ≜E
+ ∂L
+∂¯s(k)
+H ∂L
+∂˜s(k)
+
+= −2
+σ 2
+K
+X
+k=1
+Im
+∂[A(k, θ)s(k)]H
+∂¯s(k)
+∂[A(k, θ)s(k)]
+∂[˜s(k)i]
+
+= −2
+σ 2
+K
+X
+k=1
+Im
+n
+AH(k, θ)A(k, θ)
+o
+,
+(240)
+I˜s˜s(k) ≜E
+ ∂L
+∂˜s(k)
+H ∂L
+∂˜s(k)
+
+= 2
+σ 2
+K
+X
+k=1
+Re
+∂[A(k, θ)s(k)]H
+∂[˜s(k)i]
+∂[A(k)s(k)]
+∂[˜s(k)i]
+
+= 2
+σ 2
+K
+X
+k=1
+Re
+n
+AH(k)A(k, θ)
+o
+,
+(241)
+The Fisher Information Matrix is
+I¯θ =
+
+
+G(1)
+0
+· · ·
+0
+- - -
+V(1)
+0
+G(2)
+· · ·
+0
+- - -
+V(2)
+...
+...
+...
+...
+- - -
+...
+0
+0
+· · ·
+G(K)
+- - -
+V(K)
+- - - - - - - - - - - - - - - - - - - - - - - - - - -
+- - -
+- - - - - - -
+VH(1)
+VH(2)
+· · ·
+VH(K)
+- - -
+Iθθ
+
+
+, (242)
+where G(k, θ) ≜
+ I¯s¯s(k) I¯s˜s(k)
+I˜s¯s(k) I˜s˜s(k)
+
+, V(k) ≜
+ I¯sθ(k)
+I˜sθ(k)
+
+.
+APPENDIX D
+LEMMAS FOR ASYMPTOTIC ANALYSIS
+A. COVARIANCE OF THE EIGENVECTOR ESTIMATIONS
+Lemma 4: Denote that R is the covariance matrix of
+received data. The columns of U is the eigenvectors of R.
+Us = [us(1), us(2), . . . , us(D)] is consisted by the eigenvec-
+tors corresponding to the D signals. ˆus(d) is a estimation
+of us(d) from ˆR. The eigenvector estimation errors ˜us(d) =
+ˆu(d) −us(d) are asymptotically (for large N, where N is the
+number of snapshots) jointly Gaussian distributed with zero
+means and covariance matrices given by
+E{[ˆus(di) −us(di)][ˆus(dj) −us(dj)]H}
+= λs(di)
+N
+
+
+
+D
+X
+d=1
+d̸=di
+λs(d)
+[λs(d) −λs(di)]2 us(d)uH
+s (d)
++
+σ 2
+[σ 2 −λs(di)]2 UnUH
+n
+
+
+
+δdi,dj + o(N −1),
+(243)
+E
+n
+[ˆus(di) −us(di)][ˆus(dj) −us(dj)]T o
+= −
+λs(di)λs(dj)
+N[λs(di) −λs(dj)]2 us(dj)uT
+s (di)(1 −δdi,dj) + o(N −1),
+(244)
+where λs(d) is the dth eigenvalue. σ is the noise standard
+deviation, and δdi,dj is the Kronecker delta (=1 if di = dj,
+and =0 if di̸ = dj). Un is consisted by the eigenvectors
+corresponding to the noise.
+Proof: This Lemma was proposed and had been proved
+in [27], [38], [39], and [46]–[50] .
+APPENDIX E
+LEMMAS FOR THE OPTIMAL WEIGHTS OF
+WEIGHTED SIGNAL SUBSPACE FITTING
+Lemma 5: Let Ak, Bk and Ck be m × m (Hermitian)
+Positive semi-deﬁnite matrices (Bk can be Hermitian only).
+Denote 1 is a n × n square matrix with all ones. Then,
+assuming that the inverses appearing below exist, it holds that
+( K
+X
+k=1
+Re[Ak ⊙(1 ⊗Bk)]
+)−1 ( K
+X
+k=1
+Re[Ak ⊙(1 ⊗Ck)]
+)
+×
+( K
+X
+k=1
+Re[Ak ⊙(1 ⊗Bk)]
+)−1
+≥
+( K
+X
+k=1
+Re
+n
+Ak ⊙[1 ⊗(BkC−1
+k Bk)]
+o)−1
+.
+(245)
+Proof: Notice that
+Dk =
+ Ak
+Ak
+Ak
+Ak
+
+=
+ Im
+Im
+
+A
+ Im
+Im
+
+,
+(246)
+where Im is an m × m identity matrix. Denote
+Fk =
+ 1 ⊗Ck
+12 ⊗Bk
+12 ⊗Bk
+13 ⊗(BkC−1
+k Bk)
+
+=
+
+Imn
+1 ⊗(BkC−1
+k )
+
+(1 ⊗Ck)
+
+Imn
+1 ⊗(C−1
+k Bk)
+
+,
+(247)
+where Imn is an mn × mn identity matrix. Since Ck and Bk
+are Hermitian matrices, Dk and Fk are semi-deﬁnite matrices.
+Follow from [34, Lemma A.1] (Let Dk, Fk ∈Cm×m be two
+(Hermitian) positive semi-deﬁnite matrices. Then the matrix
+Dk ⊙Fk is positive semi-deﬁnite too.), and the fact that
+Re{Dk ⊙Fk} ≥0 if Dk ⊙Fk ≥0. Sum Re{Dk ⊙Fk} over
+k, we get
+K
+X
+k=1
+Re(Dk ⊙Fk) =
+ MAC
+MAB
+MAB
+MBCB
+
+≥0.
+(248)
+where
+MAC ≜
+K
+X
+k=1
+Re[Ak ⊙(1 ⊗Ck)],
+(249)
+MAB ≜
+K
+X
+k=1
+Re[Ak ⊙(12 ⊗Bk)],
+(250)
+MBCB ≜
+K
+X
+k=1
+Re[Ak ⊙(13 ⊗BkC−1
+k Bk)].
+(251)
+6912
+VOLUME 7, 2019
+
+
+=== PDF PAGE 25 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+Since 1m = N m−11, (248) turns to be
+K
+X
+k=1
+Re(Dk ⊙Fk) =
+ MAC
+n ¯
+MAB
+n ¯
+MAB
+n2
+¯
+MBCB
+
+≥0.
+(252)
+where
+¯
+MAB ≜
+K
+X
+k=1
+Re[Ak ⊙(12 ⊗Bk)],
+(253)
+¯
+MBCB ≜
+K
+X
+k=1
+Re[Ak ⊙(13 ⊗BkC−1
+k Bk)].
+(254)
+From Lemma 3,
+( K
+X
+k=1
+Re[Ak ⊙(1 ⊗Bk)]
+)−1 ( K
+X
+k=1
+Re[Ak ⊙(1 ⊗Ck)]
+)
+×
+( K
+X
+k=1
+Re[Ak ⊙(1 ⊗Bk)]
+)−1
+≥
+( K
+X
+k=1
+Re
+n
+Ak ⊙[1 ⊗(BkC−1
+k Bk)]
+o)−1
+.
+(255)
+REFERENCES
+[1] J. Du, D. Wang, W. Yu, and H. Yu, ‘‘Direct position determination of
+unknown signals in the presence of multipath propagation,’’ Sensors,
+vol. 18, no. 3, p. E892, Mar. 2018.
+[2] A. J. Weiss, ‘‘Direct position determination of narrowband radio frequency
+transmitters,’’ IEEE Signal Process. Lett., vol. 11, no. 5, pp. 513–516,
+May 2004.
+[3] A. Amar and A. J. Weiss, ‘‘Direct position determination of multiple
+radio signals,’’ in Proc. IEEE Int. Conf. Acoust., Speech, Signal Process.,
+Montreal, PQ, Canada, May 2004, p. ii-81.
+[4] A. Amar and A. J. Weiss, ‘‘Localization of narrowband radio emitters based
+on Doppler frequency shifts,’’ IEEE Trans. Signal Process., vol. 56, no. 11,
+pp. 5500–5508, Nov. 2008.
+[5] A. Weiss, ‘‘Direct geolocation of wideband emitters based on delay and
+Doppler,’’ IEEE Trans. Signal Process., vol. 59, no. 6, pp. 2513–2521,
+Jun. 2011.
+[6] T. Tirer and A. J. Weiss, ‘‘High resolution direct position determination
+of radio frequency sources,’’ IEEE Signal Process. Lett., vol. 23, no. 2,
+pp. 192–196, Feb. 2016.
+[7] T. Tirer and A. J. Weiss, ‘‘High resolution localization of narrowband radio
+emitters based on Doppler frequency shifts,’’ Signal Process., vol. 141,
+pp. 288–298, Dec. 2017.
+[8] A. Amar and A. J. Weiss, ‘‘Advances in direct position determination,’’
+in Proc. Sensor Array Multichannel Signal Process. Workshop, Barcelona,
+Spain, Jul. 2004, pp. 584–588.
+[9] A. Amar and A. J. Weiss, ‘‘New asymptotic results on two fundamental
+approaches to mobile terminal location,’’ in Proc. 3rd Int. Symp. Commun.,
+Control Signal Process., St Julians, Malta, Mar. 2008, pp. 1320–1323.
+[10] A. Amar and A. J. Weiss, ‘‘Direct position determination (DPD) of multiple
+known and unknown radio-frequency signals,’’ in Proc. 12th Eur. Signal
+Process. Conf., Sep. 2004, pp. 1115–1118.
+[11] R. Hamza and K. Buckley, ‘‘Second-order statistical analysis of totally
+weighted subspace ﬁtting methods,’’ IEEE Trans. Signal Process., vol. 42,
+no. 9, pp. 2520–2524, Sep. 1994.
+[12] M. Kaveh and A. J. Barabell, ‘‘The statistical performance of the MUSIC
+and the minimum-norm algorithms in resolving plane waves in noise,’’
+IEEE Trans. Acoust., Speech, Signal Process., vol. ASSP-34, no. 2,
+pp. 331–341, Apr. 1986.
+[13] X.-L. Li, M. Anderson, and T. Adali, ‘‘Principal component analysis for
+noncircular signals in the presence of circular white Gaussian noise,’’ in
+Proc. 44th Conf. Rec. Asilomar Conf. Signals, Syst. Comput., Nov. 2010,
+pp. 1796–1801.
+[14] J. Dauxois, A. Pousse, and Y. Romain, ‘‘Asymptotic theory for the principal
+component analysis of a vector random function: Some applications to
+statistical inference,’’ J. Multivariate Anal., vol. 12, no. 1, pp. 136–154,
+Mar. 1982.
+[15] H. Wang and M. Kaveh, ‘‘On the performance of signal-subspace
+processing—Part I: Narrow-band systems,’’ IEEE Trans. Acoust., Speech,
+Signal Process., vol. ASSP-34, no. 5, pp. 1201–1209, Oct. 1986.
+[16] H. Wang and M. Kaveh, ‘‘On the performance of signal-subspace
+processing—Part II: Coherent wide-band systems,’’ IEEE Trans. Acoust.,
+Speech, Signal Process., vol. ASSP-35, no. 11, pp. 1583–1591, Nov. 1987.
+[17] S. U. Pillai and B. H. Kwon, ‘‘Performance analysis of MUSIC-type
+high resolution estimators for direction ﬁnding in correlated and coherent
+scenes,’’ IEEE Trans. Acoust., Speech Signal Process., vol. 37, no. 8,
+pp. 1176–1189, Aug. 1989.
+[18] P. Stoica and A. Nehorai, ‘‘Performance study of conditional and uncondi-
+tional direction-of-arrival estimation,’’ IEEE Trans. Acoust., Speech Signal
+Process., vol. 38, no. 10, pp. 1783–1795, Oct. 1990.
+[19] B. Porat and B. Friedlander, ‘‘Analysis of the asymptotic relative efﬁciency
+of the MUSIC algorithm,’’ IEEE Trans. Acoust., Speech Signal Process.,
+vol. ASSP-36, no. 4, pp. 532–544, Apr. 1988.
+[20] B. Porat and B. Friedlander, ‘‘On the asymptotic relative efﬁciency of
+the MUSIC algorithm,’’ in Proc. Int. Conf. Acoust., Speech, Signal
+Process.
+(ICASSP),
+New
+York,
+NY,
+USA,
+vol.
+4,
+Apr.
+1988,
+pp. 2376–2379.
+[21] J. P. Delmas and Y. Meurisse, ‘‘Asymptotic performance analysis of DOA
+ﬁnding algorithms with temporally correlated narrowband signals,’’ IEEE
+Trans. Signal Process., vol. 48, no. 9, pp. 2669–2674, Sep. 2000.
+[22] H.-F. Zhou, L. Huang, H. C. So, and J. Li, ‘‘Performance analysis of
+G-MUSIC based DOA estimator with random linear array: A single source
+case,’’ Signal Process., vol. 142, pp. 513–521, Jan. 2018.
+[23] A. L. Swindlehurst and T. Kailath, ‘‘A performance analysis of subspace-
+based methods in the presence of model errors. I. The MUSIC algorithm,’’
+IEEE Trans. Signal Process., vol. 40, no. 7, pp. 1758–1774, Jul. 1992.
+[24] A. L. Swindlehurst and T. Kailath, ‘‘A performance analysis of subspace-
+based methods in the presence of model error. II. Multidimensional algo-
+rithms,’’ IEEE Trans. Signal Process., vol. 41, no. 9, pp. 2882–2890,
+Sep. 1993.
+[25] A. Ferreol, P. Larzabal, and M. Viberg, ‘‘On the asymptotic performance
+analysis of subspace DOA estimation in the presence of modeling errors:
+Case of MUSIC,’’ IEEE Trans. Signal Process., vol. 54, no. 3, pp. 907–920,
+Mar. 2006.
+[26] B. Ottersten, M. Viberg, and T. Kailath, ‘‘Analysis of subspace ﬁtting and
+ML techniques for parameter estimation from sensor array data,’’ IEEE
+Trans. Signal Process., vol. 40, no. 3, pp. 590–600, Mar. 1992.
+[27] P. Stoica and K. Sharman, ‘‘Maximum likelihood methods for direction-of-
+arrival estimation,’’ IEEE Trans. Acoust., Speech Signal Process., vol. 38,
+no. 7, pp. 1132–1143, Jul. 1990.
+[28] E. Moulines and J.-F. Cardoso, ‘‘Direction ﬁnding algorithms using fourth
+order statistics: Asymptotic performance analysis,’’ in Proc. IEEE Int.
+Conf. Acoust., Speech, Signal Process. (ICASSP), San Francisco, CA,
+USA, vol. 2, Mar. 1992, pp. 437–440.
+[29] J.-F. Cardoso and E. Moulines, ‘‘Asymptotic performance analysis of
+direction-ﬁnding algorithms based on fourth-order cumulants,’’ IEEE
+Trans. Signal Process., vol. 43, no. 1, pp. 214–224, Jan. 1995.
+[30] M. Bengtsson and B. Ottersten, ‘‘A generalization of weighted subspace
+ﬁtting to full-rank models,’’ IEEE Trans. Signal Process., vol. 49, no. 5,
+pp. 1002–1012, May 2001.
+[31] B. Ottersten, B. Wahlberg, M. Viberg, and T. Kailath, ‘‘Stochastic maxi-
+mum likelihood estimation in sensor arrays by weighted subspace ﬁtting,’’
+in Proc. 33rd Asilomar Conf. Signals, Syst. Comput., Paciﬁc Grove, CA,
+USA, Nov. 1989, pp. 599–603.
+[32] B. Ottersten and M. Viberg, ‘‘Analysis of subspace ﬁtting based methods
+for sensor array processing,’’ in Proc. Int. Conf. Acoust., Speech, Signal
+Process., Glasgow, U.K., vol. 4, 1989, pp. 2807–2810.
+[33] B. Ottersten and M. Viberg, ‘‘Asymptotic robustness of sensor array pro-
+cessing methods,’’ in Proc. Int. Conf. Acoust., Speech, Signal Process.,
+Albuquerque, NM, USA, vol. 5, Apr. 1990, pp. 2635–2638.
+[34] P. Stoica and N. Arye, ‘‘MUSIC, maximum likelihood, and Cramer-Rao
+bound,’’ IEEE Trans. Acoust., Speech Signal Process., vol. 37, no. 5,
+pp. 720–741, May 1989.
+[35] P.
+Stoica
+and
+A.
+Nehorai,
+‘‘MUSIC,
+maximum
+likelihood,
+and
+Cramer-Rao bound: Further results and comparisons,’’ IEEE Trans.
+Acoust., Speech Signal Process., vol. 38, no. 12, pp. 2140–2150,
+Dec. 1990.
+VOLUME 7, 2019
+6913
+
+
+=== PDF PAGE 26 ===
+J. Du et al.: USF Framework and Its Performance Analysis for DPD in the Presence of Multipath Propagation
+[36] M. Viberg and B. Ottersten, ‘‘Sensor array processing based on subspace
+ﬁtting,’’ IEEE Trans. Signal Process., vol. 39, no. 5, pp. 1110–1121,
+May 1991.
+[37] M. Viberg, B. Ottersten, and T. Kailath, ‘‘Detection and estimation in sen-
+sor arrays using weighted subspace ﬁtting,’’ IEEE Trans. Signal Process.,
+vol. 39, no. 11, pp. 2436–2449, Nov. 1991.
+[38] T. W. Anderson, ‘‘Asymptotic theory for principal component analysis,’’
+Ann. Math. Statist., vol. 34, no. 1, pp. 122–148, 1963.
+[39] G. P. Gupta, ‘‘Asymptotic theory for principal component analysis in the
+complex case,’’ Int. Indian Stat. Assoc., vol. 3, no. 1, pp. 97–106, 1965.
+[40] A. Yeredor, A. Weiss, and A. J. Weiss, ‘‘High-order analysis of the
+efﬁciency gap for maximum likelihood estimation in nonlinear Gaussian
+models,’’ IEEE Trans. Signal Process., vol. 66, no. 18, pp. 4782–4795,
+Sep. 2018.
+[41] O. Bar-Shalom and A. J. Weiss, ‘‘Transponder-aided single platform geolo-
+cation,’’ IEEE Trans. Signal Process., vol. 61, no. 5, pp. 1239–1248,
+Mar. 2013.
+[42] O. Bar-Shalom and A. J. Weiss, ‘‘Emitter geolocation using single moving
+receiver,’’ Signal Process., vol. 105, pp. 70–83, Dec. 2014.
+[43] R. O. Schmidt, ‘‘A signal subspace approach to multiple emitter location
+spectral estimation,’’ Ph.D. dissertation, Dept. Elect. Eng., Stanford Univ.,
+Stanford, CA, USA, 1981.
+[44] R. O. Schmidt, ‘‘Multiple emitter location and signal parameter estima-
+tion,’’ IEEE Trans. Antennas Propag., vol. AP-34, no. 3, pp. 276–280,
+Mar. 1986.
+[45] J. A. Cadzow, ‘‘A high resolution direction-of-arrival algorithm for narrow-
+band coherent and incoherent sources,’’ IEEE Trans. Acoust., Speech Sig-
+nal Process., vol. ASSP-36, no. 7, pp. 965–979, Jul. 1988.
+[46] A. W. Davis, ‘‘Asymptotic theory for principal component analysis: Non-
+normal case,’’ Austral. J. Statist., vol. 19, no. 3, pp. 206–212, 1977.
+[47] D. J. Jeffries and D. R. Farrier, ‘‘Asymptotic results for eigenvector meth-
+ods,’’ IEE Proc. F Commun., Radar Signal Process., vol. 132, no. 7,
+pp. 589–594, Dec. 1985.
+[48] B. Friedlander and A. J. Weiss, ‘‘On the second-order statistics of the
+eigenvectors of sample covariance matrices,’’ IEEE Trans. Signal Process.,
+vol. 46, no. 11, pp. 3136–3139, Nov. 1998.
+[49] D. Paul, ‘‘Asymptotic of sample eigen structure for a large dimensional
+spiked covariance model,’’ Statistica Sinica, vol. 17, no. 4, pp. 1617–1642,
+2007.
+[50] K. Sharman, T. Durrani, M. Wax, and T. Kailath, ‘‘Asymptotic perfor-
+mance of eigenstructure spectral analysis methods,’’ in Proc. IEEE Int.
+Conf. Acoust., Speech, Signal Process. (ICASSP), San Diego, CA, USA,
+Mar. 1984, pp. 440–443.
+JIANPING
+DU
+received the B.S. degree in
+applied mathematics and the M.S. degree in oper-
+ation research from the Zhengzhou Institute of
+Information Science and Technology, Zhengzhou,
+in 2003 and 2006, respectively. Since 2006, he has
+been a Lecturer with the Communication Engi-
+neering Department, Zhengzhou Institute of Infor-
+mation Science and Technology. He has authored
+three books and more than 20 articles. He holds
+six patents. His research interests include mathe-
+matical modeling, high-resolution emitters positioning methods, array signal
+processing, and short wave emitter positioning.
+HONGYI YU received the M.Sc. degree from
+the Department of Communication Engineering,
+Zhengzhou Information Science and Technology
+Institute, China, in 1987, and the Ph.D. degree
+from Xidian University, in 1999. He is currently
+a Professor with the National Digital Switching
+System Engineering and Technological Research
+Center, Zhengzhou, China. His main research
+interests are in the areas of wireless communi-
+cation theory, visible light communications, and
+signal processing.
+DING WANG graduated from the Department of
+Communication Engineering, Zhengzhou Institute
+of Information Science and Technology, China,
+in 2004. He received the M.S. degree in mil-
+itary communication and the Ph.D. degree in
+communication and system engineering from the
+Zhengzhou Institute of Information Science and
+Technology, in 2007 and 2011, respectively. From
+2012 to 2015, he was an Assistant Professor with
+the National Digital Switching System Engineer-
+ing and Technological Research Center and the Zhengzhou Institute of Infor-
+mation Science and Technology, where he has been an Associate Professor
+since 2016. His research activities are focused on array signal processing and
+passive location.
+DALONG ZHANG received the Ph.D. degree
+in communication and information system from
+Information
+Engineering
+University,
+Henan,
+China, in 2008. He is currently an Associate Pro-
+fessor with the School of Information Engineering,
+Zhengzhou University, Henan. His research inter-
+ests include wireless communications networks,
+the Internet of Vehicles, sensor networks, the Inter-
+net of Things, and satellite positioning systems.
+GUANGYI LIU received the B.S. degree in com-
+munication engineering from Information Engi-
+neering University, Zhengzhou, China, in 2005,
+and the M.S. and Ph.D. degrees in communication
+engineering from the National Digital Switching
+System Engineering and Technological Research
+and Development Center, Zhengzhou, China,
+in 2009 and 2015, respectively. His research inter-
+ests include wireless communications and signal
+analysis.
+6914
+VOLUME 7, 2019

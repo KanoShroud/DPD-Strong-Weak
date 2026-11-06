@@ -1,0 +1,1162 @@
+
+=== PAGE 1 ===
+3090                                                                                IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 70, 2022
+
+   A Semi-Blind Method for Localization of
+          Underwater Acoustic Sources
+
+             Amir Weiss    , Member, IEEE, Toros Arikan    , Graduate Student Member, IEEE,
+           Hari Vishnu    , Senior Member, IEEE, Grant B. Deane    , Andrew C. Singer    , Fellow, IEEE,
+                                and Gregory W. Wornell    , Fellow, IEEE
+
+
+
+  Abstract—Underwater acoustic localization has traditionally   at least the mid-1970s [4]. Fruitful combinations of advanced
+been challenging due to the presence of unknown environmental   signal processing methods and detailed underwater acoustic
+structure and dynamic conditions. The problem is richer still when   propagation models have led to a variety of methods for different
+such structure includes occlusion, which causes the loss of line-
+                                                           regimes (shallow/deep water, short/long distances, etc.) [5], [6].
+of-sight (LOS) between the acoustic source and the receivers, on
+                                                        While an abundance of methods have been developed andwhich many of the existing localization algorithms rely. We develop
+a semi-blind passive localization method capable of accurately   proposed over the years, only a portion of these survive the
+estimating the source’s position even in the possible absence of   ruthless test of practicality. Indeed, from a practical point of
+LOS between the source and all receivers. Based on typically-   view, a good applicable method is one that, on the one hand
+available prior knowledge of the water surface and bottom, we   exploits as much prior knowledge as possible, but on the other
+derive a closed-form expression for the optimal estimator under a                                                      hand does not go too far by assuming access to unavailable
+multi-ray propagation model, which is suitable for shallow-water
+                                                                information/resources. In the context of passive underwaterenvironments and high-frequency signals. By exploiting a compu-
+tationally efﬁcient form of this estimator, our methodology makes   acoustic localization, our goal in this work is to provide a robust
+comparatively high-resolution localization feasible. We also derive   algorithm, while judiciously balancing this trade-off.
+the Cramér-Rao bound for this model, which can be used to guide     In particular, we consider scenarios where the area of interest
+the placement of collections of receivers so as to optimize local-    is characterized by shallow waters (say, up to ∼100 m depth [7])
+ization accuracy. The method improves a balance of accuracy and  and relatively short distances (say, up to ∼1 km). In this regime,
+robustness to environmental model mismatch, relative to existing                                                          under a few additional realistic assumptions (stated explicitly in
+localization methods that are useful in similar settings. The method
+                                                                 the sequel), the acoustic signal propagation can be approximatedis validated with simulations and water tank experiments.
+                                                     by ray trace modeling [7], [8]. This allows us to exploit the
+  Index  Terms—Localization,   non-line-of-sight,  underwater   multipath channel effect, rather than mitigate it. In other words,
+acoustics,  matched  ﬁeld  processing,  maximum  likelihood,  we explicitly incorporate prior knowledge on the structure of
+Cramér-Rao bound, Cholesky decomposition.
+                                                                 the environment, which either allows us to successfully localize
+                                                             using fewer resources (e.g., sensors or measurements), or to
+                               I. INTRODUCTION                                                         improveperformancewhileusingthesameresources.Moreover,
+    NDERWATER localization of acoustic sources is an im-  we are capable of localizing a source in the complete absence
+      portant and challenging problem, and arises in a wide   of line-of-sight (LOS) signal components, based on non-LOSUrange of applications [1]–[3]. As such, it has been extensively  (NLOS) signal reﬂections. Naturally, these notions have already
+addressed in the literature, where early work dates back to   been considered in some settings, as reviewed next.
+
+  Manuscript received October 14, 2021; revised March 11, 2022; accepted   A. Related Work: Underwater Acoustic Localization
+April 24, 2022. Date of publication May 12, 2022; date of current version June     For short-range localization in shallow-water environments,
+28, 2022. The associate editor coordinating the review of this manuscript and
+approving  it for publication was Prof. Mojtaba Soltanalian. This work was   straight-ray tracing  is a widely-accepted approximation for
+supported in part by ONR under Grants N00014-19-1-2661, N00014-19-1-   acoustic signal propagation [7], [8]. In such environments, the
+2662, and N00014-19-1-2665, and in part by NSF under Grant CCF-1816209.   speed of sound is (at least approximately) constant1 and known
+(Corresponding author: Amir Weiss.)
+                                                                    in the relevant volume of interest. Therefore, propagation de-  Amir Weiss, Toros Arikan, and Gregory W. Wornell are with the Electrical
+Engineering and Computer Science Department, Massachusetts Institute of   lay, namely time of arrival (TOA) or time-difference of arrival
+Technology, Cambridge, MA 02139 USA (e-mail: amirweiss15@gmail.com;  (TDOA) (e.g., [10], [11]), is usually employed as a basis for
+toros_arikan@hotmail.com; gww@mit.edu).                                different localization methods [12]. However, since the under-
+  Hari Vishnu is with Acoustic Research Laboratory, National University
+of Singapore, Tropical Marine Science Institute, Singapore 119222 (e-mail:   water acoustic environment typically induces a rich multipath
+harivishnu@gmail.com).                                          channel [13], the measured signals contain both LOS and NLOS
+  Grant B. Deane is with the University of California San Diego, Scripps Insti-   components. Under such circumstances, the performance of
+tution of Oceanography, La Jolla, CA 92037 USA (e-mail: gdeane@ucsd.edu).
+                                                TOA/TDOA-based methods usually deteriorates, possibly up to  Andrew C. Singer is with the University of Illinois at Urbana Champaign,
+Urbana, IL 61820 USA (e-mail: acsinger@illinois.edu).                    unacceptable error levels.
+  This  article  has  supplementary  downloadable  material  available  at
+https://doi.org/10.1109/TSP.2022.3173731, provided by the authors.               1Nearly constant sound speed may be found, e.g., in very shallow waters, or
+   Digital Object Identiﬁer 10.1109/TSP.2022.3173731                         shallow waters that are well-mixed [9].
+
+
+                    1053-587X © 2022 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.
+                                   See https://www.ieee.org/publications/rights/index.html for more information.
+
+
+
+             Authorized licensed use limited to: MIT Libraries. Downloaded on August 17,2022 at 17:02:01 UTC from IEEE Xplore. Restrictions apply.
+
+=== PAGE 2 ===
+WEISS et al.: SEMI-BLIND METHOD FOR LOCALIZATION OF UNDERWATER ACOUSTIC SOURCES                                                       3091
+
+
+  Since the complete multipath channel is (generally) unknown,
+a possible remedy is to ﬁrst identify and separate the LOS
+components. Diamant, et al. propose in [14] a method for
+classifying the signal components as LOS and NLOS, and
+for subsequent range estimation based on the classiﬁed LOS
+components. While this approach can certainly work, it does
+not attempt to exploit the NLOS reﬂections, which contain
+valuable information on the unknown source location. Emokpae
+and Younis propose in [15] a surface-reﬂection-based method in
+                                                                                   Fig. 1.  A 2-dimensional illustration of the three-ray model. When the surface
+anactivesetting,whereonlythesurfacereﬂectionsareexploited.   and bottom are approximately ﬂat in the operational area [33], [34], this model
+In [16], Emokpae, et al. present an extended, enhanced version    enables NLOS-based localization in the potential absence of the LOS signal
+of this notion, where a scheme that employs both the LOS and   component, e.g., due to an occluder.
+surface-reﬂected NLOS components is developed to locate a lost
+(drifted away) node of an underwater sensor network. To use this
+                                                             approach, and incorporate the available knowledge by intro-
+method, all nodes in the network are required to have a sensor
+                                                          ducing an appropriate prior distribution on (all or some of) the
+array, with more than one sensor, and the waveform emitted from
+                                                       unknowns. In this work, we take a nonBayesian approach.
+the lost node (i.e., source) is assumed to be known, which is not
+                                                     Our main contributions are the following:
+always possible and less common in passive settings. Assuming       r                                               A novel SBL method for underwater acoustic sources: We
+that perfect knowledge of the physical model is available, which
+                                                                 adoptthewidely-acceptedstraight-raytracingapproachfor
+translates into an equivalent impulse response, matched ﬁeld
+                                                                  shallow-water to deﬁne a three-ray model, which explicitly
+processing (MFP) [17] is a well-known technique that makes
+                                                                      takes into account the NLOS surface and bottom signal
+full use of the environmental structure for enhanced localization.
+                                                                       reﬂections. Consequently, on top of enhanced accuracy
+However, as mentioned in [18], in realistic applications model
+                                                           due to this multipath model, our method is capable of
+mismatch is a serious problem for MFP, on top of its heavy com-
+                                                                         localization in the absence of LOS, due to a potential
+putational workload. Recent increasing efforts towards reducing
+                                                                      occluder, such as a vessel or pier pilings.
+system cost [19], [20] and computational complexity [21], [22],       r                                                                Computationally efﬁcient direct localization: Contrary to
+while exploiting environmental structure [23], motivate our
+                                                                           indirect (e.g., TDOA-based), standard localization meth-
+current work.
+                                                              ods (e.g., [29]–[31]), we take a different approach, in
+                                                          which our algorithm is applied directly to the observed
+B. Semi-Blind Localization: Motivation and Contributions                                                                           signals. Consequently, the notion of TDOA is redundant in
+  We propose a semi-blind localization (SBL) method that uses       our framework. Speciﬁcally, we assume that the source’s
+a spatially diverse network of receivers. Each receiver is required       waveform is unknown, and in particular, we do not assume
+to have a single sensor (rather than a sensor array, as in [16]),            it is a pulse-type signal. We provide a computationally
+which reduces hardware requirements, and hence the overall        efﬁcient algorithm to the resulting nonlinear optimization
+cost of the system.2 The information lost by restricting the       problem (see Section IV, Proposition 3), and demonstrate
+number of sensors is mitigated by leveraging available partial         that the algorithm works well for pulse- or non-pulse-type
+prior knowledge on the structure of the environment, namely the        signals in Section VI.
+                                                                             rdepths of the sensors and the ocean bottom. Our SBL method,      Lower bound on asymptotic performance: We develop the
+developed in a nonBayesian framework, jointly estimates the       Cramér-Rao lower bound (CRLB) on the mean-squared
+associated parameters of the implied impulse response with the        error (MSE) of any unbiased localization method for a
+unknown source position, and thus can be viewed as a form        special case of our signal model, in which our proposed
+of focalization [18]. However, it is more naturally related to the        solution coincides with the maximum likelihood estimate
+direct position determination approach [25], originally proposed      (MLE) of the source position. We demonstrate the validity
+for narrowband radio frequency signals. We show that with        of this bound with respect to ocean ambient noise, using
+some carefully chosen adaptations, a similar, though generalized        previously collected ocean acoustic recordings [32].
+                                                                             rapproach leads to our SBL method,3 which provides a good bal-        Applicability proof of concept: We provide a proof of con-
+ance between accuracy and robustness to some physical model         cept, demonstrated on acoustic measurements collected in
+mismatch. We demonstrate this via simulation experiments by       a well-controlled, small-scale water tank, which provides
+comparing to MFP and to the TDOA method referred to as       an acoustically frequency-scaled model for the shallow-
+“generalized cross-correlation with phase transform” (GCC-       water environment.
+PHAT) [26]–[28], which is well-known due to its resilience to    The rest of the paper is organized as follows. The remainder of
+multipath.                                                              this section is devoted to an outline of our notation. In Section II
+  We note in passing that  if additional knowledge of the   weformulatetheproblemforthethree-raysignalmodeldepicted
+environment is available, one may consider taking a Bayesian   in Fig. 1, and the MFP solution of this model is presented
+                                                                    in Section III. The main results, including our proposed SBL
+                                                         method, are presented in Section IV. In Section V we derive the
+  2In an application such as the ocean-of-things [3], an optimal subset of sensors
+                                                                  respective CRLB, and present empirical simulation results thatcould be chosen from a larger set of sensors [24].
+  3In contrast to the previous claim in [25], that this approach “is suitable only   corroborate our analytical derivation in Section VI. Concluding
+for RF signals and not for underwater emitter location”.                   remarks are provided in Section VIII.
+
+
+
+              Authorized licensed use limited to: MIT Libraries. Downloaded on August 17,2022 at 17:02:01 UTC from IEEE Xplore. Restrictions apply.
+
+=== PAGE 3 ===
+3092                                                                                IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 70, 2022
+
+
+C. Notation
+  We use x, x, and X for a scalar, column vector and matrix,
+respectively. The superscripts (·)T, (·)∗, (·)H, and (·)−1 denote
+the transposition, complex conjugation, conjugate transposition,
+and inverse operators, respectively. We use IK to denote the
+K × K identity matrix, and O for the all-zeros matrix. The
+pinning vector ek denotes the k-th column of the identity matrix,
+withcontext-dependentdimension.Further,δkℓ≜eTk eℓdenotes
+the Kronecker delta of k and ℓ. E[·] denotes expectation, λmax(·)
+denotes the largest eigenvalue of its (square) matrix argument,
+and the Diag(·) operator forms an M × M diagonal matrix from
+its M-dimensional vector argument. The Kronecker product is
+denoted by ⊗. We use j (a dotless j) to denote √−1; ℜ{·}       Fig. 2.  A 3-dimensional illustration of the geometry leading to (1)–(3).
+and ℑ{·} denote the real and imaginary parts (respectively) of
+their complex-valued arguments. The ℓ2 norm is denoted by
+                                                      where p ≜[xp yp zp]T; pℓ≜[xℓyℓzℓ]T is the position of the∥· ∥2, and rank(·) denotes the rank of its matrix argument. The
+                                                                     ℓ-th receiver; ρℓ≜   (xp −xℓ)2 + (yp −yℓ)2 is the horizontalsymbols R and C denote the real line and complex plane, re-
+spectively. We use x to denote the (normalized) discrete Fourier   distance between the source and the ℓ-th receiver; and h is
+transform (DFT) of x, and x to denote an estimate thereof. We   the bottom depth in the area of interest. An illustration of the
+                                                        geometry associated with (1)–(3) in our coordinate system isuse O(·) to denote the standard big O notation [35].
+                                                             given in Fig. 2  . Therefore, assuming isovelocity, the associated
+                                                              time-delays of these components are                       II. PROBLEM FORMULATION
+  Consider L spatially-diverse, time-synchronized receivers at          τrℓ(p) ≜Rrℓ , r ∈{1, 2, 3}, ∀ℓ∈{1, . . . , L},     (4)
+                                                                               c
+known locations, each consisting of a single omni-directional
+                                                      where c denotes the speed of sound, assumed to be known.hydrophone.4 Furthermore, consider the presence of an un-
+                                                              This model can be viewed as a third-order approximationknown signal in an isotropic homogeneous medium, emitted
+                                                               (with respect to the delayed signal components) of the equiv-from a source whose deterministic, unknown position is denoted
+by the vector of coordinates p ∈R3×1. We assume that the   alent impulse response of an acoustic channel, whose energy
+                                                                               is concentrated in the three arrivals corresponding to the LOSsource is static, and is located sufﬁciently far from all L receivers
+                                                        component, and the surface and bottom reﬂections. While someto permit a planar wavefront (far-ﬁeld) approximation in the
+                                                               unpredictable factors can give rise to additional componentsshallow-water waveguide. Each receiver records the measured
+                                                                    in the induced impulse response, the surface and bottom ofacoustic signal on a ﬁxed observation time interval, which after
+                                                                 the ocean are always present. Therefore,  it is reasonable tosampling and baseband conversion amounts to N samples. We
+                                                                incorporate these additional signal components into the model.further assume that the area of operation can be considered as
+                                                          Moreover, this simpliﬁed model allows for successful localiza-a shallow-water environment, and that the ocean ﬂoor depth in
+                                                                    tion in the absence of (even all) LOS components in the receivedthe relevant area of operation5 is approximately constant [36].
+                                                                      signals, a situation that may occur, e.g., due to the presence ofWe restrict our scope to (approximately) isovelocity environ-
+                                                                    potential occluders. This will be demonstrated via simulationsments and high frequency signals, in which the straight-ray
+                                                       and experiments with real data in Section VI.model approximately holds. Since we focus on short ranges in
+shallow-water environments, we neglect nonlinear propagation
+effects in the waveguide. Although the underwater acoustic   A. Baseband Signal Model
+channel generally gives rise to an equivalent rich multipath     Formally, and assuming the source has been detected in a
+channel, a relatively simple, yet useful, approach is the three-ray   given frequency band, the sampled, baseband-converted signal
+model, illustrated in Fig. 1. In this approach, the modeled signal  from the ℓ-th receiver is given by
+components are:                                                                3
+  1) The direct-path LOS component;                                                                  xℓ[n] =     brℓsrℓ[n] + vℓ[n] ≜sTℓ[n]bℓ+ vℓ[n] ∈C,
+  2) The surface reﬂection NLOS component; and
+                                                                   r=1
+  3) The bottom reﬂection NLOS component.
+  Accordingly, the associated distances traveled by these com-           ∀n ∈{1, . . . , N}, ∀ℓ∈{1, . . . , L},           (5)
+ponents from the source to the ℓ-th receiver are given by [37]                                                      where we  have  deﬁned  sℓ[n] = [s1ℓ[n] s2ℓ[n] s3ℓ[n]]T ∈
+  R1ℓ≜∥pℓ−p∥2,              (LOS)              (1)   C3×1, bℓ= [b1ℓb2ℓb3ℓ]T ∈C3×1, and where
+                                                                  1) brℓ∈C denotes the unknown attenuation coefﬁcient from
+  R2ℓ≜   ρ2ℓ+ (zp + zℓ)2,       (NLOS surface)    (2)         the source to the ℓ-th sensor associated with the r-th
+                                                          component (LOS or surface/bottom NLOS reﬂection);
+  R3ℓ≜   ρ2ℓ+ (2 h −zp −zℓ)2,   (NLOS bottom)    (3)     2) srℓ[n] ≜s(t −τrℓ(p))|t=nTs ∈C denotes the sampled r-
+                                                                          th component of the unknown signal waveform at the ℓ-
+                                                                          th sensor, where s(t −τrℓ(p)) is the analog, continuous-  4We focus on the single sensor case for convenience. However, our method-
+ology can in principle be used when the receivers have sensor arrays.               time waveform delayed by τrℓ(p), and Ts is the (known)
+  5The smallest rectangular area encompassing the source and receivers.            sampling period; and
+
+
+             Authorized licensed use limited to: MIT Libraries. Downloaded on August 17,2022 at 17:02:01 UTC from IEEE Xplore. Restrictions apply.
+
+=== PAGE 4 ===
+WEISS et al.: SEMI-BLIND METHOD FOR LOCALIZATION OF UNDERWATER ACOUSTIC SOURCES                                                       3093
+
+
+  3) vℓ[n] ∈C denotes the additive noise at the ℓ-th receiver,   physical knowledge (e.g., assuming the bottom is sand, silt, clay,
+      representing the overall contributions of internal receiver   rock,etc.)andtheangleofincidence,andisassumedtobeknown
+      noise and ambient noise, modeled as a zero-mean random   within the MFP framework for a given hypothesized emitter
+      process with an unknown variance σ2vℓ.                     location p. For (10), we assumed a perfectly reﬂecting ocean
+                                                                surface [8], [38], which approximately holds for calm shallow
+B. Equivalent Formulation in the Frequency Domain            waters. Based on this knowledge, the channel responses {Hℓ}
+                                                         can be readily computed.
+  Applying the normalized DFT to (5) yields the equivalent
+                                                     The MFP solution for the three-ray model, denoted for con-
+frequency-domain representation for all ℓ∈{1, . . . , L},
+                                                            venience as MFP3, is then given by
+           3
+                                                                      min  CMFP3(p, s),         (12)  ¯xℓ[k] =     brℓ¯s[k]e−jωkτrℓ(p) + ¯vℓ[k]                                           pMFP3 ≜argmin
+                                                                                    p∈R3×1  ¯s∈CN×1
+        r=1
+                                                      where
+       ≜¯s[k] · dHℓ[k]bℓ +¯vℓ[k] = ¯s[k] · ¯hℓ[k] + ¯vℓ[k] ∈C, (6)                       L
+                                                                             CMFP3(p, s) ≜   ∥xℓ−Hℓ(p)s∥22 ,        (13)                    ≜¯hℓ[k]
+                                                                                   ℓ=1
+where we have deﬁned
+                                                       and here we write Hℓ(p) (rather than Hℓ) to emphasize the    dℓ[k] ≜[e−jωkτ1ℓ(p) e−jωkτ2ℓ(p) e−jωkτ3ℓ(p)]H ∈C3×1,                                                        dependence on p. The simpliﬁed MFP3 solution is given by
+            −1)                                               N                2     ωk ≜2π(k    ∈R+, ∀k ∈{1, . . . , N}.                                          x[k]Hhk(p)          NTs                                                               pMFP3 = argmax                              ,        (14)
+                                                                                    ∥hk(p)∥2  For shorthand, we further deﬁne                                                  p∈R3×1  k=1
+  xℓ≜[¯xℓ[1] · · · ¯xℓ[N]]T ∈CN×1, Xℓ≜Diag(xℓ),          where we have deﬁned, for every k-th DFT component,
+                                                                        x[k] ≜[¯x1[k] · · · ¯xL[k]]T ∈CL×1,   s ≜[¯s[1] · · · ¯s[N]]T ∈CN×1,  S ≜Diag(s),
+                                                              hk(p) ≜  ¯h1[k]  · · · ¯hL[k] T ∈CL×1,   vℓ≜[¯vℓ[1] · · · ¯vℓ[N]]T ∈CN×1,
+                                                             using hk(p) (rather than hk) to emphasize the dependence
+ Dℓ≜[dℓ[1] · · · dℓ[N]]T ∈CN×3, Hℓ≜Diag (Dℓbℓ) .  (7)  on p. For completeness of  the  exposition,  the  derivation
+Note that Dℓand Hℓare nonlinear functions of the unknown   of the simpliﬁed form (14)  is given in the supplementary
+emitter position p, as suggested by the deﬁnition of dℓ[k] above   materials.
+and (1)–(4), though we omit this for brevity. With this notation,     In (14), the channel impulse response hk(p) is considered to
+we may now write (6) compactly as                          befullyknownforanygivenhypothesizedpositionp (via(1)–(4)
+     xℓ= Hℓs + vℓ∈CN×1, ∀ℓ∈{1, . . . , L}.       (8)  and (9)–(11)). In other words, assuming perfect knowledge of
+                                                                b1, . . . , bL means that any relevant physical parameter, such as
+  Thus, the localization problem can be formulated as follows:
+                                                                 the ocean bottom sediment coefﬁcient κb in (11), is assumed to
+Problem: Given the measurements {xℓ∈CN×1}Lℓ=1 of the                                                        be perfectly known as well. We relax this (somewhat unrealistic)signal model  (8), localize the source, namely estimate p.
+                                                          assumption in our semi-blind localization approach describedWe emphasize that although we are interested solely in p, the
+                                                                    next.
+channel parameters {bℓ} and the DFT coefﬁcients s of the
+emitted waveform are unknown as well.
+                                                                      IV. THE PROPOSED SEMI-BLIND LOCALIZATION METHOD
+
+        III. THE MATCHED FIELD PROCESSING SOLUTION         As our semi-blind framework, we only assume that the bottom
+                                                           depth h is known, but we do not assume that we have any prior
+  The key assumption of MFP approaches is that, for a given
+                                                      knowledge of the channel attenuation coefﬁcients. Thus, sincehypothesized emitter location p, the channel response Hℓis
+                                                                 the waveform emitted from the source is also unknown, wefully predictable.6 For the model (5), the attenuation coefﬁcients
+                                              may assume without loss of generality (w.l.o.g.) that ∥s∥2 = 1,{bℓ} can be assumed to be given by7
+                                                                             viz., s ∈SN ≜{z ∈CN×1 : ∥z∥2 = 1}, where SN is the N-         1
+  b1ℓ=       ,  (LOS attenuation)                         (9)   dimensional unit sphere. This assumption, which is common in
+        R1ℓ                                                                   similar (semi-)blind formulations (e.g., [39]), is justiﬁed due to
+      −1                                                    the inherent scaling ambiguity in (8),
+  b2ℓ=       ,  (NLOS surface reﬂection attenuation)   (10)
+        R2ℓ                                                                                                    1                                    α∈C : Hℓs = Diag (Dℓbℓ) s=Diag Dℓ  αbℓ   ( αs )
+         κb
+  b3ℓ=       ,  (NLOS bottom reﬂection attenuation)   (11)                                       ≜ s        R3ℓ                                                   ≜ bℓ
+for all ℓ∈{1, . . . , L}, where κb is the bottom reﬂection coef-
+ﬁcient, which (presumably) can be determined based on prior         = Diag Dℓ bℓ  s = Hℓ s,  ∀ℓ∈{1, . . . , L},
+
+                                                          ≜ Hℓ  6Otherwise, infeasible high-dimensional optimization is required.
+  7Ignoring the effects of volume absorption in water, which are minimal.      which, granted, is immaterial to our localization problem.
+
+
+
+
+              Authorized licensed use limited to: MIT Libraries. Downloaded on August 17,2022 at 17:02:01 UTC from IEEE Xplore. Restrictions apply.
+
+=== PAGE 5 ===
+3094                                                                                IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 70, 2022
+
+
+  Our proposed SBL solution can be viewed as the MLE of   Proposition 1 (SBL for Spectrally Flat Waveforms). Consider
+p, obtained by joint estimation of all the unknown deterministic   the case where E = O, and deﬁne the data-dependent matrix,
+model parameters, under the assumption that the noise processes
+{vℓ}Lℓ=1 from all different sensors are temporally white complex           L                                                 Q(p) ≜   XℓD∗ℓ DTℓD∗ℓ −1 XℓD∗ℓ H ∈CN×N,  (21)normal (CN) processes, mutually statistically independent, with
+equal variances. In this case, the MLE of p is the solution to the             ℓ=1
+nonlinear least squares problem                                   for any hypothesized source position p. Then,
+  pSBL ≜argmin  min  CSBL(p, s, B) ≜argmin CSBL(p),  (15)                    pSBL = argmax λmax (Q(p)) .            (22)
+        p∈R3×1   ¯s∈SN                  p∈R3×1                                         p∈R3×1
+              B∈C3×L
+                                                                 Proposition 1, whose proof is given in Appendix A, tells us                          CSBL(p)
+                                                                           that, for spectrally ﬂat waveforms s, the source’s position esti-
+where the objective function CSBL(p, s, B) is deﬁned as         mator can be computed based only on λmax(Q(p)). Moreover,
+                L                                      although our model has more unknowns, (22) is obtained by
+    CSBL(p, s, B) ≜   ∥xℓ−Diag (Dℓ(p)bℓ) s∥22 ,    (16)   (only) a 3-dimensional optimization.
+                   ℓ=1                                  The next proposition, whose proof appears in Appendix B,
+                                                                       states that the simpliﬁed form λmax(Q(p)) of the objectiveand here we write Dℓ(p) (rather than Dℓ) to emphasize the
+                                                               function can be a good approximation to (15) when E̸ = O,dependence on p. In contrast to the MFP3 solution (12), our
+                                                      namely for waveforms that are not spectrally ﬂat. In turn, this
+proposed solution (15) is due to joint estimation of all the
+unknown model parameters p, s and B ≜[b1 . . . bL] ∈C3×L,   implies that (22) can be used to localize a source emitting a
+                                                               general waveform.including the channel coefﬁcients B. Thus, in our proposed
+                                                       Proposition2(SBLforGeneralWaveforms). Considerthecase
+approach, we do not assume that the channel response is fully
+                                                       where E is not necessarily equal to O. Then,known for a given hypothesized position p of the source.
+   Intuitively, this approach should lead to a more robust so-              pSBL = argmax λmax (Q(p)) + O(εmax).
+lution than MFP3 with respect to deviations from the channel                     p∈R3×1
+knowledge (9)–(11), at the cost of extra computational effort.                                                                                          It follows that whenever εmax ≪1, we have
+Fortunately, as we show in Section IV, by exploiting the low-
+dimensional structure of the data, the additional computational                    pSBL ≈argmax λmax (Q(p)) .
+cost is negligible. Moreover, although (15) deﬁnes a nonlin-                          p∈R3×1
+ear high-dimensional optimization problem with 3 L additional                                                       However, as we demonstrate via simulations and real data in
+unknowns relative to MFP3, it boils down to a 3-dimensional                                                              Section VI, our proposed estimator exhibits good performance
+optimization problem, similar to (14).                                                         even for waveforms that are far from being spectrally ﬂat. Thus,
+  Our main result is the following localization algorithm:                                                               Proposition 2 implies that only λmax(Q(p)) is required for
+ The SBL Estimator:                                      approximately optimal localization. In particular, it sufﬁces to
+ Input: {xℓ}Lℓ=1, c, h, 3D grid of the volume of interest.         use, e.g., the power method, rather than computing the complete
+ Output: The SBL estimate, pSBL.                             eigenvalue decomposition of Q(p). However, the computational
+    1. For every candidate p on the grid:                      complexity can be reduced even more, as implied by the follow-
+      1.1. Compute the matrices {DTℓD∗ℓ}Lℓ=1;                  ing proposition, whose proof is given in Appendix C.
+      1.2. Compute the Cholesky decompositions               Proposition 3 (Efﬁcient Computation of the SBL Objective
+                                                                Function). Let Q(p) ∈CN×N be deﬁned as in (21). Then,
+      DTℓD∗ℓ≜ΓHℓΓℓ∈C3×3, ∀ℓ∈{1, . . . , L}, (17)
+         and obtain the matrices {Γℓ}Lℓ=1;                             λmax (Q(p)) = λmax Q(p)   ,           (23)
+      1.3. Compute the matrix
+       U(p)≜ X1D∗1Γ−11   · · · XLD∗LΓ−1L  ∈CN×3 L,     and the complexity of computing (23) is (only) O(NL3).
+                                                       (18)      Note that a naïve application of, e.g., the power method to
+         and construct the matrix                       Q(p)wouldcostO(N 2).Thisisalreadyprohibitivelyexpensive
+                                                                    for reasonable sample sizes on the order of N ∼103.              Q(p) ≜U(p)HU(p) ∈C3L×3L.    (19)
+                                          We emphasize that our proposed estimator implicitly opti-
+      1.4. Compute λmax Q(p)  ;                          mizes over an additional 2 · 3L unknown parameters—the chan-
+    2. Find pSBL,grid, the maximizer point on the grid.            nel attenuation coefﬁcients b1, . . . , bL—relative to the MFP
+    3. Return pSBL, the solution of a nonlinear optimization      estimator of this model, while retaining the same order of
+       solver (e.g., trust-region [40]) initialized by pSBL,grid.      computational complexity in terms of N (sample size). As an
+                                                               intermediate summary, a comparison of several attributes of the
+  We now provide the analysis, based on which the algorithm   proposed SBL with MFP3 is given in Table I.
+above is derived. For convenience, we deﬁne                     For the actual computation of the estimate pSBL, we propose a
+                                                         two-phased approach. The ﬁrst phase consists of a coarse grid
+     P ¯s ≜Diag(|s|2) ≜Ps · (IN + E) ∈RN×N+     ,    (20)                                                              search over the relevant volume of interest. In the second phase,
+where Ps ∈R+ is the average signal power (with | · |2 operating   a general purpose nonlinear optimization algorithm (e.g., trust-
+elementwise), and E is a diagonal matrix with “small” elements,   region methods [40]) is applied, where the solution from the ﬁrst
+such that εmax ≜|λmax(E)| < 1.                             phase is used for initialization.
+
+
+             Authorized licensed use limited to: MIT Libraries. Downloaded on August 17,2022 at 17:02:01 UTC from IEEE Xplore. Restrictions apply.
+
+=== PAGE 6 ===
+WEISS et al.: SEMI-BLIND METHOD FOR LOCALIZATION OF UNDERWATER ACOUSTIC SOURCES                                                       3095
+
+
+                      TABLE I                              the same source. Therefore, it weights the L signals from differ-
+COMPARISON OF THE PRIMARY ATTRIBUTES OF TRADITIONAL MFP3 AND THE   ent relative locations to the source while taking into account that
+        PROPOSED ESTIMATOR, SBL, FOR THE THREE-RAY MODEL
+                                                              they all contain shifted versions of the same waveform. This is
+                                                                     essentially the connecting link, and the advantage in processing
+                                                                 the data jointly (rather than individually). This joint weighting
+                                                                               is nontrivial in the general case. However, when the source is
+                                                                    spectrally ﬂat, i.e., E = O, the optimal way (in the sense of (15))
+                                                                    to weight and combine the data from the receivers is to form the
+                                                             matrix Q(p) as in (21), and to compute its maximal eigenvalue
+                                                                     (22). A natural interpretation of the maximal eigenvalue of a
+                                                                semi-positive deﬁnite matrix is the energy distributed along
+                                                                 the dominant direction (orthogonal to all others) in the space
+                                                        spanned by the columns of this matrix. With this interpretation,
+                                                                 the ﬁnal form of the SBL solution given in (22) is now intuitive.
+
+A. Interpretation of the SBL Solution                                  V. THE CRAMÉR-RAO LOWER BOUND FOR SBL
+
+  We now provide a useful interpretation of the closed-form   We now analyze the localization accuracy limitations of the
+expression (22) of our proposed solution, based on the derivation   proposed solution in terms of the MSE,
+presented in Appendix A. We begin by explaining the ﬁrst step,
+                                                                                                             2  .            (26)the estimation of bℓ. From (36), when S and Dℓ(deﬁned in (7))             MSE( p, p) ≜E ∥p −p∥2
+are treated as known, we see that this ﬁrst step can be regarded   Speciﬁcally, we derive the CRLB for the special case E = O.
+as compensation (or, rectiﬁcation) of the attenuations of each of   Unlike the common approach (e.g., as in [41], [42]), wherein
+the three signal components. It is also enlightening to see this   both the unknown source signal and noise are considered to
+from the noiseless case, where                              be random, in our model only the noise is considered random.
+                                                           Thus, for a given waveform, the bound can be used as a tool xℓ= SDℓbℓ=⇒   S −1xℓ  =    Dℓbℓ         .  (24)
+                                                                    for designing the deployment of a network of receivers, so as to
+                                per-frequency        per-frequency weighted        maximize accuracy in regions of higher importance.
+                           elementwise division     sum of b1ℓ,b2ℓ,b3ℓ
+                                                               Regardless of the constant spectral level (i.e., E = O), in
+Substituting {bℓ} (deﬁned in (40)) into (16) yields after simpli-   our general framework s ∈SN w.l.o.g., hence in this particular
+ﬁcation (42)—the “bℓ’s-rectiﬁed” objective, where the rectiﬁ-   case Ps = N1 . Consequently, ¯s[k] = √1N ejφs[k] for all k, and the
+cation is based on the intermediate estimators {bℓ}, which still   only waveform-related unknowns are the phases8 of the DFT
+depend on the unknown S and p at this phase.                    coefﬁcients, denoted collectively by φs ≜[φs[2] . . . φs[N]] ∈
+  Moving forward, we momentarily focus on a single (matrix)   R(N−1)×1.
+element of the sum (42). Rearranging this term, we see that       To facilitate the following derivation, we introduce a more
+                          −1       H                  compact representation of the measured signals. Speciﬁcally,
+    sHXℓD∗ℓ Dℓ TP ¯sD∗ℓ   XℓD∗ℓ   s                                                                               let x ≜[x1 . . . xL]T ∈CNL×1. Thus, (8) reads
+     = xTℓS ∗D∗ℓ Dℓ TS TS ∗D∗ℓ −1                      DTℓS Tx∗ℓ.      (25)             x = Hs + v ∈CNL×1,              (27)
+                                                      where H ≜[HT1 . . . HTL]T ∈CNL×N and v ≜[v1 . . . vL]T.
+Again, focusing on the noiseless case to gain intuition, by                                                         Denoting σ2v ≜[σ2v1 . . . σ2vL]T ∈RL×1+    , it follows thatsubstituting xℓ= SDℓbℓ, we have
+                                                 x ∼CN Hs, Diag(σ2v) ⊗IN   .          (28)                        −1
+xTℓS ∗D∗ℓ Dℓ TS TS ∗D∗ℓ  DTℓS Tx∗ℓ                                 It is well-known that for the CN signal model CN(μ, R),
+                                                                 the  Fisher  information  matrix (FIM)  elements  are  given                                  −1
+  = bTℓDTℓS TS ∗D∗ℓ Dℓ TS TS ∗D∗ℓ  DTℓS TS ∗D∗ℓb∗ℓ      by9 [43]
+                                                ∂R   ∂R       ∂μH   ∂μ
+                           N                     J[θi, θj] = Tr R−1   R−1    + 2ℜ     R−1          ,
+                                                                               ∂θi     ∂θj           ∂θi     ∂θj                                                                                         .  = bTℓDTℓS TS ∗D∗ℓb∗ℓ= ∥SDℓbℓ∥2 =      ¯s[k]dHℓ[k]bℓ 22
+                                   k=1                                          ∀i, j ∈{1, . . . , Kθ},
+Therefore, we interpret the maximization (42)—for a single  where we have deﬁned the vector of all the real-valued unknown
+receiver—as choosing the best set of parameters {s, p, bℓ}, in   deterministic parameters
+the sense that the total energy of the received signal from the                                               θ ≜ pT vec(φs)T vec(ℜ{B})T vec(ℑ{B})T σ2v T∈RKθ×1,source is maximized, under the hypothesized set of parameters.
+                                                                                                                        (29)
+  Generalizing this intuition for a signal in noise, after substi-
+                                                           with Kθ = 3 + (N −1) + 2 · 3L + L, and J(θ) is the FIM.tuting xℓinto (25), for a sufﬁciently large N, the signal-noise
+cross product terms will tend to zero by virtue of the law of large
+numbers, since the noise DFT coefﬁcients are uncorrelated and     8Note that although there are N elements in φs, there are only N −1 degrees
+zero-mean.                                                                  of freedom, since the (complex-valued) channel attenuation coefﬁcients are
+                                                                            considered unknown as well. Therefore, we assume w.l.o.g. that the ﬁrst element
+  Lastly,wegeneralizetheintuitionabovefromasinglereceiver
+                                                                               of φs, considered as a reference phase, is zero.
+to multiple receivers. For this, recall that (42) is in fact a joint      9For the sake of clarity, we speciﬁcally use a different notation for the FIM’s
+maximization of the total energy of all L received signals from    elements, with slight abuse of notation also in (30)–(32).
+
+              Authorized licensed use limited to: MIT Libraries. Downloaded on August 17,2022 at 17:02:01 UTC from IEEE Xplore. Restrictions apply.
+
+=== PAGE 7 ===
+3096                                                                                IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 70, 2022
+
+
+   It is readily seen from (28), that in our model the mean                        TABLE II
+vector and covariance matrix are functions of distinct unknown      POSITIONS OF THE SOURCE AND THE FOUR RECEIVERS FOR THE SETTING
+                                                                   CONSIDERED IN SUBSECTION VI-A, DEPICTED IN FIG. 3 (LEFT), WITH
+parameters. This immediately implies that                         Ts = 10−3 S. NOTE THAT THE SOURCE POSITION IS NOT LOCATED ON A
+    J[σ2vℓ1, σ2vℓ2 ] = N · δℓ1ℓ2, ∀ℓ1, ℓ2 ∈{1, . . . , L},     (30)                            (DISCRETE) GRID POINT
+        J[σ2vℓ, θ] = 0,          ∀θ̸ = σ2vℓ,                (31)
+namely the FIM has a block diagonal structure. Furthermore, for
+the signal-related block, we have
+             ∂(Hs)H             ∂Hs
+   J[θi, θj] = 2ℜ           Diag−1(σ2v) ⊗IN               ,
+                    ∂θi                       ∂θj
+           ∀i, j ∈{1, . . . , Kθ}, ∀ℓ∈{1, . . . , L}.        (32)
+When σ2vℓ= σ2v for all ℓ, it can be observed from (32) that the   circularly-symmetric CN distribution, such that E[|brl|2] = 1,
+signal-related FIM block is inversely proportional to the noise   with variance 0.12. The speed of sound was set to c = 1500 m/s,
+variance. Hence, the associated signal-related CRLB block is  and the sample size to N = 30. We consider the case E = O,
+inversely proportional to the signal-to-noise ratio (SNR).        suchthatthewaveform’sDFTcoefﬁcientsare ¯s[k] = √1  ejφs[k],
+   It only remains to compute the derivatives of Hs with respect                                    N
+                                                       and the phases {φs[k]}Nk=2 were drawn11 (once, and then ﬁxed)to the parameters of θ, excluding σ2v, which is merely technical.                                                             independently from the uniform distribution U(0, 2π). In this
+We defer the details of these calculations, as well as the ﬁnal                                                                   case, pSBL is the MLE, and the CRLB accurately predicts its
+expressions of all the signal-related elements of the FIM to the
+                                                            asymptotic variance. The received signals were generated ac-
+supplementary materials, along with a Matlab implementation
+                                                             cording to (6), where the noise realization for all four sensors
+of this bound. Finally, the CRLB is given by10
+                                                      were taken from recordings of ocean ambient noise from the
+                T
+ E  θ −θ  θ −θ                  ⪰J−1(θ) ≜CRLB(θ) ∈RKθ×Kθ   KAM11 experiment [32]. This way, we obtain a hybrid signal
+                                                                    for this simulation, which allows us to test the validity of the
+                                  3                         bound on real ambient noise, which is potentially not CN and
+       =⇒MSE( p, p) ≥    [CRLB(θ)]ii ,        (33)   temporally white. Since the CRLB is informative only asymptot-                                                                       ically (in the “small errors” regime), we set the noise variance12
+                              i=1
+                                                                    to σ2vℓ= σ2v = 0.1 for all ℓ∈{1, 2, 3, 4}, to have an SNR of
+for any unbiased estimator θ, and the implied p (see (29)).                                                       ∥s∥22/σ2v = 10 dB.
+                                                                     Fig. 3 presents the 2-dimensional setting under consideration,
+       VI. SIMULATION AND EXPERIMENTAL RESULTS         and the 95% conﬁdence ellipse computed using the CRLB (33),
+  In this section, we consider simulation and physical experi-   with superimposed estimates pSBL obtained for 100 different
+ments of source localization for different scenarios in order to   noise recordings. Despite the model mismatch with respect to
+corroborate our analytical derivations. First, we begin by the   the noise distribution, a good ﬁt is seen between the empirical
+evaluation and visualization of the CRLB for a hybrid signal,   results and the predicted theoretical accuracy due to the CRLB.
+wherein the signal-related component, namely Hs from (27),   Fig. 4 reﬂects the same ﬁt in the 3-dimensional space. This
+is synthetic, and the noise-related component, namely v from   not only agrees with our analytical derivation of the bound, but
+(27),istakenfrompreviouslycollectedambientnoiserecordings   also provides an empirical justiﬁcation for our stochastic noise
+from the Kauai ACOMMS ONR MURI 2011 (KAM11) experi-   model. In this regard, we note further that the hybrid signals we
+ment [32]. Second, we simulate a different scenario, wherein the   use allow us to essentially isolate the (potential) noise-related
+receivers are deployed in a linear formation. For this setting, we  model mismatch effects, and test our proposed solution with
+evaluate the performance with respect to varying SNR, model   respect to deviations of this sort only.
+mismatch (to assess robustness), and missing LOS components
+due to occluders. In these simulations, we compare our proposed   B. Comparison With GCC-PHAT and MFP3
+method to the MFP3 solution (14) and to GCC-PHAT [27], a                                          We now compare the proposed SBL method with MFP3
+TDOA-based localization method, which is considered as highly                                                       and the GCC-PHAT localization methods. In this simulated
+robust to multipath effects. In the third experiment we compare                                                             experiment, we consider the setup depicted in Fig. 5, namely
+the algorithms on data recorded from a water tank testbed.                                                           a linear deployment of the receivers. Such a deployment is con-
+                                                                ceivable for naval defense purposes near the shoreline, or harbor
+A. Validation of the CRLB for Ocean Ambient Noise            monitoring [44]. The positions of the source and the receivers,
+  We consider a scenario with L = 4 receivers, in an area with  and all relevant system and environmental parameters are given
+bottom depth h = 100 m. The locations of the receivers and   in Table III. The source’s DFT coefﬁcients ¯s[k], as well as the
+                                                               noise realizations {¯vℓ[k]}, were drawn independently from thethe source are given in Table II. The attenuation coefﬁcients
+were drawn (once, and then ﬁxed) independently from the
+                                                                            11Except for the (immaterial) φs[1] = 0, due to our semi-blind setting.
+                                                                12We do so by ﬁrst normalizing the recorded ambient noise to have unit
+  10A ⪰B is to be interpreted to mean that A −B is semi-positive deﬁnite.    variance, and then scale it accordingly to have the desired level of SNR.
+
+
+
+
+
+             Authorized licensed use limited to: MIT Libraries. Downloaded on August 17,2022 at 17:02:01 UTC from IEEE Xplore. Restrictions apply.
+
+=== PAGE 8 ===
+WEISS et al.: SEMI-BLIND METHOD FOR LOCALIZATION OF UNDERWATER ACOUSTIC SOURCES                                                       3097
+
+
+
+                                                                          TABLE III
+                                                                      THE SETTING CONSIDERED IN SUBSECTION VI-B
+
+
+
+
+
+                                                                      that MFP3’s superior performance is guaranteed only asymp-Fig. 3.   Validation of the predicted asymptotic performance using the CRLB
+for the hybrid signal, containing recordings of ocean ambient noise collected in   totically, in agreement with the results in Fig. 6.
+the KAM11 experiment. Left: The 2-dimensional setting of the scenario under     Next, we compare the performances of the three different
+consideration. Right: The 95%-conﬁdence ellipse, as predicted by the CRLB  methods with respect to perturbations in the expected channel
+(33), with 100 superimposed estimates.
+                                                                    attenuations, as prescribed by the physical model (9)–(11).
+                                                           This form of model mismatch is likely to occur in practice
+                                                       due to nonidealities13 (e.g., inaccurate prior knowledge of κb).
+                                                              Formally, we model these deviations by generating the channel
+                                                                 attenuation coefﬁcients as
+                                                                                brℓ(ϵ) = (1 −ϵ · γrℓ)brℓ· ej2πϵ·ϕrℓ,
+                                                                                                                        (34)
+                                                                         r ∈{1, 2, 3}, ℓ∈{1, 2, 3, 4},
+                                                      where {γrℓ∼U(0, 0.5)} and {ϕrℓ∼U(0, 1)} are independent.
+                                                               In (34), ϵ ∈[0, 1] is a parameter controlling the deviation from
+                                                                 the physical model, where ϵ = 0 corresponds to no deviation
+                                                      from (9)–(11).
+                                                                     Fig. 7 presents the RMS miss distance vs. ϵ. As expected, we
+                                                            observe an overall accuracy-robustness superiority of SBL rela-
+Fig. 4.  Two different points of views for the (same) 3-dimensional 95%-   tive to the competing algorithms. While MFP3 is superior when
+conﬁdence ellipsoid based on the CRLB, with 100 SBL estimates superimposed   perfect knowledge of the channel parameters κb, b1, . . . , bL is
+(legend as in Fig. 3, right). The CRLB accurately quantiﬁes how the variance of   available, SBL is inherently indifferent to deviations from their
+the proposed solution is spread in the 3-dimensional space.
+                                                                    ideal physical values. GCC-PHAT is also robust to such devia-
+                                                                        tions, but completely ignores (by design) the multipath channel,
+                                                       and therefore cannot exploit additional signal components, such
+standard CN distribution in each trial. The noise variance of the   as surface and bottom reﬂections.
+ℓ-th receiver is set as σ2vℓ= σ2v · ∥bℓ∥2, and the SNR is deﬁned     In the last simulation for this setup, we model the effect of a
+here as E[|¯s[k]|2]/σ2v = 1/σ2v. All empirical results presented in   potential occluder between some of the receivers and the source.
+this subsection are based on averaging 104 independent trials.    Speciﬁcally, for the second and third receivers (i.e., at p2 and
+  We ﬁrst compare the localization accuracies of the methods   p3), we introduce an attenuation coefﬁcient β ∈[0, 1] to the
+                                          LOS components, such thatfor different SNRs. Fig. 6 presents the root mean squared (RMS)
+miss distance, i.e., the square root of (26), vs. the SNR for each            b1ℓ(β) = β · b1ℓ· ej2π(1−β)ϕ1ℓ, ℓ∈{2, 3}.      (35)
+method. A 2D slice at the receiver’s depth of the objective                                            When β = 1, there is no occlusion, and when β = 0, the LOS
+functions of each of the algorithms for a typical realization                                                       components of receivers ℓ= 2, 3 are completely lost. The phase
+at 5 dB SNR is given in Fig. 5. For MFP3, we show the                                                                 perturbation models the interaction with the occluder.
+performance obtained with perfect knowledge of the channel                                                                     Fig. 8 presents the RMS miss distance vs. β. It is observed that
+(“Perfect Model”),  i.e., when b1, . . . , bL and κb are known   the accuracy obtained by GCC-PHAT is on the same order of the
+exactly; and when this perfect knowledge is accurate except                                                                 distances (∼25 m) corresponding to the time delays between the
+for the phases of b1, . . . , bL (“Imperfect Model”), which are  LOS and NLOS components. This level of accuracy is stable, but
+drawn independently from U(0, 2π). As observed, although                                                                               is not satisfactory for an SNR level of 10 dB (here, σ2v = 0.1). It
+GCC-PHAT improves when the SNR increases, it essentially                                                                               is also seen that in the absence of a modeling error (i.e., β = 1),
+cannot cope well—in a 3-dimensional space optimization—with                                                           MFP3attainsthehighestaccuracy. However,deviationsfromthe
+the addition of the surface and bottom reﬂections. It is also seen                                                                    ideal signal model, in the form of occluded LOS components of
+the MFP3 is highly sensitive to deviations from the assumed                                                     two receivers, inﬂict a severe performance deterioration.
+channel response. In contrast, such deviations are completely
+transparent to SBL, as it considers these parameters as unknown,
+                                                                             13Within the three-ray model. Of course, in practice there are more modelingand implicitly optimizes over them jointly with all the other
+                                                                    mismatch factors due to the simpliﬁed three-ray model. The effects of some of
+unknowns (see (36), Appendix A). The robustness at the mod-    these nonidealities will be evaluated in the next experiment, where we apply our
+erate cost in performance relative to MFP3 is evident. Note   method to real data, and demonstrate successful localization.
+
+
+
+              Authorized licensed use limited to: MIT Libraries. Downloaded on August 17,2022 at 17:02:01 UTC from IEEE Xplore. Restrictions apply.
+
+=== PAGE 9 ===
+3098                                                                                IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 70, 2022
+
+
+
+
+
+Fig. 5.   2-dimensional slices at the source depth (z = zp) of the objective function for typical realizations at 5 dB SNR. (a) GCC-PHAT (b) MFP3 with perfect
+model (c) MFP3 with unknown phases of b1 . . . , bL (d) SBL. Evidently, GCC-PHAT and MFP3 without perfect knowledge are considerably more fragile than
+the proposed method, which is similar to MFP3 with perfect knowledge with respect to stability, at the cost of a higher variance.
+
+
+
+
+
+Fig. 6.  RMS miss distance vs. SNR, for T = 100. At very low SNR, all    Fig. 7.  RMS miss distance vs. ϵ, quantifying a deviation from the physical
+methods perform poorly. As the SNR increases, GCC-PHAT improves only   model, for T = 100 and σ2vℓ= 0.1. MFP3 is sensitive to such model deviations,
+moderately, while SBL improves signiﬁcantly.                                while GCC-PHAT and SBL are robust.
+
+
+
+  As we have demonstrated in Fig. 5(c) and Fig. 6, when MFP3
+is actually mis-matched, it could perform even worse than what
+is presented in Fig. 8. Still, even in this setting, our method
+exhibits the best accuracy-stability trade-off.
+
+
+C. Experimental Results
+
+  Wenowdemonstratetheperformanceof our proposedmethod
+on acoustic data acquired in our water tank testbed—the high
+frequency autonomous acoustic tank. This system, presented in
+Fig. 9, is (roughly) of size 25 cm × 32 cm × 15 cm, and enables
+us to create a controlled and challenging setting for frequency-
+scaled underwater localization.
+  Although the water tank environment is only a scale model
+of a shallow-water environment, it nevertheless poses a chal-
+lenging scenario. In addition to the modeled bottom and surface
+reﬂections, the water tank has four additional sides, that are                                                                                   Fig. 8.  RMS miss distance vs. β, the LOS attenuation coefﬁcient of re-
+reﬂective boundaries. These thin plastic boundaries are highly    ceivers ℓ= 2, 3, for T = 100 and σ2vℓ= 0.1. Our proposed SBL offer the
+reﬂective, so that the test environment is highly reverberant,    best accuracy-stability balance out of the three methods.
+
+
+
+             Authorized licensed use limited to: MIT Libraries. Downloaded on August 17,2022 at 17:02:01 UTC from IEEE Xplore. Restrictions apply.
+
+=== PAGE 10 ===
+WEISS et al.: SEMI-BLIND METHOD FOR LOCALIZATION OF UNDERWATER ACOUSTIC SOURCES                                                       3099
+
+
+                                                                     Figs. 13, 14 and 15, presenting the objective functions
+                                                               of GCC-PHAT, MFP3 and SBL, respectively, for the same
+                                                                scenarios but with an occluder, corroborate the robustness of the
+                                           SBL method. It is seen that GCC-PHAT and MFP3 are fragile
+                                                 when such unknown environmental features are present. The
+                                           SBL method, which exhibits robustness in the presence of the
+                                                                 occluder, is still able to localize the source. Since the attenuation
+                                                               coefﬁcients are considered to be unknown, and are implicitly
+                                                              estimated (36), a perfectly valid estimated value (for some of
+                                                         them) is a value close or equal to zero. This essentially means
+                                                                      that the SBL assigns different weights to measurements from
+                                                                      different receivers, thus implicitly choosing to effectively ignore
+                                                                 the less informative data acquired by receivers with occluded
+                                                                 scenery.
+
+Fig. 9.  A picture of our water tank. Our testbed provides high frequency                VII. DISCUSSION AND EXTENSIONS
+(200–400 kHz) noisy acoustic data from a complex reverberant environment.
+                                      A natural extension of the direct localization problem that
+                                             we considered, is to the case of multiple sources and/or a more
+                                                      complex channel model, which is beyond the scope of this paper
+giving rise to a rich multipath channel. In particular, the mag-   and is left for future work. However, in this section we outline
+nitudes of the unmodeled reﬂections are comparable to the  some key challenges of this setting to motivate this non-trivial
+modeled ones in our three-ray model.                         extended problem. We then discuss the potential use of the SBL
+  In this experiment, the source is transmitting a Gaussian pulse   estimator in such scenarios, and point out important aspects of
+at a carrier frequency of 280 kHz, and the speed of sound in the   identiﬁability. Before addressing these topics, we ﬁrst discuss
+water tank is c = 1485 m/s. To maintain consistency across  some system design considerations for the particular setting
+different trials, the source and receivers were set at the same   described in Section II.
+depth. In this case, spatial diversity in the depth-direction is
+limited, hence we assume here that the source’s depth is known,   A. System Design Considerations
+and approach this 2-dimensional problem.
+                                                            For given, limited resources, one may be interested in en-  The received signals were sampled at 2 GHz. Before applying
+                                                          hancing the performance of a system as much as possible withthe localization method, the signals were decimated by a factor
+                                                                 respect to the available degrees of freedom. In the speciﬁc caseof 2 × 103, to obtain 1 MHz bandwidth signals. For each setting,
+                                                               of our localization problem, performance can be understood asin which the source and receivers were static, the observation
+                                                            accuracy (e.g., in terms of (26)), and resources, perhaps, as theinterval was 0.5 ms long. More technical details are given in the
+                                                    number of receivers, L.14 While we defer the formulation ofsupplementary materials.
+                                                                         this notion into a well-deﬁned problem (possibly using some   Figs. 10, 11 and 12 present the objective functions of GCC-
+                                                               function of the bound (33)) to future work, we comment on thePHAT, MFP3 and the proposed method, respectively, for three
+                                                             important related aspects of the topology and the number ofdifferent source locations. Here, the search area is a 30 × 30 cm2
+                                                                     receivers.square, centered around the ﬁrst receiver. Note that we inten-
+                                                                Recall that a single receiver, equipped with a single sensor,tionally did not align the search area with the one dictated by
+                                                                 receives (in general) three signal components, two of which arethe boundaries of the tank, since we assume that such prior
+                                                             reﬂected from the surface and the bottom, which are respectivelyknowledge is unavailable as in a real problem setting.
+                                                        above and under the receiver. Thus, environmental knowledge  As was observed in the simulations,  it is seen that in the
+                                                            regardingthepositionofthesurfaceandthebottomisequivalent,presence of strong multipath, GCC-PHAT suffers from the worst
+                                                                    in some sense, to having additional virtual receivers (e.g., [45])performance degradation, and MFP3 is the most accurate, best
+                                                        above and under the surface and the bottom, respectively. Inexploiting the environmental prior knowledge. SBL is less ac-
+                                                                         this respect, a single receiver already provides some verticalcurate than MFP3, but still provides reasonable estimates in the
+                                                                       spatial diversity. Still, due to the blind nature of the problem,vicinity of the source’s true location.
+                                                                    in which the emitted waveform and the channel coefﬁcients are  Next, we repeat the experiment but now with the presence of
+                                                      unknown, the information from a single sensor is insufﬁcient foran unknown object—a cylinder, stretching from the bottom to
+                                                                      localization.the surface of the tank, placed in the area between the source and
+                                                          However, two sensors already contain six signal components,the receivers, as depicted in Figs. 13–15. This unknown feature
+                                                       and can in principle contain sufﬁcient information for localiza-causes severe model mismatch; critically, if it blocks the LOS
+                                                                         tion. Intuitively, breaking the symmetry “as much as possible”between the source and a receiver, then all the three modeled
+                                                                       relative to the environment in which the system is deployedrays—LOS, and surface and bottom reﬂections—are essentially
+                                                     would lead to better performance. In the two receivers case,blocked. A ﬂexible algorithm can in principle select (possibly
+                                                               placing the second receiver in a different horizontal locationimplicitly) which receivers to use, and would be able to reject
+uninformative measurements, such as the ones acquired by a
+receiver “viewing” the occluded scenery.                             14which are also the number of sensors in our formulation.
+
+
+
+              Authorized licensed use limited to: MIT Libraries. Downloaded on August 17,2022 at 17:02:01 UTC from IEEE Xplore. Restrictions apply.
+
+=== PAGE 11 ===
+3100                                                                                IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 70, 2022
+
+
+
+
+
+          Fig. 10.  GCC-PHAT experimental results based on acoustic measurements acquired in the water tank using the system presented in Fig. 9.
+
+
+
+
+
+             Fig. 11.  MFP3 experimental results based on acoustic measurements acquired in the water tank using the system presented in Fig. 9.
+
+
+
+
+
+              Fig. 12.  SBL experimental results based on acoustic measurements acquired in the water tank using the system presented in Fig. 9.
+
+
+than the ﬁrst would lead to an increased horizontal spatial di-  number of unknown parameters. As a result,  it is no longer
+versity, which would in turn lead to enhanced performance. The   clear whether a simpliﬁed, efﬁciently computable expression
+principle of increasing spatial diversity with a ﬁxed resources   for the objective function—as (22) in Proposition 1—can be
+allocation can be formulated in some settings (e.g., [46]), and   obtained. Recall that this has a signiﬁcant effect on the overall
+provides guidance and intuition for the design of a sensors   computational complexity of the method.
+network spatial distribution. For example, one may consider     Moreover, assume that there are M sources to be localized
+deploying a linear network of sensors obliquely relative to the   (where M is known), and further assume that we have obtained
+surface.                                                   such a simpliﬁed, computationally efﬁcient expression for the
+                                                                  objective function, which is a function of the sources’ positions
+                                                                   only, denoted by, say, p(1), . . . , p(M) ∈R3×1. At this point, in
+B. Key Challenges in Extended Models
+                                                               order to obtain the optimal direct localization solution (in the
+  Incorporating multiple sources into the 3-ray signal model   sense of the extended criterion of (15)) for all M sources, one
+(5) changes the interplay between the (consequently increased)    is required to solve a 3 M-dimensional nonlinear optimization
+
+
+
+             Authorized licensed use limited to: MIT Libraries. Downloaded on August 17,2022 at 17:02:01 UTC from IEEE Xplore. Restrictions apply.
+
+=== PAGE 12 ===
+WEISS et al.: SEMI-BLIND METHOD FOR LOCALIZATION OF UNDERWATER ACOUSTIC SOURCES                                                       3101
+
+
+
+
+
+Fig. 13.  GCC-PHAT experimental results based on acoustic measurements acquired in the water tank using the system presented in Fig. 9, with the presence of
+an unknown occluder (cylinder), modeling an effect of inaccurate environmental prior knowledge.
+
+
+
+
+
+Fig. 14.  MFP3 experimental results based on acoustic measurements acquired in the water tank using the system presented in Fig. 9, with the presence of an
+unknown occluder (cylinder), modeling an effect of inaccurate environmental prior knowledge.
+
+
+
+
+
+Fig. 15.  SBL experimental results based on acoustic measurements acquired in the water tank using the system presented in Fig. 9, with the presence of an
+unknown occluder (cylinder), modeling an effect of inaccurate environmental prior knowledge.
+
+
+
+problem, which may well be non-convex. Consequently, even     Focusing again on the single source case, one may consider
+for M = 2 sources, this is already difﬁcult with a naive ex-   an extended K-ray model (with K > 3), assuming  it would
+tension of our current proposed method, as it would require a   accurately describe the signal propagation, such that the K rays
+6-dimensional grid search (referring to the ﬁrst step of the pro-   include primary and second- and higher-order reﬂections. In
+posed solution), which is infeasible for reasonable resolutions.   that case, the performance (i.e., accuracy) improvement would
+Hence, a different approach is perhaps required in order to solve   be due to an increased effective/post-processing SNR. This can
+the multiple sources direct localization problem.               be understood from the interpretation given in Subsection IV-A,
+
+
+
+
+              Authorized licensed use limited to: MIT Libraries. Downloaded on August 17,2022 at 17:02:01 UTC from IEEE Xplore. Restrictions apply.
+
+=== PAGE 13 ===
+3102                                                                                IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 70, 2022
+
+
+                                                                         ﬁrst. That is, if the ﬁrst source is at p = (xp, yp, zp), the second is
+                                                                         at p = (xp, yp, h −zp). Finally, assume that an occluding object
+                                                                               is present, such that (only) all LOS components at all L receivers
+                                                                 are blocked from both of the sources. Denoting by R2ℓ, R3ℓthe
+                                                                 distances traveled by the NLOS surface and bottom associated
+                                                                     rays, respectively, from the second source, it readily follows
+                                                      from (2)–(4) that R2ℓ= R3ℓ, R3ℓ= R2ℓ, hence
+                                                                         τ2ℓ(p) = τ3ℓ( p),  τ3ℓ(p) = τ2ℓ( p).
+                                                               In this case, if κb = 1 (of (11)), and if the two sources areFig. 16.  A 2-dimensional illustration of the special case described in Sub-
+section VII-C, wherein the sources are “acoustically invisible” in terms of the   collaborating and coordinated, then by transmitting the same
+three-ray model, and cannot be localized by the SBL estimator.             waveform, they are essentially “acoustically invisible” (under
+                                                                 the three ray model). Indeed, if we denote the waveform of
+                                                                 the second source by s(t) = s(t), the baseband-converted signal
+                                                      from the ℓ-th receiver (as in (5)) would then be
+where the SBL method is seen as an implicit way to coherently
+add all the K reﬂections from all L sensors.                                    3
+                                                                  xℓ[n] =    brℓs (t −τrℓ(p))|t=nTs  However, and since the ray-based propagation model is an ap-
+proximation, while the deviations from the 3 primary rays can be             r=2
+small, the aggregated approximation errors in the time-delays of                   3
+the higher-order reﬂections are likely to no longer be negligible.        +     brℓ s (t −τrℓ( p))|t=nTs +vℓ[n] = vℓ[n],
+In that case, on top of additional computational burden, a naive               r=2
+extension of the current approach might yield a more fragile es-                            3
+                                                     = −  r=2 brℓs(t−τrℓ(p))|t=nTs
+timator, which is sensitive to model mismatch. The challenging
+task of exploiting more complex propagation-related phenom-   since b2ℓ= R3ℓ=−1   −b3ℓand b3ℓ= R2ℓ=1    −b2ℓ, and we recall
+ena for enhanced, computationally attractive direct localization                                                                      that due to the occluder, b1ℓ= b1ℓ= 0 for all ℓ∈{1, . . . , L}.
+remains to be explored in future work.                                                           Thus, only noise is observed, and all the information is lost.
+                                                        While the scenario above can certainly inspire underwater
+C. SBL as a Solution for Multiple Sources                       acoustic warfare techniques devised against single-source meth-
+                                                         ods like the SBL, it nonetheless describes an extreme case of a
+  Notwithstanding the above, our proposed algorithm can still                                                                   perfectly tailored setting, where several conditions, which are
+be used for multiple sources localization as a sub-optimal, yet                                                                exceptionally difﬁcult to ensure, are fulﬁlled simultaneously.
+computationally feasible solution. Indeed, (22) can be viewed                                                               Therefore, and while this is only one example of a potential
+as a spatial quasi-likelihood map (as a function of p), whose                                                                       failure mechanism of the proposed method when used for lo-
+M highest maxima correspond to the M points in space, where                                                                    calization of multiple sources, one may still gain a general im-
+sources are most likely to be present (under the mismatched                                                               pression of what should happen in order for SBL to completely
+model (5), treating, for each source, all the other M −1 sources                                                                                fail in this setting. Generally, when the sources are not collab-
+as additive noise). While providing analytical guarantees for                                                                orating/coordinated and/or the symmetry is broken (e.g., by a
+this case is beyond the scope of the current work, using the                                                              non-regular deployment of the receivers), it is reasonable that
+Matlab package provided in the supplementary material, one                                                                 the proposed method would still provide reliable localization for
+could easily verify that the SBL method still serves as a viable                                                               multiple sources.
+localization solution for this extended setting.
+  Given any set of parameters that describe a particular localiza-
+                                                                                   VIII. CONCLUDING REMARKStion problem (i.e., bottom depth, locations of the receivers, etc.),
+the model (5) is guaranteed to be identiﬁable when the FIM is     In the general context of underwater acoustics, based on
+nonsingular, namely det(J(θ))̸ = 0, and (33) is ﬁnite. However,   the three-ray propagation model, we presented a semi-blind
+when using the SBL for localization of multiple source (i.e.,   localization method, which incorporates environmental knowl-
+under mismatched model) as described above, this is obviously   edge. A closed-form expression for the objective function was
+no longer true. Indeed, as least theoretically, there are certain   derived, along with an equivalent expression, which is more
+“special” (however somewhat extreme) scenarios in which the   computationally appealing. Thanks to additional degrees of
+sources not only could not be localized (reliably, or at all), but   freedom in our model, the proposed method is more robust
+may also “disappear” from the resulting heatmap.               than its MFP counterpart, and can successfully localize a source
+  To illustrate this, consider the following case, which is de-   in the absence of LOS components. Further, it exhibits stable
+picted in Fig. 16. Assume, for example, that L receivers are all   performance enhancement with respect to methods modeling
+deployed at the same depth h/2 in a linear structure, namely   only LOS components, such as GCC-PHAT.
+zℓ= z0 = h/2, yℓ= y0 and xℓ= x0 + Δ(ℓ−1) for all ℓ∈     Since the proposed method is able to coherently “collect”
+{1, . . . , L}, where Δ is the spacing between the receivers. Now,   three signal components from each sensor, the post-processing
+further assume that two sources are present, such that the second  SNR is consequently higher than any LOS-based method, which
+source is located at the same horizontal location as the ﬁrst, but   collect only one. This way, a given level of localization accuracy
+is located symmetrically about the half depth h/2 relative to the   can generally be attained with shorter observation intervals. In
+
+
+
+             Authorized licensed use limited to: MIT Libraries. Downloaded on August 17,2022 at 17:02:01 UTC from IEEE Xplore. Restrictions apply.
+
+=== PAGE 14 ===
+WEISS et al.: SEMI-BLIND METHOD FOR LOCALIZATION OF UNDERWATER ACOUSTIC SOURCES                                                       3103
+
+
+turn, it is easier to incorporate the SBL method within an appro-                                                                  Substituting bℓfrom  (40)  into  (39), using  (40), S HS =
+priatetrackingalgorithm(suchas Kalmanﬁltering), allowingfor   Diag(|s|2) ≜P ¯s and simplifying further yields
+a more general framework that localizes the source and tracks
+                                                       L
+its movement, assuming the source’s velocity is sufﬁciently low.
+                                             max   xHℓSDℓ bℓAs a topic for future research, in such cases it may be possible to       ¯s∈SN
+develop a computationally efﬁcient update scheme for the objec-          ℓ=1
+tive function (23), based on eigenvalue perturbation theory. An-           L                                                                                                   ∗               −1
+other direction for future research, that is of great practical inter-   = max   sTX ℓDℓ Dℓ HP ¯sDℓ  DHℓXℓs∗      (41)
+                                                                              ¯s∈SN
+est, is to apply coarse quantization to the collected data [47], thus             ℓ=1
+reducing the required bandwidth for communication between               L
+the different receivers. The above is also true for the potential   = max sH    XℓD∗ℓ Dℓ TP ¯sD∗ℓ −1 XℓD∗ℓ H  s,
+extensions for multiple sources, and for extended propagation          ¯s∈SN     ℓ=1
+models.                                                                                                                (42)
+                                                      where from (41) to (42) we have used that P ¯s ∈RN×N+      , and                    APPENDIX A
+                                                                      that (41) is real-valued (and nonnegative).
+              PROOF OF PROPOSITION 1                                               By assumption, E = O, hence P ¯s = Ps · IN from (20).
+  Proof: Using the identity Diag(Dℓ(p)bℓ)s = SDℓbℓ, it is   Thus, in this case (42) simpliﬁes further to
+easily seen that, for every ℓ∈{1, . . . , L}, CSBL(p, s, B) of (16)                L
+is minimized with respect to bℓby                         max sH    XℓD∗ℓ DTℓD∗ℓ −1 XℓD∗ℓ H  s
+                                                                               ¯s∈SN
+                  H      −1     H                                 ℓ=1
+       bℓ=  SDℓ  SDℓ   SDℓ   xℓ,       (36)
+                                       = max sHQ(p)s = λmax (Q(p)) ,
+assuming15 rank(Dℓ) = 3 for all ℓ∈{1, . . . , L} hereafter. Sub-                ¯s∈SN
+stituting B ≜[ b1 · · · bL] into C(p, s, B) yields               where Q(p) is deﬁned in (21). Therefore, we conclude that when
+                                            E = O, the SBL position estimate is given by
+                         L
+                                                     2
+   ˘CSBL(p, s) ≜ CSBL(p, s, B) =   xℓ−SDℓ bℓ                                 pSBL = argmax λmax (Q(p)) .
+                                                     2                                   p∈R3×1
+                             ℓ=1
+                                                                 ■
+             L
+       =    xHℓxℓ−xHℓSDℓ bℓ− b Hℓ SDℓ H xℓ                                                                       APPENDIX B
+               ℓ=1
+                                                                PROOF OF PROPOSITION 2
+           + b Hℓ SDℓ H SDℓ bℓ  .            (37)     Proof: Observe that in the proof of Proposition A, (42) holds
+                                                                    for the general case, where E is not necessarily equal to O.From (36), we observe that
+                                                               Therefore, starting from (42), and focusing on the inverse matrix         H     H         H     H         b               ℓ SDℓ  SDℓ bℓ= b ℓ SDℓ   xℓ,              of a single matrix element in the sum, we now have
+with which (37) simpliﬁes to                       DTℓP ¯sD∗ℓ −1 = 1                                                 DTℓ(IN + E) D∗ℓ −1
+                 L           L                                       Ps
+      ˘CSBL(p, s) =     xHℓxℓ  −   xHℓSDℓ bℓ.     (38)          1                    −1
+                                     =   DTℓD∗ℓ+ DTℓED∗ℓ                    ℓ=1           ℓ=1                                                          Ps
+                         constant with respect to                                1                         −1           −1
+                    p and ¯s                     =      I3 + DTℓED∗ℓ DTℓD∗ℓ    DTℓD∗ℓ
+                                                          PsTherefore, using (38), CSBL(p) in (15) can now be written as
+                                                            1         −1                       −1 −1
+                             L               =   DTℓD∗ℓ     I3 + DTℓED∗ℓ DTℓD∗ℓ            .
+       min  CSBL(p, s, B) = max   xHℓSDℓ bℓ.    (39)         Ps
+           ¯s∈SN                    ¯s∈SN
+       B∈C3×L                     ℓ=1                    Hence, using the Neumann series [48], we have16
+                                                                                   −1 −1
+At this point, notice that using                                   I3 + DTℓED∗ℓ DTℓD∗ℓ    = I3 + O(E) =⇒
+                       ∗         H       H   H
+    xHℓS = sTX ℓ=⇒ SDℓ  xℓ= X ℓDℓ    s∗,                       −1    1          −1
+                                      DTℓP ¯sD∗ℓ  =   DTℓD∗ℓ  + O(E)  .      (43)
+we may write                                                            Ps
+                              −1                    As expected, the last term in (43) indicates that this approx-
+         bℓ= DHℓS HSDℓ  DHℓXℓs∗.         (40)   imation holds when the deviations from a constant spectral
+                                                                          level, quantiﬁed here by E, are sufﬁciently small with respect
+                                                                    to the normalized average power (see (20)). Proceeding, by
+  15We ignore the extreme, unrealistic cases in which Dℓare not full rank,
+which occur only for very speciﬁc settings of the receivers’ and source’s
+positions. Nonetheless, the initial optimization is performed via a grid search,     16By denoting Φ = O(E), we mean that |λmax(Φ)| = O(εmax), where
+hence we can discard points giving rise to these rare, singular settings.         εmax = |λmax(E)|. Therefore, Φ →O when εmax →0.
+
+
+
+              Authorized licensed use limited to: MIT Libraries. Downloaded on August 17,2022 at 17:02:01 UTC from IEEE Xplore. Restrictions apply.
+
+=== PAGE 15 ===
+3104                                                                                IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 70, 2022
+
+
+substituting (43) into (42), and using well-known eigenvalue   However, we have that
+perturbation theory results [49], we obtain                  Λ+ (Q(p)) = Λ+ U(p)U(p)H
+         L
+max sH    XℓD∗ℓ DTℓP ¯sD∗ℓ −1 XℓD∗ℓ H  s                = Λ+ U(p)HU(p) = Λ+ Q(p)   ,
+¯s∈SN
+          ℓ=1                                          where Λ+(C) denotes the set of the nonzero eigenvalues of
+           L                               −1             H       the semi-positive deﬁnite matrix C, and Q(p) ∈C3L×3L. Put
+= max sH    XℓD∗ℓ  DTℓD∗ℓ   +O(E)  XℓD∗ℓ    s    ¯s∈SN                                                        simply, Q(p) has the same spectrum as Q(p). In particular,
+             ℓ=1
+                                                               λmax (Q(p)) = λmax Q(p)   .= max sH [Q(p) + O(E)] s = λmax (Q(p)) + O(εmax),
+    ¯s∈SN
+                                                           Since dim  Q(p) = 3L < N = dim(Q(p)), we have  re-
+where we recall that εmax = |λmax(E)| (see (20)). It follows
+                                                       duced the computational burden, which is now governed bythat
+                                                         L, rather than N. Speciﬁcally, the complexity is O(NL3), due
+           pSBL = argmax λmax (Q(p)) + O(εmax).              to the required Cholesky decompositions (46) applied to L
+                  p∈R3×1
+                                                            3-dimensional matrices [50], and the subsequent application of
+                               ■                                                                 the power method to the 3 L-dimensional matrix Q(p).   ■
+
+                    APPENDIX C                                  ACKNOWLEDGMENT
+              PROOF OF PROPOSITION 3
+                                                     The authors are grateful to James Preisig for helpful discus-
+  Proof: A key observation is that Q(p) is low-rank. Indeed,   sions, and for providing the KAM11 recordings.
+by deﬁnition, Q(p) is a sum of the following L matrices,
+   Qℓ(p) ≜XℓD∗ℓ DTℓD∗ℓ −1 XℓD∗ℓ H ∈CN×N,    (44)                        REFERENCES
+                                                                                      [1] A. Bahr, J. J. Leonard, and M. F. Fallon, “Cooperative localization for
+where each is low-rank. Speciﬁcally, recall that D(ℓ) ∈CN×3,        autonomous underwater vehicles,” Int. J. Robot. Res., vol. 28, no. 6,
+hence                                                                              pp. 714–728, 2009.
+           −1                           −1                       [2]  P. Corke, C. Detweiler, M. Dunbabin, M. Hamilton, D. Rus, and
+  DTℓD∗ℓ   ∈C3×3 =⇒rank  DTℓD∗ℓ   = 3,   (45)             I. Vasilescu, “Experiments with underwater robot localization and track-
+                                                                                             ing,” in Proc. IEEE Int. Conf. Robot., Automat., 2007, pp. 4556–4561.
+where we recall that rank(Dℓ) = 3 by assumption. In turn, this     [3]  J. Waterston, J. Rhea, S. Peterson, L. Bolick, J. Ayers, and J. Ellen, “Ocean
+implies that                                                                       of things: Affordable maritime sensors with scalable analysis,” in Proc.
+                                                             OCEANS, Marseille, France, 2019, pp. 1–6.
+ rank (Qℓ(p)) = rank XℓD∗ℓ DTℓD∗ℓ −1 XℓD∗ℓ H = 3      [4] H.to locateP. Bucker,sound“Usesourcesof calculatedin shallowsoundwater,”ﬁeldsJ. Acoust.and matched-ﬁeldSoc. Amer.,detectionvol. 59,
+           =⇒rank (Q(p)) = 3L,                                no. 2, pp. 368–373, 1976.
+                                                                                      [5]  H.-P. Tan, R. Diamant, W. K. G. Seah, and M. Waldmeyer, “A survey
+assuming {Qℓ(p)} are linearly independent.17 Thus, we con-         of techniques and challenges in underwater localization,” Ocean Eng.,
+clude that Q(p) has only 3 L nonzero eigenvalues. Since typi-          vol. 38, no. 14/15, pp. 1663–1676, 2011.                                                                                      [6] V. Chandrasekhar, W. K. G. Seah, Y. S. Choo, and H. V. Ee, “Localization
+cally L ≪N, we have established that Q(p) is low-rank.                 in underwater sensor networks: Survey and challenges,” in Proc. ACM Int.
+  Next, observe that Q(p) is a sum of L positive semi-deﬁnite        Workshop Underwater Netw., 2006, pp. 33–40.
+                                                                                      [7]  P. C. Etter, Underwater Acoustic Modeling: Principles, Techniques and
+matrices, and is therefore a positive semi-deﬁnite matrix as well.                                                                                      Applications. Boca Raton, FL, USA: CRC Press, 1995.
+Due to its special structure (21), it is possible to compute a     [8]  F. B. Jensen, W. A. Kuperman, M. B. Porter, and H. Schmidt, Computa-
+different matrix, Q(p), with exactly the same eigenvalues as          tional Ocean Acoustics. New York, NY, USA: Springer, 2011.
+thoseofQ(p).Forthis,deﬁnetheCholeskydecompositions[50]     [9] M. Chitre, “A high-frequency warm shallow water acoustic communica-                                                                                           tions channel model and measurements,” J. Acoust. Soc. Amer., vol. 122,
+     DTℓD∗ℓ≜ΓHℓΓℓ∈C3×3, ∀ℓ∈{1, . . . , L},     (46)         no. 5, pp. 2580–2586, 2007.                                                                               [10] X. Cheng, H. Shu, Q. Liang, and D. H.-C. Du, “Silent positioning in
+where Γℓ∈C3×3. With these L 3-dimensional square matrices,        underwater acoustic sensor networks,” IEEE Trans. Veh. Technol., vol. 57,
+                                                                                     no. 3, pp. 1756–1766, May 2008.
+substituting (46) into (21), we may now write                                                                               [11] B. Kouzoundjian, F. Beaubois, S. Reboul, J. B. Choquel, and J.-C. Noyer,
+            L                                             “A TDOA underwater localization approach for shallow water environ-
+     Q(p) =   XℓD∗ℓΓ−1ℓ  XℓD∗ℓΓ−1ℓ  H ∈CN×N,           [12] G.ment,”TunainandProc.V. C.IEEEGungor,OCEANS,“A surveyAberdeen,on deploymentScotland,techniques,2017, pp. 1–4.localiza-
+              ℓ=1                                                                   tion algorithms, and research challenges for underwater acoustic sensor
+where we emphasize that det(Γℓ)̸ = 0 is guaranteed for all ℓ∈         networks,” Int. J. Commun. Syst., vol. 30, no. 17, 2017, Art. no. e3350.
+                                                                               [13] M. Stojanovic, “Underwater acoustic communication,” Wiley Encyclope-
+{1, . . . , L} due to (45). Now, deﬁne (as in (18))                           dia Elect. Electron. Eng., pp. 1–12, 1999.
+    U(p) ≜ X1D∗1Γ−11   · · · XLD∗LΓ−1L  ∈CN×3 L,           [14] R.underwaterDiamant,acousticH.-P. Tan,localization,”and L. Lampe,IEEE“LOSTrans.andMobileNLOSComput.,classiﬁcationvol. 13,for
+with which                                                                       no. 2, pp. 311–323, Feb. 2012.
+                                                                               [15] L. Emokpae and M. Younis, “Surface based anchor-free localization algo-
+              Q(p) = U(p)U(p)H.                                rithm for underwater sensor networks,” in Proc. IEEE Int. Conf. Commun.,
+                                                                              2011, pp. 1–5.
+                                                                               [16] L. E. Emokpae, S. DiBenedetto, B. Potteiger, and M. Younis, “UREAL:
+                                                                           Underwater reﬂection-enabled acoustic-based localization,” IEEE Sensors
+  17This holds with probability one, due to the randomness in {Xℓ}.                        J., vol. 14, no. 11, pp. 3915–3925, Nov. 2014.
+
+
+
+             Authorized licensed use limited to: MIT Libraries. Downloaded on August 17,2022 at 17:02:01 UTC from IEEE Xplore. Restrictions apply.
+
+=== PAGE 16 ===
+WEISS et al.: SEMI-BLIND METHOD FOR LOCALIZATION OF UNDERWATER ACOUSTIC SOURCES                                                       3105
+
+
+
+[17] A. B. Baggeroer, W. A. Kuperman, and P. N. Mikhalevsky, “An overview    [43]  S. L.  Collier, “Fisher information for a complex Gaussian random
+      of matched ﬁeld methods in ocean acoustics,” IEEE J. Ocean. Eng., vol. 18,          variable: Beamforming applications for wave propagation in a random
+     no. 4, pp. 401–424, Oct. 1993.                                           medium,” IEEE Trans. Signal Process., vol. 53, no. 11, pp. 4236–4248,
+[18] M. D. Collins and W. A. Kuperman, “Focalization: Environmental fo-        Nov. 2005.
+     cusing and source localization,” J. Acoust. Soc. Amer., vol. 90, no. 3,    [44] W. A. P. van Kleunen, K. C. H. Blom, N. Meratnia, A. B. J. Kokkeler,
+     pp. 1410–1422, 1991.                                                                      P.  J. M. Havinga, and G.  J. M. Smit, “Underwater localization by
+[19] E. A. I. Ruland, A. Shree, N. Goumas, and M. Johnson-Roberson, “Low        combining time-of-ﬂight and direction-of-arrival,” in Proc. B OCEANS
+      cost underwater acoustic localization,” in Proc. ASA Meetings Acoust.,         Conf., Taipei, Taiwan, 2014, pp. 1–6.
+     2017, Art. no. 070006.                                                    [45] M. Siderius, D. R. Jackson, D. Rouseff, and R. Porter, “Multipath
+[20] B. Gerondeau et al., “Low-cost underwater localization system,” in Proc.        compensation in shallow water environments using a virtual receiver,” J.
+    IEEE Int. Wireless Commun. Mobile Comput., 2020, pp. 1153–1158.             Acoust. Soc. Amer., vol. 102, no. 6, pp. 3439–3449, 1997.
+[21] W. Mantzel,  J. Romberg, and K. Sabra, “Compressive matched-ﬁeld    [46] G. Shulkind, S. Jegelka, and G. W. Wornell, “Sensor array design through
+      processing,” J. Acoust. Soc. Amer., vol. 132, no. 1, pp. 90–102, 2012.            submodular optimization,” IEEE Trans.  Inf. Theory, vol. 65, no. 1,
+[22] K. L. Gemba, W. S. Hodgkiss, and P. Gerstoft, “Adaptive and compres-         pp. 664–675, Jan. 2019.
+      sive matched ﬁeld processing,” J. Acoust. Soc. Amer., vol. 141, no. 1,    [47] A. Weiss and G. W. Wornell, “One-bit direct position determination
+     pp. 92–103, 2017.                                                              of narrowband Gaussian signals,” in Proc. IEEE Stat. Signal Process.
+[23] E. Dubrovinskaya, P. Casari, and R. Diamant, “Bathymetry-aided under-        Workshop, 2021, pp. 466–470.
+     water acoustic localization using a single passive receiver,” J. Acoust. Soc.    [48] G. W. Stewart, Matrix Algorithms: Volume 1: Basic Decompositions.
+     Amer., vol. 146, no. 6, pp. 4774–4789, 2019.                            SIAM, 1998.
+[24] A. A. Saucan and M. Z. Win, “Information-seeking sensor selection for    [49] L. N. Trefethen and D. Bau III, Numerical Linear Algebra., vol. 50.
+     ocean-of-things,”IEEEInternetThingsJ.,vol.7,no.10,pp. 10072–10088,         Philadelphia, PA, USA: SIAM, 1997.
+     Oct. 2020.                                                                [50] G. H. Golub and C. F. V. Loan, Matrix Computations, 3rd ed., Baltimore,
+[25] A. J. Weiss, “Direct position determination of narrowband radio frequency      MD, USA: Johns Hopkins Univ. Press, 2013.
+      transmitters,” IEEE Signal Process. Lett., vol. 11, no. 5, pp. 513–516,
+    May 2004.
+[26] C. Knapp and G. Carter, “The generalized correlation method for es-
+     timation of time delay,” IEEE Trans. Acoust., Speech, Signal Process.,
+      vol. ASSP-24, no. 4, pp. 320–327, Aug. 1976.
+[27] M. S. Brandstein and H. F. Silverman, “A robust method for speech signal
+     time-delay estimation in reverberant rooms,” in Proc. Int. Conf. Acoust.,                     Amir Weiss (Member, IEEE) received the B.Sc.
+     Speech, Signal Process., 1997, vol. 1, pp. 375–378.                                         (magna cum laude), M.Sc., and Ph.D. degrees in elec-
+[28]  F. Grondin and J. Glass, “A study of the complexity and accuracy of                                   trical engineering from Tel Aviv University (TAU),
+      direction of arrival estimation methods based on GCC-PHAT for a pair of                             Tel-Aviv, Israel, in 2013, 2015, and 2020, respec-
+      close microphones,” 2018, arXiv:1811.11787.                                                                  tively. From 2019 to 2020, he was a Postdoctoral
+[29] G. Wang, W. Zhu, and N. Ansari, “Robust TDOA-based localization for                          Fellow with the Department of Computer Science
+     IoT via joint source position and NLOS error estimation,” IEEE Internet                         and Applied Mathematics, Weizmann Institute of
+     Things J., vol. 6, no. 5, pp. 8529–8541, Oct. 2019.                                                  Science, Rehovot, Israel. He  is currently a Post-
+[30] Y. Zou and H. Liu, “TDOA localization with unknown signal propagation                             doctoral Associate with the Research Laboratory of
+     speed and sensor position errors,” IEEE Commun. Lett., vol. 24, no. 5,                              Electronics, Massachusetts Institute of Technology,
+     pp. 1024–1027, May 2020.                                                                 Cambridge, MA, USA. His main research interests
+[31] W. Xiong, C. Schindelhauer, H. C. So, J. Bordoy, A. Gabbrielli, and    include statistical and digital signal processing, estimation theory, and machine
+       J. Liang, “TDOA-based localization with NLOS mitigation via robust    learning. From 2013 to 2020, he has held a researcher position with Elbit
+     model transformation and neurodynamic optimization,” Signal Process.,   Systems, EW, and SIGINT Elisra Ltd., Holon, Israel, specializing in detection
+      vol. 178, 2021, Art. no. 107774.                                     and estimation of RADAR and SONAR signals.
+[32] W.S.Hodgkissand J.C.Preisig,“KauaiACOMMSMURI 2011 (KAM11)    He was the recipient of the scholarship for excellent M.Sc. student from the
+     experiment,” in Proc. Eur. Conf. Underwater Acoust., 2012, pp. 993–1000.    Faculty of Engineering, TAU, in 2015, and The David and Paulina Trotsky
+[33]  P. C. Etter, Underwater Acoustic Modeling and Simulation. Boca Raton,   Foundation Award for Outstanding Ph.D. student in 2019. He was also the
+      Fl, USA: CRC Press, 2018.                                                   recipient of the Nadav Levanon Studies Prize for Graduate Students in 2016,
+[34]  J. M. Hovem, “Ray trace modeling of underwater sound propagation:    Scientiﬁc Publication Prize (three times) in 2017, 2018, and 2020, and David
+     Modeling and measurement methods for acoustic waves and for acoustic   Burshtein Scientiﬁc Publication Prize in 2019, all from the The Yitzhak and
+     microdevices,”inModelingandMeasurementMethodsforAcousticWaves   Chaya Weinstein Research Institute for Signal Processing.
+     and for Acoustic Microdevices. Rijeka, Croatia: InTech, Aug. 2013, ch. 23,
+     pp. 573–598.
+[35]  T. H. Cormen, C. E. Leiserson, R. L. Rivest, and C. Stein, Introduction to
+     Algorithms. Cambridge, MA, USA: The MIT Press, 2009.
+[36] R. Aubauer, M. O. Lammers, and W. W. L. Au, “One-hydrophone method
+      of estimating distance and depth of phonating dolphins in shallow water,”
+       J. Acoust. Soc. Amer., vol. 107, no. 5, pp. 2744–2749, 2000.
+[37]  F. Schulz, R. Weber, A. Waldhorst, and J. Bohme, “Performance enhance-
+     ment of blind adaptive equalizers using environmental knowledge,” in
+     Proc. OCEANS, 2003, pp. 1793–1799.
+[38] L. Emokpae and M. Younis, “Surface-reﬂection-based communication and
+      localization in underwater sensor networks,” ACM Trans. Sensor Netw.,
+      vol. 10, no. 3, pp. 1–51, 2014.
+[39] A. Weiss, “Blind direction-of-arrival estimation in acoustic vector-sensor
+      arrays via tensor decomposition and Kullback-Leibler divergence covari-                        TorosArikan(GraduateStudentMember,IEEE)was
+     ance ﬁtting,” IEEE Trans. Signal Process., vol. 69, pp. 531–545, 2021.                            born in Mount Kisco, NY, USA, in 1993. He received
+[40] A. R. Conn, N. I. Gould, and P. L. Toint, Trust Region Methods. Philadel-                             the B.S. degree in electrical and computer engineer-
+      phia, PA, USA: SIAM, 2000.                                                                     ing and the M.S. degree in electrical engineering
+[41] A.  B.  Baggeroer, “The  stochastic Cramér-Rao bound  for  source                         from the University of Illinois at Urbana-Champaign,
+      localization and medium tomography using vector sensors,” J. Acoust.                         Champaign, IL, USA, in 2014 and 2017, respectively.
+     Soc. Amer., vol. 141, no. 5, pp. 3430–3449, 2017.                                     He is currently working toward the Ph.D. degree in
+[42] A. B. Baggeroer, W. Kuperman, and H. Schmidt, “Matched ﬁeld process-                                 electrical engineering and computer science with the
+      ing: Source localization in correlated noise as an optimum parameter esti-                           Massachusetts Institute of Technology, Cambridge,
+     mation problem,” J. Acoust. Soc. Amer., vol. 83, no. 2, pp. 571–587, 1988.                   MA, USA.
+
+
+
+
+              Authorized licensed use limited to: MIT Libraries. Downloaded on August 17,2022 at 17:02:01 UTC from IEEE Xplore. Restrictions apply.
+
+=== PAGE 17 ===
+3106                                                                                IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 70, 2022
+
+
+
+                     Hari Vishnu (Senior Member, IEEE) received the                     Andrew C. Singer received the S.B., S.M., and Ph.D.
+                       Ph.D. degree in computer engineering from Nanyang                            degrees in electrical engineering and computer sci-
+                        Technological University, Singapore, for research on                          ence from the Massachusetts Institute of Technology
+                      improved underwater signal processing algorithms                          (MIT), Cambridge, MA, USA. Since 1998, he has
+                           for noisy waters.                                                        been with the Faculty of the Department of Electrical
+                        Since2013,hehasbeenwiththeAcousticResearch                         and Computer Engineering, University of Illinois at
+                         Laboratory, National University of Singapore, Singa-                         Urbana-Champaign, Champaign, IL, USA, where he
+                          pore, where he is currently a Senior Research Fellow.                              currently holds a Fox Family Endowed Professorship
+                      During 2019–2021, he was a Visiting Researcher with                         and also a Faculty Fellow for Research, Innovation,
+                          the Scripps Institution of Oceanography, working on                         and Entrepreneurship Strategy in the Ofﬁce of the
+                          the acoustics of melting glacier ice. His research inter-                          Vice Chancellor for Research and Innovation. He is
+ests include machine-learning for marine applications, passive and active sonar,    currently a Professor with the Department of Electrical and Computer Engi-
+and signal processing, especially for cryoacoustic and bioacoustic applications.   neering and is the Associate Dean of Innovation and Entrepreneurship with the
+He is currently working on underwater image processing and transfer, and   College of Engineering. During the academic year 1996, he was a Postdoctoral
+marine-mammal quantiﬁcation in Singapore waters. Previously, he has worked   Research Afﬁliate with the Research Laboratory of Electronics, MIT. From
+on deep-sea resource assessment and sonar for defense applications.            1996 to 1998, he was a Research Scientist with Sanders (a Lockheed Martin
+  Dr. Vishnu is a reviewer for several reputed international journals and confer-   Company), Manchester, NH, USA.
+ences. He is the Chief Editor of the IEEE OES science communication magazine      In 2000,he co-founded Intersymbol Communications,Inc.,a fablesssemicon-
+Earthzine. He was the recipient of the IEEE OES Young-Professionals-BOOST    ductor IC Company, based in Champaign, IL, USA, which built digital signal
+Award. He is the Chair of the IEEE OES Singapore chapter and actively partic-   processing-enhanced receivers for 10 Gb/s optical communications. In 2007,
+ipates in leadership of the IEEE Singapore AUV Challenge. He has served the   Intersymbol Communications, Inc. was acquired by Finisar Corporation (now
+OES Singapore chapter over the last decade in roles, including the Chairmanship    II-VI). In 2014, he co-founded OceanComm, a provider of ultra high-bandwidth
+and Secretary, and is currently the Chair of the Chapter. He has also been in   underwater acoustic modem technology for subsea industries.
+local organizing committees in the Global OCEANS 2020 Conference and the    He was the recipient of the National Science Foundation CAREER Award
+AUV 2022 Symposium, and is a member of the Acoustic Society of America’s    in 2000, Xerox Faculty Research Award in 2001, and in 2002 he was named
+Technical Committee on acoustical oceanography. Recently, he has been helping   a Willett Faculty Scholar. From 2005 to 2017, he was the Director of the
+with OES early-career efforts on the UN Decade of Ocean Sciences, and the   Technology Entrepreneur Center, College of Engineering, which is now a part of
+ECOPs-Asia network.                                                           the ofﬁce of Innovation and Entrepreneurship with the College of Engineering.
+                                                                               In 2006, he was the recipient of the IEEE Journal of Solid State Circuits Best
+                                                                         Paper Award for the paper titled “An MLSE Receiver for Electronic Dispersion
+                                                                     Compensation of OC-192 Fiber Links,” and IEEE Signal Processing Magazine
+                                                               Award for the paper titled “Turbo Equalization in 2008.” In 2009, he was an
+                                                                                  elected Fellow of the IEEE “for contributions to signal processing techniques
+                                                                                     for digital communication,” and in 2014, he was named as a Distinguished
+                                                                              Lecturer of the IEEE SIGNAL PROCESSING SOCIETY. He serves on the board of
+                      GrantB.DeanereceivedtheB.Sc.andM.Sc.degrees    directors of a number of technology companies and as an expert witness for
+                      from the University of Auckland, Auckland, New    audio, electronics, communications, and circuit-related technologies.
+                        Zealand, and the D.Phil. degree from the University
+                         of Oxford, Oxford, U.K. He is currently a Researcher
+                        with the Scripps Institution of Oceanography, Uni-
+                           versity of California San Diego, La Jolla, CA, USA.
+                                                                                     Gregory W.  Wornell  (Fellow, IEEE)  received                       His work focuses on breaking waves, underwater
+                           acoustics, and glacier acoustics research in the Arctic.                             the B.A.Sc. degree in  electrical engineering and
+                  He seeks to understand how ocean/atmosphere and                         computer science from The University of British
+                         ice/ocean interactions can be measured and moni-                          Columbia, Vancouver, BC, Canada, in 1985, and the
+                          tored using underwater sound and what this means                         S.M. and Ph.D. degrees in electrical engineering and
+for gas exchange, aerosol generation, melting glaciers and sea level rise. He is a                         computer science from the Massachusetts Institute of
+Fellow of the Acoustical Society of America. He was the recipient of the A.B.                         Technology (MIT), Cambridge, MA, USA, in 1987
+Wood Medal in 1997 and Sagar Geophysics Prize from Auckland University in                         and 1991, respectively.
+1986.                                                                                               Since 1991, he has been with the Faculty at MIT,
+                                                                                         where he is the Sumitomo Professor of engineering
+                                                                                                  with the Department of Electrical Engineering and
+                                                                  Computer Science (EECS) and the Schwarzman College of Computing, and the
+                                                                    Area Co-Chair of the EECS Doctoral Program. At MIT, he leads the Signals,
+                                                                               Information, and Algorithms Laboratory, and is afﬁliated with the Research
+                                                                          Laboratory of Electronics, Computer Science and Artiﬁcial Intelligence Lab-
+                                                                                      oratory, and Institute for Data, Systems and Society. He has held visiting
+                                                                         appointments with the Department of Electrical Engineering and Computer
+                                                                               Science, University of California, Berkeley, CA, USA, during 1999–2000, with
+                                                                          Hewlett-Packard Laboratories, Palo Alto, CA, USA, in 1999, and with AT&T
+                                                                               Bell Laboratories, Murray Hill, NJ, USA, in 1992–1993. His research interests
+                                                                     and publications areas include signal processing, information theory, statistical
+                                                                                   inference, artiﬁcial intelligence, and information security, including architec-
+                                                                                     tures for sensing, learning, computing, communication, and storage, systems
+                                                                                     for computational imaging, vision, and perception, aspects of computational
+                                                                            biology and neuroscience, and the design of wireless networks. He has been
+                                                                             involved with the Information Theory and Signal Processing societies of the
+                                                             IEEE in a variety of capacities, and maintains a number of close industrial
+                                                                                    relationships and activities. He was the recipient of a number of awards for
+                                                                          both his research and teaching, including the 2019 IEEE Leon K. Kirchmayer
+                                                                        Graduate Teaching Award.
+
+
+
+
+
+             Authorized licensed use limited to: MIT Libraries. Downloaded on August 17,2022 at 17:02:01 UTC from IEEE Xplore. Restrictions apply.

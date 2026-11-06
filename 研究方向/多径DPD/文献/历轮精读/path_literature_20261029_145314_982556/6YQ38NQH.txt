@@ -1,0 +1,643 @@
+
+=== PDF PAGE 1 ===
+Multi-Source Localization and Data Association for
+Time-Difference of Arrival Measurements
+Gabrielle Flood
+Centre for Mathematical Sciences
+Lund University, Lund, Sweden
+firstname.lastname@math.lth.se
+Filip Elvander
+Dept. of Information and Communications Engineering
+Aalto University, Espoo, Finland
+firstname.lastname@aalto.fi
+Abstract—In this work, we consider the problem of localiz-
+ing multiple signal sources based on time-difference of arrival
+(TDOA) measurements. In the blind setting, in which the source
+signals are not known, the localization task is challenging due to
+the data association problem. That is, it is not known which of
+the TDOA measurements correspond to the same source. Herein,
+we propose to perform joint localization and data association
+by means of an optimal transport formulation. The method
+operates by finding optimal groupings of TDOA measurements
+and associating these with candidate source locations. To allow
+for computationally feasible localization in three-dimensional
+space, an efficient set of candidate locations is constructed
+using a minimal multilateration solver based on minimal sets
+of receiver pairs. In numerical simulations, we demonstrate
+that the proposed method is robust both to measurement noise
+and TDOA detection errors. Furthermore, it is shown that the
+data association provided by the proposed method allows for
+statistically efficient estimates of the source locations.
+Index Terms—localization, data association, time-difference of
+arrival, multilateration, optimal transport
+I. INTRODUCTION
+Localization of signal sources occurs as a task in many
+signal processing applications, ranging from radar to audio
+signal processing, and constitutes a fundamental component
+in systems for tracking [1], [2], target identification [3], and
+noise reduction [4]. In multi-sensor settings with unknown
+broad-band source signals, the spatial position of a source is
+often determined based on time-difference of arrival (TDOA)
+measurements corresponding to receiver-receiver pairs, ob-
+tained using, e.g., cross-correlation methods [5]. However,
+in scenarios with more than one signal source, localization
+is complicated by the lack of data labels. That is, for a
+number of sets of TDOAs corresponding to different receiver-
+receiver pairs, it is not known which have been generated
+by the same signal source. The grouping of TDOAs into
+subsets, each corresponding to a single source, is referred
+to as the data association problem and is essential to multi-
+source localization [6], [7]. However, the two problems of
+data association and source localization are in general coupled,
+since TDOA association is often determined by goodness-of-fit
+to a given source location. In the case when the target sensors
+transmit signals that are well separated in time, the problem
+can be solved as the single-source case, as the association is
+given by the order of the TDOAs. To solve for the position of a
+single transmitter among several receivers of known positions
+Fig. 1.
+Two signal sources observed by four receivers, with hyperbolas
+corresponding to source locations consistent with TDOA measurements. Left:
+hyperbolas (TDOAs) labeled according to source. Right: unknown labels,
+corresponding to the localization and data association problem.
+using TDOAs is called multilateration [8], and the minimal
+configurations in 3D require four receivers. The position can
+also be found using more measurements, which might lead
+to a more accurate position, but with an increased risk of
+including corrupt data. It is common to use a setup where all
+measurements have the same reference receiver, [9], however,
+there are also solvers without this requirement [10].
+Previous works addressing multi-source localization in the
+absence of data labels include grid-based approaches origi-
+nating from the compressed sensing paradigm [11], [12] (see
+also [13] for a similar approach using direction of arrival),
+association estimation based on enumerating all possible mea-
+surement combinations [14], as well as recent deep learning
+(DL) proposals [15], [16]. However, whereas the DL tech-
+niques suffer from being specific to scenarios consistent with
+their training data, the classical approaches are limited to low-
+dimensional settings, such as localization in the plane, due to
+the complexity incurred by gridding the space fine enough for
+reasonable retrieval robustness [17], [18]. Furthermore, even if
+location estimates are produced, the data association problem
+is not necessarily solved, preventing exploitation of all avail-
+able information for statistically efficient estimates [11].
+In this paper, we propose to jointly perform source lo-
+calization and data association. In particular, we propose to
+phrase the association as an optimal transport (OT) problem
+[19], clustering TDOA measurements together by assigning
+them to a set of candidate locations. OT has previously
+111
+ISBN: 978-9-4645-9361-7
+EUSIPCO 2024
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 06:21:28 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 2 ===
+successfully been applied to clustering problems in multi-
+static localization [20], as well as problems in spectral es-
+timation [21]–[23]. In contrast to previous approaches, the
+candidate set used in the herein proposed method does not
+correspond to a gridding of the ambient space, but is formed
+using a multilateration scheme, which allows for localization
+also in three dimensions. Furthermore, for the OT problem
+we propose a novel combination of entropy (see [24]) and
+sparsity regularization that allows us to derive an efficient and
+elegant solution algorithm.1 We demonstrate the robustness of
+the proposed method in the face of increasing sensor noise, as
+well as to missing and false TDOA measurements. The quality
+of the obtained data association is shown to be sufficient for
+statistically efficient source location estimates.
+II. SOURCE LOCALIZATION
+Consider a scenario in which S ∈N sources at unknown
+locations sj ∈R3, for j = 1, . . . , S, emit unknown signal
+waveforms that impinge on R ∈N receivers at known
+locations rk ∈R3, for k = 1, . . . , R. The relative source-
+receiver distances are then encoded in TDOAs corresponding
+to a source-receiver-receiver triplet, i.e.,
+τj,(k,ℓ) = ∥sj −rk∥2 −∥sj −rℓ∥2
+ρ
+,
+(1)
+where ∥· ∥2 denotes the Euclidean norm and ρ is the speed
+of propagation. We will, without loss of generality, further on
+assume that ρ = 1. If the source signals are broadband and
+mutually uncorrelated, the TDOA τj,(k,ℓ) may be estimated
+based on the cross-correlation between the receiver signals [5].
+Herein, we assume that such estimated TDOAs are given, and
+they are modeled as random variables ˆτj,(k,ℓ),
+ˆτj,(k,ℓ) = τj,(k,ℓ) + nj,(k,ℓ),
+(2)
+where nj,(k,ℓ) is an additive perturbation. For simplicity of
+the numerical experiments, but without loss of generality for
+the proposed method, we will assume nj,(k,ℓ) ∼N(0, σ2),
+where the variance σ2 will depend on the signal to noise
+ratio and the spectral characteristics of the source signals.
+With this model, the source positions sj can be identified
+if the number of receivers is R ≥4. However, for the case
+S > 1, where the different signals are hard to distinguish in
+time, the estimation of sj is complicated by the fact that the
+source labels for the TDOA estimates are unknown. Hence,
+for two TDOA estimates ˆτj,(k,ℓ) and ˆτj′,(k′,ℓ′) it is not known
+whether j = j′, i.e., if the two TDOAs correspond to the
+same source. Identifying groups of measurements, in this case
+TDOAs, corresponding to the same source is referred to as the
+data association problem, and if solved, the source locations
+sj can be estimated using, e.g., maximum likelihood methods.
+However, in a blind estimation scenario in which the source
+signals are unknown, localization and data association become
+intrinsicly coupled problems. A 2D scenario is illustrated in
+Figure 1, showing two sources that are observed by four
+1Code: https://github.com/gabrielleflood/omt-based-toda-localization
+receivers. Here, the different hyperbolas correspond to the set
+of source locations consistent with a given receiver pair and
+TDOA. Note that due to the TDOA estimation errors, there
+are no source locations consistent with all measurements, i.e.,
+the hyperbolas do not all intersect in a single point. The joint
+data association and source localization problem is shown in
+the right-most plot where both source locations and data labels
+(associations) are missing.
+III. METHOD OUTLINE
+We propose to jointly solve the data association and local-
+ization problems using an optimal transport formulation. In
+particular, the solution to the OT problem will provide an op-
+timal association between the set of available TDOA estimates
+and a set of candidate source locations. This set of candidate
+locations is constructed by means of a multilateration solver,
+avoiding the need for extensive gridding of 3D space. Our
+proposed strategy is outlined as follows:
+1) Pick a set of receiver pairs. For each pair, create all
+combinations of TDOA estimates.
+2) Solve the multilateration problem for each TDOA com-
+bination. Collect all different solutions in a set Ωi of
+candidate source positions x ∈R3.
+3) Repeat for more sets of pairs to build the full candidate
+set Ω= ∪K
+i=1Ωi, where K ≥1 is a design parameter.
+4) Solve the OT problem to find the association between
+TDOAs T = {ˆτj,(k,ℓ)}j,k,ℓand candidate source posi-
+tions in Ω. This also finds the S best candidate positions.
+5) Given the estimated data association as well as identified
+source positions, compute refined location estimates us-
+ing a local search. The association may be re-estimated
+using only the top candidates from step 4.
+The candidate set construction is presented in Section IV,
+whereas the OT problem for data association is presented in
+Section V, together with an efficient solution algorithm. The
+proposed method is reminiscent of our earlier work [20] for
+multi-static time-of-arrival based localization. However, the
+multilateration strategy proposed here, together with the novel
+OT solver, allows for addressing problems in 3D.
+IV. CANDIDATE SET CONSTRUCTION
+The candidate set is constructed by solving a number of
+multilateration problems. To mitigate sensitivity to noise in
+any single receiver we choose a multilateration formulation
+without a fixed reference receiver. Hence, we use Equation (1),
+and allow k and ℓto be different for each measurement. In
+this case, it is enough to use three measurement equations,
+given that these are independent in the algebraic sense (the
+set of indices {k1, ℓ1, k2, ℓ2, k3, ℓ3} must contain at least four
+unique indices). We choose to use the minimal multiateration
+solver presented in [10]. However, the suggested method will
+work for other solvers as well, but the number of TDOA
+measurements might vary. Therefore, we denote this value by
+P, although P = 3 will be used throughout the paper.
+Thus, in order to construct a candidate set Ωi of source
+positions, first pick a minimal (or suitable) set of P receiver
+112
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 06:21:28 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 3 ===
+pairs, corresponding to P sets of TDOAs. Let these sets
+be denoted Ψk,ℓ= {ˆτj,(k,ℓ)}j. Thereafter, the set of all
+combinations of TDOAs, Λi = Ψk1,ℓ1 × . . . × ΨkP ,ℓP , is
+created. Each element in Λi is a P-tuple of TDOAs, and yields
+– using the multilateration method – one or more candidate
+source positions. The set of all such candidate positions for
+receiver pair set number i is collected in the set Ωi, but in
+some cases, some of the solutions given by the solver can be
+discarded. For the solver in [10] we discard any solution that
+does not match the TDOAs used, and also solutions for which
+the imaginary part is too large.
+Furthermore, several sets of receiver pairs can be consid-
+ered, as to form Ωi, i = 1, . . . , K. Ideally, these sets should
+be disjoint as to be robust to missing data (missed detections),
+but may also be chosen randomly. The full set of candidate
+positions is constructed as Ω= ∪K
+i=1Ωi, whereafter duplicates
+are removed. Further on, the elements in Ωwill be referred to
+as xj, as the order of the candidates is not important.
+V. ASSOCIATION PROBLEM
+Given the set Ωof candidate locations, we propose to
+both localize the sources sj and identify their corresponding
+TDOAs by finding an optimal association between the sets Ω
+and T . In particular, reminiscent of the approach in [20], we
+propose to do this by means of an OT problem. Building on
+the discrete Monge-Kantorovich OT problem [19], we would
+ideally solve
+minimize
+M∈{0,1}|T |×|Ω|, q∈{0,1}|Ω|
+⟨C, M⟩= trace
+ CT M
+
+s.t.
+M1|Ω| = 1|T |
+MT 1|T | = ˜Rq
+qT 1|Ω| = S, M ≤1|T |qT ,
+(3)
+where the last constraint is to be interpreted elementwise, and
+where ˜R = R(R −1)/2. Here, M is the transport or asso-
+ciation plan describing the association between TDOAs and
+candidate sources, s.t., [M]i,j = 1 if TDOA ˆτi is associated
+with source candidate xj, and zero otherwise. The quality of
+the association is measured by the objective function, with
+C ∈R|T |×|Ω| constructed as [C]i,j = c(xj, ˆτi; (k, ℓ)) where
+c : R3 × R →R+ is a consistency measure, or ground cost,
+for a candidate source position and a TDOA corresponding to
+a receiver pair. In this work, we will use
+c(x, τ; (k, ℓ)) = (∥x −rk∥2 −∥x −rℓ∥2 −τ)2 ,
+(4)
+which corresponds to the assumption that TDOA estimates are
+Gaussian random variables. Furthermore, the first and second
+constraints in (3) ensure that each TDOA is associated with
+a target, and that each selected target is associated with ˜R
+TDOAs (the number of receiver pairs), respectively. Here, 1m
+denotes a m × 1 vector of all 1’s. The last two constraints
+ensure that only S candidate sources are selected. The S-
+sparse vector q indicates which candidate sources are selected.
+As may be noted, the problem in (3) is combinatorial due
+to the integer constraints. Furthermore, it may be noted that
+(3) assumes that there are neither missing nor false TDOA
+measurements. In order to address this, and to arrive at a
+computationally efficient method for solving the association
+problem, we propose the following relaxation:
+minimize
+M∈R|T |×|Ω|
+m∈R|T |
+⟨C, M⟩+⟨c, m⟩+ϵ(D(M)+D(m))+η ∥M∥∞,1
+s.t. M1|Ω| + m = 1|T |, MT 1|T | ≤˜R1|Ω|,
+(5)
+where D(M) = P
+i,j[M]i,j log[M]i,j −[M]i,j + 1 is an en-
+tropic regularization term2 (with D(m) defined analogously),
+η and ϵ are positive parameters, and where the mixed norm is
+∥M∥∞,1 =
+X
+j
+max
+i
+|[M]i,j| .
+In (5), we have introduced an additional transportation vector
+m ∈R|T | that allows for so-called unbalanced OT [25] by
+associating TDOAs with a void, or trash, source to a cost
+c ∈R|T |. Also, the updated second constraint allows for
+missing TDOAs. Furthermore, the integer constraints have
+been relaxed to allow the elements of M and m to take
+on any real value. However, it may be readily verified that
+any feasible point with non-infinite objective value satisfies
+M ∈[0, 1]|T |×|Ω| and m ∈[0, 1]|T |. Lastly, the sparsity-
+promoting constraints in (3) have here been replaced with
+a sparsity-promoting penalty3. Relating to (3), the source
+indicator vector q is constructed as the column-wise maxima
+of the optimal M. The appeal of the relaxed problem (5) is
+that it allows for an efficient solution algorithm via its convex
+dual. The following proposition holds.
+Proposition 1. The unique optimal (M, m) is represented as
+M = P ⊙K ⊙(v ⊗u) , m = k ⊙v
+where K = exp
+ −1
+ϵ C
+
+, k = exp
+ −1
+ϵ c
+
+, and
+u = exp
+
+−1
+ϵ µ
+
+, v = exp
+1
+ϵ λ
+
+, P = exp
+1
+ϵ Φ
+
+.
+Here, λ, µ, and Φ solve the dual problem
+minimize
+λ∈R|T |, µ∈R|Ω|
++ , Φ∈R|T |×|Ω|
+ϵ ⟨P ⊙K, v ⊗u⟩+ ϵ⟨k, v⟩
+−⟨1|T |, λ⟩+ ˜R⟨1|Ω|, µ⟩
+s.t.
+∥Φ∥1,∞≤η,
+(6)
+where ∥Φ∥1,∞
+= maxj
+P
+i |[Φ]i,j|. Here, exponentiation
+is elementwise, and ⊗and ⊙denote the Kronecker and
+Hadamard
+products,
+respectively.
+Furthermore,
+for
+any
+non-negative C and c, strong duality holds.
+The proof is omitted due to the page limitation. However, it
+may be noted that Slater’s condition holds for (5), and as the
+objective is bounded from below for non-negative C and c,
+strong duality follows. Furthermore, the dual problem (6) can
+be solved efficiently using block-coordinate descent, which
+2Entropy regularization, applied to the standard OT problem, was first
+introduced in [24].
+3Note that the two last constraints of (3) are equivalent to ∥M∥∞,1 = S.
+113
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 06:21:28 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 4 ===
+can be interpreted as generalized Sinkhorn iterations [26], [27].
+In particular, in iteration i, the variables are updated as
+λ(i) = −ϵ log
+
+P(i−1) ⊙Ku(i−1)
+µ(i) =ϵ
+
+log
+
+P(i−1)T ⊙KT v(i)
+−log ˜R1|Ω|
+
++
+h
+Φ(i)i
+:,ℓ=−ϵ Γ
+h
+K ⊙v(i) ⊗u(i)i
+:,ℓ, η/ϵ
+
+, ℓ=1, . . . , |Ω|,
+where the log-operations are elementwise, (·)+ is elementwise
+truncation at zero, and Γ : R|T | × R+ →R|T | is defined as
+Γ(y, p) = arg min
+x
+⟨exp(x), y⟩, s.t. ∥x∥1 ≤p.
+(7)
+Due to space constraints, we omit the proof of these updates.
+For computing Γ, we use the solver from [28]. It may be
+verified that all computations can be performed in log-domain
+using log-sum-exp stabilization (see, e.g., [25]). Thus, the
+entropy regularization parameter ϵ can be selected arbitrarily
+small without causing numerical overflow in the iterations, and
+may be regarded as a parameter for the solution algorithm
+rather than for the primal problem (5) itself. In our numerical
+experiments, we set ϵ = 10−7 to closely approximate the
+corresponding OT problem without entropy regularization.
+The overall computational complexity of the problem is
+O (|Ω||T | log |T |), resulting from the updates of Φ. Here,
+the complexity for evaluating Γ is O (|T | log |T |) [28]. Since
+the optimal M gives an estimate of the association between
+TDOAs and candidate sources, the location estimates can be
+refined by a local non-linear search implementing, e.g., a
+maximum likelihood estimator exploiting all the available data.
+This will be demonstrated in the numerical section.
+VI. EXPERIMENTAL VALIDATION
+In this section, we evaluate the performance of the proposed
+method, and in particular its robustness to perturbations in the
+form of TDOA measurement noise as well as to false and
+missing TDOAs. For all experiments, R = 12 receiver and
+S = 3 source positions were in each simulation generated
+randomly in a 10 × 10 × 2 m room. The implied TDOAs
+were computed for each receiver pair, whereafter these were
+perturbed with Gaussian noise n ∼N(0, σ2), where σ is the
+standard deviation. The number of minimal sets of receiver
+pairs was set to K = 3 and the three index sets were chosen
+randomly, but we ensured that no receiver pair was used twice.
+The solver from [10] was used for multilateration according to
+Section IV and duplicates whose distance to another candidate
+were smaller than 1 cm were excluded from the full candidate
+set Ω= ∪3
+i=1Ωi. For the association problem, we used the
+ground cost in (4), with the cost c for the void source being set
+to the 95th percentile of the empirical distribution of the costs
+corresponding to the candidates. With η = 1, the estimated
+source positions were determined as the S dominant columns
+of M solving (5). Using the association provided by M,
+the location estimates were then refined using a local search
+minimizing (4) for each source individually, using Matlab’s
+fminsearch. To increase the chances for identifiable source
+0
+0.05
+0.1
+0.15
+10 -2
+10 -1
+10 0
+0
+0.2
+0.4
+0.6
+0.8
+1
+rate
+Proposed
+Proposed, refined
+Root CRLB
+SMTL
+Assoc. rate
+Fig. 2.
+Expected localization error (left axis) and the rate of correctly
+associated TDOA measurements (right axis) for varying noise level σ.
+positions, in a statistical sense, for the multilateration solver,
+we re-estimated the sources using new index sets if the root
+Cram´er-Rao lower bound (CRLB) was higher than 20 m for all
+K index sets with found source positions. As a performance
+measure, we present the average distance from the estimate
+to ground truth source (in meters), as well as the association
+rate, i.e., the fraction of TDOAs that were correctly associated
+with either its corresponding source or the void source.
+As reference, we include estimates by the SMTL method
+[11] using the setting recommended by the authors. As it is
+not computationally feasible to run this method with a uniform
+gridding of the room, we use our candidate set as grid. Also,
+we include the CRLB, corresponding to the setup with all the
+available TDOA measurements, as an absolute benchmark.
+A. Noise sensitivity
+Here, we evaluate the performance with respect to the size
+of the measurement error n in (2). The standard deviation σ
+of the error was varied between [0.01, 0.19], and there were
+no false or missing TDOA measurements. The average results
+over 100 simulations are shown in Figure 2, with the left and
+right y-axes showing the average Euclidean distance between
+estimates and ground truth sources, and the average association
+rate for the proposed method, respectively. As can be seen,
+the proposed method displays considerable robustness to the
+TDOA noise. Also, the number of TDOAs correctly associated
+with their respective sources is high enough as to achieve
+statistical efficiency in the refinement step. It may here be
+noted that the statistical accuracy of the estimates without
+refinement is limited due to the small number of measurements
+used in the multilateration step.
+B. Missing and False TDOA Measurements
+When evaluating the robustness to false and missing TDOA
+measurements, we fixed the noise standard deviation at σ =
+0.03. In the case of false TDOAs, we N ∈N times chose
+a receiver pair at random and added a false TDOA, drawn
+uniformly in the range of the corresponding pairs already
+existing TDOAs, yielding in total N false measurements. For
+114
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 06:21:28 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 5 ===
+0
+5
+10
+15
+20
+10 -2
+10 0
+0
+0.5
+1
+rate
+Proposed
+Proposed, refined
+Root CRLB
+SMTL
+Assoc. rate
+Void rate
+0
+2
+4
+6
+8
+10
+12
+10 -2
+10 0
+0
+0.5
+1
+rate
+Fig. 3.
+Expected localization error (left axis) and the rate of correctly
+associated TDOA measurements (right axis) with respect to false and missing
+measurements, on the top and bottom, respectively. For false measurements
+the association rate for false-to-void source is included.
+the case of missing TDOAs, we randomly deleted measure-
+ments using an analogue procedure. The maximum considered
+value N = 22 corresponds to approximately 10% of the
+available TDOA measurements. The average results over 100
+simulations are displayed in Figure 3, with the upper and
+lower plots showing results for false and missing TDOA
+measurements, respectively. As may be noted, although false
+and missing values affects the association rate, the proposed
+method yields accurate estimates for moderately large N.
+VII. CONCLUSIONS
+In this work, we have presented a method for joint multi-
+source localization and data association for TDOA measure-
+ments. First, several minimal multilateration problems are
+solved, and all solutions are considered candidate source
+positions. Thereafter, an optimal transport formulation, with
+entropy and sparsity regularization, is used to associate the
+TDOAs with the desired amount of candidates while also
+finding the best source positions. The obtained association then
+allows for a refinement stage achieving statistical efficiency.
+Experiments show that the proposed method is robust to mea-
+surement noise, as well as false or missing TDOA detections.
+REFERENCES
+[1] I. Potamitis, H. Chen, and G. Tremoulis, “Tracking of multiple moving
+speakers with multiple microphone arrays,” IEEE Trans. Speech Audio
+Process., vol. 12, no. 5, pp. 520–529, Sept 2004.
+[2] R. Niu, R. S. Blum, R. K. Varshney, and A. L. Drozd, “Target Lo-
+calization and Tracking in Noncoherent Multiple-Input Multiple-Output
+Radar Systems,” IEEE Trans. Aerosp. Electron. Syst., vol. 48, no. 2, pp.
+1466–1489, 2012.
+[3] J. Li and P. Stoica, “MIMO Radar with Colocated Antennas,” IEEE
+Signal Process. Mag., vol. 24, no. 5, pp. 106–114, 2007.
+[4] S. Gannot, E. Vincent, S. Markovich-Golan, and A. Ozerov, “A Consoli-
+dated Perspective on Multimicrophone Speech Enhancement and Source
+Separation,” IEEE/ACM Trans. Audio, Speech, Lang. Process., vol. 25,
+no. 4, pp. 692–730, 2017.
+[5] C. Knapp and G. Carter, “The generalized correlation method for
+estimation of time delay,” IEEE Trans. Acoust., Speech, Signal Process.,
+vol. 24, no. 4, pp. 320–327, 1976.
+[6] X. Dang, W. Ma, E. A. P. Habets, and H. Zhu, “Tdoa-based robust sound
+source localization with sparse regularization in wireless acoustic sensor
+networks,” IEEE/ACM Trans. Audio, Speech, Lang. Process., vol. 30, pp.
+1108–1123, 2022.
+[7] J. Velasco, D. Pizarro, J. Macias-Guarasa, and A. Asaei, “Tdoa matrices:
+Algebraic properties and their application to robust denoising with
+missing data,” IEEE Trans. Signal Process., vol. 64, no. 20, pp. 5242–
+5254, 2016.
+[8] E. Widdison and D. G. Long, “A review of linear multilateration
+techniques and applications,” IEEE Access, 2024.
+[9] Y. T. Chan and K. C. Ho, “A simple and efficient estimator for hyperbolic
+location,” IEEE transactions on signal processing, vol. 42, no. 8, pp.
+1905–1915, 1994.
+[10] K. ˚Astr¨om, M. Larsson, G. Flood, and M. Oskarsson, “Extension of
+time-difference-of-arrival self calibration solutions using robust multi-
+lateration,” in European Signal Process. Conf., 2021, pp. 870–874.
+[11] H. Jamali-Rad and G. Leus, “Sparsity-aware multi-source tdoa local-
+ization,” IEEE Trans. Signal Process., vol. 61, no. 19, pp. 4874–4887,
+2013.
+[12] J. Schmitz, R. Mathar, and D. Dorsch, “Compressed time difference of
+arrival based emitter localization,” in 2015 3rd International Workshop
+on Compressed Sensing Theory and its Applications to Radar, Sonar
+and Remote Sensing (CoSeRa), 2015, pp. 263–267.
+[13] N. Dong, L. Zhang, H. Zhou, X. Li, S. Wu, and X. Liu, “Two-stage fast
+matching pursuit algorithm for multi-target localization,” IEEE Access,
+vol. 11, pp. 66 318–66 326, 2023.
+[14] X. Dang, H. Zhu, and Q. Cheng, “Multiple sound source localization
+based on a multi-dimensional assignment model,” in Int. Conf. Inf.
+Fusion, 2018, pp. 1732–1737.
+[15] M. S. Ayub, J. Chen, A. Zaman, and J. Bai, “Deep attention aware
+feature learning for data association in multiple source localization,”
+IEEE Communications Letters, vol. 27, no. 1, pp. 125–129, 2023.
+[16] M. S. Ayub, C. Jianfeng, and A. Zaman, “Multiple acoustic source
+localization using deep data association,” Appl. Acoust., vol. 192, p.
+108731, 2022.
+[17] X. Dang and H. Zhu, “A feature-based data association method for
+multiple acoustic source localization in a distributed microphone array,”
+J. Acoust. Soc. Am., vol. 149, no. 1, pp. 612–628, 01 2021.
+[18] H. Sundar, T. V. Sreenivas, and C. S. Seelamantula, “TDOA-based
+multiple acoustic source localization without association ambiguity,”
+IEEE/ACM Trans. Audio, Speech, Lang. Process., vol. 26, no. 11, pp.
+1976–1990, 2018.
+[19] C. Villani, Optimal Transport: Old and New.
+Berlin: Springer, 2008.
+[20] F. Elvander, J. Karlsson, and T. van Waterschoot, “Convex Clustering for
+Multistatic Active Sensing via Optimal Mass Transport,” in European
+Signal Process. Conf., 2021.
+[21] F. Elvander, S. I. Adalbj¨ornsson, J. Karlsson, and A. Jakobsson, “Using
+Optimal Transport for Estimating Inharmonic Pitch Signals,” in IEEE
+Int. Conf. Acoust. Speech, Signal Process., 2017, pp. 331–335.
+[22] F. Elvander and A. Jakobsson, “Defining Fundamental Frequency for
+Almost Harmonic Signals,” IEEE Trans. Signal Process., vol. 68, pp.
+6453–6466, 2020.
+[23] F. Elvander, “Estimating Inharmonic Signals with Optimal Transport
+Priors,” in IEEE Int. Conf. Acoust., Speech, Signal Process., 2023.
+[24] M. Cuturi, “Sinkhorn distances: Lightspeed computation of optimal
+transport,” in Adv Neural Inf Process Syst, 2013, pp. 2292–2300.
+[25] G. Peyr´e, M. Cuturi et al., “Computational optimal transport: With
+applications to data science,” Found. Trends Mach. Learn., vol. 11, no.
+5-6, pp. 355–607, 2019.
+[26] J. Karlsson and A. Ringh, “Generalized Sinkhorn iterations for regu-
+larizing inverse problems using optimal mass transport,” SIAM J. Imag.
+Sci., vol. 10, no. 4, pp. 1935–1962, 2017.
+[27] F. Elvander, I. Haasler, A. Jakobsson, and J. Karlsson, “Multi-marginal
+optimal transport using partial information with applications in robust
+localization and sensor fusion,” Signal Processing, vol. 171, p. 107474,
+2020.
+[28] I. Haasler and F. Elvander, “Multi-Frequency Tracking via Group-Sparse
+Optimal Transport,” IEEE Control Systems Letters, vol. 8, pp. 1048 –
+1053, 2024.
+115
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 06:21:28 UTC from IEEE Xplore.  Restrictions apply. 

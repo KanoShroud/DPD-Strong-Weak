@@ -1,0 +1,63 @@
+AKBARI AND VALAEE: DECIMETER LEVEL COOPERATIVE DIRECT LOCALIZATION WITH ISING MODEL APPROACH                                 14395
+
+
+estimated. Thus, this approach is able to tackle the subopti-  (DLE) and Direct Source Localization (DiSouL) [19], [21],
+mality problem.                                                    [22], [23].
+  The idea of direct localization was first developed in [20].     Direct  localization  offers  several advantages over  tradi-
+In that work, the authors proposed a one-step direct localiza-   tional methods, including reduced computational complexity,
+tion approach based on estimating the eigenstructure of the   faster localization process, and improved accuracy in chal-
+spectral density matrix of the received signal. After a few   lenging multipath environments. Despite facing challenges in
+decades, in [19], the authors proposed a direct position deter-   wider-area networks and environmental characteristics, contin-
+mination (DPD) technique. They defined a closed-form cost  ued research and development are expected to further enhance
+function for matched-field processing using a two-dimensional   the accuracy, efficiency, and applicability of direct localization
+search over the known locations of the emitter. Then, in [21],  methods [19], [23], [45].
+the DPD was extended to multiple sources. However, the
+DPD technique assumed a multipath-free environment. Later,   B. Contributions and Organization
+in [22], the authors proposed a maximum likelihood estimation                                                              This paper proposes a novel direct localization method by
+based on direct localization for a multipath environment with                                                              co-processing the received signal at all antenna arrays. To co-
+a known number of multipaths. In [22], authors proposed                                                              process data, we take advantage of the fact that LoS path
+a  direct location estimation (DLE) algorithm  for a dense                                                      from the mobile user to all of the antenna arrays originates
+multipath environment based on a Gaussian approximation.                                                      from a common location in the area. Nevertheless, non-LoS
+This method requires the estimator to have prior knowledge of                                                    (NLoS) paths are caused by reflection from different objects
+the power delay profile. Recently, Garcia et al. [23] presented                                                                    in the environment, making them to have a random nature.
+a direct source localization (DiSouL) that jointly processes the                                                               In other words, when we grid the area, the strongest signal
+received data in all the antenna arrays in a compressed sensing                                                               received at all the antenna arrays comes from one of the grid
+framework. They considered an ℓ1-norm relaxation to solve   points. Taking this fact into account, the localization problem
+this problem. It has been shown that the ℓ1-norm relaxation   can be formulated as a sparse support recovery problem.
+can induce bias in location estimates [24].                                                               Therefore, we employ a compressed sensing framework for
+                                                           our direct localization approach which is an NP-hard opti-
+A. Related Work                                                            mization problem. As mentioned before, ℓ1-norm relaxation is
+  Modeling  radio  propagation  indoors  presents numerous   generally used to make this problem tractable which results in
+challenges due to multipath interference, limited LoS paths,   inherent bias to the solution. However, recently, authors of [46]
+and site-specific variables. Various signal metrics, including   proposed that under some conditions, binary approximation
+Received Signal Strength (RSS), CSI, AoA, ToF, and Time-   for ℓ0-norm optimization problems leads to optimal support.
+Difference-of-Arrival (TDoA), are used for indoor localization,   In addition, although the binary approximation is  still NP-
+each offering distinct advantages [2], [25], [26], [27], [28],   hard, there exists efficient binary programming solvers such
+[29].                                                           as branch-and-bound methods and annealing-based methods.
+  Wi-Fi-based localization relies on technologies like IEEE     In particular, we reformulate our problem as a binary ℓ0-
+802.11, Bluetooth, ZigBee, RFID, and UWB, with IEEE  norm minimization problem inspired by [8]. In this paper,
+802.11 (Wi-Fi) being the most widely used. Wi-Fi networks   in order to solve this problem, we use annealing-based solvers.
+serve as signal detection references, facilitating the creation of   These solvers are able to solve optimization problems in the
+effective localization systems without additional infrastructure.   format of an Ising energy problem. Thus, we convert our
+However, improving localization accuracy requires sophisti-   problem to an Ising energy problem to be able to utilize recent
+cated algorithms to overcome challenges such as unregulated   efficient binary programming solvers. This research builds on
+interference and signal fluctuations [30], [31], [32].                initial ideas presented in [47], taking them further with a deep
+  Localization algorithms play a crucial role in localizing   dive into the proposed method, thorough testing with real
+objects or individuals within an environment. Conventional   indoor data, and an in-depth statistical evaluation, including
+methods include triangulation [33], Kalman filters [34], com-   calculating the Cramér-Rao Bound (CRB) to compare with
+pressed sensing  [1], multidimensional  scaling  [35],  direct   existing localization methods.
+localization  [36], and  fingerprinting  [37].  Learning-based    To summarize, the key contributions of our work are:
+methods, including supervised [38], unsupervised [39], semi-      • Providing an in-depth explanation of using the Ising
+supervised  [40],  reinforcement  [41],  transfer  [42],  feder-      model to tackle direct localization problems, establishing
+ated [43], and deep learning [44], offer more sophisticated       a solid foundation for solving these problems.
+approaches to localization, leveraging machine learning tech-      • Determining specific conditions  that allow our binary
+niques for improved accuracy and efficiency.                      approximation method to accurately locate signal origins,
+  Direct  localization,  as  a  technique  within  Wi-Fi-based       improving the precision of localization.
+localization, aims  to enhance the accuracy and  efficiency      • Conducting a statistical efficiency assessment with the
+of positioning  signal sources by  directly  calculating  their      CRB, offering insights into the reliability and precision
+locations without intermediate parameter estimations. This        of the method.
+method has evolved significantly over time, with advancements      • Supporting our theoretical insights with real-world tests,
+such as the direct position determination (DPD) technique and       comparing the performance of our proposed method with
+the introduction of algorithms like direct location estimation        other existing approaches.
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:02:33 UTC from IEEE Xplore. Restrictions apply.

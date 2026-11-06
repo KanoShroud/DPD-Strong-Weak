@@ -1,0 +1,18 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {marked} from 'file:///C:/Users/Administrator/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/marked/lib/marked.esm.js';
+const root=path.dirname(fileURLToPath(import.meta.url));
+const parent=path.dirname(root), file=path.join(parent,'准入报告.html');
+let previous=fs.readFileSync(file,'utf8');
+const archive=path.join(parent,'准入报告_四直达核验前.html');
+if(!fs.existsSync(archive))fs.copyFileSync(file,archive);
+const css=previous.match(/<style>([\s\S]*?)<\/style>/)[1];
+const body=marked.parse(fs.readFileSync(path.join(root,'四直达核验报告.md'),'utf8')).replaceAll('<table>','<div class="table-wrap"><table>').replaceAll('</table>','</table></div>');
+const html=`<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>四直达全局歧义核验</title><style>${css}\nmain{padding-top:20px}main>p:nth-child(2){font-size:14px;background:none;padding:0}h1{font-size:36px}.top{padding-top:25px}.intro{padding:20px;border-left:4px solid #b16b2c;background:#f6eddc;border-radius:0 12px 12px 0}</style></head><body><div class="wrap top"><a href="../准入报告.html">← 文献准入总报告</a><p class="intro">四条直达消除了连续欠约束，但仍发现域内离散双解。没有通过裁剪高度或改变站点来制造“通过”。</p></div><main class="wrap">${body}</main><footer class="wrap">几何与完整IQ等价核验，不是定位性能排行榜；保留全部候选、原始数组和源码身份。</footer></body></html>`;
+fs.writeFileSync(path.join(root,'四直达核验报告.html'),html,'utf8');
+previous=previous.replace(/<section id="step1-latest"[\s\S]*?<\/section>/,'');
+const banner=`<section id="step1-latest" style="padding:22px 26px;margin:24px 0;background:#f6eddc;border-left:4px solid #b16b2c;border-radius:0 12px 12px 0"><h2 style="margin:0 0 12px;font-size:24px">最新：每源四直达的全局核验已完成</h2><p>总共5站不变。四LOS消除了连续歧义，但发现两个均处于20—120m高度范围的位置，相距约21.17m，却产生同一份混合IQ。本轮未发现未知LOS集合额外引入域内假解；暂不进入性能比较。</p><p><a href="step1_four_los_20261025/四直达核验报告.html"><strong>查看四直达结果、推导和下一步边界 →</strong></a> · <a href="step1_identifiability_20261025/第一步核验报告.html">上一轮三直达记录</a></p><p style="font-size:13px;color:#775a31">以下为文献阶段历史报告；最新执行条件与结果以上述链接为准。</p></section>`;
+previous=previous.replace('<main class="wrap">',`<main class="wrap">${banner}`);
+fs.writeFileSync(file,previous,'utf8');
+console.log('Updated four-LOS report and original admission HTML.');

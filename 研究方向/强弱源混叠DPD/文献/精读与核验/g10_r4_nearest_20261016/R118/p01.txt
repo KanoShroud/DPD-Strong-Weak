@@ -1,0 +1,62 @@
+Received 18 November 2025, accepted 5 December 2025, date of publication 16 December 2025,
+date of current version 22 December 2025.
+
+Digital Object Identifier 10.1109/ACCESS.2025.3645128
+
+
+
+QNOMP: A Quasi-Newton-Based Joint Multipath
+Optimization Method for Super-Resolution
+Channel Estimation and Extrapolation
+
+
+YI ZENG  1, MINGGUANG HAN  2, XIAOGUANG LI  3, AND TIEJUN LI  4
+1School of Mathematical Sciences, Peking University, Beijing 100871, China
+2Huawei Technologies Company Ltd., Shanghai 201722, China
+3MOE-LCSM, School of Mathematics and Statistics, Hunan Normal University, Changsha, Hunan 410081, China
+4LMAM, School of Mathematical Sciences, Peking University, Beijing 100871, China
+
+Corresponding authors: Xiaoguang Li (lixiaoguang@hunnu.edu.cn) and Tiejun Li (tieli@pku.edu.cn)
+
+This work was supported in part by the National Key Research and Development Program of China under Grant 2021YFA1003301, and in
+part by the National Science Foundation of China under Grant 12288101 and Grant 12101230.
+
+
+ ABSTRACT Channel estimation and extrapolation are key challenges in massive multiple-input multiple-
+  output communications. In this paper, we propose a quasi-Newton-based joint multipath optimization
+  approach called Quasi-Newton Orthogonal Matching Pursuit (QNOMP) to address these problems. The
+  algorithm comprises two stages for super-resolution recovery: first, we perform a computationally efficient
+  on-grid OMP estimation of channel parameters in the sparsity domain (e.g., delay or angle); then, an off-grid
+  optimization is carried out to achieve super-resolution. In the off-grid stage, we employ the quasi-Newton
+ method to jointly estimate all multipath parameters, rather than optimizing them one at a time as in the
+  Newtonized OMP approach. This joint estimation improves both computational efficiency and accuracy.
+  Moreover, we derive an optimal extrapolation solution based on the linear minimum mean squared error
+  criterion, establish its connection to the Slepian basis, and present a practical algorithm for extrapolation
+  using the QNOMP results. We also propose a specialized approach that exploits the inherent block sparsity
+  of the considered channels. Numerical experiments on simulated models and clustered delay line channels
+  demonstrate the superior performance and low computational complexity of QNOMP.
+
+
+ INDEX TERMS Quasi-Newton OMP, optimal extrapolation, slepian basis, block sparsity, super-resolution.
+
+
+I. INTRODUCTION                                           Research has shown that although CSI is measured in
+Massive multiple-input multiple-output (MIMO) is a key     the frequency and spatial (i.e., antenna) domains, it admits
+technology for wireless communications [1], [2], [3], [4], [5].    a  sparse  representation  in  the  virtual  (i.e.,  delay and
+To realize the potential gains of massive MIMO, accurate     angle) domains [6]. This sparsity provides a tractable linear
+estimation of channel state information (CSI) is essential.     multipath channel characterization. Leveraging this sparsity
+In time division duplex (TDD) systems, users transmit uplink     enables more efficient CSI estimation. Furthermore, based on
+pilots over designated frequency bands in different time     the estimated virtual-domain parameters, CSI can be readily
+slots, rather than over the entire band. Consequently, the     extrapolated to non-pilot frequency bands by applying the
+base station (BS) must estimate the CSI over the  pilot     underlying multipath channel model.
+bands (channel estimation) and extrapolate  it to non-pilot      Compressed sensing (CS) is an effective technique for
+bands (channel extrapolation) to demodulate the transmitted     reconstructing sparse signals from a limited number of
+signals. Generally, channel extrapolation is more challenging     linear measurements. Greedy algorithms, such as orthogonal
+than channel estimation.                                   matching  pursuit (OMP) and  its  variants  [7],  [8],  [9],
+                                                                    [10],  [11],  [12],  [13], represent a popular  class of CS
+  The associate editor coordinating the review of this manuscript and    methods due to their low computational complexity. Another
+approving it for publication was Jonathan Rodriguez    .                   category relies on the convex relaxation of the ℓ0 norm via
+
+
+                                      2025 The Authors. This work is licensed under a Creative Commons Attribution 4.0 License.
+212652                                               For more information, see https://creativecommons.org/licenses/by/4.0/                           VOLUME 13, 2025

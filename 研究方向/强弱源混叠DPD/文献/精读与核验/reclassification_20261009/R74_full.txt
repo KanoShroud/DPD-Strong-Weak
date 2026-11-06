@@ -1,0 +1,1981 @@
+--- PDF PAGE 1 ---
+IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY, VOL. 74, NO. 10, OCTOBER 2025
+16137
+Newtonized Orthogonal Matching Pursuit for
+High-Resolution Target Detection in Sparse
+OFDM ISAC Systems
+Syed Najaf Haider Shah
+, Sebastian Semper
+, Aamir Ullah Khan
+, Christian Schneider
+, and Joerg Robert
+Abstract—Integrated Sensing and Communication (ISAC) is a
+technology paradigm that combines sensing capabilities with com-
+munication functionalities in a single device or system. In vehicle-
+to-everything (V2X) sidelink, ISAC can provide enhanced safety
+by allowing vehicles to not only communicate with one another but
+alsosensethesurroundingenvironmentbyusingsidelinksignals.In
+ISAC-capable V2X sidelink, the random resource allocation results
+in an unstructured and sparse distribution of time and frequency
+resources in the received orthogonal frequency division multiplex-
+ing(OFDM)grid,leadingtodegradedradardetectionperformance
+when processed using the conventional 2D-FFT method. To ad-
+dress this challenge, this paper proposes a high-resolution off-grid
+radar target detection algorithm irrespective of the OFDM grid
+structure.TheproposedmethodutilizestheNewtonizedorthogonal
+matching pursuit (NOMP) algorithm to effectively detect weak
+targets masked by the sidelobes of stronger ones and accurately
+estimates off-grid range and velocity parameters with minimal time
+and frequency resources through Newton reﬁnements. Simulation
+results demonstrate the superior performance of the proposed
+NOMP-basedtargetdetectionalgorithmcomparedtoexistingcom-
+pressed sensing (CS) methods in terms of detection probability,
+resolution, and accuracy. Additionally, experimental validation is
+performed using a bistatic radar setup in a semi-anechoic chamber.
+The measurement results validate the simulation ﬁndings, showing
+that the proposed algorithm signiﬁcantly enhances target detection
+and parameter estimation accuracy in realistic scenarios.
+Index Terms—Sparse OFDM, ISAC, Newtonized orthogonal
+matching pursuit, resource allocation, off-grid estimation.
+I. INTRODUCTION
+I
+N RECENT decades, the ﬁelds of wireless communications
+and radar sensing have witnessed signiﬁcant advancements,
+driven by the growing demand for high-speed data transfer and
+precise environmental awareness. However, the rapid increase
+in connected devices and applications, such as autonomous driv-
+ing, smart cities, and extended reality, has put immense pressure
+on the already crowded electromagnetic spectrum. This spec-
+trum scarcity has led to the emergence of Integrated Sensing and
+Received 11 November 2024; revised 10 February 2025 and 23 April 2025;
+accepted 20 May 2025. Date of publication 23 May 2025; date of current version
+17 October 2025. This work was supported by Horizon 2020 Marie Skłodowska-
+Curie Innovative Training Networks Programme “Integrated Telematics for Next
+Generation 5G Vehicular Communications (ITN-5VC)” under Grant 955629.
+The review of this article was coordinated by Dr. Boya Di. (Corresponding
+author: Syed Najaf Haider Shah.)
+The authors are with the Electronic Measurements and Signal Processing
+(EMS) Group, Technische Universitt Ilmenau 98693 Ilmenau, Germany (e-mail:
+syed-najaf-haider.shah@tu-ilmenau.de).
+Digital Object Identiﬁer 10.1109/TVT.2025.3573165
+Communications (ISAC) as a promising solution that merges
+communication and radar sensing functionalities within a single
+system. ISAC enables the efﬁcient sharing of limited spectrum
+and hardware resources between these two domains, resulting in
+substantial cost savings and improved system performance [1],
+[2].
+ISAC is not just about spectrum efﬁciency, it is also a key
+enabler for next-generation cellular technologies like beyond
+ﬁfth-generation (B5G) and sixth-generation (6G). ISAC repre-
+sents a promising key technology for enhancing connectivity
+and intelligent decision-making in various applications such as
+high-resolution sensing and tracking, simultaneous localization,
+mapping, and imaging [3] etc. In cellular-vehicle-to-everything
+(C-V2X), particularly in 6G-V2X systems, ISAC will enable
+vehicles to communicate with one another while simultaneously
+sensing their environment. This dual capability is crucial for
+facilitating cooperative driving, where vehicles can share infor-
+mation about their surroundings, road conditions, and potential
+hazards in real-time [4]. By integrating sensing and communica-
+tion functions, ISAC enhances situational awareness, enabling
+vehicles to make informed decisions that improve overall traf-
+ﬁc safety ultimately contributing to safer, more efﬁcient, and
+intelligent transportation systems.
+In a multiuser ISAC-capable vehicle-to-everything (V2X)
+sidelink system, vehicles in autonomous mode randomly select
+distinct frequency (subcarriers) and time (symbols) resources
+from an orthogonal frequency division multiplexing (OFDM)
+resource grid to perform communication and radar sensing
+simultaneously [5]. This random resource selection is suscep-
+tible to mutual interference and resource collisions due to the
+hidden-node problem [6]. When the interfered or overlapped
+resources are removed from this unstructured OFDM resource
+grid, the received OFDM signal at the radar receiver becomes
+sparse in both time and frequency domain. This sparsity poses
+signiﬁcant challenges for conventional radar processing meth-
+ods, such as two dimensional fast Fourier transform (2D-FFT),
+multiple signal classiﬁcation (MUSIC), or estimation of sig-
+nal parameters via rational invariance techniques (ESPRIT),
+which are typically designed for either continuous or regu-
+larly spaced time-frequency OFDM signals [7]. These methods
+rely on speciﬁc assumptions about the underlying signal struc-
+ture. For example, 2D-FFT assumes orthogonal basis functions
+and regularly spaced samples to avoid spectral leakage and
+unpredictable sidelobes. Similarly, MUSIC and ESPRIT require
+0018-9545 © 2025 IEEE. All rights reserved, including rights for text and data mining, and training of artiﬁcial intelligence and similar technologies.
+Personal use is permitted, but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:21 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 2 ---
+16138
+IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY, VOL. 74, NO. 10, OCTOBER 2025
+a structured covariance matrix or Vandermonde-like properties,
+which are disrupted by irregular and sparse sampling. With
+sparse and unstructured OFDM signals, these algorithms suf-
+fer from model-mismatch which results in biased estimates.
+Furthermore, irregular grids exacerbate the formation of range-
+Doppler independent sidelobes, where the energy from stronger
+targets spreads unpredictably, masking weaker targets and mak-
+ing their detection unreliable [8]. Techniques like windowing,
+commonly used for sidelobe suppression in regular grids, are
+often ineffective in such scenarios. Additionally, the dynamic
+nature of resource allocation in multiuser ISAC systems in-
+troduces further challenges, as the grid structure can change
+rapidly, rendering traditional methods unsuitable for real-time
+processing.
+To address the challenges posed by the sparse nature of
+the OFDM signal in ISAC systems, compressed sensing (CS)
+techniquesofferapromisingalternative.CShasbeenextensively
+utilized in both communication and radar sensing applications.
+In communication systems, CS is employed for channel esti-
+mation through sparse signal recovery [9], [10], while in radar
+sensing, it provides super-resolution and enhanced accuracy
+in parameter estimation [11], [12]. Notably, CS methods have
+demonstrated superiority over subspace-based approaches like
+MUSIC in noisy environments, particularly when strong domi-
+nant clutter or direct signals are present [13]. Additionally, CS
+is well-suited for scenarios where continuous target observa-
+tion is not feasible, as it can reconstruct signals from a small
+number of samples by exploiting signal sparsity, even when
+the sampling interval is irregular. However, CS methods are
+not without challenges, particularly the grid mismatch problem.
+This issue arises when the true parameters of a target (e.g., range
+and Doppler shift) do not align with the discretized grid used
+for parameter estimation [14]. Even with a ﬁnely discretized
+parameter grid, the true target parameters often fall between
+grid points, leading to estimation errors [15]. Furthermore,
+increasing the grid resolution to mitigate this issue results in
+a quadratic increase in computational complexity, making real-
+time processing impractical.
+Addressing these challenges is essential to unlocking the full
+potential of ISAC in V2X systems and other advanced applica-
+tions. Effective radar target detection in dynamic environments
+requires low-complexity algorithms that offer super-resolution
+capabilities, eliminate grid mismatches, and accurately estimate
+both on-grid and off-grid parameters. The development of such
+algorithms will be key to enabling reliable, high-precision sens-
+ing in ISAC-capable V2X systems, paving the way for safer,
+smarter, and more connected transportation environments.
+A. Related Work
+Several approaches have been proposed to address the chal-
+lenges posed by sparse OFDM signals in ISAC systems. The au-
+thorsin[16],[17]introducedaCSmethodnamedsparseiterative
+multidimensional frequency estimation (SIMFE) based on the
+orthogonal matching pursuit (OMP) algorithm to deal with the
+increased range sidelobes caused by non-equidistant subcarrier
+interleaving in the OFDM grid. To support reﬁned off-grid
+parameter estimation, SIMFE utilizes interpolation (e.g., 3 rd
+order Taylor series approximation), which improves estimation
+accuracy and reduces the residual error for the next iteration.
+However, this method focuses solely on range sidelobe suppres-
+sion and does not account for sparsity in the time domain. Other
+approaches, such as those in [18], [19], combine the Discrete
+Fourier Transform (DFT) and Basis Pursuit (BP) algorithms to
+resolve ambiguities in range estimation due to random subcarrier
+allocation but suffer from high computational complexity. To
+enhance range and velocity proﬁle reconstruction with sparse
+OFDM signals, approximate message passing (AMP) and split
+augmented Lagrangian shrinkage (SALSA) algorithms were
+employedin[20],[21].However,thesealgorithmsstrugglewhen
+sparsity across OFDM symbols is considered. Moreover, these
+methods do not address the grid mismatch problem, which arises
+whentrueparametervaluesdonotalignwiththediscretizedgrid.
+To account for this issue, gridless CS methods based on atomic
+norm minimization (ANM) are employed to estimate off-grid
+parameters accurately [22], [23], but their computational com-
+plexity is often prohibitive for practical implementation.
+While existing CS algorithms for sparse OFDM signals have
+made important strides, they exhibit several key shortcomings.
+Some suffer from high Doppler sidelobes due to the sparsity
+along the time domain not being considered. Others fail to
+addressthegridmismatchproblem.Additionally,thosethatoffer
+solutionstogridmismatchissuessufferfromhighcomputational
+complexity, limiting their practical use in real-time applications.
+B. Contributions
+To address these shortcomings, this paper proposes a super-
+resolution off-grid radar target detection algorithm based on the
+Newtonized orthogonal matching pursuit (NOMP) regardless
+of the OFDM grid structure. The proposed algorithm effectively
+detects weak targets masked by the sidelobes of strong targets in
+the sparse OFDM-based multiuser ISAC-capable V2X sidelink
+system with minimal sensing resources.
+Thekeycontributionsofthispaperaresummarizedasfollows:
+1) We introduce a high-resolution radar target detection al-
+gorithm that operates without restrictions on the structure
+of the OFDM grid, leveraging the NOMP method for both
+on-grid and off-grid parameter estimation. The algorithm
+consists of three key steps: (1) coarse on-grid estimation,
+(2) local Newton reﬁnements, and (3) joint Newton re-
+ﬁnements. In the ﬁrst step, standard OMP is employed to
+estimate the on-grid delay and Doppler shift parameters.
+Toacceleratetheprocess,theconventionalcorrelationstep
+in the OMP is replaced with a computationally efﬁcient
+2D-FFT operation, ensuring faster on-grid estimation. In
+the second step, Newton reﬁnements are applied itera-
+tively to the newly detected on-grid parameter estimation,
+allowing for accurate off-grid parameter estimation. In
+the third step, unlike the existing NOMP algorithm that
+performcyclicNewtonreﬁnementsonpreviouslydetected
+parameters one by one, the proposed algorithm jointly re-
+ﬁnesalldetectedparametersineachiteration.Thisjointre-
+ﬁnement step introduces a feedback mechanism, allowing
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:21 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 3 ---
+SHAH et al.: NEWTONIZED ORTHOGONAL MATCHING PURSUIT FOR HIGH-RESOLUTION TARGET DETECTION
+16139
+the re-evaluation of previously estimated parameters in the
+presence of newly detected ones. This approach mitigates
+parameter interference, leading to improved estimation
+accuracy and resolution. To reduce the computational bur-
+den associated with joint Newton reﬁnements, the block
+Hessian matrix is simpliﬁed into a block diagonal matrix,
+yielding a low-complexity solution. These enhancements
+make the proposed algorithm not only highly accurate
+but also computationally efﬁcient, rendering it suitable for
+real-timeradartargetdetectioninmultiuserISACsystems.
+2) The proposed algorithm is rigorously evaluated through
+simulations to assess its performance across several key
+metrics, including effective weak target recovery, de-
+tection of closely-spaced off-grid targets, root-mean-
+squared-error (RMSE) in range and velocity estimations,
+convergence behavior, and execution time. The results
+demonstrate the superiority of the proposed NOMP-based
+algorithm compared to existing methods such as peri-
+odogram (2D-FFT), SALSA, OMP, and SIMFE, high-
+lighting its enhanced ability to accurately detect and re-
+solve targets under sparse and unstructured OFDM grid.
+3) To evaluate the performance of the proposed algorithm
+in realistic conditions, we conducted experiments using
+a bistatic radar setup within a semi-anechoic chamber.
+The experiments were facilitated by the Virtual Road
+Simulation and Test Area (VISTA) at the Thuringian
+Center of Innovation in Mobility, providing a controlled
+environmentforpreciseevaluation[24].Themeasurement
+results corroborate the simulation ﬁndings, demonstrating
+the practical feasibility of the NOMP-based algorithm in
+real-world scenarios.
+C. Notation
+Scalars, vectors, matrices, and sets are denoted using dif-
+ferent typographical conventions. Scalars are represented by
+italic letters (a) or Greek letters (α). Vectors are indicated by
+bold lowercase letters (a), and matrices are denoted by bold
+uppercase letters (A). Matrix operations follow standard math-
+ematical conventions. AT, AH, A−1, A†, and A∗represent
+transpose, Hermitian transpose, inverse, pseudo-inverse, and
+conjugate of matrix A respectively. The identity matrix of size
+N × N is denoted by IN. For element-wise operations, the
+Hadamard (element-wise) product between matrices A and B
+is represented by A ◦B, and element-wise division is denoted
+as A ⊘B. The Kronecker product of two matrices A and B is
+denoted as A ⊗B. The Fourier transform operation is denoted
+by F{·}, and its inverse by F−1{·}. O(·) denotes the big-O
+notation. Norms and other mathematical notations include the
+ℓ2 norm, which is denoted as ∥x∥2 and represents the Euclidean
+norm of vector x.
+The rest of the paper is organized as follows: Section II
+presents the ISAC system model and signal model. Section III
+describes the proposed high-resolution off-grid target detection
+algorithm using the NOMP algorithm. Section IV presents the
+simulation results. Measurement setup and measurement results
+Fig. 1.
+ISAC-capable sidelink scenario.
+are presented in Section V. Finally, Section VI concludes the
+paper.
+II. ISAC-CAPABLE SIDELINK SYSTEM
+We assume a scenario that consists of multiple vehicles mov-
+ing on a road. The vehicles exchange data with one another
+through sidelink signals while also utilizing reﬂected sidelink
+signals to sense the surrounding environment, enabling a mul-
+tiuser ISAC-capable sidelink system. As shown in Fig. 1, in com-
+pliance with the half-duplex mode of operation in V2X sidelink
+communication,atransmittingvehicle(TX)transmitsdatapack-
+ets to a receiving vehicle (RX) over the sidelink channel. The
+RX receives not only the direct sidelink signal from the TX but
+also the reﬂected signals from the neighboring vehicle (Strong
+Target) and a pedestrian (Weak Target). This conﬁguration en-
+ables the RX to operate as a bistatic radar, utilizing the reﬂected
+sidelink signals to estimate the range and relative velocity of the
+targets [25]. For simplicity, we assume a single antenna setup at
+theTXandtheRX,whichinherentlylimitsthesystem’sabilityto
+estimatetheangleofarrival(AoA)ofthetargets,whichiscritical
+for precise localization and lane-level discrimination in complex
+vehicular scenarios. However, using antenna arrays for high
+resolution off-grid parameter estimation introduces a lot more
+calibration effort, since the angle-dependent far-ﬁeld response
+of the antenna array has to be measured and incorporated into
+the AoA estimation algorithm, and usually such calibration is
+not practically feasible for vehicular setups. Moreover, in a
+multi-antenna bistatic ISAC system, rigorous synchronization
+(i.e., phase and timing alignment) across antenna elements must
+be considered, which we leave for future investigation. The
+other vehicles (other) also communicate with the RX through
+the V2X sidelink multiple access technology. In this multiuser
+ISAC-capable sidelink setup, the TX randomly selects time and
+frequency resources from the OFDM resource pool which is
+also shared by other vehicles as shown in Fig. 2. This random
+selection forms an unstructured sparse OFDM grid which will be
+receivedbytheRXforcommunicationandradarprocessing.The
+TX also sends the information of its time-frequency resources
+(i.e., number and locations in the sparse OFDM grid) to the RX
+over the sidelink control channel so that RX have the knowledge
+of the TX signal.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:21 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 4 ---
+16140
+IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY, VOL. 74, NO. 10, OCTOBER 2025
+Fig. 2.
+The resource allocation grid obtained by random resource selection in
+a multiuser ISAC-capable sidelink system.
+A. Signal Model
+The transmitted signal x : R →C in complex baseband con-
+sists of N subcarriers and M OFDM symbols resulting in an
+N × M TX resource grid X. Within X, the TX selects a random
+subset Ωs of resources from Ω where Ω = {(n, m) | 0 < n ≤
+N, 0 < m ≤M} and Ωs ⊂Ω. Hence, the transmit signal x is
+given by
+x(t) =
+M−1
+
+m=0
+N−1
+
+n=0
+Xn,mej 2π
+T nt
+
+rectT (t −mTo),
+(1)
+with
+Xn,m ∈
+
+An,m,
+if {n, m} ∈Ωs
+0,
+otherwise
+(2)
+where An,m, T, and To denote the modulation symbol (e.g.,
+QPSK), rectangular pulse duration, and the OFDM symbol du-
+ration including the cyclic preﬁx (CP) respectively. The received
+OFDM grid at the RX after removing the CP and taking the DFT
+can be written as
+Yn,m =
+K
+
+k=1
+βkXn,me−j2πnΔfτkej2πmToαk + Zn,m,
+(3)
+where K is the total number of targets which are assumed to
+be placed at arbitrary locations in the parameter space, and τk
+and αk are bistatic delay and Doppler shift of the kth target at
+the RX respectively. The term βk = |βk|ejφk is the complex
+attenuation coefﬁcient which includes the attenuation constant
+and the phase shift of the signal reﬂected from the kth target,
+and Zn,m represents additive white Gaussian noise (AWGN)
+with zero mean. Here we assume that multiple transmitters are
+transmitting simultaneously, however, their resource occupancy
+is set to a very low level (≈1% of the total resources), resulting
+in a negligible interference in Y.
+III. OFF-GRID TARGET DETECTION USING NOMP
+ALGORITHM
+This section introduces the proposed NOMP-based target
+detection algorithm that estimates the targets placed across
+a continuous parameter space as an off-grid sparse recovery
+method. The NOMP algorithm performs Newtonian gradient
+descent which is a second-order optimization technique to itera-
+tively reﬁne parameter estimates by leveraging both gradient
+(ﬁrst-order) and curvature (second-order) information of the
+cost function. This approach achieves faster convergence and
+higher accuracy compared to ﬁrst-order methods, particularly
+for non-linear problems like off-grid parameter estimation. In
+the proposed algorithm, Newtonian gradient descent reﬁnes the
+delay and Doppler parameters which are initially coarsely esti-
+mated on a discretized grid using the OMP algorithm. However,
+due to grid mismatch, these coarse estimates often deviate from
+the true off-grid values. To counteract this, Newton reﬁnements
+iteratively minimize the residual error to achieve precise off-grid
+parameter estimation. The details of Newton reﬁnement process
+are discussed in the subsequent sections.
+First, we account for the transmitted symbols from the re-
+ceived OFDM signal Y by element-wise division with X as
+given in [26], [27], to obtain the frequency domain channel
+transfer function matrix H ∈CN×M as
+Hn,m = Yn,m
+Xn,m
+=
+K
+
+k=1
+βke−j2πnΔfτkej2πmToαk + ˜Zn,m,
+(4)
+where H is a sparse matrix with nonzero entries located at the
+set of indices Ωs. By excluding the unused resources (i.e., zero
+entries), the matrix H is compressed to Hs. We express the
+compressed matrix Hs in vector form as
+hs =
+K
+
+k=1
+βkaΩs(τk, αk) + ˜z,
+(5)
+where aΩs(τk, αk) ∈C|Ωs| is the response vector corresponding
+to the kth off-grid target, i.e.,
+aΩs(τk, αk) =
+
+e−j2πnΔfτkej2πmToαk
+{n,m}∈Ωs .
+(6)
+Thus, (5) can be rewritten as
+hs = Ab + ˜z,
+(7)
+where
+A = [aΩs(τ1, α1), aΩs(τ2, α2), . . . , aΩs(τK, αK)] ∈
+C|Ωs|×K, b = [β1, β2, . . . , βK] ∈CK, and ˜z ∈C|Ωs| is the
+noise vector.
+A. OMP
+Conventional grid-based CS methods discretize the parameter
+plane into N × M grid points and assume that each grid point
+corresponds to a potential target’s parameter. Let ¯τ
+Δ= {¯τp ∈
+
+0, dmax
+c
+
+| p = 1, . . . , N}, and ¯α
+Δ= {¯αq ∈
+
+−2vmax
+λ
+, 2vmax
+λ
+
+|
+q = 1, . . . , M}, be the discretized delay and Doppler shift
+grids respectively, where dmax is the sum of the maximum
+transmitter-to-target range and the maximum target-to-receiver
+range, vmax is the maximum allowed relative velocity, λ and
+c are the wavelength and speed of light respectively. Then, the
+measurement vector hs can be expressed as
+hs = ¯A¯b + ¯z,
+(8)
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:21 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 5 ---
+SHAH et al.: NEWTONIZED ORTHOGONAL MATCHING PURSUIT FOR HIGH-RESOLUTION TARGET DETECTION
+16141
+Algorithm 1: The OMP Algorithm.
+1: Input: hs, ¯A, K
+2: Initial state: r0 = hs, Π0 = ∅, ℓ= 0
+3: repeat
+4:
+ℓ= ℓ+ 1
+5:
+Match step:
+▷Compute the correlation
+6:
+cℓ= ¯AHrℓ−1
+7:
+Identify step:
+▷Potential basis mismatch here
+8:
+Πℓ= Πℓ−1 ∪{arg maxj |cℓ(j)|2}
+9:
+Update step:
+▷Basis mismatch affects this step
+10:
+¯bℓ= arg minv:supp(v)⊆Πℓ∥hs −¯Av∥2
+2
+11:
+rℓ= hs −¯A¯bℓ
+▷Update the residue
+12: until ℓ= K
+13: Output: ¯bK, ΠK
+where
+¯A = [a(¯τ1, ¯α1), a(¯τ2, ¯α1), . . . , a(¯τN, ¯αM)] ∈
+C|Ωs|×NM is the sensing matrix, ¯b = [¯β1, ¯β2, . . . , ¯βNM] ∈
+CNM is the attenuation coefﬁcient vector of grid points. In (8),
+hs and ¯A are known while ¯b is unknown. Since |Ωs| ≪NM,
+(8) is underdetermined, hence there is no unique solution
+without additional assumptions about the considered problem.
+When the targets are sparsely occupying the parameter space,
+that is, non-zero elements in the solution vector ¯b are very
+few, (8) can be solved by utilizing sparse recovery methods,
+which impose sparsity by appropriate regularization of the
+obtained solutions. One of the most prominent CS methods is
+the OMP algorithm, where the main idea is to obtain a new
+support element of ¯b in each iteration, by determining the
+maximum correlation between the residual and columns of the
+measurement matrix. The OMP is stated in Algorithm 1.
+However, the OMP suffers from the basis mismatch issue;
+that is, when the target lies off the grid points constituting ¯A
+and ¯b, its performance degrades. In Algorithm 1, the identify
+step selects the atom with the highest correlation to the current
+residual. However, when the target lies between two grid points,
+the selected atom will not perfectly align with the actual target,
+leadingtoamismatchthatislateraccountedforbytheestimation
+of spurious ghost paths, i.e., the algorithm proposes detected tar-
+get locations that have no physical justiﬁcation. This mismatch
+also further propagates to the update step, where the residual is
+updated based on a suboptimal atom selection, thereby reducing
+the accuracy of the reconstructed signal and also the reliability
+of the estimated target parameters.
+B. NOMP
+To address this limitation, we introduce a high-resolution
+off-grid target detection method using the NOMP algorithm. The
+NOMP extends the OMP by introducing Newton reﬁnements to
+mitigate the basis mismatch. The proposed algorithm roughly
+involves three steps: 1) making a coarse estimation of a new tar-
+get’s parameters on a discrete grid using the OMP, 2) performing
+local optimization using Newton reﬁnements in the vicinity of
+the coarse estimate, essentially introducing off-grid estimates, 3)
+conducting global optimization using Newton reﬁnements for all
+previously identiﬁed targets jointly. By introducing these steps,
+the algorithm mitigates the impact of basis mismatch, resulting
+in improved performance compared to standard OMP, especially
+when the target lies off the discretized grid points.
+Let C = {τℓ, αℓ, βℓ| ℓ= 1, . . . , K} represent the set of pa-
+rameters to be estimated. The corresponding residual will be
+calculated by
+hr(C) = hs −
+K
+
+ℓ=1
+βℓaΩs (τℓ, αℓ) .
+(9)
+We obtain the maximum likelihood estimate of C by minimizing
+the residual energy ∥hr(C)∥2
+2. However, it is computationally
+inefﬁcient to directly minimize the residual w.r.t all parameters.
+Therefore, we estimate the parameters of multiple targets by
+performing Newtonian gradient descent for each target’s param-
+eters individually using the coarse estimation result of OMP as
+on-grid initial estimates.
+1) Initial Coarse Estimation: We ﬁrst perform a coarse de-
+tection of τℓand αℓwithin respective discrete grids ¯τ and ¯α.
+The coarse estimate of (τℓ, αℓ) is obtained by the OMP method
+summarized in Algorithm 1, where the match step involves
+computing the correlations between the residual and the columns
+of the sensing matrix ¯A. However, when ¯A is a large matrix, this
+step incurs a high computational cost due to the large number
+of matrix-vector multiplications. To reduce the computational
+complexity, we propose a modiﬁcation by exploiting the struc-
+ture of the sensing matrix. We know that in our sensing scenario
+the sensing matrix ¯A can be written as:
+¯A = Is(F∗
+m ⊗Fn),
+(10)
+where Is ∈B|Ωs|×NM is a binary row-selection matrix that
+extracts speciﬁc rows from the Kronecker product matrix (F∗
+m ⊗
+Fn), corresponding to the active time-frequency resource el-
+ements indexed by Ωs. The matrices Fn ∈CN×N and Fm ∈
+CM×M are Fourier matrices. This decomposition of ¯A allows
+us to take advantage of the fast Fourier transform (FFT) for
+faster computation. To this end, we deﬁne a matrix R ∈CN×M,
+whose entries at the indices Ωs are initialized with the values of
+the residual vector hr, (i.e., R(Ωs) = hr). Then, we exploit the
+FFT to compute the correlation as:
+cℓ= (Is(F∗
+m ⊗Fn))H hr
+= vec
+
+F
+	
+F−1(R)
+
+T
+(11)
+Here, F and F−1 represent the FFT and IFFT, respectively,
+and vec(·) vectorizes the resulting matrix. By using (I)FFT we
+signiﬁcantly reduce the computational complexity of the corre-
+lation step from O(|Ωs|NM) (i.e., direct matrix multiplication)
+to O(NM(log(N) + log(M))).
+Once the correlation vector cℓis computed, the coarse on-grid
+estimate (ˆτℓ, ˆαℓ) is selected as
+Πℓ= arg max
+j
+|cℓ(j)|2,
+(ˆτℓ, ˆαℓ) = ind2sub ([N, M], Πℓ) ,
+(12)
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:21 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 6 ---
+16142
+IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY, VOL. 74, NO. 10, OCTOBER 2025
+where the function ind2sub converts linear index Πℓto subscript
+indices ˆτℓand ˆαℓas
+ˆτℓ= Πℓ−(⌈Πℓ/N⌉−1)N,
+ˆαℓ= ⌈Πℓ/N⌉.
+(13)
+We obtain the corresponding attenuation coefﬁcients ˆβℓby
+invoking step 10 of Algorithm 1. Hereafter in all subsequent
+sections, we assume a = aΩs for clarity and brevity.
+2) LocalNewtonReﬁnements: IneachiterationoftheNOMP
+algorithm, the residual hr is updated by subtracting the contri-
+bution of previously estimated targets from the observed signal
+hs. Initially, we set hr = hs. After detecting a new target,
+its estimated contribution is removed from the residual before
+proceeding to the next iteration. At this stage, the coarse esti-
+mates (ˆτℓ, ˆαℓ, ˆβℓ) of the newly detected target are reﬁned by the
+Newton method. The reﬁned estimates are obtained by solving
+the nonlinear least squares problem ∥hr −a(ˆτℓ, ˆαℓ)ˆβℓ∥2
+2, which
+is equivalent to maximizing
+S
+
+ˆτℓ, ˆαℓ, ˆβℓ
+
+= 2ℜ
+
+hH
+r a(ˆτℓ, ˆαℓ)ˆβℓ
+
+−|ˆβℓ|2∥a(ˆτℓ, ˆαℓ)∥2
+2.
+(14)
+The Newton reﬁnement of (ˆτℓ, ˆαℓ) is done by
+ ˆτ ′
+ℓ
+ˆα′
+ℓ
+
+=
+ ˆτℓ
+ˆαℓ
+
+−¨S
+
+ˆτℓ, ˆαℓ, ˆβℓ
+−1 ˙S
+
+ˆτℓ, ˆαℓ, ˆβℓ
+
+,
+(15)
+where ˙S is known as the Jacobian matrix and is deﬁned as
+˙S
+
+ˆτℓ, ˆαℓ, ˆβℓ
+
+=
+ ∂S
+∂ˆτℓ
+∂S
+∂ˆαℓ
+
+,
+(16)
+and ¨S is known as the Hessian matrix and is deﬁned as
+¨S
+
+ˆτℓ, ˆαℓ, ˆβl
+
+=
+
+∂2S
+∂ˆτ 2
+ℓ
+∂2S
+∂ˆτℓ∂ˆαℓ
+∂2S
+∂ˆαℓ∂ˆτℓ
+∂2S
+∂ˆα2
+ℓ
+
+.
+(17)
+The ﬁrst order partial derivatives of S w.r.t ˆτℓand ˆαℓare
+computed as
+∂S
+∂ˆτℓ
+= 2ℜ
+
+hr −a(ˆτℓ, ˆαℓ)ˆβℓ
+H ∂a(ˆτℓ, ˆαℓ)
+∂ˆτℓ
+ˆβℓ
+
+,
+(18)
+∂S
+∂ˆαℓ
+= 2ℜ
+
+hr −a(ˆτℓ, ˆαℓ)ˆβℓ
+H ∂a(ˆτℓ, ˆαℓ)
+∂ˆαℓ
+ˆβℓ
+
+.
+(19)
+Similarly, the second-order derivatives are computed as
+∂2S
+∂ˆτ 2
+ℓ
+= 2ℜ
+
+hr −a(ˆτℓ, ˆαℓ)ˆβℓ
+H ∂2a(ˆτℓ, ˆαℓ)
+∂ˆτ 2
+ℓ
+ˆβℓ
+−|ˆβℓ|2 ∂aH(ˆτℓ, ˆαℓ)
+∂ˆτℓ
+∂a(ˆτℓ, ˆαℓ)
+∂ˆτℓ
+
+,
+(20)
+∂2S
+∂ˆα2
+ℓ
+= 2ℜ
+
+hr −a(ˆτℓ, ˆαℓ)ˆβℓ
+H ∂2a(ˆτℓ, ˆαℓ)
+∂ˆα2
+ℓ
+ˆβℓ
+−|ˆβℓ|2 ∂aH(ˆτℓ, ˆαℓ)
+∂ˆαℓ
+∂a(ˆτℓ, ˆαℓ)
+∂ˆαℓ
+
+,
+(21)
+∂2S
+∂ˆτℓ∂ˆαℓ
+=
+∂2S
+∂ˆαℓ∂ˆτℓ
+= 2ℜ
+
+hr −a(ˆτℓ, ˆαℓ)ˆβℓ
+H ∂2a(ˆτℓ, ˆαℓ)
+∂ˆαℓ∂ˆτℓ
+ˆβℓ
+−|ˆβℓ|2 ∂aH(ˆτℓ, ˆαℓ)
+∂ˆαℓ
+∂a(ˆτℓ, ˆαℓ)
+∂ˆτℓ
+
+.
+(22)
+When plugging these into (15) and iterating it, we obtain the
+locally reﬁned delay ˆτ ′
+ℓand Doppler shift ˆα′
+ℓestimates. Then we
+can update the target’s attenuation coefﬁcient ˆβ′
+ℓat the end of
+each Newton reﬁnement step via
+ˆβ′
+ℓ= aH (ˆτ ′
+ℓ, ˆα′
+ℓ) hr/∥a (ˆτ ′
+ℓ, ˆα′
+ℓ)∥2
+2.
+(23)
+Finally, the residual vector hr will be updated according to
+(9). This step is repeated Rs times, where Rs is the number
+of Newton reﬁnements.
+3) Global Newton Reﬁnements: After the Newton reﬁne-
+ments of individual targets’ parameters, the estimated reﬁned
+parameterssetisC′ = {(ˆτ ′
+ℓ, ˆα′
+ℓ, ˆβ′
+ℓ) | ℓ= 1, . . . , K}.Inthisstep,
+all the reﬁned estimates (τ ′
+ℓ, α′
+ℓ, β′
+ℓ) in C′ are jointly ﬁne-tuned
+via the joint Newton reﬁnements. Consider Kth round, where
+K number of targets have been discovered. At this point, we
+jointly ﬁne-update the targets’ estimates using the following
+optimization problem.
+S(C′) =
+hs −
+K
+
+ℓ=1
+ˆβ′
+ℓa (ˆτ ′
+ℓ, ˆα′
+ℓ)
+
+2
+2
+= ∥hs −AC′bC′∥2
+2.
+(24)
+This problem can be solved by the joint Newton reﬁnement
+method as given below.
+
+ˆτ ′′
+1 , . . . , ˆτ ′′
+K
+ˆα′′
+1, . . . , ˆα′′
+K
+
+=
+
+ˆτ ′
+1, . . . , ˆτ ′
+K
+ˆα′
+1, . . . , ˆα′
+K
+
+−¨S(C′)−1 ˙S(C′),
+(25)
+where, ¨S(C′) ∈R2 K×2 K and ˙S(C′) ∈R2 K×1 areblockHessian
+and block Jacobian matrices, which are given below.
+¨S(C′) =
+⎡
+⎢⎢⎢⎣
+¨S11
+¨S12
+· · ·
+¨S1K
+¨S21
+¨S22
+· · ·
+¨S2K
+...
+...
+...
+...
+¨SK1
+¨SK2
+· · ·
+¨SKK
+⎤
+⎥⎥⎥⎦, ˙S(C′) =
+⎡
+⎢⎢⎣
+˙S1
+...
+˙SK
+⎤
+⎥⎥⎦.
+(26)
+The expressions of the entries of the matrix ¨S(C′), and the matrix
+˙S(C′) are rather lengthy and can be found in the Appendix.
+Notably, due to the block hessian matrix structure, the compu-
+tational complexity of the joint Newton reﬁnement step in (25)
+is O((3K)3) which increases non-linearly with the number of
+targets. Thus, we propose low-complexity update by relaxing
+the block Hessian matrix to a block diagonal matrix as
+¨S(C′) =
+⎡
+⎢⎢⎢⎣
+¨S11
+0
+· · ·
+0
+0
+¨S22
+· · ·
+0
+...
+...
+...
+...
+0
+0
+· · ·
+¨SKK
+⎤
+⎥⎥⎥⎦,
+(27)
+This reduces the complexity to O(K) per step. Finally the
+attenuation coefﬁcients vector bC′′ corresponding to the updated
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:21 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 7 ---
+SHAH et al.: NEWTONIZED ORTHOGONAL MATCHING PURSUIT FOR HIGH-RESOLUTION TARGET DETECTION
+16143
+Algorithm 2: Proposed NOMP Algorithm.
+1: Input: hs, ¯A, δ
+2: Initial state: h0
+r = hs, Π0 = ∅, ℓ= 0, R0(Ωs) = hr
+3: repeat
+4:
+ℓ= ℓ+ 1
+5:
+Initial Coarse Estimation:
+6:
+cℓ= vec(F(F−1(Rℓ−1))T)
+▷Faster com-
+putation
+7:
+Πℓ= arg maxj |cℓ(j)|2
+8:
+(ˆτℓ, ˆαℓ) = ind2sub(size(R), Πℓ)
+9:
+ˆβℓ= aH(ˆτℓ, ˆαℓ)hℓ−1
+r
+/∥a(ˆτℓ, ˆαℓ)∥2
+2
+10:
+Local Newton Reﬁnement:
+▷Iterate Rs times
+11:
+(ˆτ ′
+ℓ, ˆα′
+ℓ) = (ˆτℓ, ˆαℓ) −¨S−1 ˙S
+12:
+ˆβ′
+ℓ= aH(ˆτ ′
+ℓ, ˆα′
+ℓ)hℓ−1
+r
+/∥a(ˆτ ′
+ℓ, ˆα′
+ℓ)∥2
+2
+13:
+hℓ
+r = hℓ−1
+r
+−ˆβ′
+ℓa(ˆτ ′
+ℓ, ˆα′
+ℓ)
+14:
+C′ = C′ ∪(ˆτ ′
+ℓ, ˆα′
+ℓ, ˆβ′
+ℓ)
+▷Local reﬁned
+estimates
+15:
+Global Newton Reﬁnement:
+16:
+(ˆτ ′′
+ℓ, ˆα′′
+ℓ) = (ˆτ ′
+ℓ, ˆα′
+ℓ) −¨S(C′)−1 ˙S(C′)
+▷1 ≤ℓ
+≤K
+17:
+bC′′ = A†
+C′′hs
+▷Least squares gain update
+18:
+hℓ
+r = hs −AC′′bC′′
+▷Update the residue
+19:
+Rℓ(Ωs) = hℓ
+r
+▷Update the R matrix
+20:
+Πℓ= Πℓ−1 ∪sub2ind(size(R), ˆτ ′′
+ℓ, ˆα′′
+ℓ)
+21: until max |cℓ|2 ≤δ
+22: Output: bC′′, Π
+parameters set C′′ = {(ˆτ ′′
+ℓ, ˆα′′
+ℓ, ˆβ′′
+ℓ) | ℓ= 1, . . . , K} is obtained
+by least squares method as
+bC′′ = A†
+C′′hs,
+(28)
+where, AC′′ ≜[a(ˆτ ′′
+1 , ˆα′′
+1), . . . , a(ˆτ ′′
+K, ˆα′′
+K)].
+The algorithm terminates when maxj |cℓ(j)|2 ≤δ, where
+δ ≜ln |Ωs| −ln (−ln (1 −pfa)) is a CFAR-based threshold,
+which is selected based on the required probability of false alarm
+pfa [28].
+The
+proposed
+NOMP-based
+algorithm
+is
+stated
+in
+Algorithm 2.
+C. Computational Complexity Analysis
+In this section, we analyze the computational complexity
+of the proposed NOMP algorithm. The Algorithm 2 has three
+major parts: Initial coarse estimation (steps 6-9), Local New-
+ton reﬁnement (steps 11–14), and Global Newton reﬁnement
+(steps 16-20), and the computational complexity of each part
+is O(NM(log(N) + log(M))), O(kRs|Ωs|), and O(|Ωs|k2 +
+k3), respectively, where k represents the current number of
+iterations. Besides the perstage analysis for the proposed NOMP
+algorithm, we compare its complexity with that of other CS
+algorithms: standard OMP, SIMFE [16] (a variant of OMP),
+SALSA [20], and ANM (via SDP) in Table I. While NOMP’s
+reﬁnement steps increase complexity modestly over standard
+OMP, its total runtime remains orders of magnitude lower than
+ANM and comparable to OMP’s variant SIMFE. At the same
+TABLE I
+COMPUTATIONAL COMPLEXITY COMPARISON
+TABLE II
+SIMULATION PARAMETERS
+time, it provides offgrid estimation, resolving the grid mismatch
+problem, unattainable by the standard OMP, SALSA and 2D-
+FFT. This compelling tradeoff of accuracy vs. computational
+burden motivates our choice of NOMP as the core algorithm for
+highresolution ISAC target detection.
+IV. SIMULATION RESULTS
+In this section, we evaluate the performance of the proposed
+NOMP algorithm and compare it with conventional 2D-FFT,
+SALSA [20], OMP, and SIMFE [16]. Additionally, while the
+ANM could also be considered as a benchmark, it introduces
+prohibitive computational overhead with the parameter settings
+considered in this work. The simulation settings in this study
+emulate an ISAC scenario aligned with the 3GPP standard for
+5 G V2X sidelink. The scenario consists of a TX vehicle, an
+RX vehicle, and a variable number of targets, including vehicles
+and pedestrians. Both the TX and RX vehicles are equipped
+with 3 dBi gain antennas and transmit at 23 dBm, operating in
+half-duplex mode to support communication and bistatic radar
+sensing. A carrier frequency of 5.9 GHz with a bandwidth of 50
+50MHz is used, providing 1596 subcarriers per OFDM symbol,
+of which 1560 are usable after accounting for guard bands.
+With a subcarrier spacing of Δf = 30 kHz (i.e., numerology
+μ = 1), a 10 ms radio frame consisting of 280 OFDM symbols
+is considered. Communication resources are allocated using
+thestandardsensing-basedsemi-persistentscheduling(SB-SPS)
+scheme, while radar sensing resources are randomly selected,
+resulting in an unstructured and sparse OFDM grid. A detailed
+summary of the OFDM grid conﬁguration, ISAC scenario, and
+NOMP algorithm settings is provided in Table II.
+To show the ability of the proposed method to detect weak
+targets (e.g., pedestrians) in the presence of strong targets (e.g.,
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:21 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 8 ---
+16144
+IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY, VOL. 74, NO. 10, OCTOBER 2025
+Fig. 3.
+Probability of weak target detection in the presence of strong target.
+Fig. 4.
+Recovery of two closely spaced off-grid targets in range domain.
+vehicles) and AWGN, we evaluate the probability of detection as
+a function of strong-to-weak-target peak ratio (SWPR) as shown
+in Fig. 3. The larger values of SWPR imply lower peak power
+of weak targets. The 2D-FFT shows the worst performance
+followed by SALSA, OMP, and SIMFE. The SALSA and OMP
+fully recover weak targets up to SWPR of about 6 dB and
+14 dB respectively. The SIMFE shows better performance with
+full recovery of weak targets up to around 18 dB SWPR. The
+proposed NOMP-based algorithm outperforms all approaches
+with perfect recovery of weak targets up to SWPR of about
+23 dB.
+Next, we evaluate the ability to distinguish two closely spaced
+off-grid targets in both the range and velocity domain as shown
+in Figs. 4 and 5 respectively. In the range domain, the two targets
+are separated by 0.5 m (i.e., one is kept at 100 m while the other
+is placed at 100.5 m) as shown in the maximized region of Fig.
+4. The 2D-FFT and SALSA show similar performance and can
+recover only one target with a peak at the grid point close to the
+true range. The OMP detects both targets but with inadequate
+accuracy (i.e., the peak of the second target is more than 2 m
+Fig. 5.
+Recovery of two closely spaced off-grid targets in velocity domain.
+away from the true range). However, SIMFE, with the help of
+the interpolation step, provides better range estimates than the
+OMP with estimation error ≤1 m. Finally, the NOMP not only
+successfully distinguishes two close targets but also estimates
+the off-grid ranges with supreme accuracy. On the other hand,
+in the velocity domain, the two targets are separated by 1 m/s
+(i.e., one is moving at 23 m/s while the other is at 24 m/s)
+as shown in Fig. 5. Here, the 2D-FFT and SALSA show the
+worst performance with sidelobes comparable in magnitude to
+the main lobe. This behavior can lead to false target detections
+andreducedoveralldetectionreliabilityandaccuracy.Moreover,
+both algorithms fail to resolve the targets in the velocity domain
+and produce a single merged main lobe appearing at the nearest
+grid point to 23 m/s target velocity. The OMP again shows two
+peaks, one is quite accurate while the other has a deviation
+of around 2 m/s. The SIMFE also detects two peaks but with
+superior accuracy than the OMP. The NOMP outperforms the
+OMP and SIMFE by estimating the off-grid velocities with
+minimum deviations.
+Then we investigate the estimation accuracies of the afore-
+mentioned algorithms as a function of SNR. We evaluate the
+RMSE in the range and velocity estimation for a single target
+case (K = 1) by running 500 independent Monte Carlo (MC)
+simulations for each SNR. In each MC iteration, the subset Ωs of
+resources is randomly selected to form sparse TX matrix X, and
+the noise matrix Z is also randomly generated, following Gaus-
+sian distribution. The target’s range and velocity are randomly
+chosen from U(50 m, 1500 m) and U(−30 m/s, 30 m/s) respec-
+tively. The Cramer-Rao bound (CRB) given in [29] is taken as
+a benchmark. The CRBs for range and velocity estimation are
+expressed as follows:
+σ2
+range ≥
+3c2
+SNR8π2MN(n2 −1)Δf 2 ,
+σ2
+velocity ≥
+3c2
+S NR8π2f 2c MN(m2 −1)T 2o
+.
+(29)
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:21 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 9 ---
+SHAH et al.: NEWTONIZED ORTHOGONAL MATCHING PURSUIT FOR HIGH-RESOLUTION TARGET DETECTION
+16145
+Fig. 6.
+RMSE in range estimation.
+Fig. 7.
+RMSE in velocity estimation.
+The RMSEs in range and velocity estimation are shown in
+Figs. 6 and 7 respectively, which show that the proposed NOMP-
+based algorithm not only outperforms the other four approaches
+but also gradually approaches the CRB. When increasing the
+Newton reﬁnements from Rs = 5 to Rs = 10, the RMSE range
+and velocity curves converge faster and meet the CRB curve.
+Thus a trade-off exists between accuracy requirements and com-
+plexity. On the other hand, since the 2D-FFT, SALSA, and OMP
+support on-grid target search, their RMSEs (i.e., in both range
+and velocity estimation) no longer improve with the increase in
+SNR. However, in case of SIMFE, the RMSE decreases with the
+increase in SNR but at very slow rate.
+In Fig. 8, we illustrate the convergence rate of the NOMP
+and compare it with that of the OMP. We analyze the effect of
+the oversampling factor (γ) on the convergence rate. By setting
+γ = 4. and K = 6, we simulate the norm of the residual as a
+function of the number of iterations. The results show that the
+NOMP, under γ = 1 (without an oversampled grid) and γ = 4
+(withanoversampledgrid), converges muchfaster thantheOMP
+in both cases. In fact, the NOMP reduces the residual energy
+Fig. 8.
+Convergence rates of OMP and NOMP with and without over-sampled
+grid at K = 6.
+Fig. 9.
+Execution time per iteration comparison of classical OMP, classical
+NOMP, and their faster implementations as a function of number of targets.
+more quickly by utilizing the local and joint Newton reﬁnements
+steps. The NOMP with the oversampled grid converges after 6
+iterations (equal to K) while NOMP without the oversampled
+grid achieves convergence after 7 iterations estimating one spu-
+rious ghost target. The convergence times for the NOMP with
+and without oversampled grid are 3.95 sand 1.03 s, respectively.
+In contrast, the OMP takes 195.36 s with the oversampled grid
+and 56.15 s without oversampled grid. These simulations were
+conducted on a 3 GHz Intel(R) Core(TM) i5-7400 CPU.
+In Fig. 9, we show the execution time per iteration of the
+conventional OMP, NOMP, and their faster implementations.
+Both classical OMP and classical NOMP compute the corre-
+lations between the residual and the columns of the sensing
+matrix in each iteration, which has a computational complexity
+of O(γ|Ωs|(MN)). By replacing this correlation step with a
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:21 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 10 ---
+16146
+IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY, VOL. 74, NO. 10, OCTOBER 2025
+Fig. 10.
+Bistatic radar conﬁguration with metallic spheres emulating rotating
+targets.
+more efﬁcient 2D-FFT operation, the complexity of the algo-
+rithms can be reduced to O(γ|Ωs| log(MN)), leading to faster
+implementations.
+V. MEASUREMENT SETUP
+To validate the proposed algorithm, we employ a bistatic radar
+setup in a semi-anechoic chamber, namely the Virtual Road
+Simulation and Test Area (VISTA), at the Thuringian Center
+of Innovation in Mobility. VISTA features a metal-shielded
+semi-anechoic chamber with inner dimensions of 13 m × 9 m ×
+7.5 m. This chamber is equipped with a 6.5 m diameter turntable
+and an 8 m diameter spherical near-ﬁeld antenna measurement
+system. This state-of-the-art test facility supports various RF
+measurement setups, including automotive antenna measure-
+ments, over-the-air channel emulation, and automotive radar
+testing [30]. To conduct bistatic dynamic scattering measure-
+ments for predeﬁned trafﬁc reference scenarios under repro-
+ducible laboratory conditions, it is essential to cover the full
+range of bistatic angles from 0° to 360°, as well as the complete
+spectrum of bistatic Doppler frequencies, which vary based on
+the target velocity [31].
+A. Bistatic Radar Conﬁguration
+Fig. 10 depicts the bistatic setup, with the transmitter placed
+outside the turntable and the receiver mounted on it. By posi-
+tioning the radar target at the rotational center of the turntable,
+this conﬁguration allows the bistatic angle to be varied across
+the full 360 ◦azimuth range. In the context of stationary radar
+networks, the Doppler effect observed during measurements is
+a result of the motion of radar targets. To effectively validate
+the estimation outcomes, it is essential that this movement
+can be described analytically, thereby providing the necessary
+ground truth data. This approach ensures that the measurement
+setup adequately simulates real-world conditions and allows for
+precise evaluation of the radar system’s performance.
+B. Target Emulator and Measurement Hardware
+The objective of the target emulator is to replicate Doppler
+frequencies typical of urban trafﬁc scenarios within a straight-
+forward and reproducible test setup. This approach allows the
+signal processing software and its algorithms to be tested and
+evaluated under well-controlled laboratory conditions before
+Fig. 11.
+Image of the bistatic test setup at VISTA [24]. The metallic spheres
+on the target emulators, and the receiver are mounted on the turntable, while
+the transmitter is placed outside the turntable. Pyramidal-shaped cones are
+microwave absorbers that are used to minimize ground reﬂections.
+moving to more resource-intensive ﬁeld tests. Fig. 11 illustrates
+themeasurementsetup,whichincludesthecarousel-typebistatic
+Doppler target emulator. The VISTA facility features a turntable
+used to vary the angle between the transmitter and receiver.
+The transmit antenna is placed outside the turntable while the
+receive antenna is on the turntable. A motor equipped with an
+absolute angle value encoder ensures constant target velocities
+and provides continuous knowledge of the target positions. Two
+wooden cantilever beams with a span of 3 m are attached to
+the motor’s rotational center, with metallic spheres mounted
+at the ends to serve as radar targets. The Doppler target em-
+ulator generates reproducible experimental data by ensuring
+strict synchronization between the RF measurements and the
+time-varying speeds and angles of the rotating cantilever beams.
+Two software-deﬁned radio devices from the National Instru-
+ments, namely Universal Software Radio Peripheral (USRP)
+2954R are utilized to feed the spatially separated transmitter and
+receiver. These devices facilitate precise time synchronization
+with 10 MHz and 1 pulse per second signals shared between
+the transmitter and receiver. USRPs lack internal data storage
+capabilities and instead stream the measured data samples to and
+from a server connected via Ethernet. Since the sampling clocks
+are derived from the 10 MHz signal, all samples on the Rx and
+Tx are inherently time-stamped. In addition to data streaming,
+the Rx server controls the VISTA turntable and the motor of the
+radar target emulator.
+C. Measurement Parameters
+To maximize the spatial resolution of radar-based range
+measurements, the USRPs are conﬁgured to operate at their
+maximum analog frequency bandwidth of 160 MHz, centered
+at 5.9 GHz. The radar signals used in the measurements are
+typical OFDM symbols of LTE. The wideband transmit signal,
+a Newman sequence, is continuously transmitted with a period
+of 64 µs similar to LTE symbol duration (i.e. 66.7 μs).
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:21 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 11 ---
+SHAH et al.: NEWTONIZED ORTHOGONAL MATCHING PURSUIT FOR HIGH-RESOLUTION TARGET DETECTION
+16147
+TABLE III
+RADAR TARGET PARAMETERS
+We conduct measurements of 4 different setups. Each setup
+has a speciﬁc combination of sphere diameter and angular speed
+as shown in Table III. Setups 1 and 2 involve small-sized spheres
+(6 cm diameter) rotating at two different speeds: 60 rpm (slow)
+and 80 rpm (fast) respectively. On the other hand, setups 3
+and 4 feature large-sized spheres (12 cm diameter) rotating at
+speeds of 30 rpm (slow) and 60 rpm (fast) respectively. The
+maximum rotation speed of 80 rpm ensures tangential velocities
+of the spheres up to 45 kmh−1, which is comparable to realistic
+vehicle speed in urban trafﬁc. To emulate various combinations
+of bistatic delay and Doppler shift, we measure a full rotation
+of the turntable in 5 ◦increments for each setup. During the
+data recording, the turntable remains stationary while the motor
+operates at a constant speed. This allows comprehensive evalua-
+tions of the NOMP algorithm under controlled and reproducible
+conditions.
+D. Data Processing and Parameter Estimation
+The data processing and parameter estimation start with the
+time-variant frequency response of the channel matrix H, ob-
+tained through the element-wise division between the measured
+received frequency spectrum Y and the predeﬁned transmit
+frequencyspectrumX.Weselectacoherentblockoftheﬁrst200
+symbols from H, which we refer to as the Hc matrix. This block
+of 200 symbols results in an observation time of 12.8 ms, pro-
+viding a Doppler resolution of 78.125 Hz. Given the frequency
+bandwidthof160 MHz,adelayresolutionof6.25 nsisachieved.
+Next, exponential averaging-based background subtraction [32]
+is applied to Hc to eliminate contributions from static objects,
+which exhibit zero Doppler shifts. This step ensures that only the
+dynamic components, indicative of moving spheres, remain in
+the processed data. Subsequently, we construct an unstructured
+sparse matrix by randomly selecting a subset Ωs of time and
+frequency samples from the Hc matrix. By excluding unused
+samples from the Hc matrix, we compress it to a sparse matrix
+Hs. For the parameter estimation, Hs and its corresponding
+sensing matrix are input to the NOMP algorithm. We repeat
+this process for each consecutive block of 200 coherent sym-
+bols using the same set of resources Ωs until the last block to
+assess the performance of the NOMP algorithm for every degree
+of motor rotation over a complete rotation. These processing
+steps ensure a detailed evaluation of the NOMP’s efﬁcacy in
+estimating delays and Doppler shifts in sparse OFDM ISAC
+systems, providing validation of the proposed NOMP-based
+target detection method through experimental results.
+E. Measurement Results
+Fig. 12 presents a comparison of delay and Doppler shift
+estimation results using the proposed NOMP-based algorithm
+across all four setups, along with the analytically calculated
+delay and Doppler shift (i.e., ground truths) for one complete
+rotation of the target emulator. The NOMP utilizes |Ωs| = 1 %
+of the total time and frequency samples in Hc for the delay and
+Doppler shift estimations in all four setups. Since the measure-
+ments are conducted in a semi-anechoic chamber, reﬂections
+from the test environment are reduced. Additionally, reﬂections
+from static objects (e.g., motor and antenna arch in VISTA, etc.)
+are minimized by using the background subtraction algorithm,
+ensuring that only reﬂections from the two moving spheres
+are processed. Across the four setups, the NOMP successfully
+estimates the delay and Doppler shift of the moving spheres
+with high accuracy, even when using only η = 1 % resources.
+This efﬁciency is evident in the close alignment of the esti-
+mations with the ground truths, underscoring the algorithm’s
+performance in different scenarios involving different target
+sizes and angular speeds. The missing estimation points in
+all setups highlight a critical observation regarding the use of
+directional horn antennas in the measurement setup. As the
+spheres rotate, they periodically leave the antennas’ ﬁeld of
+view (FOV), causing the reﬂected signal power to drop below
+detectable levels. This effect is more pronounced in setups with
+higher angular speeds, especially in setup 2, where the spheres
+move at 80 rpm through the antenna’s ﬁeld of view, reducing the
+likelihood of continuous detection. In addition, there are some
+outliers observed around 20 ns in the delay-Doppler plots across
+all setups. These outliers are caused by reﬂections from the
+wooden rod (cantilever beam) holding the metallic spheres. As
+the rod rotates, the reﬂection point on the rod changes depending
+on the aspect angle. The different radii and resulting tangential
+velocities of these reﬂection points cause Doppler frequencies
+that vary from negative to positive maximum values, creating
+the observed horizontal outlier pattern. These reﬂections were
+not explicitly considered in the ground truth but are naturally
+reconstructed by our algorithm, demonstrating its ability to cap-
+ture physically plausible scene components beyond the intended
+targets.
+In addition to the results obtained using the NOMP algorithm,
+delay and Doppler shift estimations are also performed using the
+OMP algorithm, with an oversampled grid (γ = 4), for setups
+2 and 4 as shown in Fig. 13. Both setups are evaluated under
+the same conditions as in the NOMP case to enable a direct
+comparison between the two algorithms. The results illustrate
+that the OMP algorithm, while capable of performing estima-
+tions, suffers from the inherent limitation of on-grid estimations.
+Due to the discretization of the parameter space, OMP relies
+on a ﬁxed grid, and as a result, its estimations tend to snap
+to the closest grid point, leading to inaccurate target detection.
+This is due to the basis mismatch problem not handled by
+the OMP algorithm. In contrast, the NOMP overcomes this
+problem by introducing Newton reﬁnements steps resulting in
+superior detection accuracy as evident from the much closer
+alignmentbetweentheNOMPestimationsandthegroundtruths.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:21 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 12 ---
+16148
+IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY, VOL. 74, NO. 10, OCTOBER 2025
+Fig. 12.
+Comparison of delay and Doppler shift estimations in (a) Setup 1, (b) Setup 2, (c) Setup 3, and (d) Setup 4 with the ground truths for one complete
+rotation of the target emulator. The color of the estimations represents the magnitude of the moving spheres throughout the complete rotation.
+Fig. 13.
+Delay and Doppler shift estimations results in (a) Setup 2 and (b) Setup 4, using OMP with oversampled grid (γ = 4). The color of the estimations
+represents the magnitude of the moving spheres throughout the complete rotation.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:21 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 13 ---
+SHAH et al.: NEWTONIZED ORTHOGONAL MATCHING PURSUIT FOR HIGH-RESOLUTION TARGET DETECTION
+16149
+Fig. 14.
+Box plots of error distribution in (a) absolute delay and (b) absolute
+Doppler shift across 4 setups.
+Moreover, the missing estimation points and rod reﬂections in
+the delay-Doppler plots are consistent in both Figs. 12 and 13,
+but they are more pronounced in the OMP algorithm results
+comparedtotheNOMPalgorithm.Thiscomparisonunderscores
+the limitations of traditional grid-based approaches like OMP in
+applications where high precision is required, especially in high
+mobility ISAC scenarios.
+To evaluate the accuracy of the estimation results, the error
+distributions of the estimated delay and Doppler shift across the
+four setups are plotted using box plots as shown in Fig. 14. To
+further analyze the impact of resource utilization on estimation
+accuracy, 50 simulations are performed for each setup using
+η = 1 %, η = 5 %, and η = 10 % of the total time-frequency
+resources. For each simulation, the percentage of resources is
+randomly selected from the Hc matrix, ensuring a variety of
+time-frequency combinations are tested. Fig. 14(a) presents the
+box plot of absolute delay errors, while Fig. 14(b) shows the
+absolute Doppler shift errors. The results indicate that the error
+in delay estimation is generally lower in setups 3 and 4, which
+involve spheres with a larger diameter (12 cm), compared to
+setups 1 and 2, which feature spheres with a smaller diameter
+(6 cm). This suggests that larger spheres having larger radar
+cross-section (RCS) provide more accurate delay estimations.
+A larger RCS leads to stronger reﬂected signals, increasing
+the SNR at the receiver. Higher SNR improves the ability
+of the NOMP to distinguish between the signal and noise,
+leading to a more accurate estimation of delay. In contrast,
+smaller spheres with lower RCS produce weaker reﬂections,
+resulting in lower SNR, and hence, more estimation errors.
+Additionally, across all four setups, the delay estimation error
+consistently decreases as resource utilization increases, demon-
+strating that greater resource allocation enhances estimation
+accuracy. In terms of Doppler shift estimation, the error is most
+prominent in setup 2, where the spheres rotate at 80 rpm. The
+higher angular speed in this setup introduces more variabil-
+ity in the Doppler shift, leading to greater estimation errors
+compared to the other setups. A similar trend is observed in
+Doppler shift estimation errors with respect to resource uti-
+lization, where increasing the percentage of utilized resources
+reduces the error. These ﬁndings highlight the importance of
+adequate resource allocation in improving the accuracy of de-
+lay and Doppler shift estimation, especially under challenging
+conditions such as higher angular velocities or smaller target
+sizes.
+VI. CONCLUSION
+In this paper, we proposed a high-resolution off-grid tar-
+get detection algorithm based on the Newtonized Orthogonal
+Matching Pursuit (NOMP). The proposed algorithm is suit-
+able for a multiuser Integrated Sensing and Communication
+(ISAC) system with arbitrary orthogonal frequency division
+multiplexing (OFDM) resource grid structure. The proposed
+algorithm has three main stages. In the ﬁrst stage, the algorithm
+provides an initial coarse estimate of the target’ delay and
+Doppler shift parameters based on discretized grid points. In
+the second stage, this rough on-grid estimate is reﬁned in the
+surrounding two-dimensional continuous delay-Doppler space
+using the Newton method. Finally, in the third stage, a global
+joint feedback optimization is applied to all estimated targets.
+This joint feedback optimization allows inaccurately identiﬁed
+targets with small spacing to be updated and potentially sepa-
+rated more accurately, improving the delay-Doppler resolution.
+The proposed algorithm offers not only effective and accurate
+gridless target detection thanks to Newton reﬁnements but also
+high computational efﬁciency. Additionally, the algorithm does
+not require prior knowledge of the number of targets for termina-
+tion, which makes it suitable for realistic scenarios. Besides, the
+proposed algorithm outperforms the existing typical methods in
+weak target recovery under strong target components, detection
+of closely spaced off-grid targets, estimation accuracy, conver-
+gence rate, and execution time. Furthermore, the feasibility of
+the algorithm is validated using bistatic radar measurement data
+with dynamic radar targets in a metal-shielded semi-anechoic
+chamber. The measurement results showed that the proposed
+NOMP-based algorithm can accurately detect targets with only
+1 % of the total OFDM resources, signiﬁcantly reducing the
+OFDM resource occupancy for radar sensing in ISAC system.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:21 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 14 ---
+16150
+IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY, VOL. 74, NO. 10, OCTOBER 2025
+In future work, we can employ the proposed algorithm in
+resource allocation strategies in ISAC systems. Given that the
+algorithm efﬁciently handles sparse and unstructured OFDM
+grids, it can be utilized to optimize resource allocation in mul-
+tiuser ISAC-capable V2X sidelink systems. By incorporating
+the algorithm into advanced resource management techniques,
+the resource occupancy for high-resolution radar sensing can
+be minimized in dense ISAC systems. Additionally, advanced
+interference mitigation techniques can be explored to address
+challenges arising from multiuser resource overlapping in dense
+vehicular scenarios. Furthermore, extending the algorithm to
+account for multi-dimensional parameters beyond range and ve-
+locity, such as angle-of-arrival (AoA), can enable its application
+in more complex vehicular networks and urban scenarios.
+APPENDIX A
+In (26), the block Hessian matrix ¨S(C′) and the block Jacobian
+matrix ˙S(C′) are deﬁned. The entry ˙Sℓin ˙S(C′) is the Jacobian
+matrix of the ℓth target and is deﬁned as
+˙Sℓ=
+ ∂S(C′)
+∂ˆτ ′
+ℓ
+∂S(C′)
+∂ˆα′
+ℓ
+
+,
+(30)
+where the ﬁrst order partial derivatives of S(C′) w.r.t ˆτ ′
+ℓand ˆα′
+ℓ
+are computed as
+∂S(C′)
+∂ˆτ ′
+ℓ
+= 2ℜ
+
+(hs −AC′bC′)H ∂a(ˆτ ′
+ℓ, ˆα′
+ℓ)
+∂ˆτ ′
+ℓ
+ˆβ′
+ℓ
+
+,
+(31)
+∂S(C′)
+∂ˆα′
+ℓ
+= 2ℜ
+
+(hs −AC′bC′)H ∂a(ˆτ ′
+ℓ, ˆα′
+ℓ)
+∂ˆα′
+ℓ
+ˆβ′
+ℓ
+
+,
+(32)
+whereas the entry ¨Sℓk in ¨S(C′) is the Hessian matrix, and is
+deﬁned for two cases: ℓ= k and ℓ̸ = k.
+When ℓ= k, we have ¨Sℓℓas the ℓth diagonal entry in ¨S(C′),
+and is deﬁned as
+¨Sℓℓ=
+⎡
+⎣
+∂2S(C′)
+∂ˆτ ′2
+ℓ
+∂2S(C′)
+∂ˆτ ′
+ℓ∂ˆα′
+ℓ
+∂2S(C′)
+∂ˆα′
+ℓ∂ˆτ ′
+ℓ
+∂2S(C′)
+∂ˆα′2
+ℓ
+⎤
+⎦,
+(33)
+where the second-order derivatives are computed as
+∂2S(C′)
+∂ˆτ ′2
+ℓ
+= 2ℜ
+
+(hs −AC′bC′)H ∂2a(ˆτ ′
+ℓ, ˆα′
+ℓ)
+∂ˆτ ′2
+ℓ
+ˆβ′
+ℓ
+−|ˆβ′
+ℓ|2 ∂aH(ˆτ ′
+ℓ, ˆα′
+ℓ)
+∂ˆτ ′
+ℓ
+∂a(ˆτ ′
+ℓ, ˆα′
+ℓ)
+∂ˆτ ′
+ℓ
+
+,
+(34)
+∂2S(C′)
+∂ˆα′2
+ℓ
+= 2ℜ
+
+(hs −AC′bC′)H ∂2a(ˆτ ′
+ℓ, ˆα′
+ℓ)
+∂ˆα′2
+ℓ
+ˆβ′
+ℓ
+−|ˆβ′
+ℓ|2 ∂aH(ˆτ ′
+ℓ, ˆα′
+ℓ)
+∂ˆα′
+ℓ
+∂a(ˆτ ′
+ℓ, ˆα′
+ℓ)
+∂ˆα′
+ℓ
+
+,
+(35)
+∂2S(C′)
+∂ˆτ ′
+ℓ∂ˆα′
+ℓ
+= ∂2S(C′)
+∂ˆα′
+ℓ∂ˆτ ′
+ℓ
+= 2ℜ
+
+(hs −AC′bC′)H ∂2a(ˆτ ′
+ℓ, ˆα′
+ℓ)
+∂ˆα′
+ℓ∂ˆτ ′
+ℓ
+ˆβ′
+ℓ
+−|ˆβ′
+ℓ|2 ∂aH(ˆτ ′
+ℓ, ˆα′
+ℓ)
+∂ˆα′
+ℓ
+∂a(ˆτ ′
+ℓ, ˆα′
+ℓ)
+∂ˆτ ′
+ℓ
+
+.
+(36)
+When ℓ̸ = k, we have ¨Sℓk as the (ℓ, k)-th off-diagonal entry
+in ¨S(C′), and is deﬁned as
+¨Sℓk =
+⎡
+⎣
+∂2S(C′)
+∂ˆτ ′
+k∂ˆτ ′
+ℓ
+∂2S(C′)
+∂ˆτ ′
+k∂ˆα′
+ℓ
+∂2S(C′)
+∂ˆα′
+k∂ˆτ ′
+ℓ
+∂2S(C′)
+∂ˆα′
+k∂ˆα′
+ℓ
+⎤
+⎦,
+(37)
+where the second-order derivatives are computed as
+∂2S(C′)
+∂ˆτ ′
+k∂ˆτ ′
+ℓ
+= −2ℜ
+∂a(ˆτ ′
+k, ˆα′
+k)
+∂ˆτ ′
+k
+ˆβ′
+k
+H ∂a(ˆτ ′
+ℓ, ˆα′
+ℓ)
+∂ˆτ ′
+ℓ
+ˆβ′
+ℓ
+
+,
+(38)
+∂2S(C′)
+∂ˆα′
+k∂ˆα′
+ℓ
+= −2ℜ
+∂a(ˆτ ′
+k, ˆα′
+k)
+∂ˆα′
+k
+ˆβ′
+k
+H ∂a(ˆτ ′
+ℓ, ˆα′
+ℓ)
+∂ˆα′
+ℓ
+ˆβ′
+ℓ
+
+,
+(39)
+∂2S(C′)
+∂ˆτ ′
+k∂ˆα′
+ℓ
+= −2ℜ
+∂a(ˆτ ′
+k, ˆα′
+k)
+∂ˆτ ′
+k
+ˆβ′
+k
+H ∂a(ˆτ ′
+ℓ, ˆα′
+ℓ)
+∂ˆα′
+ℓ
+ˆβ′
+ℓ
+
+,
+(40)
+∂2S(C′)
+∂ˆα′
+k∂ˆτ ′
+ℓ
+= −2ℜ
+∂a(ˆτ ′
+k, ˆα′
+k)
+∂ˆα′
+k
+ˆβ′
+k
+H ∂a(ˆτ ′
+ℓ, ˆα′
+ℓ)
+∂ˆτ ′
+ℓ
+ˆβ′
+ℓ
+
+,
+(41)
+REFERENCES
+[1] R. Thoma, T. Dallmann, S. Jovanoska, P. Knott, and A. Schmeink, “Joint
+communication and radar sensing: An overview,” in Proc. 15th Eur. Conf.
+Antennas Propag., 2021, pp. 1–5.
+[2] J. Du et al., “An overview of resource allocation in integrated sensing
+and communication,” in Proc. 2023 IEEE/CIC Int. Conf. Commun. China,
+2023, pp. 1–6.
+[3] D. K. Pin Tan et al., “Integrated sensing and communication in 6G:
+Motivations, use cases, requirements, challenges and future directions,”
+in Proc. 1st IEEE Int. Online Symp. Joint Commun. Sens., 2021,
+pp. 1–6.
+[4] X. Cheng, D. Duan, S. Gao, and L. Yang, “Integrated sensing
+and communications (ISAC) for vehicular communication networks
+(VCN),” IEEE Internet Things J., vol. 9, no. 23, pp. 23441–23451,
+Dec. 2022.
+[5] S. N. H. Shah, D. Martín-Sacristán, C. Ravelo, C. Smeenk, C. Schneider,
+and J. Robert, “Radar-enabled resource allocation in 5G-V2X sidelink
+communication,” in Proc. IEEE 26th Int. Conf. Intell. Transp. Syst., 2023,
+pp. 1416–1421.
+[6] V. Todisco, S. Bartoletti, C. Campolo, A. Molinaro, A. O. Berthet, and
+A. Bazzi, “Performance analysis of sidelink 5G-V2X mode 2 through
+an open-source simulator,” IEEE Access, vol. 9, pp. 145648–145661,
+2021.
+[7] M. L. Rahman, P.-F. Cui, J. A. Zhang, X. Huang, Y. J. Guo, and
+Z. Lu, “Joint communication and radar sensing in 5G mobile network
+by compressive sensing,” in Proc. IEEE 19th Int. Symp. Commun. Inf.
+Technol., 2019, pp. 599–604.
+[8] R. S. Thoma et al., “Cooperative passive coherent location: A promising
+5 G service to support road safety,” IEEE Commun. Mag., vol. 57, no. 9,
+pp. 86–92, Sep. 2019.
+[9] Z. Wan, Z. Gao, B. Shim, K. Yang, G. Mao, and M.-S. Alouini,
+“Compressive sensing based channel estimation for millimeter-wave full-
+dimensional MIMO with lens-array,” IEEE Trans. Veh. Technol., vol. 69,
+no. 2, pp. 2337–2342, Feb. 2020.
+[10] J. W. Choi, B. Shim, Y. Ding, B. Rao, and D. I. Kim, “Compressed sensing
+for wireless communications: Useful tips and tricks,” IEEE Commun.
+Surveys Tuts., vol. 19, no. 3, pp. 1527–1550, Third Quarter 2017.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:21 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 15 ---
+SHAH et al.: NEWTONIZED ORTHOGONAL MATCHING PURSUIT FOR HIGH-RESOLUTION TARGET DETECTION
+16151
+[11] M. A. Hadi, S. Alshebeili, K. Jamil, and F. E. El-Samie, “Compressive
+sensing applied to radar systems: An overview,” Signal, Image Video
+Process., vol. 9, no. 1, pp. 25–39, 2015. [Online]. Available: https://link.
+springer.com/article/10.1007/s11760-015-0824-y
+[12] J. H. Ender, “On compressive sensing applied to radar,” Signal Process.,
+vol. 90, no. 5, pp. 1402–1414, 2010.
+[13] C.
+R.
+Berger,
+B.
+Demissie,
+J.
+Heckenbach,
+P.
+Willett,
+and
+S. Zhou, “Signal processing for passive radar using OFDM waveforms,”
+IEEE J. Sel. Topics Signal Process., vol. 4, no. 1, pp. 226–238,
+Feb. 2010.
+[14] B. N. Bhaskar, G. Tang, and B. Recht, “Atomic norm denoising with
+applications to line spectral estimation,” IEEE Trans. Signal Process.,
+vol. 61, no. 23, pp. 5987–5999, Dec. 2013.
+[15] Y. Chi, L. L. Scharf, A. Pezeshki, and A. R. Calderbank, “Sensitivity
+to basis mismatch in compressed sensing,” IEEE Trans. Signal Process.,
+vol. 59, no. 5, pp. 2182–2195, May 2011.
+[16] G. Hakobyan and B. Yang, “A novel OFDM-MIMO radar with non-
+equidistantsubcarrierinterleavingandcompressedsensing,”inProc.IEEE
+17th Int. Radar Symp., 2016, pp. 1–5.
+[17] G. Hakobyan and B. Yang, “A novel OFDM-MIMO radar with non-
+equidistant dynamic subcarrier interleaving,” in Proc. 2016 Eur. Radar
+Conf., 2016, pp. 45–48.
+[18] B. Nuss, L. Sit, and T. Zwick, “A novel technique for tnter-
+ference mitigation in OFDM radar using compressed sensing,” in
+Proc. 2017 IEEE MTT-S Int. Conf. Microw. Intell. Mobility, 2017,
+pp. 143–146.
+[19] B. Kong, Y. Wang, H. Leung, X. Deng, H. Zhou, and F. Zhou, “Sparse
+representation based range-doppler processing for integrated OFDM
+radar-communication networks,” Int. J. Antennas Propag., vol. 2017,
+pp. 1–12, 2017.
+[20] C. Knill, B. Schweizer, S. Sparrer, F. Roos, R. F. H. Fischer, and
+C. Waldschmidt, “High range and doppler resolution by application
+of compressed sensing using low baseband bandwidth OFDM radar,”
+IEEE Trans. Microw. Theory Techn., vol. 66, no. 7, pp. 3535–3546,
+Jul. 2018.
+[21] C. Knill, F. Roos, B. Schweizer, D. Schindler, and C. Waldschmidt,
+“Random multiplexing for an MIMO-OFDM radar with compressed
+sensing-based reconstruction,” IEEE Microw. Wireless Compon. Lett.,
+vol. 29, no. 4, pp. 300–302, Apr. 2019.
+[22] G. Tang, B. N. Bhaskar, P. Shah, and B. Recht, “Compressed sensing
+off the grid,” IEEE Trans. Inf. Theory, vol. 59, no. 11, pp. 7465–7490,
+Nov. 2013.
+[23] S. Semper and F. Romer, “ADMM for ND line spectral estimation using
+grid-free compressive sensing from multiple measurements with applica-
+tions to DOA estimation,” in Proc. IEEE Int. Conf. Acoust., Speech Signal
+Process., 2019, pp. 4130–4134.
+[24] M. Döbereiner et al., “Joint high-resolution delay-doppler estimation for
+Bi-static radar measurements,” in Proc. 16th Eur. Radar Conf., 2019,
+pp. 145–148.
+[25] A. U. Khan, S. N. H. Shah, C. Schneider, and J. Robert, “Target detection
+in a highway scenario with extended V2V channel model,” in Proc. 2024
+IEEE Wireless Commun. Netw. Conf., 2024, pp. 1–6.
+[26] C. Sturm and W. Wiesbeck, “Waveform design and signal processing
+aspects for fusion of wireless communications and radar sensing,” Proc.
+IEEE, vol. 99, no. 7, pp. 1236–1259, Jul. 2011.
+[27] C. Ravelo, D. Martín-Sacristán, S. N. H. Shah, C. Smeenk, G. Del Galdo,
+and J. F. Monserrat, “Sensing resources reduction for vehicle detection
+with integrated sensing and communications,” in Proc. IEEE 97th Veh.
+Technol. Conf., 2023, pp. 1–5.
+[28] B. Mamandipoor, D. Ramasamy, and U. Madhow, “Newtonized or-
+thogonal matching pursuit: Frequency estimation over the contin-
+uum,” IEEE Trans. Signal Process., vol. 64, no. 19, pp. 5066–5081,
+Oct. 2016.
+[29] M.
+F.
+Keskin,
+V.
+Koivunen,
+and
+H.
+Wymeersch,
+“Limited
+feedforward
+waveform
+design
+for
+OFDM
+dual-functional
+radar-
+communications,” IEEE Trans. Signal Process., vol. 69, pp. 2955–2970,
+2021.
+[30] M. A. Hein et al., “Emulation of virtual radio environments for realistic
+end-to-end testing for intelligent trafﬁc systems,” in Proc. 2015 IEEE MTT-
+S Int. Conf. Microw. Intell. Mobility, 2015, pp. 1–4.
+[31] A. Schwind et al., “Bi-static delay-doppler reference for cooperative
+passive vehicle-to-x radar applications,” IET Microw. Antennas Propag.,
+vol. 14, no. 14, pp. 1749–1757, 2020.
+[32] M.Piccardi,“Backgroundsubtractiontechniques:Areview,”inProc.2004
+IEEE Int. Conf. Syst., Man Cybern., 2004, pp. 3099–3104.
+Syed Najaf Haider Shah received the B.Eng. degree
+in electrical engineering from the National University
+of Sciences and Technology, Islamabad, Pakistan, in
+2017, and the master’s degree in electrical engineer-
+ing with majors in digital and wireless communica-
+tion systems from Information Technology Univer-
+sity, Lahore, Pakistan, in 2020. He is currently work-
+ing toward the Ph.D. degree with Technische Univer-
+sität Ilmenau (TU Ilmenau), Ilmenau, Germany. His
+research interests include waveform design for joint
+communication and radar sensing, optimal resource
+allocation algorithms design in vehicular networks, compressive sensing, and
+parameter estimation.
+Sebastian Semper received the Master of Science
+degree in 2015, and the Doctoral degree (with Hons.)
+in electrical engineering, in 2022. He also studied
+mathematics with Technische Universität Ilmenau
+(TU Ilmenau), Ilmenau, Germany. Since 2015, he has
+been a Research Assistant with Electronic Measure-
+ments and Signal Processing Group, which is a joint
+research activity between the Fraunhofer Institute for
+Integrated Circuits IIS and TU Ilmenau, Ilmenau.
+Since 2022, he has been a Post Doctoral Student
+with Electronic Measurements and Signal Processing
+Group. His research interests include compressive sensing, parameter estima-
+tion, optimization, numerical methods, and algorithm design.
+Aamir Ullah Khan received the B.S. degree in elec-
+trical (telecommunication) engineering from COM-
+SATS University (formerly known as COMSATS In-
+stitute of Information Technology), Islamabad, Pak-
+istan, in 2015, and the master’s degree in electron-
+ics and communications engineering from Kocaeli
+University, Kocaeli, Türkiye. He is currently working
+toward the Ph.D. degree with Technische Universität
+Ilmenau, Ilmenau, Germany. His research interests
+include propagation modeling for integrated com-
+munication and sensing enabled vehicle-to-vehicle
+(V2V) systems, parameter estimation, and target detection in a clutter-rich
+environment.
+Christian Schneider received the Diploma in electri-
+cal engineering from Technische Universität Ilmenau,
+Ilmenau, Germany, in 2001. He is currently a Group
+Leader with Electronic Measurements and Signal
+Processing Department, TU Ilmenau and Fraunhofer
+IIS. His research interests include multi-dimensional
+channel sounding, radio channel characterization and
+modeling, and its application to space-time signal
+processing and integrated sensing and, communica-
+tion questions. He was the recipient of the best paper
+award at the European Wireless Conference in 2013
+and the European Conference of Antennas and Propagation in 2017 and 2019.
+Joerg Robert received the Ph.D. degree in terrestrial
+TV broadcast using multi-antenna systems from TU
+Braunschweig, Braunschweig, Germany, in 2013. He
+studied electrical engineering and information tech-
+nology with TU Ilmenau, Ilmenau, Germany and TU
+Braunschweig, Braunschweig. From 2006 to 2012, he
+conducted research on the topic of digital television
+with the Institute of Communications Engineering,
+TU Braunschweig. He was actively involved in the
+development of DVB-T2, the second generation of
+digital terrestrial television. In 2012, he joined the
+LIKEchairwithFriedrich-Alexander-UniversitätErlangen-Nürnberg,Erlangen,
+Germany. Since 2021, he has been a Full Professor and the Head of the Group
+for Dependable Machine-to-Machine Communication with the Department of
+Electrical Engineering and Information Technology, Technische Universitaet
+Ilmenau. His research focuses on low power wide area networks. Joerg Robert
+is very active in international standardization. He is currently a Secretary of the
+IEEE 802.15 standardization group, and the Vice-Chair of the IEEE 802.19.3
+Task Group on wireless coexistence.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:21 UTC from IEEE Xplore.  Restrictions apply. 

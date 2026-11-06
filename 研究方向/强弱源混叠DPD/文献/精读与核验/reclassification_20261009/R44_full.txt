@@ -1,0 +1,1799 @@
+--- PDF PAGE 1 ---
+IEEE/ACM TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING, VOL. 32, 2024
+3517
+Multi-Source Direction-of-Arrival Estimation Using
+Steered Response Power and Group-Sparse
+Optimization
+Elisa Tengan
+, Thomas Dietzen
+, Member, IEEE, Filip Elvander
+, and Toon van Waterschoot
+, Member, IEEE
+Abstract—In this paper, a method is proposed for estimating the
+direction of arrival (DOA) of multiple broadband sound sources.
+This is achieved by solving a group-sparse optimization problem,
+which models an observed broadband steered response power
+(SRP) map as a linear function of power spectral densities (PSDs),
+associated to a set of candidate DOAs. The estimation of the source
+DOAs is then accomplished by identifying peaks in the resulting
+spatial power density, i.e., the estimated direction-speciﬁc PSDs
+integrated over frequency. The proposed method is motivated by
+its potential to reveal more distinct peaks in the estimated spatial
+power density than those directly observed in the SRP map, which
+can be beneﬁcial to the robustness in DOA estimation performance
+when multiple sources need to be distinguished under varying
+acoustic conditions. An implementation of the proposed method us-
+ing the alternating direction method of multipliers (ADMM) is pre-
+sented, and the DOA estimation performance is evaluated with both
+simulated and experimental data. Results show that, especially in
+reverberant scenarios, the proposed method presents an advantage
+in locating closely spaced sources when compared to SRP-PHAT,
+the group-sparse iterative covariance-based estimation (GSPICE)
+method, and the wideband MUSIC method with geometric aver-
+aging. Furthermore, it is observed that for a compact microphone
+array, the proposed method overall maintained its performance
+even when using SRP maps with lower grid resolutions than the
+sampling requirements of the broadband SRP function. Finally,
+results obtained with experimental data showed the applicability
+of the proposed method in a practical meeting room environment.
+Index
+Terms—Source
+localization,
+direction-of-arrival
+estimation, group sparsity, steered response power.
+I. INTRODUCTION
+T
+HE ﬁeld of sound source localization research has re-
+mained prevalent due to its wide-ranging applications,
+Manuscript received 13 December 2023; revised 20 May 2024; accepted 11
+June 2024. Date of publication 26 June 2024; date of current version 26 July
+2024. This work was supported in part by the ESAT Laboratory of KU Leuven,
+in the frame of FWO Mandate under Grant SB 1S86520N, in part by KU Leuven
+internal funds under Grant C14/21/075, and in part by European Research
+Council under the European Union’s Horizon 2020 research and innovation
+program / ERC Consolidator under Grant SONORA 773268. The associate
+editor coordinating the review of this manuscript and approving it for publication
+was Dr. Jens Ahrens. (Corresponding author: Elisa Tengan.)
+Elisa Tengan, Thomas Dietzen, and Toon van Waterschoot are with the
+Department of Electrical Engineering (ESAT/STADIUS), KU Leuven, 3000
+Leuven, Belgium (e-mail: elisa.tengan@esat.kuleuven.be; thomas.dietzen@
+esat.kuleuven.be; toon.vanwaterschoot@esat.kuleuven.be).
+Filip Elvander is with the Department of Information and Commu-
+nications Engineering, Aalto University, 02150 Espoo, Finland (e-mail:
+ﬁlip.elvander@aalto.ﬁ).
+Digital Object Identiﬁer 10.1109/TASLP.2024.3419417
+including domains as diverse as hearing aid technology [1], [2],
+multi-party videoconferencing [3], acoustic surveillance [4] and
+autonomous robots [5]. Over time, signiﬁcant research efforts
+have been devoted to addressing the challenges of maintaining
+a robust source localization performance in realistic scenarios.
+Many source localization methods rely on the use of micro-
+phone arrays, primarily due to the spatial diversity they offer
+and that can be effectively exploited [6]. Some well-established
+categories of array processing methods for source localization
+include beamforming methods [7], [8], subspace-based ap-
+proaches [9], [10], [11], as well as generalized cross-correlation
+(GCC) methods [12], [13], [14]. Additionally, machine learn-
+ing [15], [16] and compressed sensing techniques [17], [18],
+[19], [20], as well as methods based on optimal transport [21],
+[22], [23], have also emerged as relevant alternatives.
+Among the conventional GCC-based methods, the steered re-
+sponse power (SRP) has been thoroughly used as the foundation
+for new localization methods being further developed, mostly
+due to its robustness in adverse acoustic conditions such as noisy
+and reverberant environments when compared to, for instance,
+subspace-based approaches [13], [14], [24], [25], [26], [27].
+Moreover, the use of the phase transform (PHAT) weighting
+on the GCC function yields the well-established SRP-PHAT
+framework, which has been demonstrated to improve perfor-
+mance on the localization of speech sources in reverberant
+environments [13], [14], [24], [28], [29].
+Since the conventional SRP and SRP-PHAT methods rely on
+ﬁnding the candidate direction that yields the maximum value
+over a spatial acoustic map [24], when multiple sources are
+present, differentiating true source-related peaks from spurious
+peaks caused by noise or acoustic reﬂections, as well as resolv-
+ing closely located sources, can become a difﬁcult task when
+employing these methods [29], [30], [31]. As a consequence,
+various strategies have been proposed to improve multi-source
+localization under an SRP-based framework [31], [32], [33],
+[34], [35], [36], [37], [38], [39], [40], [41], [42], [43], [44].
+Some techniques propose the recursive removal of the inﬂuence
+of previously located sound sources in the observed SRP maps,
+thereby enabling the localization of the remaining sources [32],
+[33], [34], [35]. Spatial clustering [36], [37] and grid reﬁnement
+methods [38], [39] represent other relevant approaches in this
+context. Exploiting sparsity in the time-frequency domain [31],
+[40], [41] and in the acoustic scene [42], [43], [44] has also been
+investigated.
+2329-9290 © 2024 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.
+See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 27,2026 at 07:41:31 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 2 ---
+3518
+IEEE/ACM TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING, VOL. 32, 2024
+In this paper, as an alternative contribution to the task of
+multi-source localization under an SRP-based framework, we
+proposeamethodforestimatingthedirectionofarrival(DOA)of
+multiple broadband sound sources in far-ﬁeld scenarios based on
+group-sparse modeling. Group-sparse regularization, previously
+applied in the context of broadband source localization with
+co-prime arrays [45] and single directional microphones [46],
+[47], is here employed to model a broadband SRP map. In par-
+ticular, the cross-correlations used for computing the observed
+SRP map are modeled as a linear function of (unknown) source
+power spectral densities (PSDs), supported on an overcomplete
+search grid of candidate DOAs. Given the assumption of spatial
+sparsity, only a small number of candidate DOAs will have
+non-zero PSDs, yielding a group-sparse structure to the vector
+constructed by concatenating the DOA-speciﬁc PSDs from the
+entire search grid. We propose to estimate the full set of PSDs by
+solving a linear inverse problem augmented by a group-sparsity
+penalty. The source DOAs are then identiﬁed by the peaks of the
+spatial power density, i.e., the estimated direction-speciﬁc PSDs
+integrated over frequency. The motivation behind the proposed
+method lies in its potential to reveal more distinct peaks in the
+resulting spatial power density than those directly observed in
+the broadband SRP map [17], [42], [43], which can be beneﬁcial
+to the robustness of the DOA estimation performance when
+multiple sources need to be distinguished under varying acoustic
+conditions.
+The proposed method is based on our previous work [48], in
+which the search grid of candidate DOAs used to compose the
+PSD vector to be estimated was assumed to coincide with the
+search grid of the observed SRP map that is being modeled, and
+the estimation of the PSD vector was performed by solving a
+Group Lasso problem [49]. In this paper, the extension of the
+method from [48] is twofold: Firstly, we reformulate the opti-
+mization problem to accommodate scenarios where the search
+gridusedfor computingtheSRPmapcanhavealower resolution
+than the one used in the estimation of the source PSD vector.
+Within this context, the uniform spatial sampling requirements
+of the broadband SRP function, for a given microphone array
+conﬁguration, are also derived in this work. We note that an
+analytical expression of the sampling requirements of the GCCs
+used in the computation of the SRP map has been previously
+presented in [50], in terms of time difference of arrival (TDOA),
+and therein used to determine the pair-speciﬁc maximum signal
+bandwidth for which the sampling of the GCC function can
+be performed without aliasing, given a chosen grid resolu-
+tion. Moreover, different approaches aimed at efﬁcient spatial
+sampling of the SRP have also been proposed, based on the
+spatial distribution of TDOAs [51], [52], [53]. Alternatively,
+our focus lies in establishing, through a different perspective, a
+reference for the required uniform spatial grid resolution, and
+consequently, the number of required broadband SRP samples,
+to ensure the highest feasible spatial resolution in the observed
+SRP map. Secondly, the method from our previous work [48]
+is further extended by using a group square-root Lasso [54]
+formulation for the optimization problem in the estimation of
+the PSD vector, as opposed to the more conventional group
+Lasso formulation [49] previously employed. As shown in [55],
+the group square-root Lasso is equivalent to a group-sparse
+covariance ﬁtting problem, and its formulation can facilitate
+the required regularization tuning based on group-sparse co-
+variance ﬁtting criteria [54], [55]. This adaptation is particularly
+valuable in practical applications where the acoustic noise con-
+ditions are not known a priori. An efﬁcient implementation of
+the proposed framework using the alternating direction method
+of multipliers (ADMM) [56] is also presented.
+In order to evaluate the proposed method’s DOA estimation
+performance, a series of simulations subject to different acoustic
+conditions are performed. We ﬁrst consider a two-speaker sce-
+narioandsubsequentlyvarythelevelsofnoiseandreverberation,
+as well as the angular separation and broadband power level
+difference between sources. We then consider scenarios with up
+to ﬁve sound sources, involving speech and instrumental music.
+The effects of the grid resolution of the observed SRP map,
+as well as of limiting the number of iterations within the pro-
+posed method’s ADMM scheme, are analyzed. Furthermore, the
+method’s performance is evaluated with experimental data [57].
+This study greatly extends the aspects considered for evaluating
+the proposed method when compared with those presented in our
+previous work[48]. Moreover, theproposedmethodis compared
+with the conventional SRP-PHAT method, as well as with the
+group-sparse iterative covariance-based estimation (GSPICE)
+method [55], here used for estimating the PSDs directly from
+the microphone array cross-correlations, and with the wideband
+MUSIC method with geometric averaging [9], [58]. Results
+show that, especially in reverberant scenarios, the proposed
+method presents an advantage in locating closely spaced sources
+when compared to the SRP-PHAT, GSPICE, and wideband
+MUSIC. Furthermore, it is shown that for a compact microphone
+array, the proposed method overall maintains its performance
+even when using SRP maps computed with grid resolutions
+that are lower than the sampling requirements of the broadband
+SRP function. This observation, along with results obtained
+for limited numbers of iterations within the ADMM-scheme,
+indicate potential approaches to reduce the proposed method’s
+overall computational complexity while maintaining its DOA
+estimation performance. Finally, results obtained with experi-
+mental data show the validity and applicability of the proposed
+method in a practical meeting room environment.
+This paper is organized as follows. In Section II, the signal
+model is deﬁned. In Section III, the broadband SRP formulation,
+as well as its spatial sampling requirements, are detailed. In
+Section IV, the proposed method is presented. In Section V, the
+simulation setups and their implementation are detailed, with
+results discussed in Section VI. Finally, Section VII concludes
+the paper.
+Notation: vectors and matrices are denoted by lower- and
+upper-case boldface letters, respectively. For matrices A (and
+vectors a where applicable), A⊤, AH, ℜ{A}, and [A]m,n
+respectively denote the transpose, the Hermitian transpose, the
+real part, and the element of A at index (m, n). For vectors
+a, ∥a∥p denotes the lp-norm, the operation diag(a) creates a
+diagonalmatrixfromtheelementsofa,andweuse ˆa todenotean
+estimate of a. For scalars a, the expectation operator is denoted
+by E{a}, the complex conjugate by a∗and an estimate by ˆa. The
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 27,2026 at 07:41:31 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 3 ---
+TENGAN et al.: MULTI-SOURCE DIRECTION-OF-ARRIVAL ESTIMATION USING STEERED RESPONSE POWER AND GROUP-SPARSE OPTIMIZATION
+3519
+operation mod(a, b) denotes amodulo b, and ⌈a⌉denotes the
+ceiling of a. Euler’s number is denoted by e and the imaginary
+unit by j.
+II. SIGNAL MODEL
+We here consider scenarios where sound sources are located
+in the far ﬁeld and in the same horizontal plane as a planar mi-
+crophone array with M elements, indexed by m = 1, . . . , M.
+The time difference of arrival (TDOA) of a propagating sound
+wave arriving from an azimuth angle γ that is observed at a
+microphone pair (m, m′) is given by [14]
+Δtm,m′(γ) = (pm −pm′)⊤rγ/c.
+(1)
+Here, pm ∈R3 and pm′ ∈R3 are the Cartesian coordinate
+vectors of microphones m and m′, respectively, i.e., pm =
+[xm, ym, zm]⊤and pm′ = [xm′, ym′, zm′]⊤. Furthermore, rγ de-
+notes the incident direction vector of unit length for azimuth
+angle γ, and c is the speed of sound. The azimuth angle of a
+sound source will also be referred to as its DOA.
+In the discrete Fourier transform (DFT) domain, the m-th
+microphone signal is denoted by ym(ωk), with ωk denoting
+the discrete angular frequency. Assuming that the microphone
+signals are sampled in the time domain with a sampling rate
+fs, and that the signal ym(ωk) is computed from a fast Fourier
+transform (FFT) of length 2˜K, the discrete frequencies corre-
+spond to ωk = kπfs/K, with k ∈{−K + 1, . . . , K}. More-
+over, while considering a total of J sound sources located at
+DOAs ϑ1, . . . , ϑJ, the signal ym(ωk) is modeled as
+ym(ωk) = wH
+m(ωk)s(ωk) + nm(ωk),
+(2)
+where nm(ωk) denotes the undesired component, which can be
+due to noise and reverberation. The vector s(ωk) ∈CJ corre-
+sponds to the source signal vector at the array’s ﬁrst microphone,
+here used as reference:
+s(ωk) = [s1(ωk), . . . sJ(ωk)]⊤,
+(3)
+with si(ωk) denoting the signal emitted by the i-th source. The
+vector wm(ωk) ∈CJ is thus the transfer function relative to the
+array’s ﬁrst microphone:
+wm(ωk) =
+
+ejωkΔtm,1(ϑ1), . . . ejωkΔtm,1(ϑJ)⊤
+,
+(4)
+such that, based on (3), w1(ωk) corresponds to w1(ωk) =
+[1, . . . , 1]⊤.
+The generalized cross-correlation between recorded sig-
+nals from a microphone pair (m, m′) in the DFT domain is
+deﬁned as
+ψm,m′(ωk) = E{ym(ωk)y∗
+m′(ωk)}.
+(5)
+If the source signals are assumed to be mutually uncorrelated,
+then the cross-correlation between si(ωk) and si′(ωk), for i, i′ ∈
+{1, . . . , J}, is given by
+E{si(ωk)s∗
+i′(ωk)} =
+
+φSi(ωk)
+if i = i′
+0
+if i̸ = i′
+(6)
+where φSi(ωk) is the power spectral density (PSD) of the
+i-th source signal. Furthermore, from (1), one can note
+that Δtm,m′(γ) = Δtm,1(γ) −Δtm′,1(γ). Thus, the cross-
+correlation ψm,m′(ωk) can be expressed as
+ψm,m′(ωk) =
+J
+
+i=1
+φSi(ωk)e−jωkΔtm,m′(ϑi) + η2
+m,m′(ωk), (7)
+where η2
+m,m′(ωk) denotes the cross-correlation of the undesired
+component1 for microphone pair (m, m′).
+III. BROADBAND STEERED RESPONSE POWER (SRP) MAPPING
+A. Broadband SRP Formulation
+For conciseness, a microphone pair (m, m′) will be denoted
+by index p in the remainder, such that a given TDOA Δtm,m′(γ)
+will be denoted by Δtp(γ). For an M-element microphone array,
+the total number of different microphone pairs P is given by
+P = M(M −1)/2.
+(8)
+Since ψp(ωk) is Hermitian, we consider its single-sided form,
+with k ∈{0, . . . , K}. Assuming the DC component to be neg-
+ligible (ψp(ω0) = 0), the broadband SRP for a given candidate
+DOA angle γ is deﬁned as [59]
+z(γ) = 2
+P
+
+p=1
+K
+
+k=1
+ℜ{ψp(ωk)ejωkΔtp(γ)}.
+(9)
+The exponential term in (9) corresponds to the phase shift
+applied to the pair-speciﬁc cross-correlation ψp(ωk) in or-
+der to obtain a frequency-domain delay-and-sum beamformer
+steered towards candidate direction γ [13]. Considering a to-
+tal of N SRP samples obtained at angles from the SRP grid
+ΓN = {γ1, . . . , γN}, we deﬁne the broadband SRP map vector
+z ∈RN as
+z = [z(γ1), . . . z(γN)]⊤,
+(10)
+which can be expressed as a matrix-vector product as follows.
+We deﬁne, for a microphone pair p, the matrix Hp ∈CN×K and
+the vector ψp ∈RK, respectively, as
+[Hp]n,k = ejωkΔtp(γn),
+(11)
+
+ψp
+
+k = ψp(ωk).
+(12)
+By stacking multiple matrices Hp and vectors ψp, respectively,
+as
+H = [H1, . . . HP ] ,
+(13)
+ψ =
+
+ψ⊤
+1 , . . . ψ⊤
+P
+⊤,
+(14)
+the broadband SRP map z can be expressed as
+z = 2ℜ{Hψ}.
+(15)
+Conventionally, in a scenario with a single broadband source
+at DOA ϑ1, performing the DOA estimation using an observed
+1We note that there may be cross-correlation terms between the source signals
+and the undesired component, stemming from the latter’s broad deﬁnition in
+(2). However, such cross-correlation terms do not impact the formulation of the
+optimization problem within the proposed method.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 27,2026 at 07:41:31 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 4 ---
+3520
+IEEE/ACM TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING, VOL. 32, 2024
+Fig. 1.
+Example of a microphone pair on the horizontal plane with its corre-
+sponding inter-microphone Euclidean distance dp and rotation αp.
+SRP map involves ﬁnding the index n from the set of candidate
+DOAs that yields the maximum value of z(γn):
+ˆn = arg maxnz(γn),
+(16)
+such that the single source’s estimated DOA is given by
+ˆϑ1 = γˆn.
+(17)
+B. Uniform Spatial Sampling Requirements
+In order to describe the uniform spatial sampling require-
+ments2 of a broadband SRP map used for performing DOA es-
+timation, we start by analyzing the TDOA expression of a given
+microphone pair. As previously presented in (1), the TDOA
+depends on the incident direction vector rγ, which, in the case of
+far-ﬁeld propagation and sound sources on the same horizontal
+plane as a planar microphone array, corresponds to [14]
+rγ = −[cos γ, sin γ, 0]⊤.
+(18)
+The vector (pm −pm′) in (1) is given by
+(pm −pm′) =
+⎡
+⎢⎣
+xm −xm′
+ym −ym′
+0
+⎤
+⎥⎦=
+⎡
+⎢⎣
+dp cos αp
+dp sin αp
+0
+⎤
+⎥⎦
+(19)
+where dp denotes the Euclidean distance of the microphone pair
+as in dp = ∥pm −pm′∥2, and αp denotes the microphone pair’s
+rotation on the horizontal plane. In Fig. 1, an example of a
+microphone pair on the horizontal plane and its corresponding
+distance dp and rotation αp are illustrated.
+2The sampling requirements speciﬁed in this section are related to the reso-
+lution required by the broadband SRP function such that, when computed for a
+grid of candidate DOAs, an SRP map with a distinct peak is obtained. Hence,
+these requirements do not refer to the relation between the spacing between
+microphones and the signal’s wavelength, for which the effect of spatial aliasing
+is commonly deﬁned [60].
+By decomposing the cross-correlation ψp(ωk) into its mag-
+nitude and phase components |ψp(ωk)| and ∠ψp(ωk), respec-
+tively, the broadband SRP in (9) can be reformulated as
+z(γ) = 2
+P
+
+p=1
+K
+
+k=1
+ℜ{|ψp(ωk)|ej∠ψp(ωk)ejωkΔtp(γ)}
+(20a)
+= 2
+P
+
+p=1
+K
+
+k=1
+|ψp(ωk)| cos(∠ψp(ωk) + ωkΔtp(γ)),
+(20b)
+which corresponds to, essentially, a weighted sum of cosines
+with frequencies being dependent on Δtp(γ). By substituting
+(18) and (19) into (1), the TDOA expression becomes Δtp(γ) =
+dp
+c cos(αp −γ), which allows for the broadband SRP in (20b)
+to be reformulated as
+z(γ) = 2
+P
+
+p=1
+K
+
+k=1
+|ψp(ωk)| cos
+
+∠ψp(ωk)−ωkdp
+c
+cos(αp−γ)
+
+.
+(21)
+Toobtaintheapproximatespatialfrequencyofz(γ),welinearize
+the term cos(αp −γ) around an arbitrary look direction, denoted
+γ0, by means of a ﬁrst-order Taylor series approximation:
+cos(αp−γ) ≈cos(αp−γ0)+
+
+d
+dγ cos(αp−γ)
+
+γ=γ0
+
+(γ−γ0)
+= cos(αp −γ0) + sin(αp −γ0)(γ −γ0),
+(22)
+with
+d
+dγ cos(αp −γ)|γ=γ0 denoting the derivative of cos(αp −
+γ) with respect to γ, evaluated in γ = γ0. Hence, by inserting
+the above approximation in (21), we obtain
+z(γ) = 2
+P
+
+p=1
+K
+
+k=1
+|ψp(ωk)| cos
+
+∠ψp(ωk)
+−ωkdp
+c
+(cos(αp −γ0) + sin(αp −γ0)(γ −γ0))
+
+,
+(23)
+such that the spatial frequency of z(γ) at look direction γ0, for
+frequency ωk and microphone pair p, is given by
+¯ωk,p,γ0 = ωkdp
+c
+sin(αp −γ0).
+(24)
+Based on the Nyquist-Shannon sampling theorem [61], and by
+assuming the microphone signals to be bandlimited by ωb, i.e.,
+ψp(ωk) = 0 for ωk > ωb, we deﬁne, for microphone pair p, the
+corresponding critical spatial sampling period (in radians) as
+Δγp,γ0 =
+π
+maxωk≤ωb ¯ωk,p,γ0
+=
+πc
+ωbdp sin(αp −γ0).
+(25)
+Note that the smallest value of Δγp,γ0 for a given microphone
+pair p, denoted Δγpmin, occurs at γ0 = αp −π/2 and is equal
+to Δγpmin = (πc)/(ωbdp). This observation is consistent with
+the one presented in [50]. Additionally, note that for a given
+microphone array conﬁguration, the microphone pair with the
+largest inter-microphone distance, denoted dmax, describes the
+smallest critical spatial sampling period over the entire array,
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 27,2026 at 07:41:31 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 5 ---
+TENGAN et al.: MULTI-SOURCE DIRECTION-OF-ARRIVAL ESTIMATION USING STEERED RESPONSE POWER AND GROUP-SPARSE OPTIMIZATION
+3521
+corresponding to
+Δγ =
+πc
+ωbdmax
+.
+(26)
+Therefore, if the SRP grid ΓN used to compute the SRP map z
+is intended to be spatially uniform, one could consider Δγ as a
+lower bound for the grid resolution, which guarantees that z(γ)
+is sufﬁciently sampled over γ for all microphone pairs and look
+directions. In that case, the minimum number of required SRP
+samples Nmin, uniformly distributed over 2π, is given by
+Nmin =
+ 2π
+Δγ
+
+=
+2ωbdmax
+c
+
+.
+(27)
+The knowledge of Nmin is particularly relevant for compact
+microphone arrays. It has the potential to indicate whether the
+number of SRP samples to be considered, and therefore, the
+computational complexity of SRP-based DOA estimation meth-
+ods, can be reduced while maintaining the highest achievable
+spatial resolution of the SRP map, given the available array
+conﬁguration.
+IV. PROPOSED METHOD
+The conventional SRP approach detailed in Section III-A is
+evidently straightforward when performing single-source local-
+ization. However, when considering the case of multiple sources,
+especially under adverse acoustic conditions, such approach can
+be subject to DOA estimation errors caused by the presence
+of spurious peaks in the observed SRP map, as well as to the
+inability to resolve closely located sources. Therefore, in the fol-
+lowing section, we present a method that aims to further improve
+the DOA estimation of multiple sources while considering the
+aforementioned limitations of the conventional SRP approach.
+A. Group-Sparse Fitting of a Broadband SRP Map
+We deﬁne a candidate source PSD vector ϕS,l ∈RK as
+ϕS,l = [φS(ω1, θl) . . . φS(ωK, θl)]⊤,
+(28)
+where φS(ωk, θl) is the candidate source PSD with DOA θl
+for frequency ωk. By considering a set of L candidate DOAs
+ΘL = {θ1, . . . , θL} uniformly distributed over 2π and stack-
+ing different ϕS,l vectors, for l = 1, . . . , L, and L ≫J, the
+overcomplete vector ϕS ∈RKL of direction-dependent source
+PSDs is obtained as
+ϕS =
+
+ϕ⊤
+S,1 . . . ϕ⊤
+S,L
+⊤.
+(29)
+In addition, we deﬁne a vector ap,l ∈CK composed of the
+frequency-domain phase shifts related to a speciﬁc microphone
+pair p and candidate direction θl as
+ap,l =
+
+e−jω1Δtp(θl) . . . e−jωKΔtp(θl)⊤
+,
+(30)
+such that we can obtain a matrix A ∈CKP ×KL as
+A =
+⎡
+⎢⎢⎣
+A1,1
+. . .
+A1,L
+...
+...
+...
+AP,1
+. . .
+AP,L
+⎤
+⎥⎥⎦,
+(31)
+where Ap,l = diag(ap,l) Based on (7), we model the cross-
+correlation vector ψ in (14) as
+ψ = AϕS,
+(32)
+so that the broadband SRP vector in (15) can be expressed as
+z = 2ℜ{HAϕS} = 2ℜ{HA}ϕS = BϕS,
+(33)
+where the second equality follows from the PSDs being real-
+valued, and where we deﬁne B = 2ℜ{HA}. With this, we
+propose to estimate the PSDs corresponding to the candidate
+DOAs, and thereby the source DOAs, by solving
+minimize
+ϕS≥0
+1
+2 ∥z −BϕS∥2 +
+L
+
+l=1
+λl
+ϕS,l
+
+2
+(34)
+where λl is a regularization parameter. The proposed opti-
+mization problem’s formulation corresponds to a nonnegative
+group square-root Lasso problem [54]. The regularization term
+L
+l=1 λl∥ϕS,l∥2 promotes solutions with a group-sparse struc-
+ture, i.e., only a few of the subvectors ϕS,l composing ϕS
+should be nonzero, which agrees with the assumption of having
+a limited number of point sources (J ≪L). By estimating ˆϕS,
+and consequently, ˆϕS,1, . . . , ˆϕS,L, the source signals’ DOAs
+are estimated by identifying the peaks on the spatial power
+density, obtained by integrating the PSD values over frequency
+for each subvector ˆϕS,l, as previously proposed in [48]. The
+proposed group-sparse optimization-based method is motivated
+by the potential to reveal more distinct peaks in the spatial
+power density than those directly observed in the broadband
+SRP map [17], [42], [43], which can positively contribute to
+the robustness of the DOA estimation performance in scenarios
+where multiple sources need to be distinguished under varying
+acoustic conditions. For a total of J sources, the estimated
+DOAs ˆϑ1, . . . , ˆϑJ arethenchosentobethecandidatedirections
+related to the J largest peaks. One may note that the grid of
+candidate DOAs ΘL employed to compose ϕS is not required
+to be equal to the SRP grid ΓN used to obtain the observed SRP
+map z, as opposed to the approach previously proposed in [48].
+The choice of formulating a group square-root Lasso problem
+as opposed to the more conventional group Lasso [49] relates to
+the possibility of tuning the regularization parameter λl, which
+affects the level of group sparsity in the solution obtained,
+independently from the noise level [54]. Under the conditions
+of homoscedastic noise, it has been shown in [55] that the
+group square-root Lasso is equivalent to a relaxed version of
+the covariance ﬁtting problem, which motivates the selection
+of the regularization parameter based on the corresponding co-
+variance ﬁtting criteria [62]. In that case, considering same-size
+groups in the deﬁnition of ϕS, the reference value ˜λl according
+to which the optimal choice of λl is scaled is given by [54], [55]
+˜λl =
+
+
+
+
+
+
+∥b(l−1)K+1∥2
+2 . . . ∥blK∥2
+2
+⊤
+2
+N
+,
+(35)
+for l = 1, . . . , L, with bq denoting the q-th column of B.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 27,2026 at 07:41:31 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 6 ---
+3522
+IEEE/ACM TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING, VOL. 32, 2024
+B. Group Square-Root Lasso Implementation
+In order to solve the problem in (34), we present an implemen-
+tation based on the alternating direction method of multipliers
+(ADMM) [56].
+By using auxiliary variables, denoted u1 and u2, the problem
+in (34) can be reformulated as
+minimize
+u1,u2≥0
+1
+2 ∥u1∥2 +
+L
+
+l=1
+λl ∥u2,l∥2
+(36a)
+subject to
+u1 = z −BϕS
+(36b)
+u2 = ϕS
+(36c)
+where u2,l corresponds to the l-th group composing the vector
+u2, such that it can be represented as
+u2 =
+
+u⊤
+2,1
+. . .
+u⊤
+2,L
+⊤.
+(37)
+The augmented Lagrangian of the optimization problem in
+(36) is given by
+Lμ(ϕS, u1, u2, d1, d2) = 1
+2 ∥u1∥2 +
+L
+
+l=1
+λl ∥u2,l∥2
++ μ
+2 ∥z −BϕS −u1 −d1∥2
+2
++ μ
+2 ∥ϕS −u2 −d2∥2
+2
+(38)
+where d1 and d2 are the (scaled) dual variables, and μ can be
+interpreted as a dual update step size [56].
+For a given ADMM iteration, indexed as q, we deﬁne the
+following shorthands:
+ζ1(q) = z −BϕS(q + 1) −d1(q),
+(39)
+ζ2(q) = ϕS(q + 1) −d2(q),
+(40)
+such that the updates for each variable in (38) can be written as
+ϕS(q + 1) = arg min
+ϕS
+Lμ(ϕS, u1(q), u2(q), d1(q), d2(q)),
+(41)
+u1(q + 1) = arg min
+u1
+1
+2 ∥u1∥2 + μ
+2 ∥ζ1(q) −u1∥2
+2 ,
+(42)
+u2(q + 1) = arg min
+u2≥0
+L
+
+l=1
+λl ∥u2,l∥2 + μ
+2 ∥ζ2(q) −u2∥2
+2 ,
+(43)
+d1(q + 1) = u1(q + 1) −ζ1(q),
+(44)
+d2(q + 1) = u2(q + 1) −ζ2(q).
+(45)
+It can be readily veriﬁed that the updates for the primal variables
+are given by
+ϕS (q + 1) =
+
+B⊤B + IKL
+−1 
+B⊤(z −u1(q) −d1(q))
++u2(q) + d2(q)] ,
+(46)
+u1 ( q + 1) = T (ζ1(q), 1/μ) ,
+(47)
+Algorithm 1: The Proposed DOA Estimation Algorithm.
+1:
+initiate ˆϕS = 0KL×1
+2:
+initiate j := 0, u2(0) = ˆϕS,
+ϕS(0) = d2(0) = 0KL×1, u1(0) = d1(0) = 0N×1
+3:
+repeat {ADMM scheme}
+4:
+update ϕS(j + 1) as in (46)
+5:
+update u1( j + 1) as in (47)
+6:
+for l ←1 to L do
+7:
+update u2,l as in (48)
+8:
+end for
+9:
+d1(j + 1) = u1(j + 1) −ζ1(j)
+10:
+d2(j + 1) = u2(j + 1) −ζ2(j)
+11:
+j ←j + 1
+12:
+until convergence
+13:
+store ˆϕS = u2(end)
+14:
+estimate ˆϑi, for i = 1, . . . , J, as the J largest peaks
+integrated over frequency in ˆϕS
+u2,l ( q + 1) = T
+
+max
+
+ζ2,l(q), 0
+
+, λl
+μ
+
+,
+(48)
+where IKL denotes a KL × KL identity matrix, and T(x, κ) is
+deﬁned as the soft-thresholding operator
+T(x, κ) =
+
+max
+
+1 −
+κ
+∥x∥2
+, 0
+
+x.
+(49)
+In (48), the update of u2 is computed group-wise, for l =
+1, . . . , L. After computing the updates of d1 and d2 as in (44)
+and (45), respectively, the whole iterative process is repeated un-
+til convergence [56]. The proposed method’s entire framework,
+employingthepresentedADMM-basedimplementation,issum-
+marized in Algorithm 1. It may be noted that the per-iteration
+complexity is dominated by (46), which, if implemented by us-
+ing a Cholesky factorization of (B⊤B + IKL), has a complexity
+of O(K2˜L2). Furthermore, if N < KL, then the per-iteration
+complexity is O(NKL).
+V. EVALUATION
+In order to evaluate the DOA estimation performance of the
+proposed method, a series of simulations is performed under
+different acoustic conditions. In Section V-A, the parameters
+describing the different simulated acoustic scenarios are deﬁned.
+In Section V-B, the choice of the search grids of candidate
+DOAs ΓN and ΘL are detailed. In Section V-C, the methods
+with which the proposed method is compared, as well as the the
+performance metric used to evaluate the DOA estimation, are
+speciﬁed. The particular characteristics of each scenario and the
+results obtained are further detailed and discussed in Section VI.
+A. Simulation Setup
+Different far-ﬁeld propagation scenarios are simulated in a
+rectangular room with dimensions 6.3 × 5.1 × 2.9 m. A uni-
+form circular array with a radius of 5 cm and M = 6 micro-
+phones is considered to be centered at Cartesian coordinates
+[3.1, 2.7, 1.5]⊤m, with a total of P = 15 distinct microphone
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 27,2026 at 07:41:31 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 7 ---
+TENGAN et al.: MULTI-SOURCE DIRECTION-OF-ARRIVAL ESTIMATION USING STEERED RESPONSE POWER AND GROUP-SPARSE OPTIMIZATION
+3523
+TABLE I
+SOURCE SIGNAL TYPES
+pairs, and the largest inter-microphone distance corresponding
+to the array’s diameter (dmax = 0.1 m). The implementation of
+the image source method [63] presented in [64] is used for sim-
+ulating the room acoustics, characterized by the reverberation
+time (T60).
+The simulated point sources are denoted by Si, where i is the
+source index, and are placed in the same horizontal plane as the
+microphone array, at a radial distance of 1.5 m from the center
+of the array. Each source emits a randomly selected segment of
+a pre-determined signal type. The signal type of each source
+and the section in which it is present is detailed in Table I.
+With the exception of Section VI-F, all sources are simulated
+with equal broadband power. Spatially white speech-shaped
+noise is generated by ﬁltering white Gaussian noise with a
+16th-order ﬁnite impulse response (FIR) linear prediction ﬁlter
+obtained from a babble noise signal [65]. With σ2
+Si denoting
+the broadband power of the i-th source’s reverberant signal at
+the array’s ﬁrst microphone, the signal-to-noise ratio (SNR) is
+deﬁned as
+SNR = σ2
+S1
+σ2n
+,
+(50)
+where σ2
+n denotes the broadband power of the spatially white
+component. With a sampling rate of fs = 16 kHz, the simulated
+time-domain microphone signals have a duration of 3 s, and
+their short-time Fourier transform (STFT) is computed using
+a 512-point square-root Hann window and 50% overlap, re-
+sulting in a time-domain window of 32 ms and a total of 187
+frames. We assume that in all scenarios, the microphone signal’s
+bandwidth is limited by ωb = 2πfb, with fb = 8 kHz. The cross-
+correlations in (5) are obtained by averaging the PHAT-weighted
+STFT cross-correlations over a total of Nf frames 3. Considering
+the single-sided broadband SRP formulation in (9), a total of
+K = 256 frequency bins are used.
+For each scenario, a total of R = 100 realizations are per-
+formed, and for each realization r, the ﬁrst source’s DOA
+(ϑ(r)
+1 ) is randomly generated over the range of 360 ◦without
+constraining it to lie on the candidate DOA search grids ΓN and
+ΘL being used. The remaining sources’ DOAs are then set as
+ϑ(r)
+i
+= ϑ(r)
+i−1 + Δϑ(r)
+i,i−1,
+for i = 2, . . . , J,
+(51)
+3Since the weighting operation is not accounted for in the cross-correlation
+model presented in Section II, the PSD vector estimated with the proposed
+method will be inherently weighted as well in this simulation setup. However,
+due to the DOA estimation being based solely on the location of the nonzero
+elements of the PSD vector, it is expected that the proposed method’s overall
+performance should not be affected.
+Fig. 2.
+Illustration of a simulated scenario with two sources at a radial distance
+of 1.5 m from the center of a 6-element uniform circular array.
+where Δϑ(r)
+i,i−1 denotes the angular separation between two
+neighboring sources for realization r. This separation is ran-
+domly selected within a speciﬁed range in each scenario con-
+sidered, and an example illustrating the spatial conﬁguration of
+two sources is presented in Fig. 2.
+In addition to the aforementioned simulated acoustic setups,
+we utilize measured room impulse responses (RIRs) from the
+database detailed in [57] to assess the proposed method’s DOA
+estimation performance within a realistic meeting room environ-
+ment, and the corresponding scenarios being tested are further
+speciﬁed in Section VI-I.
+B. Search Grids of Candidate DOAs
+The set of candidate DOAs ΘL, used in the proposed method’s
+optimization problem to deﬁne the candidate source PSD vector
+ϕS, is generated as a search grid with a ﬁxed resolution of
+5 ◦, which yields a total of L = 72 candidate DOAs, uniformly
+distributed over 360 ◦. The SRP grid ΓN, used to compute the
+observed SRP map z, is deﬁned as a subset of ΘL (ΓN ⊆ΘL),
+such that the N SRP samples composing z are also uniformly
+distributed over 360 ◦. Based on the sampling requirements
+determined in Section III-B, we note that, due to the largest
+inter-microphone distance of the uniform circular array corre-
+sponding to its diameter (dmax = 0.1 m), the SRP map z should
+be composed, in theory, of at least Nmin = 30 uniformly dis-
+tributed samples over the range of 360 ◦, which corresponds
+to a grid resolution of approximately Δγ ≈12.2 ◦. Therefore,
+varying N allows for analyzing the different levels at which the
+possible spatial aliasing effects over the observed SRP map z
+can affect the DOA estimation performance.
+C. Compared Methods and Performance Metric
+The proposed method is implemented as in Algorithm 1,
+with the regularization parameter set to λl = 0.001˜λl, with ˜λl
+deﬁned in (35), for l = 1, . . . , L. We note that although this
+heuristic approach to the selection of λl may be suboptimal,
+it is motivated by the objective of presenting a performance
+evaluation of the proposed method that is generalisable across
+the different acoustic conditions considered in this study. The
+proposed method’s DOA estimation performance is compared
+to that of the conventional SRP-PHAT method, such that the
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 27,2026 at 07:41:31 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 8 ---
+3524
+IEEE/ACM TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING, VOL. 32, 2024
+TABLE II
+MAIN PARAMETERS FOR EACH SET OF RESULTS, DIVIDED BY SUBSECTIONS
+effect of locating peaks in the estimated direction-speciﬁc PSDs
+rather than directly over the observed broadband SRP map can
+be assessed in the DOA estimation performance. The proposed
+method is also compared with another group-sparse regression
+approach, namely the group-sparse iterative covariance-based
+estimation (GSPICE) method, proposed in [55] and brieﬂy
+explained in the Appendix. The GSPICE method is here used
+to estimate the source PSD vector ϕS, and consequently, the
+sources’ DOAs, by directly ﬁtting the microphone array cross-
+correlationsvector ψ totheproposedsourcePSDmodel,accord-
+ing to (32). The comparison between the proposed method and
+GSPICE primarily aims to evaluate the effect in DOA estimation
+performance and computational complexity of combining pair-
+wise GCC information and modeling an observed SRP map as a
+linear function of PSDs, compared to directly utilizing pairwise
+GCCs for this purpose. Finally, the proposed method is also
+compared with the wideband MUSIC method with geometric
+averaging [9], [58], which will be referred to as WMUSIC in
+the remainder. We note that the choice of the SRP grid ΓN does
+not apply to GSPICE and WMUSIC in this comparison, as both
+methods are employed considering the set of candidate DOAs
+ΘL. For all methods, the DOAs are estimated by ﬁnding the J
+largest local maxima on the corresponding maps obtained, and
+for the proposed method and GSPICE, the convergence criteria
+are deﬁned with respect to the relative change in the estimated
+vectorsbetweeniterations,withamaximumnumberofiterations
+imposed.
+The absolute DOA estimation error for a speciﬁc source and
+realization is computed as
+ϵ(r)
+i
+= |mod(ϑ(r)
+i
+−ˆϑ(r)
+i , 360◦)|,
+for i = 1, . . . , J,
+(52)
+and the score indicating whether a source is considered to be
+successfully located is deﬁned as
+ρ(r)
+i
+=
+
+1,
+if ϵ(r)
+i
+≤ϵth
+0,
+otherwise
+(53)
+where ϵth corresponds to an absolute error threshold, in de-
+grees. Here, ϵth is set to 5 ◦in all cases. With the exception of
+Section VI-F, in which the DOA estimation success is evaluated
+per source, the success rate used for evaluation is computed as
+the average number of successes over all sources and realizations
+of the scenario being considered, as
+¯ρ =
+1
+JR
+J
+
+i=1
+R
+
+r=1
+ρ(r)
+i .
+(54)
+VI. RESULTS
+In this section, we analyze the effect of each parameter de-
+scribed in Section V-A on the DOA estimation performance of
+the proposed method, in comparison with SRP-PHAT, GSPICE
+and WMUSIC. In Table II, a summary of the parameter val-
+ues, used in each setup conﬁguration being considered in the
+following subsections, is presented.
+A. Number of SRP Samples and Computational Complexity
+Firstly, we aim to observe the effect of the choice of the
+candidate DOA search grid ΓN used to compute the observed
+SRP map z in the DOA estimation performance of the pro-
+posed method and the conventional SRP-PHAT method. We
+also evaluate the computational complexity of the proposed
+method compared to SRP-PHAT, GSPICE and WMUSIC. In
+this context, the computational complexity of SRP-PHAT is
+here determined by the cost of computing z, which corresponds
+to O(NKP). For GSPICE, the computational complexity cor-
+responds to O(K2 L2) [55]. The complexity of WMUSIC is
+dominated by the per-frequency eigenvalue decomposition and
+computation of the pseudospectrum [68], and corresponds to
+O(M 3K + M 2KL). For the proposed method, as previously
+mentioned in Section IV-B, the computational complexity cor-
+responds to O(NKL).
+We consider a scenario with two sources (S1 and S2), with
+an angular separation of Δϑ(r)
+2,1 ∈[15 ◦, 30 ◦]. The SNR is set to
+0 dB and the simulations are performed under anechoic condi-
+tions (T60 = 0 s). A total of Nf = 64 STFT cross-correlation
+frames are averaged in order to obtain the cross-correlation
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 27,2026 at 07:41:31 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 9 ---
+TENGAN et al.: MULTI-SOURCE DIRECTION-OF-ARRIVAL ESTIMATION USING STEERED RESPONSE POWER AND GROUP-SPARSE OPTIMIZATION
+3525
+Fig. 3.
+Success rate and number of per-iteration multiplications Nmult as a
+function of N, with L = 72, SNR = 0 dB and T60 = 0 s. (a) Success rate ¯ρ as
+a function of N. (b) Number of per-iteration multiplications Nmult as a function
+of N.
+vector ψ, and the number of points composing the SRP search
+grid ΓN and used to compose the SRP map vector z is var-
+ied as N = 12, 18, 24, 36, 72, yielding the grid resolutions of
+30 ◦, 20 ◦, 15 ◦, 10 ◦and 5 ◦, respectively.
+In Fig. 3(a), the success rates obtained with each method,
+and for the case of the proposed method and SRP-PHAT, with
+different values of N, are presented. The shaded areas depict
+the 95% binomial proportion conﬁdence interval computed
+for each method’s success rate, based on the Clopper-Pearson
+method [69], and this representation will be maintained in the
+following sections. It can be observed that, in this anechoic
+scenario, the proposed method overall outperforms SRP-PHAT
+for varying N. Moreover, for N ≥24, the proposed method
+attains a performance that is comparable to GSPICE and over-
+all better than WMUSIC. Since the minimum number of re-
+quired SRP samples for the scenario considered corresponds to
+Nmin = 30 (cf. Section V-B), this result indicates that while the
+Fig. 4.
+Success rate obtained for different numbers of averaging STFT cross-
+correlation frames Nf, with SNR = 0 dB and T60 = 0 s.
+knowledge of Nmin can be beneﬁcial for having a reference when
+designing the SRP grid ΓN, a sufﬁciently robust performance
+can nonetheless still be achieved with the proposed method
+for lower grid resolutions of the SRP map z being employed,
+and therefore, with a reduction in computational complexity.
+Based on these observations, and for ease of interpretation, the
+simulation results in the following subsections are presented for
+N = 24 and N = 72.
+In Fig. 3(b), the computational complexity of each method
+in terms of the number of multiplications per iteration (Nmult),
+and for the case of the proposed method and SRP-PHAT, with
+different values of N, is presented. We note that, in this set
+of simulations, the proposed method required on average 90
+iterations to reach convergence, whereas GSPICE required on
+average 40 iterations. Nevertheless, the average runtime for
+the proposed method was lower than for GSPICE. When the
+complexity is evaluated alongside the success rates presented
+in Fig. 3(a), we can observe that despite the proposed method
+being more computationally expensive than the conventional
+(and non-terative) SRP-PHAT and WMUSIC methods, it still
+allows for an improvement in DOA estimation performance that
+is comparable to GSPICE, at a signiﬁcantly lower computational
+cost per iteration.
+B. Number of Averaging STFT Cross-Correlation Frames
+In order to observe the effect of averaging over multiple STFT
+cross-correlation frames on the DOA estimation performance of
+the proposed method, we again consider the case of two sources
+(S1 and S2), with an angular separation of Δϑ(r)
+2,1 ∈[15 ◦, 30 ◦].
+The SNR is set to 0 dB and the simulations are performed
+under anechoic conditions (T60 = 0 s). The number of STFT
+cross-correlation frames being considered (Nf) is varied be-
+tween 1 and 128. In Fig. 4, the success rate obtained with the
+proposed method and SRP-PHAT for N = 24 and N = 72, as
+well as the success rate obtained with GSPICE and WMUSIC,
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 27,2026 at 07:41:31 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 10 ---
+3526
+IEEE/ACM TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING, VOL. 32, 2024
+Fig. 5.
+Success rate obtained for different angular separations between
+sources, with SNR = 0 dB and T60 = 0.2 s.
+is presented. It can be observed that in the two-source sce-
+nario considered, the DOA estimation performance improves for
+GSPICE, WMUSIC, and the proposed method, as the number
+of STFT cross-correlation frames Nf increases. However, in
+the case of SRP-PHAT, it is suspected that the close spacing
+between sources in the scenario tested causes the performance
+to be mainly limited by N, such that an increase in Nf did not
+substantially affect the method’s performance, and the success
+rate was lower than all other methods in comparison. We can also
+observe that for Nf ≤64, the proposed method overall performs
+better than WMUSIC and similar to GSPICE, at a lower compu-
+tational complexity than the latter method, indicating a potential
+beneﬁt of its use in cases where the number of available frames
+is limited.
+C. Angular Separation Between Sources
+In this set of simulations, we aim to investigate the inﬂuence
+of the angular separation between two sources (S1 and S2) of
+equal broadband power on the DOA estimation performance
+obtained with the proposed method, the conventional SRP-
+PHAT, GSPICE, and WMUSIC. We vary the angular separation
+between the two sources such that, for each scenario consid-
+ered, Δθ(r)
+2,1 is within one of the following intervals: [5 ◦, 15 ◦],
+[15 ◦, 30 ◦], [30 ◦, 60 ◦], [60 ◦, 120 ◦], and [120 ◦, 180 ◦]. The SNR
+is set to 0 dB and T60 = 0.2 s. We consider the cases where
+N = 24 and N = 72 for the proposed method and SRP-PHAT,
+and the success rates obtained with each method are presented
+in Fig. 5. We again observe that the performance of SRP-PHAT
+is more dependent on the choice of N than the one obtained
+when employing the proposed method. We also observe that, for
+all methods, the DOA estimation performance overall improves
+as the angular separation between sources increases, with the
+success rates of GSPICE, WMUSIC, SRP-PHAT (N = 72) and
+the proposed method being similar when the angular separation
+between sources is above 30 ◦. Given this observation, we note
+Fig. 6.
+Success rate obtained for different SNRs, with T60 = 0.2 s.
+that although employing the proposed method in such scenarios
+may not provide a distinct beneﬁt in DOA estimation or compu-
+tational complexity, it still outperforms GSPICE, WMUSIC and
+SRP-PHAT when Δθ2,1 ∈[5 ◦, 15 ◦] and Δθ2,1 ∈[15 ◦, 30 ◦], in-
+dicating its speciﬁc advantage in differentiating closely located
+sources.
+D. Noise Level
+In this set of simulations, the effect of the spatially white
+noise level on the DOA estimation performance of the proposed
+method in comparison to the conventional SRP-PHAT, GSPICE,
+and WMUSIC is analyzed by varying the SNR between −18 dB
+and 18 dB, for the case of two sources (S1 and S2) of equal
+broadband power. The reverberation time is set to T60 = 0.2 s
+and the angular separation is Δϑ(r)
+2,1 ∈[15 ◦, 30 ◦]. The success
+rates obtained with each method for the different SNRs con-
+sidered, as well as for N = 24 and N = 72 in the case of SRP-
+PHAT and the proposed method, are presented in Fig. 6. It can be
+observed that for GSPICE, WMUSIC and the proposed method,
+the DOA estimation performance overall improves as the SNR
+increases, with GSPICE and WMUSIC seemingly attaining their
+highest success rate at SNR= 12 dB, and the proposed method
+attaining its highest success rate at SNR= 0 dB. However, SRP-
+PHAT demonstrates less sensitivity to noise levels compared to
+theother methods. Theseobservations suggest that theproximity
+between the simulated sources and the level of reverberation are
+likely the main factors limiting the performance of the compared
+methods. Notably, the proposed method outperforms all others
+for SNR≥−12 dB, maintaining similar success rates for both
+N = 24 and N = 72.
+E. Reverberation
+The effect of reverberation on the DOA estimation perfor-
+mance of the proposed method is evaluated for the case of
+two sources (S1 and S2) of equal broadband power and with
+Δθ(r)
+2,1 ∈[15 ◦, 30 ◦]. For SRP-PHAT and the proposed method,
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 27,2026 at 07:41:31 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 11 ---
+TENGAN et al.: MULTI-SOURCE DIRECTION-OF-ARRIVAL ESTIMATION USING STEERED RESPONSE POWER AND GROUP-SPARSE OPTIMIZATION
+3527
+Fig. 7.
+Success rate obtained different reverberation times (T60), with
+SNR = 0 dB.
+the number of SRP samples is again set to N = 24 and N = 72.
+The SNR is set to 0 dB and the reverberation time is varied
+between 0 s and 0.6 s, with T60 = 0 s corresponding to the
+anechoic case. The success rates obtained with each method
+being compared are presented in Fig. 7, where it is observed
+that the proposed method, GSPICE and WMUSIC present a
+DOA estimation performance that is seemingly more sensitive
+to an increase in T60 than the conventional SRP-PHAT. Nev-
+ertheless, the proposed method still outperforms all compared
+methods when T60 ≥0.2 s, indicating its potential advantage in
+locating closely spaced sources in reverberant environments. As
+in the previous subsections, we again observe that the proposed
+method’s average accuracy scores obtained with N = 24 and
+N = 72 mostly coincide.
+F. Broadband Power Ratio Between Two Sources
+In order to investigate the effect of a possible power level
+difference between sound sources on the DOA estimation per-
+formance of the methods being compared, we consider the case
+of two sources (S1 and S2) with Δϑ(r)
+2,1 ∈[15 ◦, 30 ◦], and we
+deﬁne a broadband power ratio (PR) between the two sources as
+PR = σ2
+S1
+σ2
+S2
+,
+(55)
+where σ2
+S1 and σ2
+S2 are deﬁned as in Section V-A. Since the
+speech sources S1 and S2 correspond to one male and one
+female speaker, respectively, and naturally present different
+spectral characteristics, the power ratio deﬁned in (55) is not
+expected to be uniform over all frequencies. The power ratio PR
+is varied between −6 dB and 6 dB, the SNR is set to 0 dB and
+T60 = 0.2 s. Differently from the previous evaluations presented
+in Sections VI-A–VI-E, the success rate is here computed per
+source and denoted by ¯ρS1 and ¯ρS2 for sources S1 and S2,
+respectively. The results per source obtained with N = 24 and
+N = 72 SRP samples are shown in Fig. 8. As the value of PR
+increases, we can observe that, overall, the success rate for the
+Fig. 8.
+Success rate per source obtained for different PRs, with SNR = 0 dB
+and T60 = 0.2 s.
+ﬁrst source increases, whereas it decreases for the second source.
+Moreover, we observe that the intersection between the success
+rates for each source and method does not necessarily occur
+exactly at PR = 0 dB, and that the performance ranges related
+to S1 and S2 do not necessarily coincide, for the PR values
+considered. This is most likely due to S1 and S2 being a male
+and female speaker, respectively, and consequently presenting
+different spectral characteristics that may inﬂuence the DOA
+estimation task. Finally, we observe that the proposed method
+presents a more distinct advantage over the compared methods
+in localizing S1 than S2, when considering all PR values tested
+and for for both N = 24 and N = 72.
+G. Number of Sources
+Up until now, only two-source scenarios have been consid-
+ered while evaluating the proposed method’s DOA estimation
+performance in comparison with SRP-PHAT, GSPICE, and
+WMUSIC. In order to further investigate the proposed method’s
+performance for more challenging scenarios, we now vary the
+number of sources present in the simulated acoustic scene
+from 1 to 5. The sources’ DOAs are generated as explained in
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 27,2026 at 07:41:31 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 12 ---
+3528
+IEEE/ACM TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING, VOL. 32, 2024
+Fig. 9.
+Success rate obtained for different numbers of sources, with SNR =
+0 dB and T60 = 0 s.
+Section V-A, with the angular separation between two sub-
+sequent sources Δϑ(r)
+i,i−1 set within the range of [15 ◦, 30 ◦],
+while not being constrained to be equal between all neighboring
+sources. Each source is successively included in the simulated
+scenario in their corresponding order (S1 to S5). The SNR is
+set to 0 dB, and due to the increased number of sources in
+comparison to the previous sets of simulations, the reverberation
+time is set to T60 = 0 s. We note that, for the SRP-PHAT method
+with N = 24, a score of ρ(r)
+i
+= 0 was assigned to the sources
+that could not be located due to an insufﬁcient number of
+peaks in the observed SRP-PHAT map of the corresponding
+realization.
+The success rates obtained with all compared methods are
+shown in Fig. 9. We can observe that the DOA estimation
+performance of all methods decrease as the number of simulated
+sources increase, and under the anechoic conditions consid-
+ered in this set of simulations, GSPICE presents overall the
+best DOA estimation performance in cases where more than
+3 sources are present. Moreover, although the proposed method
+does not present an advantage over SRP-PHAT with N = 72 in
+the single-source case, it still shows an improvement in DOA
+estimation in the multi-source cases. Finally, when N = 24,
+the proposed method outperforms SRP-PHAT in all single and
+multi-source scenarios tested, presenting a trend in the success
+rate that is somewhat similar to WMUSIC.
+H. Number of Iterations
+Despite the advantages in terms of DOA estimation perfor-
+mance of the proposed method, observed in difference scenarios
+tested and compared to SRP-PHAT, GSPICE and WMUSIC
+in the previous sections, it could be argued that the overall
+computational complexity resulting from the iterative procedure
+of the ADMM-based implementation of the proposed method
+may render its practical use challenging in certain applications.
+Therefore, in this section, we aim to investigate the num-
+ber of iterations required by the proposed method to attain a
+Fig. 10.
+Success rate obtained for different numbers of iterations, with SNR =
+0 dB and T60 = 0 s.
+comparable DOA estimation performance to SRP-PHAT,
+GSPICE and WMUSIC. This information could prove valu-
+able in scenarios where setting a ﬁxed number of iterations is
+feasible, potentially allowing for comparable DOA estimation
+performance even before reaching convergence.
+Similarly to Section VI-A, we consider a scenario with two
+sources (S1 and S2), with an angular separation of Δϑ(r)
+2,1 ∈
+[15 ◦, 30 ◦]. The SNR is set to 0 dB and the simulations are
+performed under anechoic conditions (T60 = 0 s). The num-
+ber of averaged STFT cross-correlation frames corresponds to
+Nf = 64. As previously mentioned in Section VI-A, and given
+the scenario being considered, the proposed method required on
+average 90 iterations to reach convergence, whereas GSPICE
+required on average 40 iterations. In this set of simulations,
+however, the DOA estimation is performed while considering
+the estimated vector obtained after 10 to 100 iterations of the
+proposed method, and after 10 to 50 iterations of GSPICE.
+The success rates obtained with the proposed method (for
+N = 24 and N = 72) and GSPICE for different numbers of
+iterations are presented in Fig. 10. For comparison, the success
+rates of SRP-PHAT and WMUSIC are represented by the dashed
+horizontal lines. We can observe that, for N = 72, the proposed
+method reaches a DOA estimation performance comparable to
+WMUSIC after 30 iterations, and comparable to GSPICE after
+50 iterations. Moreover, we observe that for both N = 72 and
+N = 24, the proposed method outperforms SRP-PHAT after 20
+iterations. These results indicate an opportunity to reduce the
+computational complexity of the proposed method by limiting
+the number of iterations computed within the ADMM scheme,
+while achieving a comparable performance to the other methods
+being tested.
+I. Angular Separation Between Two Sources in a Meeting
+Room Environment
+In order to evaluate the DOA estimation performance of
+the compared methods in a realistic environment, experimental
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 27,2026 at 07:41:31 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 13 ---
+TENGAN et al.: MULTI-SOURCE DIRECTION-OF-ARRIVAL ESTIMATION USING STEERED RESPONSE POWER AND GROUP-SPARSE OPTIMIZATION
+3529
+Fig. 11.
+Success rate obtained for different angular separations between
+sources in a meeting room environment, with SNR = 0 dB and T60 = 0.659 s.
+RIRs from the database detailed in [57] were used. Speciﬁcally,
+we employ RIRs measured in a meeting room (referred to
+as the Medium Meeting Room), with a reverberation time of
+T60 = 0.659 s. A circular array of 60 loudspeakers and 1.5 m
+radius is placed approximately at the center of the room. We
+consider the case of a uniform circular array of M = 6 micro-
+phones and 0.1 m radius, placed at the center of the loudspeaker
+array (referred to as Zone E). The loudspeaker and microphone
+array setups are reported to be placed at a height of 1.45 m from
+the ground. In this setup, since the maximum inter-microphone
+distance corresponds to dmax = 0.2 m, the minimum required
+number of SRP samples corresponds to Nmin = 60.
+The DOA estimation performance is evaluated for the case of
+two sources (S1 and S2) of equal broadband power. The angular
+separation between two neighboring loudspeakers from the cir-
+cular array of 60 elements is approximately 6 ◦[57], and we vary
+the angular separation between sources by selecting a random
+loudspeaker pair with an angular separation Δθ(r)
+2,1 falling within
+one of the following intervals: [5 ◦, 15 ◦], [15 ◦, 30 ◦], [30 ◦, 60 ◦],
+[60 ◦, 120 ◦], and [120 ◦, 180 ◦]. The source signals are convolved
+with the measured RIRs, and diffuse babble noise [65], [70]
+is added to convey more realistic acoustic conditions, with
+SNR = 0 dB.
+The success rates obtained with GSPICE, WMUSIC, SRP-
+PHAT and the proposed method are shown in Fig. 11. An
+improvement in DOA estimation performance can be observed
+for GSPICE, WMUSIC, SRP-PHAT (N = 72) and the proposed
+method (N = 72) when Δθ(r)
+2,1 ∈[15 ◦, 30 ◦] and in comparison
+to the results presented in Fig. 5. This improvement is likely due
+to the greater spacing between microphones from the circular
+array when compared to the scenario simulated in Section VI-C.
+However, we now observe a greater performance degradation
+for the proposed method with N = 24. This suggests that the
+higher spatial resolution of the circular array may induce more
+pronounced spatial aliasing effects when computing an SRP
+map with only N = 24 samples, thereby limiting the DOA
+estimation performance of the proposed method in this sce-
+nario. Nevertheless, with N = 72, we observe that the proposed
+method performs slightly better than the compared methods
+for angular separations above 15 ◦, and that with N = 24, it
+performs similarly to WMUSIC for angular separations above
+30 ◦, which indicates the potential advantage of employing the
+proposed method in realistic scenarios, such as the meeting room
+environment under consideration.
+VII. CONCLUSION
+In this paper, we proposed a method for estimating the DOAs
+of multiple broadband sources by solving a group-sparse opti-
+mization problem that models a broadband SRP map as a linear
+function of PSDs, and where the grid resolution of the observed
+SRP map can be lower than the resolution of the DOA search
+grid used to model the candidate source PSDs. The estimation
+of the source DOAs is then accomplished by identifying peaks
+in the resulting spatial power density, i.e., the direction-speciﬁc
+PSDs integrated over frequency. An implementation using the
+alternating direction method of multipliers (ADMM) is pre-
+sented, and the DOA estimation performance of the proposed
+method is evaluated with both simulated and experimental data.
+Results showed that, especially in reverberant scenarios, the pro-
+posed method presented an advantage in locating closely spaced
+sources when compared to the conventional SRP-PHAT, the
+group-sparse iterative covariance-based estimation (GSPICE)
+method, and the wideband MUSIC method with geometric
+averaging. Furthermore, it was observed that, for a compact
+microphone array, the proposed method overall maintained its
+performance even when using SRP maps computed with grid
+resolutions that are lower than the sampling requirements of the
+broadband SRP function. This observation, along with results
+obtained for limited numbers of iterations within the ADMM-
+scheme, indicated potential approaches to reduce the proposed
+method’s overall computational complexity while maintaining
+its DOA estimation performance. Finally, results obtained with
+experimental data showed the validity and applicability of the
+proposed method in a practical meeting room environment.
+APPENDIX
+GSPICE APPLIED TO MICROPHONE CROSS-CORRELATIONS
+Let ˆψ ∈CKP denote the vector of cross-correlations es-
+timated from the microphone array’s signals, which is here
+modeled as
+ˆψ = AϕS + e,
+(56)
+where A and ϕS are deﬁned as in Section IV, and e ∈CKP is
+the noise component in ˆψ. A covariance matrix of the measured
+cross-correlations is modeled as
+R = ˜AP ˜AH ∈RKP ×KP ,
+(57)
+where ˜A is an augmented version of A, deﬁned as ˜A =
+[A, IKP ] ∈CKP ×KL+KP . The matrix P is deﬁned as P =
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 27,2026 at 07:41:31 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 14 ---
+3530
+IEEE/ACM TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING, VOL. 32, 2024
+diag(p), with p denoting the vector of unknown diagonal load-
+ings within the covariance model used:
+p = [p⊤
+1 , . . . , p⊤
+L, σ1, . . . , σKP ]⊤,
+(58)
+with pl corresponding to the l-th group’s diagonal loadings
+vector:
+pl = [p1,l, . . . , pK,l]⊤,
+(59)
+and σ1, . . . , σKP corresponding to the noise power for each
+frequency and microphone pair, represented as a total of KP
+single-element groups.
+In the GSPICE method, it is ﬁrst proposed to solve the
+following optimization problem [55]:
+minimize
+p
+ˆψ
+HR−1 ˆψ +
+L+KP
+
+l=1
+νl ∥pl∥p
+subject to R = ˜AP˜AH
+p ≥0
+(60)
+where νl is
+νl =
+
+
+∥˜a(l−1)K+1∥2
+2 . . . ∥˜alK∥2
+2
+⊤
+2 ,
+(61)
+for l = 1, . . . , L, with ˜aq denoting the q-th column of ˜A. The
+objective function in (60) corresponds to a relaxed version of the
+conventional covariance ﬁtting criteria, depending on the choice
+of the lp-norm [55], and by introducing the auxiliary variable
+β = [ϕ⊤
+S, e⊤]⊤, an equivalent formulation of the optimization
+problem can be obtained as:
+minimize
+p,β
+βHP−1β +
+L+KP
+
+l=1
+νl ∥pl∥p
+subject to ˜Aβ = ˆψ
+p ≥0
+(62)
+which, when implemented, can be split into two convex subprob-
+lems that are iteratively solved for p and β. It is shown in [55]
+that in the case of homoscedastic noise, i.e., the noise component
+presents equivariance power, another equivalent formulation of
+the optimization problem (proof omitted) can be obtained as:
+minimize
+ϕS
+∥ˆψ −AϕS∥2 +
+L
+
+l=1
+ νl
+KP
+ϕS,l
+ 2p
+p+1
+(63)
+which, when p →∞, corresponds to the group square-root
+Lasso problem without a nonnegativity constraint.
+ACKNOWLEDGMENT
+This paper reﬂects only the authors” views and the Union
+is not liable for any use that may be made of the contained
+information. “A holistic approach to the design of integrated
+and distributed digital signal processing algorithms for audio
+and speech communication devices”.
+REFERENCES
+[1] M. Farmani, M. S. Pedersen, Z.-H. Tan, and J. Jensen, “Informed sound
+source localization using relative transfer functions for hearing aid appli-
+cations,” IEEE/ACM Trans. Audio, Speech, Lang. Process., vol. 25, no. 3,
+pp. 611–623, Mar. 2017.
+[2] F. Elvander, R. Ali, A. Jakobsson, and T. v. Waterschoot, “Ofﬂine noise
+reduction using optimal mass transport induced covariance interpolation,”
+in Proc. IEEE 27th Eur. Signal Process. Conf., 2019, pp. 1–5.
+[3] A.Marti,M.Cobos,andJ.J.Lopez,“Realtimespeakerlocalizationandde-
+tection system for camera steering in multiparticipant videoconferencing
+environments,” in Proc. IEEE Int. Conf. Acoust., Speech, Signal Process.,
+2011, pp. 2592–2595.
+[4] K. Lopatka, J. Kotus, and A. Czyzewski, “Detection, classiﬁcation and
+localization of acoustic events in the presence of background noise for
+acoustic surveillance of hazardous situations,” Multimedia Tools Appl.,
+vol. 75, pp. 10407–10439, 2016.
+[5] C. Rascon and I. Meza, “Localization of sound sources in robotics: A
+review,” Robot. Auton. Syst., vol. 96, pp. 184–210, 2017.
+[6] J. Benesty, J. Chen, and Y. Huang, Microphone Array Signal Processing,
+(Series Springer Topics in Signal Processing), vol. 1. Berlin, Germany:
+Springer, 2008.
+[7] J. Capon, “High-resolution frequency-wavenumber spectrum analysis,”
+Proc. IEEE, vol. 57, no. 8, pp. 1408–1418, Aug. 1969.
+[8] J. Krolik and D. Swingler, “Multiple broad-band source location using
+steeredcovariancematrices,”IEEETrans.Acoust.,SpeechSignalProcess.,
+vol. 37, no. 10, pp. 1481–1494, Oct. 1989.
+[9] R. Schmidt, “Multiple emitter location and signal parameter estima-
+tion,” IEEE Trans. Antennas Propag., vol. TAP-34, no. 3, pp. 276–280,
+Mar. 1986.
+[10] R. Roy and T. Kailath, “ESPRIT - estimation of signal parameters via
+rotational invariance techniques,” IEEE Trans. Acoust., Speech, Signal
+Process., vol. 37, no. 7, pp. 984–995, Jul. 1989.
+[11] A. Barabell, “Improving the resolution performance of eigenstructure-
+based direction-ﬁnding algorithms,” in Proc. IEEE Int. Conf. Acoust.,
+Speech, Signal Process., 1983, pp. 336–339.
+[12] C. Knapp and G. Carter, “The generalized correlation method for es-
+timation of time delay,” IEEE Trans. Acoust., Speech, Signal Process.,
+vol. TASSP-24, no. 4, pp. 320–327, Aug. 1976.
+[13] J. H. DiBiase, H. F. Silverman, and M. S. Brandstein, Robust Localization
+in Reverberant Rooms. Berlin, Germany: Springer, 2001, pp. 157–180.
+[14] J. H. DiBiase, “A high-accuracy, low-latency technique for talker lo-
+calization in reverberant environments using microphone arrays,” Ph.D.
+dissertation, Dept. Eng., Brown Univ., Providence, RI, USA, 2000.
+[15] S. Chakrabarty and E. A. P. Habets, “Broadband DOA estimation using
+convolutional neural networks trained with noise signals,” in Proc. IEEE
+Workshop Appl. Signal Process. Audio, Acoust., 2017, pp. 136–140.
+[16] P.-A. Grumiaux, S. Kiti´c, L. Girin, and A. Guérin, “A survey of sound
+source localization with deep learning methods,” J. Acoust. Soc. Amer.,
+vol. 152, no. 1, pp. 107–151, Jul. 2022.
+[17] D. Malioutov, M. Cetin, and A. S. Willsky, “A sparse signal reconstruction
+perspective for source localization with sensor arrays,” IEEE Trans. Signal
+Process., vol. 53, no. 8, pp. 3010–3022, Aug. 2005.
+[18] S. Fortunati, R. Grasso, F. Gini, M. S. Greco, and K. LePage, “Single-
+snapshot DOA estimation by using compressed sensing,” EURASIP J.
+Adv. Signal Process., vol. 2014, no. 1, Dec. 2014, Art. no. 120.
+[19] Y. Park, F. Meyer, and P. Gerstoft, “Sequential sparse Bayesian learning
+for time-varying direction of arrival,” J. Acoust. Soc. Amer., vol. 149, no. 3,
+pp. 2089–2099, Mar. 2021.
+[20] Z. Bai, L. Shi, J. R. Jensen, J. Sun, and M. G. Christensen, “Acoustic DOA
+estimation using space alternating sparse Bayesian learning,” EURASIP J.
+Audio, Speech, Music Process., vol. 2021, no. 1, Dec. 2021, Art. no. 14.
+[21] F. Elvander, I. Haasler, A. Jakobsson, and J. Karlsson, “Multi-marginal
+optimal transport using partial information with applications in robust
+localization and sensor fusion,” Signal Process., vol. 171, pp. 1–19, 2020.
+[22] F.Elvander,I.Haasler,A.Jakobsson,andJ.Karlsson,“Trackingandsensor
+fusion in direction of arrival estimation using optimal mass transport,” in
+Proc. IEEE 26th Eur. Signal Process. Conf., 2018, pp. 1617–1621.
+[23] F. Elvander, I. Haasler, A. Jakobsson, and J. Karlsson, “Non-coherent
+sensor fusion via entropy regularized optimal mass transport,” in Proc.
+IEEE Int. Conf. Acoust., Speech, Signal Process., 2019, pp. 4415–4419.
+[24] J. P. Dmochowski, J. Benesty, and S. Affes, “A generalized steered
+response power method for computationally viable source localization,”
+IEEE Trans. Audio, Speech, Lang. Process., vol. 15, no. 8, pp. 2510–2526,
+Nov. 2007.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 27,2026 at 07:41:31 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 15 ---
+TENGAN et al.: MULTI-SOURCE DIRECTION-OF-ARRIVAL ESTIMATION USING STEERED RESPONSE POWER AND GROUP-SPARSE OPTIMIZATION
+3531
+[25] A. Johansson, G. Cook, and S. Nordholm, “Acoustic direction of arrival
+estimation, a comparison between root-MUSIC and SRP-PHAT,” in Proc.
+IEEE Region Conf., 2004, pp. 629–632.
+[26] J. P. Dmochowski, J. Benesty, and S. Affes, “Broadband music: Oppor-
+tunities and challenges for multiple source localization,” in Proc. IEEE
+Workshop Appl. Signal Process. Audio Acoust., 2007, pp. 18–21.
+[27] J. P. Dmochowski and J. Benesty, “Steered beamforming approaches for
+acoustic source localization,” in Speech Processing in Modern Commu-
+nication: Challenges and Perspectives. Berlin, Germany: Springer, 2010,
+pp. 307–337.
+[28] C. Zhang, D. Florencio, and Z. Zhang, “Why does PHAT work well in
+lownoise, reverberative environments?,” in Proc. IEEE Int. Conf. Acoust.,
+Speech, Signal Process., 2008, pp. 2565–2568.
+[29] K. D. Donohue, J. Hannemann, and H. G. Dietz, “Performance of
+phase transform for detecting sound sources with microphone arrays in
+reverberant and noisy environments,” Signal Process., vol. 87, no. 7,
+pp. 1677–1691, 2007.
+[30] D. Bechler and K. Kroschel, “Considering the second peak in the GCC
+function for multi-source TDOA estimation with a microphone array,” in
+Proc. Int. Workshop Acoustic Echo Noise Control, 2003, pp. 315–318.
+[31] D. Pavlidi, A. Grifﬁn, M. Puigt, and A. Mouchtaris, “Real-time multiple
+sound source localization and counting using a circular microphone array,”
+IEEETrans.Audio,Speech,Lang.Process.,vol.21,no.10,pp. 2193–2206,
+Oct. 2013.
+[32] A. Brutti, M. Omologo, and P. Svaizer, “Multiple source localization
+based on acoustic map de-emphasis,” EURASIP J. Audio, Speech, Music
+Process., vol. 2010, pp. 1–17, 2010.
+[33] M. J. Taghizadeh, P. N. Garner, H. Bourlard, H. R. Abutalebi, and A. Asaei,
+“An integrated framework for multi-channel multi-source localization and
+voice activity detection,” in Proc. IEEE Joint Workshop Hands-free Speech
+Commun. Microphone Arrays, 2011, pp. 92–97.
+[34] D. Diaz-Guerra and J. R. Beltran, “Source cancellation in cross-correlation
+functions for broadband multisource DOA estimation,” Signal Process.,
+vol. 170, 2020, Art. no. 107442.
+[35] Y. Oualil, F. Faubel, and D. Klakow, “Joint detection and localization
+of multiple speakers using a probabilistic interpretation of the steered
+response power,” in Proc. Workshop Stat. Perceptual Audition, 2012,
+pp. 68–73.
+[36] H. Do and H. F. Silverman, “SRP-PHAT methods of locating simultaneous
+multiple talkers using a frame of microphone array data,” in Proc. IEEE
+Int. Conf. Acoust., Speech, Signal Process., 2010, pp. 125–128.
+[37] H. Do and H. F. Silverman, “A method for locating multiple sources from a
+frame of a large-aperture microphone array data without tracking,” in Proc.
+IEEE Int. Conf. Acoust., Speech, Signal Process., 2008, pp. 301–304.
+[38] Y. Oualil, F. Faubel, and D. Klakow, “A fast cumulative steered response
+power for multiple speaker detection and localization,” in Proc. IEEE 21st
+Eur. Signal Process. Conf., 2013, pp. 1–5.
+[39] M. B. Çöteli, O. Olgun, and H. Hacihabibo˘glu, “Multiple sound source
+localization with steered response power density and hierarchical grid
+reﬁnement,” IEEE/ACM Trans. Audio, Speech, Lang. Process., vol. 26,
+no. 11, pp. 2215–2229, Nov. 2018.
+[40] E. Hadad and S. Gannot, “Multi-speaker direction of arrival estimation
+using SRP-PHAT algorithm with a weighted histogram,” in Proc. IEEE
+Int. Conf. Sci. Elect. Eng. Isr., 2018, pp. 1–5.
+[41] S. Thakallapalli, S. V. Gangashetty, and N. Madhu, “NMF-weighted SRP
+for multi-speaker direction of arrival estimation: Robustness to spatial
+aliasing while exploiting sparsity in the atom-time domain,” EURASIP J.
+Audio, Speech, Music Process., vol. 2021, no. 1, 2021, Art. no. 13.
+[42] Z. Chu, J. Weng, and Y. Yang, “Determination of propagation model
+matrix in generalized cross-correlation based inverse model for broadband
+acoustic source localization,” J. Acoust. Soc. Amer., vol. 147, no. 4,
+pp. 2098–2109, 2020.
+[43] T. Padois, O. Doutres, F. Sgard, and A. Berry, “Time domain localization
+technique with sparsity constraint for imaging acoustic sources,” Mech.
+Syst. Signal Process., vol. 94, pp. 85–93, 2017.
+[44] J. Velasco, D. Pizarro, and J. Macias-Guarasa, “Source localization with
+acoustic sensor arrays using generative model based ﬁtting with sparse
+constraints,” Sensors, vol. 12, no. 10, pp. 13781–13812, 2012.
+[45] Q. Shen, W. Liu, W. Cui, S. Wu, Y. D. Zhang, and M. G. Amin, “Low-
+complexity direction-of-arrival estimation based on wideband co-prime
+arrays,” IEEE/ACM Trans. Audio, Speech, Lang. Process., vol. 23, no. 9,
+pp. 1445–1456, Sep. 2015.
+[46] E. Tengan, M. Taseska, T. Dietzen, and T. v. Waterschoot, “Direction-
+of-arrival and power spectral density estimation using a single directional
+microphone,” in Proc. 29th Eur. Signal Process. Conf., 2021, pp. 221–225.
+[47] E. Tengan, T. Dietzen, F. Elvander, and T. v. Waterschoot, “Direction-of-
+arrival and power spectral density estimation using a single directional
+microphone and group-sparse optimization,” EURASIP J. Audio, Speech,
+Music Process., vol. 2023, no. 38, pp. 1–20, 2023.
+[48] E. Tengan, T. Dietzen, F. Elvander, and T. v. Waterschoot, “Multi-source
+direction-of-arrival estimation using group-sparse ﬁtting of steered re-
+sponse power maps,” in Proc. IEEE Workshop Appl. Signal Process. Audio
+Acoust., 2023, pp. 1–5.
+[49] M. Yuan and Y. Lin, “Model selection and estimation in regression with
+grouped variables,” J. Roy. Stat. Soc. Ser. B: Stat. Methodol., vol. 68, no. 1,
+pp. 49–67, 2006.
+[50] G. García-Barrios, J. M. Gutiérrez-Arriola, N. Sáenz-Lechón, V. J. Osma-
+Ruiz, and R. Fraile, “Analytical model for the relation between signal
+bandwidth and spatial resolution in steered-response power phase trans-
+form (SRP-PHAT) maps,” IEEE Access, vol. 9, pp. 121549–121560, 2021.
+[51] M.Cobos,A.Marti,andJ.J.Lopez,“AmodiﬁedSRP-PHATfunctionalfor
+robust real-time sound source localization with scalable spatial sampling,”
+IEEE Signal Process. Lett., vol. 18, no. 1, pp. 71–74, Jan. 2011.
+[52] L. O. Nunes et al., “A steered-response power algorithm employing hier-
+archical search for acoustic source localization using microphone arrays,”
+IEEE Trans. Signal Process., vol. 62, no. 19, pp. 5171–5183, Oct. 2014.
+[53] D. Salvati, C. Drioli, and G. L. Foresti, “Exploiting a geometrically
+sampled grid in the steered response power algorithm for localization
+improvement,” J. Acoust. Soc. Amer., vol. 141, no. 1, pp. 586–601,
+2017.
+[54] F.Bunea,J.Lederer,andY.She,“Thegroupsquare-rootLasso:Theoretical
+properties and fast algorithms,” IEEE Trans. Inf. Theory, vol. 60, no. 2,
+pp. 1313–1325, Feb. 2014.
+[55] T. Kronvall, S. I. Adalbjörnsson, S. Nadig, and A. Jakobsson, “Group-
+sparse regression using the covariance ﬁtting criterion,” Signal Process.,
+vol. 139, pp. 116–130, 2017.
+[56] S. Boyd, “Distributed optimization and statistical learning via the alternat-
+ing direction method of multipliers,” Foundations Trends Mach. Learn.,
+vol. 3, no. 1, pp. 1–122, 2010.
+[57] S. Zhao, Q. Zhu, E. Cheng, and I. S. Burnett, “A room impulse response
+database for multizone sound ﬁeld reproduction (L),” J. Acoust. Soc. Amer.,
+vol. 152, no. 4, pp. 2505–2512, Oct. 2022.
+[58] M. R. Azimi-Sadjadi, A. Pezeshki, and N. Roseveare, “Wideband DOA
+estimation algorithms for multiple moving sources using unattended
+acoustic sensors,” IEEE Trans. Aerosp. Electron. Syst., vol. 44, no. 4,
+pp. 1585–1599, Oct. 2008.
+[59] T. Dietzen, E. D. Sena, and T. v. Waterschoot, “Low-complexity steered
+response power mapping based on Nyquist-Shannon sampling,” in Proc.
+IEEE Workshop Appl. Signal Process. Audio Acoust., 2021, pp. 206–210.
+[60] J. Dmochowski, J. Benesty, and S. Affes, “On spatial aliasing in micro-
+phone arrays,” IEEE Trans. Signal Process., vol. 57, no. 4, pp. 1383–1395,
+Apr. 2009.
+[61] R. J. I. Marks, Introduction to Shannon Sampling and Interpolation
+Theory. Berlin, Germany: Springer, 2012.
+[62] T. Kronvall and A. Jakobsson, “Hyperparameter selection for group-
+sparse regression: A probabilistic approach,” Signal Process., vol. 151,
+pp. 107–118, 2018.
+[63] J. B. Allen and D. A. Berkley, “Image method for efﬁciently simulating
+small-room acoustics,” J. Acoust. Soc. Amer., vol. 65, no. 4, pp. 943–950,
+1979.
+[64] E. D. Sena, N. Antonello, M. Moonen, and T. v. Waterschoot, “On the mod-
+eling of rectangular geometries in room acoustic simulations,” IEEE/ACM
+Trans. Audio, Speech, Lang. Process., vol. 23, no. 4, pp. 774–786,
+Apr. 2015.
+[65] T. Dietzen, R. Ali, M. Taseska, and T. v. Waterschoot, “MYRiAD: A
+multi-array room acoustic database,” EURASIP J. Audio, Speech, Music
+Process., vol. 2023, no. 1, pp. 1–17, 2023.
+[66] V. Panayotov, G. Chen, D. Povey, and S. Khudanpur, “Librispeech: An
+ASR corpus based on public domain audio books,” in Proc. IEEE Int.
+Conf. Acoust., Speech, Signal Process., 2015, pp. 5206–5210.
+[67] M. Defferrard, K. Benzi, P. Vandergheynst, and X. Bresson, “FMA: A
+dataset for music analysis,” in Proc. 18th ISMIR Conf., 2017, pp. 316–323.
+[68] Y.-S. Yoon, L. M. Kaplan, and J. H. McClellan, “TOPS: New DOA
+estimator for wideband signals,” IEEE Trans. Signal Process., vol. 54,
+no. 6, pp. 1977–1989, Jun. 2006.
+[69] J. Reiczigel, “Conﬁdence intervals for the binomial parameter: Some new
+considerations,” Statist. Med., vol. 22, no. 4, pp. 611–621, 2003.
+[70] E. A. Habets, I. Cohen, and S. Gannot, “Generating nonstationary multi-
+sensor signals under a spatial coherence constraint,” J. Acoust. Soc. Amer.,
+vol. 124, no. 5, pp. 2911–2917, 2008.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 27,2026 at 07:41:31 UTC from IEEE Xplore.  Restrictions apply. 

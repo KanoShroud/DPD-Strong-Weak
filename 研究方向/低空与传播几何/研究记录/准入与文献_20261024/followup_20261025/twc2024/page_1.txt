@@ -1,0 +1,67 @@
+14394                                                      IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 23, NO. 10, OCTOBER 2024
+
+ Decimeter Level Cooperative Direct Localization
+          With Ising Model Approach
+
+            Shiva Akbari   , Graduate Student Member, IEEE, and Shahrokh Valaee   , Fellow, IEEE
+
+
+
+  Abstract— With the ubiquitous availability of WiFi signals,     Addressing these challenges is important and researchers
+WiFi-based localization methods have gained a lot of attention,   have proposed several algorithms to increase the precision
+especially in indoor environments. Generally, accurate indoor                                                               of location estimation, especially within indoor environments.
+localization is challenging due to the multipath effect. Numerous
+                                                          Moreover, the emergence of 5G and 6G networks, renownedmethods have been proposed to increase the accuracy of local-
+ization for multipath environments. One of the recent methods   for their enhanced positioning capabilities, holds considerable
+is direct localization. This method includes a two-dimensional   potential for more accurate location-based services. Recently,
+search in a planar geometry to directly localize the source without   for indoor environments, WiFi-based  localization methods
+estimating any intermediate variable such as angle-of-arrival                                                         have been developed [1], [2]. These methods rely on channel
+or time-of-flight. In this paper, we use a compressed sensing
+                                                                      state information (CSI). CSI captures the amplitude and phaseframework in the direct localization technique to estimate the
+location of a user in an indoor multipath environment. We form   information of the transmitted signal and is utilized to esti-
+a penalized ℓ0-norm structure for this problem and then convert  mate different signal parameters, such as the angle of arrival
+this structure to an Ising energy problem to take advantage of the  (AoA) and time of flight (ToF). These parameters can lead to
+efficient existing binary programming solvers. In this paper, the                                                                      different localization techniques [2]. One of the categories of
+Ising energy problem is solved using Markov Chain Monte Carlo
+                                                         WiFi-based localization uses the angle of arriving wavefront,(MCMC). The evaluations show that our approach significantly
+improves the localization accuracy compared to other approaches  AoA, to localize users [3], [4], [5], [6], [7], [8], [9]. In AoA-
+in the literature.                                            based methods,  first, the AoA of the wavefront is retrieved
+                                                      from the outputs of the receiving antenna arrays. Next, the  Index Terms— Direct localization, compressed sensing, sparse
+modeling, Ising model, Digital Annealer.                          location of the user is estimated by triangulation.
+                                                           There  has  been  extensive  research  on  increasing  the
+                                                            accuracy and computational  efficiency of AoA estimation
+                           I. INTRODUCTION                        techniques. One of the initial methods introduced for AoA
+   OCATION-BASED services (LBS) are a category of   estimation  is beamforming, which  extends  the  principles
+     applications and services designed to provide users with   of  Fourier-based  spectral  analysis  [10]. Another  class  ofL
+information or assistance related to their specific geograph-   techniques, known  as  the subspace-based  algorithms,  uti-
+ical  position. In recent  years, these  services have gained   lizes the second-order statistics of signals to estimate AoA.
+considerable  attraction,  especially  in  applications such  as  MUSIC [11] and ESPIRIT [12] are among these methods.
+navigation, tracking, augmented reality, etc. Accurate location  While these algorithms are computationally  efficient, they
+information is crucial for these applications. Consequently, the   suffer from low accuracy, especially in scenarios with highly
+field of localization has gained significant attention from both   correlated signals [13]. To enhance the accuracy of AoA esti-
+academia and industry. While the Global Positioning System   mates, maximum-likelihood estimation techniques have been
+(GPS) has proven highly effective for outdoor localization,   proposed. However, these methods require prior knowledge
+it encounters challenges in indoor and harsh multipath environ-   of the number of sources [14]. In recent decades, with the
+ments. In these environments, GPS signals can be obstructed   introduction of sparse representation and compressed sensing,
+or distorted by structures, walls, and other physical obstacles.  AoA estimation techniques based on sparse modeling have
+This can lead to imprecise location data, which is unsuitable   been proposed [7], [8], [9], [15]. These methods recover a
+for many LBS applications.                                    sparse signal in a domain from under-sampled linear mea-
+                                                           surements [16].
+  Manuscript received 16 October 2023; revised 27 March 2024; accepted    The existing AoA-based localization methods have accept-
+29 May 2024. Date of publication 19 June 2024; date of current version   able performance in open-air environments where there  is
+11 October 2024. This work was supported in part by Fujitsu Ltd.; in part by
+Fujitsu Consulting (Canada) Inc.; and in part by the University of Toronto to  few reflections in the environment. However, these methods
+access Digital Annealer. The associate editor coordinating the review of this   require a two-step procedure (AoA estimation and triangula-
+article and approving it for publication was P. Casari. (Corresponding author:   tion) that makes the solutions suboptimal [17], [18]. Recently,
+Shiva Akbari.)
+  The authors are with the Department of Electrical and Computer Engi-   a  direct  positioning  approach  has been  introduced  [19],
+neering, University of Toronto, Toronto, ON M5S 2E4, Canada (e-mail:  where  the  user’s  location  is  directly  estimated from  the
+shiva.akbari@mail.utoronto.ca).                                      received signal in the antenna arrays;  it requires a search
+  Color versions of one or more figures in  this  article are available  at
+https://doi.org/10.1109/TWC.2024.3413671.                            over  the  potential  locations  of  the  source  [20].  In  this
+  Digital Object Identifier 10.1109/TWC.2024.3413671                  method, no intermediate parameter, such as AoA or ToF, is
+
+                    1536-1276 © 2024 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.
+                                  See https://www.ieee.org/publications/rights/index.html for more information.
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:02:33 UTC from IEEE Xplore. Restrictions apply.

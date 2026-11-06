@@ -1,0 +1,67 @@
+Y. Zeng et al.: QNOMP: A Quasi-Newton-Based Joint Multipath Optimization Method
+
+
+
+B. OPTIMAL LOW-RANK APPROXIMATION OF LOX           where Nc denotes the number of scattering clusters, and
+We propose an alternative strategy to approximate LOX by     Ni is the number of sub-paths within the i-th cluster. Sub-
+generalizing the LMMSE problem (19) as follows:              paths belonging to the same cluster share approximately
+                                                                    identical delays, while their spatial angles are distributed
+   min E ∥Z −Ae(τ)β∥22 ,  s.t.  Z = U(Ah′ + b),   (27)     over a certain range, referred to as the angular spread of   U,A,b
+                                                                the cluster. Denote the angular blocks as Ci =  {θi,j|j =
+where the columns of matrix U = [u1, u2, . . . , ur] ∈CK×r                                                               1, 2, . . . , Ni}, i =   1, 2, . . . , Nc. Each angular block  is
+form a set of basis vectors, and r ≤K denotes the rank. When                                                     assumed to be concentrated within an angular spread:
+r = K, this formulation reduces to the original LMMSE
+problem (19). For r < K, it yields the LMMSE estimator with                 Ci ⊂Bi = (θi,0 −1i, θi,0 + 1i).         (30)
+a low-rank constrained, representing the optimal low-rank
+                                               By leveraging the inherent block sparsity structure of
+approximation of LOX. For a fixed U, the optimal solution
+                                                                wireless channels, we propose an enhanced QNOMP frame-
+of (27) is
+                                                   work  to improve estimation accuracy. After completing
+     Z = PU · Cov(Ae(τ)β, h′)Cov(h′, h′)−1h′.    (28)     the standard QNOMP procedure, the estimated parameters
+                                                              (τ, θ, β) capture the dominant propagation paths. These paths
+where PU := U(UHU)−1UH. This solution corresponds to                                                           correspond to the centers of the angular blocks Bi defined
+the orthogonal projection of the LOX estimator (20) onto the                                                                   in (30), where τi represents the cluster delay, θi denotes
+column space of U. Without loss of generality, we can assume                                                                the angular block center, and |βi|2 approximates the total
+the basis vectors are orthonormal, i.e., UHU = Ir. The MSE                                                          energy within the angular block. Based on this structural
+of the estimator Z then simplifies to                                                                         prior, we propose a simple algorithm to adaptively reconstruct
+    MSE = −Tr[UHCov(Ae(τ)β, h′)Cov(h′, h′)−1            the angular blocks and compute the final channel parameters.
+                                                         Given  the  estimated  parameters  (τ, θ, β), each  path                  · Cov(h′, Ae(τ)β)U]                       (29)
+                                                     component  (τi, θi, βi)  is expanded into an angular block
+up to an additive constant. A detailed derivation is provided     structure. The maximum angular width of the block is set
+in Appendix A. Thus, we can choose orthogonal basis U     as 1 = γ 1θ, where 1θ denotes the unit width and γ ≥
+properly to minimize the MSE. It is well known that the basis    1 controls the block size. Specifically, each block Bi consists
+minimizing the MSE consists of the top r eigenvectors of the     of 2γ + 1 sub-paths:
+matrix Cov(Ae(τ)β, h′)Cov(h′, h′)−1Cov(h′, Ae(τ)β).
+                                                                             Bi = {(τi, θi + j1θ)|j = −γ  : γ }.         (31)  In channel estimation problem, we have Ae = A0, which
+implies that Cov(h′, Ae(τ)β) = Cov(A0β, A0β). Note that    The total energy of the block  is Ei =   |βi|2. Under a
+the covariance matrix Cov(h′, h′) =  Cov(A0β, A0β) +     non-informative prior assumption, the energy is uniformly
+σ 2I shares eigenvectors with Cov(A0β, A0β). Therefore,     distributed among all sub-paths. Thus, each individual sub-
+the optimal basis {u1, . . . , ur} can be chosen as the top r     path (τi, θi + j1θ) carries energy
+eigenvectors of Cov(A0β, A0β).
+                                                                                                            |βi|2
+  We further note that the optimal basis for the low-rank LOX                                Eij =                           (32)approximation is intrinsically related to the discrete prolate                           2γ + 1.
+spheroidal sequences (DPSS), also known as the discrete      The set of  all sub-paths within the angular blocks  is
+Slepian basis [60]. In fact, it can be shown that when Np = 1,    denoted as (τ b, θb, Eb) =  V{(τij, θij, Eij) =   (τi, θi +
+the eigenvectors {u1, u2, . . . , ur} exactly coincide with the    j1θ, Eij) i = 1 : Np, j = −γ  : γ }. A regularized LMMSE
+DPSS. A detailed discussion is provided in Appendix C.         estimator is then employed to refine the gain of each sub-path:
+  The optimal low-rank LOX approximation offers a way
+                                                               β(Eb) = (AHb Ab + σ 2(Eb)−1)−1AHb h′,      (33)to achieve the highest precision with a minimal number of
+degrees of freedom. In return, it requires the computation
+of the optimal basis. In contrast, the Gaussian quadrature
+approximation in (26) involves more degrees of freedom
+but relies exclusively on Fourier bases, leading to simpler
+implementation.
+
+
+C. THE BLOCK REWEIGHTING TECHNIQUE
+In  realistic communication  scenarios, propagation paths
+are not entirely random but often exhibit clustered struc-
+tures [44]. The multipath channel model in (4) can be
+reformulated as
+                   Nc               Ni
+           hk = X e−j2πτik1f X βi,jaθ  θi,j  ,                 FIGURE 1. Block diagram of the proposed QNOMP algorithm with block
+                  i=1            j=1                                   reweighting: A complete workflow.
+
+
+VOLUME 13, 2025                                                                                                         212661

@@ -1,0 +1,2594 @@
+
+=== PDF PAGE 1 ===
+IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY
+1
+MMSE-based Distributed Direct Position
+Determination in Single-hop Sensor Networks
+Bowen Ding, Dan Song, Boyu Han, and Wei Wang
+Abstract—Distributed adaptive direct position determination
+(D-ADPD) is a time-difference-of-arrival (TDOA)-based localiza-
+tion algorithm designed for single-hop sensor networks. The algo-
+rithm is iterative and typically initialized by using two-step meth-
+ods. However, the obtained initial values and the convergence
+performance of the D-ADPD are poor in low signal-to-noise ratio
+(SNR) environments, resulting in significant positioning errors.
+The algorithm also fails when channel propagation induces phase
+offsets. To address these issues, this paper proposes a distributed
+direct position determination algorithm with single-hop trans-
+mission. The proposed algorithm consists of three steps: First,
+a distributed frequency domain detection method is proposed
+to identify the radiated signal’s frequency components. A cost
+function is then formulated based on these detected frequency
+components with the minimum mean square error (MMSE)
+criterion to eliminate the influence of out-of-band noise. Second, a
+coarse positioning method is introduced to provide reliable initial
+values for subsequent iteration. Finally, the algorithm iteratively
+estimates target positions and compensates for phase offsets using
+the diffusion strategy and the gradient method. Simulation results
+demonstrate that the proposed algorithm outperforms the D-
+ADPD and other similar methods in low SNR environments.
+When the SNR is between -15 dB and 10 dB, the root mean square
+error of the proposed positioning algorithm is approximately
+5 dB lower than other distributed direct localization methods
+and about 10 dB lower than that of the classical distributed two-
+step method. Furthermore, it is insensitive to the channel-induced
+phase offset, exhibiting greater robustness than the D-ADPD.
+Index Terms—Direct position determination (DPD), distributed
+localization, wireless sensor networks, single-hop, minimum mean
+square error (MMSE), time difference of arrival (TDOA).
+I. INTRODUCTION
+T
+IME delay-based passive localization is a crucial function
+of wireless sensor networks, widely applied in fields such
+as vehicle localization [1], [2], navigation [3], environment
+perception [4], and electronic reconnaissance [5], [6]. The
+passive technique requires no signal emission, thus lowering
+power consumption and system costs.
+In recent years, direct position determination (DPD) algo-
+rithms [7]–[9] have gained significant attention due to their
+higher positioning accuracy in low signal-to-noise ratio (SNR)
+environments compared to traditional two-step methods [10]–
+[13]. Moreover, DPD algorithms are capable of localizing time
+This work was supported in part by the National Natural Science Foundation
+under Grant 62471058, and in part by the National Natural Science Foundation
+for Young Scientists of China under Grant 62101558. (Corresponding authors:
+Wei Wang and Dan Song)
+Bowen Ding, Boyu Han and Wei Wang are with the School of Electronic
+and Communication Engineering, Sun Yat-sen University, Shenzhen 518107,
+China.
+(e-mail:
+dingbw@mail2.sysu.edu.cn;
+hanby6@mail2.sysu.edu.cn;
+wangw278@mail.sysu.edu.cn); Dan Song is with the Test Center, National
+University of Defense Technology, Xi’an 710106, China. (e-mail: dan-
+song91@hotmail.com)
+domain overlapping signals [15], [16], which are challenging
+for two-step methods. Unlike two-step methods that require
+estimating the time difference of arrival (TDOA), DPD algo-
+rithms directly process the received signals to obtain the target
+position in one step.
+DPD algorithms can be categorized into centralized DPD al-
+gorithms [17]–[19] and distributed DPD algorithms [20]–[22]
+based on their signal fusion method. In centralized processing,
+each sensor transmits its observed signals to a fusion center for
+integrated processing. In contrast, distributed DPD algorithms
+operate in a decentralized network where computational tasks
+are spread across sensors, enabling each sensor to collabo-
+ratively solve the target position. Consequently, distributed
+DPD algorithms require lower communication bandwidth and
+computing resources compared to centralized DPD algorithms.
+Additionally, they mitigate the risk of system failure due to
+fusion center malfunction [23]–[25].
+Early studies on distributed DPD algorithms focused on
+exchanging positioning data through multi-hop transmission
+within the sensor network. Sensors store and forward the
+received data from their neighbors until it reaches a specific
+sensor. To reduce the computational and communication load
+of distributed DPD, M. Pourhomayoun et al. [20] proposed
+three algorithms. The first reduces computation by using the
+Gershgorin theorem to approximate the maximum eigenvalue
+of the cross ambiguity matrix (CAM). To lower communi-
+cation load, the second algorithm leverages the symmetry of
+the cross-ambiguity function (CAF) and image compression,
+while the third reconstructs the CAM from partial CAF values
+and TDOA measurements. However, all three methods rely on
+multi-hop transmission of signals and CAF values, demanding
+significant communication bandwidth. The distributed DPD
+algorithm proposed in [21] limits the sharing of observed
+signals to neighboring sensors only, requiring single-hop trans-
+mission of observed signals. Nevertheless, the measured CAF
+values still need to be transmitted to every sensor via multi-
+hop transmission. Building upon this approach, the iterative
+distributed DPD (IDDPD) algorithm proposed in [22] en-
+hances the positioning solution method. By incorporating deep
+neural networks, the IDDPD algorithm transforms the cost
+function into a gradient-solvable form and iteratively solves
+for the target position using gradient methods, improving
+computational efficiency compared to the original importance
+sampling method.
+Prior algorithms for multi-hop networks suffer from high
+resource requirements, system complexity, and communication
+overheads such as latency and packet loss. To overcome
+this, the distributed adaptive direct position determination (D-
+This article has been accepted for publication in IEEE Transactions on Vehicular Technology. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TVT.2026.3654660
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on January 27,2026 at 03:51:18 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 2 ===
+IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY
+2
+ADPD) algorithm [27] was proposed as the first single-hop
+distributed DPD method. In the D-ADPD algorithm, data
+transmitted to neighboring sensors does not continue to propa-
+gate within the sensor network. Based on the diffusion strategy
+[28]–[30], sensors only need to share observed signals and
+diffusion information with their neighbors to achieve global
+consensus. Experiments have shown that the performance of
+the D-ADPD algorithm is superior to the centralized adaptive
+direct position determination algorithm (C-ADPD) proposed
+in [31]. Despite these advantages, the D-ADPD algorithm
+still faces several limitations. First, the initialization of its
+iterative process typically relies on two-step methods, which
+tend to yield inaccurate estimates in low SNR environments.
+Second, the algorithm exhibits poor convergence at low SNRs,
+even when initialized with accurate values. Consequently,
+these two issues lead to large positioning errors in low SNR
+environments. Third, the formulation assumes that path atten-
+uation coefficients are real-valued. However, channel-induced
+phase offsets are often non-negligible in practical positioning
+scenarios, resulting in complex-valued attenuation coefficients.
+This mismatch renders the D-ADPD algorithm ineffective in
+such realistic environments.
+In addition to the D-ADPD algorithm, several TDOA-
+based distributed localization algorithms have been devel-
+oped for single-hop sensor networks. The distributed two-
+step method proposed in [32] reformulates emitter localization
+from local TDOA measurements as an optimization problem,
+incorporating constraints to ensure consistency across sensor
+estimates. To further address estimation consistency, diffusion
+strategies were integrated into the two-step framework in [33]
+and [34]. These algorithms achieve comparable localization
+performance to the classical centralized two-step method.
+In contrast to the aforementioned methods that rely on the
+nonlinear TDOA model, [35] introduced a distributed two-
+step algorithm based on a linear TDOA model, which fur-
+ther improves localization accuracy. However, obtaining linear
+TDOA measurements requires each sensor to estimate the time
+of arrival (TOA) of the emitter signal, making the approach
+unsuitable for non-cooperative emitter localization. Moreover,
+these distributed two-step methods [32]–[35] require the es-
+timation of TOA/TDOA in their initial step, which inher-
+ently introduces information loss. Consequently, they generally
+exhibit lower localization accuracy compared to distributed
+direct localization methods, especially in low SNR regimes.
+The distributed direct localization method proposed in [36]
+constructs a local cost function, which is defined as the sum
+of the magnitudes of the CAFs between a sensor and its
+neighboring sensors. However, as an iterative algorithm, it
+does not address the issue of obtaining reliable initial value,
+which can lead to the problem of being trapped in local optima
+when the initial value is inaccurate. In summary, existing
+distributed localization algorithms fall short of fully resolving
+the limitations associated with D-ADPD.
+Motivated by these challenges, this paper proposes a dis-
+tributed DPD algorithm designed for single-hop sensor net-
+works. A cost function is constructed in the frequency domain
+based on the minimum mean square error (MMSE) criterion.
+The proposed positioning algorithm comprises three steps:
+frequency domain detection, coarse positioning, and fine posi-
+tioning. By introducing a distributed frequency domain detec-
+tion method, our positioning algorithm selectively processes
+only the detected frequency components, thereby reducing
+computational load and improving positioning accuracy. In
+both coarse and fine positioning steps, the algorithm eliminates
+the need to estimate TDOAs and obtains position estimates
+directly through signal processing. By fully utilizing prior
+information from the received signals, the proposed coarse
+positioning method achieves high positioning accuracy even in
+low SNR environments, providing reliable initial values for the
+fine positioning step. Additionally, the algorithm incorporates
+a phase term into the cost function to compensate for phase dif-
+ferences caused by different channels. In the fine positioning
+step, the algorithm iteratively estimates both the target position
+and the phase compensation terms, making it applicable to
+scenarios involving both real-valued and complex-valued path
+attenuation coefficients.
+The main contributions of this paper are as follows:
+1) A new cost function for single-hop distributed DPD
+algorithms is constructed. This cost function is computed
+in the signal’s frequency domain, thereby avoiding the
+errors introduced by the sine cardinal interpolation used
+in the time-domain cost function calculation. Further-
+more, a phase term is incorporated into the cost function
+to compensate for the channel-induced phase shift, en-
+abling its effective application in scenarios with complex
+path attenuation coefficients.
+2) Based on the constructed cost function, a distributed
+DPD method is proposed, which comprises frequency-
+domain detection, coarse positioning, and fine position-
+ing stages. The proposed algorithm is fully distributed,
+requiring information exchange only between neigh-
+boring sensors without the need for data forwarding
+or global information fusion. Additionally, its iterative
+mechanism is well-suited for pipeline processing. These
+features make the algorithm particularly suitable for
+resource-constrained sensor networks.
+3) The coarse positioning method integrates distributed
+update operations with a ring neighborhood topology,
+providing reliable initial estimates for iterative process-
+ing even under low SNR conditions and in multi-emitter
+environments.
+This paper is organized as follows. Section II introduces the
+distributed positioning scenario and signal model. Section III
+presents the distributed frequency domain detection method.
+Section IV introduces the proposed distributed DPD algorithm.
+Section V shows the simulation results. Finally, Section VI
+concludes this paper.
+Notation: In this paper, bold lowercase italic letters denote
+vectors, while bold uppercase upright letters denote matrices.
+The operators (·)∗and (·)T represent the complex conjugate
+and transpose, respectively. The symbols |·| and ∥·∥denote the
+magnitude and Euclidean norm, respectively. E(·) denotes the
+expectation operator, and diag(·) denotes the diagonal opera-
+tor. ⊙represents the element by element product (Hadamard
+product). Real(·) denotes the real part of a complex value.
+This article has been accepted for publication in IEEE Transactions on Vehicular Technology. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TVT.2026.3654660
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on January 27,2026 at 03:51:18 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 3 ===
+IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY
+3
+4
+8
+1
+3
+2
+10
+9
+5
+6
+7
+Emitter
+Sensor
+Communication Link
+Fig. 1. A sensor network utilized for positioning tasks.
+II. MODELING OF THE PROBLEM
+This section first establishes the model of the distributed
+positioning problem and introduces the relevant concepts of
+the neighborhood. Subsequently, the signals received by each
+sensor are modeled, providing the theoretical foundation for
+the proposed positioning algorithm.
+A. Distributed Positioning Scenario
+The positioning scenario is simplified by assuming a single
+emitter in the space. To determine its position u, a synchro-
+nized sensor network consisting of M sensors is deployed.
+The set V = {1, 2, ..., M} denotes the deployed sensors in
+the network. Each sensor i can receive the signals emitted by
+the target and obtain its own position pi, i ∈V .
+While processing the received signals, each sensor can
+share data related to the target and itself with the other
+sensors to achieve collaborative positioning. Due to limitations
+in communication resources and energy consumption, it is
+assumed that sensors only communicate with their neighbors.
+Specifically, sensors have a communication radius within
+which other sensors are considered their neighbors. The set of
+all communication edges is denoted as E. If the sensor i and
+the sensor m are neighbors, then (i, m) ∈E ⇐⇒(m, i) ∈E.
+All neighbors of the sensor i form its neighborhood
+Ni = {m|m ∈V, (i, m) ∈E} = {i1, i2, · · · , i|Ni|},
+(1)
+where |Ni| represents the number of the i-th sensor’s neigh-
+bors. Fig. 1 shows a scenario in which a sensor network with
+ten sensors is used to locate an emitter. In the figure, the
+dashed and solid lines represent the communication range and
+communication links, respectively.
+B. Signal Model
+Assuming the signal emitted by the source propagates line-
+of-sight to each sensor, the received signal at the sensor i can
+be expressed as
+ri(t) = ηis(t −τi) + wi(t),
+(2)
+where s(t) is the unknown signal from the emitter with an
+average power of σ2
+s. ηi and τi are the path attenuation
+coefficient and time delay of the signal arriving at the sensor i,
+respectively. wi(t) is a zero-mean Gaussian white noise with
+variance σ2
+w, introduced during channel propagation. After
+discrete sampling, sensor i obtains the digital signal in the
+time domain:
+ri[n] = ηis[n −τifs] + wi[n],
+(3)
+where fs is the sampling rate. By applying the discrete Fourier
+transform (DFT), the sampled digital signal can be transformed
+from the time domain to the frequency domain:
+yi[n] = ηiS[n]e−j2πfsτin/N + Wi[n],
+(4)
+where N is the sampling number. From (4), it can be inferred
+that in the noise-free model, the DFT results of the sensor i
+can be represented by the DFT results of the other sensors:
+yi[n] = ηi
+ηm
+ym[n]ej2πfsτi,mn/N.
+(5)
+In the above equation, the TDOA term τi,m is defined as:
+τi,m = τm −τi = 1
+c (∥pm −u∥−∥pi −u∥),
+(6)
+where c is the speed of light.
+III. DISTRIBUTED FREQUENCY DOMAIN DETECTION
+A. Classical Spectral Estimation Method
+Detecting the frequency components of a received signal
+first requires estimating its power spectrum. Modern spectral
+estimation typically relies on the autoregressive (AR) model,
+which assumes that the signal to be estimated is the output of
+a Γ-order all-pole linear system driven by a noise sequence.
+By estimating the model parameters and the noise power σ2
+w,
+the power spectrum can be obtained by
+P(ejw) =
+σ2
+w
+1 + PΓ
+γ=1 aγe−jwγ
+
+2 ,
+(7)
+where aγ is the γ-th model parameter. Among AR spectral
+estimation algorithms, the Burg method is a classical method
+that performs well in low SNR environments [37]. The follow-
+ing briefly introduces the principle of the Burg method. In the
+method, the γ-th order forward prediction error power ρ(i)
+γ,f,
+backward prediction error power ρ(i)
+γ,b, and average prediction
+error power ρ(i)
+γ
+for sensor i are defined as
+ρ(i)
+γ,f =
+1
+N −γ
+N−1
+X
+n=γ
+e(i)
+γ,f[n]
+
+2
+,
+ρ(i)
+γ,b =
+1
+N −γ
+N−1
+X
+n=γ
+e(i)
+γ,b[n]
+
+2
+,
+ρ(i)
+γ
+= (ρ(i)
+γ,f + ρ(i)
+γ,b)/2,
+(8)
+γ = 1, 2, · · · , Γ, where e(i)
+γ,f[n] and e(i)
+γ,b[n] are the γ-th order
+forward and backward prediction errors for sensor i at the n-th
+sample, calculated by
+e(i)
+γ,f[n] = e(i)
+γ−1,f[n] + k(i)
+γ e(i)
+γ−1,b[n −1],
+e(i)
+γ,b[n] = e(i)
+γ−1,b[n −1] + k(i)∗
+γ
+e(i)
+γ−1,f[n].
+(9)
+This article has been accepted for publication in IEEE Transactions on Vehicular Technology. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TVT.2026.3654660
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on January 27,2026 at 03:51:18 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 4 ===
+IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY
+4
+The core of the Burg method is to minimize the average
+prediction error power. By setting the derivative of ρ(i)
+γ
+with
+respect to the reflection coefficient k(i)
+γ
+to zero, sensor i obtains
+the γ-th order reflection coefficient as
+k(i)
+γ
+=
+−2 PN−1
+n=γ e(i)
+γ−1,f[n]e(i)∗
+γ−1,b[n −1]
+PN−1
+n=γ
+e(i)
+γ−1,f[n]
+
+2
++
+e(i)
+γ−1,b[n −1]
+
+2.
+(10)
+Subsequently, sensor i computes the AR model parameters and
+noise power based on the reflection coefficients and estimates
+the signal spectrum via (7).
+B. Proposed Distributed Frequency Domain Detection Method
+Classical spectral estimation methods utilize observations
+from a single sensor, neglecting the correlation among signals
+received by different sensors. To overcome this limitation, this
+section develops a distributed extension of the Burg method.
+Using signals received by the entire network, the global γ-th
+order average prediction error power is defined as
+ρglobal
+γ
+=
+M
+X
+i=1
+ρ(i)
+γ .
+(11)
+The objective of the proposed method is to minimize this
+global power. However, in a distributed sensor network,
+each sensor can only access observations from its neighbors,
+making computation of ρglobal
+γ
+infeasible. Therefore, by em-
+ploying the diffusion strategies presented in [28]–[30], the
+minimization of the global average prediction error power
+is transformed into the minimization of the local average
+prediction error power at each individual sensor. The local
+average prediction error power for sensor i is defined as:
+ρlocal,i
+γ
+
+k(i)
+γ
+
+= ρ(i)
+γ
+
+k(i)
+γ
+
++
+X
+m∈Ni
+υi,m
+2
+k(i)
+γ −k(m)
+γ
+
+2
+,
+(12)
+where υi,m is a regularization coefficient. Similarly, setting
+the derivative of ρlocal,i
+γ
+with respect to k(i)
+γ
+to zero yields the
+reflection coefficient:
+k(i,diff)
+γ
+= (1 −
+X
+m∈Ni
+bi,m)E(i)
+1
+E(i)
+2
++
+X
+m∈Ni
+bi,mk(m)
+γ
+,
+(13)
+where E(i)
+1
+= −2 PN−1
+n=γ e(i)
+γ−1,f[n]e(i)∗
+γ−1,b[n −1], E(i)
+2
+=
+PN−1
+n=p (|e(i)
+γ−1,f[n]|2 + |e(i)
+γ−1,b[n −1]|2), and bi,m = (N −
+γ)υi,m/E(i)
+2 . The above equation can be interpreted as each
+sensor computing its reflection coefficient via (10) and then
+obtaining an updated reflection coefficient by weighted aver-
+aging within its neighborhood.
+Next, the time domain recursive concept of the lattice least
+mean square adaptive filter is introduced into the algorithm,
+making it more suitable for real-time pipeline processing by
+hardware. The numerator and denominator of the γ-th order
+reflection coefficient for sensor i are recursively updated as:
+C(i)
+γ
+←C(i)
+γ
++ e(i)
+γ−1,f[n]e(i)∗
+γ−1,b[n −1],
+D(i)
+γ
+←D(i)
+γ +
+e(i)
+γ−1,f[n]
+
+2
++
+e(i)
+γ−1,b[n −1]
+
+2
+.
+(14)
+Algorithm 1 DTV-Burg
+For each sensor i in the sensor network, execute the following
+operations in parallel:
+for n = 0, 1, · · · , N −1 do
+Initialize e(i)
+0,f[n] and e(i)
+0,b[n] to 0.
+for γ = 1, 2, · · · , Γ do
+Calculate e(i)
+γ,f[n] and e(i)
+γ,b[n] according to (9).
+Update C(i)
+γ
+and D(i)
+γ
+according to (14).
+Update k(i)
+γ
+according to (15).
+Calculate ˜a(i)
+γ,l for l = 1, · · · , γ according to (18).
+end for
+Transmit ˜a(i)
+Γ,l to all neighbors m, m ∈Ni.
+Receive ˜a(m)
+Γ,l from neighbors m, m ∈Ni.
+Update a(i)
+Γ,l according to (19).
+end for
+Obtain the l-th AR model parameter a(i)
+Γ,l (l = 1, · · · , Γ) and
+calculate the normalized power spectrum estimate Pi(ejw)
+according to (7).
+The reflection coefficient is then given by
+k(i)
+γ
+←−2h C(i)
+γ
+D(i)
+γ
+,
+(15)
+where h denotes the amplification factor, which is set to 1
+when no amplification is applied. In low SNR environments,
+the estimated reflection coefficients tend to be underestimated
+due to noise corruption. This underestimation results in exces-
+sive smoothing of the estimated power spectrum, thereby hin-
+dering the distinction between signal and noise components.
+To mitigate this issue, amplifying the reflection coefficients
+(i.e., setting h > 1) compensates for the bias and promotes
+sparsity, which is equivalent to augmenting the minimization
+problem in (12) with a regularization term for each sensor:
+min
+k(i)
+γ
+ρ(i)
+γ +
+X
+m∈Ni
+υi,m
+2
+k(i)
+γ −k(m)
+γ
+
+2
+−ϱ
+k(i)
+γ
+
+2
+,
+(16)
+where ϱ > 0 serves as the regularization parameter related to
+the amplification. This operation encourages the model to rely
+more heavily on dominant reflection coefficients (associated
+with the signal), thereby accentuating the signal’s frequency
+components in the spectral estimation. When amplification is
+applied, it is also essential to verify whether the coefficients
+remain within the unit circle to ensure model stability. If
+a coefficient falls outside the unit circle, it is truncated as
+follows:
+k(i)
+γ
+←0.99 k(i)
+γ
+k(i)
+γ
+
+.
+(17)
+Since the AR model parameters are computed from the
+reflection coefficients, the algorithm fuses the AR model
+parameters instead of the reflection coefficients. Following the
+computation of the reflection coefficients in each iteration via
+This article has been accepted for publication in IEEE Transactions on Vehicular Technology. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TVT.2026.3654660
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on January 27,2026 at 03:51:18 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 5 ===
+IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY
+5
+(15), sensor i obtains the diffusion information of the γ-th
+order AR parameters as follows:
+˜a(i)
+γ,l =
+(
+˜a(i)
+γ−1,l + k(i)
+γ ˜a(i)∗
+γ−1,γ−l, l = 1, ..., γ −1
+k(i)
+γ ,
+l = γ
+.
+(18)
+Subsequently, each sensor computes the Γ-th order AR param-
+eters by weighted averaging over its neighborhood:
+a(i)
+Γ,l ←
+X
+m∈Ni
+bi,m˜a(m)
+Γ,l , l = 1, · · · , Γ.
+(19)
+As the noise power does not affect subsequent frequency
+detection, it is excluded from computation. After computing
+the Γ-th AR model parameters using (19), sensor i obtains the
+spectrum estimate Pi(ejw) via (7). This spectral estimation
+method utilizes observed signals from both the local sensor
+and its neighbors within a pipeline processing framework.
+Therefore, this method is named the distributed time variant
+Burg (DTV-Burg), and its detailed procedure is shown in
+Algorithm 1.
+After introducing the procedure for estimating the signal’s
+power spectrum, the subsequent step involves utilizing the es-
+timated spectrum to detect the distribution of signal frequency
+components. Let L denote the number of DFT points. By
+evaluating Pi(ejw) at discrete angular frequencies correspond-
+ing to the analog frequencies 0, fs/L, · · · , (L −1)fs/L, the
+power spectrum sequence Pi = [Pi[0], Pi[1], · · · , Pi[L −1]]T
+is obtained. After defining events H(l)
+1
+and H(l)
+0
+to represent
+the presence and absence of the signal at the l-th frequency
+component, respectively, the frequency domain detection prob-
+lem can be described as
+(
+H(l)
+1
+: Pi[l]>Gi
+H(l)
+0
+: Pi[l] ≤Gi
+,
+(20)
+where Gi is the detection threshold for the sensor i. The mean
+threshold is adopted in this paper:
+Gi = 1
+L
+L−1
+X
+l=0
+Pi[l].
+(21)
+Let Fi be the set of indices of the detected frequency
+components. If frequency domain detection is not performed,
+it is assumed that the signal is distributed across the entire
+processing bandwidth, in which case Fi = {0, 1, · · · , L −1}.
+IV. PROPOSED DISTRIBUTED DPD ALGORITHM
+DPD algorithms start by establishing a cost function, where
+the extremum of the cost function corresponds to the estimated
+target position. To find the extremum, iterative DPD algorithms
+often require an accurate coarse positioning result for proper
+initialization to avoid convergence to local optima. Therefore,
+this section presents the proposed distributed DPD algorithm,
+sequentially describing its cost function, coarse positioning
+method, and fine positioning method.
+A. Cost Function
+Since the proposed algorithm operates in the frequency
+domain, the received signals are first transformed into the
+frequency domain. By employing First-In-First-Out (FIFO)
+queue storage technology, sensor i maintains the time domain
+sequence block of the received signal at time n as
+r(n)
+i
+= [ri[n −L + 1], ri[n −L + 2], · · · , ri[n]]T ,
+(22)
+where L is the FIFO depth. Then, the normalized frequency-
+domain sequence block y(n)
+i
+can be obtained by the DFT:
+y(n)
+i
+[k] = 1
+L
+L−1
+X
+l=0
+r(n)
+i
+[l]e−j2πkl/L, k = 0, 1, . . . , L −1, (23)
+where y(n)
+i
+[k] and r(n)
+i
+[l] are the k-th and l-th elements of y(n)
+i
+and r(n)
+i
+, respectively. By performing the same operation to the
+received time-domain signals from the neighbors, each sensor
+stores the normalized frequency-domain sequence blocks of
+itself and its neighbors. To reduce the computation load,
+sensors update the frequency-domain sequences by
+y(n+1)
+i
+=
+
+y(n)
+i
+−ri[n −L + 1]
+L
+1L
+
+⊙ej2πn/L
++ ri[n + 1]
+L
+ej2πn(L−1)/L,
+(24)
+where 1L is an all-ones column vector of length L, and
+n = [0, 1, · · · , L −1]T. According to (5), the error at the
+l-th frequency component between the sensor i and the sensor
+m at time n is represented as
+e(n)
+i,m[l] = y(n)
+m [l] −y(n)
+i
+[l]e−j2πfsˆτi,ml/Lejϕi,m,
+(25)
+where ˆτi,m is the estimated TDOA term. The phase term ϕi,m
+is used to compensate for the phase impact due to channel
+propagation. Based on the MMSE criterion, the local cost
+function for sensor i is constructed in the frequency domain
+as
+Ji(u) =
+X
+m∈Ni
+L−1
+X
+l=0
+E
+n
+|e(n)
+i,m[l]|2o
+.
+(26)
+This local cost function represents the sum of squared errors
+among neighboring sensors. Using the distributed frequency
+domain detection method, the above cost function can be
+rewritten as
+Ji(u) =
+X
+m∈Ni
+X
+l∈Fi
+E
+n
+|e(n)
+i,m[l]|2o
+,
+(27)
+which calculates the errors only at the detected frequency
+components. This operation is employed in both coarse and
+fine positioning steps, effectively reducing computational load
+and eliminating the impact of out-of-band noise.
+To utilize the observed signals from the entire sensor
+network, the global cost function is constructed as
+J(u) =
+X
+i∈V
+Ji(u),
+(28)
+which is the sum of the local cost functions of all sensors. The
+proposed cost function is formulated in the frequency domain
+based on the MMSE criterion, avoiding the time-domain sine
+This article has been accepted for publication in IEEE Transactions on Vehicular Technology. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TVT.2026.3654660
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on January 27,2026 at 03:51:18 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 6 ===
+IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY
+6
+cardinal interpolation required in [27]. As discussed in [38],
+the sine cardinal function exhibits slow decay in the time
+domain. Consequently, a single noise-corrupted sample can
+significantly impact distant interpolated points. Furthermore,
+low SNR environments exacerbate the Gibbs phenomenon
+inherent in sine cardinal interpolation [39]. In such scenarios,
+noise induces severe temporal fluctuations. Applying sine
+cardinal interpolation near these abrupt transitions generates
+intense Gibbs oscillations, resulting in signal distortion. There-
+fore, sine cardinal interpolation is highly sensitive to noise,
+limiting its applicability in low SNR environments.
+B. Coarse Positioning Method
+When the source signals are separated in the time domain,
+the coarse positioning problem involves finding the minimum
+point of the cost function. Among optimization methods, the
+whale optimization algorithm (WOA) proposed in [40] has
+been widely applied due to its robust global and local search
+capabilities. In WOA, the concepts of individual best position
+and population best position are defined. Assume that each
+sensor contains Np particles, forming a population of size Np.
+For the ξ-th particle in sensor i, the individual best position
+ubest
+i,ξ
+is the location with the highest fitness value encountered
+its iterations. In turn, the population best position uglobal
+i
+is the
+location corresponding to the maximum fitness value among
+all individual best positions within the population:
+uglobal
+i
+= Best{ubest
+i,1 , ubest
+i,2 , · · · , ubest
+i,Np},
+(29)
+where Best{·} returns the position with the highest fitness
+among the inputs. To update particle positions, WOA employs
+three operations, namely “encircling prey”, “bubble-net attack-
+ing”, and “search for prey.” These operations aim to guide
+uglobal
+i
+toward the global optimum within the search space.
+However, in multi-emitter scenarios with overlapping time-
+domain signals, the problem becomes the task of identifying
+multiple extrema of the cost function. Standard optimization
+algorithms such as WOA often neglect suboptimal values and
+focus only on the global optimum, rendering them ineffective
+in such cases. To enable WOA to retain suboptimal solu-
+tions, the ring neighborhood topology introduced in [41] is
+incorporated. Specifically, the Np particles at each sensor are
+arranged in a ring structure, with each particle connected to
+its two adjacent particles. For instance, the left neighbor of the
+first particle is the last particle, while its right neighbor is the
+second particle. Through these local interactions, each particle
+forms a neighborhood. Accordingly, the local best position of
+the ξ-th particle at sensor i is defined as:
+ulocal
+i,ξ
+= Best{ubest
+i,ξ−1, ubest
+i,ξ , ubest
+i,ξ+1}.
+(30)
+To prevent all particles in the population from converging to
+a single point and to enable the discovery of multiple optima,
+the particle’s “encircling prey” operation is modified. Instead
+of moving toward the population best position, each particle
+now searches toward its local best position. Accordingly, the
+“encircling prey” update for the ξ-th particle of sensor i is
+given by
+ui,ξ ←ulocal
+i,ξ
+−A ⊙Di,ξ,
+(31)
+,i 
+u
+,
+best
+i 
+u
+,
+,
+1
+(
+)
+local
+best
+i
+i
+
+
+u
+u
+i
+N
+u
+Fig. 2.
+Particle distribution of sensor i during multi-extremal search. The
+black circles denote the particles.
+where A = 2a(rand(1)−0.5) and a = 2−2(t/tmax). t is the
+current iteration count, tmax is the maximum iteration count,
+and rand(ω) returns a vector with each coordinate uniformly
+distributed within the interval [0,ω]. The perception distance
+vector is defined as Di,ξ = |λ ⊙ulocal
+i,ξ
+−ui,ξ|, with λ =
+rand(1). The vector λ is introduced to expand the perception
+range of the particles.
+Similarly, the “bubble-net attacking” operation is redefined
+to search around the individual best position rather than the
+population best:
+ui,ξ ←ubest
+i,ξ + ebl cos(2πl)D
+′
+i,ξ,
+(32)
+where the spiral coefficient b is set to 1 in this paper, l is a
+random variable uniformly distributed between -1 and 1, and
+the distance vector is defined as D
+′
+i,ξ = |ubest
+i,ξ −ui,ξ|. Then,
+particles are guided toward their local best positions and their
+individual best positions by the “encircling prey” step and the
+“bubble-net attacking” step, respectively.
+Since particles are in a ring neighborhood topology, a
+particle’s local best, individual best, and population best may
+differ. This mechanism allows particles to maintain multiple
+detected peaks in multi-extremal scenarios. Fig. 2 provides
+further explanation. Specifically, the blue circle represents
+the individual best position of the ξ-th particle, while the
+yellow circle denotes the individual best of the (ξ + 1)-th
+particle, which simultaneously serves as the local best for
+the ξ-th particle. As illustrated, the individual bests of these
+two particles are located on different peaks. The individual
+best of the ξ-th particle will converge toward that of the
+(ξ + 1)-th particle only if the ξ-th particle enters the shaded
+region shown in the figure. However, as the ξ-th particle
+progressively shifts its individual best toward the left peak
+via (32), the shaded region diminishes, thereby decreasing
+the probability of the two individual bests converging to the
+same peak. Furthermore, since the position update via (31) is
+stochastic and relies on randomly generated parameters, this
+probability is further reduced. Even if two particles converge
+to the same peak, the propagation of information is restricted.
+Although the individual best of the ξ-th particle influences
+the local best of the (ξ −1)-th particle, an update to the
+local best of the (ξ −1)-th particle does not trigger an update
+for the (ξ −2)-th particle. According to (30), the local best
+of the (ξ −2)-th particle is determined by the individual
+This article has been accepted for publication in IEEE Transactions on Vehicular Technology. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TVT.2026.3654660
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on January 27,2026 at 03:51:18 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 7 ===
+IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY
+7
+Sensor 1
+Sensor 2
+Sensor 3
+Information 
+exchange
+Fig. 3. Sensors share population information with their neighbors to achieve
+the centralized processing effect. The blue circles represent particles.
+best of the (ξ −1)-th particle, rather than its local best.
+This property retards the diffusion of information across the
+entire population, facilitating the formation of multiple sub-
+populations distributed over different peaks.
+To further ensure that particle distributions across sensors
+achieve performance comparable to centralized processing,
+sensors exchange their population best positions during iter-
+ations. This allows sensors to obtain the neighborhood best
+position:
+uN
+i
+= Rand{uglobal
+i1
+, uglobal
+i2
+, · · · , uglobal
+i|Ni| },
+(33)
+where Rand{·} returns a randomly selected position from the
+inputs. This process is equivalent to connecting the particles
+across different sensors, thereby forming a larger ring neigh-
+borhood topology, as illustrated in Fig. 3. In the scenario
+depicted in Fig. 2, the particles of sensor i are distributed
+across the first two peaks, overlooking the third. If a neigh-
+boring sensor possesses particles searching the third peak, the
+neighborhood best position enables the particles within sensor
+i to acquire the opportunity to explore this third peak.
+After defining the neighborhood best position, the particle’s
+“search for prey” operation is modified from moving toward
+a randomly selected particle’s position to moving toward the
+neighborhood best position:
+ui,ξ ←ui,ξ + rand(1) ⊙(uN
+i −ui,ξ).
+(34)
+This modification enhances the algorithm’s global search
+capability. The three operations defined above are randomly
+selected by particles. Since every particle within a sensor has
+access to the neighborhood best, the probability of choosing
+the “search for prey” operation is kept relatively low (set to
+0.1 in this paper) to prevent convergence to a single position
+in multi-extremal scenarios. By introducing distributed update
+methods and a ring neighborhood topology into the standard
+WOA, the proposed algorithm is termed the ring neighborhood
+topology-based distributed WOA (RNTDWOA). The detailed
+procedure is shown in Algorithm 2.
+Then, it is necessary to specify how the particle fitness is
+calculated. In the coarse positioning step, the objective of each
+sensor is set to minimize its local cost function. Consequently,
+the fitness is defined as the inverse of this cost function,
+to transform the minimization problem into a maximization
+problem suitable for the RNTDWOA. Based on the local cost
+Algorithm 2 RNTDWOA
+For each particle ξ in the sensor i, execute the following
+operations in parallel:
+Initialize ui,ξ randomly in the search space.
+for t = 1, 2, · · · , tmax do
+if fitness(ui,ξ) > fitness(ubest
+i,ξ ) then
+ubest
+i,ξ
+←ui,ξ
+end if
+Calculate uglobal
+i
+according to (29).
+Calculate ulocal
+i,ξ
+according to (30).
+Calculate uN
+i
+according to (33).
+Generate a random number m uniformly distributed be-
+tween 0 and 1.
+if m < 0.45 then
+Update ui,ξ according to (31).
+else if m < 0.9 then
+Update ui,ξ according to (32).
+else
+Update ui,ξ according to (34).
+end if
+end for
+Output the individual best ubest
+i,ξ .
+function defined in (27) and the error term defined in (25), the
+fitness at position ui,ξ is given by
+fitness(ui,ξ) =
+1
+J(L)
+i
+(ui,ξ)
+=
+1
+P
+m∈Ni
+P
+l∈Fi |e(L)
+i,m[l]|2 =
+1
+P
+m∈Ni
+P
+l∈Fi
+y(L)
+m [l] −y(L)
+i
+[l]e−j2πfs˜τi,ml/L+j ˜ϕi,m
+
+2 ,
+(35)
+where J(L)
+i
+denotes the instantaneous local cost function at
+time L. The time delay term ˜τi,m and phase term ˜ϕi,m depend
+on ui,ξ. According to (6), the time delay term is calculated
+as:
+˜τi,m = 1
+c (∥pm −ui,ξ∥−∥pi −ui,ξ∥),
+(36)
+while the phase term ˜ϕi,k is zero for real-valued path atten-
+uation coefficients. For complex path attenuation coefficients,
+it is calculated as:
+˜ϕi,m = angle
+ X
+l∈Fi
+
+y(L)
+i
+[l]e−j2πfs˜τi,ml/L∗
+y(L)
+m [l]
+!
+,
+(37)
+where angle(·) returns the phase of the input complex number.
+This closed-form solution is derived by setting the derivative
+of the fitness function with respect to the phase term to zero.
+After detailing the RNTDWOA, we now describe how
+each sensor obtains its coarse positioning results. Through
+the RNTDWOA, each sensor first obtains the individual best
+positions of its particles. These individual best positions are
+then shared with neighboring sensors. By clustering the in-
+dividual best positions from itself and its neighbors, each
+sensor can independently obtain coarse positioning results.
+However, under conditions of low SNR and limited number of
+This article has been accepted for publication in IEEE Transactions on Vehicular Technology. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TVT.2026.3654660
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on January 27,2026 at 03:51:18 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 8 ===
+IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY
+8
+particles, inconsistencies may arise. For example, sensor i may
+obtain a coarse positioning result for one of the sources, while
+its neighboring sensor k may not. To address this, sensors
+exchange coarse results with their neighbors after clustering.
+Let Th denote the distance threshold, and let urough
+k,l
+be the
+l-th coarse positioning result at sensor k. If
+∀l, s.t.∥urough
+k,l
+−urough
+i,m
+∥> Th
+(38)
+is satisfied, then sensor k adds urough
+i,m
+to its coarse positioning
+results. After no more than M rounds of sharing, all sensors
+obtain the final coarse positioning results.
+C. Fine Positioning Method
+The global cost function of the proposed algorithm is
+defined in (28). The position in the search space that minimizes
+this function corresponds to the fine positioning result:
+ˆu = min
+u J(u).
+(39)
+Since the coarse positioning method provides an effective
+initialization, the target position can be iteratively refined using
+the gradient method:
+ˆu ←ˆu −µ∇uJ(ˆu),
+(40)
+where µ is the step size for position iteration, ∇u(·) represents
+the gradient with respect to the emitter position, and ˆu is
+the current estimated position. When the positioning scenario
+involves multiple emitters with overlapping signals in the time
+domain, the gradient descent method is applied to each target’s
+coarse positioning result.
+However, each sensor can only access signals from its
+neighbors in distributed processing, making it impossible to
+compute the global cost function. Therefore, the diffusion
+strategy is introduced, enabling each sensor to achieve global
+consensus convergence using only local information. Each sen-
+sor initializes the position estimate with its coarse positioning
+result. Similar to equations (18) and (19), each sensor then
+updates the position estimate in two steps (adaptation and
+combination) during each iteration:
+ψi ←ˆui −µi∇uJi(ˆui),
+(41)
+ˆui ←
+X
+m∈Ni∪{i}
+bi,mψm,
+(42)
+where µi is the step size for sensor i’s position update, ψi is
+the diffusion information, and ˆui is the position estimate of
+the emitter by the sensor i. In these two update steps, each
+sensor first adjusts the position estimate based on its local
+cost function, and then fuses the position estimates from itself
+and its neighbors. In scenarios where source signals arrive
+simultaneously at sensors, each sensor computes diffusion
+information for each target and matches received diffusion
+information from neighbors by minimizing the distance to its
+own. Matched diffusion information is then fused according
+to (42). In equations (19) and (42), the fusion process adopts
+the Metropolis weighting scheme as described in paper [42]:
+bi,m =
+
+
+
+1
+1+max{|Ni|,|Nm|},
+if m ∈Ni
+1 −P
+l∈Ni bi,l,
+m = i
+0,
+otherwise
+,
+(43)
+where the resulting weighting matrix B is a classical doubly
+stochastic matrix. This property ensures that limn→∞Bn =
+1M1T
+M/M. Consequently, the estimates at all sensors converge
+to the global average as iterations proceed, providing the
+theoretical guarantee for achieving robust consensus in our
+distributed framework.
+According to (27), the gradient of the local cost function
+with respect to the emitter position at the n-th iteration is
+∇uJi(ˆui) =
+X
+m∈Ni
+X
+l∈Fi
+∇u
+e(n)
+i,m[l]
+
+2
+.
+(44)
+By applying the chain rule, the gradient term is computed as
+∇u
+e(n)
+i,m[l]
+
+2
+=
+∂
+e(n)
+i,m[l]
+
+2
+∂ˆτi,m
+∂ˆτi,m
+∂ˆui
+,
+(45)
+where
+∂
+e(n)
+i,m[l]
+
+2
+∂ˆτi,m
+=4πfsl
+L
+Real
+
+e(n)∗
+i,m [l]y(n)
+i
+[l]×
+jejϕi,me−j2πfsˆτi,ml/L	
+,
+(46)
+∂ˆτi,m
+∂ˆui
+= 1
+c
+ (ˆui −pi)
+∥ˆui −pi∥−(ˆui −pm)
+∥ˆui −pm∥
+
+.
+(47)
+In practice, the phase shift due to channel propagation is often
+non-negligible, as ignoring it leads to significant positioning
+errors. Therefore, the phase compensation term ϕi,m is initial-
+ized to zero and iteratively estimated by
+ϕi,m ←ϕi,m −βi∇ϕi,mJi(ϕi,m),
+(48)
+where βi is the step size for sensor i’s phase update. The
+gradient term above at the n-th iteration is calculated by
+∇ϕi,mJi(ϕi,m) =
+X
+l∈Fi
+∇ϕi,m
+e(n)
+i,m[l]
+
+2
+,
+(49)
+where
+∇ϕi,m
+e(n)
+i,m[l]
+
+2
+= −2Real
+
+e(n)∗
+i,m [l]y(n)
+i
+[l]×
+jejϕi,me−j2πfsˆτi,ml/L	
+.
+(50)
+During each iteration of the algorithm, sensors simulta-
+neously update the estimate of the target position and the
+phase compensation terms. As the algorithm progresses, ϕi,m
+will converge to its true value angle(ηm/ηi). The algorithm
+terminates after Niter iterations and outputs the estimated
+position as the fine positioning result.
+D. Summary of the Proposed Positioning Algorithm
+The proposed distributed DPD algorithm operates sequen-
+tially across the three steps detailed in the previous sections.
+Initially, the DTV-Burg method is applied for frequency do-
+main detection. In the subsequent coarse and fine positioning
+steps, signal processing is performed only on the detected
+frequency components. The RNTDWOA is employed for
+coarse positioning in the second step, while fine positioning
+results are obtained by minimizing the global cost function
+using the diffusion strategy and gradient descent method in
+This article has been accepted for publication in IEEE Transactions on Vehicular Technology. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TVT.2026.3654660
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on January 27,2026 at 03:51:18 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 9 ===
+IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY
+9
+Algorithm 3 DDPDF
+A. Distributed Frequency Domain Detection
+1. Using the DTV-Burg method, each sensor obtains the
+discrete power spectrum sequence Pi.
+2. According to (20), each sensor i judges Pi to obtain the
+frequency point distribution set Fi.
+B. Distributed Coarse Positioning
+1. Using the RNTDWOA method, each sensor i obtains
+ubest
+i,ξ , ξ = 1, 2, ...Np.
+2. Each sensor i transmits ubest
+i,ξ
+to all neighbors m, m ∈Ni,
+and receives ubest
+m,ξ from all neighbors m.
+3. Each sensor i clusters the individual best positions of
+the particles from itself and the neighborhood to obtain the
+coarse positioning results urough
+i,ξ
+.
+4. Each sensor shares coarse results with its neighbors and
+updates according to (38).
+C. Distributed Fine Positioning
+Each sensor i uses the coarse positioning results as the
+initial values ˆu(q)
+i , and executes the following operations
+in parallel:
+for n = L −1, L, · · · , L + Niter −2 do
+Update ψ(q)
+i
+according to (41).
+Transmit ψ(q)
+i
+to all neighbors m, m ∈Ni, and receive
+ψ(q)
+m from all neighbors m.
+Update ˆu(q)
+i
+according to (42).
+Update ϕ(q)
+i,m, m ∈Ni according to (48).
+Calculate y(n+1)
+m
+, m ∈Ni ∪{i} according to (24).
+end for
+Output ˆu(q)
+i .
+the third step. Let ψ(q)
+i
+and ˆu(q)
+i
+represent the diffusion
+information and position estimate of emitter q at sensor i,
+respectively. Additionally, the phase compensation term for
+emitter q between sensors i and m is represented as ϕ(q)
+i,m.
+Then, the procedure of the algorithm is shown in Algorithm
+3. Since the proposed positioning algorithm is based on the
+MMSE criterion and operates in the frequency domain, it is
+designated as MMSE-based distributed DPD in the frequency
+domain (DDPDF).
+In the proposed positioning algorithm, all necessary in-
+formation is acquired via single-hop transmission within the
+sensor network. Excluding coarse positioning, each sensor
+needs to transmit observed signals and diffusion information
+to its neighbors. Let ζ = P
+i |Ni|/M represent the aver-
+age number of neighbors, and Q represent the number of
+targets. Then, the average communication load is given by
+2ζ(N + QNiter). During the coarse positioning step, sensors
+need to transmit the population best positions during iterations,
+the individual best positions of particles at the end of iterations,
+and the shared coarse positioning results to their neighbors.
+This results in a maximum average communication load of
+2ζ(tmax + Np + MQ).
+TABLE I
+COMPARISON OF COMPUTATIONAL COMPLEXITY
+Methods
+Computational complexity
+DDPDF
+O(ζ|F|Niter + ζL log L)
+Distributed DPD [21]
+O( M−1
+2
+(N log2 N + LdMNp) + M2Np)
+D-ADPD [27]
+O (ζLdNiter)
+D-MCDPD [36]
+O (ζ|F|Niter + ζL log L)
+TABLE II
+DETAILS OF SENSORS
+Identifier i
+Coordinates (m)
+Identifier i
+Coordinates (m)
+1
+(-1780,866)
+6
+(-414,-500)
+2
+(-1780,-866)
+7
+(500,48)
+3
+(-1280,0)
+8
+(586,-500)
+4
+(-414,500)
+9
+(1000,-300)
+5
+(0,914)
+10
+(1200,-1000)
+The algorithm is fully distributed, with computations spread
+across the sensors. In the frequency domain detection step,
+each sensor computes AR model parameters, power spec-
+trum sequence, and detection threshold, with a computational
+complexity of O
+ NΓ2
+. In the coarse positioning step, each
+sensor computes particle fitness, updates particle positions,
+and clusters the individual best positions. Different clustering
+algorithms exhibit varying computational complexities. Ex-
+cluding clustering, the computational complexity of coarse
+positioning is O (tmaxNpζ|F|), where |F| represents the
+average number of frequency components detected by each
+sensor. In the fine positioning step, each sensor computes the
+DFT results of the observed signals from itself and its neigh-
+bors, calculates the gradient terms, and weights the diffusion
+information. The computational complexity of fine positioning
+is O (ζ|F|NiterQ + ζL log L). Table I compares the com-
+putational complexity of the proposed algorithm with other
+distributed direct localization methods, where Ld represents
+the stages of the delay filter, and Np denotes the number of
+candidate points in the search space. Since both the D-ADPD
+and D-MCDPD algorithms require initial values for iteration,
+the comparison is conducted under the assumption that the
+initial values are already determined. The proposed algorithm
+exhibits computational complexity similar to D-MCDPD, but
+when signals are sparsely distributed in the frequency domain,
+it achieves lower runtime than the D-ADPD method that
+operates in the time domain. By contrast, the distributed DPD
+algorithm in [21] relies on local observations from each sensor
+and its computational complexity is related to the number of
+sensors M. In large-scale sensor networks where M ≫ζ,
+this approach has significantly higher complexity than the
+proposed algorithm.
+Furthermore, the fundamental design choices of the pro-
+posed algorithm are aimed at achieving high practical feasi-
+bility in resource-constrained sensor networks. By relying only
+on single-hop communication, the algorithm eliminates the
+need for data forwarding and routing, thereby reducing energy
+consumption and minimizing data storage requirements com-
+pared to multi-hop approaches. The algorithm is distributed
+and restricts each sensor’s communication to nodes within its
+communication radius. This limitation on communication links
+This article has been accepted for publication in IEEE Transactions on Vehicular Technology. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TVT.2026.3654660
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on January 27,2026 at 03:51:18 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 10 ===
+IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY
+10
+further decreases the energy consumption of the sensor net-
+work. Besides, the iterative procedure of the algorithm is well-
+suited for stream processing on sensors, avoiding the need for
+extensive historical data storage and complex computations.
+This makes the algorithm particularly compatible with the low-
+power processors commonly found in sensor networks.
+V. SIMULATION RESULTS
+A. Simulation Setup
+To locate the emitter, ten sensors are deployed in a 4000 m
+× 4000 m area, with their positions consistent with those in
+[21] and listed in Table II. The area of interest for positioning
+is the central 2000 m × 2000 m region. Each sensor has a
+communication radius of R = 1800 m and communicates only
+with sensors within this range.
+Two emitters are placed at positions [0m, 200m]T and
+[500m, 200m]T. Each emitter radiates a linear frequency mod-
+ulation (LFM) signal with a bandwidth of 2 MHz, a pulse
+width of 0.4 ms, and an average power of σ2
+s = 100 W. The
+signals received by sensors overlap in the time domain but
+differ in center frequencies. Except for the coarse localization
+experiment in Section V-E and the multi-target localization
+experiment in Section V-F where both emitters are used, all
+other experiments consider single-emitter scenarios that retain
+only the first emitter. Unless otherwise specified, the path
+attenuation coefficients are set to η1 = η2 = · · · = ηM = 1.
+The Monte Carlo simulation is repeated Nexp = 1000 times.
+The frequency domain block size is L = 3000. Each sensor
+has Np = 10 particles. The numbers of iterations for coarse
+and fine positioning are set to tmax = 50 and Niter = 1000,
+respectively. The DTV-Burg method uses N = 4000 samples
+for frequency domain detection. The clustering method used
+in coarse positioning is density based spatial clustering of
+applications with noise (DBSCAN) [43], with a distance
+parameter epsilon = 100 m and a minimum of 15 data points
+required to form a core point. The distance threshold is set
+to Th = 100 m. The step sizes for emitter position and phase
+updates are µi = 0.5 and βi = 0.0005, respectively.
+B. Convergence of the Proposed Positioning Algorithm
+In this subsection, the coarse results are randomly initialized
+near the emitter position to examine the convergence behavior
+of the proposed algorithm at individual sensors. The SNR at
+each sensor is fixed at 10 dB. The path attenuation coefficients
+are unit-modulus complex numbers with phases uniformly
+distributed in [0,2π). The local root mean square error (RMSE)
+is used to describe the real-time positioning accuracy of sensor
+i during the fine positioning step:
+RMSElocal[n] =
+v
+u
+u
+t
+1
+Nexp
+Nexp
+X
+k=1
+∥ˆu(k)
+i
+[n] −u∥2,
+(51)
+where ˆuk
+i [n] denotes the fine positioning result of sensor i
+after n iterations in the k-th Monte Carlo experiment. Fig.
+4 shows the convergence curves of the position estimates for
+five sensors. The five curves coincide after several iterations,
+and remain coincident when the algorithm reaches a steady
+0
+200
+400
+600
+800
+1000
+Number of iterations
+10-1
+100
+101
+102
+103
+RMSElocal (m)
+Sensor 1
+Sensor 3
+Sensor 5
+Sensor 7
+Sensor 9
+1
+5
+101
+102
+950
+955
+0.330
+0.334
+Fig. 4. Real-time positioning accuracy of each sensor during fine positioning
+using the proposed algorithm.
+0
+200
+400
+600
+800
+1000
+Number of iterations
+-2
+-1.5
+-1
+-0.5
+0
+0.5
+1
+Phase (rad)
+1,2
+angle( 2/ 1)
+3,2
+angle( 2/ 3)
+7,5
+angle( 5/ 7)
+6,3
+angle( 3/ 6)
+Fig. 5. Convergence curves of the phase compensation terms.
+0
+200
+400
+600
+800
+1000
+Number of iterations
+100
+101
+102
+RMSE (m)
+i=0.5,
+i=0.0002
+i=1.0,
+i=0.0004
+i=1.5,
+i=0.0006
+i=5.0,
+i=0.0002
+0
+500
+1000
+101
+102
+Fig. 6. Convergence curves of the algorithm under different update step sizes.
+The inset depicts the iteration curve from a single Monte Carlo trial.
+state. Therefore, the sensors achieve consistent convergence
+in estimating the emitter position. In subsequent simulations,
+RMSE =
+v
+u
+u
+t
+1
+MNexp
+M
+X
+i=1
+Nexp
+X
+k=1
+∥ˆu(k)
+i
+−u∥2
+(52)
+This article has been accepted for publication in IEEE Transactions on Vehicular Technology. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TVT.2026.3654660
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on January 27,2026 at 03:51:18 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 11 ===
+IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY
+11
+0
+2
+4
+6
+8
+10
+Frequency (Hz)
+106
+0.3
+0.4
+0.5
+0.6
+0.7
+0.8
+0.9
+1
+Power spectrum
+Power spectrum estimate
+Detection threshold
+(a)
+0
+2
+4
+6
+8
+10
+Frequency (Hz)
+106
+0.3
+0.4
+0.5
+0.6
+0.7
+0.8
+0.9
+1
+Power spectrum
+Power spectrum estimate
+Detection threshold
+(b)
+0
+2
+4
+6
+8
+10
+Frequency (Hz)
+106
+0.3
+0.4
+0.5
+0.6
+0.7
+0.8
+0.9
+1
+Power spectrum
+Power spectrum estimate
+Detection threshold
+(c)
+-15
+-10
+-5
+0
+5
+10
+SNR (dB)
+0
+0.1
+0.2
+0.3
+0.4
+0.5
+0.6
+0.7
+0.8
+0.9
+1
+Probability
+Pd (Burg)
+Pd (DTV-Burg without amplification)
+Pd (DTV-Burg with amplification)
+Pf (Burg)
+Pf (DTV-Burg without amplification)
+Pf (DTV-Burg with amplification)
+(d)
+Fig. 7. The frequency domain detection results for sensor 1 using the Burg method and the proposed DTV-Burg method. (a) SNR is -10 dB and the Burg
+method is employed. (b) SNR is -10 dB and the DTV-Burg method (without reflection coefficient amplification) is employed. (c) SNR is -10 dB and the
+DTV-Burg method (with reflection coefficient amplification) is employed. (d) Frequency domain detection performance of sensor 1 under different SNRs.
+is used to measure the positioning accuracy of the entire sensor
+network, where ˆu(k)
+i
+is the estimated position of sensor i in
+the k-th Monte Carlo experiment.
+Next, Fig. 5 shows the convergence curves of the phase
+compensation terms during the fine positioning step. The phase
+of the path attenuation coefficients for sensors 1 to 10 is
+incremented from 0.2π to 2π in steps of 0.2π, and the phase
+update step size is set to βi = 0.0002. The results show that
+the proposed algorithm effectively compensates for channel-
+induced phase shifts and remains applicable in scenarios with
+complex path attenuation coefficients.
+Finally, four sets of update step sizes are configured to
+investigate their impacts on the proposed algorithm. As il-
+lustrated in Fig. 6, a larger step size reduces the number of
+iterations required for the algorithm to reach a steady state.
+Consequently, employing a small step size with insufficient
+iterations may prevent the algorithm from fully converg-
+ing, thereby increasing the localization error. Conversely, an
+excessively large step size (e.g., position update step size
+µi=5) leads to oscillations, which deteriorates the localization
+accuracy. Therefore, selecting an appropriate update step size
+is crucial for achieving high-precision localization.
+C. Performance of the DTV-Burg Method
+This subsection evaluates the performance of the proposed
+DTV-Burg method. The frequency range of the LFM signal
+received by each sensor spans from 0 MHz to 2 MHz in the
+baseband and the SNR at each sensor is set consistently. Fig.
+7 (a), (b), and (c) present the spectrum estimation results
+and corresponding thresholds for sensor 1 at an SNR of -
+10 dB, using both the conventional Burg method and the
+proposed DTV-Burg method. As shown, the proposed DTV-
+Burg method effectively eliminates the spurious peak at 3 MHz
+and more accurately estimates the signal spectrum, notably
+enhancing the signal components around 2 MHz. By applying
+an amplification factor of 1.5 to the reflection coefficients, the
+noise level decreases from the range of 0.6∼0.7 to 0.4∼0.5.
+Consequently, the detection threshold can be appropriately
+raised to ensure detection performance.
+To quantify the performance of the DTV-Burg method, the
+detection rate Pd and false detection rate Pf are defined as
+Pd = Nin/Nsignal and Pf = Nout/Nnoise, respectively.
+Nsignal and Nnoise represent the number of frequency com-
+ponents within and outside the signal band, respectively, while
+4
+4.5
+5
+5.5
+6
+6.5
+7
+7.5
+8
+1,2 (s)
+10-7
+0
+0.2
+0.4
+0.6
+0.8
+1
+1/Cost (normalized)
+True value
+Time domain (SNR = 0 dB)
+Time domain (SNR = -5 dB)
+Time domain (SNR = -10 dB)
+Frequency domain (SNR = 0 dB)
+Frequency domain (SNR = -5 dB)
+Frequency domain (SNR = -10 dB)
+Fig. 8.
+Comparison of cost functions constructed in the time domain and
+frequency domain under different SNRs.
+Nin and Nout denote the number of points exceeding the
+threshold within and outside the signal band, respectively.
+Fig. 7 (d) illustrates the detection and false detection rates of
+sensor 1 under varying SNRs. For the case involving reflection
+coefficient amplification (denoted as ’amplification’ in the
+legend), the amplification factor is set to h = 1.2, with a
+detection threshold of 1.05 times the mean value. The results
+indicate that the DTV-Burg method outperforms the traditional
+Burg method, achieving a higher detection rate and a lower
+false detection rate, especially at low SNRs. For example,
+at an SNR of -15 dB, the Burg method achieves a detection
+rate of approximately 0.86 with a false detection rate of
+about 0.36, whereas the DTV-Burg method without reflection
+coefficient amplification improves performance to a detection
+rate of 0.97 and reduces the false detection rate to around
+0.26. When reflection coefficient amplification is applied, the
+false detection rate is further reduced to approximately 0.05.
+These findings demonstrate that incorporating neighborhood
+information through the DTV-Burg framework yields more
+accurate spectrum estimation in noisy environments, making
+it particularly effective for low SNR scenarios.
+D. Comparison of Cost Functions
+To demonstrate the superiority of the proposed cost func-
+tion, we compare the frequency-domain and time-domain cost
+This article has been accepted for publication in IEEE Transactions on Vehicular Technology. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TVT.2026.3654660
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on January 27,2026 at 03:51:18 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 12 ===
+IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY
+12
+functions, as illustrated in Fig. 8. In this experiment, the error
+between sensor 1 and 2 is computed, with the cost functions
+being negated and normalized for visualization. It can be
+observed that as the SNR deteriorates, the optimum of the
+time-domain cost function (utilizing sine cardinal interpola-
+tion) gradually deviates from the ground truth. In contrast,
+the optimum of the proposed frequency-domain cost function
+remains consistent with the true value. The deviation observed
+in the time-domain cost function implies an inaccurate esti-
+mation of the TDOA term τ1,2. This inaccuracy propagates
+to the position estimate, subsequently degrading localization
+accuracy. Consequently, the proposed frequency-domain cost
+function demonstrates superior robustness under low SNR
+environments compared to the time-domain cost function.
+E. Coarse Positioning Performance of the RNTDWOA
+In [41], the ring neighborhood topology structure was
+first combined with optimization algorithms, resulting in the
+RNTPSO algorithm. Subsequent research expanded this ap-
+proach to distributed scenarios, leading to the RNTDPSO al-
+gorithm. The particle update mechanism is defined as follows:
+vi,ξ ←χ(vi,ξ + rand(φ1) ⊙(ubest
+i,ξ −ui,ξ) + rand(φ2)⊙
+(ulocal
+i,ξ
+−ui,ξ) + rand(φ2) ⊙(uN
+i −ui,ξ)),
+(53)
+ui,ξ ←ui,ξ + vi,ξ,
+(54)
+where vi,ξ is the velocity of particle ξ in sensor i, and χ is the
+constriction coefficient. Following the recommended settings
+in [41], χ = 0.7298, φ1 = φ2 = 2.05. In this subsection, the
+coarse positioning performance of the proposed RNTDWOA
+method is compared with the RNTDPSO method, using identi-
+cal clustering parameters. Fig. 9 shows the convergence of the
+individual best positions of all particles in the sensor network
+at an SNR of -7 dB. The results show that RNTDWOA
+exhibits faster convergence speed than RNTDPSO, owing to
+its multiple particle update operations that enhance global
+and local search capabilities. After 50 iterations, particles in
+RNTDWOA converge near the two targets, while RNTDPSO
+still exhibits dispersed particles.
+The SNR is further varied from -15 dB to 10 dB to evaluate
+the coarse positioning performance of both algorithms at
+different SNRs, and the corresponding results are presented
+in Fig. 10. The discontinuity (i.e., the abrupt termination
+of the red curve in the very low SNR regime) indicates
+instances where the sensors fail to obtain coarse positioning
+results through clustering, as the minimum number of particles
+required for clustering is not satisfied. From the figure, it can
+be observed that the positioning error of the RNTDWOA is
+approximately half that of the RNTDPSO across all SNRs,
+indicating better coarse positioning performance. At an SNR
+of -15 dB, the RNTDPSO without frequency domain detection
+fails to converge, whereas the RNTDWOA remains capable of
+convergence. At higher SNRs, the positioning errors of both
+algorithms remain stable. This phenomenon is primarily due
+to the mutual interference between the two time overlapping
+sources. Since the two emitters operate with identical power,
+the signal from one source acts as significant interference
+-1000
+-500
+0
+500
+1000
+x (m)
+-1000
+-500
+0
+500
+1000
+y (m)
+Particles
+Emitters
+(a) Results after 50 iterations of the
+RNTDPSO.
+-1000
+-500
+0
+500
+1000
+x (m)
+-1000
+-500
+0
+500
+1000
+y (m)
+Particles
+Emitters
+(b) Results after 50 iterations of the
+RNTDWOA.
+Fig. 9. The distribution of individual best positions of particles.
+-15
+-10
+-5
+0
+5
+10
+SNR (dB)
+10
+20
+30
+40
+50
+60
+70
+RMSE (m)
+RNTDPSO (without frequency domain detection)
+RNTDWOA (without frequency domain detection)
+RNTDPSO (with frequency domain detection)
+RNTDWOA (with frequency domain detection)
+Fig. 10.
+Coarse positioning performance of RNTDPSO and RNTDWOA
+under different SNRs.
+to the other. Consequently, as the background noise power
+becomes negligible, the signal-to-interference-plus-noise ratio
+(SINR) converges to approximately 0 dB, preventing further
+reduction in positioning error.
+The effect of frequency domain detection on the coarse
+positioning is also examined. Without this step, particle fitness
+is calculated across all base-band frequency components and
+affected by out-of-band noise. When the SNR exceeds -10 dB,
+the positioning errors of the algorithms with and without
+frequency domain detection are almost identical. When the
+SNR decreases to -12.5 dB, the RNTDPSO without frequency
+domain detection fails to converge, while the RNTDPSO with
+frequency domain detection can still converge. Similarly, the
+RNTDWOA achieves higher coarse localization accuracy with
+frequency domain detection compared to without it when the
+SNR falls below -10 dB. These results indicate that frequency
+domain detection enhances particle convergence in both RNT-
+DWOA and RNTDPSO under low SNR environments.
+The impact of population size on the proposed algorithm
+is also evaluated in the multi-emitter scenario. As illustrated
+in Fig. 11, once the population size of each sensor reaches a
+certain threshold, further increasing the population size yields
+only slight improvements in coarse localization accuracy and
+exerts negligible influence on the final fine localization accu-
+racy. This behavior is attributed to the superior convergence
+capability inherent in the fine estimation stage of the proposed
+algorithm.
+This article has been accepted for publication in IEEE Transactions on Vehicular Technology. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TVT.2026.3654660
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on January 27,2026 at 03:51:18 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 13 ===
+IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY
+13
+-15
+-10
+-5
+0
+SNR (dB)
+101
+RMSE (m)
+Coarse Positioning (Np=10)
+Fine Positioning (Np=10)
+Coarse Positioning (Np=15)
+Fine Positioning (Np=15)
+Coarse Positioning (Np=20)
+Fine Positioning (Np=20)
+Fig. 11.
+Impact of population size on the algorithm in the multi-emitter
+scenario.
+F. Positioning Performance of the Proposed Algorithm
+In this subsection, the proposed algorithm is compared with
+several representative TDOA-based positioning algorithms.
+The benchmark algorithms include the distributed DPD al-
+gorithm from [21], the D-ADPD algorithm from [27], the D-
+MCDPD algorithm from [36], the two-step method from [14],
+and the distributed two-step method from [32]. Among them,
+D-MCDPD, D-ADPD and method from [21] are distributed
+DPD algorithms. The distributed DPD [21] algorithm and the
+two-step method require multi-hop transmission, while the
+other algorithms only necessitate single-hop transmission. In
+both the two-step method and the distributed two-step method,
+TDOA parameters are obtained through exhaustive search for
+the maximum of the CAF. For all algorithms, each sensor
+collects 0.4 ms of signal, corresponding to 4000 samples. In
+the distributed two-step method, the localization problem is
+solved iteratively using the alternating direction method of
+multipliers (ADMM).
+First, the localization performance of different algorithms is
+compared in a single-emitter scenario, where only the emitter
+located at [0m, 200m]T is considered. In this experiment, the
+path attenuation coefficients are set as real values. Details
+on the calculation of the Cram´er-Rao lower bound (CRLB)
+are provided in the Appendix. To ensure a fair performance
+comparison, both the D-ADPD and D-MCDPD algorithms use
+the coarse positioning results of the proposed algorithm as
+their initial values for iterations. Additionally, the proposed
+algorithm does not employ frequency-domain detection to
+enhance localization accuracy. The comparison results are
+presented in Fig. 12, which demonstrate that the proposed
+positioning algorithm achieves the best performance across all
+SNRs. The distributed DPD [21] and D-MCDPD algorithms
+follow, while the two-step and distributed two-step methods
+exhibit the poorest performance at high SNRs. In contrast, the
+D-ADPD algorithm performs worst at low SNRs. The RMSE
+of the proposed positioning algorithm is approximately 5 dB
+lower than that of the distributed DPD [21] and D-MCDPD
+algorithms, and about 10 dB lower than that of the two-step
+and distributed two-step methods. Specifically, at SNRs of -
+15 dB and 10 dB, the proposed algorithm exhibits positioning
+-15
+-10
+-5
+0
+5
+10
+SNR (dB)
+10-2
+100
+102
+104
+RMSE (m)
+DDPDF
+D-ADPD [27]
+Two-step [14]
+Distributed DPD [21]
+D-MCDPD [36]
+Distributed two-step [32]
+CRLB
+Fig. 12. Comparison of localization performance among different algorithms
+in a single-emitter scenario with a fixed sensor network.
+-15
+-10
+-5
+0
+5
+10
+SNR (dB)
+10-1
+100
+101
+102
+103
+104
+RMSE (m)
+DDPDF
+D-ADPD [27]
+Two-step [14]
+Distributed DPD [21]
+D-MCDPD [36]
+Distributed two-step [32]
+CRLB
+Fig. 13. Comparison of localization performance among different algorithms
+in a single-emitter scenario with a randomly deployed sensor network.
+errors of approximately 10 m and 0.1 m, respectively. As the
+SNR increases, the positioning performance of the proposed
+algorithm approaches the CRLB. Additionally, the positioning
+error of the two-step method is about 1000 m at an SNR of
+-15 dB. In contrast, Fig. 10 shows that the proposed coarse
+positioning method achieves positioning errors of approxi-
+mately 30 m at the same SNR. Therefore, the proposed coarse
+positioning method provides more reliable initial values for
+iterative distributed DPD algorithms than the two-step method
+in low SNR environments.
+To better demonstrate general performance, we randomize
+the positions of the sensors in each Monte Carlo trial while
+ensuring both network connectivity and local observability
+(where each sensor maintains at least two neighbors). As
+illustrated in Fig. 13, the performance of the proposed algo-
+rithm remains virtually unaffected. Notably, it still achieves a
+localization accuracy that lies closer to the CRLB compared
+to the benchmark algorithms.
+Subsequently, the localization performance of the algo-
+rithms in a multi-emitter scenario is compared. When signals
+from different emitters are separated in the time domain, the
+multi-emitter localization problem is equivalent to multiple
+single-emitter localization problems, and the corresponding
+This article has been accepted for publication in IEEE Transactions on Vehicular Technology. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TVT.2026.3654660
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on January 27,2026 at 03:51:18 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 14 ===
+IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY
+14
+-15
+-10
+-5
+0
+5
+10
+SNR (dB)
+10-1
+100
+101
+102
+103
+RMSE (m)
+DDPDF (emitter 1)
+D-ADPD (emitter 1) [27]
+D-MCDPD (emitter 1) [36]
+DDPDF (emitter 2)
+D-ADPD (emitter 2) [27]
+D-MCDPD (emitter 2) [36]
+Fig. 14. Comparison of localization performance among different algorithms
+in a multi-emitter scenario.
+performance results are already presented in Fig. 12. There-
+fore, we consider a scenario with two emitters transmitting
+signals simultaneously, where their signals overlap in the
+time domain upon arrival at each sensor. Since the two-step
+and distributed two-step methods require signal separation
+before localization, and the distributed DPD [21] algorithm
+is not designed for multi-emitter scenarios, these methods
+are excluded from the comparison. As shown in Fig. 14,
+mutual interference between the two sources arises in the
+high SNR regime (similar to that in Fig. 10), which causes
+the RMSE curves of all three algorithms to exhibit negligible
+variation. Nevertheless, the proposed algorithm achieves the
+best localization performance for both targets, particularly for
+target 2. These results demonstrate that the proposed algorithm
+exhibits superior robustness and effectiveness in scenarios with
+time-domain overlapping signals.
+Finally, the path attenuation coefficients are set as com-
+plex values, and the performance of the proposed algorithm
+and the D-ADPD method is compared in the single-emitter
+scenario. As shown in Fig. 15, despite being initialized with
+the coarse positioning results from the proposed algorithm,
+the D-ADPD algorithm fails to converge to the true values
+and exhibits significant localization errors across all SNRs.
+In contrast, the proposed algorithm achieves high-precision
+localization by iteratively estimating the phase compensation
+terms. Additionally, the effect of frequency domain detection
+on the localization performance of the proposed algorithm is
+also examined. When the SNR is between -7.5 dB and 5 dB,
+frequency domain detection improves positioning accuracy by
+eliminating the impact of out-of-band noise, with the effect
+being more pronounced at lower SNRs. However, when SNR
+falls below -7.5 dB, the performance of frequency domain
+detection deteriorates (see Fig. 7 (d)), reducing the benefits
+of frequency-domain detection. Meanwhile, it is noteworthy
+that when the SNR is above 7.5 dB, the localization error
+of the algorithm with frequency domain detection is slightly
+larger. This is because frequency domain detection leads to a
+truncation of the signal’s frequency domain, using a bandwidth
+that is slightly narrower than the actual signal spectrum.
+Overall, the proposed algorithm demonstrates clear advan-
+-15
+-10
+-5
+0
+5
+10
+SNR (dB)
+100
+101
+102
+103
+RMSE (m)
+DDPDF (with detection and amplification)
+DDPDF (with detection)
+DDPDF (without detection)
+D-ADPD [27]
+Fig. 15. Localization performance of the proposed algorithm and the D-ADPD
+method in the scenario with complex path attenuation coefficients. In the
+legend, “detection” and “amplification” refer to frequency domain detection
+and reflection coefficient amplification, respectively.
+tages over other TDOA-based approaches. Compared with
+distributed DPD [21], it eliminates the need for multi-hop
+transmission and the global fusion of all local measurements,
+resulting in reduced computational and communication bur-
+dens in large-scale sensor networks. Relative to D-ADPD,
+it reconstructs the cost function in the frequency domain,
+eliminating the need for signal interpolation in the time domain
+to calculate errors among sensors. Additionally, it compensates
+for phase shifts introduced by channel propagation, enabling
+the algorithm to operate effectively in positioning scenarios
+where path attenuation coefficients are complex. The D-
+MCDPD algorithm applies the Gershgorin theorem to convert
+the centralized cost function into a distributed one, which
+introduces approximation errors. In contrast, the proposed
+method avoids this approximation, thereby achieving higher
+localization accuracy. Furthermore, compared to the two-step
+and distributed two-step methods, the proposed algorithm fully
+leverages the correlation between signals received by different
+sensors, avoiding the information loss caused by the TDOA
+estimation step found in two-step frameworks.
+G. The Impact of Noise and Delay in Sensor Networks on the
+Proposed Algorithm
+Noise and delays are common in distributed sensor net-
+works. Therefore, noise and delays are introduced into the sen-
+sor network to examine their impact on the proposed algorithm
+in this subsection. For the noise setting, the SNR of the signal
+received by sensor 1 is fixed at -15 dB to simulate a sensor
+failure. According to [27], such failure-induced noise has a
+severe impact on centralized direct localization. For the delay
+setting, data exchange between neighboring sensors is assigned
+a random integer delay ranging from 0 to 5 clock cycles.
+Each packet is assumed to be timestamped, enabling sensors
+to determine the transmission delay. The simulation results
+are shown in Fig. 16. The red curve represents the RMSE
+of the proposed algorithm under ideal conditions (without
+noise or delay), while the purple curve reflects the effect of
+failure-induced noise only. The blue curve represents the case
+This article has been accepted for publication in IEEE Transactions on Vehicular Technology. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TVT.2026.3654660
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on January 27,2026 at 03:51:18 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 15 ===
+IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY
+15
+-15
+-10
+-5
+0
+5
+10
+SNR (dB)
+10-1
+100
+101
+102
+RMSE (m)
+DDPDF (no latency and noise)
+DDPDF (in the presense of noise)
+DDPDF (without delay-tolerant strategy)
+DDPDF (with delay-tolerant strategy)
+10
+0.1234
+0.1238
+Fig. 16. Localization performance of the proposed algorithm in the presence
+of transmission delays and sensor failure noise.
+with delays but without compensation, and the yellow curve
+illustrates the performance when the delay-tolerant strategy
+from [36] and [44] is applied. Under this strategy, delays are
+compensated when computing the error term:
+e(n)
+i,m[l] = y(n)
+m [l] −y(n)
+i
+[l]e−j2π(fsˆτi,m+di,m)l/Lejϕi,m, (55)
+where di,m denotes the number of delay cycles for data
+transmitted from sensor m to sensor i. The simulation results
+show that noise introduced by a faulty sensor has little effect
+on the overall performance of the proposed algorithm. At an
+SNR of 10 dB, the localization error is about 0.1 m under
+ideal conditions and remains within 0.4 m even with failure-
+induced noise. This robustness stems from the decentralized
+nature of the algorithm, which avoids reliance on any single
+sensor. However, in the presence of data transmission delays,
+the localization error increases sharply when no additional
+processing is applied, particularly at high SNRs. In contrast,
+by incorporating the delay-tolerant strategy, the proposed al-
+gorithm achieves localization accuracy that is nearly identical
+to the ideal case.
+VI. CONCLUSION
+This paper proposed a distributed direct position determina-
+tion algorithm designed for single-hop sensor networks. The
+algorithm consists of three steps: frequency domain detection,
+coarse positioning, and fine positioning. The frequency domain
+detection step identifies the frequency components of the radi-
+ated signal. In the next two steps, the algorithm processes only
+the detected frequency components to reduce computational
+load and mitigate the impact of out-of-band noise, thereby
+enhancing positioning accuracy. The coarse positioning step
+provides reliable initial values even in low SNR environments.
+During the fine positioning step, the algorithm iteratively
+estimates both the target positions and the phase compensation
+terms, eliminating the impact of signal phase shifts caused by
+channel propagation. Simulation results demonstrate that in
+low SNR environments, the proposed algorithm superior po-
+sitioning accuracy compared with the D-ADPD algorithm and
+other representative TDOA-based methods. Furthermore, the
+proposed algorithm can converge in scenarios with complex
+path attenuation coefficients, making it more robust compared
+to the D-ADPD algorithm.
+APPENDIX
+A. CRLB for TDOA-based Direct Localization
+Following a derivation similar to that in paper [45], the
+Fisher information matrix (FIM) related to the emitter position
+u can be expressed as:
+FIM(u) = 2
+σ2w
+α˜PΛ˜PT,
+(56)
+where
+α = |η1|2
+N−1
+X
+n=0
+
+−j2πfsn
+Nc
+S[n]
+
+2
+,
+˜P =
+ u −p2
+∥u −p2∥−u −p1
+∥u −p1∥, u −p3
+∥u −p3∥−
+u −p1
+∥u −p1∥,
+· · · , u −pM
+∥u −pM∥−
+u −p1
+∥u −p1∥
+T
+,
+Λ = H2 −HηηTHT
+1 + ηTη ,
+(57)
+with the relative path attenuation vector defined as η =
+[η2/η1, · · · , ηM/η1]T, and H = diag(η). The CRLB for u
+is then obtained by inverting the FIM in (56) and taking the
+trace of the resulting matrix.
+REFERENCES
+[1] Z. Dai, G. Wang, X. Jin, and X. Lou, “Nearly optimal sensor selection
+for TDOA-based source localization in wireless sensor networks,” IEEE
+Trans. Veh. Technol., vol. 69, no. 10, pp. 12 031–12 042, 2020.
+[2] H. Zhu, Q. Wang, Y. Li, and H. Leung, “Variational bayesian based
+localization for intelligent vehicle using lidar and GPS data fusion:
+Algorithm and experiments,” IEEE/ASME Trans. Mechatronics, vol. 27,
+no. 6, pp. 5659–5667, 2022.
+[3] O. Kaiwartya, Y. Cao, J. Lloret, S. Kumar, N. Aslam, R. Kharel, A. H.
+Abdullah, and R. R. Shah, “Geometry-based localization for gps outage
+in vehicular cyber physical systems,” IEEE Trans. Veh. Technol., vol. 67,
+no. 5, pp. 3800–3812, 2018.
+[4] H. Zhu, K.-V. Yuen, L. Mihaylova, and H. Leung, “Overview of envi-
+ronment perception for intelligent vehicles,” IEEE Trans. Intell. Transp.
+Syst., vol. 18, no. 10, pp. 2584–2601, 2017.
+[5] G. Giunta, L. Pallotta, and D. Orlando, “Detecting sensor failures in
+TDOA-based passive radars: A statistical approach based on outlier
+distribution,” IEEE Trans. Aerosp. Electron. Syst., vol. 59, no. 3, pp.
+2176–2187, 2023.
+[6] Y. Lin, Y. Li, D. Song, and W. Wang, “Sensor selection for TOA-based
+multi-target localization with non-shared sensors,” IEEE Trans. Aerosp.
+Electron. Syst., 2024.
+[7] A. J. Weiss, “Direct position determination of narrowband radio frequency
+transmitters,” IEEE Signal Process. Lett., vol. 11, no. 5, pp. 513–516,
+2004.
+[8] T. Tirer and A. J. Weiss, “High resolution localization of narrowband
+radio emitters based on doppler frequency shifts,” Signal Process., vol.
+141, pp. 288–298, 2017.
+[9] O. Bar-Shalom and A. J. Weiss, “Direct positioning of stationary targets
+using MIMO radar,” Signal Processing, vol. 91, no. 10, pp. 2345–2358,
+2011.
+[10] Y. Chan and K. Ho, “A simple and efficient estimator for hyperbolic
+location,” IEEE Trans. Signal Process., vol. 42, no. 8, pp. 1905–1915,
+1994.
+[11] G. Wang, W. Zhu, and N. Ansari, “Robust TDOA-based localization for
+IOT via joint source position and NLOS error estimation,” IEEE Internet
+Things J., vol. 6, no. 5, pp. 8529–8541, 2019.
+[12] H. Li, O. Elnahas, and Z. Quan, “TDOA-based indoor localization via
+linear fusion with low-rank matrix approximation,” IEEE Internet Things
+J., vol. 11, no. 6, pp. 10635–10647, Mar. 2024.
+This article has been accepted for publication in IEEE Transactions on Vehicular Technology. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TVT.2026.3654660
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on January 27,2026 at 03:51:18 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 16 ===
+IEEE TRANSACTIONS ON VEHICULAR TECHNOLOGY
+16
+[13] K. Do˘ganc¸ay, “On the bias of linear least squares algorithms for passive
+target localization,” Signal Process., vol. 84, no. 3, pp. 475–486, 2004.
+[14] S. Cao, X. Chen, X. Zhang, and X. Chen, “Combined weighted method
+for TDOA-based localization,” IEEE Trans. Instrum. Meas., vol. 69, no. 5,
+pp. 1962–1971, 2019.
+[15] A. Amar and A. Weiss, “Advances in direct position determination,” in
+Proc. Sensor Array Multichannel Signal Process. Workshop, 2004, pp.
+584–588.
+[16] G. Wu, M. Zhang, and F. Guo, “Direct position determination: An
+overview,” J. Radars, vol. 9, no. 6, pp. 998–1013, 2020.
+[17] T. Tirer and A. J. Weiss, “High resolution direct position determination
+of radio frequency sources,” IEEE Signal Process. Lett., vol. 23, no. 2,
+pp. 192–196, 2016.
+[18] A. J. Weiss, “Direct geolocation of wideband emitters based on delay
+and doppler,” IEEE Trans. Signal Process., vol. 59, no. 6, pp. 2513–2521,
+2011.
+[19] F. Ma, Z.-M. Liu, and F. Guo, “Direct position determination for
+wideband sources using fast approximation,” IEEE Trans. Veh. Technol.,
+vol. 68, no. 8, pp. 8216–8221, 2019.
+[20] M. Pourhomayoun and M. L. Fowler, “Distributed computation for direct
+position determination emitter location,” IEEE Trans. Aerosp. Electron.
+Syst., vol. 50, no. 4, pp. 2878–2889, 2014.
+[21] F. Ma, Z.-M. Liu, and F. Guo, “Distributed direct position determina-
+tion,” IEEE Trans. Veh. Technol., vol. 69, no. 11, pp. 14007–14012, 2020.
+[22] L. Lv, S. Wu, H. Li, C. Jiang, and Y. Su, “DNN-aided distributed direct
+position determination for UAV cluster,” IEEE Trans. Veh. Technol., vol.
+72, no. 12, pp. 16839–16844, Dec. 2023.
+[23] F. Meyer, B. Etzlinger, Z. Liu, F. Hlawatsch, and M. Z. Win, “A scalable
+algorithm for network localization and synchronization,” IEEE Internet
+Things J., vol. 5, no. 6, pp. 4714–4727, 2018.
+[24] W. Yuan, N. Wu, B. Etzlinger, H. Wang, and J. Kuang, “Cooperative
+joint localization and clock synchronization based on gaussian message
+passing in asynchronous wireless networks,” IEEE Trans. Veh. Technol.,
+vol. 65, no. 9, pp. 7258–7273, 2016.
+[25] F. Meyer, B. Etzlinger, F. Hlawatsch, and A. Springer, “A distributed
+particle-based belief propagation algorithm for cooperative simultaneous
+localization and synchronization,” in Proc. Asilomar Conf. Signals, Syst.
+Comput., 2013, pp. 527–531.
+[26] M. Marcus and H. Minc, A survey of matrix theory and matrix
+inequalities.
+Courier Corporation, 1992, vol. 14.
+[27] W. Xia and W. Liu, “Distributed adaptive direct position determination
+of emitters in sensor networks,” Signal Process., vol. 123, pp. 100–111,
+2016.
+[28] F. S. Cattivelli and A. H. Sayed, “Diffusion LMS strategies for dis-
+tributed estimation,” IEEE Trans. Signal Process., vol. 58, no. 3, pp.
+1035–1048, 2010.
+[29] C. G. Lopes and A. H. Sayed, “Diffusion least-mean squares over
+adaptive networks: Formulation and performance analysis,” IEEE Trans.
+Signal Process., vol. 56, no. 7, pp. 3122–3136, 2008.
+[30] J. Chen and A. H. Sayed, “Diffusion adaptation strategies for distributed
+optimization and learning over networks,” IEEE Trans. Signal Process.,
+vol. 60, no. 8, pp. 4289–4305, 2012.
+[31] S. Zhong, W. Xia, and Z. He, “Adaptive direct position determination
+of emitters based on time differences of arrival,” in Proc. IEEE China
+Summit Int. Conf. Signal Inf. Process., 2013, pp. 230–234.
+[32] W. Yu, N. D. Gaubitch, and R. Heusdens, “Distributed TDOA-based
+indoor source localization,” in Proc. IEEE Int. Conf. Acoust., Speech
+Signal Process. (ICASSP), 2018, pp. 6887–6891.
+[33] A. Gendler, S. Y. Peleg, and A. Amar, “A diffusion-based distributed
+time difference of arrival source positioning,” in Proc. 24th Int. Conf.
+Inf. Fusion (FUSION), 2021, pp. 1–5.
+[34] X. Wang, D. Hu, and Q. Si, “Distributed-robust source localization in
+wireless acoustic sensor networks,” in Proc. IEEE Int. Conf. Acoust.,
+Speech Signal Process. (ICASSP), 2025, pp. 1–5.
+[35] M. Doostmohammadian, A. Taghieh, and H. Zarrabi, “Distributed es-
+timation approach for tracking a mobile target via formation of UAVs,”
+IEEE Trans. Autom. Sci. Eng., vol. 19, no. 4, pp. 3765–3776, 2021.
+[36] B. Ding, D. Song, Z. Yang, and W. Wang, “Neighborhood selection-
+based distributed maximum correlation accumulation direct position de-
+termination,” IEEE Trans. Aerosp. Electron. Syst., vol. 61, no. 2, pp.
+4296–4312, Apr. 2025.
+[37] J. C. Burgess, “On digital spectrum analysis of periodic signals,” J.
+Acoust. Soc. Amer., vol. 58, no. 3, pp. 556–567, 1975.
+[38] M. Unser, “Sampling-50 years after Shannon,” Proc. IEEE, vol. 88,
+no. 4, pp. 569–587, 2002.
+[39] A. J. Jerri, The Gibbs Phenomenon in Fourier Analysis, Splines and
+Wavelet Approximations. New York, NY, USA: Springer, 1998.
+[40] S. Mirjalili and A. Lewis, “The whale optimization algorithm,” Adv.
+Eng. Softw., vol. 95, pp. 51–67, 2016.
+[41] X. Li, “Niching without niching parameters: particle swarm optimization
+using a ring topology,” IEEE Trans. Evol. Comput., vol. 14, no. 1, pp.
+150–169, 2009.
+[42] Z. Chen, Y. Weng, and D. Peng, “A low-complexity direct position
+determination method based on the diffusion strategy in wireless sensor
+array networks,” IEEE Trans. Circuits Syst. II: Exp. Briefs, vol. 70, no.
+12, pp. 4584–4588, Dec. 2023.
+[43] M. Ester, H.-P. Kriegel, J. Sander, and X. Xu, “Density-based spatial
+clustering of applications with noise,” in Proc. Int. Conf. Knowl. Discov-
+ery Data Mining, 1996, vol. 240, no. 6.
+[44] M. Doostmohammadian, M. Pirani, and U. A. Khan, “Consensus-based
+networked tracking in presence of heterogeneous time-delays,” in Proc.
+10th RSI Int. Conf. Robot. Mechatronics (ICRoM), Nov. 2022, pp. 17–22.
+[45] F. Ma, Z.-M. Liu, and F. Guo, “Direct position determination in
+asynchronous sensor networks,” IEEE Trans. Veh. Technol., vol. 68, no. 9,
+pp. 8790–8803, 2019.
+This article has been accepted for publication in IEEE Transactions on Vehicular Technology. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/TVT.2026.3654660
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on January 27,2026 at 03:51:18 UTC from IEEE Xplore.  Restrictions apply. 

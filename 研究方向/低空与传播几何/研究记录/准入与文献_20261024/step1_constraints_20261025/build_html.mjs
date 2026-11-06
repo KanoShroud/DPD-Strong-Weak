@@ -1,0 +1,18 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {marked} from 'file:///C:/Users/Administrator/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/marked/lib/marked.esm.js';
+const root=path.dirname(fileURLToPath(import.meta.url)),parent=path.dirname(root);
+const file=path.join(parent,'准入报告.html');
+let previous=fs.readFileSync(file,'utf8');
+const archive=path.join(parent,'准入报告_物理约束核验前.html');
+if(!fs.existsSync(archive))fs.copyFileSync(file,archive);
+const css=previous.match(/<style>([\s\S]*?)<\/style>/)[1];
+const body=marked.parse(fs.readFileSync(path.join(root,'物理约束核验报告.md'),'utf8')).replaceAll('<table>','<div class="table-wrap"><table>').replaceAll('</table>','</table></div>');
+const extra=`h1{font-size:clamp(28px,4vw,38px)}main{padding-top:18px}main>p:nth-child(2){font-size:14px;background:none;padding:0}.top{padding-top:24px}.intro{padding:22px;border-left:4px solid #177e80;background:#e6efea;border-radius:0 12px 12px 0}.table-wrap{overflow:auto}td{min-width:120px}code{overflow-wrap:anywhere}summary{padding:18px 0;cursor:pointer;font-weight:650}details{border-top:1px solid #d4dfdc;margin-top:30px}footer{padding:30px 0;color:#627575}`;
+fs.writeFileSync(path.join(root,'物理约束核验报告.html'),`<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>哪些物理约束能排除假位置？</title><style>${css}\n${extra}</style></head><body><div class="wrap top"><a href="../准入报告.html">← 文献准入总报告</a><p class="intro">不能只问“反射能否拟合”。还要问：<br><strong>拟合出的环境，会不会同时挡住那些本应直达的信号？</strong></p></div><main class="wrap">${body}</main><footer class="wrap">有限机制诊断，不是性能排行榜；新物理假设尚未冻结，未启动正式定位实验。</footer></body></html>`,'utf8');
+previous=previous.replace(/<section id="step1-latest"[\s\S]*?<\/section>/,'');
+const banner=`<section id="step1-latest" style="padding:22px 26px;margin:24px 0;background:#e6efea;border-left:4px solid #177e80;border-radius:0 12px 12px 0"><h2 style="margin:0 0 12px;font-size:24px">最新：物理约束核验完成</h2><p>最早/最强路径不能直接充当直达标签。固定反例中，共同垂直墙仍可拟合真假解释；同时检查无限不透明墙不能截断已有LOS后，才排除替代解释。有限立面、其他可见路径及遮挡成因尚待统一建模，不能宣称已完成消歧。</p><p><a href="step1_constraints_20261025/物理约束核验报告.html"><strong>查看三项检查、因果拆分与下一步边界 →</strong></a> · <a href="step1_deployment_20261025/部署与多径歧义报告.html">上一轮部署核验</a></p><p style="font-size:13px;color:#526d66">以下为此前文献准入内容；当前结果以上述链接为准。</p></section>`;
+previous=previous.replace('<main class="wrap">',`<main class="wrap">${banner}`);
+fs.writeFileSync(file,previous,'utf8');
+console.log('Report and admission banner updated.');

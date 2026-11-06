@@ -1,0 +1,43 @@
+[PDF p.1] Abstract-We present a novel and efficient algorithm for computing the exact maximum likelihood estimator of the locations of multiple sources in passive sensor arrays. The estimator is equally well appli- cable to the case of coherent signals appearing, for example, in mul- tipath propagation problems, and to the case of a single snapshot. Sim- ulation results that demonstrate the performance of the algorithm ate included.
+
+[PDF p.1] I. INTRODUCTION HE localization of radiating sources by passive sensor T arrays is one of the central problems in radar, sonar, radio-astronomy , and seismology. The simplest, yet not degenerate, problem in this context is the estimation of the directions-of-arrival of narrow-band sources with the same known center frequency, which are located in the far field of an array composed of sensors with arbitrary locations and arbitrary directional characteristics.
+
+[PDF p.1] This problem has received considerable attention in the last 30 years, and a variety of techniques for its solution have been proposed. The Maximum Likelihood (ML) technique was one of the first to be investigated [ 141, [9]. Nonetheless, because of the high computational load of the multivariate nonlinear maximization problem in- volved, it did not become popular. Instead, suboptimal techniques with reduced computational load have domi- nated the field. The better known ones are the Minimum Variance method of Capon [3], the MUSIC method of Schmidt [ 131 and Bienvenu and Kopp [ 11, and the related Minimum Norm method of Reddi [ 1 13 and Kumaresan and Tufts [8]. For a review of these and related techniques, the reader is referred to [6], [lo], and [5].
+
+[PDF p.1] The performance of these techniques is inferior to that of the ML technique. The difference in the performance is especially conspicuous in the threshold region, namely, when the signal-to-noise ratio is small, or alternatively, when the number of samples (“snapshots”) is small.
+
+[PDF p.1] Moreover, these techniques cannot handle the case of coherent signals. This case appears, for example, in spec- ular multipath propagation problems and, therefore, it is of great practical importance. The preprocessing spatial
+
+[PDF p.1] In this paper we present a novel and computationally attractive method for computing the ML estimator. It is based on an iterative technique referred to as “Alternating Projection” (AP), that transforms the multivariate nonlin- ear maximization problem into a sequence of much sim- pler one-dimensional maximization problems.
+
+[PDF p.1] The paper is organized as follows. In Section 11, we formulate the problem. In Section I11 and Section IV, re- spectively, we derive the ML estimator and present the AP algorithm. Computer simulations that demonstrate the performance of the ML estimator, as computed with the AP algorithm, in comparison with the Cramer-Rao lower bound and the MUSIC algorithm are presented in Section V. Our concluding remarks are given in Section VI.
+
+[PDF p.2] direction 0, ever, to the case of fully correlated signals and to the case of a single snapshot). Assumptions A1 and A2 are needed to guarantee the uniqueness of the solution [19]. Assump- tions A3 and A4 are the conventional assumptions for the
+
+[PDF p.2] Substituting this result back into the log-likelihood func- tion, ignoring constant terms, we get that the ML esti- mator is obtained by solving the following maximization problem:
+
+[PDF p.3] This estimator has an appealing geometric interpreta- tion. Notice, from (l), that in the absence of noise the vector x ( t ) stays in the q-dimensional space spanned by the columns of A(@), referred to as the “signal sub- space,” while the presence of noise may cause x ( t ) to wander away from this subspace. From (12) it follows that the Maximum Likelihood estimator is obtained by searching over the array manifold for those q steering vec- tors that form the q-dimensional signal subspace which is
+
+[PDF p.3] This expression shows that the Maximum Likelihood estimator, unlike the MUSIC and the Minimum Norm es- timators, involves all the eigenvalues and the eigenvec- tors of R; the larger the eigenvalue the more important it is that the projection of the corresponding eigenvector onto the signal subspace be maximized.
+
+[PDF p.3] In this section we present an efficient algorithm for computing the ML estimator. The algorithm is based on a maximization technique, referred to as Alternating Maximization, which we apply in conjunction with a computationally efficient projection-matrix decomposi- tion scheme.
+
+[PDF p.3] Intuitively, the algorithm climbs the peak of L ( 0 ) along lines parallel to the axes, as shown schematicaly in Fig. 1. The rate of climb depends, of course, on the struc- ture of L ( 0 ) in the proximity of the peak. Since a max- imization is performed at every iteration, the value of the maximized function, L ( @ ) , cannot decrease. As a result,
+
+[PDF p.4] the algorithm is bound to converge to a local maximum. Depending on the initial condition, the local maximum may or may not be the global one.
+
+[PDF p.4] As the initialization step is so critical to the global con- vergence, it is a key element in the algorithm. The fol- lowing rather simple initialization procedure gave excel- lent results in the extensive set of simulations we have run for different scenarios.
+
+[PDF p.4] V. SIMULATION RESULTS In order to demonstrate the performance of the (ML) estimator computed by the AP algorithm, we compare it to the Cramer-Rao lower bound and with the suboptimal MUSIC algorithm in several simulated experiments.
+
+[PDF p.4] In all the first four experiments, the array was linear and uniform with three isotropic sensors spaced half a wavelength apart. The array beamwidth, defined as the reciprocal of its length in wavelengths, was therefore 57”. The sources were two equal power narrow-band emitters, and the noise was additive and uncorrelated from sensor to sensor and with the signals.
+
+[PDF p.4] In every experiment we performed 100 Monte-Carlo runs and computed the root-mean-square (rms) error for each direction-of-arrival.
+
+[PDF p.5] emitters impinging from 0" and 20". The number of snap- shots taken was 10. Fig. 2 shows the resulted rms error (in degrees) of the first source as a function of the SNR, defined as SNR = 10 log (s2/02), where s2 and a* are the average power of the signals and the noise, respec-
+
+[PDF p.5] In the second experiment, the scenario was the same as in the first one, except that this time we fixed the SNR to 20 dB. Fig. 3 shows the resulted rms error of the first
+
+[PDF p.6] In the third experiment, the two emitters were located at 0" and 5" and the SNR was again 20 dB. Fig. 4 shows the substantially improved performance of the ML esti- mator. The somewhat larger deviation from the Cramer- Rao bound in this case is explained by the fact that the bound is known to be not tight in the threshold region.
+
+[PDF p.6] In the fourth experiment, we simulated the coherent signals case. The scenario was as in the first experiment, except that this time the two sources were fully corre- lated. Fig. 5 shows the results as a function of the SNR. When compared to Fig. 3, about 10 percent degradation

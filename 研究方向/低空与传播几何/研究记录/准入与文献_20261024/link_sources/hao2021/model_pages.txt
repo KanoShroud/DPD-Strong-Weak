@@ -1,0 +1,128 @@
+
+--- PDF PAGE 1 ---
+1148                                                                     IEEE WIRELESS COMMUNICATIONS LETTERS, VOL. 10, NO. 6, JUNE 2021
+
+  Sparse Bayesian Inference-Based Direct Off-Grid Position Determination in
+                          Multipath Environments
+
+          Kegang Hao   , Graduate Student Member, IEEE, and Qun Wan   , Senior Member, IEEE
+
+
+
+  Abstract—The   classical  super-resolution  Direct  Position   a SOCP problem. Besides, the GQE exists inherently in all
+Determination (SR-DPD) algorithms fail to suppress the coher-   above on-grid model based algorithms. On the other hand,
+ent  Non-Line-of-Sight (NLOS)  interference due  to  the  lack                                                                 the SSR based off-grid method was proposed to eliminate the
+of  independent  measurements. The  existing  Sparse  Signal
+                                       GQE and estimate the Angle of Arrival (AOA) of coherentReconstruction (SSR) based DPD approach suffers from the
+intractable  complexity  since   it  needs  to  solve  a  Second-   sources [8].
+Order Cone Programming (SOCP) problem. Besides, the Grid    The central contribution of this letter is stated as follows.
+Quantization Error (GQE) exists in all above on-grid model based  We extend the off-grid method in [8] to solve a more nonlinear
+algorithms inherently. The proposed Sparse Bayesian Inference                                        DPD problem in multipath environment.  First, we param-
+(SBI) based off-grid DPD algorithm  is easy to implement as
+                                                                   eterized both the Line-of-Sight (LOS) component and thethe Expectation-Maximization (EM) method is applied to decou-
+ple the multi-dimensional optimization problem. In addition, the  NLOS components by position coordinates to build the off-
+GQE is also eliminated by introducing the Gradient Descent (GD)   grid model. second, we introduced the GD mechanism into
+mechanism into the EM steps to update the grid point coordinates   the SBI framework to estimate the off-grid position coordi-
+of interest iteratively.                                                                nates of interest iteratively. Finally, We designed numerical
+  Index Terms—Sparse  signal  reconstruction,  off-grid  direct   simulations to validate the advantages of the proposed SBI
+position  determination,  sparse  Bayesian  inference,  gradient   based off-grid DPD algorithm.
+descent.
+
+                                                                                II. MEASUREMENT MODEL AND SSR BASED PROBLEM
+                                                              FORMULATION
+                                                         Given Nr indoor receivers at pj , j = 1, . . . , Nr  respec-                           I. INTRODUCTION
+                                                                            tively, each receiver is equipped with an hybrid antenna array
+   HE DPD approaches outperform the traditional two-step                                                               of M panels. The known signal waveform is transmitted by
+    ones at low Signal to Noise Ratio (SNR) or in multipathT                                                       a transmitter at p. After undergoing multiple reﬂections, the
+environment [1], [2], [3]. The SR-DPD algorithms such as                                                                 transmitted signal impinges on the jth receiver from Qj differ-
+the Multiple Signals Classiﬁcation (MUSIC) based DPD [1]                                                                 ent AOA θq,j , q = 0, . . . , Qj −1 with associated Propagation
+and the Minimum Variance Distortionless Response (MVDR)                                                   Time Delay (PTD) τq,j , where q = 0 denotes the LOS com-
+based DPD [4], require lots of independent measurements to                                      ∥pj −p∥
+                                                          ponent  (i.e.,  τ0,j =  τj (p) =     c    ) and others denoteacquire the second-order statistics. Thus, these SR-DPD algo-
+                                                                 the NLOS components. We deﬁne  the NLOS parametersrithms cannot suppress the coherent NLOS interference in
+                                                                        (θq,j , τq,j ) as unknown and arbitrary because no prior sta-multipath environment unless the Data Smoothing (DS) tech-
+                                                                               tistical knowledge of the channel is assumed. According tonique [5] is applied. However, the DS will reduce the effective
+                                                                 the Channel Frequency Response (CFR) expression derivedbandwidth of the received signal, which weakens the resolv-
+                                                                    in [9], we gather the CFRs across the M panels into a singleing power. The prior statistical information about the multipath
+                                                                     vector, then the jth CFR vector at the nth frequency is givenchannel was utilized to approximate the Maximum Likelihood
+                                                     by(ML) solution of the DPD problem in multipath environ-
+ment  [6]. Nevertheless,  it  is almost impossible to acquire     hj (n) = γ0,j Caj (p)e−j2πnΔf τj (p)
+the effective channel information in practice. The SSR based                 Qj −1
+DPD approach was also proposed to improve the localization                                                                  τq,j                                         +       γq,j Caj (θq,j )e−j2πnΔf  + wj (n)(1)
+performance in multipath environment [7]. Unfortunately,  it                                                               q=1
+suffers from the intractable complexity since it needs to solve
+                                                      where  {γq,j }Qjq=0−1  are  the  path  attenuation  coefﬁcients,
+  Manuscript  received December  22, 2020;  revised  February  1, 2021;   aj (·) ∈CM0 denotes the steering vector corresponding to the
+accepted February 2, 2021. Date of publication February 5, 2021; date of cur-                    ×M0rent version June 9, 2021. This work was supported in part by the National   jth receiver and C ∈CM       is a known codebook used to
+Natural Science Foundation of China (NSFC) under Grant 61771108 and   precode. Δf is the frequency interval. wj (n) denotes the com-
+Grant U1533125; and in part by the Fundamental Research Funds for the   plex Gaussian white noise. Considering the information about
+Central Universities under Grant ZYGX2015Z011. The associate editor coor-
+dinating the review of  this  article and approving  it for publication was   the transmitter position is carried only by the LOS compo-
+A. Ozcelikkale. (Corresponding author: Qun Wan.)                      nents (this claim is supported by the analysis in [10], which
+  The authors  are with  the School of Information and Communication  showed that the Fisher information decreases when NLOS
+Engineering, University of Electronic Science and Technology of China,
+Chengdu 611731, China (e-mail: wanqun@uestc.edu.cn).                components are present), only LOS component  is parame-
+   Digital Object Identiﬁer 10.1109/LWC.2021.3057502                     terized by p directly. Our indoor DPD problem is stated as
+
+                    2162-2345 c⃝2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.
+                                  See https://www.ieee.org/publications/rights/index.html for more information.
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:42:54 UTC from IEEE Xplore. Restrictions apply.
+--- PDF PAGE 2 ---
+HAO AND WAN: SPARSE BAYESIAN INFERENCE-BASED DIRECT OFF-GRID POSITION DETERMINATION IN MULTIPATH ENVIRONMENTS                1149
+
+follows: Given the receiver positions {pj }Nrj=1, estimate the   A(˜PG) ≜[A1, . . . , AG] ∈CNrNM ×GNr              (10)
+                                                                                                                                            . . . , ˜aNr (˜pg)} ∈CNrNM ×Nrtransmitter position p∗from the measurements {hj (n)}Nr,Nj,n=1.      Ag ≜blkdiag{˜a1(˜pg),
+  To discuss our indoor DPD problem in SSR perspective,            T     T                                                                                                     ˜γ ≜[˜γ 1 , . . . , ˜γ G]T ∈CGNr                    (11)
+we regard the NLOS parameter pair (θq,j , τq,j ) as local polar
+                                                                                                   ˜γ g ≜(˜γg,1, . . . , ˜γg,Nr )T ∈CNr                   (12)coordinate (θq,j , dq,j ) (dq,j ≜cτq,j where c is the light speed)
+and transform it into global Cartesian coordinate as follows      w ≜[wT1 , . . . , wTNr ]T ∈CNrNM                (13)
+                           cos θq,j                       where  blkdiag{·}  denotes  the  block-diagonalization.  ˜γg,j            pq,j = dq,j RT       + pj ,              (2)                              sin θq,j                           equals to γq,j  if the qth component of the jth CFR is parame-
+                                                                    terized by the coordinate ˜pg  (i.e., ˜γg,j = γq,j , if ˜pg = pq,j )where the Strapdown Matrix R (deﬁned in [11]) depends on
+                                                       and ˜γg,j = 0 otherwise. ˜γ is sparse since GNr ≫   Nrj  Qj .the array attitude. The NLOS coordinate pq,j can be regarded
+                                                   The LOS components of  all Nr CFRs are parameterizedas the location of a Virtual Transmitter (VT), which transmits
+                                                     by the same coordinate  (i.e., ˜pg0 = p0,j , j = 1, . . . , Nr)the coherent interference signal. However, the VT at pq,j does
+                                                                    for the fact that LOS components originate from the truenot disturb all receivers but the jth receiver, because no prior
+                                                                      transmitter. This leads to the g0th block-sparsity of  ˜γ  (i.e.,statistic knowledge of the multipath channel is assumed. After
+                                                                                           ˜γ g0 = (γ0,1, . . . , γ0,Nr )T ). While the blocks correspondingtransforming, both the LOS component and the NLOS compo-
+                                                                    to the VTs are single-sparse since the NLOS components arenents can be represented on a manifold parameterized by the
+                                                              independent. Consequently, we can distinguish the LOS com-global coordinates. Hence, by stacking the measurements (1)
+                                                           ponents from the NLOS components by the block-sparsity ofat different frequencies, we obtain the compact form of the
+                                                                                           ˜γ . The indoor DPD problem is now transformed into the oneCFR as follows
+                                                               of SSR of ˜γ .
+               hj = Aj (p, Pj )γ j + wj                 (3)     In reality, the coordinate pq,j varies continuously but the
+                                                              candidate coordinate ˜pg  is discrete. Therefore, the On-grid                  −1
+where Pj = {pq,j }Qjq=1   is a coordinate set, corresponding   assumption {p, Pj } ⊂˜PG almost fails and the model (8)
+to the NLOS components of the jth CFR and                 based SSR algorithms are limited by the GQE. To eliminate
+                                                                 the GQE, we apply the linearization method in [8] to approx-        hj ≜[hTj (1), . . . , hTj (N )]T ∈CNM                (4)
+                                                           imate the true measurement model. Suppose that ˜pgq,j ∈˜PG
+ Aj (p, Pj ) ≜[˜aj (p), ˜aj (p1,j ), . . . , ˜aj (pQj −1,j )] ∈CNM×Qj                                                                               is the nearest candidate coordinate to pq,j and pq,j /∈˜PG.
+        γ j ≜(γ0,j , . . . , γQj −1,j )T ∈CQj                   (5)  We approximate the spacial signature vector ˜aj (pq,j ) using
+       wj ≜[wTj (1), . . . , wTj (N )]T ∈CNM               (6)   linearization:
+                                                                                                                                                                        ′           (gq,j )        ′           (gq,j )
+                                                                                            ˜aj (pq,j ) ≃˜aj (˜pgq,j ) + ˜a j (˜xgq,j )β x   + ˜a j (˜ygq,j )β y     (14)where the spacial signature vector ˜aj (z) (z denotes p or pq,j )
+is deﬁned as                                            where ˜pgq,j = (˜xgq,j , ˜ygq,j ) and
+
+                                                                                                                            ′                    ∈CNM                                                                      (p)       (z)                               (z)]      ˜aj         ≜b(τj (z)) ⊗[Caj                                                                                                      −˜zg, g                                                              = gq,j                                                                                          ˜a                                                                                                                                           , β(g)z =   zq,j                                                                                                        j (˜zgq,j ) ≜∂˜aj                                                                                                               0,                                                                                                              otherwise                                                                  ∂z                                 τj (z), . .                                               . , e−j2πN      (z))         ≜(e−j2πΔf                                    Δf τj (z))T ∈CN  b(τj                                                                                                  p=˜pgq,j
+
+                                      j                      (z)r1, . . . , e−jkT                                                                      j (z)rM0 )T ∈CM0  (7)                                                           (15)    aj (z) ≜(e−jkT
+                                                      where z denotes x or y. Deﬁne Δz = diag{βz ⊗1Nr } wherewhere ⊗denotes the Kronecker product and the known rm0
+denotes the relative coordinate of the m0th array element to   1Nr ∈{1}Nr and βz = (β(1)z   , . . . , β(G)z  )T ∈RG. To ensure
+                                               −z)                                                    2π(pj                                                                            ∈                                                                 the accuracy                                                                             of the                                                                                           linear                                                                                   approximation                                                                                                                 (14), we limit                                                                                                   βzthe reference one. The wave vector kj (z) equals to                                                   λ∥pj −z∥,                                                   [−r,                                                              r]G. A new                                                                                       off-grid                                                                                           dictionary                                                                                               parameterized                                                                                               by βx,                                                                                              βywhere λ is the wavelength of the transmitted signal. The polar
+                                                       and ˜PG is given byradius in (2) equals to the distance between the jth receiver
+and the VT at pq,j (dq,j ≜cτq,j = ∥pj −pq,j ∥), so we have    Φ(˜PG, βx , βy) ≃A(˜PG) + Ax (˜PG)Δx + Ay(˜PG)Δy  (16)
+            ∥pj −pq,j ∥
+τj (pq,j ) =     c        .                                    where
+  To combine the DPD concept with the SSR approach, we
+further build the sparse representation model for all Nr CFR             Az (˜PG) ≜∂A(P)                     (17)
+                                                                               ∂z  P= ˜PGmeasurements. Let A(˜PG) be an over-complete dictionary
+and suppose all unknown coordinates, for both LOS and NLOS   For brevity, we write Φ = Φ(˜PG, βx, βy). The SSR based
+components, are exactly on the ﬁxed grid ˜PG = {˜pg}Gg=1,   off-grid DPD model can be written as
+i.e., {p, Pj } ⊂˜PG, j = 1, . . . , Nr. Hence, the sparse model                  h = Φ˜γ + w                     (18)
+including all measurements can be written as
+                                                      where h, w ∈CNrNM , Φ ∈CNrNM ×GNr and ˜γ ∈CGNr .
+              h = A(˜PG)˜γ + w                    (8)  The off-grid dictionary in [8] solely depends on the angle vari-
+                                                                  ation while that in (16) depends on the coordinate variationwhere
+                                             β and the position grid ˜PG. This extension is the base of
+     h ≜[hT1 , . . . , hTNr ]T ∈CNrNM                    (9)   introducing the GD mechanism into EM steps.
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:42:54 UTC from IEEE Xplore. Restrictions apply.

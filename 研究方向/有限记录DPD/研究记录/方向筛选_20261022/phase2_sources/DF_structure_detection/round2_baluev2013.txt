@@ -1,0 +1,1102 @@
+                                              Mon. Not. R. Astron. Soc. 000, 1–13 (2013)      Printed 29 September 2018      (MN LATEX style file v2.2)
+
+
+
+
+                                              Detecting multiple periodicities in observational data with
+                                              the multi-frequency periodogram.
+                                              I. Analytic assessment of the statistical significance
+arXiv:1308.6463v1 [astro-ph.IM] 29 Aug 2013
+
+
+
+
+                                              Roman V. Baluev⋆
+                                              Central Astronomical Observatory at Pulkovo of Russian Academy of Sciences, Pulkovskoje shosse 65, St Petersburg 196140, Russia
+                                              Sobolev Astronomical Institute, St Petersburg State University, Universitetskij prospekt 28, Petrodvorets, St Petersburg 198504, Russia
+
+
+
+                                              Accepted 2013 August 23. Received 2013 July 23; in original form 2013 May 20
+
+
+
+                                                                                ABSTRACT
+                                                                                We consider the “multi-frequency” periodogram, in which the putative signal is mod-
+                                                                                elled as a sum of two or more sinusoidal harmonics with idependent frequencies. It is
+                                                                                useful in the cases when the data may contain several periodic components, especially
+                                                                                when their interaction with each other and with the data sampling patterns might
+                                                                                produce misleading results.
+                                                                                     Although the multi-frequency statistic itself was already constructed, e.g. by
+                                                                                G. Foster in his CLEANest algorithm, its probabilistic properties (the detection signif-
+                                                                                icance levels) are still poorly known and much of what is deemed known is unrigourous.
+                                                                                These detection levels are nonetheless important for the data analysis. We argue that
+                                                                                to prove the simultaneous existence of all n components revealed in a multi-periodic
+                                                                                variation, it is mandatory to apply at least 2n − 1 significance tests, among which the
+                                                                                most involves various multi-frequency statistics, and only n tests are single-frequency
+                                                                                ones.
+                                                                                     The main result of the paper is an analytic estimation of the statistical significance
+                                                                                of the frequency tuples that the multi-frequency periodogram can reveal. Using the
+                                                                                theory of extreme values of random fields (the generalized Rice method), we find a
+                                                                                handy approximation to the relevant false alarm probability. For the double-frequency
+                                                                                periodogram this approximation is given by an elementary formula 16    π
+                                                                                                                                                         W 2 e−z z 2 , where
+                                                                                W stands for a normalized width of the settled frequency range, and z is the observed
+                                                                                periodogram maximum. We carried out intensive Monte Carlo simulations to show
+                                                                                that the practical quality of this approximation is satisfactory. A similar analytic
+                                                                                expression for the general multi-frequency periodogram is also given in the paper,
+                                                                                though with a smaller amount of numerical verification.
+                                                                                Key words: methods: data analysis - methods: statistical - methods: analytical
+
+
+
+                                              1    INTRODUCTION                                                    radial velocity variation that multiple planets induce on
+                                                                                                                   their host star, sometimes makes such data rather difficult
+                                              The raw time-series data that are obtained in astronomical
+                                                                                                                   for an analysis. It is well-known that multiple periodic vari-
+                                              or other observations often contain more than one periodic
+                                                                                                                   ations can interfere with each other and with the periodic
+                                              component. For example, in the field of the exoplanets dis-
+                                                                                                                   patterns of the non-uniform time series sampling. When we
+                                              covery, the fraction of known multi-planet systems is close to
+                                                                                                                   plot a traditional periodogram of such data, we may even
+                                              20%, with about 1.3 planets per system in average (See The
+                                                                                                                   discover that its maximum peak is unrelated to any of the
+                                              Extrasolar Planets Encyclopaedia at www.exoplanet.eu). Al-
+                                                                                                                   real periodicities (even for data without any random noise at
+                                              though some may claim that 20% is still only a minor frac-
+                                                                                                                   all). Such examples are given, for example, in (Foster 1995)
+                                              tion, the multi-planet systems are the objects which are most
+                                                                                                                   and also in the teaching manual (Vityazev 2001). This obvi-
+                                              interesting for further investigations and most important for
+                                                                                                                   ously appears because the single-sinusoid signal model, that
+                                              the associated theory work.
+                                                                                                                   is implicitly used by the (Lomb 1976)–(Scargle 1982) peri-
+                                                   However, the complicated character of the compound
+                                                                                                                   odogram, as well as by its more advanced relatives, is inad-
+                                                                                                                   equate when dealing with the data containing two or more
+                                              ⋆
+                                                                                                                   periodicities. Note that we do not speak here of the over-
+                                                  E-mail: roman@astro.spbu.ru
+2     R.V. Baluev
+tone harmonics that appear when a single non-sinusoidal           (the alternative hypothesis). The classic Lomb-Scargle peri-
+periodic signal is involved; for that case the so-called multi-   odogram is based on a simple sinusoidal model of the signal
+harmonic periodogram (Schwarzenberg-Czerny 1996; Baluev           to detect:
+2009b) should be used. We address here a more general case
+when the frequencies of the harmonics are independent and                         µ = A cos(2πf t) + B sin(2πf t),                      (1)
+unknown (not binded to any basic frequency).                      where the parameters A and B are implicitly estimated by
+     On itself, the definition of a periodogram that could        means of a linear regression. Now let us assume that the
+take into account at least two or many periodicities at once      compound signal, that we expect to reveal in the time-series
+is rather trivial (see Section 2). We do not claim any in-        data, is representable as the following sum of n independent
+vention rights on it: the earliest, to our concern, papers        sinusoids:
+utilizing essentially the same multi-frequency statistic were                        n
+(Foster 1995, 1996a,b). In these works, the multi-frequency
+                                                                                     X
+                                                                              µ=            Ai cos(2πfi t) + Bi sin(2πfi t).            (2)
+test statistic is treated as a part of the Foster’s CLEANest                          i=1
+algorithm. In fact, the “global” version of the CLEANest
+method implies the direct dealing with the multi-frequency        The definition of the multi-frequency periodogram itself,
+periodogram plotted in a multi-frequency space (or at least       based on (2), is analogous to the one for the Lomb-Scargle
+in some representative portions of this space).                   periodogram, based on (1). Here we slightly extend the for-
+     The non-trivial problem that we address here is the esti-    mulae of a general (but still single-frequency) linear peri-
+mation of the false alarm probability (FAP) associated with       odogram, given in (Baluev 2008). Now we have 2n unknown
+the observed peaks of this periodogram. The FAP is neces-         linear coefficients Ai and Bi . In fact, the frequencies fi are
+sary to justify any claims of signal detection in the presence    unknowns too, but we treat them separately since they are
+of the noise. For the multi-frequency periodogram the FAP         non-linear parameters. Let us rewrite the model (2) in the
+characterizes the joint significance of an extracted group of     vectorial notation as
+periodicities, and it is different from the usual significances     µ(θ, f , t) = θ · ϕ(f , t),
+of individual periodicities, treated each on its own. We dis-
+                                                                      ϕ(f , t) = {cos(2πfi t), sin(2πfi t)}i=1,2,...,n ,
+cuss this difference and the practical importance of the joint
+FAP in Section 3.                                                            θ = {Ai , Bi }i=1,2,...,n ,    f = {f1 , f2 , . . . , fn }. (3)
+     Since the FAP is related to the distribution function
+                                                                  Now we can eliminate the linear parameters θ by means of
+of the periodogram maxima, we estimate it with the gener-
+                                                                  the linear least-square regression (that is, to estimate them
+alized Rice method for random processes and fields, which
+                                                                  on the basis of the input data xi , ti , and σi ). To do this, we
+allows to efficiently approximate to the relevant extreme-
+                                                                  must solve the following minimization task:
+value distributions. We first used this method for the Lomb-
+Scargle periodogram in (Baluev 2008), and after that it ap-                          χ2 (θ, f ) = h(x − µ)2 i 7−→ min                   (4)
+                                                                                                                      θ
+peared very useful. In Section 4 we derive the FAP formula
+for the multi-frequency periodograms using our generalized        Here we have borrowed from (Baluev 2008) the notation
+method described in (Baluev 2013).                                hF (t)i, which stands for the weighted sum of the values F (ti )
+     In Section 5 we discuss some further generalizations of      with the weights wi = 1/σi2 .
+the basic multi-frequency periodogram, which are analogous             Since this χ2 function is quadratic in θ, the necessary
+to the ones already known for the Lomb-Scargle one. After         minimization can be done elementary:
+that, in Section 6 we present the results of Monte Carlo
+simulations that we carry out to verify our analytic FAP                       min χ2 (θ, f ) = hx2 i − hxϕiT hϕ ⊗ ϕi−1 hxϕi,
+                                                                                 θ
+estimations, while in Section 7 we compare the detection             θ∗ = arg min χ2 (θ, f ) = hϕ ⊗ ϕi−1 hxϕi,                          (5)
+sensitivity of the single- and multi-frequency periodograms.                     θ
+
+Finally, in Section 8 we provide a demonstrative example          where ‘⊗’ is the dyadic product of vectors (a ⊗ b is a ma-
+showing the potential capabilities of the double-frequency        trix constructed of the elements ai bj ). By analogy with
+periodogram.                                                      the Lomb-Scargle periodogram, the multi-frequency peri-
+                                                                  odogram, associated to the model (2), can be defined as
+                                                                  the half of the maximum decrement in χ2 implied by (5):
+2   MULTI-FREQUENCY PERIODOGRAM                                              1 2              1
+                                                                     z(f ) =    hx i − min χ2 = hxϕiT hϕ ⊗ ϕi−1 hxϕi (6)
+First of all, we should define the dataset that we deal with.                2          θ       2
+Let it consists of N measurements xi , taken at the time ti ,     Since this z(f ) is basically a test statistic, its large values
+and having the uncertainty σi . For now we assume that σi         indicate that the data probably contain a variation that can
+are known accurately, although later we will also consider        be expressed (or at least approximated) by the model (2).
+the more wide-spread case when only the weights wi ∝ 1/σi2        However, it must be remembered that large values of z(f )
+are known, while the values of σi are known only to a free        does not yet mean that all sinusoidal components of (2) are
+multiplicative constant. The errors of xi are assumed Gaus-       actually present. When the data contain only a single si-
+sian and mutually independent, with the variances given by        nusoid at a given frequency f ∗ , the function z(f ) will be
+σi2 .                                                             large when fi ≈ f ∗ only for a single index i (for all fj with
+      When deriving the definition of the classic Lomb-Scarge     j 6= i). In fact, the multi-frequency periodogram can also
+periodogram, it is assumed that the data contain only pure        reveal single periodicities too, although its detection power
+noise (the null hypothesis) or the noise as well as a signal      in this case would be smaller than in the single-frequency
+                                                                          Multi-frequency detection significance                 3
+framework (see Sect. 7). When the data contain n period-            cussed above, the multi-frequency periodogram has no iso-
+icities at fi∗ , the multi-frequency periodogram has a multi-       lated peaks; its peaks are located in the intersection nodes
+dimensional cross-like shape: large values at the orthogonal        of the grid generated by the mentioned system of candidate
+lines fi ≈ fi∗ accompanied by an especially high peak at the        frequencies.
+intersection point. In practice, this picture may be of course           It is possible that more computationally fast FFT-like
+made more complicated, e.g. due to the aliasing.                    methods of evaluation of z(f ) may be constructed, similar
+      There are pecularities of (6) at the diagonals fi = fj ,      to the ones already developed for the Lomb-Scargle peri-
+where the model (2) becomes formally degenerate. This de-           odogram and its other extensions (e.g. Palmer 2009). We
+generacy can be easily eliminated, however. For example, for        leave this question without attention here, since we further
+the double-frequency case this can be done by means of an           focus only on the statistical characteristics of the multi-
+equivalent replace of the base ϕ by the following set:              frequency periodogram.
+
+                   cos(π(f1 + f2 )t) cos(π(f2 − f1 )t),
+                    sin(π(f1 + f2 )t) cos(π(f2 − f1 )t),
+         cos(π(f1 + f2 )t) sin(π(f2 − f1 )t)/(f2 − f1 ),            3   STATISTICAL ISSUES COMING FROM THE
+         sin(π(f1 + f2 )t) sin(π(f2 − f1 )t)/(f2 − f1 ).     (7)        SIGNAL MULTIPLICITY
+It is not hard to check that an arbitrary linear combi-             The construction of the multi-frequency periodogram is not
+nation of these new base functions can be transformed               the main goal of our present paper. This task on itself
+to the form of the original model (2) with n = 2, but               is rather easy, and a statistic similar to (6) have already
+now at the line f1 = f2 we have a non-degerate base                 been introduced in the literature; e.g. it was suggested by
+{cos 2πf t, sin 2πf t, t cos 2πf t, t sin 2πf t}. This also means   Foster (1995) in his CLEANest algorithm. Remarkably, the
+that a large diagonal value of z(f ) indicates, in general, a       “global” version of the CLEANest just utilizes the direct
+modulated periodicity with a slowly varying amplitude and           evaluation of our multi-frequency periodogram (possibly, in
+phase.                                                              some restricted domains of the entire frequency space).
+     It is possible to further generalize the definition (6)              The goal that we are trying to reach in our work here
+to deal with some underlying variation in the data that is          is the more rigorous treatment of the statistical significance
+deemed to always exist, even if the multi-periodic signal that      of the periodicities that we extract from the data.
+we seek is absent. For example, in practice we must always                In practice, a sequential approach is usually adopted
+take into account at least an arbitrary constant offset of xi .     to detect the periods in the data: plot a single-frequency
+We will discuss the ways to further generalize the multi-           periodogram, find a candidate period, ensure that it is sig-
+frequency periodogram in Section 5. Though some of these            nificant, remove the relevant variation from the data. This
+generalizations should be treated in practice as mandatory,         sequential approach has two weaknesses. The first issue ap-
+we do not write down the extended definitions here. This is         pears because for n signal components we must carry out a
+because the definitions here are mainly intended for the use        complete multiple hypothesis testing procedure rather than
+in Section 4 below, where we need to deal with more simple          to just test each of these n components individually. After we
+formulae.                                                           have obtained many of the periods, we have done many sta-
+     The matrix hϕ ⊗ ϕi in (6) is the Fisher information            tistical decisions. This means that we have a proportionally
+matrix associated to the parameters θ. In the case of the           larger chance to make a false detection, in comparison with
+Lomb-Scargle periodogram, the single non-diagonal element           the extraction of only a single variation. Therefore, even if
+of this matrix could be made zero by means of choosing a            each of the period extracted had its FAP at some tolerable
+suitable time shift. This simplified the final formula to a sum     level, say 0.01, the overall FAP for the whole set of the vari-
+of two squared terms. In the case of double-frequency peri-         ations is definitely greater: e.g. ∼ 0.1, if we have claimed to
+odogram this diagonalization is much harder. As explained           detect ten periods. In the end, although each of these peaks
+e.g. in (Schwarzenberg-Czerny 1998), in the general case we         have passed the settled FAP threshold individually, we are
+may perform a Gram-Shmidt orthogonalization of the base             still unsure about the reality of all of them.
+ϕ in the sense of the scalar product (a(t), b(t)) = ha(t)b(t)i.           The other issue of the sequential approach is that we
+After this procedure, the Fisher matrix will appear strictly        make a rather implicit assumption that all periods that we
+diagonal, so that the periodogram (6) will be expressed as          have extracted before the given step do actually exist. The
+a sum of 2n squares. This orthogonalization must be done            FAP of the next detected period does not involve the un-
+anew for each new set of frequency values.                          certainty related to the very existence of these previously
+     The main difference of the multi-frequency peri-               detected peaks. In practice, we often dealt with the case
+odogram (6) from the Lomb-Scargle one is in the number of           when the LS periodogram of the data contain two similar
+its arguments: it depends on many frequencies, rather than          peaks that have only a moderate significance. Such peaks
+on only one. Therefore, its visual representation is a multi-       are not nececcarily aliases of each other, so each of them
+dimensional field rather than a usual graph of a function of        might represent a true periodicity. However, in the single-
+a single argument. The honest computation of z(f ) already          frequency framework, we cannot rigourously evaluate their
+for n ⩾ 3 on a full multi-dimensional grid of fi is a chal-         significance, because we cannot be entirely sure that one of
+lenge. However, in practice it might be enough to compute           these periods is true. If these peaks are similar to each other
+the multi-frequency periodogram only in the vicinities of a         and pass the FAP threshold both, we may only conclude
+small number of candidate frequencies that are revealed as          that at least one of the relevant periodicities exists, but to
+peaks on the single-frequency periodogram. As we have dis-          confirm the existence of the both, we have to make an unjus-
+4     R.V. Baluev
+tified assumption that either first or the second one is true.
+In the end, this leads to an incorrect FAP estimation.
+     To solve the two issues described above we need a
+method of calculation of the cumulative significance for a
+
+
+
+
+                                                                  amplitude 2
+
+
+
+
+                                                                                                   amplitude 2
+group of the periods, in addition to the significances of the
+individual periods of this group. In general, the significance
+of a group may be greater as well as smaller than the indi-
+vidual significances, because there are two counter-acting ef-
+fects. First, the increased number of free model parameters,                           case I                           case II
+describing the group of periodicities, leads to larger noise
+                                                                                amplitude 1                      amplitude 1
+levels, and this decreases the group significance. Secondly,
+the contributions from really existing variations are accumu-
+lated when they are treated jointly, and this increases the
+group significance.
+     For example, considering the case of two equal peri-
+
+
+
+
+                                                                  amplitude 2
+
+
+
+
+                                                                                                   amplitude 2
+odogram peaks, four distinct outcomes are possible:
+   (i) None of the peaks is significant individually, and they
+are insignificant as a couple too.
+   (ii) The peaks are significant individually, but not as a
+                                                                                       case III                         case IV
+couple.
+   (iii) The peaks are insignificant individually, but they are                 amplitude 1                      amplitude 1
+significant as a couple.
+   (iv) The peaks are significant individually, as well as a      Figure 1. The illustration of various types of the interaction
+couple.                                                           between the single-dimensional individual uncertainties (shown as
+                                                                  a square error box) and the two-dimensional uncertainty domain
+The conclusions following from the cases I and IV are obvi-       (shown as a error circle). See text for the detailed discussion.
+ous: our peaks are just insignificant or just significant both.
+In the case II we would conclude that only one of the peaks
+probably exists, but there is no enough observational evi-        cover the axes Ki = 0, but the origin K1 = K2 = 0 is still
+dence to confirm that both of them are true. If the peaks         outside of the circle.
+are equal, we cannot decide which of them is the true one.             One may think that these subtle geometric and prob-
+In the case III we would draw basically the same conclusion:      ability effects are rather insignificant and might be just
+at least one or even both of the periods probably exist. We       neglected in practice. This might seem so in the two-
+still cannot claim for sure that both peaks are true, since       dimensional graphs shown above, but when the number of
+their individual significances are not enough for that.           the frequency component grows, the role of these effects can
+      We give a graphical illustration of these types of out-     become only more importaint. The dimensionality penalty
+comes in Fig. 1. In these plots we schematically show the         increases, and the behaviour near the boundary of the uncer-
+uncertainty domains for the components amplitudes K1 and          tainty domain becomes decisive (recall that the most of the
+K2 . For the sake of the simplicity, we adopt that the distri-    volume of a highly-dimensional ball resides near its surface,
+butions of Ki are uncorrelated and Gaussian, although this        rather than in its core).
+is far from the truth. In this illustration, to “detect” a sin-        By this point, the reader might feel a bit confused, since
+gle component or the couple means to ensure that a value          the issue that we describe still may look rather fuzzy and
+Ki = 0 for a given Ki is outside of the relevant uncertainty      foggy. Now he is prepared to look at it from yet another point
+domain. Notice that the uncertainty segments for a single         of view. Foster (1996a,b) clearly explains how it is important
+Ki are not just projections of the uncertainty circle for the     to explicitly settle the null hypothesis of the signal detection
+couple (K1 , K2 ), because of the different number of the de-     task. This is the hypothesis that explains the data through
+grees of freedom. The sizes of the two-dimensional error el-      a more simple model that does not contain the putative
+lipse and the error box inferred by the single-dimensional        signal or some its portions. The main difficulty with this null
+uncertainties is variable and depends on the distributions        hypothesis is that it frequently resides in the subconscious
+shape, on the dimnensionality of the problem, and on the          domain of a researcher’s mind, and is not explicitly realized
+FAP levels involved. The geometric relastionship between          even when it is pretty complicated. So, what null hypothesis
+these regions may be different, although the diameter of the      we usually bear in mind when we claim “our dataset contains
+circle is always greater than the side of the box.                n periodic components at the frequencies f1 , f2 , . . . , fn ”?
+      Of course, the cases II and III are mostly paradoxi-             A traditional detection algorithm, based on the sequen-
+cal. In the case II, the both variations are significant on       tial extraction of these components, assumes that the null
+themselves, but their joint significance is insufficient due to   hypothesis represents one of the following branches:
+the dimensionality penalty. Here the circle encompasses the
+box entirely. In the case III, we can detect the components         (i) No signal at all, only a constant
+jointly, thanks to the accumulation of their contributions,         (ii) The signal contains a single component f1
+but when we treat them individually, we deal with only a            (iii) Signal = component f1 + component f2 and no more
+portion of this joint contribution, and this portion appears        (iv) Signal = component f1 + component f2 + compo-
+insignificant. Here the box and consequently the circle partly    nent f3 and no more
+                                                                       Multi-frequency detection significance                   5
+ ...                                                             multi-frequency periodogram will show a remarkable peak
+ (v) Signal = sum of n − 1 components, f1 to fn−1 and no         at different frequencies. When the data sampling produce
+more                                                             aliases, we may need to also scan the vicinities of all possi-
+                                                                 ble alias frequencies too (since we do not know in advance,
+However, this null hypothesis is obviously inappropriate, be-    which of the peaks are aliases). But in any way, we do not
+cause it relies on a particular detection sequence: first ex-    have to scan the entire multi-frequency space.
+tract f1 , secondly f2 , and so on. In such a case, our alter-        The number of the tests involving a k-component signal
+native hypothesis, which is a completion of the null one to      is Cnk (thePbinomial coefficient), hence their total number
+the entire space of all admissible models, would embed the       equals to      n−1   k     n
+                                                                                k=0 Cn = 2 − 1. Each test generates its own
+following special occurrences: “signal = a single component                           1
+                                                                 value of the FAP. In the frequentist framework that we
+f2 ”, “signal = component f2 + component f3 and no more”,        adopt here, there is always some well-defined true signal
+and so on. These particular models are not the ones that we      model, determining which branch of the null hypothesis is
+would like to have inside our alternative hypothesis, since      real (when calculating the FAP we must not admit a thought
+they admit that some of the components that we claimed to        that the null hypothesis itself might be wrong). Therefore,
+reveal may not exist in some layout. Thus, even if we prove      only one of the mentioned 2n − 1 tests should be relevant.
+that this alternative hypothesis is true, this is not the ini-   However, since we do not know which one that should be,
+tial proposition we aimed to prove. This occurs because our      we can select a worst-case result, i.e the maximum among
+original null hypothesis listed above is incomplete. Note that   these 2n − 1 FAP values.
+the frequency values fi are not allowed to vary arbitrarily           In pracice it is a frequent case when the periodograms
+here, because they should always reside inside the relevant      contain more suspicious peaks than the ones that our se-
+periodogram peaks, according to their detection sequence.        quential detection algorithm have extracted. Then it might
+      Since we want to prove that each of the components ex-     be necessary to check whether these additional peak pro-
+ists, we must adopt the complete null hypothesis, containing     vide a better fit of the data in some other multiple combina-
+the following model branches:                                    tion. This is essentially what Foster (1995) calls the global
+  (i) No signal at all, only a constant                          CLEANest algorithm. This activity may result in a few of
+  (ii) The signal contains a single component, any one of fi     alternative sets of fi . However, to rigorously prove the sta-
+  (iii) The signal is a sum of any two (and only two) com-       tistical significance of each such frequency set, i,e. to confirm
+ponents fi and fj                                                a high confidence probability associated to the proposition
+  (iv) The signal is a sum of any three (and only three)         “each of fi does exist” (conditionally to the selected rival
+components fi , fj , fk                                          configuration), we must ensure the individual significance
+  ...                                                            of fi (as inferred by the single-frequency periodograms), as
+  (v) Signal = sum of n − 1 of the components that exclude       well as their significance in various multi-frequency combi-
+any of fi                                                        nations (within the adopted configuration of fi ). If just one
+                                                                 of the relevant FAP values is too large, we have to admit
+This new null hypothesis takes into account the possiblity       that some of the extracted components still might be false
+that e.g. the first extracted periodicity is due to the noise,   positives.
+while all others are still true. The previous null hypothesis         We do not consider here the issue of distinguishing be-
+undeservedly neglected such possibilities, disregarding their    tween different alternative sets of fi , when these sets do not
+importance in the case when all relevant periodogram peaks       encompass each other (this may appear due to the aliases).
+have only a moderate significance, and no peak clearly dom-      This issue should be treated by means of different statistical
+inates.                                                          tests that are designed to deal with non-nested models, see
+     Our alternative hypothesis, that we want to prove, re-      (Baluev 2012).
+mains always the same: it states “the signal is indeed a              There is also a minor matter that we need to highlight.
+sum of all n detected components”. Different branches of         Note that the single-frequency periodograms that provide
+our complete null hypothesis thus generate different test        some of the test statistics for verifying fi , are the ones for
+statistics. Following the same enumeration sequence as in        testing n signals against n − 1 ones. These “verification
+the above list, they are:                                        periodograms” are different from the single-frequency pe-
+                                                                 riodograms that appear during the detection sequency, in
+  (i) The maximum of a single available n-frequency peri-
+                                                                 which the hypothesis of m signals is tested against the one
+odogram
+                                                                 with m + 1 components, subsequently for m = 0, 1, . . . , n − 1
+  (ii) n maxima of the (n−1)-frequency periodograms (with
+                                                                 (this is what Foster (1995) calls as the SLICK spectrum).
+one of fi moved to the base model)
+                                                                 Only the last detection periodogram simultaneously belongs
+  (iii) n(n−1)/2 maxima of (n−2)-frequency periodograms
+                                                                 to the family of the verification ones. Obviously, the verifi-
+(moving some pair of frequencies to the base model)
+                                                                 cation periodograms should be more reliable, because they
+  ...
+                                                                 likely involve a more adequate data model. They cannot be
+  (iv) n maxima of single-frequency periodograms, for
+which we have only one of fi in the signal model with the
+rest in the base one
+                                                                 1 Even though a multi-frequency periodogram may be maximized
+From the computational point of view this task is much eas-      in a limited frequency domain around fi to save computational
+ier than it may seem. In practice, it is enough to maximize      resources, its FAP estimation must always assume the widest do-
+all these periodograms in only small vicinities of the esti-     main — the Cartesian power of the original frequency scan range.
+mated frequency values fi . There is a little chance that the    This is because we did not knew the values of fi in advance.
+6     R.V. Baluev
+used at the detection stage, since we do not know in ad-          case with a help of a ruse. We cannot just directly sub-
+vance the number of the components to extract. We expect          stitute the model (2) in the formulae from (Baluev 2013),
+that these verification periodograms should typically gen-        because (2) contains 2n linear coefficients, instead of only a
+erate higher peaks and concequently infer larger individual       single signal amplitude, as we need for (Baluev 2013). We
+significances of fi than the detection periodograms (though       need to transform (2) to an equivalent form, possibly look-
+we do not expect a big difference in the FAP as an ab-            ing more complicated, but containing only a single common
+stract function of the maximum peak height z). This effect        amplitude parameter. For n = 2, one way to do so leads to
+is nonetheless counterbalanced by the need to ensure that         the following representation:
+all multi-frequency combinations are also significant.
+     Therefore, to properly detect multiple periodic signals,     µ = Kh,      h = cos α cos(2πf1 t + λ1 ) + sin α cos(2πf2 t + λ2 ),
+the most of the significance tests that we apply, should be                                                                     (10)
+multi-frequency ones. Construction of a method that would         where K is the mentioned single amplitude, and h is a func-
+allow to estimate such a joint multi-frequency significance is    tion of the time t and of the five free parameters, including
+the main goal of our work.                                        the new auxiliary non-linear parameter α, responsible for
+                                                                  the mixture of the two sinusoidal components.
+                                                                       When deriving our further results we will use the ap-
+                                                                  proximation of the ‘uniform phase coverage’ (UPC), as we
+4   ASYMPTOTIC SIGNIFICANCE LEVELS                                called it in (Baluev 2013). In this approximation, we neglect
+As it is well-known, the false alarm probability tied to an       the quantities like
+observed value of a signal detection statistic, is related to                          htk cos ωti,   htk sin ωti,              (11)
+the distribution function of this quantity. When the frequen-
+                                                                                            k
+cies fi are fixed (known a priori), such decisioning quantity     in comparison with h|t| i and similar quantities (in our case
+would be just the value z(f ). In this case, the model (2)        k = 0, 1, and 2). This approximation is formally good only
+would be entirely linear, and hence 2z(f ) would follow           when ω is outside of a peak of the spectral window (the spec-
+the chi-square distribution with 2n degrees of freedom. For       tral leakage effect is negligible for a given ω). However, as
+n = 2 this would imply FAP(z) = e−z (z + 1), for instance.        we have already discussed and demonstrated in many works
+However, in practice the frequencies fi are unknowns like         (Baluev 2008, 2009b, 2013) the presence of the spectral leak-
+θ. Since fi are non-linear, the maximization of the peri-         age itself does not yet significantly corrupt the quality of
+odogram z(f ) is a non-trivial task, as well as the calcula-      the final UPC approximation of the FAP. This is because
+tion of the necessary distribution function of its maximum        we should eventually perform an integration over a wide fre-
+peaks. To solve this task we will use the approach described      quency range, and the anomalies generated by narrow peaks
+by Baluev (2013). This approach is based on the generalized       of the spectral window appear negligible after such an inte-
+Rice method for random fields presented by Azaı̈s & Delmas        gration.
+(2002). The Rice method allows to obtan an estimation of                 The UPC approximation basically enabled us just to
+the necessary false alarm probability in the following form:      drop all the terms of the type (11) anywhere we met them,
+                                                                  leaving only the dominating terms htk i.
+                      FAP(z) . M (z),                      (8)
+                                                                         According to Baluev (2013), first we need to construct
+where z is the observed periodogram maximum, and M (z)            from the model h a normalized function ψ, such that hψi ≡
+is an explicitly-defined function.                                0, and hψ 2 i ≡ 1. Since under the assumption of UPC we
+                                                                            2                      2
+     The high practical value of the estimation (8) is founded      p hh i ≈ 0 already and hh i ≈ h1i/2, we can put ψ ≈
+                                                                  have
+on the following things: (i) it usually has a good or at least    h 2/h1i. Finally we need to evaluate the matrix G = hψ ′ ⊗
+                                                                                                        p
+satisfactory accuracy (in terms of the difference FAP − M or      ψ ′ i, based on the gradient ψ ′ ≈ h′ 2/h1i. The gradient of
+at least in terms of the z-level thresholds that are mapped to    h looks like:
+a given value of FAP(z) or M (z)); (ii) this accuracy increases
+                                                                      h′α = − sin α cos(2πf1 t + λ1 ) + cos α cos(2πf2 t + λ2 ),
+for larger z, which has more practical importance, since in
+practice we need to have a good accuracy mainly for the              h′λ1 = − cos α sin(2πf1 t + λ1 ),
+small FAPs; (iii) in the case when the deviation between             h′f1 = −2πt cos α sin(2πf1 t + λ1 ),
+M (z) and FAP(z) is too large, the function M (z) still serves       h′λ2 = − sin α sin(2πf2 t + λ2 ),
+as a majorant for FAP(z), guaranteeing that the number of
+false detection will never exceed the desired small level; (iv)      h′f2 = −2πt sin α sin(2πf2 t + λ2 ).                       (12)
+the function M (z) often can be approximated by a simple          Using these formulae and UPC approximation, we obtain
+and accurate elementary formula.                                                                                               
+     For the Lomb-Scargle periodogram, for example, we ob-                1      0            0           0              0
+tained in (Baluev 2008):                                                0 cos2 α      2π t̄ cos2 α       0              0      
+                                                                                        2 ¯2
+                                                                                  2             2
+                                                                                                                                
+                                            √                      G ≈ 0 2π t̄ cos α 4π t cos α
+                                                                                                         0              0      ,
+                 FAP(z) . M (z) ≈ W e−z z.                  (9)                                            2                2
+                                                                                                                                
+                                                                        0       0            0       sin α       2π t̄ sin α 
+     Now, let us first consider the more easy case of the                 0      0            0     2π t̄ sin2 α 4π 2 t¯2 sin2 α
+double-frequency periodogram, and after that we proceed              tk = htk i/h1i,                                            (13)
+to dealing with the general multi-frequency periodogram.
+     Although the method in (Baluev 2013) was originally          which also implies
+designed to deal with a single (though non-sinusoidal) peri-         √             π 2
+                                                                                                               q
+                                                                                                                         2
+odicity to detect, it still can be applied to a multi-frequency          det G ≈    T sin2 2α,        Teff =    4π(t2 − t ).    (14)
+                                                                                   4 eff
+                                                                         Multi-frequency detection significance                 7
+We note that the quantity Teff , emerging here, is the effective   and f2 = fmin,max generate an extra term in (18) of the order
+length of the time series that was first introduced in (Baluev     of ∼ W e−z z 3/2 , and an extra term for the vertices of the
+2008).              √                                              relevant frequency box would be ∼ e−z z. The non-frequency
+     The quantity det G should now be integrated over the          parameters λi and α, thanks to their periodicity, do not
+space of all five free parameters α, λi , fi to obtain the final   generate any boundary effects. Anyway, all these extra terms
+result:                                                            are negligible, because the value of W in practice is typically
+                                                                   large or very large (∼ 100 or ∼ 1000 or even more). The
+      FAP(z) . M (z) ≃ Ae−z z d/2−1 ,
+                      Z √                                                                  √ would have a very small relative
+                                                                   relevant correction to (18)
+                 1                                                 magnitude of ∼ 1/(W z) and ∼ 1/(zW 2 ). No doubts, it
+          A=              det G df1 df2 dλ1 dλ2 dα,         (15)
+               2π d/2                                              can be safely neglected in practice.
+where d — the number of free model parameters — is now                  The other small terms that were dropped off in (15),
+equal to 6.                                                        have the relative magnitude of ∼ 1/z and ∼ 1/z 2 . As we
+     Here we should take care of one subtle thing: over what       have already discussed in (Baluev 2013), these terms are
+exactly domain we must do the integration? We must take            usually very difficult to evaluate, because they involve ma-
+into account that the mentioned parameters of the signal           nipulations already with second-order dervatives of ψ, com-
+satisfy a few relations of equivalence. Namely, the following      bined in tensors of order 4 and dimension n. In our case, it
+six vectors of the parameters                                      is a 5 × 5 × 5 × 5 tensor, for instance. These terms are also
+                                                                   expected to be negligible, because we are usually interested
+     { K,         α,       λ1 ,   f1 ,       λ2 ,   f2 },
+                                                                   in large values of z: typically, when z is smaller than 10,
+     {−K,         α,   λ1 + π,    f1 ,   λ2 + π,    f2 },
+                                                                   the signal is very uncertain, and the associated false alarm
+     {−K,     α + π,       λ1 ,   f1 ,       λ2 ,   f2 },
+                                                            (16)   probability is large, so we just have no real need to know
+     { K,     π − α,   λ1 + π,    f1 ,       λ2 ,   f2 },
+                                                                   this probability with a good precision. However, in the par-
+     { K,       −α,        λ1 ,   f1 ,   λ2 + π,    f2 },
+              π                                                    ticular case of the double-frequency periodogram, we were
+     { K,       − α,       λ2 ,   f2 ,       λ1 ,   f1 },
+              2                                                    able to rigorously evaluate these terms, rather than just to
+all describe the same signal (10). To encompass all possible       blindly neglect them. This appeared possible because of the
+signals inside a frequency range [fmin , fmax ], simultaneously    simplicity of the signal model. According to our results, the
+throwing away all the duplicates, we may consider the fol-         corrected general expression (19) looks like
+lowing domain:                                                                              "
+                      π                                                                       π               2
+  K ⩾ 0, 0 ⩽ α ⩽ , 0 ⩽ λi ⩽ 2π, fmin ⩽ fi ⩽ fmax .                  FAP(z) . M (z) ≈ e   −z
+                                                                                                 (2W1 W2 − W12  )(z 2 + 2z + 2)−
+                      4                                                                       16
+                                                           (17)                              #
+Notice that the condition K ⩾ 0 is exactly the one required                                 1
+                                                                             − W1 W2 z +          .                           (20)
+in (Baluev 2013) for (15) to be valid (otherwise A should be                                2
+doubled). The condition α ⩽ π/4 appears because due to the
+last equivalence of (16) the replacement α 7→ π/2 − α would        In the case of the same frequency range for the both fre-
+just swap the signal components with each other, keeping           quencies (W1 = W2 = W12 = W ) we therefore have
+the sum intact. Performing the integration over the domain                                 2 −z
+                                                                                                
+                                                                                                  π 2 π              π−4
+                                                                                                                             
+described, we eventually obtain                                      FAP(z) . M (z) ≈ W e            z +     −1 z+             .
+                                                                                                  16      8               8
+                      π 2 −z 2                                                                                              (21)
+ FAP(z) . M (z) ≈        W e z , W = Teff (fmax − fmin ).
+                      16                                                We do not give the detailed derivation of (20) and (21),
+                                                           (18)    because it still appeared very complicated. We only men-
+     The formula (18) is valid for the case when the frequen-      tion that we used the general formulae of Proposition b of
+cies fi belong to the same range. Sometimes we may have            Theorem 1 by Azaı̈s & Delmas (2002). Some extra discus-
+some prior information that would imply different ranges for       sion can be also found in (Baluev 2013). Actually, we wrote
+f1 and f2 . In the case when these ranges do not intersect,        down these refined results here only to demonstrate below
+we should extend the integration domain from 0 ⩽ α ⩽ π/4           that their difference from (19) and (18) is negligible.
+to 0 ⩽ α ⩽ π/2, because now the frequency components are                Let us now consider the general multi-frequency case.
+not freely swappable and the last equivalence of (16) is no        Now we may put
+longer valid. This will double the result. In the most general
+                                                                                                n
+case, when the frequency ranges are partially intersecting,                                     X
+we may write down:                                                            µ = Kh,     h=          νk cos(2πfk t + λk ),   (22)
+                                                                                                k=1
+                           π                2
+      FAP(z) . M (z) ≈       (2W1 W2 − W12    )e−z z 2 ,   (19)    where νk are components of a unit vector ν parameterized
+                          16
+where W1 and W2 are associated with the frequency ranges           by n − 1 spherical angles forming another vector α. Now the
+of f1 and f2 , while W12 is related to their common intersec-      gradient of h looks like
+tion.                                                                                     n
+                                                                                          X ∂νk
+     The formulae for M (z) in (15) and, consequently (18)                        h′α =              cos(2πfk t + λk ),
+                                                                                                ∂α
+and (19), make some additional approximating assumptions                                  k=1
+
+that we still need to discuss. The first thing it neglects is                    h′λk = −νk sin(2πfk t + λk ),
+the effect of the domain (17) boundary, which importance                          h′fk = −2πtνk sin(2πfk t + λk ).            (23)
+was described in (Baluev 2013). In the case of the double-
+frequency periodogram, the boundary sides f1 = fmin,max            These expressions allow us to write down the matrix G very
+8     R.V. Baluev
+similarly to the double-frequency case; the necessary deter-               For the more practical case, in which there is a single
+minant can be then expressed as                                       common frequency segment W , it is rather difficult to de-
+                                       s                              fine the necessary integration domain for αi . Instead, let us
+   √                                        ∂ν T ∂ν
+                                                   
+               n/2 n                 2
+     det G ≈ π Teff (ν1 ν2 . . . νn ) det              (24)           try to correct the formula (30). What is the underlying rea-
+                                            ∂α ∂α                     son making the normalization of the FAP different for the
+The last multiplier in this expression, containing the gra-           cases of the shared and independent frequency segments? Of
+dient of ν over α, is rather unpleasant and needs some                course, this is the symmetry property of the multi-frequency
+simplification. Let us define an auxiliary square matrix              periodogram. For the double-frequency periodogram the ob-
+R = (ν, ∂ν/∂α), and try to find its squared determinant:              vious identity z(f1 , f2 ) = z(f2 , f1 ) implies that only a half
+                                                  !                   of the frequency square W × W is informational; another
+                                              ∂ν
+                                 νTν      ν T ∂α                      half is just a mirror copy. This halves the resulting FAP
+    (det R)2 = det(RT R) = det ∂ν T       ∂ν T ∂ν   .  (25)
+                                 ∂α
+                                     ν ∂α      ∂α
+                                                                      value — compare (18) and (19) with W12 = 0. In the case
+                                                                      of the general multi-frequency periodogram only a single n-
+Since the identity ν 2 ≡ 1 holds true for every α, the off-           simplex inside the entire frequency cube is informational.
+diagonal elements of the last matrix in (25) are zero, the            Since the volume of this simplex constitutes 1/n! fraction of
+top-left element is unit, and we finally obtain                       the cube volume, we have for this case
+    √
+                                                     
+                                                   ∂ν
+                     n
+      det G ≈ π n/2 Teff (ν1 ν2 . . . νn )2 det ν,      . (26)                      FAP(z) . M (z) ≃ Ãn e−z z 3n/2−1 ,
+                                                   ∂α
+                                                                                                    Wn
+The last determinant basically represents the Jacobian of                                   Ãn =      I1 I2 . . . In−1 .         (31)
+                                                                                                    n!
+the transition from the Cartesian to the spherical coordinate
+system, i.e. from x = rν to the pair (r, ν).                               From this general approximation we can easily re-
+     Let us recall the formulae of the multi-dimensional              construct the FAP formulae for the Lomb-Scargle peri-
+spherical parametrization:                                            odogram (9) and for the double-frequency periodogram (18).
+                                                                           We do not consider here the most general case when
+              ν1 = cos α1 ,                                           the frequency segments are different but may have common
+              ν2 = sin α1 cos α2 ,                                    parts.
+              ν3 = sin α1 sin α2 cos α3 ,
+                 ...
+           νn−1 = sin α1 sin α2 . . . sin αn−2 cos αn−1 ,             5   SOME FURTHER EXTENSIONS
+              νn = sin α1 sin α2 . . . sin αn−2 sin αn−1 ,     (27)   The multi-frequency periodogram defined in (6) assumes the
+where all αi except for the last one, should in general reside        empty null hypothesis: the input data are expected to rep-
+in the segment [0, π], and αn−1 is allowed to vary inside             resent the pure noise or the pure noise plus a signal with
+                                                                      no even an offset. Therefore, another possible way to gen-
+[0, 2π].
+     With these formulae we can rewrite (26), after rather            eralize the multi-frequency periodogram is to consider some
+long but straightforward manipulations, in a detailed form:           non-trivial base models describing an expected underlying
+                                                                      variation (the non-trivial null hypothesis). In practice there
+                              n−1
+     √                        Y                                       should be at least a free constant term in the null hypoth-
+                        n
+         det G ≈ π n/2 Teff         sin3k−1 αn−k cos2 αn−k .   (28)
+                                                                      esis, because the data xi almost always have an arbitrary
+                              k=1
+                                                                      offset to be determined from the data.
+     Again the issue arises, what integration domain we                     It is already clearly demonstrated in the literature that
+should adopt for (28)? This should be the largest possible            this is a bad practice to just pre-center the input time se-
+domain that still does not contain any equivalent pairs of            ries and then pass the residuals to the LS periodogram
+points (describing the same signal). Now it is easier to con-         (Cumming et al. 1999). Instead, we must honestly perform
+sider the case when the frequencies fi all belong to different        the linear regression under the null hypothesis (“data are
+segments, and these segments do not intersect with each               equal to an unknown constant”), under the alternative one
+other. Then we may adopt the domain                                   (“the data are equal to a constant plus the putative signal”)
+                    π                                                 and evaluate the inferred test statistic. For the n = 1 (Lomb-
+K ⩾ 0, 0 ⩽ αi ⩽ , 0 ⩽ λi ⩽ 2π, fi,min ⩽ fi ⩽ fi,max .
+                    2                                                 Scargle) case this was essentially done by Ferraz-Mello
+                                                          (29)
+                                                                      (1981), who defined the so-called Date-Compensated Dis-
+The condition αi ∈ [0, π/2] appeared because the signs of
+                                                                      crete Fourier Transform, DCDFT. This periodogram is
+individual terms in (22) are managed by the longitudes λi ,
+                                                                      known rather well already, though in the literature it is re-
+while all νi must then be positive to get rid of duplicate
+                                                                      ferred to under different names; e.g. it is called as just “the
+signals in the domain.
+                                                                      generalized periodogram” by Zechmeister & Kürster (2009).
+     Substituting all necessary quantities to (15) and inte-
+                                                                      We prefer an intuitive and concise name “the floating-mean
+grating, we obtain
+                                                                      periodogram”, given by Cumming et al. (1999).
+    FAP(z) . M (z) ≃ An e−z z 3n/2−1 ,                                      Cumming et al. (1999) also suggested to extend the
+         An = W1 W2 . . . Wn I1 I2 . . . In−1 ,                       floating-mean periodogram further, taking into account an
+                                                                      arbitrary linear or a quadratic trend in the data. Moreover,
+                 Zπ/2                              
+                                                                      it is quite easy to construct a generalized periodogram with
+                                               3k 3
+          Ik = 2     sin3k−1 α cos2 α dα = B     ,    .        (30)   an arbitrary multi-parametric linear model (e.g. a polyno-
+                                                2 2
+                  0                                                   mial trend) of the underlying variation (Baluev 2008). In
+                                                                             Multi-frequency detection significance                  9
+this case, the definition (6) must also involve the linear re-         side effects. At least, this is well confirmed by the numerical
+gression made for this non-trivial base model. We should               simulations discussed below.
+replace (6) by                                                               Finally, we may consider a weakly non-linear base
+                                                                     model, which may include e.g. some previously detected pe-
+               1
+       z(f ) =     min χ2H (θH ) − min χ2K (θK , f ) ,   (32)          riodicities. These periodograms are extensively referred to in
+               2 θH                θK
+                                                                       Section 3. The base frequencies are formally non-linear pa-
+where χ2H,K are the χ2 goodness-of-fit functions (4), now              rameters, but they are linearizable, since once the periodic-
+corresponding to either null (H) or the alternative (K) mod-           ity is extracted, its frequency always resides within a narrow
+els. Previously, for an empty H, we had just χ2H ≡ hx2 i.              periodogram peak. For these periodograms the argumenta-
+     When the underlying variation is modelled by a low-               tion of the above paragraph applies qualitatively: the FAP
+order polynomial, the theory of significance levels from Sec-          formulae of Section 4 should work in the asymptotic sense
+tion 4 remains practically unchanged, because under the as-            N → ∞. However, we should realize that in concrete practi-
+sumption of UPC the powers of time, tk , appear orthogonal             cal cases with a concrete N these FAP approximation may
+to the sine and cosine functions, since during the calcula-            fail sometimes, e.g. after we have already extracted a large
+tion of the extreme-value distribution we anyway neglect               number of the signal components. This issue is something
+the terms like (11).2 For the extensions of the Lomb-Scragle           that we leave for future work.
+periodogram we checked it in (Baluev 2008, 2009b), and be-
+low we verify this for the double-frequency periodogram too,
+using the Monte Carlo simulations.                                     6   SIMULATIONS
+     In the Sections 2 and 4 we only considered the case
+when σi are known precisely. In practice we usually do not             We have done some numerical simulations to check our an-
+know them with good accuracy. Usually only the weights                 alytical results. In these simulations, we used the double-
+wi of the observations are known, while the full variances             frequency periodogram with a free constant term in the
+are determined through wi as σi2 = κ/wi , where κ is an                base model (a double-frequency analog of the general-
+extra unknown parameter. In this case we need to introduce             ized floating-mean periodogram by Ferraz-Mello (1981) and
+some normalization of the periodogram, since the value of              Zechmeister & Kürster (2009)). We considered both the case
+χ2 is now proportional to the unknown multiplier κ. We                 with known σi and the case when σi contain an unknown
+recommend to use in this case a multi-frequency analog of              factor. In all the cases we deal with a single range for the
+the periodogram z3 from (Baluev 2008). We can define it                both frequencies fi (meaning that W1 = W2 = W12 = W ).
+here as                                                                The main results are shown in Fig. 2, where for W ≈ 100
+                                                                   and different time series we plot the simulated FAP curves
+                       NH                  2z(f )
+         z3 (f ) = −        − n log 1 −             ,    (33)          together with the analytic approximation (18) and its re-
+                        2                 min χ2H                      fined version (20). As for the Lomb-Scargle periodogram, the
+where NH = N − dim θH .                                                quality of our analytic formulae is the best for an even time
+     This periodogram is related to the likelihood ratio               series, and degrades for a time series with strong aliasing.
+statistic, and for large N its distributions (including the dis-       However, our estimation always consitutes an upper limits
+tribution of the maximum) are asymptotically the same as               on the FAP. We can always be pretty sure that if we got
+the ones of the χ2 -statistic z(f ). We have already discussed         the estimation of, e.g. M (z) = 1%, the actual value of FAP
+this issue in (Baluev 2009a, 2013). For the single-frequency           may be almost the same or smaller than this value. This
+variant of z3 the reader may find more accurate expression of          means that the use of M (z) from (18) instead of FAP does
+the type (8), which do not rely on the N → ∞ asymptotics,              not increase the number of false alarms above the desired
+in (Baluev 2008). It is easy to ensure that they are indeed            level.
+asymptotically equivalent to the similar expressions for z, if              A bad side effect of possible deviation between M and
+the extra condition z, z3 ≪ N is also satisfied. The princi-           FAP is the increase of the detection threshold. However, in
+pal nature of this condition is explained in (Baluev 2009a),           the worst case of Fig. 2 this increase constitutes the relatitve
+and we believe that it should be valid in the case of the              magnitude of ∼ 1/3, which is not catastrophic at all.
+multi-frequency periodogram too. Unfortunately, at present                  It may be noted that with the increase of W to a more
+we cannot generalize the more accurate formula for M (z3 )             practical level of ∼ 1000, the precision of our FAP estimate
+from (Baluev 2008) to the multi-frequency case, because this           gets even better (Fig. 3). We believe this is because larger
+would need the generalized Rice method for non-Gaussian                value of W makes the signal/noise threshold to move to a
+random fields, which is to our awareness still poorly devel-           higher z-level, and the Rice method becomes more accurate
+oped. At present we have to approximate the function M (z3 )           for z → ∞, since it has an asymptotic nature.
+by its analog M (z), as we have just described. Notice that                 At last, we can conclude, that the refined formula (20)
+the FAP will be anyway extremely small for the values of z             does not have any practical advatage with respect to the
+or z3 as large as N , so in practice the need to satisfy an ex-        original more simple expressions (19) and (18). As we ex-
+tra condition like z ≪ N should not produce any significant            pected, only the leading z 2 term is important in (20), and
+                                                                       the others are neglectable. As usually, the main source of
+                                                                       the error of our approach is the intrinsic error of the Rice
+2  The periodogram itself still properly takes into account the non-   method (the difference between M (z) and FAP(z)), rather
+orthogonality of tk to the trigonometric functions; we emphasize       than the inaccuracy of the approximated M (z).
+that the UPC approximation is used only to approximate its dis-             Performing similar Monte Carlo simulations for a multi-
+tribution. Get back to Section 4 for a justification.                  frequency periodogram with n > 2 is not feasible due to the
+10                           R.V. Baluev
+
+                                                               N=100 even timings, 100000 Monte Carlo trials, W=51.2 (Nyquist band), fixed σi N=100 random timings, 100000 Monte Carlo trials, W=104.6, scalable σi
+                                                                    1
+                                   false alarm probability
+
+
+
+
+                                                                0.1
+
+
+                                                               0.01
+
+
+                                                              0.001
+
+
+                                                             0.0001
+
+                                                                            N=100 random timings, 100000 Monte Carlo trials, W=104.6, fixed σi            N=100 clumped timings, 100000 Monte Carlo trials, W=101.7, scalable σi
+                                                                    1
+                                   false alarm probability
+
+
+
+
+                                                                0.1
+
+
+                                                               0.01
+
+
+                                                              0.001
+
+
+                                                             0.0001
+                                                                        0               5            10            15           20               25       0             5            10         15              20            25
+                                                                                                       maximum z                                                                      maximum z3
+
+
+Figure 2. The graphs comparing the analytic FAP estimations (18) (thick solid curves) and (21) (thin solid curves) and the simulated
+FAP (noisy thin curves, red in the electronic version). The panels to the left correspond to the cases with the noise uncertainties σi are
+known a priori; the ones to the right are for the fixed-weights model with σi2 ∝ 1/wi . In the case of “clumped timings” (right-bottom
+panel) the N = 100 points of the data were equally split in 10 equidistant groups with 90% time gaps between them. This implies a very
+strong aliasing, which invalidates our FAP formula as an approximation but does not break its upper limit property.
+
+
+
+                                   N=100 random timings, 100000 Monte Carlo trials, W=1046, scalable σi                                               Here the function zsf is the relevant single-frequency pe-
+                              1                                                                                                                       riodogram (actually, its Ferraz-Mello’s version in our case).
+                                                                                                                                                      This expansion is valid everywhere except for the neighbour-
+false alarm probability
+
+
+
+
+                             0.1                                                                                                                      hoods of the diagonals fi = fj .
+                                                                                                                                                            Obviously, the maximum of the sum in (34) is achieved
+                            0.01                                                                                                                      if and only if each of fi corresponds to a peak of zsf (f ).
+                                                                                                                                                      However, we cannot just select the absolute maximum of
+                           0.001                                                                                                                      zsf (f ) at some f = f ∗ and claim that the global maximum of
+                                                                                                                                                      z(f ) is at fi = f ∗ and is equal to n max zsf . This would imply
+                          0.0001                                                                                                                      that all fi are equal to each other, which invalidates (34).
+                                   14                          16             18       20       22     24        26       28         30
+                                                                                            maximum z3
+                                                                                                                                                      Instead of this, we should locate n different tallest peaks of
+                                                                                                                                                      zsf (f ) and sum them up to approximate the global maximum
+Figure 3. Same as the right-top panel of Fig. 2, but for a much                                                                                       of z(f ).
+wider frequency range. Notice that the increase of W made our                                                                                               This approximation allows us to dramatically speed up
+analytic estimations more accurate.                                                                                                                   our Monte Carlo simulations, although now we can only deal
+                                                                                                                                                      with the cases that are free of spectral leakage. Instead of
+                                                                                                                                                      scanning the multi-dimensional frequency grid, it is enough
+huge computational demands. Nonetheless, it would not be                                                                                              to evaluate the single-frequency periodogram.
+comfortable just to leave the multi-frequency FAP approxi-                                                                                                  The results are shown in Fig. 4. We may notice that the
+mation from Section 4 without any numerical verification at                                                                                           simulated FAP curves slightly break the inequality of (31) in
+all, because the relevant math manipulations were not triv-                                                                                           the range below the level of 10−3 . We believe this indicates
+ial. At least, we should ensure that that these FAP formulae                                                                                          the inaccuracy of the expansion (34) rather then the actual
+do not hide e.g. a error in the coefficient.                                                                                                          breaking of (31). This is because in the previous simulation
+     The direct maximization of z(f ) is a computation-                                                                                               of Fig. 3 the double-frequency FAP did not exceed the ana-
+heavy procedure, but in some simple cases it can be dra-                                                                                              lytic estimation, while in Fig. 4 it does. Taking into account
+matically simplified. Namely, when the observations are dis-                                                                                          the inaccuracy of (34) and Monte Carlo uncertainties, our
+tributed uniformly in time (strictly evenly or randomly with                                                                                          conclusion is that the analytic estimation (31) does not hide
+uniform distribution), we can apply the UPC approximation                                                                                             an obvious math error at least.
+to the periodogram itself, rather than only to its FAP ap-
+proximation. In this case the sinusoidal terms in (2) appear
+practically orthogonal to each other. Then, considering that                                                                                          7       DETECTION SENSITIVITY
+σi are known, the following approximate expansion appears:
+                                                                                                                                                      It is interesting to investigate the detection sensitivity of
+                                      z(f ) ≈ zsf (f1 ) + zsf (f2 ) + . . . + zsf (fn ).                                          (34)                the multi-frequency statistic, comparing it with the classic
+                                                                                                                                           Multi-frequency detection significance                 11
+
+                                       N=100 random timings, 100000 Monte Carlo trials, W=1046, fixed σi                                       0.1
+                              1
+
+
+
+
+                             0.1
+false alarm probability
+
+
+
+
+                                                                                                                    double-frequency FAP
+                                                                                                                                              0.01
+
+                            0.01
+
+
+
+
+                           0.001
+                                                                                                                                             0.001
+
+
+                          0.0001
+                                   0           10          20         30         40          50            60
+                                                                 maximum z
+
+                                                                                                                                            0.0001
+Figure 4. The simulated FAP curves for the multi-frequency pe-                                                                                   0.0001           0.001           0.01          0.1
+riodograms obtained using the approximation (34), and the theo-                                                                                                   single-frequency FAP
+retic FAP estimations (31). The adopted number of the frequency
+components was n = 1, 2, 3, and 5 (from left to right).                                                         Figure 5. Comparison of the detection efficency of the single- and
+                                                                                                                double- frequency periodograms in terms of the analytic FAP es-
+                                                                                                                timations from (9) and (18). The three plotted curves correspond
+                                                                                                                to W = 100, 1000, and 10000. The actual signal is assumed to
+single-frequency one. We will do this in a simplified frame-                                                    involve two periodicities of the same amplitude, so the maximum
+work, in terms of the FAP estimations (18) and (9). We                                                          value of the single-frequency periodogram is roughly half of that
+consider only the case n = 2. According to the argumenta-                                                       of the double-frequency one.
+tion of Section 3, we must evaluate in this case three peri-
+odograms: two single-frequency residual periodograms (Fos-
+ter’s SLICK periodograms computed assuming that one of                                                                                         0.1
+the periodicities is in the base model) and the only available
+double-frequency periodogram.
+     Let us first assume that amplitudes of the periodic com-                                                                                 0.01
+ponents are equal. Then, in a rough approximation (dis-
+                                                                                                                    double-frequency FAP
+
+
+
+
+carding the aliasing effects), the maximum values of the
+single-frequency periodograms are equal to each other, and                                                                                   0.001
+according to (34), the maximum the double-frequency pe-
+riodogram is roughly twice the maximum of the single-
+frequency ones. This means that we should compare the val-                                                                                  0.0001
+ues of (9) with (18), substituting some z in the first and 2z in
+the second. Notice that the plain Lomb-Scargle periodogram
+of the raw data is equal, in this approximation, to the sum                                                                                  1e-05
+of the individual single-frequency periodograms mentioned
+above. Therefore, it will posess two distinct peaks at their
+relevant frequencies, both having approximately the same                                                                                     1e-06
+height of z.                                                                                                                                     1e-06    1e-05     0.0001    0.001      0.01   0.1
+     We plot the relevant FAP comparison graphs in Fig. 5,                                                                                                        single-frequency FAP
+for W = 100, 1000, and 10000. We may notice two things:
+                                                                                                                Figure 6. Similar to Fig. 5, but now we fix W = 1000 and vary
+the double-frequency periodogram appears in this case def-
+                                                                                                                the amplitude ratio of the sinusoidal components: 1 : 1, 1.2 : 1, and
+initely superior over the single-frequency one in terms of                                                      2 : 1 (curves from right to left).
+the sensitivity, and this advantage is almost independent of
+W . This means that when our periodic components have
+equal amplitudes, it is unlikely that the double-frequency                                                           However, we may notice that in terms of the detec-
+periodogram may disprove the single-frequency detections.                                                       tion thresholds (critical z levels) the difference between the
+     When we consider the cases of unequal amplitude ratio                                                      single- and double-frequency periodograms is not that huge
+(Fig. 6), we can find that it affects crucially the sensitivity                                                 as it may seem when we compare FAPs in Fig. 6. From (9)
+of the double-frequency periodogram relatively to the single-                                                   and (18) we conclude that the difference between the z levels
+frequency one. For the amplitude ratio 1.2 the sensitivities                                                    is roughly the logarithm of the relevant FAP ratio.
+become roughly similar, and after that the double-frequency
+FAP becomes much larger than the single-frequency one.
+Therefore, in the more frequent cases with unequal am-
+                                                                                                                8                          A DOUBLE-FREQUENCY EXAMPLE
+plitudes, the extra statistical verification by the double-
+frequency periodogram is mandatory, since it may easily                                                         In the above sections, the reader may become convinced
+disprove our single-frequency detections.                                                                       that we preach a single purpose of the multi-frequency pe-
+12     R.V. Baluev
+riodogram: disappoint a hasty person who claimed a detec-                The importance of the detection significance levels for
+tion of several periods too soon. This not the only purpose,       the multi-frequency periodogram is even further empha-
+of course. Let us provide some demonstration of how the            sized, because it is not just some fancy multi-frequency pe-
+double-frequency periodogram may work in a constructive            riodogram that we may use or may refuse to use. As we
+rather than destructive manner. We consider the following          have discussed, the need to assess the multi-frequency FAP
+model example. The N = 150 data points are clumped in 5            still persists even when we detect periodicities in a sequential
+groups (each contains 30 randomly distributed points) sepa-        single-frequency manner. If we wish to have nothing common
+rated by gaps. The gaps cover 43% of each such “data+gap”          with any multi-frequency periodograms, we may produce an
+chunk. The data are noisless and contain only a signal, which      increased number of false detections.
+is a sum of two cosinusoidal components with f1 = 0.9 Hz                 We would like draw some more attention to the com-
+and f2 = 1.1 Hz and equal amplitudes. The phases of the            parison of the Lomb-Scargle FAP formulae (9) with e.g. its
+components are 0◦ and 145◦ .                                       double-frequency analog (18). Remarkably, they looks rather
+     This signal represents a beating process shown in Fig. 7.     simialar to each other. In fact, we could easily guess the cor-
+We can see that the gaps in the data are such that only each       rect powers of W and of z in (18), based on (9), even without
+odd beating cycle is sampled. The DCDFT periodogram of             any sophisticated calculations, just by taking into account
+these data shows no much difference with the case of a single      the increase of the number of the free parameters of the sig-
+sinusoid at f = 1.0 Hz (Fig. 8). In practice we would be           nal. However, it would be impossible to guess the non-trivial
+unable to distinguish such single- and double-frequency case.      and important coefficient of π/16 ≈ 1/5. It could be derived
+The only difference is that the side peaks in the double-          only by means of a rigorous application of the generalized
+frequency case are larger than for the single-frequency one.       Rice method, as we have done here.
+However, in practice this would just make us to think that               So far in the paper, we paid little attention to the task
+the spectral leakage is a bit stronger than it actually is.        of practical computation and maximization of the multi-
+Therefore, the we are unable to find a correct model for           frequency periodogram. Obviously, this may constitute a
+the signal in Fig. 7: the single-frequency periodogram would       challenge already for n ⩾ 3. In the next Paper II, an effi-
+direct us to a wrong way from the very beginning stage of          cient parallellized computation algorithm is to be presented.
+the analysis.                                                      The beta version of this algorithm is already available for
+     However, armed with the double-frequency peri-                download at http://sourceforge.net/projects/fredec/,
+odogram, we can find the correct solution of the problem           although with only a little documentation until Paper II.
+immediately. As we can see in Fig. 9, this periodogram re-
+veals the correct period pair for the double-frequency signal,
+and simultaneously it does not generate any undesired ad-
+                                                                   ACKNOWLEDGMENTS
+ditional periods for the single-period data.
+     Of course, in practice the success of the analysis would      This work was supported by the Russian Foundation for Ba-
+also depend on the signal/noise ratio, but the Lomb-Scargle        sic Research (project No. 12-02-31119 mol a) and by the pro-
+periodogram failed already for entirely noiseless data that        gramme of the Presidium of Russian Academy of Sciences
+we have just considered.                                           “Non-stationary phenomena in the Objects of Universe”. I
+     Our general conclusion is that the double- and multi-         would like to express my gratitude to the anonymous re-
+frequency periodograms may appear rather useful in certain         viewer for providing constructive suggestions.
+especially difficult time-series analysis tasks. They are able
+to reveal correct periodic solutions in the cases when single-
+frequency periodograms fail.
+                                                                   REFERENCES
+                                                                    Azaı̈s J.-M., Delmas C., 2002, Extremes, 5, 181
+                                                                    Baluev R. V., 2008, MNRAS, 385, 1279
+9    CONCLUSIONS
+                                                                    Baluev R. V., 2009a, MNRAS, 393, 969
+On itself, it is usually quite easy to invent a sophisticated       Baluev R. V., 2009b, MNRAS, 395, 1541
+periodogram to satisfy the demands of some specific data-           Baluev R. V., 2012, MNRAS, 422, 2372
+analysis task. For example, the multi-frequency periodogram         Baluev R. V., 2013, MNRAS, 431, 1167
+that we considered here was known for almost two decades            Cumming A., Marcy G. W., Butler R. P., 1999, ApJ, 526,
+already. One of the principal obstacles that put a strict lim-       890
+itation on the practical use of such periodograms is the need       Ferraz-Mello S., 1981, AJ, 86, 619
+of a simultaneously rigorous, general, and computationally          Foster G., 1995, AJ, 109, 1889
+efficient approach to evaluate the significance levels asso-        Foster G., 1996a, AJ, 111, 541
+ciated with these new periodograms. Even for the classic            Foster G., 1996b, AJ, 111, 555
+Lomb-Scargle periodogram the evaluation of these signifi-           Lomb N. R., 1976, Ap&SS, 39, 447
+cance levels represented a substantial difficulty over decades.     Palmer D. M., 2009, ApJ, 695, 496
+      We believe that the FAP estimation approach based on          Scargle J. D., 1982, ApJ, 263, 835
+the generalized Rice method, that we are using extensively          Schwarzenberg-Czerny A., 1996, ApJ, 460, L107
+during last 5 years, satisfies all these requests. It inherits      Schwarzenberg-Czerny A., 1998, Baltic Astron., 7, 43
+the generality and rigorous basis of the Rice method. Also,         Vityazev V. V., 2001, Analysis of uneven time series (in
+it often leads to entirely analytic and self-closed results that     Russian). SPb Univ. Press, Saint Petersburg
+work according to a simple principle “just substitute”.             Zechmeister M., Kürster M., 2009, A&A, 496, 577
+                                                                                                                                   Multi-frequency detection significance                                       13
+
+                                    2
+                              1.5
+                                    1
+                              0.5
+                                    0
+                              -0.5
+                               -1
+                              -1.5
+                               -2
+                                        0                                      10                  20                               30                   40                                    50
+                                                                                                            time
+
+Figure 7. The signal and data of the model example of Section 8. The signal contains two periodic components which generate the
+beating, and the dataset is such that only each odd beating cycle is sampled (see text for the detailed description). The noise is absent.
+
+
+               50                                                                                                         50
+                                                                true                                                                                                false
+
+               40                                                                                                         40
+ DCDFT power
+
+
+
+
+                                                                                                            DCDFT power
+
+
+
+
+               30                                                                                                         30                                                true
+                                                                                                                                                             true
+
+               20                                                                                                         20
+                                                        false          false
+
+               10                                                                                                         10
+
+
+               0                                                                                                           0
+                    0   0.2   0.4           0.6   0.8            1             1.2   1.4   1.6   1.8    2                      0     0.2   0.4   0.6   0.8            1            1.2   1.4        1.6   1.8   2
+                                                          frequency                                                                                           frequency
+
+
+Figure 8. The Lomb-Scargle periodograms of two synthetic datasets: of the one shown in Fig. 8 with two periodicities at 0.9 Hz and
+1.1 Hz (right graph), and of a similar one containing only a single periodicity at 1.0 Hz (left graph). The time series involves periodic
+gaps generating an aliasing frequency of 0.1 Hz (see text for the detailed description). The noise is absent.
+
+
+This paper has been typeset from a TEX/ LATEX file prepared
+by the author.
+14               R.V. Baluev
+
+
+                1.3                                                    60                 1.3                                                      60
+
+
+
+
+                                          e)
+
+
+
+
+                                                                                                                      )
+                1.2                                                    50                 1.2                                                      50
+
+
+
+
+                                                                                                                    ue
+                                          ls
+                                       (fa
+
+
+
+
+                                                                                                                 (tr
+                                    30
+
+
+
+
+                                                                                                              60
+                                  z=
+
+
+
+
+                                                                                                            z=
+
+
+
+
+                                                                                                                             e)
+                                                     )
+                1.1                                                    40                 1.1                                                      40
+                                                   ue
+
+
+
+
+                                                                                                                             ls
+                                                                                                                          (fa
+  frequency 2
+
+
+
+
+                                                                            frequency 2
+                                                (tr
+                                               45
+
+
+
+
+                                                                                                                      44
+                                          z=
+
+
+
+
+                                                                                                                    z=
+                                                            e)
+
+
+
+
+                                                                                                                                        )
+                 1                                                     30                  1                                                       30
+
+
+
+
+                                                                                                                                      ue
+                                                            ls
+                                                         (fa
+
+
+
+
+                                                                                                                                   (tr
+                                                     30
+
+
+
+
+                                                                                                                                  60
+                                                    z=
+
+
+
+
+                                                                                                                             z=
+                0.9                                                    20                 0.9                                                      20
+
+                0.8                                                    10                 0.8                                                      10
+
+                0.7                                                    0                  0.7                                                      0
+                      0.7   0.8   0.9    1     1.1         1.2   1.3                            0.7   0.8   0.9    1     1.1           1.2   1.3
+                                    frequency 1                                                               frequency 1
+
+Figure 9. The double-frequency periodograms plotted for the same datasets as in Fig. 8. We label the highest peaks with the corre-
+sponding maximum periodogram values.
+

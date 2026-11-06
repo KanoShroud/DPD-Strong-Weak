@@ -1,0 +1,180 @@
+
+--- PDF PAGE 3 ---
+Sensors 2025, 25, 4967                                                                                                           3 of 16
+
+
+
+                                 the received signals, thereby avoiding any loss of available information, and can be
+                                      effectively applied to high-resolution models. Moreover, we further use forward spa-
+                                            tial smoothing to address the issue of covariance matrix rank deficiency in multipath
+                                environments.
+                                   2.  We offer a cost function based on forward spatial smooth and subspace data fusion
+                                   to obtain the initial estimation, and then first-order Taylor expansion is employed
+                                   to obtain off-grid compensation on the initial estimation, enhancing the localization
+                              performance for emitters that do not lie on the search grid.
+                                   3.  We have evaluated the performance of our algorithm across multiple circumstances
+                               using comprehensive simulation studies and actual experiments. The results of
+                                  these simulations demonstrate our algorithm’s remarkable efficacy and adaptability,
+                               underscoring its significant potential for application in multipath environments.
+
+                            The structure of this paper is as follows: Section 2 describes the model of the received
+                                signals. In Section 3, cross-spectrum data model is introduced. Then, Section 4 introduces
+                            the proposed algorithm. In Section 5, the proposed algorithm is compared with other
+                           algorithms through numerical simulation. Then, the real-world experiment is conducted
+                              in Section 6 to verify the viability of the proposed algorithm. Finally, Section 7 concludes
+                            the paper.
+                                      Notations: Bold characters indicate vectors (e.g., a), bold italic characters indicate matrices
+                                      (e.g., A). [•]T, [•]∗, [•]H and [•]+ stand for transpose, conjugation, conjugate transpose and
+                         Moore–Penrose inverse, respectively. [•]n denote the n-th element of the vector.
+
+                             2. Signal Model
+
+                              Consider that there are L observation sensors and the l-th sensor located at
+                               Sl = [Xl, Yl]T. We suppose that all sensors are time-synchronized. Suppose that there
+                                    is an unknown far-field emitter that is confined to a plane with a fixed altitude, and it
+                            transmits a wide-band signal. Assuming the unknown emitter is located in p = [xp, yp]T.
+                       The localization scenario within a multipath environment is illustrated in Figure 1.
+
+
+                                               Sensor
+
+                                                 Emitter
+
+
+
+
+
+                                                                                                     ...
+
+
+                                                                            ...
+
+
+
+
+                              Figure 1. Location scenario in a multipath environment.
+
+                              Then, the received signal of the l-th sensor can be expressed as
+
+
+                                    M
+                                                 xl(n) = ∑ λlms(n −τlm) + σl(n), n = 1, 2, . . ., Na,                   (1)
+                                               m=1
+
+                       where M is the number of multipath components, Na is the number of samples, λlm is
+                            the attenuation coefficient caused by the multipath environment, s(n) is the unknown
+                        wideband signal transmitted by the emitter, σl(n) is a white, zero-mean, complex, additive
+--- PDF PAGE 5 ---
+Sensors 2025, 25, 4967                                                                                                           5 of 16
+
+
+                        where Gsk( f ) is the self-spectrum of sk(nk).
+                            To utilize the time-delay information for the subsequent processing of the received
+                               signal, we assume that the selected reference signal is free of multipath components.
+                            In practice, a signal with prior information is typically selected as the reference signal.
+                          Then, the reference signal can be written as
+
+                                                         x0k(nk) = λ0s(nk −τ0) + σ0k(nk),                             (7)
+
+                        where λlm is the attenuation coefficient.
+                              Then, the self-correlation of x0k(nk) can be denoted as
+
+                                                  Rx0k(τ) = E[x0k(nk)xH0k(nk + τ)]
+                                                            h                             i                                 = E λ0s(nk −τ0)λH0 sH(nk −τ0 + τ)                        (8)
+
+                                + E[σ0k(nk)σ0k(nk + τ)]
+                                 = λ0λH0 Rs(τ) + Rσ0k(τ),
+
+                           so the self-spectrum can be written as
+
+                                                          Gx0k( f ) = λ0λH0 Gsk( f ) + Gσ0k( f ).                             (9)
+
+                          Then, Equation (6) can be rewritten as
+
+                                                                          P  Q λipλHjq            f                                                   Gijk( f ) =  Gx0k( f ) −Gσ0k( f ) ∑ ∑       e−j2π ∆τijpq.              (10)
+                                                                         p=1 q=1 λ0λH0
+
+                              Thus, the TDOA information contained in the received signal has been extracted in
+                            the form of the cross-spectrum. Equation (10) can be rewritten as
+
+                                                                Gijk( f )     P  Q                       f ∆τijpq                                                           gijk( f ) =     = ∑ ∑ µijpqe−j2π   + γijk( f )                (11)
+                                                          Gx0k( f )   p=1 q=1
+
+                                                                                                                                                                                  f ∆τijpq,                          (12)                                                       γijk( f ) = −Gσ0k( f ) ∑P ∑Q µijpqe−j2π
+                                                            Gx0k( f ) p=1 q=1
+
+                                                λipλHjq
+                        where µijpq =           , γ( f ) can be regarded as the noise term that is independent of Gx1k( f )                                            λ0λH0
+                       and follows a Gaussian distribution.
+                                 In order to use the high-resolution spectrum estimation method, we would like to
+                        sample gijk( f ) uniformly in the frequency domain to obtain the effective vectors. Let
+                       ω0 denote the first chosen frequency point, and we select the valid portion of the cross-
+                         spectrum with Nf points, then we get
+
+                                                                 Gijk = Aijµij + γijk ∈CNf ×1,                            (13)
+
+                        where
+--- PDF PAGE 8 ---
+Sensors 2025, 25, 4967                                                                                                           8 of 16
+
+
+
+                         Due to the orthogonal relationship in noise subspace and signal vector, we have
+
+                                         UHn b(p) = 0.                                     (27)
+
+                          Then, perform a first-order Taylor expansion of Equation (25) at p = pini
+
+                                                                                ∂b(pini)                            UHn (b(pini)+∂b(pini) (x −ˆxini) +         (y −ˆyini)) = 0.             (28)
+                                                                                   ∂ˆxini                       ∂ˆyini
+
+                               Defining the deviation term as ∆x = x −ˆxini, ∆y = y −ˆyini, the least square solution
+                              of the deviation term can be denoted as
+
+                                    "                                         #                                                               +                                    ∆x                                                                 h ∂b(pini)    ∂b(pini) i
+                              = Re − UHn        ˆxini             ˆyini    UHn b(pini)                (29)                                     ∆y
+
+
+                              According to (25), we can derive that
+
+                                                 ∂b(pini)                                         T                               =   ∂˜aT11(pini)   . . .  ∂˜aTij(pini)   . . .  ∂˜aT(L−1)L(pini)     .                (30)
+                                                                     ∂ˆxini                ∂ˆxini                 ∂ˆxini                    ∂ˆxini
+
+                                                 −j2π f0e−j2π f0∆τij11     
+                                                        ∂˜aij(pini)
+                              =                                                              ∂∆τij11                                                                                                   ...                                 (31)
+                                                                  ∂ˆxini          ∂ˆxini                   −j2π                                                                                                                                                                                                      fD(Nf −1)∆τij11   .
+                                                   −j2π fD(Nf −1)e
+
+                                                       ∂∆τij11    ([pini]1 −[Si]1)     [pini]1 −[Sj]1
+                                =         −                             .                   (32)
+                                                                         ∂ˆxini      ∥Si −pini∥c      ∥Sj −pini∥c
+
+                                Since the partial derivative of b(pini) with respect to ˆyini is of the same form as that
+                         with respect to ˆxini, no further elaboration is provided here. The final estimation of the
+                             emitter ˆp = [ ˆx, ˆy]T can be denoted as
+
+                                             "   #  "    #  "    #                                                                                                              ˆx             ˆxini      ∆x
+                                    =     +               .                            (33)
+                                                                                                              ˆy             ˆyini      ∆y
+
+                           The essential steps of the proposed algorithm are summarized below:
+                                   1.    Select the reference signal x1(n) based on the prior information and segment the
+                                   signals received by each sensor.
+                                   2.   According to Equation (4), compute the cross-correlation between any two sensors
+                           and obtain the cross-spectrum by applying the DFT.
+                                   3.    Select the effective portion of the cross-spectrum according to Equation (17), and then
+                              perform forward spatial smoothing to obtain ˜Rij according to Equation (18).
+                                   4.   Obtain the initial position estimation pini based on Equations (22)–(24).
+                                   5.   Obtain the final position estimation ˆp based on Equations (25) and (29)–(33).
+
+                             5. Performance Analysis
+
+                                   5.1. Complexity Analysis
+
+                                 In this subsection, we contrast the computational complexity of the JTAC algorithm
+                         with that of the DPD-MFF [21] algorithm, the DPD-CS [37] algorithm, and the initial esti-
+                          mation of the proposed algorithm (DPD-AC). In this paper, for convenience of comparison,
+                           computational complexity is quantified by the number of complex multiplications, which
+                                    is approximately four times that required for real multiplications. Define Nx and Ny as
+                            the number of grid points for the x-axis and y-axis, respectively. The computational com-

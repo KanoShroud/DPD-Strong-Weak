@@ -1,0 +1,77 @@
+AKBARI AND VALAEE: BINARY STRUCTURED SPARSITY APPROACH FOR MULTI-ANCHOR DIRECT LOCALIZATION                                    14057
+
+
+method adeptly manages overlapping groups, addressing a com-    Numerous techniques have been developed in sparse mod-
+mon challenge found in traditional techniques. Its emphasis on   eling, including Lasso (ℓ1-norm regularization), which induces
+group-level dynamics also increases its resilience against noise   sparsity in linear model coefﬁcients [32], and algorithms like Or-
+and outliers within individual features. Given these strengths,   thogonal Matching Pursuit (OMP) [33] and Basis Pursuit [34].
+the binary group structured sparsity method is especially advan-   These methods, which seek the sparsest data representation
+tageous for handling large-scale and complex datasets, where   under certain  constraints, signiﬁcantly reduce the required
+traditional methods often struggle.                          measurements compared to traditional methods like Shannon-
+                                                          Nyquist theory.
+A. Novelty and Motivation                                Beyond the scope of feature selection, sparse modeling plays
+                                                           a crucial role in compressed sensing. This technique is im-
+  Compared to existing methods, our approach stands out by di-
+                                                                 portant in effectively reconstructing signals or images from a
+rectly considering the structural sparsity within the distribution
+                                                                 limited set of measurements. This is particularly useful in ﬁelds
+of the signal which is a feature often overlooked in standard
+                                                                       like image processing and medical imaging, where it allows
+localization techniques. Our binary approximation approach
+                                                                    for data acquisition with fewer resources and reduced data
+simpliﬁes the computational process, enabling faster and more
+                                                               transmission [35].
+accurate localization in multipath conditions. By transforming
+                                                                  In addition, sparse modeling is utilized in various areas such
+the localization problem into a binary format, we can utilize
+                                                               as sparse nonlinear regression, probabilistic networks, matrix
+advanced binary programming solvers that are inherently more
+                                                                      factorization, and techniques like sparse PCA and nonnegative
+suited for discrete data processing, leading to more precise and
+                                                             matrix factorization. Its applications span a wide range of dis-
+robust localization outcomes. This choice is particularly justiﬁed
+                                                                       ciplines, from astronomy and physics to speech processing and
+in environments where the accurate modeling of sparsity can
+                                                                    robotics, underscoring its broad relevance and impact in modern
+signiﬁcantly enhance localization accuracy, such as in indoor
+                                                               science and technology [36].
+and urban settings where NLoS components predominate.
+
+B. Paper Structure                                           B. Structured Sparsity
+
+  The paper is structured as follows. We ﬁrst provide a detailed     Structured sparsity is an advanced concept in the ﬁeld of
+background on the mathematical concepts used in the study   sparse modeling, which goes beyond the basic idea of sparsity,
+in Section  II. We then present the environment and system   typically characterized by a large number of zero elements. This
+model for our localization approach in Section III, followed by   concept is important in providing a deeper understanding of how
+a comprehensive discussion of our methodology in Section IV.   non-zero elements in a model are arranged and interconnected,
+In Section V, we provide the steps to calculate CRB for our   rather than just focusing on their existence [28].
+method. Next, in Section VI, we present a detailed performance     In structured sparsity, the placement of non-zero elements in
+evaluation of our proposed method in both simulated and real-   a solution or model follows speciﬁc patterns or structures, rather
+world indoor settings. In Section VII some of the limitations of   than being random. This is particularly applicable in areas such
+this method is mentioned and future directions to expand this   as machine learning, signal processing, and statistics, where it
+work is discussed. Finally, the paper concludes with a summary   helps to interpret different patterns of non-zero elements based
+of our ﬁndings in Section VIII.                            on the intrinsic relationships in the data. These relationships
+                                                           could be physical, temporal, or related to other inherent prop-
+                              II. BACKGROUND                              erties. For example, in image processing, this concept is seen
+                                                      where pixels that are spatially close to each other form blocks of
+A. Sparse Modeling
+                                                           non-zero elements, showing their spatial relationship [29], [37].
+  Sparsemodelingisanincreasinglyimportantconceptwhichis  The main categories of structured sparsity include:
+widely utilized across different domains like signal processing,     1) Grouping of variables: In structured sparsity, non-zero
+machine learning, and statistics [28]. This approach is essen-        elements are frequently grouped together. Methods such
+tial in accurately reconstructing high-dimensional signals from         as grouped Lasso facilitate this by making entire groups
+limited measurements. High-dimensional problems with small         of coefﬁcients uniformly zero or non-zero.
+samples are typically underdetermined and computationally     2) Hierarchical patterns: Sometimes the sparsity in a model
+challenging, but introducing structures like sparsity makes them         exhibits a hierarchical pattern, in which the importance of
+manageable.                                                             certain variables depends on other variables.
+  The core principle of sparse modeling focuses on the effec-     3) Graph-based patterns: In some circumstances, graphs are
+tive representation and reconstruction of data characterized by        used to determine the sparsity structure of a model, with
+sparsity. To be more speciﬁc, only a few number of variables are        connected nodes reﬂecting various variables having the
+signiﬁcant, and the rest are zero or nearly zero. This means that a       same sparsity status.
+few relevant variables are often enough to explain the measure-     4) Application-speciﬁc patterns: The nature of an application
+ment. Moreover, even if the original problem is not inherently        has a signiﬁcant impact on its sparsity pattern. In time-
+sparse, it is often possible to ﬁnd a transformation to a coordi-         series data, the sequence of occurrences is vital, whereas
+nate system or dictionary that permits a sparse representation          in image processing, the spatial arrangement of pixels is
+[28], [32].                                                                         critical.
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:02:23 UTC from IEEE Xplore. Restrictions apply.

@@ -1,0 +1,968 @@
+=== PDF PAGE 1 ===
+       IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS                                                                                   1
+
+    NLOS-Aware TDOA-Based UAV Localization:
+   Cram´er-Rao Bounds, Measurement Modeling, and
+               Experimental Validation
+
+                          Cole Dickerson, Saad Masrur, ¨Ozg¨ur ¨Ozdemir, and Ismail G¨uvenc¸
+
+
+
+
+        Abstract—Passive time-difference-of-arrival (TDOA) localiza-   between two sensors cancels the unknown transmit time, so
+       tion is well suited for tracking non-cooperative unmanned aerial   the UAV position can be obtained by multilateration from a set
+       vehicles (UAVs) that do not report their positions. However, its                                                                     of TDOA measurements, with synchronization required only
+      accuracy degrades under the mixed line-of-sight (LOS) and non-
+                                                     among the ground sensors [5].       line-of-sight (NLOS) propagation that is typical of low-altitude2026        flight. In this paper, we develop NLOS-aware Cram´er–Rao lower    The accuracy of TDOA-based UAV localization depends
+     bounds (CRLBs) and an empirically calibrated measurement  on the  flight altitude and the signal bandwidth and, most
+     model for TDOA-based UAV localization, and we evaluate both   strongly, on whether each sensor has a line-of-sight (LOS) orOct with measurements from  five UAV  flights on the Aerial Ex-                                                                 a non-line-of-sight (NLOS) link to the UAV. An NLOS link
+      perimentation and Research Platform for Advanced Wireless
+                                                           weakens the received signal and adds a positive excess delay,     (AERPAW). The analysis yields an identifiability condition that21       relates the number of sensors to the number of NLOS links,  and the resulting TDOA bias cannot be removed by averaging.
+      together with a bias-induced error floor that a wider bandwidth   Localization bounds, NLOS error characterization, and UAV
+      cannot remove. The model parameters are estimated by matching   localization experiments have each been studied extensively,
+      simulated and measured error distributions. Experimental results   as reviewed in Section II. However, an NLOS-aware Cram´er–
+     show that the error depends most strongly on the number of
+                                                      Rao lower bound (CRLB) analysis of aerial TDOA localization      sensors in LOS, while a higher altitude and a wider bandwidth
+      lower the median error. Relocating a sensor that is always in   that is evaluated against measurements, together with a model
+    NLOS into the open flight area can lower the median horizontal   that reproduces the measured errors, has not been reported.[eess.SP] bound by two orders of magnitude  if the relocated sensor  is     In our earlier work [1], we derived a TDOA CRLB for
+       in LOS. The fitted model reproduces the median errors of the  LOS conditions, compared  it with measurements from five
+       2.5 MHz and 5 MHz flights but underestimates the heaviest error
+                                            UAV  flights on the Aerial Experimentation and Research        tails. Finally, rejecting outlier fixes lowers the error far more
+      than Kalman or particle filtering, because the remaining error   Platform for Advanced Wireless (AERPAW), and released the
+        is dominated by bias.                                             dataset [6]. That initial evaluation reported the error together
+                                                                 with the LOS states of the towers but did not model the NLOS        Index Terms—AERPAW, Cram´er–Rao lower bound, Fisher in-
+      formation, identifiability, Kalman filter, measurement modeling,   bias or the measured error distribution, and it did not process
+    NLOS bias, outlier rejection, TDOA, UAV localization.            the position estimates. It also reported, without an explanation,
+                                                                 a stable error of more than 30 m while the UAV hovered at a
+                                   I. INTRODUCTION                     waypoint where three of the four sensors were in LOS.
+                                                          The specific contributions of this work, which is a rigorous       HE detection and tracking of non-cooperative unmanned
+                                                                    extension of [1], can be summarized as follows.            aerial vehicles (UAVs) has become a key requirement for T
+      safe operations in the low-altitude airspace [2]–[4]. Unautho-     • We develop NLOS-aware CRLBs for 3D TDOA localiza-
+      rized or malfunctioning UAVs may not report their positions        tion under two models of the NLOS biases. The random-
+      to a UAV  traffic management system,  yet they must be        bias bound  treats  the biases as random with knownarXiv:2610.30053v1
+      located and followed for safe separation and, if needed, for         statistics and includes them, together with the excess
+       interdiction. A practical way to localize such a UAV is to listen        attenuation of each NLOS link, in the TDOA covariance.
+      passively to the radio-frequency (RF) signals that  it already      The deterministic bound treats the biases as unknown
+      emits, such as its command-and-control and video links, with       parameters of an augmented Fisher information matrix
+      a network of time-synchronized ground sensors  [3]. Since       (FIM). A hybrid bound with a Gaussian prior on the
+      the transmit time of a non-cooperative emitter is unknown,        biases connects the two, as  it equals the random-bias
+      the time of arrival (TOA) at a single sensor cannot be con-      bound when the prior matches the bias  statistics and
+      verted into a range. The time difference of arrival (TDOA)        tends to the deterministic bound as the prior becomes
+                                                                          uninformative.
+         C.  Dickerson,  S.  Masrur,  ¨O.  ¨Ozdemir, and  I.  G¨uvenc¸  are with  the     • We show that the deterministic bound is finite only if the
+       Department of Electrical and Computer Engineering, North Carolina State
+        University, Raleigh, NC 27606 USA (e-mail: {jcdicker, smasrur, oozdemi,      number of sensors exceeds the number of NLOS links
+       iguvenc}@ncsu.edu).                                           by at least four, or by three when the UAV altitude is
+         This work was supported in part by the National Science Foundation (NSF)       known, so that knowing the altitude is equivalent to one
+       under Grants CNS-2450593, CNS-2332834, and DGE-2137100. The material
+        in this paper was presented in part at the IEEE International Conference on        additional LOS sensor. For the AERPAW deployment, in
+      Communications (ICC) Workshops, Montreal, QC, Canada, Jun. 2025 [1].        which one sensor is blocked throughout the flight, the
+
+=== PDF PAGE 2 ===
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS                                                                                   2
+
+
+     position and the biases therefore cannot be separated at   A. Localization Bounds and LOS TDOA Methods
+    any point in 3D and can be separated at only 45% of    The CRLB is a standard tool to characterize the accuracy
+     the points when the altitude is known. We also quantify   of range-based localization [5], [7]. The impact of 3D an-
+     the gains of additional LOS sensors and of relocating the   tenna radiation patterns on the CRLB of TDOA-based UAV
+    blocked sensor.                                               localization is studied in [8], and antenna-pattern effects on
+  • We show that a localizer that ignores the NLOS biases,  TOA-based 3D UAV localization, including a Gaussian NLOS
+    such as a weighted least-squares localizer, is biased and   bias on links with random LOS states, are analyzed in [9].
+     has an error floor. To first order, the position offset that  The CRLB of 2D TOA localization with directive antennas
+     causes this floor depends on the biases and the sensor    is derived in [10], the TDOA localization performance of
+    geometry but not on the bandwidth, so a wider bandwidth  UAV-mounted sensors under flight disturbances is analyzed
+     lowers the CRLB but not the floor. The floor is consistent   in [11], and the effect of the network topology and the cost
+     with the measured error, which remains tens of meters   function on least-squares positioning is studied in [12]. The
+    above the CRLB wherever three sensors are in LOS and  CRLB also serves as a design criterion and a benchmark.
+     barely decreases between 2.5 MHz and 5 MHz.           In [13], a variable-speed UAV path is optimized for passive
+  • We develop a per-measurement error model that combines   target localization by minimizing the CRLB, and in [14], a
+     correlated shadowing, attitude and antenna-pattern fluctu-   closed-form estimator that combines TDOA and frequency
+     ations, a heavy-tailed NLOS excess delay, mobility noise,   difference  of  arrival and approaches  the CRLB with  the
+    and detection outages. We estimate its seven unknown  minimum number of sensors is proposed. In [15], a TDOA-
+     parameters jointly from the measured error distributions   based self-localization method for UAVs without the global
+     of all flights by simulation-based minimum-distance esti-   positioning system (GPS) is developed by least squares with
+     mation. The fitted model reproduces the median errors of   a convexity guarantee. However, apart from [9], these works
+     the four flights at 2.5 MHz and 5 MHz within 25%, and  assume LOS propagation, and none of them evaluates  its
+      its deviations in the error tails and at 1.25 MHz point to  bound against measurements.
+     the effects that it does not capture.
+  • We characterize the measured error as a function of   B. NLOS Error Bounds and Mitigation
+      altitude, bandwidth, and the number of LOS sensors,    The CRLB of wireless geolocation in NLOS environments
+    and evaluate outlier rejection, and Kalman and particle    is derived in [16], where an NLOS measurement whose bias
+      filtering of the position estimates. Outlier rejection based    is unknown and has no prior is shown to carry no position
+    on the circular error probable (CEP) and a kinematic   information; this result is generalized to wideband localization
+    speed gate lowers the pooled 90th-percentile error from   in [17]. A position error bound for ultra-wideband (UWB)
+    850 m to 99 m, whereas Kalman and particle filtering of   localization in dense cluttered environments is derived in [18],
+     the retained fixes does not lower it further, because the  and UWB geolocation techniques, including the treatment
+     residual error is dominated by bias.                       of NLOS  errors,  are reviewed  in  [19]. NLOS mitigation
+  The rest of this paper is organized as follows. Section II   algorithms based on residual weighting and on linear program-
+reviews the related literature. In Section III, we introduce the  ming are proposed in [20] and [21], respectively, and NLOS
+system model and the LOS CRLB, and in Section IV, we   identification and mitigation for time-based localization are
+develop the NLOS-aware bounds and the bias-induced error   surveyed in [22]. These studies consider terrestrial networks
+floor. The measurement model and the position estimator are  and rely on analysis or simulation, and none of them evaluates
+presented in Section V, followed by the parameter estimation   an NLOS-aware bound with aerial TDOA measurements.
+and post-processing procedures in Section VI. Section VII
+describes the AERPAW experiments and the  dataset, and   C. UAV Localization Experiments
+Section VIII presents the experimental and numerical results.   A UAV localization and tracking system based on passive
+Finally, Section IX concludes the paper, and the appendices  RF sensing and Kalman filtering is evaluated outdoors in [23],
+contain the proofs.                                       and a scalable UWB TDOA system for the indoor navigation
+  Notation: Vectors and matrices are denoted by bold low-   of multiple UAVs is presented in [24]. However, these experi-
+ercase and uppercase  letters, respectively. (·)T denotes the   ments neither compare the measured error with a localization
+transpose, Tr(·) the  trace, diag(·) a diagonal matrix,  E[·]  bound nor model the NLOS bias.
+the expectation, ∥·∥the Euclidean norm, and N(µ, σ2) the    As Table I shows, each prior work covers only a subset
+Gaussian distribution. A ⪰B (A ≻B) means that A −B is   of the five aspects. To the best of our knowledge, this is the
+positive semidefinite (definite), and 1 and I denote the all-ones    first work that combines an NLOS-aware CRLB analysis with
+vector and the identity matrix.                               a measurement-validated error model for a deployed ground
+                                       TDOA network that localizes UAVs in 3D, and connects the
+                                                     two through a common set of fitted propagation parameters.                     II. LITERATURE REVIEW
+  In this section, we review prior work on localization bounds                III. SYSTEM MODEL AND LOS CRLB
+and LOS TDOA methods, on NLOS error bounds and mitiga-     In this section, we introduce the TOA and TDOA measure-
+tion, and on UAV localization experiments. Table I compares  ment model and the LOS CRLB, the baseline for the NLOS
+the scope of the closest works with that of this paper.          analysis of Section IV. Table II summarizes the main symbols.
+
+=== PDF PAGE 3 ===
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS                                                                                   3
+
+
+TABLE  I: Scope of closely related work versus this paper                                                                                                   Non-cooperative UAV
+(✓: addressed; ∼: partially addressed; ×: not addressed). The
+columns indicate CRLB or FIM analysis, NLOS bias, a 3D or
+                                                                                                                                          t1                                      t3UAV setting, real measurements, and error modeling.
+                                                                                          (x1,y1,z1)
+      Work        CRLB  NLOS  3D/UAV  Meas.  Model                                                 (x,y,z)
+                                                                                                                                                                          t4           (x3,y3,z3)          [8], [13], [14]  ✓    ×    ✓    ×   ×                                            t2
+         [9]        ✓   ✓    ✓    ×   ×
+        [10]       ✓    ×    ×    ×   ×                z
+                                                                               y                                                                                    RF sensor        [15]       ×    ×    ✓    ×   ×
+        [16]–[19]     ✓   ✓    ×    ×   ×                              (x2,y2,z2)                      (x4,y4,z4)
+        [20]–[22]     ×   ✓    ×    ×   ×                       x
+         [23], [24]     ×    ×    ✓    ✓   ×
+         [1]        ✓    ∼    ✓    ✓   ×           Fig. 1: Passive TDOA localization of a non-cooperative UAV
+       This work     ✓   ✓    ✓    ✓   ✓            at (x, y, z) by time-synchronized RF sensors at (xi, yi, zi),
+                                                      which measure the arrival times ti of its signal.
+
+      TABLE II: Summary of the main notation.
+
+ Symbol          Definition                                           loss (FSPL), the SNR is given by
+
+  x, ˆx            True and estimated UAV position [x, y, z]T                                                         2                                                                                Pr,i                λ
+ xh               Horizontal UAV position [x, y]T                SNRi =       ,  Pr,i = PtGtGr,i         Li,  Pn = kBTB,
+  xi, N            Position of sensor i; number of sensors                   Pn                   4πdi
+                                                                                                                                  (3)  di, cˆti          True and measured range to sensor i
+  bi, ni        NLOS range bias (bi ≥0) and noise of sensor i        where Pt  is the UAV transmit power, Gt and Gr,i are the
+  σi, SNRi       Ranging standard deviation and SNR of sensor i         transmit and receive antenna gains, λ is the wavelength, kB
+  si          LOS state of sensor i (1: LOS, 0: NLOS)                  is Boltzmann’s constant, T is the temperature, B is the noise
+  β, B             Effective bandwidth and noise bandwidth
+                                                           bandwidth, and Li ≤1 is an excess-loss factor, with Li = 1 on  Li, Lex          Excess-loss factor and NLOS excess loss (dB)
+  r, iℓ            Reference sensor; other sensor of the ℓth TDOA      LOS links. We denote the LOS state of sensor i by si ∈{0, 1},
+ m, ρ         Number of TDOAs (m = N−1); stacked TDOA vector    where si = 1 indicates a link in LOS.
+  h(x), J         Noise-free range differences and their Jacobian           With sensor r as the reference, the TDOA measurements,
+ Q         TDOA noise covariance                            expressed as range differences, are ρr,i = c(ˆtr −ˆti) for  i̸ = r,
+  F, C         FIM and CRLB covariance
+                                                      which cancels the transmit time and can be expressed as K, KNLOS      Set of NLOS links and its cardinality
+  σb,i, µb         Bias standard deviation and median NLOS bias
+ k              Measurement index (proxy for time)                       ρr,i = hr,i(x) + (br −bi) + (nr −ni),     hr,i(x) = dr −di.
+                                                                                                                                  (4)
+                                        We denote by iℓthe non-reference sensor of the ℓth measure-
+                                                           ment. When all links are in LOS, the vector ρ that stacks theA. TOA and TDOA Measurements
+                              m = N −1 measurements is Gaussian, ρ ∼N(h(x), Q),
+  We consider N passive, time-synchronized RF sensors at  where h(x) stacks the range differences hr,iℓ(x), and the
+known fixed positions and a UAV at the unknown position   covariance matrix can be expressed as
+x = [x, y, z]T, as illustrated in Fig. 1. Sensor i is located
+at xi = [xi, yi, zi]T, at the range di = ∥x −xi∥from the       Q = σ2r 11T + diag σ2i1, . . . , σ2im  ,           (5)
+UAV, and forms a maximum-likelihood (ML) estimate  ˆti of
+                                                      which has a shared-reference structure, since every TDOAthe TOA of the UAV signal. By the asymptotic normality of
+                                                               contains the reference noise nr, which correlates all measure-the ML estimator [5], the range equivalent of this estimate can
+                                                       ments through the common term σ2r.be written as
+
+       c ˆti = di + c t0 + bi + ni,     ni ∼N(0, σ2i ),     (1)                                                             B. LOS Cram´er–Rao Lower Bound
+
+where c is the speed of light, t0 is the unknown transmit time,    The CRLB bounds the error covariance of any unbiased
+bi ≥0 is the range bias caused by an NLOS blockage, with   estimator ˆx of x as E[(ˆx −x)(ˆx −x)T] ⪰F−1(x), where the
+bi = 0 on LOS links, and ni is the ranging noise. The NLOS  FIM is given by [5]
+bias has been modeled as Gaussian [9], exponential [19], or
+                                                                                  ∂h(x)
+uniform [21]. The ranging standard deviation follows from the    F(x) = JTQ−1J ∈R3×3,    J =     ∈Rm×3,   (6)
+                                                                        ∂xML time-delay estimation bound [7] as
+                                                              and, as is common for ranging-based localization, the infor-
+                               c
+                  σi = √                    ,                 (2)   mation carried by the dependence of Q on x is neglected. The                    2  2 π √SNRi β                                                                  ℓth row of J is the difference of two unit vectors,
+where β is the effective bandwidth and SNRi is the received            ∂hr,iℓ(x)                 x −xi
+                                            = ur −uiℓ,     ui =                  (7)signal-to-noise ratio (SNR) at sensor i. With free-space path                                                     ∂x                    ∥x −xi∥,
+
+=== PDF PAGE 4 ===
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS                                                                                   4
+
+
+where ui points from sensor i toward the UAV. From the  where Qnoise is the noise covariance (5) evaluated with the
+CRLB covariance C = F−1, we obtain the 3D, vertical, and   attenuated NLOS SNRs, and σb,i = 0 on LOS links. Replacing
+horizontal root-mean-square error (RMSE) bounds       Q in (6) by Qtot yields the random-bias bound
+     RMSE3D = p Tr(C),   RMSEz = p Czz,                  CR = JTQ−1totJ −1,                (11)                                                              (8)
+           RMSEh = p Cxx + Cyy,                                                      which is finite for any non-degenerate geometry and captures
+where Cxx, Cyy, and Czz are the diagonal entries of C. The   both NLOS effects, the SNR loss through Qnoise and the
+horizontal bound RMSEh  is derived from the 3D CRLB,   bias uncertainty through Qbias. For non-Gaussian biases with
+where altitude is estimated jointly with horizontal position.   the same variances, CR  is the error covariance of the best
+When the altitude is known, as in our experiments described   linear unbiased estimator and an upper bound on the exact
+in Section VII, only the horizontal position xh = [x, y]T is  CRLB, since the Gaussian distribution has the smallest Fisher
+unknown, and the Jacobian reduces to its first two columns   information for a given variance.
+Jxy. The altitude-known horizontal bound is then given by
+        q                                         B. Model B: Deterministic Unknown Biases  RMSEknownh   =  Tr (JTxyQ−1Jxy)−1 ≤RMSEh,    (9)
+                                              When the bias statistics are unknown, the most conservative
+where the inequality holds because knowing one parameter                                                     model treats each NLOS bias as a deterministic unknown
+cannot reduce the information about the others. In our setup,                                                           parameter that must be estimated together with the position.
+the sensors are mounted about 10 m above ground, and the                                                          For TOA localization, it is shown in [16], [17] that an NLOS
+UAV  flies  at 40–100 m  at horizontal distances of several                                                      measurement whose bias is unknown and has no prior carries
+hundred meters. The elevation angles are therefore small, the                                                     no position information. We extend this result to the shared-
+vertical geometry is poor, and RMSEh can be much larger   reference TDOA model (4) and express it as a condition on the
+than RMSEknownh       . Since the measured errors in this paper  number of sensors. The unknown parameter vector becomes
+come from an altitude-known solver, we compare them with
+RMSEknownh       .                                             θ =  x, y, z, {bj}j∈K T ∈R3+KNLOS,
+
+                                                           so  that each NLOS link adds one unknown. By  (4), the   IV. NLOS-AWARE CRLBS AND THE BIAS-INDUCED
+                                                                    derivative of the ℓth TDOA with respect to the bias bj is                ERROR FLOOR
+  In this section, we extend the LOS bound to links that                   ∂ρr,iℓ
+                                             = δjr −δjiℓ,     j ∈K,           (12)
+are blocked by terrain, foliage, or buildings. An NLOS link                 ∂bj
+degrades ranging in two ways. First, the blockage attenuates                                                      where δab denotes the Kronecker delta. A bias on the reference
+the received power by the excess loss Lex (in dB), which we                                                              sensor thus shifts every TDOA by br, whereas a bias on a non-
+model by setting Li = 10−Lex/10 in (3) on each NLOS link;                                                                reference sensor shifts only its own TDOA, by −bj. With the
+this lowers SNRi and, through (2), increases σi. Second, the                                                                  bias block Jb ∈Rm×KNLOS built from (12) and the augmented
+excess propagation delay adds the positive bias bi in (1) on                                                            Jacobian Ja = [ J  Jb ], the augmented FIM and the position
+the NLOS links, whose set we denote by K = {i : si = 0}                                                           block of its inverse are given by
+and whose number we denote by KNLOS = |K|; both depend
+on the UAV position.                                      Fa = JTa Q−1noiseJa,   CD = F−1a   1:3, 1:3,     (13)
+  The  resulting bound depends on what  is known about
+                                                      where [·]1:3,1:3 denotes the upper-left 3 × 3 block. The deter-
+the biases. In Model A, the biases are random with known
+                                                                  ministic bound CD accounts for the information that is spent
+statistics, which applies when NLOS statistics are available
+                                                     on estimating the biases.
+from ray tracing, a channel model, or earlier measurements,
+but the individual biases are not calibrated. In Model B, the   Proposition 1 (Identifiability). The deterministic bound CD
+biases are deterministic unknowns, in which case the position   in (13) is finite only if
+and the biases may not be separable. A hybrid bound connects
+                                m ≥3 + KNLOS ⇐⇒  N ≥4 + KNLOS.    (14)the two models. All bounds assume that the LOS state of each
+link is known.                                                 Conversely, the condition is sufficient whenever the geometry
+                                                                               is non-degenerate, that is, whenever any three rows ur −uiℓ
+A. Model A: Random-Bias CRLB                                of J that belong to LOS sensors are linearly independent. This
+  We model the random part of each NLOS bias as a zero-   fails only for special arrangements, for example, when the UAV
+mean Gaussian variable with variance σ2b,i, independent across  and all LOS sensors lie in one plane.
+links; the bias mean is a deterministic offset that a calibrated
+                                                                  Proof: See Appendix A.
+estimator can remove, and the effect of an uncompensated bias
+                                                              Since N −KNLOS  is the number of LOS sensors, (14)
+is analyzed in Section IV-D. Since the biases enter (4) in the
+                                                                  requires at least four LOS sensors, as many as 3D TDOA
+same way as the noise, they add a covariance term with the
+                                                                    localization  requires without NLOS  links. Each unknown
+shared-reference structure of (5),
+                                                                  bias absorbs the TDOA that it enters, which then no longer
+         Qtot = Qnoise + Qbias,                               constrains the position. When (14) holds, CD therefore equals
+                                                         (10)
+        Qbias = σ2b,r11T + diag σ2b,i1, . . . , σ2b,im  ,            the LOS bound of the LOS sensors alone, and excluding
+
+=== PDF PAGE 5 ===
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS                                                                                   5
+
+
+the NLOS sensors loses no information but cannot restore   Proposition 2 (Bias floor). Under the linearized model, the
+identifiability either, because it leaves N −KNLOS unchanged.  WLS estimate (18) has the mean offset
+When the altitude is known, the same argument applies to
+the two horizontal coordinates, and the condition becomes           δxb = E[ˆx] −x = JTWJ −1JTW bρ,      (19)
+N ≥3 + KNLOS, so that knowing the altitude is equivalent
+                                                     and its mean-squared error (MSE) satisfiesto one additional LOS sensor. Section VIII-B evaluates both
+conditions for the AERPAW deployment.                                        MSE = E∥ˆx −x∥2 = ∥δxb∥2 + Tr Cov(ˆx)
+                                                                                                                        (20)
+                                                                ≥∥δxb∥2 + Tr(Cn),
+C. Hybrid Bound
+  In practice, the biases are often partially known, for ex-  where Cn√ = (JTQ−1noiseJ)−1, with equality for W = Q−1noise.
+ample, through a typical excess-delay spread from a channel   Hence,  MSE ≥∥δxb∥.
+model or from earlier measurements. A bound that combines
+                                                                  Proof: See Appendix B.
+random parameters with a prior and deterministic parameters
+                                                                 Proposition 2 splits the error of a practical localizer into
+without one is known as a hybrid CRLB [25], and its purely
+                                                           a variance term Tr(Cn), which is the CRLB of Section III
+random counterpart is the Bayesian CRLB [26]; bounds with
+                                                               evaluated with the attenuated NLOS SNRs, and a bias term
+a prior on the NLOS biases have been derived for TOA
+                                                        ∥δxb∥2, which depends only on the biases, on the geometry
+localization in [16], [18]. For the TDOA model, we place
+                                                           through J, and on the relative link weights through W. The
+a zero-mean Gaussian prior with variance σ2prior on each                                                             following corollary makes the bandwidth dependence of the
+unknown bias. Since such a prior adds the information σ−2prior                                                     two terms explicit.
+to its own parameter only [26], the hybrid FIM and the position
+bound are given by                                        Corollary 1 (Bandwidth invariance of the  floor).  Let the
+                                                                        effective bandwidth β  in (2) be proportional to the noise
+Fh = Fa+diag 03, σ−2prior1KNLOS  ,   CH = F−1h   1:3, 1:3,   bandwidth B in (3), and  let the biases bρ be fixed. Then
+                                                         (15)                                                        Qnoise(B) = (B0/B) Qnoise(B0) for a reference bandwidth
+where 03 is the all-zeros vector of length three and 1KNLOS                                                      B0, and the ML-weighted estimator (W = Q−1noise) satisfies
+the all-ones vector of length KNLOS. Unlike Fa, the hybrid
+FIM Fh is invertible whenever J has rank three. Applying the                   B0         B→∞
+                                           MSE(B) = ∥δxb∥2 +    Tr Cn(B0)  −−−−−→∥δxb∥2,
+Schur complement and the Woodbury identity to (15) gives                B
+                                                                                                                        (21)
+                                       −1
+     CH =  JT Qnoise + σ2prior JbJTb −1J      ,     (16)  where δxb does not depend on B.
+                                                                  Proof: See Appendix B.in which the unknown biases act as additional noise with the
+covariance σ2priorJbJTb , which has the shared-reference struc-   A wider bandwidth thus reduces√the RMSE contribution of
+ture of Qbias in (10). Equation (16) connects the three bounds.   the variance term by a factor of   2 per doubling of B but
+If all NLOS links have the same bias standard deviation σb   leaves the bias term unchanged,√     because a common scaling of
+and σprior = σb, then CH equals the random-bias bound CR. W cancels in (19). The  2 rate follows from the per-sample
+As σprior →0, the biases become known, and CH reduces to  SNR in (3); if the receiver integrates the signal over a fixed
+(JTQ−1noiseJ)−1, the LOS bound with the NLOS SNR loss. As   time, σi is proportional to 1/B, the RMSE contribution of the
+σprior →∞, CH tends to the deterministic bound CD, which   variance term halves per doubling of B, and the bias term is
+is unbounded whenever (14) fails.                             again unchanged. Corollary 1 assumes fixed biases; a wider
+                                                        bandwidth can also reduce the biases themselves by resolving
+                                                                 multipath, which is a separate effect. Section VIII-C compares
+D. Bias-Induced Error Floor
+                                                                these predictions with the measurements.
+  The bounds above limit the variance of unbiased estimators.
+However, a practical localizer that ignores the NLOS biases is
+a biased estimator. To quantify this effect, we write the stacked    V. MEASUREMENT MODEL AND POSITION ESTIMATION
+TDOA vector of (4) as                                                                  In this section, we develop a per-measurement model that
+      ρ = h(x) + bρ + n,   n ∼N(0, Qnoise),    (17)   generates synthetic range measurements along the measured
+                                                                         trajectories, together with the position estimator that operates
+where bρ stacks the TDOA biases br −biℓand n stacks the  on them. Section VI then estimates the model parameters from
+noise differences nr −niℓ. A localizer that does not know bρ   the measured errors.
+computes the weighted least-squares (WLS) estimate
+             ˆx = arg min  ρ −h(˜x) TW ρ −h(˜x)  ,      (18)                                                             A. Per-Measurement Signal and Range Model
+                              ˜x
+                                                              Let k denote the measurement index, which serves as awhere W ≻0 is a weight matrix, and W = Q−1noise yields the
+                                                         proxy for time, let T denote the set of indices at which theML estimator without biases. For small errors, we linearize
+                                        UAV is in transit between waypoints, and let I{A} denote theh(˜x) ≈h(x) + J(˜x −x), with J as in (6).
+                                                                   indicator function, which equals 1 if the event A occurs and
+
+=== PDF PAGE 6 ===
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS                                                                                   6
+
+
+                                          TABLE III: Measurement-model parameters fitted to the raw0 otherwise. At index k, the received SNR (in dB) at sensor
+                                                       and to the gated (outlier-removed) measured errors, as dis-i is modeled as
+                                                           cussed in Section VIII-D, and fixed parameters (SD: standard
+ SNRi(k) =  Pt + Gt + Gr,i −FSPL(di(k)) −NF −Pn                                                                  deviation; hover and transit values are separated by a slash).
+          −Lex 1 −si(k) + Xshi (k) + Xatti  (k),
+                                                         (22)        Symbol       Description                  Eq.  Raw  Gated
+
+                                                                                Estimated by error-distribution matching (Section VI-A)
+where the bracketed term  is the free-space SNR of (3) in
+                                                                    µb (m)     NLOS bias median           (24)  54.1   61.5
+dB, reduced by the receiver noise figure NF; Pt and Pn are         σlog       NLOS bias log-SD           (24)  1.01   1.41
+expressed in dBm, the antenna gains in dBi, and FSPL(·)        Lex (dB)    NLOS excess loss            (22)  13.1   14.5
+in dB; and si(k)  is the LOS  state  at index k. The  first      NF (dB)      Receiver noise figure         (22)   6.2     3.9
+                                                          σNLOSsh    (dB) NLOS shadowing SD         (23)   6.9     8.1random term models correlated shadowing as a  first-order
+                                                         σmp (m)      Multipath bias SD            (24)   5.8     6.8
+autoregressive process,                                                                                        τres (m)      Residual rejection threshold   (25)  31.6   18.5
+    Xshi (k) = ψ Xshi (k −1) + p1 −ψ2 σsh wi(k),     (23)         Fixed
+                                                                           γth (dB)      Detection SNR threshold      (22)    −5
+where wi(k) ∼N(0, 1)  is white Gaussian noise, and σsh      ψ           Shadowing correlation        (23)    0.97/0.6
+equals σLOSsh   on LOS links and the larger σNLOSsh    on NLOS         σatt (dB)     Attitude fluctuation SD       (22)     1.5/3.5
+                                                           σLOSsh   (dB)  LOS shadowing SD           (23)      4links. Following the Gudmundson model [27], the correlation
+                                                             σmob (m)     Mobility ranging SD          (24)      6
+coefficient ψ is close to one while the UAV hovers, which
+freezes  the shadowing, and smaller  in  transit, where  the
+motion of the UAV decorrelates it. The second random term
+                                                                      altitude z. Equation (25) is the WLS estimator (18) restricted
+Xatti  (k) ∼N(0, σ2att) models attitude and antenna-pattern                                                                    to two dimensions with W = I. A solution whose residual
+fluctuations. Since roll, pitch, and yaw change the airframe
+                                                        norm, divided by the number of TDOAs, exceeds the threshold
+antenna gain toward each sensor [28], σatt is small in hover
+                                                                          τres is discarded as a no-estimate event; this gate models the
+and larger in transit.
+                                                              consistency check of the geolocation software.
+  The ranging standard deviation σi(k) follows from (2) with
+the SNR of (22). Omitting the transmit time, which cancels in
+                                                               VI. MODEL PARAMETER ESTIMATION ANDthe TDOAs, the range measurement at index k is
+                                                                  POST-PROCESSING
+           ˆdi(k) = di(k) + bi(k) + bmpi  (k) + ni(k),                                                         (24)     In this section, we present two procedures that operate on
+         ni(k) ∼N 0, σ2i (k) + σ2mob I{k ∈T }  ,              position estimates. The first estimates the unknown parameters
+                                                               of the measurement model from the measured errors, so thatwhere bi(k)  is the NLOS bias, which  is log-normal with
+log bi ∼N(log µb, σ2log) on NLOS links, that is, with median   the model can explain the error. The second processes the
+µb and log-standard deviation σlog, and zero on LOS links;   sequence of position estimates to remove gross outliers and to
+bmpi  (k) ∼N(0, σ2mp)  is a quasi-static multipath bias; and  smooth the remaining jitter.
+σmob captures the additional ranging error in transit caused by
+the finite integration window and by residual synchronization   A. Measurement-Model  Parameter  Estimation  by  Error-
+and Doppler errors. Both biases are frozen while the UAV   Distribution Matching
+hovers and are redrawn independently at each index in transit.                                                                 Several parameters of (22)–(25), such as the NLOS bias
+A sensor is detected only if SNRi(k) exceeds the threshold                                                                               statistics, the excess loss, and the receiver noise figure, are
+γth, and no estimate is produced when fewer than three sensors                                                                     specific to the site and the hardware. They cannot be measured
+are detected. As a result, the model produces a nearly constant                                                                     directly from the released dataset, which contains only position
+error offset in hover and a fluctuating error in transit. Table III                                                                  estimates, yet they determine how large and how heavy-tailed
+lists its parameters and the equations in which they appear.                                                                 the  localization  error  is. We therefore estimate the seven
+                                                            parameters in Table III, namely
+B. TDOA Position Estimation
+                                        ϕ = {µb, σlog, Lex, NF, σNLOSsh     , σmp, τres},     (26)  Like the geolocation software of the experimental system,
+the estimator operates in 2D with the altitude known. Let D(k)  from the measured errors and fix the remaining parameters of
+denote the set of sensors detected at index k. With the detected   Table III at typical values to keep the number of unknowns
+sensor of the highest SNR as the reference r, the Levenberg–   small. The detection threshold γth, for example, enters the
+Marquardt (LM) algorithm solves                               detection only through its sum with the estimated NF.
+                                                     The likelihood of the measured errors is intractable, because    ˆxh(k) = arg min X     ρr,i(k) −hr,i(xh) 2,    (25)                                                                 the error depends on ϕ through the detection threshold, the
+             xh∈R2  i∈D(k)\{r}
+                                   LM solution, and the residual gate, but the model can be
+where ˆxh(k) is the estimate of the horizontal position xh =   simulated. We therefore use a simulation-based minimum-
+[x, y]T defined in Section  III, ρr,i(k) =  ˆdr(k) −ˆdi(k)  is   distance estimator in the  spirit of  indirect inference  [29],
+the TDOA formed from  (24), and hr,i(xh)  is  the range   in which a statistic of the data is computed once from the
+difference (4) evaluated  at x = [xTh, z]T with the known   measurements and once from simulations of the model, and
+
+=== PDF PAGE 7 ===
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS                                                                                   7
+
+
+    1                           2                                               (a)    CEP>CEPmax                 (b)
+         Candidate parameter          Simulate the measurement model
+            vector ϕ (seven            on the geometry, trajectory, and                                                      true track
+        unknown parameters)           LOS states of flight f
+
+
+    4                           3
+        Cost: KS distance Df(ϕ)        LM position estimation                                                           Kalman                                                                                                     accepted                     → modeled                                                              error CDF̂                                                                                                                                               estimate     and           valid-fraction                      mismatch,iterate      summed                over five                              flights                                                                                              vmaxΔt                                             Fmodf  (e;ϕ)
+                                                                                       true
+                                                                                    track                                            retained    6                           5
+                                     Measured errors of flight f                                                                  fix        Nelder–Mead                      update                    → measured error CDF̂                         speed gate
+            of ϕ; stop at               ϕ ⋆                                                     Fmeasf   (e)                Fig. 3: Post-processing on a synthetic track. (a) Fixes (dots)
+                                                                 are shown with their CEPs (circles, every third fix); fixes with
+Fig.  2:  Estimation  of  the  model  parameters  by  error-                                                            a large CEP or an implausible jump from the last accepted fix
+distribution matching. Step 1 selects a candidate parameter                                                                 are rejected (crosses). The threshold examples show a fix with
+vector ϕ. In steps 2 and 3, the measurement model and the                                                            a CEP above CEPmax and a fix outside the speed-gate radius
+estimator are simulated on the actual geometry, trajectory, and                                                  vmax∆t (dashed circle). (b) A random-walk Kalman filter (line
+LOS states of each flight, and in step 4, the resulting error                                                            with dots) smooths the retained fixes (open circles). The gray
+CDF is compared with the measured one of step 5 by the                                                                       line is the true track.
+Kolmogorov–Smirnov (KS) distance. In step 6, the Nelder–
+Mead method updates ϕ until the cost (27) is minimized.
+                                                           bandwidth, which reduces the  risk of  overfitting a single
+                                                                               flight. Since Df(ϕ) is piecewise constant and non-convex, we
+the parameters are adjusted until the two agree, as illustrated   minimize (27) with the derivative-free Nelder–Mead simplex
+in Fig. 2, whose numbered steps are referred to below. We   method, which forms step 6 of Fig. 2, starting from typical
+match the entire empirical error distribution rather than a few   parameter values. Each cost evaluation simulates Rf = 2
+moments, since the error is heavy-tailed and its moments are   replicates of each flight with fixed seeds, which makes the
+dominated by a few extreme errors.                             cost deterministic in ϕ.
+   Let f ∈{1, . . . , 5} index  the  flights,  let  ef,k  denote
+the horizontal error of the kth valid estimate of  flight f,                                                              B. Post-Processing: Outlier Rejection and Filtering
+and let nf be the number of valid estimates. The empirical
+                                                            Like the estimator in (25), the geolocation software ofcumulative distribution function (CDF) of the measured errors,
+ˆFfmeas (e) = n−1f Pnfk=1 I{ef,k ≤e},  is  the  fraction  of   the RF sensors produces one position fix per measurement.
+                                                      With each  fix,  it  also  reports the  circular  error probableestimates with an error of  at most  e. The modeled CDF
+ˆFfmod (e; ϕ) is computed in the same way from Rf Monte   (CEP), which is therefore available as part of the RF sensor
+                                                          measurements. The sequence of fixes contains two types ofCarlo replicates of flight f, each of which simulates (22)–
+                                                                          error. A few fixes are gross outliers, hundreds of meters away(25) along the actual trajectory, geometry, and per-sensor LOS
+                                                       from the true position, which are caused by severe NLOSstates of flight f. We estimate ϕ in (26) as
+                                                                conditions or by a spurious multilateration solution. The other
+                   5                                                 fixes lie close to the true track but scatter around it from one fix
+ ϕ⋆= arg min X h Df(ϕ) + η vmeasf   −vmodf  (ϕ) i ,         to the next. Post-processing therefore has two stages, which are
+        ϕ∈Φ               f=1                                    (27)                                                                         illustrated in Fig. 3. The first stage removes the gross outliers,
+         Df(ϕ) = sup ˆFfmeas (e) −ˆFfmod (e; ϕ) ,         and the second stage smooths the retained fixes.
+                           e                                 The first stage applies two tests, and a fix is rejected if it fails
+where Φ is the set of admissible (positive) parameter values,   either of them. The first test uses the CEP, which is the radius
+Df(ϕ) is the two-sample Kolmogorov–Smirnov (KS) distance   of a circle centered on the fix that contains the true position
+between the measured and modeled CDFs, vf is the fraction   with probability 0.5, so a large CEP indicates an unreliable
+of measurement indices that yield a valid estimate, and η =    fix. For a nearly circular error distribution, CEP ≈0.59(σx +
+0.6 weights the two terms. Steps 2 and 3 of Fig. 2 compute   σy), where σx and σy are the standard deviations of the east
+ˆFfmod and vmodf     , step 5 provides ˆFfmeas and vmeasf      , and step 4  and north errors. The CEP gate rejects every fix whose CEP
+evaluates the cost in (27).                                   exceeds the threshold CEPmax. The second test, a kinematic
+  The supremum in (27) is taken over 220 logarithmically   speed gate, checks whether the UAV could have moved from
+spaced error values between 1 m and 3.2 km. The KS distance   the last accepted fix to the new fix. If the distance between the
+depends only on the ranks of the errors, so a few extreme  two fixes, divided by the elapsed time ∆t, exceeds the speed
+errors cannot dominate the  fit, but  it is less sensitive in the   threshold vmax, the jump is physically implausible, and the
+tails than in the body of the distribution. The valid-fraction  new fix is rejected. In other words, a new fix is accepted only
+term constrains NF and τres, which mainly determine whether    if it lies within the radius vmax∆t around the last accepted fix.
+an estimate is produced. Summing over all five flights forces   In Fig. 3(a), we show one example of each test. We set vmax
+a single parameter vector to reproduce every altitude and   well above the UAV speed, so that the scatter of the fixes alone
+
+=== PDF PAGE 8 ===
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS                                                                                   8
+
+
+
+
+
+        GPS
+                  RF sensor
+
+
+
+        Antenna                                         SDR node
+
+
+       (a) RF sensor on tower LW3.                 (b) UAV with the transmitting SDR.                    (c) Site and tower layout.
+
+Fig. 4: AERPAW Lake Wheeler Field Road Labs site. (a) Keysight N6841A RF sensor; the arrows point to the sensor, its
+broadband antenna, and its GPS tracker. (b) UAV carrying an AERPAW portable node with a USRP B205mini SDR (arrow).
+(c) Towers LW1–LW5; the RF sensors on LW2–LW5 provide the TDOA measurements.
+
+
+                                          TABLE IV: Measured horizontal localization error per flightdoes not trigger the speed gate. If the TDOAs were available,
+                                                                     (valid fixes; P90: 90th percentile).random sample consensus [30] over subsets of sensors could
+detect the outliers in the measurement domain instead.                                                                                         Flight                 Valid/   Valid  Mean  Median     P90
+  In the second stage, we filter the retained fixes with three                                      total    (%)    (m)      (m)     (m)
+filters: a constant-velocity (CV) Kalman filter [31], a random-        40 m, 1.25 MHz   186/255    72.9   312.0     117.1    891.5
+walk (RW) Kalman filter, and an RW particle filter with 500        40 m, 2.5 MHz    168/242    69.4   280.3      59.0    980.0
+particles and Student-t measurement noise with three degrees        40 m, 5 MHz     185/245    75.5   358.8      51.6   1132.0
+                                                                       70 m, 5 MHz     205/245    83.7   256.4      42.9    666.0
+of freedom, whose heavy  tails limit the influence of large        100 m, 5 MHz    240/261    92.0   163.6      33.2    312.0
+errors [32]. The RW filters propagate xh,k = xh,k−1+wk with
+wk ∼N(0, q ∆t I2), where q is the process-noise intensity
+and I2 is the 2 × 2 identity matrix, and use the CEP-adaptive   Buildings and trees were modeled in the Java OpenStreetMap
+measurement covariance Rk = (α CEPk)2I2, where the factor   editor and imported into MATLAB for ray tracing, which
+α is tuned, since the reported CEP overstates the actual error.   yields the LOS state of each link along the trajectory; satellite
+All filters use only the retained fixes.                        views of these LOS states at the three altitudes are given in [1].
+                                                     Tower LW5, about 1.5 km north of the field, is in NLOS at
+        VII. EXPERIMENTAL SETUP AND DATASET           every point of every flight, and tower LW1, which is inside
+  In this section, we describe the AERPAW testbed, the RF   the flight area but did not host an RF sensor, is used in the
+sensors, the flights, and the dataset used in Section VIII.       placement study of Section VIII-B.
+  The experiments were conducted at the AERPAW Lake   A measurement without a returned position counts as a no-
+Wheeler Field Road Labs site on July 15, 2024. The sensors   estimate event. The released dataset [6] contains the position
+of Section III are four Keysight N6841A RF sensors [33],   estimates, the ground truth, the per-tower LOS states, and the
+shown in Fig. 4(a), on towers LW2–LW5, whose layout is  CEP of each fix, but not the TDOAs. Our processing follows
+shown in Fig. 4(c). They detect and time-stamp RF signals   the released MATLAB script and reproduces the error statistics
+between 20 MHz and 6 GHz, are synchronized by GPS, and   of [1] exactly, as shown in Table IV.
+report to a common geolocation server, which estimates the
+                                                                 VIII. EXPERIMENTAL AND NUMERICAL RESULTS2D position of the emitter with the altitude known and reports
+a CEP for each fix. During each flight, a USRP B205mini     In this section, we  first characterize the measured error
+software-defined radio (SDR) on the UAV, shown in Fig. 4(b),  and then evaluate the NLOS-aware bounds, the measurement
+transmitted a 3.32 GHz channel-sounding waveform generated   model, and the post-processing on the AERPAW data. Unless
+with GNU Radio, from which the sensors localized the UAV.   otherwise noted, the bounds are evaluated at 5 MHz along the
+The transmit power was 30.67 dBm, the antenna gains were   measured trajectories with the actual sensor positions and per-
+set to 0 dBi, and the temperature in (3) was T = 304.3 K.   link LOS states. The NLOS parameters are the fitted values of
+This cooperative setup, with a known waveform and a known   Table III, and the random-bias bound (11) uses σb,i = 54 m,
+altitude, is a favorable case for the passive localization of non-   the fitted median bias µb; since the fitted log-normal bias has
+cooperative UAVs.                                          a larger spread, this choice can only lower the bound. As
+  As listed in Table IV, five flights, each flown once, cover   in [1], we set β = B in (2) and use the per-sample SNR
+altitudes of 40 m, 70 m, and 100 m and bandwidths of   of  (3), and  all bounds include the                                                                                                                          fitted noise figure NF.                                                  √
+1.25 MHz, 2.5 MHz, and 5 MHz. In Fig. 5, we show the  The root-mean-square bandwidth B/  12 of a flat spectrum
+common closed path of the flights through the waypoints A–H  would raise the variance-limited bounds by a factor of 3.5,
+in local coordinates, together with the number of LOS towers  and integrating over n samples would lower them by √n, but
+along the path at 40 m. The UAV flies at about 5 m/s between   neither choice affects the bias-dominated bounds. Horizontal
+the waypoints and hovers for about 1 min at B, D, E, and  bounds are given by (9) unless they are labeled as 3D, in which
+G, and the system produces a position fix about every 4 s.   case they follow from (8).
+
+=== PDF PAGE 9 ===
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS                                                                                   9
+
+
+                                          TABLE V: Medians of the horizontal and vertical CRLBs
+    200    LW5      LW4                     3 LOS towers
+           1.55 km   E    0.47 km                   2 LOS towers    along the trajectory at 5 MHz, with the 90th percentiles of
+                                                  1 LOS tower      the larger bounds in brackets. The LOS bound is taken over
+                                         RF sensor          all points, and the altitude-known NLOS bound separately over
+                                                  no sensor                                                                 the points with three and with at most two LOS towers.      0
+      D
+                                                                                               Points    Altitude known (m)   3D localizer, NLOS
+      LW2               B  A                                           Alt.      with LOS NLOS:   NLOS:     Horiz.      Vert.
+ (m)                                                                            3 LOS       3 LOS ≤2 LOS       (m)     (km)
+         C   −200                       LW1                                                                       40 m    31%  0.21    0.19   53 [91]  146 [724]       2.6 North                                                                       70 m    46%  0.22    0.20   70 [99]  143 [686]       1.1
+                                                                       100 m   58%  0.21    0.21  70 [110]  123 [615]      0.83
+
+
+   −400
+                       H              G        from 0.15 to 0.8 m, whereas the NLOS bound is bimodal.              1 LOS tower
+                                           LW3    With three LOS towers, the NLOS bound remains below 1 m
+                                                        (median 0.2 m), close to the LOS bound. With fewer than                       F
+   −600                                                           three towers in LOS, its median rises to 53–70 m, over two
+          −400        −200         0          200         400
+                                                               orders of magnitude above the LOS value. This is because                                     East (m)
+                                                                  three LOS towers determine the horizontal position without
+Fig. 5: Common UAV trajectory in local east–north coordi-   the blocked link, whereas with two LOS towers, the position
+nates, marked by the number of LOS towers among LW2–   also depends on a TDOA with an uncertain bias. Increasing
+LW5 during the 40 m flight. The UAV hovers for about 1 min   altitude raises the fraction of points in the low mode, from 31%
+at the waypoints in squares and passes through those in circles.   at 40 m to 46% at 70 m and 58% at 100 m, consistent with the
+Filled triangles mark the RF sensors on LW2 and LW3, the   measured altitude dependence in Section VIII-A. Table V lists
+open triangle marks LW1, which has no sensor, and the arrows   the corresponding medians for the three altitudes, separately
+point to the sensors on LW4 and LW5, 0.47 km and 1.55 km   at the points with three and with at most two LOS towers.
+north of the origin. The ellipses mark the points with a single      Fig. 7(b), shows the 40 m NLOS bound for three bias levels,
+LOS tower, at waypoint B and between waypoints F and G.    with σb,i = µb. The low mode barely changes, while the high
+                                                mode grows nearly proportionally to µb, increasing eightfold
+                                                      from µb = 10 m to 80 m. The high mode is therefore governed
+A. Effect of Altitude, Bandwidth, and LOS Conditions        by the bias uncertainty rather than by the thermal noise.
+  In Fig. 6, we show the CDFs of the measured horizontal      Fig. 7(c) compares the deployed network with one replacing
+error for the three altitudes at 5 MHz and the three bandwidths  LW5 by LW1 inside the flight area Fig. 5. Assuming LW1
+at 40 m, together with the error of all flights grouped by the    is always in LOS, the 40 m median bound falls from 38 m
+number of LOS towers. As shown in Fig. 6(a), the median   to 0.24 m and the 90th percentile from 83 m to 1.3 m,
+error decreases with altitude, from 52 m at 40 m to 43 m   approaching the all-LOS bound. Replacing the always-blocked
+at 70 m and 33 m  at 100 m. As shown in Fig. 6(b),  it  LW5 preserves three LOS towers even when one of LW2–LW4
+also decreases with bandwidth, from 117 m at 1.25 MHz to    is blocked. Since the field-wide LOS state of LW1 was not ray
+59 m at 2.5 MHz and 52 m at 5 MHz. As seen in Table IV,   traced, this gain is an optimistic estimate.
+however, the mean and the 90th percentile do not decrease    The 3D columns of Table V quantify the cost of not knowing
+with bandwidth, and altitude also raises the fraction of valid   the altitude, which is the case for a non-cooperative UAV.
+estimates, from 75.5% at 40 m to 92.0% at 100 m. In Fig. 6(c),   Since the sensors view the UAV at small elevation angles,
+the number of LOS towers has an even larger effect, as the   the median vertical bound  is 0.8–2.6 km, and the altitude
+median error rises from 33 m with three LOS towers to 96 m   uncertainty raises the median horizontal bound to 123–146 m.
+with two and 510 m with one. Over the valid fixes, LW2,                                             Remark 1 (Identifiability of the AERPAW deployment). Since
+LW3, and LW4 are in LOS 92%, 97%, and 54% of the time,                                           LW5 is blocked at every point, KNLOS ≥1 everywhere, and
+respectively, and LW5 never. The altitude dependence  is a                                                                 the deployed network with N = 4 violates (14) at every point.
+consequence of this effect, because a higher altitude clears                                           A 3D localizer therefore cannot separate the position from
+more of the trees and buildings around the field and thus adds                                                                 the NLOS biases anywhere, and CD is unbounded. With the
+LOS towers, as quantified in Section VIII-B.                                                                     altitude known, the condition N ≥3 + KNLOS holds only
+                                                       where LW5 is the only blocked tower, at 45% of the points
+B. NLOS CRLBs, Identifiability, and Sensor Placement          of the three 5 MHz flights. Identifiability requires additional
+                                             LOS sensors, added or relocated, or prior information on the
+   Fig. 7 shows the CDFs of the altitude-known horizontal
+                                                                   biases, as in Model A.
+CRLB along the trajectory at 5 MHz, and we discuss its three
+panels in turn. Fig. 7(a) compares the random-bias NLOS     In Fig. 8, we show the fraction of trajectory points at which
+bound under the actual LOS states for the three altitudes,   the deterministic-bias CRLB  is  finite as a function of the
+together with the LOS bound at 40 m. The LOS bound ranges  number of sensors, for a 3D localizer and with the altitude
+
+=== PDF PAGE 10 ===
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS                                                                                  10
+
+
+
+      1
+           (a) Altitude, 5 MHz                             (b) Bandwidth, 40 m
+
+                                                                                       1000
+    0.75                                                                                                    510 m
+          medians                                 medians                                        (m)           52, 43, 33 m                                 117, 59, 52 m
+                                                                                                                                                                                             error
+     0.5 CDF                                                                                     100                    96 m
+                                                                                                                                                                                                                                                                                                               Measured                                    33 m
+    0.25
+                                     40 m                                   1.25 MHz
+                                     70 m                                     2.5 MHz          10
+                                     100 m                              5 MHz                    (c) All flights
+      0
+              10        100       1000             10        100       1000                   1          2          3
+                  Measured error (m)                       Measured error (m)                          Number of LOS towers
+
+Fig. 6: Measured horizontal localization error. (a) CDFs for the three altitudes at 5 MHz and (b) for the three bandwidths at
+40 m, with the medians annotated. (c) Error of all flights grouped by the number of LOS towers among LW2–LW5 (40, 476,
+and 468 fixes with one, two, and three LOS towers), with the median next to each box (boxes: interquartile range; whiskers:
+5th and 95th percentiles).
+
+
+      1
+            (a)           NLOS, 40 m                    (b)              μb =10 m                         (c)
+                    NLOS, 70 m                                   μb =54 m
+                    NLOS, 100 m                                  μb =80 m
+    0.75               LOS, 40 m                         LOS                                                                       ×8
+                                                                                                          median
+                                                                                                        38 m to 0.24 m
+
+     0.5 CDF
+
+
+
+    0.25
+                                                                                     LW2–LW5 (deployed)                    3 LOS towers:    2 or fewer:                                    high mode
+                        0.2 m           53–70 m                              ∝μb                      LW1–LW4 (alternate)
+                                                                                            LW2–LW5, all LOS
+      0
+          0.1         1         10        100       0.1         1         10        100       0.1         1         10        100
+                     Horizontal CRLB (m)                           Horizontal CRLB (m)                           Horizontal CRLB (m)
+
+Fig. 7: CDFs of the altitude-known horizontal CRLB along the trajectory at 5 MHz. (a) Random-bias NLOS bound under the
+actual LOS states for the three altitudes and LOS bound at 40 m; the arrows mark the two modes. (b) NLOS bound at 40 m
+for three bias levels, with σb,i = µb, and LOS bound; the arrow marks the factor between µb = 10 m and µb = 80 m in
+the high mode. (c) Deployed network under the actual LOS states, an alternate network in which LW5 is replaced by LW1,
+assumed in LOS, and the deployed network with all links in LOS; the arrow marks the change of the median.
+
+
+known. One and two additional LOS sensors raise the 3D  1 m, but errors remain at tens of meters, except for clusters
+fraction from zero to 45% and 91%, respectively, the fractions   of several-hundred-meter errors between C and D at 70 m and
+reached with the altitude known and one sensor fewer. This  100 m.
+is because each additional LOS sensor raises N −KNLOS by     This gap is consistent with the bias floor of Proposition 2.
+one, so that, as Proposition 1 predicts, knowing the altitude    If the geolocation software follows (25), it weights all TDOAs
+has the same effect as one additional LOS sensor.            equally(W = I), so LW5’s excess delay shifts the estimates,
+                                                        whereas the random-bias bound assumes weights that effec-
+C. Per-Measurement Error and the Bias Floor                   tively discard LW5. At points with three LOS towers, (19)
+   Fig. 9 shows the measured error per fix versus measurement   with W = I and µb = 54 m on LW5 predicts a median offset
+index k  for  all  five  flights, alongside  the altitude-known  ∥δxb∥of 19–27 m, comparable to the measured 28–40 m at
+CRLB under actual and all-LOS conditions. The measured   2.5 MHz and 5 MHz. Since (19) is linear in bρ, halving the
+error follows the bound’s two modes but never reaches the   bias to 27 m reduces the predicted offset to 10–14 m.
+lower one. Errors are largest with at most two LOS towers,    The measured median’s bandwidth dependence agrees with
+particularly near waypoints F, G, and H, where the bound is   Corollary 1, while gross errors dominate the mean and 90th
+tens of meters. With three LOS towers, the bound is below   percentile. From 2.5 MHz to 5 MHz, the 40 m median falls
+
+=== PDF PAGE 11 ===
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS                                                                                  11
+
+
+                                          TABLE VI: Measured versus modeled error per  flight for
+          3D (altitude unknown)                                             100%        the raw  fit. Modeled errors use (22)–(25) with parameters  (%) 100    2D (altitude known)      91%      91%
+                                                              estimated via (27) (six Monte Carlo replicates).
+                       same    points 75
+                                                                       KS   Median (m)      P90 (m)
+     50         45%      45%                                                  Flight                 dist.  Meas.  Model  Meas.  Model
+
+     25                                                                  40 m, 1.25 MHz  0.19    117     77    891    311        Identifiable                                                                      40 m, 2.5 MHz    0.10     59     57    980    269
+          0%
+      0                                                                  40 m, 5 MHz     0.21     52     63   1132    258
+            4 (deployed)            5                6                     70 m, 5 MHz     0.12     43     42    666    304
+                        Number of sensors N                              100 m, 5 MHz    0.15     33     41    312    343
+
+Fig. 8: Fraction of trajectory points of the three 5 MHz flights
+at which the deterministic-bias CRLB  is  finite, versus the
+                                                     117 m to 59 m between 1.25 MHz and 2.5 MHz indicates
+number of sensors N. The additional sensors are in LOS; their
+                                                     unmodeled narrowband degradation (Section VIII-D). The bias
+positions do not affect identifiability as long as the geometry
+                                                                      floor can be reduced by excluding or de-weighting NLOS links
+is non-degenerate. The arrow marks that knowing the altitude
+                                                               or improving sensor geometry.
+has the same effect as one additional sensor.
+                                                     The waypoint structure also clarifies the anomaly reported
+                                                                    in [1]. While the UAV hovers at waypoint E, where only
+           (a) 40 m, 1.25 MHz         measured      actual       all LOS                                        LW5 is blocked, erros remain at 32–34 m across all three
+ (m) 1000                                               5 MHz flights, with an interquartile range below 4 m. At
+                                                                         this location, the LW5 bias causes an offset of only about     10 Error        B   C D    E          F    G    H   A                                                     6 m. By (19), a static bias of 40–55 m (130–180 ns) on any
+      0.1                                     LOS link would produce the observed error, possibly from
+           (b) 40 m, 2.5 MHz                                    an unresolved reflection off a nearby structure [34] or sensor
+ (m) 1000                                                      timing offset. The model of Section V reproduces the freezing
+                                                               of such a bias during hover, but with the fitted σmp, a static
+     10 Error      B    C D     E        F      G   H  A      bias of this size on a LOS link is improbable, which points to
+      0.1                                                  an unmodeled site-specific effect.
+           (c) 40 m, 5 MHz
+ (m) 1000                                                D. Measurement-Model Fit and Parameter Sensitivity
+
+     10 Error        B    C  D    E         F      G  H   A       Figs. 10(a)–(e) compare the measured error CDFs of five
+                                                                          flights with those generated by the measurement model (22)–
+      0.1
+                                                                     (25), before and after outlier rejection. Table VI reports the
+           (d) 70 m, 5 MHz
+                                         KS distances, medians, and 90th percentiles of the raw errors.
+ (m) 1000                                                     Table III lists the parameters fitted via (27), which are shared
+                                                               across all flights; only altitude, bandwidth, trajectory, and LOS     10 Error      B  C D      E        F     G   H A
+                                                                       states vary. For the four  flights  at 2.5 MHz and 5 MHz,
+      0.1                                                modeled medians are within 25% of measurements, with KS
+           (e) 100 m, 5 MHz                                          distances of 0.10 to 0.21. However, the model underestimates
+ (m) 1000                                                          the 90th percentile at 40 m and 70 m by factors of 2.2 to 4.4.
+                                                     At 1.25 MHz, it underestimates the error throughout, with a
+     10 Error        B   C  D   E        F    G   H    A    median of 77 m versus the measured 117 m. This is because
+      0.1                                                          the model lacks gross-error mechanisms, such as spurious mul-
+       0         50        100       150       200       250     tilateration solutions, which would produce the long measured
+                          Measurement index k
+                                                                                   tails, while (2) captures neither ML delay ambiguity near the
+Fig. 9: Measured error of each fix (circles) versus the mea-   detection threshold nor unresolved multipath at coarse time
+surement index k for the five flights, with the altitude-known   resolution. Thus, the model reproduces the typical errors but
+horizontal CRLB at the bandwidth of each flight under the   the heaviest tails or narrowband degradation.
+actual LOS states (solid) and with all links in LOS (dotted).     Outlier rejection removes most errors above 100 m and
+The shading gives the number of LOS towers among LW2–   lowers the median in both measured and modeled data, while
+LW5 (light: three, medium: two, dark: one), and the vertical   retaining about half the fixes. Because the model does not
+dotted lines and letters mark the waypoints.                  produce CEP, only the speed gate applies to modeled fixes,
+                                                                yielding different rejection behavior. Refitting ϕ after outlier
+                                                                    rejection changes the median NLOS bias by 14% (54 m to
+only from 59 m to 52 m, versus about 42 m predicted for  62 m), but σlog, NF, and τres by about 40% (Table III). The
+variance-limited error using the per-sample SNR of (3), or    latter parameters trade off with each other and the missing
+30 m with fixed integration time. The larger reduction from  CEP gate, while the median bias remains stable.
+
+=== PDF PAGE 12 ===
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS                                                                                  12
+
+
+      1
+           (a) 40 m                       (b) 40 m                        (c) 40 m                       (d) 70 m                        (e) 100 m
+         1.25 MHz                   2.5 MHz                 5 MHz                   5 MHz                   5 MHz
+    0.75
+                                                                                                                          gated          raw
+     0.5 CDF
+                                                                                                                            measured
+                                                                                                                       model    0.25
+                                                                                                                       raw
+                                                                                                                                         gated
+      0
+           10    100   1000        10    100   1000        10    100   1000        10    100   1000        10    100   1000
+                  Error (m)                    Error (m)                    Error (m)                    Error (m)                    Error (m)
+
+   1000                                                                                                                     measured
+                                           P90
+
+    300
+(m)
+
+    100Error
+
+     30                                     median
+                                         (f)                            (g)                            (h)                                    (i)                                    (j)
+             40     80     120   5       15      25      1.25       2.5       5   0      5     10     15     log-normal     fixed
+                  μb (m)                       Lex (dB)              Bandwidth (MHz)               σmob (m)          NLOS bias model
+
+Fig. 10: Measurement model performance. (a)–(e) Measured (no markers) and modeled (squares) error CDFs, raw (solid) and
+gated, that is, after outlier rejection (dotted), with the raw and the refitted parameters of Table III; the CEP gate applies only
+to the measured fixes. (f)–(i) Modeled median (circles) and 90th-percentile (squares) errors of the 40 m, 5 MHz flight versus
+four parameters, with the fitted or nominal values dashed; (h) uses the three 40 m flights. (j) Same errors for a log-normal and
+a fixed NLOS bias, with the measured values dashed.
+
+
+                                                                                            1
+           (a)              fixes kept                   (b)                               100                   (c)
+   1000
+                                                                       fixes kept
+
+                                                                                                      0.75
+                                                                              75                                      P90: 850
+    300                                                                                                    (%)                                         to 99 m
+(m)                       P90                           P90
+                                                                                                                                                  kept         0.5                                                                              50         CDFError    100                                                                                                                                                                       Fixes
+
+                median                                                        median                 25           0.25                   raw
+                                                                                                                                                      outliers rejected
+     30         CEPmax                                   vmax                                     RW Kalman filter
+                                                                              0             0
+       100 200 300 400      600        off    10  20     40     60            off                       10        100       1000
+              CEP threshold (m)                    Speed threshold (m/s)                                      Pooled error (m)
+
+Fig. 11: Post-processing of the measured fixes. (a) CEP-gate and (b) speed-gate sweeps of the pooled median (circles) and
+P90 (squares) errors and of the fraction of fixes kept (triangles, right axis), with the selected thresholds dashed. (c) Pooled
+error CDFs of the raw fixes, after outlier rejection, and after RW Kalman filtering; the arrow marks the P90 reduction.
+
+
+   Figs.  10(f)–(i)  show  the  modeled  median  and  90th-  which removes them from the solution together with their
+percentile errors versus NLOS bias level µb, excess loss Lex,   biases and slightly lowers the median. Fig. 10(j) shows that
+bandwidth, and mobility noise σmob for the 40 m, 5 MHz   the spread of the bias matters as well, since a fixed bias of
+flight, with the other parameters fixed at fitted or nominal   µb lowers the modeled 90th percentile from 258 m to 200 m,
+values. Raising µb from 10 m to 120 m increases the modeled   further below the measured 1132 m. The model must therefore
+median from 18 m to 121 m and the 90th percentile from   capture the NLOS bias statistics; the other parameters matter
+158 m to 437 m. In contrast, Lex and σmob change the   less.
+median by less than 15%, while the modeled median across
+the three 40 m flights varies between 57 m and 77 m with   E. Outlier Rejection and Filtering
+the bandwidth. As Proposition 2 shows, NLOS bias sets the                                                                     Figs. 11(a) and (b) show the pooled median and 90th-
+offset that dominates the error, whereas a larger excess loss                                                                   percentile errors and fraction of fixes kept as a function of
+mainly pushes NLOS links below the detection threshold,                                                                 the CEP and speed thresholds, respectively. CEP indicates fix
+
+=== PDF PAGE 13 ===
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS                                                                                  13
+
+
+quality, with a rank correlation of 0.40 with error. Fixes with  Ja ∈Rm×(3+KNLOS) has full column rank 3+KNLOS, which
+CEP below 200 m have a median error of 36 m versus 168 m   requires m ≥3+KNLOS, i.e., (14). To show that the condition
+otherwise. In Fig. 11(b), the speed gate alone lowers the 90th-    is tight and sufficient, we examine the structure of Ja.
+percentile error from 850 m to 109 m at vmax = 20 m/s    Case 1 (LOS reference): By (12), the column of Jb that
+retaining 57% of the fixes. Gross outliers produce jumps of   corresponds to the bias of an NLOS sensor  j̸ = r is −eℓ,
+hundreds of meters, implying unrealistic speeds far above the  where eℓis the ℓth unit vector and ℓis the row with iℓ= j.
+UAV’s 5 m/s. With CEPmax = 250 m and vmax = 22 m/s,   Ordering the rows so that the m −KNLOS rows of the LOS
+chosen by inspecting these sweeps, outlier rejection retains   sensors come first, Ja takes the block form
+52% of the  fixes.   Fig. 11(c), compares the pooled error
+                                                                JL     0
+                                                                                                                                                             ,              (28)CDFs before and after outlier rejection, and after RW Kalman                  Ja =
+filtering. Outlier rejection lowers the pooled median error from                   JN  −IKNLOS
+51 m to 33 m and the 90th-percentile error from 850 m
+                                                      where JL and JN contain the position rows (7) of the LOS
+to 99 m. This in-sample gain does not hinge on the exact
+                                                       and the NLOS sensors, respectively. Multiplying Ja from
+thresholds, as the 90th percentile stays at 103–121 m for speed                                                                                        h I3    0   i
+                                                                 the right by the nonsingular matrix  JN IKNLOS   yields thethresholds of 8 m/s to 25 m/s.
+                                                              block-diagonal matrix with the blocks JL and −IKNLOS, so   Filtering offers  little additional benefit. An RW Kalman
+filter with weak smoothing (q = 100 m2/s, α = 0.15) reduces   rank(Ja) = KNLOS + rank(JL). Full column rank there-
+                                                                  fore holds  if and only  if rank(JL) =  3, which requiresthe median to 30 m but raises the 90th percentile from 99 m
+to 102 m. Stronger smoothing (q = 4 m2/s) lags the stop- m −KNLOS ≥3, i.e., (14). For a non-degenerate geometry,
+                                                                  three LOS rows with linearly independent vectors ur −uiℓand-go motion, increasing the median to 53 m and the 90th
+                                                               give rank three, which proves sufficiency.percentile to 190 m. A CV Kalman filter reaches a similar
+median but raises the 90th percentile to 110–116 m due to    Case 2 (NLOS reference): If sensor r is NLOS, the column
+velocity drift across gaps in the 4 s track. The particle filter   of br is the all-ones vector 1 by (12), and the columns of the
+occasionally loses track, raising the 90th percentile to 771 m.   other KNLOS −1 NLOS biases are the negative unit vectors
+After outlier rejection, the remaining error is dominated by the  −eℓas in Case 1. Eliminating the NLOS rows with their own
+bias floor of Section VIII-C, which position-domain filtering   bias columns leaves the m−(KNLOS−1) = N −KNLOS rows
+cannot remove. Thus, outlier rejection is the most effective   of the LOS sensors, which determine the three coordinates and
+post-processing step.                                            the offset br. Full rank then requires rank([ JL 1 ]) = 4 and
+                                                         hence N −KNLOS ≥4, again (14).
+                                                                  In both cases, each NLOS row carries its own free bias,                   IX. CONCLUSION
+                                                      which absorbs any value of that TDOA. The row thus con-
+  In this paper, we developed NLOS-aware CRLBs and an                                                                       tributes nothing to the position, and the Schur complement
+empirically calibrated measurement model for TDOA-based                                                               of the bias block of Fa equals the FIM of the LOS rows
+UAV localization, evaluated using five AERPAW flights. With                                                                  alone, in agreement with [16], [17]. When (14) fails in Case 1,
+known altitude, the random-bias bound is below 1 m with                                              JL has a nonzero null vector v, and the joint perturbation
+three LOS towers but over two orders of magnitude larger                                                            (δx, δb) = (v, JN v) satisfies Ja[δxT, δbT]T = 0 by (28).
+otherwise, consistent with the measured altitude dependence.                                                  Moving the position along v while changing the biases by
+The identifiability condition shows that the deployed network                                          JN v leaves every TDOA mean unchanged, so the two param-
+cannot separate the position from the NLOS biases at any                                                                      eter values cannot be distinguished, and no unbiased estimator
+point in 3D and that knowing the altitude is equivalent to                                                           has a finite variance. Case 2 follows in the same way with a
+one additional LOS sensor. The measured error remains tens                                                                    null vector of [ JL 1 ]. Finally, when the altitude is known,
+of meters above the bound and barely decreases between                                            J has two columns, and the same argument with rank two in
+2.5 MHz and 5 MHz, as the bias-induced error floor predicts.                                                               place of three gives N ≥3 + KNLOS.           ■
+The fitted model reproduces the median errors of the four
+flights  at 2.5 MHz and 5 MHz within 25%, and  outlier
+rejection is the most effective post-processing step, whereas                    APPENDIX B
+filtering cannot remove the bias. Limitations include the coop-       PROOFS OF PROPOSITION 2 AND COROLLARY 1
+erative transmitter, known altitude, one flight per configuration,
+                                                             Proof of Proposition 2: With the linearization h(˜x) ≈unavailable TDOAs, and the model’s underestimation of the
+                                                     h(x)+J(˜x−x), the WLS cost (18) is quadratic in ˜x. Setting itsheaviest error tails. Future work will validate the model on
+                                                                gradient to zero gives the normal equations JTWJ(ˆx −x) =more flights and sites, model gross errors and narrowband
+                                  JTW ρ −h(x)  , whose solution isdegradation, and develop an estimator that detects and de-
+weights NLOS links.
+                                                                                             ˆx = x + G ρ −h(x)  ,  G = JTWJ −1JTW,
+
+                  APPENDIX A                                                      where JTWJ  is invertible for a non-degenerate geometry.
+            PROOF OF PROPOSITION 1
+                                                                   Inserting (17), ρ −h(x) = bρ + n, yields the error
+  The bound CD  in (13)  is  finite  if and only  if Fa  is
+invertible. Since Q−1noise ≻  0,  this holds  if and only  if                               ˆx −x = Gbρ + Gn,
+
+=== PDF PAGE 14 ===
+IEEE TRANSACTIONS ON AEROSPACE AND ELECTRONIC SYSTEMS                                                                                  14
+
+
+whose  first term  is deterministic and whose second term    [11] W. Wang, P. Bai, X. Liang, J. Zhang, and L. He, “Performance analysis
+has zero mean. Taking the expectation gives (19), and the          for TDOA localization using UAVs with flight disturbances,” in Proc.
+                                                                                                        Int. Conf. Inf. Fusion (FUSION), Xi’an, China, Jul. 2017, pp. 1–6.
+covariance of the estimate is                                            [12] V. Dizdarevic and K. Witrisal, “On impact of topology and cost function
+                                                                       on LSE position determination in wireless networks,” in Proc. Workshop
+                 Cov(ˆx) = G Qnoise GT.              (29)          Positioning, Navig., Commun. (WPNC), Hannover, Germany, Mar. 2006,
+                                                                                     pp. 129–138.
+Since the cross term 2 bTρGTG E[n] vanishes, E∥ˆx −x∥2 =    [13] L. Chen, C. You, Y. Wang, and X. Li, “Variable-speed UAV path opti-
+∥Gbρ∥2 +Tr(GQnoiseGT), which is the equality in (20). For         mization based on the CRLB criterion for passive target localization,”
+W = Q−1noise, (29) reduces to (JTQ−1noiseJ)−1 = Cn, and by         Sensors, vol. 25, no. 17, p. 5297, Aug. 2025.                                                                               [14] M. Kazzazi, M. Morsali, and R. Amiri, “CLEAR: A closed-form
+the Gauss–Markov theorem, no other weight matrix yields a         minimal-sensor TDOA/FDOA estimator for moving-source IoT local-
+smaller covariance, i.e., GQnoiseGT ⪰Cn. Taking the trace          ization,” arXiv preprint arXiv:2510.04160, 2025.
+gives the inequality in (20), and since the variance term is    [15]  S. Motie, H. Zayyani, M. Salman, and M. Bekrani, “Self UAV localiza-
+nonnegative, MSE ≥∥δxb∥2.                ■          tionWirelessusingCommun.multiple Lett.,base stationsvol. 13, basedno. 9, onpp.TDoA2432–2436,measurements,”Sep. 2024.IEEE
+  Proof of Corollary 1: By  (3), SNRi = Pr,i/(kBTB),    [16] Y. Qi, H. Kobayashi, and H. Suda, “Analysis of wireless geolocation in a
+and with β = κB  for a  constant  κ,  (2)  gives σ2i =          non-line-of-sight environment,” IEEE Trans. Wireless Commun., vol. 5,                                                                                     no. 3, pp. 672–681, Mar. 2006.
+c2kBT/(8π2κ2Pr,iB). Every ranging  variance, and  there-    [17] Y. Shen and M. Z. Win, “Fundamental limits of wideband localization—
+fore every entry of Qnoise, scales as 1/B, which proves         Part I: A general framework,” IEEE Trans. Inf. Theory, vol. 56, no. 10,
+Qnoise(B) =  (B0/B) Qnoise(B0).  For  the ML  weight         pp. 4956–4980, Oct. 2010.
+                                                                               [18] D. B. Jourdan, D. Dardari, and M. Z. Win, “Position error bound for
+W(B) = (B/B0) W(B0), the factor B/B0 appears once     UWB localization in dense cluttered environments,” IEEE Trans. Aerosp.
+inside the inverse and once outside it in G, so it cancels, and         Electron. Syst., vol. 44, no. 2, pp. 613–628, Apr. 2008.
+δxb = Gbρ does not depend on B. In contrast, Cn(B) =    [19]  S. Gezici and Z. Sahinoglu, “UWB geolocation techniques for IEEE
+                                                                                 802.15.4a  personal  area  networks,”  Mitsubishi  Electric  Res. Labs.
+(B0/B) Cn(B0). Substituting both into (20) with equality       (MERL), Cambridge, MA, Tech. Rep. TR2004-110, Aug. 2004.
+gives (21).                          ■    [20]  P.-C. Chen, “A non-line-of-sight error mitigation algorithm in location
+                                                                                        estimation,” in Proc. IEEE Wireless Commun. Netw. Conf. (WCNC),
+                                                                                              vol. 1, New Orleans, LA, Sep. 1999, pp. 316–320.
+             ACKNOWLEDGMENT                                                                               [21]  S. Venkatesh and R. M. Buehrer, “A linear programming approach to
+  The authors used Anthropic’s Claude Code and Cowork to      NLOS error mitigation in sensor networks,” in Proc. Int. Symp. Inf.
+                                                                                    Process. Sensor Netw. (IPSN), Nashville, TN, Apr. 2006, pp. 301–308.
+assist with code development and simulations (Sections IV–                                                                               [22] R. E. Nkrow, B.  Silva, D. Boshoff, G. Hancke, M. Gidlund, and
+VIII), data analysis, and drafting and editing of the manuscript        A. Abu-Mahfouz, “NLOS identification and mitigation for time-based
+text (all sections). All AI-assisted content was independently         indoor localization systems: Survey and future research directions,” ACM
+                                                                        Comput. Surv., vol. 56, no. 12, pp. 1–41, Dec. 2024.
+verified by the authors, who take full responsibility for the                                                                               [23] U. Bhattacherjee, E. Ozturk, O. Ozdemir, I. Guvenc, M. L. Sichitiu, and
+work.                                                                   H. Dai, “Experimental study of outdoor UAV localization and tracking
+                                                                                 using passive RF sensing,” in Proc. ACM Workshop Wireless Netw.
+                 REFERENCES                                       Testbeds, Exp. Eval. Charact. (WiNTECH), New Orleans, LA, 2021,
+                                                                                     pp. 31–38.
+ [1] C. Dickerson, S. Masrur,  J. Dickerson, O. Ozdemir, and  I. Guvenc,    [24]  J. Tiemann and C. Wietfeld, “Scalable and precise multi-UAV indoor
+     “Impact of altitude, bandwidth, and NLOS bias on TDOA-based 3D         navigation using TDOA-based UWB localization,” in Proc. Int. Conf.
+   UAV localization: Experimental results and CRLB analysis,” in Proc.        Indoor Positioning Indoor Navig. (IPIN), Sapporo, Japan, Sep. 2017,
+    IEEE Int. Conf. Commun. Workshops (ICC Workshops), Montreal, QC,         pp. 1–7.
+     Canada, Jun. 2025, pp. 671–677.                                         [25] Y. Rockah and P. M. Schultheiss, “Array shape calibration using sources
+ [2] Federal Aviation Administration, “Unmanned  aircraft system (UAS)          in unknown locations—Part I: Far-field sources,” IEEE Trans. Acoust.,
+       traffic management (UTM): Concept of operations v2.0,” FAA NextGen         Speech, Signal Process., vol. 35, no. 3, pp. 286–299, Mar. 1987.
+      Office, Washington, DC, USA, Tech. Rep., Mar. 2020.                    [26] H. L. Van Trees, Detection, Estimation, and Modulation Theory, Part I.
+ [3]  I. Guvenc, F. Koohifar, S. Singh, M. L. Sichitiu, and D. Matolak, “De-      New York, NY, USA: Wiley, 2001.
+      tection, tracking, and interdiction for amateur drones,” IEEE Commun.    [27] M. Gudmundson, “Correlation model for shadow fading in mobile radio
+     Mag., vol. 56, no. 4, pp. 75–81, Apr. 2018.                                    systems,” Electron. Lett., vol. 27, no. 23, pp. 2145–2146, 1991.
+ [4] M. M. Azari, H. Sallouha, A. Chiumento, S. Rajendran, E. Vinogradov,    [28]  J. Chen, D. Raye, W. Khawaja, P. Sinha, and I. Guvenc, “Impact of 3D
+     and S. Pollin, “Key technologies and system trade-offs for detection and     UWB antenna radiation pattern on air-to-ground drone connectivity,” in
+      localization of amateur drones,” IEEE Commun. Mag., vol. 56, no. 1,         Proc. IEEE Veh. Technol. Conf. (VTC-Fall), Chicago, IL, Aug. 2018,
+     pp. 51–57, Jan. 2018.                                                          pp. 1–5.
+ [5]  S. A. Zekavat and R. M. Buehrer, Eds., Handbook of Position Location:    [29] C. Gouri´eroux, A. Monfort, and E. Renault, “Indirect inference,” J. Appl.
+     Theory, Practice, and Advances, 2nd ed.  Hoboken, NJ, USA: Wiley-         Econometrics, vol. 8, no. S1, pp. S85–S118, 1993.
+    IEEE Press, 2019.                                                        [30] M. A.  Fischler and R. C.  Bolles, “Random sample consensus: A
+ [6] C. Dickerson, O. Ozdemir, M. L. Sichitiu, and I. Guvenc, “AERPAW        paradigm for model  fitting with applications to image analysis and
+     Keysight N6841A RF sensor UAV  localization measurements with        automated cartography,” Commun. ACM, vol. 24, no. 6, pp. 381–395,
+    LOS/NLOS information, July 2024,” Dryad [Dataset], 2025, accessed:         Jun. 1981.
+     Mar. 2025. [Online]. Available: https://doi.org/10.5061/dryad.vq83bk44h    [31] Y. Bar-Shalom, X. R. Li, and T. Kirubarajan, Estimation with Applica-
+ [7]  S. Gezici, “A survey on wireless position estimation,” Wireless Pers.          tions to Tracking and Navigation.  New York, NY, USA: Wiley, 2001.
+    Commun., vol. 44, no. 3, pp. 263–282, Feb. 2008.                        [32]  F. Gustafsson, F. Gunnarsson, N. Bergman, U. Forssell,  J. Jansson,
+ [8]  P. Sinha, Y. Yapici, and  I. Guvenc, “Impact of 3D antenna radiation        R. Karlsson, and P.-J. Nordlund, “Particle filters for positioning, nav-
+      patterns on TDOA-based wireless localization of UAVs,” in Proc. IEEE          igation, and tracking,” IEEE Trans. Signal Process., vol. 50, no. 2, pp.
+    INFOCOM Workshops (INFOCOM WKSHPS), Paris, France, Apr. 2019,        425–437, Feb. 2002.
+     pp. 614–619.                                                             [33] Keysight Technologies, “N6854A geolocation server and N6841A RF
+ [9]  P. Sinha and I. Guvenc, “Impact of antenna pattern on TOA based 3D         sensor software,” [Online]. Available: Keysight Technologies.
+   UAV localization using a terrestrial sensor network,” IEEE Trans. Veh.    [34]  S. D. Coutts, “Passive localization of moving emitters using out-of-plane
+      Technol., vol. 71, no. 7, pp. 7703–7718, Jul. 2022.                              multipath,” IEEE Trans. Aerosp. Electron. Syst., vol. 36, no. 2, pp. 584–
+[10]  I. M. Khan, X. Wang, W. Moran, and W. S. T. Rowe, “Cram´er–Rao         595, Apr. 2000.
+     bound analysis of spatial effects in 2D TOA localization with directive
+      antennas,” IEEE Access, vol. 13, pp. 2518–2528, 2025.

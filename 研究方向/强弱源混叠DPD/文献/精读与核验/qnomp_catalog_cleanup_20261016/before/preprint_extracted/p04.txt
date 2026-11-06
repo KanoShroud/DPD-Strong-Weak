@@ -1,0 +1,61 @@
+                                                                                                                                                  4
+
+
+this grid. To deal with this grid mismatch issue, we treat τ,  Algorithm 2 Off-Grid BFGS Refinement
+θ in (7) as continuous variables and optimize them by BFGS      1: Input: CSI h′, OMP estimation  ˆτ, ˆθ ∈Rk, maximum
+Quasi-Newton algorithm.                                                iteration nin
+  In the k-th iteration of OMP, we have selected k propagation      2: Output: Refined estimation τ, θ
+paths with delay ˆτ ∈Rk and angle ˆθ ∈Rk. Note that given      3: Initialize: τ = ˆτ, θ = ˆθ, , n = 1
+a set of (τ, θ), the gain β can be estimated by least squares      4: while n < nin do
+estimation ˆβ = ˆβ(τ, θ) = A†(τ, θ)h′. We are left to solve      5:    Compute ˆβ = A†(τ, θ)h′
+the continuous optimization problem                                      6:    Using (15) to compute the gradient information
+                                                                                       7:    Using Armijo rule to determine step size α
+                    1                          2
+      min L(τ, θ) =     h′ −A(τ, θ)ˆβ(τ, θ)    .    (13)      8:    Update τ and θ by scheme (14).
+         τ,θ          σ2                         2                  9:   n ←n + 1
+                                                                              10: end while
+  We take the BFGS algorithm, one of the most effective    11: return τ, θ
+quasi-Newton method, to perform the optimization [37]. It uti-
+lizes the historically computed gradient information to approx-
+imate the inverse of Hessian matrix which avoids computing   C. The Stopping Criterion of OMP Iteration
+the matrix inverse. Applying BFGS to (13), the scheme reads
+                                                     The OMP iteration is executed until the residual vector r
+     n+1    n                                               reaches the noise level. We adopt the constant false alarm rate   τ   = τ + αnHτngτn,
+                                                 (CFAR) stopping criterion [29] to measure whether the resid-
+   θn+1 = θn + αnHθngθn,                                     ual meets the noise level. Suppose we have got the accurate
+                       [δgτn]THτnδgτn    δτnδτ nT           value of channel parameters τ, θ and β, the residual of the  Hτn+1 = Hτn +  1 +                          ·                         [δgτn]Tδτn      [δgτn]Tδτn          reconstructed signal satisfies F−1(r) = A(τ√0, θ0)Hw′/MN.
+                                 T            Due to the orthogonality of A, ˜w = AHw/ MN is still an
+            −δτn[δgτn]THτn + Hτnδgτnδτ n ,        (14)  AGN with covariance σ2I. It is straightforward to show that
+                          [δgτn]Tδτn
+                                                           o                                                                               τ, θ, β                       [δgθn]THθnδgθn                                                    = P  ∥˜w∥2∞< MNTv                                δθnδθTn          P n F−1(r) 2∞< Tv                                                             ·  Hθn+1 = Hθn +  1 +
+                        [δgθn]Tδθn     [δgθn]Tδθn                    MN           MN
+                    n]THθn + HθnδgθnδθTn           = P   |˜w1|2 < MNTv   =  1 −e−MNTv           −δθn[δgθ                                                                                       σ2            ,
+                          [δgθn]Tδθn                      where Tv is a constant we are going to determine. Let Tv =
+                                                σ2(log(MN) + Z)/MN. We have (1 −e−MNTv/σ2)MN =
+with the definition δτn = τ n+1 −τ n, δθn = θn+1 −θn, and             MN                                                      1 −(MN)−1e−Z    ≈exp (−exp(−Z)) when MN  is
+δgτ,θn = gτ,θn+1 −gτ,θn   .                                                                       large. Thus we have
+  In (14), the vectors gτn, gθn indicate the gradient of τ and
+                                                = hro ≈1 −exp −exp(−Z)  .θ at the n-th iteration step (τ n, θn), respectively. The step   P n F−1(r) 2∞> Tv ˆh
+size αn > 0 can be determined by the Armijo line search rule
+[37]. The matrix Hτn, Hθn ∈Rk×k is the approximated inverse  Given a small probability Pfa, we can ensure
+                                                                  o                                                                                        τ, θ, β                                                         < PfaHessian matrix. One can derive ∇τaτ(τ), ∇θaθ(θ) and related          P n F−1(yr) 2∞> Tv
+variables as below
+                                                     by choosing Z = log(MN) −log(−log(1 −Pfa)), namely
+   ∇τA = ∇τaτ ⊗aθ, ∇θA = aτ ⊗∇θaθ,
+                 2                                     Tv = (MN)−1σ2(log(MN) −log(−log(1 −Pfa))).  (16)
+     gτn = ∇τL =  ℜ ˆβ∗⊙∇τAH(A ˆβ −h′) ,      (15)                                      2
+                 σ2                                         Therefore, if we found  F−1(r) ∞> MNTv, we can reject                 2
+     gθn = ∇θL =  ℜ ˆβ∗⊙∇θAH(A ˆβ −h′) ,             the original hypothesis that we have found the correct channel                σ2                                                               parameters, which means the reconstructed signal does not
+                                                      meet the noise level so we should run more OMP iterations.where the above equations are evaluated at (τ, θ) = (τ n, θn),
+and ˆβ∗is the conjugate of complex vector ˆβ. To start the
+iteration, the OMP on-grid estimation (ˆτ, ˆθ) can serve as the  D. The Joint BFGS Stage
+initial value for (τ, θ), and the initial value of matrix H can be    The modified OMP iteration introduced in Sections III-A
+chosen as the identity matrix Ik. The off-grid BFGS refinement  and III-B determines the number of propagation paths and
+algorithm is shown in Algorithm 2.                             gives a estimation of channel parameters iteratively. After this
+  Unlike the on-grid module, in the k-th iteration, the off-grid   stage, we fix the number of paths Np, thus the gains β will be
+BFGS refinement optimizes the delays and angles of all the   nonzero. Now the problem becomes a parameter optimization
+k estimated paths jointly. So this module not only improves   without any sparse constraints. We correct all the delays and
+the single path estimation from the on-grid module, but also   angles further with the BFGS algorithm again. In detail, we
+corrects the entire estimated multipath parameters so one can   are going to solve the regularized problem
+alleviate the issue of being stuck at the local minimum by                   1
+                                                  min                                                           L(τ, θ) =                                                                              ∥h′ −A(τ, θ)ˆβ∥22 + ˆβHE−1 ˆβ,    (17)sequential optimization.                                                                      τ,θ                                                                    σ2

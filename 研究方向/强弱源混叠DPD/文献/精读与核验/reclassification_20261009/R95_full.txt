@@ -1,0 +1,796 @@
+--- PDF PAGE 1 ---
+A fast direct locator for radiation source based on
+composite convolution neural network
+Chenhao Gong,1
+Guomei Zhang,1,✉Guobing Li,1
+and Yue Mao2
+1School of Information and Communications Engineering, Xi’an Jiao-
+tong University, Xi’an, Shaanxi, China
+2Xi’an Research Institute of Surveying and Mapping, Xi’an, Shaanxi,
+China
+✉E-mail: zhanggm@mail.xjtu.edu.cn
+The high spatial search complexity of the direct positioning method
+in passive positioning systems leads to long positioning time and high
+computational resource consumption. In response to this issue, this ar-
+ticle proposes a fast localization scheme based on composite convolu-
+tional neural networks (CCNN), which can effectively explore the cor-
+relation between the position of the radiation source and the charac-
+teristics of the received signal. CCNN is a 20-layer composite network
+based on fully convolutional network layer, which is composed of con-
+volutional layers, batch normalization (BN) layers, and ReLU activation
+function layers with unidirectional connections. Then, CCNNs are ad-
+justed and trained for positioning single and multiple radiation sources,
+respectively. Simulation results show that the computational time of the
+proposed method can be reduced by nearly 98% compared with the di-
+rect positioning scheme. Meanwhile, about 71.2% of positioning error’s
+reduction is achieved.
+Introduction: Radiation source (RS) localization technology plays a sig-
+niﬁcant role in military and civilian ﬁelds, such as electronic counter-
+measure reconnaissance, search and rescue, radio monitoring and shared
+transportation. The passive positioning of radiation source has been
+widely concerned due to its good concealment, long location distance
+and strong survival ability. The related research can be mainly divided
+into three categories—two-step localization, direct position determina-
+tion and deep learning based localization.
+A two-step locator generally includes two steps: parameter extrac-
+tion and position calculation. Time of arrival (TDOA), received signal
+strength (RSS) and angle of arrival (AOA) are some common local-
+ization parameters used in radio source positioning [1]. However, due
+to the effect of some factors such as the signal’s phase ambiguity, the
+constrained sampling frequency and complex channel environments, the
+estimation of these parameters often results in errors and the localiza-
+tion performance is further limited. In order to reduce the dependence
+of positioning accuracy on some single parameter, multiple parameters
+were used jointly in some works. For instance, TDOA and AOA were
+used jointly to locate the source by exploring both time-domain and
+space-domain information in [2]. For position calculation in a two-step
+locator, the weighted least squares method (WLS), two-stage weighted
+least squares (TS-WLS), Chan algorithm and Taylor algorithm are usu-
+ally adopted to solve the equations based on the selected positioning
+parameters. However, these methods cannot compensate for the infor-
+mation loss caused by parameter extraction, inevitably leading to limita-
+tions in positioning accuracy. Meanwhile, the introduction of intentional
+and unintentional noise can also lead to poorer performance of the two-
+step method.
+To reduce the effect of intermediate parameters estimation on the ﬁ-
+nal positioning performance, a direct position determination (DPD) al-
+gorithm was proposed by Amar in [3]. In this method, an objective func-
+tion is established by directly using the received raw signal. Then, an
+exhaustive search is performed throughout the regularly divided space
+grids to ﬁnd the optimal value of the objective function. The center po-
+sition of the gird with the optimal value is just the localization result. In
+order to further improve positioning accuracy, the researchers have been
+focusing on how to construct a better cost function to achieve a closer
+proximity to the true position of the target during the search process.
+Furthermore, various parameters related to the source have been used to
+build the cost function, such as Doppler frequency shift [4], TDOA and
+FDOA [5]. Since exhaustive search is usually included to optimize the
+cost function in many DPD methods, a high computational complexity is
+inevitable. In order to reduce computational pressure, distributed direct
+positioning schemes [6], majorization-minimization (MM) algorithm [7]
+and parallel factor (PARAFAC) analysis [8] were proposed subsequently.
+The former disperses the complexity of centralized positioning to differ-
+ent distributed devices, while the latter two schemes use optimization
+and parallel analysis methods to replace the exhaustive search, respec-
+tively. However, these processing will result in the consumption of hard-
+ware resources and the loss of positioning accuracy. The DPD method
+faces serious drawbacks such as high search complexity and difﬁculty in
+establishing cost functions. Therefore, how to balance positioning accu-
+racy and computational complexity has become a dilemma.
+Recently, deep learning has been introduced into the radio positioning
+ﬁeld. In [9], multilayer perceptron (MLP) neural network was adopted to
+realize mapping between objective positions and positioning parameters
+in two-step method for indoor WiFi-based localization. However, deep
+neural networks often require a large number of fully connected rela-
+tionships, which puts great pressure on real-time computation and pre-
+training of nodes, making it difﬁcult to achieve the real-time superiority
+of advanced optimization methods as described in [10–12]. The scheme
+based on LSTM network is introduced in the context of ultra wide band
+(UWB) technology, whose relative positioning error can reach 1.4%
+[13], but the disadvantage is also high complexity. Fortunately, recent re-
+search used a combination of convolutional neural network (CNN) and
+SVM in the task of plant disease classiﬁcation [14], which improved
+classiﬁcation accuracy while signiﬁcantly reducing computational com-
+plexity. Therefore, CNN-based deep learning networks are more suitable
+for preserving important features and reducing complexity.
+The two-step localization method and the direct localization method
+face the bottlenecks of low localization accuracy and high computational
+complexity, respectively. The outstanding contribution of the reference
+[15] inspires us that deep learning technology is a way to overcoming
+this dilemma and achieving better trade-offs. This issue is handled in
+our work. CNN can extract space features contained in data excellently
+with a lower processing complexity, it is introduced into our design.
+Also a basic unit FCN of the network layer is designed to help build a
+lightweight network that can quickly achieve positioning. Different from
+the existing deep learning based positioning solutions, which only apply
+deep learning networks to extract localization parameters or to replace
+localization equations solving, here a composite convolutional neural
+network (CCNN) is designed to realize the automatic feature extraction
+from the original received data ﬁrst and then directly output positions
+of the target sources. It is aimed to minimize complexity while ensuring
+superior localization performance. The main contributions of our work
+are as follows:
+• A fully convolutional network (FCN) block was designed, which in-
+cludes a one-dimensional convolutional layer, a normalization layer,
+and an activation function layer. This block centers around the convo-
+lutional layer and simultaneously achieves feature extraction, numer-
+ical normalization, and non-linear feature activation. The moderate
+combination of FCN can achieve fast and efﬁcient source localization.
+• A composite CNN combing four FCN blocks and four Max-pooling
+layers is designed to realize the directly positioning task for single ra-
+dio source and multiple radio sources, respectively. Three relevant pa-
+rameters for each FCN block are appropriately selected by a lot of re-
+peated experiments, which successfully realize high-precision source
+localization under low computational complexity conditions.
+• Dataset for training and test is established through simulation. Then,
+the positioning performances of the trained networks are evaluated un-
+der different scenarios by simulation. The results demonstrate that the
+proposed locator has strong robustness under the scenes with small-
+scale fading and low signal-to-noise ratio. The designed network can
+be easily expanded to the case of multi-source localization just by im-
+proving the dimension of the output layer. What’s more, the proposed
+localization system does not need an antenna array at the sensor com-
+pared with the classic multiple signal classiﬁcation (MUSIC)-DPD
+method for positioning multiple sources.
+System model and problem formulation: Consider the scene diagram of
+radiation source localization shown in Figure 1. It is assumed that there
+ELECTRONICS LETTERS
+July 2024
+Vol. 60 No. 14 wileyonlinelibrary.com/iet-el
+1
+
+
+--- PDF PAGE 2 ---
+,1
+,1
+(
+,
+)
+S
+S
+x
+y
+,2
+,2
+(
+,
+)
+S
+S
+x
+y
+,
+,
+(
+,
+)
+S p
+S p
+x
+y
+1
+1
+( ,
+)
+x y
+2
+2
+(
+,
+)
+x
+y
+3
+3
+(
+,
+)
+x
+y
+Fig. 1 Scene diagram of source localization system
+are L receivers equipped with single antenna on the ground to receive
+the radiation signals from the stationary and non-cooperative sources.
+The receivers are supposed to be synchronized in time and frequency.
+The positions of all receivers are prior known. And denote the position
+of the lth receiver as (xl, yl). For the pth radiation source, its unknown
+position is represented by (xS,p, yS,p). Moreover, we assume the number
+of RSs has been known by using some estimation methods, such as com-
+pressed sensing technology and Akaike information criterion, which are
+not discussed in this paper.
+The received signal of the lth receiver can be expressed as
+rl(t) =
+P
+
+p=1
+βlpsp(t −τlp −t0) + nl(t), 0 ≤t ≤T,
+(1)
+where sp(t −τlp −t0) is the p-th source signal transmitted at time t0 and
+P is the number of RSs. T is the observation duration in time domain.
+Moreover, nl(t) is additive white Gaussian noise following the standard
+normal distribution with the variance of σ 2
+l . βlp is the channel fading
+coefﬁcient from the p-th source to the l receiver, which is modeled and
+calculated according to the formula in the reference [3]. When there are
+many transmission obstacles or multiple scattering paths, βlp is often
+modeled as Rice fading. τlp in Equation (1) is the time delay from the
+p-th source to the l-th receiver, which can be expressed as
+τlp =
+
+(xS,p −xl)2 + (yS,p −yl)2
+c
+,
+(2)
+where c is the propagation speed of electromagnetic waves.
+The positioning problem for unknown RS is to get the position esti-
+mations {(
+xS,p,
+yS,p)} based on the received signals {rl(t)} and the posi-
+tions {(xl,yl)} of all the receivers. So it can be modeled as
+Ps =
+
+argmin
+Ps
+f {Cl, Ps}|Cl
+
+,
+(3)
+where
+Cl = [{r1(t), (x1, y1)}, . . . {rL(t), (xL, yL)}]
+and
+{Ps} =
+{(xS,1, yS,2), . . . , (xS,P, yS,P)}. The cost function f of deep learning
+network uses the MSE criterion to minimize the deviation between the
+estimated positions and the true positions.
+Network structure of CCNN: Referring to the idea of DPD method, we
+expect to directly extract the positions of RSs from the original signals
+received at all the receivers by using a specially designed neural network.
+The received signal is fed into the network in the form of a sequence,
+which is used for feature extraction.The positioning results are directly
+obtained at the output layer. Therefore, for L receivers with the sampling
+number of Ns, the following input data sequence for network can be
+obtained.
+Inputs = [[r1(1 · ts), . . . , r1(Ns · ts)], . . .
+. . . , [rL(1 · ts), . . . , rL(Ns · ts)]],
+(4)
+where ts is the sampling interval in time domain.
+Fig. 2 CCNN network structure diagram
+Due to the combination of one-dimensional convolutional (1D-CNN)
+layers, batch normalization (BN) layers, and activation function layers
+being frequently used in classiﬁcation and object detection tasks, it is
+also introduced into our network. For convenience, the cascading of the
+above three objects is deﬁned as a basic unit and denoted by a full con-
+volutional layer (FCN). In a FCN block, 1D-CNN layer is to extract use-
+ful features from the input data sequence for the subsequent regression
+task. It performs convolution operations on the input data by sliding con-
+volutional kernels. BN layer helps to improve the training stability and
+performance of neural networks by alleviating the problems of gradient
+disappearance and gradient explosion. Activation functions are mainly
+used to introduce nonlinear characteristics and can enable neural net-
+works to learn and represent complex functional relationships. ReLU
+function only involves simple threshold operations, which can improve
+the training speed of network and is also robust to gradient explosion.
+Therefore, it is selected as the activation function in a FCN layer. The
+speciﬁc operation process is shown in the lower part of Figure 2.
+In a FCN layer, there are three main adjustable parameters, namely
+the number of convolution kernels, the length of the convolution window
+and the distance of kernels movement, corresponding to the α, β and γ
+parameters in Figure 2, respectively. The mapping process within a FCN
+layer can be schematically expressed as
+g(x) = f (x) ∗h(x) =
+ +∞
+−∞
+f (ξ )h(x −ξ )dξ,
+η(x) =
+x −E[x]
+√Var[x] + ϵ ∗ζ + δ,
+ReLU (x) =
+	
+x
+x ≥0
+0
+x < 0
+,
+(5)
+where g(x) represents a one-dimensional convolution process. f (x) rep-
+resents input sequence and h(x) is 1D-CNN kernel. η(x) shows the pro-
+cess of data normalization, where ζ and δ are learnable parameters.
+When ζ takes the standard deviation and δ takes the mean value, the
+normalization layer happens to be an identity transformation.
+In the input layer, Equation (1) is used to generate signals and Equa-
+tion (4) helps to concatenate signal samples to form training samples.
+While the ﬁrst dimension NT in the input matrix represents the num-
+ber of training samples. The composite convolutional neural network
+(CCNN) based on FCN unit consists of 20 layers, which is as shown in
+the upper part of Figure 2.
+FCN adopts a three-layer structure for internal connection, and we
+have conducted several experiments on the selection of the number of
+FCNs, ranging from 3 to 10 (with CCNN’s total layers ranging from 16
+to 44). Through repeated experiments, selecting four FCN layers (a total
+of 20 layers) for orderly arrangement is in line with our trade-off between
+network training complexity and localization accuracy. First, one FCN
+layer with a large α parameter is used to capture the low dimensional
+2
+ELECTRONICS LETTERS
+July 2024
+Vol. 60 No. 14 wileyonlinelibrary.com/iet-el
+ 1350911x, 2024, 14, Downloaded from https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/ell2.13271 by Readcube-Labtiva, Wiley Online Library on [09/10/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+--- PDF PAGE 3 ---
+Table 1. Conﬁguration of system and network parameters
+System
+Conﬁguration
+Network
+Conﬁguration
+Average signal power
+1 W
+Inputs dimension
+[768,1]
+Signal type
+BPSK
+Learning rate
+0.001
+Number of receivers
+3
+Learning rate decay
+0.1
+Ns
+256
+Optimizers
+Adam
+Number of RSs
+P=1 or 2
+α1, α2, α3, α4
+[128, 32, 32, 32]
+Transmission bandwidth
+1 × 107(Hz)
+β1, β2, β3, β4
+[3, 3, 5, 7]
+Sampling frequency
+1 × 108(Hz)
+γ1, γ2, γ3, γ4
+[1, 1, 1, 1]
+Number of testing samples
+5000
+Number of epochs
+3000
+Received SNR for training
+10 dB
+Position of receiver 1
+[0,0]
+Position of receiver 2
+[225,225]
+Position of receiver 3
+[175,175]
+Number of training samples
+3000
+SNR test interval
+2 dB
+features, which are ﬂattened and connected for feature integration. Fi-
+nally, they are connected to a two-layer MLP network where output the
+source positioning results. It is worth mentioning that each FCN layer
+is followed by a max pooling layer to reduce computational complex-
+ity by merging features and removing redundant information, while the
+pooling window length is 2 and the step size is 1. The small pooling
+window ensures that the main features of the sequence can be extracted
+and the edge features are not missed as much as possible through single
+step movement.
+Simulation results: In order to test the effectiveness of the proposed
+scheme, the system parameters and the network parameters shown in
+Table 1 are used in simulation. Radiation sources are randomly gener-
+ated in a square area of [300, 300](m) size to obtain the samples for
+training and testing network. Based on the counterintuitive phenomenon
+of stochastic resonance [16, 17], we added Gaussian white noise to the
+training samples to suppress noise and improve system performance.
+The locations of RSs during simulation will be taken as the output la-
+bels for training network.
+Our main experimental assumption is that there are no special ob-
+stacles between the radiation source and receiver in the channel, only
+with LOS path propagation and large-scale fading path-loss. At present,
+complex channel effects such as shadow fading and frequency selective
+fading are not being considered. The positioning situation in small-scale
+fading channels will be discussed separately in a section of the experi-
+ment. For the loss function for training network is the mean square error
+(MSE) function. While the evaluation function for testing network is the
+mean average error (MAE) function. The deﬁnitions of MSE, MAE and
+signal-to-noise ratio (SNR) are same as in reference [2]. For the MSE
+loss function, L2 regularization penalty term is added to the square of
+the model weights to prevent overﬁtting of model training. Moreover,
+samples with a uniformly distributed SNR from [0 dB–25 dB] are taken
+as the test set.
+The baseline schemes compared with the proposed methods include
+the state-of-the-art two-step method using TDOA and AOA jointly [18],
+as well as the ML-DPD method with different grid edge lengths that pur-
+sue extreme positioning performance. The two-step method combines
+time difference and AOA to establish a nonlinear equation system, and
+solves it using the WLS method, while the DPD method includes a spa-
+tial grid search process based on the maximum likelihood criterion. But
+in order to estimate AOA parameters, the two-step method assumes that
+each receiver is equipped with four antennas to form a uniform linear
+antenna array, which will greatly increase the hardware cost of the re-
+ceiver.
+For the case of P = 1, Figure 3 shows the MAE simulation results
+of different schemes. It can be seen that the CCNN-based scheme has
+the highest overall positioning accuracy under the entire signal-to-noise
+ratio range. Compared with the ML-DPD algorithm with a 2m-grid, the
+relative positioning error can be reduced to about 60%. While, under
+signal-to-noise ratios lower than 10 dB, the positioning error can reach
+to about 10% of the two-step positioning method. What’s more, the pro-
+0
+5
+10
+15
+20
+25
+Received Signal-to-ratios (dB)
+10-1
+100
+101
+102
+103
+Mean Average Error (m)
+Composite Convolutional Neural Network (CCNN)
+ML-DPD grid edge length-5m
+ML-DPD grid edge length-3m
+ML-DPD grid edge length-2m
+Two-step based on AOA and TDOA[18]
+CRLB-DPD
+8
+10
+100
+Fig. 3 Positioning errors varying with received SNR for various localization
+schemes
+posed scheme has less hardware cost because single antenna rather than
+four antennas is needed at each receiver. The black star line in ﬁgure is
+the Cramer Rao Lower Bound (CRLB) of DPD, which is the positioning
+performance bound for unbiased estimation. The deﬁnition and calcu-
+lation process of CRLB can be found in the reference [7]. We can see
+that the performance of our scheme is closer to the CRLB than the other
+methods, especially in low SNR range. It reﬂects the strong robustness of
+CCNN against noise in low signal-to-noise ratio. The reason why our lo-
+cator can achieve excellent performance may be that the ﬁrst FCN layer
+used by CCNN is equipped with a large α parameter (sufﬁcient convo-
+lution kernels) to ensure that the network extracts complete low dimen-
+sional features of the signal. Then, three different FCN layers extract
+the positional features of the signal in different dimensions and com-
+bine them through a ﬂatten layer to fully utilize the role of each FCN
+layer without causing feature omission. The cascading of FCN layer
+and pooling layer extracts useful features for localization while reduc-
+ing complexity. Finally, by connecting the aliasing features to the MLP
+network, the convolutional features are transformed into the position nu-
+merical domain, and the localization results are successfully obtained at
+the output neuron node.
+In order to verify the robustness of the network after training to the
+small-scale fading of channel, the βlp in Equation (1) is selected to fol-
+low the Rice fading model [19] when generating testing samples. In Rice
+model, K is the energy factor and represents the ratio of transmission
+energy between the line-of-sight (LOS) path and the other non-line-of-
+sight (NLOS) paths in wireless channel. When K approaches 0, it is a
+Rayleigh fading channel. While K approaches positive inﬁnity, the chan-
+nel is a Gaussian channel. The simulation results are shown in Figure 4.
+It can be seen that CCNN exhibits strong robustness to the small-scale
+fading. For the additional Rice fading introduced in the testing samples
+(when K = 1), its positioning error only increases by about 10%. How-
+ever, for the case of rayleigh fading channel without LOS path, the posi-
+tioning error becomes higher than the Rice channel, but still signiﬁcantly
+better than the DPD method in the same condition. Based on our basic
+experiments and additional experiments introducing Rice fading, we can
+conclude that there is a strong mapping relationship between the signal
+and position in the passive positioning system. This is because CCNN is
+essentially a mathematical model with a ﬁxed calculation process, but it
+can adapt well to changes in the position of the radiation source and rela-
+tively simple changes in the channel environment. This indicates that the
+mapping relationship between the signal and position is likely to exist,
+which has been well learned by CCNN.
+There are three main parameters in each FCN block, namely α, β and
+γ , which have impact on the localization performance of the whole net-
+work. Since the low dimensional features extracted by the convolutional
+layer are more important for the subsequent processing, α1 in the ﬁrst
+ELECTRONICS LETTERS
+July 2024
+Vol. 60 No. 14 wileyonlinelibrary.com/iet-el
+3
+ 1350911x, 2024, 14, Downloaded from https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/ell2.13271 by Readcube-Labtiva, Wiley Online Library on [09/10/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+--- PDF PAGE 4 ---
+0
+5
+10
+15
+20
+25
+Received Signal-to-ratios (dB)
+100
+101
+102
+Mean Average Error (m)
+Rayleigh Fading K=0 (CCNN)
+Rice Fading K=1 (CCNN)
+Rice Fading K=2 (CCNN)
+Rice Fading K=3 (CCNN)
+Only large-scale fading (CCNN)
+Rice Fading K=1 (ML-DPD)
+Rayleigh Fading K=0 (ML-DPD)
+Fig. 4 Positioning errors of CCNN under different small scale fading (K rep-
+resents the master-slave path energy ratio for small-scale fading)
+0
+5
+10
+15
+20
+25
+Received Signal-to-ratios (dB)
+1
+2
+3
+4
+5
+6
+7
+8
+9
+Mean Average Error (m)
+64kernels
+128kernels
+256kernels
+512kernels
+8
+10
+12
+2
+2.5
+3
+-1
+0
+1
+2
+3
+7.5
+8
+8.5
+Fig. 5 Impact of α1 on localization performance (the number of kernels rep-
+resents the size of α1)
+FCN layer is focused on here. In Figure 5, four different settings of α1
+are simulated and the corresponding results are compared. We can con-
+clude that overﬁtting will occur when α1 is too small. When α1 increases
+to 512, the network training effect will be more stable, but it does not
+improve the overall positioning performance signiﬁcantly. Based on this
+result, it is appropriate to set α1 = 128.
+In order to verify the scalability of the proposed network for the multi-
+source positioning requirement, the relevant simulation is carried on.
+Since P = 2, the corresponding number of nodes in the network out-
+put layer in Figure 2 has been changed to 4, while the other parts in
+the network structure remain unchanged. The retrained network can be
+used in multi-source scenarios. The samples have been regenerated un-
+der the scene with 2 RSs and the adjusted network is trained based on
+the new samples set. The classic MUSIC-DPD based multi-source lo-
+calization algorithm is compared with the CCNN-based method and the
+corresponding results are shown in Figure 6. It can be seen that the pro-
+posed network in this paper is also effective for multi-source localiza-
+tion. It shows better robustness in low SNR case than MUSIC-DPD.
+Although the positioning performance of CCNN becomes worse under
+relative high SNR, it can reduce the computation overhead signiﬁcantly.
+This result can be found in Table 2.
+From Table 3, it can be seen that CCNN takes the least running time
+for executing single localization among all the schemes. What’s more,
+0
+5
+10
+15
+20
+25
+Received Signal-to-ratios (dB)
+0
+5
+10
+15
+20
+25
+30
+35
+40
+Mean Average Error (m)
+Composite Convolutional Neural Network (CCNN)
+MUSIC-DPD Multi-Source Localization Algorithm
+Fig. 6 Positioning errors comparison for two-RSs localization
+Table 2. Comparison table of single source positioning error
+Scheme/SNR
+0 dB
+5 dB
+10 dB
+15 dB
+20 dB
+CCNN (proposed)
+8.68 m
+4.01 m
+2.19 m
+1.78 m
+1.74 m
+ML-DPD-5m
+88.89 m
+15.65 m
+5.23 m
+4.80 m
+4.76 m
+ML-DPD-3m
+83.325 m
+7.73 m
+3.75 m
+3.51 m
+3.37 m
+ML-DPD-2m
+81.05 m
+7.69 m
+3.37 m
+2.83 m
+2.75 m
+Two-step on AOA and TDOA [14] 220.08 m 166.25 m 123.32 m 10.63 m 1.69 m
+CRLB-DPD
+5.74 m
+3.07 m
+1.81 m
+1.01 m
+0.72 m
+Table 3. Comparison of computation time among various schemes
+Type of algorithm
+Time of localization (s)
+CCNN (single)(proposed)
+0.024
+CCNN (multi)(proposed)
+0.024
+ML-DPD grid edge length-5m (single)
+0.186
+ML-DPD grid edge length-3m (single)
+0.523
+ML-DPD grid edge length-2m (single)
+1.163
+Two-step method based on AOA and TDOA [14] (single)
+0.104
+MUSIC-DPD (multi)
+0.576
+the needed time doesn’t increase when the number of RSs increases from
+1 to 2. Speciﬁcally, the calculation time of CCNN can be shortened to
+about 2.1% of the ML-DPD with grid size of 2m. At the same time, the
+positioning error of CCNN can also be reduced obviously, just shown
+in Figure 3. In addition, the computation complexity of the proposed
+scheme is even lower than the simple two-step method and is about
+23.1% of the latter. Compared with MUSIC-DPD positioning method,
+CCNN for two-sources scenario has much lower computational com-
+plexity and is only about 4.2% of MUSIC-DPD. This is due to the fact
+that the network after training only performs forward calculation for po-
+sition estimation, avoiding exhaustive search in DPD and iterative pro-
+cess based in two-step localization.
+Conclusions: In response to the high complexity problem of DPD,
+a composite convolutional neural network based deep learning local-
+ization algorithm is proposed in this paper. Full convolutional layer
+(FCN) is adopted as the basic unit of CCNN. The designed and trained
+CCNN can learn the positional features contained in the original
+signals and deduce the positions of RSs directly from them. Simulation
+results show that CCNN can locate radiation sources precisely with
+4
+ELECTRONICS LETTERS
+July 2024
+Vol. 60 No. 14 wileyonlinelibrary.com/iet-el
+ 1350911x, 2024, 14, Downloaded from https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/ell2.13271 by Readcube-Labtiva, Wiley Online Library on [09/10/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+
+--- PDF PAGE 5 ---
+lower computation complexity. The overall positioning performance
+is better than the classic direct localization methods. Moreover, the
+proposed algorithm is robust to small-scale fading of wireless channel,
+including Rice fading and Rayleigh fading. The proposed network
+can be easily extended to solve the multiple-sources localization
+problem.
+However, when CCNN is extended to multiple radiation sources, the
+positioning performance is relatively reduced. CCNN has strong robust-
+ness to low signal-to-noise ratio, but it may encounter accuracy bottle-
+necks under high signal-to-noise ratio conditions, namely insensitivity to
+signal purity. In addition, the transmission scenario is generated only by
+simulation. In the future, signal data can be collected for training in real
+environments, and the structure of CCNN can be combined by FCN with
+other advanced network layers such as self-attention and transformer to
+solve more complex localization tasks.
+Author contributions: Chenhao Gong: Conceptualization; investiga-
+tion; methodology; software; writing—original draft. Guomei Zhang:
+Conceptualization; investigation; methodology; writing—review and
+editing. Guobing Li: Formal analysis; methodology; project admin-
+istration. Yue Mao: Data curation; formal analysis; writing—review
+and editing.
+Acknowledgement: This work was supported by Project Funded by Na-
+tional Ministries and Commissions of China, the Natural Science Basic
+Research Program of Shaanxi under Grant No. 2023-JC-YB-519 and the
+Innovation Capability Support Program of Shaanxi under the Grant No.
+2021TD-08.
+Conﬂict of interest statement: The authors declare no conﬂict of interest.
+Data availability statement: The data that support the ﬁndings of this
+study are available from the corresponding author upon reasonable re-
+quest.
+© 2024 The Author(s). Electronics Letters published by John Wiley &
+Sons Ltd on behalf of The Institution of Engineering and Technology.
+This is an open access article under the terms of the Creative Commons
+Attribution-NonCommercial-NoDerivs License, which permits use and
+distribution in any medium, provided the original work is properly cited,
+the use is non-commercial and no modiﬁcations or adaptations are made.
+Received: 15 May 2024
+Accepted: 23 June 2024
+doi: 10.1049/ell2.13271
+References
+1
+Yang, K., et al.: Constrained total least-squares location algorithm us-
+ing time-difference-of-arrival measurements. IEEE Trans. Veh. Technol.
+59(3), 1558–1562 (2010)
+2
+Li, H., et al.: Hybrid TDOA/FDOA and track optimization of UAV
+swarm based on A-optimality. J. Syst. Eng. Electron. 34(1), 149–159
+(2023)
+3
+Amar, A., Weiss, A.J.: Direct position determination (DPD) of multiple
+known and unknown radio-frequency signals. In: 2004 12th European
+Signal Processing Conference, pp. 1115–1118. IEEE, Piscataway (2004)
+4
+Picard, J.S., Weiss, A.J.: Direct position determination sensitivity to
+NLOS propagation effects on Doppler-shift. IEEE Trans. Signal Pro-
+cess. 67(14), 3870–3881 (2019)
+5
+Zhiyu, L.U., et al.: A direct position determination method with com-
+bined TDOA and FDOA based on particle ﬁlter. Chin. J. Aeronaut.
+31(1), 161–168 (2018)
+6
+Ma, F., Liu, Z.M., Guo, F.: Distributed direct position determination.
+IEEE Trans. Veh. Technol. 69(11), 14007–14012 (2020)
+7
+Wang, Z., et al.: Majorization-minimization based direct localization us-
+ing one-bit channel measurements. IEEE Wireless Commun. Lett. 13(5),
+1389–1393 (2024)
+8
+Li, J., et al.: Multi-TDOA estimation and source direct position determi-
+nation based on parallel factor analysis. IEEE Internet Things J. 10(8),
+7405–7415 (2023)
+9
+Lohan, E.S., et al.: Wi-Fi crowdsourced ﬁngerprinting dataset for indoor
+positioning. Data 2(4), 32–32 (2017)
+10
+Zhai, X., et al.: Heterogeneous system-on-chip-based lattice-Boltzmann
+visual simulation system. IEEE Syst. J. 14(2), 1592–1601 (2020)
+11
+Esfahani, S.S., et al.: Lattice-Boltzmann interactive blood ﬂow simula-
+tion pipeline. Int. J. Comp. Assist. Radiol. Surg. 15, 629–639 (2020)
+12
+Zhai, X., et al.: Zynq SoC based acceleration of the lattice Boltzmann
+method. Concurr. Computat.: Pract. Exp. 31(17), e5184 (2019)
+13
+Poulose, A., Han, D.S.: Feature-based deep LSTM network for indoor
+localization using UWB measurements. In: 2021 International Confer-
+ence on Artiﬁcial Intelligence in Information and Communication, pp.
+298–301. IEEE, Piscataway (2021)
+14
+Yag, I., Altan, A.: Artiﬁcial intelligence-based robust hybrid algorithm
+design and implementation for real-time detection of plant diseases in
+agricultural environments. Biology 11, 1732 (2022)
+15
+Sezer, A., Altan, A.: Detection of solder paste defects with an
+optimization-based deep learning model using image processing tech-
+niques. Sold. Surf. Mount Technol. 33(5), 291–298 (2021)
+16
+Regaya, Y., Amira, A., Dakua, S.: Development of a cerebral aneurysm
+segmentation method to prevent sentinel hemorrhage. Netw. Model.
+Anal. Health Informat. Bioinformat. 12, 18 (2023)
+17
+Mohanty, S., Dakua, S.P.: Toward computing cross-modality symmet-
+ric non-rigid medical image registration. IEEE Access 10, 24528–24539
+(2022)
+18
+Terças, L., et al.: Bayesian-based indoor factory positioning using AOA,
+TDOA and hybrid measurements. IEEE Internet Things J. 11(12),
+21620–21631 (2024)
+19
+Xiao-guang, Y., Wan-hai, Y., Lin, S.: Decision fusion with censoring
+wireless sensors under Rice fading channels. In: 2009 International Con-
+ference on Cyber-Enabled Distributed Computing and Knowledge Dis-
+covery, pp. 343-347. IEEE, Piscataway (2009)
+ELECTRONICS LETTERS
+July 2024
+Vol. 60 No. 14 wileyonlinelibrary.com/iet-el
+5
+ 1350911x, 2024, 14, Downloaded from https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/ell2.13271 by Readcube-Labtiva, Wiley Online Library on [09/10/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License

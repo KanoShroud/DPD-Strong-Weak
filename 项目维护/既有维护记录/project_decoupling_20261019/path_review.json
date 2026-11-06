@@ -1,0 +1,2512 @@
+[
+  {
+    "file": "gate0_runtime.m",
+    "line": 5,
+    "text": "%   setenv('SOURCECOUNT_RUN_MODE', 'formal')"
+  },
+  {
+    "file": "gate0_runtime.m",
+    "line": 8,
+    "text": "%   SOURCECOUNT_DATA_ROOT   正式数据根目录，默认 <project>/data"
+  },
+  {
+    "file": "gate0_runtime.m",
+    "line": 9,
+    "text": "%   SOURCECOUNT_OUTPUT_ROOT           输出根目录，默认 <project>/outputs_e2e"
+  },
+  {
+    "file": "gate0_runtime.m",
+    "line": 10,
+    "text": "%   SOURCECOUNT_REFERENCE_OUTPUT_ROOT 原项目冻结outputs根目录，只读"
+  },
+  {
+    "file": "gate0_runtime.m",
+    "line": 13,
+    "text": "run_mode = lower(strtrim(getenv('SOURCECOUNT_RUN_MODE')));"
+  },
+  {
+    "file": "gate0_runtime.m",
+    "line": 18,
+    "text": "error('SOURCECOUNT_RUN_MODE 必须为 smoke 或 formal，当前为 %s', run_mode);"
+  },
+  {
+    "file": "gate0_runtime.m",
+    "line": 21,
+    "text": "data_root = strtrim(getenv('SOURCECOUNT_DATA_ROOT'));"
+  },
+  {
+    "file": "gate0_runtime.m",
+    "line": 25,
+    "text": "output_root = strtrim(getenv('SOURCECOUNT_OUTPUT_ROOT'));"
+  },
+  {
+    "file": "gate0_runtime.m",
+    "line": 27,
+    "text": "output_root = fullfile(project_root, 'outputs_e2e');"
+  },
+  {
+    "file": "gate0_runtime.m",
+    "line": 29,
+    "text": "reference_output_root = strtrim(getenv('SOURCECOUNT_REFERENCE_OUTPUT_ROOT'));"
+  },
+  {
+    "file": "runtime_config.py",
+    "line": 5,
+    "text": "- ``SOURCECOUNT_RUN_MODE``: ``smoke`` 或 ``formal``，默认 smoke。"
+  },
+  {
+    "file": "runtime_config.py",
+    "line": 6,
+    "text": "- ``SOURCECOUNT_DATA_ROOT``: 正式数据根目录，默认 ``<project>/data``。"
+  },
+  {
+    "file": "runtime_config.py",
+    "line": 7,
+    "text": "- ``SOURCECOUNT_OUTPUT_ROOT``: 输出根目录，默认 ``<project>/outputs_e2e``。"
+  },
+  {
+    "file": "runtime_config.py",
+    "line": 8,
+    "text": "- ``SOURCECOUNT_REFERENCE_OUTPUT_ROOT``: 原项目冻结 ``outputs`` 根目录；只读。"
+  },
+  {
+    "file": "runtime_config.py",
+    "line": 9,
+    "text": "- ``SOURCECOUNT_DEVICE``: PyTorch 设备，默认 ``cuda:0``。"
+  },
+  {
+    "file": "runtime_config.py",
+    "line": 23,
+    "text": "os.environ.get(\"SOURCECOUNT_DATA_ROOT\", PROJECT_ROOT / \"data\")"
+  },
+  {
+    "file": "runtime_config.py",
+    "line": 26,
+    "text": "os.environ.get(\"SOURCECOUNT_OUTPUT_ROOT\", PROJECT_ROOT / \"outputs_e2e\")"
+  },
+  {
+    "file": "runtime_config.py",
+    "line": 28,
+    "text": "_reference_output_value = os.environ.get(\"SOURCECOUNT_REFERENCE_OUTPUT_ROOT\")"
+  },
+  {
+    "file": "runtime_config.py",
+    "line": 34,
+    "text": "DEFAULT_DEVICE = os.environ.get(\"SOURCECOUNT_DEVICE\", \"cuda:0\")"
+  },
+  {
+    "file": "runtime_config.py",
+    "line": 51,
+    "text": "\"未设置 SOURCECOUNT_REFERENCE_OUTPUT_ROOT；\""
+  },
+  {
+    "file": "runtime_config.py",
+    "line": 61,
+    "text": "\"SOURCECOUNT_OUTPUT_ROOT 与 SOURCECOUNT_REFERENCE_OUTPUT_ROOT \""
+  },
+  {
+    "file": "runtime_config.py",
+    "line": 104,
+    "text": "value = (mode or os.environ.get(\"SOURCECOUNT_RUN_MODE\", \"smoke\")).lower()"
+  },
+  {
+    "file": "runtime_config.py",
+    "line": 107,
+    "text": "f\"SOURCECOUNT_RUN_MODE 必须为 smoke 或 formal，当前为 {value!r}\""
+  },
+  {
+    "file": "runtime_config.py",
+    "line": 118,
+    "text": "\"\"\"返回章节数据目录；smoke 数据永远位于 outputs_e2e/smoke。\"\"\""
+  },
+  {
+    "file": "DPD_MVDR/verify_DPD_MVDR.py",
+    "line": 4,
+    "text": "每次写入新的 outputs_e2e/verification/dpd_mvdr/<时间戳>，保留失败尝试。"
+  },
+  {
+    "file": "DPD_MVDR/verify_DPD_MVDR.py",
+    "line": 122,
+    "text": "root = '{root}'; folder = '{folder}'; addpath(root);"
+  },
+  {
+    "file": "DPD_MVDR/verify_DPD_MVDR.py",
+    "line": 188,
+    "text": "completed = subprocess.run([matlab, \"-batch\", command], cwd=ROOT, env=env,"
+  },
+  {
+    "file": "DPD_MVDR/verify_DPD_MVDR.py",
+    "line": 256,
+    "text": "folder = ROOT/\"outputs_e2e\"/\"verification\"/\"dpd_mvdr\"/stamp"
+  },
+  {
+    "file": "DPD_MVDR/verify_DPD_MVDR.py",
+    "line": 257,
+    "text": "expected = (ROOT/\"outputs_e2e\").resolve()"
+  },
+  {
+    "file": "paper/archive/evidence_revision_20261018/render_review.py",
+    "line": 11,
+    "text": "HERE = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/prepare_assets.py",
+    "line": 28,
+    "text": "ROOT = HERE.parents[2]"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/prepare_assets.py",
+    "line": 29,
+    "text": "BASE = ROOT / 'outputs_e2e/unified/e2e_g10'"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/prepare_formal_assets.py",
+    "line": 20,
+    "text": "CASES = ROOT / 'outputs_e2e/reports/g10_r4_supplement_review_20261017'"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/prepare_formal_assets.py",
+    "line": 199,
+    "text": "if not path.is_relative_to(ROOT / 'outputs_e2e'):"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/validate_draft.py",
+    "line": 126,
+    "text": "forbidden = ('F:\\\\', 'outputs_e2e', 'G10-', 'record_sha', 'checkpoint', '通过门禁')"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/validate_revision.py",
+    "line": 11,
+    "text": "ROOT = HERE.parents[2]"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/validate_revision.py",
+    "line": 36,
+    "text": "if not path.is_relative_to(ROOT / 'outputs_e2e') or sha(path) != expected:"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/qa/comparison_structure_revision_before/prepare_formal_assets.py",
+    "line": 20,
+    "text": "CASES = ROOT / 'outputs_e2e/reports/g10_r4_supplement_review_20261017'"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/qa/comparison_structure_revision_before/prepare_formal_assets.py",
+    "line": 199,
+    "text": "if not path.is_relative_to(ROOT / 'outputs_e2e'):"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/qa/formal_revision_before/prepare_assets.py",
+    "line": 28,
+    "text": "ROOT = HERE.parents[2]"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/qa/formal_revision_before/prepare_assets.py",
+    "line": 29,
+    "text": "BASE = ROOT / 'outputs_e2e/unified/e2e_g10'"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/qa/formal_revision_before/validate_draft.py",
+    "line": 126,
+    "text": "forbidden = ('F:\\\\', 'outputs_e2e', 'G10-', 'record_sha', 'checkpoint', '通过门禁')"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/qa/formal_revision_before/validate_revision.py",
+    "line": 11,
+    "text": "ROOT = HERE.parents[2]"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/qa/formal_revision_before/validate_revision.py",
+    "line": 34,
+    "text": "if not path.is_relative_to(ROOT / 'outputs_e2e/unified/e2e_g10') or sha(path) != expected:"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/qa/paired_visual_revision_before/prepare_formal_assets.py",
+    "line": 18,
+    "text": "CASES = ROOT / 'outputs_e2e/reports/g10_r4_supplement_review_20261017'"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/qa/paired_visual_revision_before/prepare_formal_assets.py",
+    "line": 48,
+    "text": "if not path.is_relative_to(ROOT / 'outputs_e2e'):"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/qa/paired_visual_revision_before/validate_revision.py",
+    "line": 11,
+    "text": "ROOT = HERE.parents[2]"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/qa/paired_visual_revision_before/validate_revision.py",
+    "line": 28,
+    "text": "if not path.is_relative_to(ROOT / 'outputs_e2e') or sha(path) != expected:"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/qa/profile_stratified_revision_before/prepare_assets.py",
+    "line": 28,
+    "text": "ROOT = HERE.parents[2]"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/qa/profile_stratified_revision_before/prepare_assets.py",
+    "line": 29,
+    "text": "BASE = ROOT / 'outputs_e2e/unified/e2e_g10'"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/qa/profile_stratified_revision_before/prepare_formal_assets.py",
+    "line": 20,
+    "text": "CASES = ROOT / 'outputs_e2e/reports/g10_r4_supplement_review_20261017'"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/qa/profile_stratified_revision_before/prepare_formal_assets.py",
+    "line": 135,
+    "text": "if not path.is_relative_to(ROOT / 'outputs_e2e'):"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/qa/profile_stratified_revision_before/validate_revision.py",
+    "line": 11,
+    "text": "ROOT = HERE.parents[2]"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/qa/profile_stratified_revision_before/validate_revision.py",
+    "line": 32,
+    "text": "if not path.is_relative_to(ROOT / 'outputs_e2e') or sha(path) != expected:"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/qa/revision1_before/prepare_assets.py",
+    "line": 27,
+    "text": "ROOT = HERE.parents[2]"
+  },
+  {
+    "file": "paper/archive/pre_cas_20261018/qa/revision1_before/prepare_assets.py",
+    "line": 28,
+    "text": "BASE = ROOT / 'outputs_e2e/unified/e2e_g10'"
+  },
+  {
+    "file": "paper/archive/review_followup_20261018/validate_evidence_revision.py",
+    "line": 10,
+    "text": "PAPER = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "paper/scripts/analyze_contribution_closeout.py",
+    "line": 7,
+    "text": "PAPER = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "paper/scripts/analyze_contribution_closeout.py",
+    "line": 51,
+    "text": "spectral = ROOT / 'outputs_e2e/unified/e2e_g10/r4/spectral_window_20261018_175147_595913/report.json'"
+  },
+  {
+    "file": "paper/scripts/analyze_contribution_closeout.py",
+    "line": 52,
+    "text": "stop = ROOT / 'outputs_e2e/unified/e2e_g10/r4/joint_profile_pilot_20261018_190843_836406/analysis.json'"
+  },
+  {
+    "file": "paper/scripts/export_mechanism_evidence.py",
+    "line": 8,
+    "text": "PAPER = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "paper/scripts/export_mechanism_evidence.py",
+    "line": 21,
+    "text": "pointer = read(ROOT/'outputs_e2e/unified/e2e_g10/r4/adaptation_review.json')"
+  },
+  {
+    "file": "paper/scripts/export_mechanism_evidence.py",
+    "line": 23,
+    "text": "assert source.is_relative_to((ROOT/'outputs_e2e').resolve())"
+  },
+  {
+    "file": "paper/scripts/flatten_manuscript.py",
+    "line": 7,
+    "text": "root = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "paper/scripts/migrate_cas_layout.py",
+    "line": 11,
+    "text": "PAPER = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "paper/scripts/migrate_cas_layout.py",
+    "line": 46,
+    "text": "text = text.replace('HERE = Path(__file__).resolve().parent\\nROOT = HERE.parents[2]',"
+  },
+  {
+    "file": "paper/scripts/migrate_cas_layout.py",
+    "line": 47,
+    "text": "'HERE = Path(__file__).resolve().parents[1]\\nROOT = HERE.parent')"
+  },
+  {
+    "file": "paper/scripts/migrate_cas_layout.py",
+    "line": 63,
+    "text": "payload = dict(date='2026-10-18', original_location='outputs_e2e/papers/wideband_multisource_localization',"
+  },
+  {
+    "file": "paper/scripts/prepare_assets.py",
+    "line": 27,
+    "text": "HERE = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "paper/scripts/prepare_assets.py",
+    "line": 29,
+    "text": "BASE = ROOT / 'outputs_e2e/unified/e2e_g10'"
+  },
+  {
+    "file": "paper/scripts/prepare_assignment_cost.py",
+    "line": 18,
+    "text": "HERE = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "paper/scripts/prepare_assignment_cost.py",
+    "line": 20,
+    "text": "BASE = ROOT/'outputs_e2e/unified/e2e_g10/r4'"
+  },
+  {
+    "file": "paper/scripts/prepare_assignment_cost.py",
+    "line": 24,
+    "text": "spec = importlib.util.spec_from_file_location('assignment_metrics', SOURCE)"
+  },
+  {
+    "file": "paper/scripts/prepare_formal_assets.py",
+    "line": 20,
+    "text": "CASES = ROOT / 'outputs_e2e/reports/g10_r4_supplement_review_20261017'"
+  },
+  {
+    "file": "paper/scripts/prepare_formal_assets.py",
+    "line": 199,
+    "text": "if not path.is_relative_to(ROOT / 'outputs_e2e'):"
+  },
+  {
+    "file": "paper/scripts/render_review.py",
+    "line": 12,
+    "text": "HERE = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "paper/scripts/validate_assignment_cost.py",
+    "line": 10,
+    "text": "HERE = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "paper/scripts/validate_contribution_closeout.py",
+    "line": 7,
+    "text": "PAPER = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "paper/scripts/validate_draft.py",
+    "line": 12,
+    "text": "HERE = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "paper/scripts/validate_draft.py",
+    "line": 127,
+    "text": "forbidden = ('F:\\\\', 'outputs_e2e', 'G10-', 'record_sha', 'checkpoint', '通过门禁')"
+  },
+  {
+    "file": "paper/scripts/validate_evidence_revision.py",
+    "line": 11,
+    "text": "PAPER = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "paper/scripts/validate_migration.py",
+    "line": 9,
+    "text": "PAPER = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "paper/scripts/validate_revision.py",
+    "line": 9,
+    "text": "HERE = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "paper/scripts/validate_revision.py",
+    "line": 37,
+    "text": "if not path.is_relative_to(ROOT / 'outputs_e2e') or sha(path) != expected:"
+  },
+  {
+    "file": "第三章代码/chapter_runtime.py",
+    "line": 9,
+    "text": "PROJECT_ROOT = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "第三章代码/chapter_runtime.py",
+    "line": 10,
+    "text": "if str(PROJECT_ROOT) not in sys.path:"
+  },
+  {
+    "file": "第三章代码/chapter_runtime.py",
+    "line": 11,
+    "text": "sys.path.insert(0, str(PROJECT_ROOT))"
+  },
+  {
+    "file": "第三章代码/ctrl_exp1A.m",
+    "line": 17,
+    "text": "addpath(script_dir, fileparts(script_dir));"
+  },
+  {
+    "file": "第三章代码/gate1_smoke_ch3.py",
+    "line": 32,
+    "text": "if str(import_root) not in sys.path:"
+  },
+  {
+    "file": "第三章代码/gate1_smoke_ch3.py",
+    "line": 33,
+    "text": "sys.path.insert(0, str(import_root))"
+  },
+  {
+    "file": "第三章代码/gen_exp2B.m",
+    "line": 24,
+    "text": "addpath(script_dir, fileparts(script_dir));"
+  },
+  {
+    "file": "第三章代码/gen_exp2C.m",
+    "line": 25,
+    "text": "addpath(script_dir, fileparts(script_dir));"
+  },
+  {
+    "file": "第三章代码/main30.m",
+    "line": 22,
+    "text": "addpath(script_dir, fileparts(script_dir));"
+  },
+  {
+    "file": "第三章代码/main30.m",
+    "line": 25,
+    "text": "trials_env = strtrim(getenv('SOURCECOUNT_CH3_TRIALS_LIST'));"
+  },
+  {
+    "file": "第三章代码/main30.m",
+    "line": 26,
+    "text": "seed_env = strtrim(getenv('SOURCECOUNT_CH3_RANDOM_SEED'));"
+  },
+  {
+    "file": "第三章代码/main30.m",
+    "line": 52,
+    "text": "error(['SOURCECOUNT_CH3_TRIALS_LIST 与 SOURCECOUNT_CH3_RANDOM_SEED ' ..."
+  },
+  {
+    "file": "第三章代码/main30.m",
+    "line": 56,
+    "text": "error(['SOURCECOUNT_CH3_TRIALS_LIST 必须是 3 个逗号分隔的正整数，' ..."
+  },
+  {
+    "file": "第三章代码/main30.m",
+    "line": 63,
+    "text": "error(['SOURCECOUNT_CH3_TRIALS_LIST 必须是 3 个逗号分隔的正整数，' ..."
+  },
+  {
+    "file": "第三章代码/main30.m",
+    "line": 72,
+    "text": "error(['SOURCECOUNT_CH3_RANDOM_SEED 必须是 [0,%d] 内的整数，' ..."
+  },
+  {
+    "file": "第三章代码/main30.m",
+    "line": 78,
+    "text": "error(['SOURCECOUNT_CH3_RANDOM_SEED 必须是 [0,%d] 内的整数，' ..."
+  },
+  {
+    "file": "第三章代码/s2g1_ch3.py",
+    "line": 102,
+    "text": "result = subprocess.run("
+  },
+  {
+    "file": "第三章代码/s2g1_ch3.py",
+    "line": 115,
+    "text": "except (OSError, subprocess.SubprocessError, ValueError, IndexError):"
+  },
+  {
+    "file": "第三章代码/s2g1_ch3.py",
+    "line": 143,
+    "text": "project_root = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "第三章代码/s2g1_ch3.py",
+    "line": 173,
+    "text": "git_head = subprocess.run("
+  },
+  {
+    "file": "第三章代码/s2g1_ch3.py",
+    "line": 180,
+    "text": "git_status = subprocess.run("
+  },
+  {
+    "file": "第三章代码/s2g1_ch3.py",
+    "line": 635,
+    "text": "project_root = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "第三章代码/s2g3_compute_coarse_dpd.m",
+    "line": 27,
+    "text": "addpath(script_dir, fileparts(script_dir));"
+  },
+  {
+    "file": "第三章代码/s2g5r4_pycharm_train.py",
+    "line": 16,
+    "text": "PROJECT_ROOT = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "第三章代码/s2g5r4_pycharm_train.py",
+    "line": 92,
+    "text": "subprocess.run(command, check=True, cwd=PROJECT_ROOT, env=environment)"
+  },
+  {
+    "file": "第三章代码/s2g5_r4_ch3_scale.py",
+    "line": 34,
+    "text": "PROJECT_ROOT = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "第三章代码/s2g5_r4_train_ch3.py",
+    "line": 33,
+    "text": "PROJECT_ROOT = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "第四章代码/chapter_runtime.py",
+    "line": 9,
+    "text": "PROJECT_ROOT = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "第四章代码/chapter_runtime.py",
+    "line": 10,
+    "text": "if str(PROJECT_ROOT) not in sys.path:"
+  },
+  {
+    "file": "第四章代码/chapter_runtime.py",
+    "line": 11,
+    "text": "sys.path.insert(0, str(PROJECT_ROOT))"
+  },
+  {
+    "file": "第四章代码/eval_ch4_checkpoint.py",
+    "line": 23,
+    "text": "if str(import_root) not in sys.path:"
+  },
+  {
+    "file": "第四章代码/eval_ch4_checkpoint.py",
+    "line": 24,
+    "text": "sys.path.insert(0, str(import_root))"
+  },
+  {
+    "file": "第四章代码/gate2_smoke_ch4.py",
+    "line": 34,
+    "text": "if str(import_root) not in sys.path:"
+  },
+  {
+    "file": "第四章代码/gate2_smoke_ch4.py",
+    "line": 35,
+    "text": "sys.path.insert(0, str(import_root))"
+  },
+  {
+    "file": "第四章代码/gate3_ch4.py",
+    "line": 23,
+    "text": "if str(import_root) not in sys.path:"
+  },
+  {
+    "file": "第四章代码/gate3_ch4.py",
+    "line": 24,
+    "text": "sys.path.insert(0, str(import_root))"
+  },
+  {
+    "file": "第四章代码/gate3_stage_runner.py",
+    "line": 130,
+    "text": "result = subprocess.run("
+  },
+  {
+    "file": "第四章代码/gate3_stage_runner.py",
+    "line": 143,
+    "text": "except (OSError, ValueError, subprocess.SubprocessError):"
+  },
+  {
+    "file": "第四章代码/gate3_stage_runner.py",
+    "line": 215,
+    "text": "def stop_process_tree(process: subprocess.Popen[bytes]) -> None:"
+  },
+  {
+    "file": "第四章代码/gate3_stage_runner.py",
+    "line": 280,
+    "text": "process = subprocess.Popen("
+  },
+  {
+    "file": "第四章代码/gate3_stage_runner.py",
+    "line": 284,
+    "text": "stdout=subprocess.PIPE,"
+  },
+  {
+    "file": "第四章代码/gate3_stage_runner.py",
+    "line": 285,
+    "text": "stderr=subprocess.STDOUT,"
+  },
+  {
+    "file": "第四章代码/gate3_stage_runner.py",
+    "line": 337,
+    "text": "except subprocess.TimeoutExpired:"
+  },
+  {
+    "file": "第四章代码/gate3_stage_runner.py",
+    "line": 342,
+    "text": "except subprocess.TimeoutExpired:"
+  },
+  {
+    "file": "第四章代码/main31_loc_v3.m",
+    "line": 20,
+    "text": "addpath(script_dir, fileparts(script_dir));"
+  },
+  {
+    "file": "第四章代码/main31_loc_v3.m",
+    "line": 38,
+    "text": "gate_profile_val = strtrim(getenv('SOURCECOUNT_CH4_GATE_PROFILE'));"
+  },
+  {
+    "file": "第四章代码/main31_loc_v3.m",
+    "line": 47,
+    "text": "trials_env = strtrim(getenv('SOURCECOUNT_CH4_TRIALS_LIST'));"
+  },
+  {
+    "file": "第四章代码/main31_loc_v3.m",
+    "line": 50,
+    "text": "error(['SOURCECOUNT_CH4_TRIALS_LIST 必须是 3 个逗号分隔的正整数，' ..."
+  },
+  {
+    "file": "第四章代码/main31_loc_v3.m",
+    "line": 65,
+    "text": "error(['SOURCECOUNT_CH4_TRIALS_LIST 必须是 3 个逗号分隔的正整数，' ..."
+  },
+  {
+    "file": "第四章代码/main31_loc_v3.m",
+    "line": 76,
+    "text": "seed_env = strtrim(getenv('SOURCECOUNT_CH4_RANDOM_SEED'));"
+  },
+  {
+    "file": "第四章代码/main31_loc_v3.m",
+    "line": 79,
+    "text": "error(['SOURCECOUNT_CH4_RANDOM_SEED 必须是 [0,%d] 内的整数，' ..."
+  },
+  {
+    "file": "第四章代码/main31_loc_v3.m",
+    "line": 85,
+    "text": "error(['SOURCECOUNT_CH4_RANDOM_SEED 必须是 [0,%d] 内的整数，' ..."
+  },
+  {
+    "file": "第四章代码/main_exp_bw.m",
+    "line": 13,
+    "text": "addpath(script_dir, fileparts(script_dir));"
+  },
+  {
+    "file": "第四章代码/main_exp_dist.m",
+    "line": 13,
+    "text": "addpath(script_dir, fileparts(script_dir));"
+  },
+  {
+    "file": "第四章代码/main_exp_sep.m",
+    "line": 13,
+    "text": "addpath(script_dir, fileparts(script_dir));"
+  },
+  {
+    "file": "第四章代码/main_exp_snr.m",
+    "line": 14,
+    "text": "addpath(script_dir, fileparts(script_dir));"
+  },
+  {
+    "file": "第四章代码/s2g2_ch4.py",
+    "line": 44,
+    "text": "result = subprocess.run("
+  },
+  {
+    "file": "第四章代码/s2g2_ch4.py",
+    "line": 59,
+    "text": "except (OSError, subprocess.SubprocessError, ValueError, IndexError):"
+  },
+  {
+    "file": "第四章代码/s2g2_ch4.py",
+    "line": 146,
+    "text": "git_head = subprocess.run("
+  },
+  {
+    "file": "第四章代码/s2g2_ch4.py",
+    "line": 150,
+    "text": "git_status = subprocess.run("
+  },
+  {
+    "file": "第四章代码/s2g3_composability.py",
+    "line": 32,
+    "text": "if str(import_root) not in sys.path:"
+  },
+  {
+    "file": "第四章代码/s2g3_composability.py",
+    "line": 33,
+    "text": "sys.path.append(str(import_root))"
+  },
+  {
+    "file": "第四章代码/s2g3_composability.py",
+    "line": 34,
+    "text": "if str(SCRIPT_DIR) in sys.path:"
+  },
+  {
+    "file": "第四章代码/s2g3_composability.py",
+    "line": 35,
+    "text": "sys.path.remove(str(SCRIPT_DIR))"
+  },
+  {
+    "file": "第四章代码/s2g3_composability.py",
+    "line": 36,
+    "text": "sys.path.insert(0, str(SCRIPT_DIR))"
+  },
+  {
+    "file": "第四章代码/s2g4r4_pycharm_train.py",
+    "line": 19,
+    "text": "PROJECT_ROOT = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "第四章代码/s2g4r4_pycharm_train.py",
+    "line": 140,
+    "text": "completed = subprocess.run(monitor_command, env=environment, check=False)"
+  },
+  {
+    "file": "第四章代码/s2g4_coarse_d8.py",
+    "line": 28,
+    "text": "if str(import_root) not in sys.path:"
+  },
+  {
+    "file": "第四章代码/s2g4_coarse_d8.py",
+    "line": 29,
+    "text": "sys.path.insert(0, str(import_root))"
+  },
+  {
+    "file": "第四章代码/s2g5r3_cascade.py",
+    "line": 34,
+    "text": "if str(import_root) in sys.path:"
+  },
+  {
+    "file": "第四章代码/s2g5r3_cascade.py",
+    "line": 35,
+    "text": "sys.path.remove(str(import_root))"
+  },
+  {
+    "file": "第四章代码/s2g5r3_cascade.py",
+    "line": 36,
+    "text": "sys.path.insert(0, str(SCRIPT_DIR))"
+  },
+  {
+    "file": "第四章代码/s2g5r3_cascade.py",
+    "line": 37,
+    "text": "sys.path.insert(1, str(CH3_DIR))"
+  },
+  {
+    "file": "第四章代码/s2g5r3_cascade.py",
+    "line": 38,
+    "text": "sys.path.insert(2, str(PROJECT_ROOT))"
+  },
+  {
+    "file": "第四章代码/s2g5r4_cascade.py",
+    "line": 22,
+    "text": "PROJECT_ROOT = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "第四章代码/s2g5r5_candidate_k.py",
+    "line": 37,
+    "text": "if str(import_root) in sys.path:"
+  },
+  {
+    "file": "第四章代码/s2g5r5_candidate_k.py",
+    "line": 38,
+    "text": "sys.path.remove(str(import_root))"
+  },
+  {
+    "file": "第四章代码/s2g5r5_candidate_k.py",
+    "line": 39,
+    "text": "sys.path.insert(0, str(SCRIPT_DIR))"
+  },
+  {
+    "file": "第四章代码/s2g5r5_candidate_k.py",
+    "line": 40,
+    "text": "sys.path.insert(1, str(CH3_DIR))"
+  },
+  {
+    "file": "第四章代码/s2g5r5_candidate_k.py",
+    "line": 41,
+    "text": "sys.path.insert(2, str(PROJECT_ROOT))"
+  },
+  {
+    "file": "第四章代码/s2g5r6b0_generate_control.m",
+    "line": 31,
+    "text": "addpath(script_dir, fileparts(script_dir));"
+  },
+  {
+    "file": "第四章代码/s2g5r6b0_paper_conditions.py",
+    "line": 24,
+    "text": "PROJECT_ROOT = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "第四章代码/s2g5r6b0_paper_conditions.py",
+    "line": 26,
+    "text": "if str(CH4_DIR) not in sys.path:"
+  },
+  {
+    "file": "第四章代码/s2g5r6b0_paper_conditions.py",
+    "line": 27,
+    "text": "sys.path.insert(0, str(CH4_DIR))"
+  },
+  {
+    "file": "第四章代码/s2g5r6_evaluate.py",
+    "line": 25,
+    "text": "PROJECT_ROOT = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "第四章代码/s2g5r6_evaluate.py",
+    "line": 29,
+    "text": "if str(import_root) in sys.path:"
+  },
+  {
+    "file": "第四章代码/s2g5r6_evaluate.py",
+    "line": 30,
+    "text": "sys.path.remove(str(import_root))"
+  },
+  {
+    "file": "第四章代码/s2g5r6_evaluate.py",
+    "line": 31,
+    "text": "sys.path.insert(0, str(CH4_DIR))"
+  },
+  {
+    "file": "第四章代码/s2g5r6_evaluate.py",
+    "line": 32,
+    "text": "sys.path.insert(1, str(CH3_DIR))"
+  },
+  {
+    "file": "第四章代码/s2g5r6_evaluate.py",
+    "line": 33,
+    "text": "sys.path.insert(2, str(PROJECT_ROOT))"
+  },
+  {
+    "file": "第四章代码/s2g5r6_multiseed.py",
+    "line": 18,
+    "text": "PROJECT_ROOT = Path(__file__).resolve().parents[1]"
+  },
+  {
+    "file": "第四章代码/s2g5r6_multiseed.py",
+    "line": 21,
+    "text": "if str(CH4_DIR) not in sys.path:"
+  },
+  {
+    "file": "第四章代码/s2g5r6_multiseed.py",
+    "line": 22,
+    "text": "sys.path.insert(0, str(CH4_DIR))"
+  },
+  {
+    "file": "第四章代码/s2g5r6_multiseed.py",
+    "line": 206,
+    "text": "ch3_process = subprocess.run("
+  },
+  {
+    "file": "第四章代码/s2g5r6_multiseed.py",
+    "line": 225,
+    "text": "ch3_process = subprocess.run("
+  },
+  {
+    "file": "第四章代码/s2g5r6_multiseed.py",
+    "line": 359,
+    "text": "returncode = subprocess.run("
+  },
+  {
+    "file": "统一模型代码/common/classify_data_integrity.py",
+    "line": 20,
+    "text": "PROJECT_ROOT = Path(__file__).resolve().parents[2]"
+  },
+  {
+    "file": "统一模型代码/common/classify_data_integrity.py",
+    "line": 21,
+    "text": "if str(PROJECT_ROOT) not in sys.path:"
+  },
+  {
+    "file": "统一模型代码/common/classify_data_integrity.py",
+    "line": 22,
+    "text": "sys.path.insert(0, str(PROJECT_ROOT))"
+  },
+  {
+    "file": "统一模型代码/common/g5_live_log.py",
+    "line": 12,
+    "text": "ROOT = Path(__file__).resolve().parents[2]"
+  },
+  {
+    "file": "统一模型代码/common/g5_live_log.py",
+    "line": 13,
+    "text": "BENCHMARK = ROOT/'outputs_e2e/unified/g5_prefetch_probe/20260919_230910/report.json'"
+  },
+  {
+    "file": "统一模型代码/common/g5_live_log.py",
+    "line": 73,
+    "text": "process=subprocess.Popen([sys.executable,'-u',*arguments],cwd=ROOT,env=env,"
+  },
+  {
+    "file": "统一模型代码/common/g5_live_log.py",
+    "line": 74,
+    "text": "stdout=log,stderr=subprocess.STDOUT,creationflags=subprocess.CREATE_NO_WINDOW)"
+  },
+  {
+    "file": "统一模型代码/common/g5_live_log.py",
+    "line": 111,
+    "text": "except subprocess.TimeoutExpired:"
+  },
+  {
+    "file": "统一模型代码/common/materialize_reference_snapshot.py",
+    "line": 1,
+    "text": "\"\"\"将只读参考输入以 Windows 无缓冲方式固化到 outputs_e2e。"
+  },
+  {
+    "file": "统一模型代码/common/materialize_reference_snapshot.py",
+    "line": 12,
+    "text": "_path_sys.path.insert(0, str(_PathRoot(__file__).resolve().parents[2]))"
+  },
+  {
+    "file": "统一模型代码/common/materialize_reference_snapshot.py",
+    "line": 75,
+    "text": "completed = subprocess.run("
+  },
+  {
+    "file": "统一模型代码/common/preflight_reference.py",
+    "line": 7,
+    "text": "_path_sys.path.insert(0, str(_PathRoot(__file__).resolve().parents[2]))"
+  },
+  {
+    "file": "统一模型代码/common/preflight_reference.py",
+    "line": 43,
+    "text": "help=\"可选报告路径；必须位于 outputs_e2e 且目标不存在。\","
+  },
+  {
+    "file": "统一模型代码/common/runtime_paths.py",
+    "line": 9,
+    "text": "PROJECT_ROOT = Path(__file__).resolve().parents[2]"
+  },
+  {
+    "file": "统一模型代码/common/runtime_paths.py",
+    "line": 10,
+    "text": "if str(PROJECT_ROOT) not in sys.path:"
+  },
+  {
+    "file": "统一模型代码/common/runtime_paths.py",
+    "line": 11,
+    "text": "sys.path.insert(0, str(PROJECT_ROOT))"
+  },
+  {
+    "file": "统一模型代码/common/diagnostics/cache_read_path_probe.py",
+    "line": 6,
+    "text": "_path_sys.path.insert(0, str(_PathRoot(__file__).resolve().parents[3]))"
+  },
+  {
+    "file": "统一模型代码/common/diagnostics/cache_read_path_probe.py",
+    "line": 195,
+    "text": "workspace = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "统一模型代码/common/diagnostics/cache_read_path_probe.py",
+    "line": 196,
+    "text": "if not output.is_relative_to(workspace / \"outputs_e2e\"):"
+  },
+  {
+    "file": "统一模型代码/common/diagnostics/cache_read_path_probe.py",
+    "line": 197,
+    "text": "raise ValueError(\"Output must be inside outputs_e2e\")"
+  },
+  {
+    "file": "统一模型代码/common/diagnostics/cache_training_path_probe.py",
+    "line": 24,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "统一模型代码/common/diagnostics/cache_training_path_probe.py",
+    "line": 25,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "统一模型代码/common/diagnostics/cache_training_path_probe.py",
+    "line": 158,
+    "text": "result = subprocess.run(args, capture_output=True, text=True, encoding=\"utf-8\","
+  },
+  {
+    "file": "统一模型代码/common/diagnostics/cache_training_path_probe.py",
+    "line": 170,
+    "text": "if not output.is_relative_to(ROOT / \"outputs_e2e\"):"
+  },
+  {
+    "file": "统一模型代码/common/diagnostics/cache_training_path_probe.py",
+    "line": 171,
+    "text": "raise ValueError(\"Output outside outputs_e2e\")"
+  },
+  {
+    "file": "统一模型代码/common/diagnostics/optimize_feature_loader.py",
+    "line": 19,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "统一模型代码/common/diagnostics/optimize_feature_loader.py",
+    "line": 20,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "统一模型代码/common/diagnostics/optimize_feature_loader.py",
+    "line": 243,
+    "text": "if not output.is_relative_to(ROOT / \"outputs_e2e\") or output.is_relative_to(source):"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0.py",
+    "line": 26,
+    "text": "PACKAGE_ROOT = Path(__file__).resolve().parents[2]"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0.py",
+    "line": 31,
+    "text": "if str(import_root) in sys.path:"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0.py",
+    "line": 32,
+    "text": "sys.path.remove(str(import_root))"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0.py",
+    "line": 34,
+    "text": "sys.path.insert(0, str(import_root))"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0.py",
+    "line": 143,
+    "text": "completed = subprocess.run("
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0d.py",
+    "line": 17,
+    "text": "PACKAGE_ROOT = Path(__file__).resolve().parents[2]"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0d.py",
+    "line": 19,
+    "text": "if str(PROJECT_ROOT) not in sys.path:"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0d.py",
+    "line": 20,
+    "text": "sys.path.insert(0, str(PROJECT_ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0d.py",
+    "line": 69,
+    "text": "(Path(__file__).resolve().parents[3] / '统一模型代码/gates/g0/directional_ladder.py').resolve(),"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0d.py",
+    "line": 70,
+    "text": "(Path(__file__).resolve().parents[3] / '统一模型代码/gates/g0/eigen_gap_probe.py').resolve(),"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0d_double.py",
+    "line": 16,
+    "text": "PROJECT_ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0d_double.py",
+    "line": 17,
+    "text": "if str(PROJECT_ROOT) not in sys.path:"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0d_double.py",
+    "line": 18,
+    "text": "sys.path.insert(0, str(PROJECT_ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0d_double.py",
+    "line": 63,
+    "text": "(Path(__file__).resolve().parents[3] / '统一模型代码/gates/g0/directional_ladder.py').resolve(),"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0d_double.py",
+    "line": 64,
+    "text": "(Path(__file__).resolve().parents[3] / '统一模型代码/physics/fine_dpd_autograd.py').resolve(),"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0d_fp64.py",
+    "line": 15,
+    "text": "PROJECT_ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0d_fp64.py",
+    "line": 16,
+    "text": "if str(PROJECT_ROOT) not in sys.path:"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0d_fp64.py",
+    "line": 17,
+    "text": "sys.path.insert(0, str(PROJECT_ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0d_fp64.py",
+    "line": 52,
+    "text": "(Path(__file__).resolve().parents[3] / '统一模型代码/gates/g0/directional_ladder.py').resolve(),"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0d_fp64.py",
+    "line": 53,
+    "text": "(Path(__file__).resolve().parents[3] / '统一模型代码/gates/g0/e2e_g0d.py').resolve(),"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0d_fp64.py",
+    "line": 54,
+    "text": "(Path(__file__).resolve().parents[3] / '统一模型代码/physics/fine_dpd_autograd.py').resolve(),"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0d_mixed.py",
+    "line": 15,
+    "text": "PROJECT_ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0d_mixed.py",
+    "line": 16,
+    "text": "if str(PROJECT_ROOT) not in sys.path:"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0d_mixed.py",
+    "line": 17,
+    "text": "sys.path.insert(0, str(PROJECT_ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0d_mixed.py",
+    "line": 53,
+    "text": "(Path(__file__).resolve().parents[3] / '统一模型代码/gates/g0/directional_ladder.py').resolve(),"
+  },
+  {
+    "file": "统一模型代码/gates/g0/e2e_g0d_mixed.py",
+    "line": 54,
+    "text": "(Path(__file__).resolve().parents[3] / '统一模型代码/physics/fine_dpd_autograd.py').resolve(),"
+  },
+  {
+    "file": "统一模型代码/gates/g1/e2e_g1.py",
+    "line": 26,
+    "text": "PACKAGE_ROOT = Path(__file__).resolve().parents[2]"
+  },
+  {
+    "file": "统一模型代码/gates/g1/e2e_g1.py",
+    "line": 31,
+    "text": "if str(import_root) not in sys.path:"
+  },
+  {
+    "file": "统一模型代码/gates/g1/e2e_g1.py",
+    "line": 32,
+    "text": "sys.path.insert(0, str(import_root))"
+  },
+  {
+    "file": "统一模型代码/gates/g1/e2e_g1_r1.py",
+    "line": 10,
+    "text": "PACKAGE_ROOT = Path(__file__).resolve().parents[2]"
+  },
+  {
+    "file": "统一模型代码/gates/g1/e2e_g1_r1.py",
+    "line": 12,
+    "text": "if str(PROJECT_ROOT) not in sys.path:"
+  },
+  {
+    "file": "统一模型代码/gates/g1/e2e_g1_r1.py",
+    "line": 13,
+    "text": "sys.path.insert(0, str(PROJECT_ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g1/e2e_g1_r1.py",
+    "line": 18,
+    "text": "SOURCE_RUN = PROJECT_ROOT / \"outputs_e2e\" / \"unified\" / \"e2e_g1\" / \"20260901_145307\""
+  },
+  {
+    "file": "统一模型代码/gates/g1/diagnostics/diagnose_g1_hard_count_decode.py",
+    "line": 22,
+    "text": "PACKAGE_ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "统一模型代码/gates/g1/diagnostics/diagnose_g1_hard_count_decode.py",
+    "line": 24,
+    "text": "if str(PROJECT_ROOT) not in sys.path:"
+  },
+  {
+    "file": "统一模型代码/gates/g1/diagnostics/diagnose_g1_hard_count_decode.py",
+    "line": 25,
+    "text": "sys.path.insert(0, str(PROJECT_ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g1/recovery/recover_g1_finalize.py",
+    "line": 11,
+    "text": "_path_sys.path.insert(0, str(_PathRoot(__file__).resolve().parents[4]))"
+  },
+  {
+    "file": "统一模型代码/gates/g1/recovery/recover_g1_finalize.py",
+    "line": 137,
+    "text": "\"全部G1参考数据和参考checkpoint均经Windows无缓冲复制到outputs_e2e，\""
+  },
+  {
+    "file": "统一模型代码/gates/g1/recovery/resume_g1_training.py",
+    "line": 18,
+    "text": "PROJECT_ROOT = Path(__file__).resolve().parents[4]"
+  },
+  {
+    "file": "统一模型代码/gates/g1/recovery/resume_g1_training.py",
+    "line": 19,
+    "text": "if str(PROJECT_ROOT) not in sys.path:"
+  },
+  {
+    "file": "统一模型代码/gates/g1/recovery/resume_g1_training.py",
+    "line": 20,
+    "text": "sys.path.insert(0, str(PROJECT_ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g10/config.py",
+    "line": 4,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "统一模型代码/gates/g10/config.py",
+    "line": 5,
+    "text": "BASE = ROOT / 'outputs_e2e/unified/e2e_g10'"
+  },
+  {
+    "file": "统一模型代码/gates/g10/methods.py",
+    "line": 249,
+    "text": "p, q = parents[i], parents[i+1]"
+  },
+  {
+    "file": "统一模型代码/gates/g10/runtime.py",
+    "line": 24,
+    "text": "if path.is_relative_to(Path('F:/SourceCount_DPD/outputs').resolve()):"
+  },
+  {
+    "file": "统一模型代码/gates/g10/test_g10.py",
+    "line": 138,
+    "text": "r = subprocess.run([sys.executable, '-c', \"print('G10 中文日志 测试✓')\"],"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r1/test_shared.py",
+    "line": 110,
+    "text": "text = subprocess.run([sys.executable, '-c', \"print('中文日志：共同状态核验')\"],"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r2/config.py",
+    "line": 7,
+    "text": "BASE = ROOT / 'outputs_e2e/unified/e2e_g10/r2'"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r2/runtime.py",
+    "line": 94,
+    "text": "scene = load_scene(Path(entry['metadata']).parents[1], key)"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r2/tests.py",
+    "line": 151,
+    "text": "result = subprocess.run([sys.executable, '-c', \"print('中文日志：G10-R2 恢复检查')\"],"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r2/test_plot_layout.py",
+    "line": 14,
+    "text": "spec = importlib.util.spec_from_file_location(name, path)"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r2/band/config.py",
+    "line": 5,
+    "text": "BASE = ROOT/'outputs_e2e/unified/e2e_g10/r2/band'"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r3/checks.py",
+    "line": 171,
+    "text": "capture = subprocess.run([sys.executable, '-c', \"print('中文日志：恢复检查通过')\"],"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r3/config.py",
+    "line": 4,
+    "text": "ROOT = Path(__file__).resolve().parents[4]"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r3/config.py",
+    "line": 5,
+    "text": "BASE = ROOT/'outputs_e2e/unified/e2e_g10/r3'"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r3/config.py",
+    "line": 6,
+    "text": "R2_BASE = ROOT/'outputs_e2e/unified/e2e_g10/r2/band'"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r4/checks.py",
+    "line": 26,
+    "text": "cmdline=lambda: ['python', 'F:/SourceCount_DPD_E2E/test.py']),"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r4/checks.py",
+    "line": 110,
+    "text": "output = subprocess.run([sys.executable, '-c', \"print('中文日志：R4核验通过')\"],"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r4/config.py",
+    "line": 4,
+    "text": "ROOT = Path(__file__).resolve().parents[4]"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r4/config.py",
+    "line": 5,
+    "text": "BASE = ROOT/'outputs_e2e/unified/e2e_g10/r4'"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r4/formal_prepare.py",
+    "line": 27,
+    "text": "r=subprocess.run([sys.executable,str(ENTRY),*args],cwd=str(cwd),env=env,"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r4/formal_seal.py",
+    "line": 32,
+    "text": "allowed.add(str(ENTRY.relative_to(ENTRY.parents[3])))"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r4/paper_evidence.py",
+    "line": 14,
+    "text": "ROOT = Path(__file__).resolve().parents[4]"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r4/paper_evidence.py",
+    "line": 15,
+    "text": "BASE = ROOT/'outputs_e2e/unified/e2e_g10/r4'"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r4/paper_pair_prepare.py",
+    "line": 85,
+    "text": "for cwd in (run.ENTRY.parent, run.ROOT/'outputs_e2e'):"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r4/paper_pair_prepare.py",
+    "line": 86,
+    "text": "p = subprocess.run([sys.executable, str(run.ENTRY), '--check-only'], cwd=cwd, env=env,"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r4/runtime.py",
+    "line": 59,
+    "text": "manifest = read(ROOT/'outputs_e2e/literature/g10_r4_nearest_20261016/source_manifest.json')"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r4/stop_review.py",
+    "line": 34,
+    "text": "'R1': ROOT/'outputs_e2e/unified/e2e_g10/r1/fs50m_n8192/formal_20261014_205445',"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r4/stop_review.py",
+    "line": 35,
+    "text": "'R2_BAND': ROOT/'outputs_e2e/unified/e2e_g10/r2/band/independent_20261016_151236',"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r4/stop_review.py",
+    "line": 36,
+    "text": "'R3': ROOT/'outputs_e2e/unified/e2e_g10/r3/independent_20261016_210849_013753'}"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r4/paper_checks/segment_model_check.py",
+    "line": 18,
+    "text": "ROOT = Path(__file__).resolve().parents[5]"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r4/paper_checks/segment_model_check.py",
+    "line": 19,
+    "text": "BASE = ROOT/'outputs_e2e/unified/e2e_g10/r4'"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r4/paper_checks/segment_model_check.py",
+    "line": 141,
+    "text": "assert source.is_relative_to((ROOT/'outputs_e2e').resolve())"
+  },
+  {
+    "file": "统一模型代码/gates/g10/r4/paper_checks/spectral_window_check.py",
+    "line": 148,
+    "text": "assert path.is_relative_to(source) and source.is_relative_to(ROOT/'outputs_e2e')"
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_latent_fusion.py",
+    "line": 23,
+    "text": "PACKAGE_ROOT = Path(__file__).resolve().parents[2]"
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_latent_fusion.py",
+    "line": 27,
+    "text": "\"SOURCECOUNT_REFERENCE_OUTPUT_ROOT\","
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_latent_fusion.py",
+    "line": 31,
+    "text": "if str(root) not in sys.path:"
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_latent_fusion.py",
+    "line": 32,
+    "text": "sys.path.insert(0, str(root))"
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_latent_fusion.py",
+    "line": 55,
+    "text": "/ \"outputs_e2e\""
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_preflight.py",
+    "line": 17,
+    "text": "PACKAGE_ROOT = Path(__file__).resolve().parents[2]"
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_preflight.py",
+    "line": 21,
+    "text": "\"SOURCECOUNT_REFERENCE_OUTPUT_ROOT\","
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_preflight.py",
+    "line": 25,
+    "text": "if str(root) not in sys.path:"
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_preflight.py",
+    "line": 26,
+    "text": "sys.path.insert(0, str(root))"
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_preflight.py",
+    "line": 43,
+    "text": "SOURCE_RUN = PROJECT_ROOT / \"outputs_e2e\" / \"unified\" / \"e2e_g1\" / \"20260901_145307\""
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_r1.py",
+    "line": 23,
+    "text": "PACKAGE_ROOT = Path(__file__).resolve().parents[2]"
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_r1.py",
+    "line": 27,
+    "text": "\"SOURCECOUNT_REFERENCE_OUTPUT_ROOT\","
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_r1.py",
+    "line": 31,
+    "text": "if str(root) not in sys.path:"
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_r1.py",
+    "line": 32,
+    "text": "sys.path.insert(0, str(root))"
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_r1.py",
+    "line": 56,
+    "text": "/ \"outputs_e2e\""
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_r2.py",
+    "line": 20,
+    "text": "PACKAGE_ROOT = Path(__file__).resolve().parents[2]"
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_r2.py",
+    "line": 24,
+    "text": "\"SOURCECOUNT_REFERENCE_OUTPUT_ROOT\","
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_r2.py",
+    "line": 28,
+    "text": "if str(root) not in sys.path:"
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_r2.py",
+    "line": 29,
+    "text": "sys.path.insert(0, str(root))"
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_r2.py",
+    "line": 47,
+    "text": "PROJECT_ROOT / \"outputs_e2e\" / \"unified\" / \"e2e_g2_r1\" / \"20260903_183506\""
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_r2_d1.py",
+    "line": 21,
+    "text": "PACKAGE_ROOT = Path(__file__).resolve().parents[2]"
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_r2_d1.py",
+    "line": 25,
+    "text": "\"SOURCECOUNT_REFERENCE_OUTPUT_ROOT\","
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_r2_d1.py",
+    "line": 29,
+    "text": "if str(root) not in sys.path:"
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_r2_d1.py",
+    "line": 30,
+    "text": "sys.path.insert(0, str(root))"
+  },
+  {
+    "file": "统一模型代码/gates/g2/e2e_g2_r2_d1.py",
+    "line": 44,
+    "text": "PROJECT_ROOT / \"outputs_e2e\" / \"unified\" / \"e2e_g2_r2\" / \"20260904_163951\""
+  },
+  {
+    "file": "统一模型代码/gates/g3/backfill_e2e_rmse.py",
+    "line": 7,
+    "text": "_path_sys.path.insert(0, str(_PathRoot(__file__).resolve().parents[3]))"
+  },
+  {
+    "file": "统一模型代码/gates/g3/backfill_e2e_rmse.py",
+    "line": 22,
+    "text": "PROJECT_ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "统一模型代码/gates/g3/backfill_e2e_rmse.py",
+    "line": 252,
+    "text": "default=PROJECT_ROOT / \"outputs_e2e\" / \"unified\" / \"e2e_rmse_backfill\","
+  },
+  {
+    "file": "统一模型代码/gates/g3/e2e_g3.py",
+    "line": 18,
+    "text": "PACKAGE_ROOT = Path(__file__).resolve().parents[2]"
+  },
+  {
+    "file": "统一模型代码/gates/g3/e2e_g3.py",
+    "line": 20,
+    "text": "if str(PROJECT_ROOT) not in sys.path:"
+  },
+  {
+    "file": "统一模型代码/gates/g3/e2e_g3.py",
+    "line": 21,
+    "text": "sys.path.insert(0, str(PROJECT_ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g3/e2e_g3.py",
+    "line": 36,
+    "text": "PROJECT_ROOT / \"outputs_e2e\" / \"unified\" / \"e2e_g2_r2\" / \"20260904_163951\""
+  },
+  {
+    "file": "统一模型代码/gates/g3/e2e_g3.py",
+    "line": 39,
+    "text": "PROJECT_ROOT / \"outputs_e2e\" / \"unified\" / \"e2e_g2_r2_d1\" / \"20260904_180714\""
+  },
+  {
+    "file": "统一模型代码/gates/g4/e2e_g4.py",
+    "line": 25,
+    "text": "PACKAGE_ROOT = Path(__file__).resolve().parents[2]"
+  },
+  {
+    "file": "统一模型代码/gates/g4/e2e_g4.py",
+    "line": 29,
+    "text": "\"SOURCECOUNT_REFERENCE_OUTPUT_ROOT\","
+  },
+  {
+    "file": "统一模型代码/gates/g4/e2e_g4.py",
+    "line": 33,
+    "text": "if str(root) not in sys.path:"
+  },
+  {
+    "file": "统一模型代码/gates/g4/e2e_g4.py",
+    "line": 34,
+    "text": "sys.path.insert(0, str(root))"
+  },
+  {
+    "file": "统一模型代码/gates/g4/e2e_g4.py",
+    "line": 55,
+    "text": "SOURCE_R2_RUN = PROJECT_ROOT / \"outputs_e2e\" / \"unified\" / \"e2e_g2_r2\" / \"20260904_163951\""
+  },
+  {
+    "file": "统一模型代码/gates/g4/e2e_g4.py",
+    "line": 56,
+    "text": "SOURCE_G3_RUN = PROJECT_ROOT / \"outputs_e2e\" / \"unified\" / \"e2e_g3\" / \"20260905_135720\""
+  },
+  {
+    "file": "统一模型代码/gates/g4/audits/verify_e2e_g4_cache.py",
+    "line": 7,
+    "text": "_path_sys.path.insert(0, str(_PathRoot(__file__).resolve().parents[4]))"
+  },
+  {
+    "file": "统一模型代码/gates/g4/audits/verify_e2e_g4_final.py",
+    "line": 7,
+    "text": "_path_sys.path.insert(0, str(_PathRoot(__file__).resolve().parents[4]))"
+  },
+  {
+    "file": "统一模型代码/gates/g4/recovery/e2e_g4_eager_recovery.py",
+    "line": 16,
+    "text": "PROJECT_ROOT = Path(__file__).resolve().parents[4]"
+  },
+  {
+    "file": "统一模型代码/gates/g4/recovery/e2e_g4_eager_recovery.py",
+    "line": 17,
+    "text": "if str(PROJECT_ROOT) not in sys.path:"
+  },
+  {
+    "file": "统一模型代码/gates/g4/recovery/e2e_g4_eager_recovery.py",
+    "line": 18,
+    "text": "sys.path.insert(0, str(PROJECT_ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/e2e_g5_contract.py",
+    "line": 11,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "统一模型代码/gates/g5/e2e_g5_contract.py",
+    "line": 12,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/e2e_g5_contract.py",
+    "line": 79,
+    "text": "if path.suffix == '.py' and path.is_relative_to(ROOT) and not path.is_relative_to(ROOT / 'outputs_e2e'):"
+  },
+  {
+    "file": "统一模型代码/gates/g5/e2e_g5_evaluate.py",
+    "line": 12,
+    "text": "ROOT=Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "统一模型代码/gates/g5/e2e_g5_evaluate.py",
+    "line": 13,
+    "text": "sys.path.insert(0,str(ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/e2e_g5_execute.py",
+    "line": 13,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "统一模型代码/gates/g5/e2e_g5_execute.py",
+    "line": 14,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/e2e_g5_execute.py",
+    "line": 27,
+    "text": "process = subprocess.Popen([sys.executable, '-u', *arguments], cwd=ROOT, env=env,"
+  },
+  {
+    "file": "统一模型代码/gates/g5/e2e_g5_execute.py",
+    "line": 28,
+    "text": "stdout=log, stderr=subprocess.STDOUT, creationflags=subprocess.CREATE_NO_WINDOW)"
+  },
+  {
+    "file": "统一模型代码/gates/g5/e2e_g5_features.py",
+    "line": 14,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "统一模型代码/gates/g5/e2e_g5_features.py",
+    "line": 15,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/e2e_g5_prepare.py",
+    "line": 18,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "统一模型代码/gates/g5/e2e_g5_prepare.py",
+    "line": 19,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/e2e_g5_prepare.py",
+    "line": 24,
+    "text": "SOURCE = ROOT / \"outputs_e2e/unified/e2e_g4/20260905_164500\""
+  },
+  {
+    "file": "统一模型代码/gates/g5/e2e_g5_prepare.py",
+    "line": 69,
+    "text": "if not path.is_relative_to(ROOT / \"outputs_e2e\"):"
+  },
+  {
+    "file": "统一模型代码/gates/g5/e2e_g5_prepare.py",
+    "line": 140,
+    "text": "if not run.is_relative_to(ROOT / \"outputs_e2e/unified/e2e_g5\"):"
+  },
+  {
+    "file": "统一模型代码/gates/g5/e2e_g5_train.py",
+    "line": 18,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "统一模型代码/gates/g5/e2e_g5_train.py",
+    "line": 19,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/audits/e2e_g5_pilot.py",
+    "line": 12,
+    "text": "ROOT=Path(__file__).resolve().parents[4]"
+  },
+  {
+    "file": "统一模型代码/gates/g5/audits/e2e_g5_pilot.py",
+    "line": 13,
+    "text": "sys.path.insert(0,str(ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/audits/e2e_g5_provenance.py",
+    "line": 12,
+    "text": "ROOT = Path(__file__).resolve().parents[4]"
+  },
+  {
+    "file": "统一模型代码/gates/g5/audits/e2e_g5_provenance.py",
+    "line": 13,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/audits/verify_e2e_g5_final.py",
+    "line": 12,
+    "text": "ROOT = Path(__file__).resolve().parents[4]"
+  },
+  {
+    "file": "统一模型代码/gates/g5/audits/verify_e2e_g5_final.py",
+    "line": 13,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/diagnostics/g5_prefetch_probe.py",
+    "line": 5,
+    "text": "_path_sys.path.insert(0, str(_PathRoot(__file__).resolve().parents[4]))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/diagnostics/g5_prefetch_probe.py",
+    "line": 61,
+    "text": "prior = ROOT/'outputs_e2e/unified/g5_sample_range/20260919_223427'"
+  },
+  {
+    "file": "统一模型代码/gates/g5/diagnostics/g5_prefetch_probe.py",
+    "line": 67,
+    "text": "out = ROOT/'outputs_e2e/unified/g5_prefetch_probe'/time.strftime('%Y%m%d_%H%M%S')"
+  },
+  {
+    "file": "统一模型代码/gates/g5/diagnostics/g5_slot_diagnosis.py",
+    "line": 16,
+    "text": "ROOT = Path(__file__).resolve().parents[4]"
+  },
+  {
+    "file": "统一模型代码/gates/g5/diagnostics/g5_slot_diagnosis.py",
+    "line": 17,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/diagnostics/g5_slot_diagnosis.py",
+    "line": 94,
+    "text": "if not out.is_relative_to(ROOT / \"outputs_e2e\") or out.is_relative_to(run) or run.is_relative_to(out):"
+  },
+  {
+    "file": "统一模型代码/gates/g5/diagnostics/g5_slot_probes.py",
+    "line": 15,
+    "text": "ROOT = Path(__file__).resolve().parents[4]"
+  },
+  {
+    "file": "统一模型代码/gates/g5/diagnostics/g5_slot_probes.py",
+    "line": 16,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/diagnostics/G5工程接入验证.py",
+    "line": 5,
+    "text": "_path_sys.path.insert(0, str(_PathRoot(__file__).resolve().parents[4]))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/diagnostics/G5样本读取验证.py",
+    "line": 5,
+    "text": "_path_sys.path.insert(0, str(_PathRoot(__file__).resolve().parents[4]))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/diagnostics/G5样本读取验证.py",
+    "line": 22,
+    "text": "ROOT = Path(__file__).resolve().parents[4]"
+  },
+  {
+    "file": "统一模型代码/gates/g5/diagnostics/G5样本读取验证.py",
+    "line": 23,
+    "text": "RUN = ROOT / 'outputs_e2e/unified/e2e_g5/20260919_approved'"
+  },
+  {
+    "file": "统一模型代码/gates/g5/diagnostics/G5样本读取验证.py",
+    "line": 53,
+    "text": "out = ROOT / 'outputs_e2e/unified/g5_sample_range' / time.strftime('%Y%m%d_%H%M%S')"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r1/e2e_g5_r1.py",
+    "line": 15,
+    "text": "ROOT = Path(__file__).resolve().parents[4]"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r1/e2e_g5_r1.py",
+    "line": 16,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r1/e2e_g5_r1.py",
+    "line": 28,
+    "text": "SOURCE = ROOT/'outputs_e2e/unified/e2e_g5/20260919_approved'"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r1/e2e_g5_r1.py",
+    "line": 29,
+    "text": "BASE = ROOT/'outputs_e2e/unified/e2e_g5_r1/20260920_approved'"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r1/e2e_g5_r1.py",
+    "line": 75,
+    "text": "if path.suffix == '.py' and path.is_relative_to(ROOT) and not path.is_relative_to(ROOT/'outputs_e2e'):"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r1/e2e_g5_r1.py",
+    "line": 160,
+    "text": "parent = parents[str(p)]"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r1/e2e_g5_r1.py",
+    "line": 356,
+    "text": "if not out.resolve().is_relative_to((ROOT/'outputs_e2e').resolve()) or out.resolve().is_relative_to(SOURCE.resolve()):"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r1/tests/test_g5_r1.py",
+    "line": 10,
+    "text": "ROOT=Path(__file__).resolve().parents[5]"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r1/tests/test_g5_r1.py",
+    "line": 11,
+    "text": "sys.path.insert(0,str(ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r1/tests/test_g5_r1.py",
+    "line": 86,
+    "text": "result=subprocess.run([sys.executable,'-c',\"print('中文路径：联合选峰✓')\"],env=env,"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r2/e2e_g5_r2.py",
+    "line": 12,
+    "text": "ROOT = Path(__file__).resolve().parents[4]"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r2/e2e_g5_r2.py",
+    "line": 13,
+    "text": "sys.path.insert(0,str(ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r2/e2e_g5_r2.py",
+    "line": 100,
+    "text": "'g5_r1_reference':str(ROOT/'outputs_e2e/unified/e2e_g5_r1/20260920_approved/evaluation/comparison_report.json')})"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r2/g5_r2_runtime.py",
+    "line": 22,
+    "text": "ROOT = Path(__file__).resolve().parents[4]"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r2/g5_r2_runtime.py",
+    "line": 23,
+    "text": "SOURCE = ROOT/'outputs_e2e/unified/e2e_g5/20260919_approved'"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r2/g5_r2_runtime.py",
+    "line": 24,
+    "text": "BASE = ROOT/'outputs_e2e/unified/e2e_g5_r2/20260921_approved'"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r2/g5_r2_runtime.py",
+    "line": 151,
+    "text": "parent = parents[str(path)]"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r2/g5_r2_runtime.py",
+    "line": 227,
+    "text": "if path.suffix == '.py' and path.is_relative_to(ROOT) and not path.is_relative_to(ROOT/'outputs_e2e'):"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r3/g5_r3.py",
+    "line": 29,
+    "text": "BASE = ROOT/'outputs_e2e/unified/e2e_g5_r3'"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r3/g5_r3.py",
+    "line": 295,
+    "text": "if path.suffix=='.py' and path.is_relative_to(ROOT) and not path.is_relative_to(ROOT/'outputs_e2e'):"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r4/g5_r4.py",
+    "line": 25,
+    "text": "SOURCE = ROOT/'outputs_e2e/unified/e2e_g5_r3/20260922_115824'"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r4/g5_r4.py",
+    "line": 26,
+    "text": "BASE = ROOT/'outputs_e2e/unified/e2e_g5_r4'"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r4/g5_r4.py",
+    "line": 296,
+    "text": "if p.suffix=='.py' and p.is_relative_to(ROOT) and not p.is_relative_to(ROOT/'outputs_e2e'):"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r5/g5_r5.py",
+    "line": 23,
+    "text": "R4 = ROOT/'outputs_e2e/unified/e2e_g5_r4/20260922_131120'"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r5/g5_r5.py",
+    "line": 24,
+    "text": "BASE = ROOT/'outputs_e2e/unified/e2e_g5_r5'"
+  },
+  {
+    "file": "统一模型代码/gates/g5/r5/g5_r5.py",
+    "line": 205,
+    "text": "if path.suffix == '.py' and path.is_relative_to(ROOT) and not path.is_relative_to(ROOT/'outputs_e2e'):"
+  },
+  {
+    "file": "统一模型代码/gates/g5/recovery/e2e_g5_recover_freeze.py",
+    "line": 6,
+    "text": "ROOT = Path(__file__).resolve().parents[4]"
+  },
+  {
+    "file": "统一模型代码/gates/g5/recovery/e2e_g5_recover_freeze.py",
+    "line": 7,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/recovery/e2e_g5_resume_budget.py",
+    "line": 9,
+    "text": "ROOT = Path(__file__).resolve().parents[4]"
+  },
+  {
+    "file": "统一模型代码/gates/g5/recovery/e2e_g5_resume_budget.py",
+    "line": 10,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/recovery/e2e_g5_resume_cuda.py",
+    "line": 7,
+    "text": "ROOT = Path(__file__).resolve().parents[4]"
+  },
+  {
+    "file": "统一模型代码/gates/g5/recovery/e2e_g5_resume_cuda.py",
+    "line": 8,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/recovery/G5停止回读.py",
+    "line": 5,
+    "text": "_path_sys.path.insert(0, str(_PathRoot(__file__).resolve().parents[4]))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/recovery/G5停止回读.py",
+    "line": 15,
+    "text": "RUN = Path(__file__).resolve().parents[4] / 'outputs_e2e/unified/e2e_g5/20260919_approved'"
+  },
+  {
+    "file": "统一模型代码/gates/g5/tests/test_g5_model.py",
+    "line": 12,
+    "text": "ROOT = Path(__file__).resolve().parents[4]"
+  },
+  {
+    "file": "统一模型代码/gates/g5/tests/test_g5_model.py",
+    "line": 13,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/tests/test_g5_training_contract.py",
+    "line": 12,
+    "text": "ROOT = Path(__file__).resolve().parents[4]"
+  },
+  {
+    "file": "统一模型代码/gates/g5/tests/test_g5_training_contract.py",
+    "line": 13,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/tests/test_g5_training_contract.py",
+    "line": 37,
+    "text": "folder = Path(tempfile.mkdtemp(prefix='g5_training_contract_', dir=ROOT / 'outputs_e2e'))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/tests/test_g5_verified_io.py",
+    "line": 15,
+    "text": "ROOT = Path(__file__).resolve().parents[4]"
+  },
+  {
+    "file": "统一模型代码/gates/g5/tests/test_g5_verified_io.py",
+    "line": 16,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "统一模型代码/gates/g5/tests/test_g5_verified_io.py",
+    "line": 21,
+    "text": "out = Path(tempfile.mkdtemp(prefix=\"g5_io_smoke_\", dir=ROOT / \"outputs_e2e\"))"
+  },
+  {
+    "file": "统一模型代码/gates/g6/g6_p0.py",
+    "line": 31,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "统一模型代码/gates/g6/g6_p0.py",
+    "line": 32,
+    "text": "G5 = ROOT/'outputs_e2e/unified/e2e_g5/20260919_approved'"
+  },
+  {
+    "file": "统一模型代码/gates/g6/g6_p0.py",
+    "line": 33,
+    "text": "R5 = ROOT/'outputs_e2e/unified/e2e_g5_r5/20260922_152822'"
+  },
+  {
+    "file": "统一模型代码/gates/g6/g6_p0.py",
+    "line": 34,
+    "text": "BASE = ROOT/'outputs_e2e/unified/e2e_g6_p0'"
+  },
+  {
+    "file": "统一模型代码/gates/g6/g6_p0.py",
+    "line": 93,
+    "text": "if not p.is_relative_to(ROOT/'outputs_e2e') or p.is_relative_to(self.out):"
+  },
+  {
+    "file": "统一模型代码/gates/g6/g6_p1_runtime.py",
+    "line": 24,
+    "text": "BASE = ROOT/'outputs_e2e/unified/e2e_g6_p1/20260922_approved'"
+  },
+  {
+    "file": "统一模型代码/gates/g6/g6_p1_runtime.py",
+    "line": 25,
+    "text": "P0 = ROOT/'outputs_e2e/unified/e2e_g6_p0/20260922_165854'"
+  },
+  {
+    "file": "统一模型代码/gates/g6/g6_p1_runtime.py",
+    "line": 55,
+    "text": "if p.suffix == '.py' and p.is_relative_to(ROOT) and not p.is_relative_to(ROOT/'outputs_e2e'):"
+  },
+  {
+    "file": "统一模型代码/gates/g6/g6_p2_runtime.py",
+    "line": 18,
+    "text": "BASE = ROOT/'outputs_e2e/unified/e2e_g6_p2/20260923_approved'"
+  },
+  {
+    "file": "统一模型代码/gates/g6/g6_p2_runtime.py",
+    "line": 60,
+    "text": "if path.suffix=='.py' and path.is_relative_to(ROOT) and not path.is_relative_to(ROOT/'outputs_e2e'):"
+  },
+  {
+    "file": "统一模型代码/gates/g6/g6_p3.py",
+    "line": 26,
+    "text": "BASE = ROOT/'outputs_e2e/unified/e2e_g6_p3'"
+  },
+  {
+    "file": "统一模型代码/gates/g6/g6_p3.py",
+    "line": 63,
+    "text": "r1contract = ROOT/'outputs_e2e/unified/e2e_g5_r1/20260920_approved/contract.json'"
+  },
+  {
+    "file": "统一模型代码/gates/g6/g6_p4.py",
+    "line": 26,
+    "text": "BASE = ROOT/'outputs_e2e/unified/e2e_g6_p4'"
+  },
+  {
+    "file": "统一模型代码/gates/g6/g6_p4.py",
+    "line": 27,
+    "text": "P3 = ROOT/'outputs_e2e/unified/e2e_g6_p3/20260924_182847'"
+  },
+  {
+    "file": "统一模型代码/gates/g6/g6_p4.py",
+    "line": 33,
+    "text": "if not self.out.is_relative_to(BASE.resolve()) or self.out.is_relative_to(Path('F:/SourceCount_DPD/outputs').resolve()):"
+  },
+  {
+    "file": "统一模型代码/gates/g7/compact_data.py",
+    "line": 17,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "统一模型代码/gates/g7/compact_data.py",
+    "line": 18,
+    "text": "BASE = ROOT / 'outputs_e2e/unified/e2e_g7_compact'"
+  },
+  {
+    "file": "统一模型代码/gates/g7/compact_data.py",
+    "line": 19,
+    "text": "SOURCE = ROOT / 'outputs_e2e/unified/e2e_g5/20260919_approved'"
+  },
+  {
+    "file": "统一模型代码/gates/g7/compact_data.py",
+    "line": 20,
+    "text": "P1 = ROOT / 'outputs_e2e/unified/e2e_g6_p1/20260922_approved'"
+  },
+  {
+    "file": "统一模型代码/gates/g7/compact_data.py",
+    "line": 21,
+    "text": "OLD_G7 = ROOT / 'outputs_e2e/unified/e2e_g7/20260924_approved'"
+  },
+  {
+    "file": "统一模型代码/gates/g7/g7_runtime.py",
+    "line": 27,
+    "text": "BASE = ROOT/'outputs_e2e/unified/e2e_g7/20260924_approved'"
+  },
+  {
+    "file": "统一模型代码/gates/g7/g7_runtime.py",
+    "line": 58,
+    "text": "r1 = read(ROOT/'outputs_e2e/unified/e2e_g5_r1/20260920_approved/contract.json')"
+  },
+  {
+    "file": "统一模型代码/gates/g7/g7_runtime.py",
+    "line": 83,
+    "text": "if not self.out.is_relative_to(BASE.resolve()) or self.out.is_relative_to(Path('F:/SourceCount_DPD/outputs').resolve()):"
+  },
+  {
+    "file": "统一模型代码/gates/g8/legacy.py",
+    "line": 18,
+    "text": "if str(folder) not in sys.path:"
+  },
+  {
+    "file": "统一模型代码/gates/g8/legacy.py",
+    "line": 19,
+    "text": "sys.path.insert(0, str(folder))"
+  },
+  {
+    "file": "统一模型代码/gates/g8/legacy.py",
+    "line": 34,
+    "text": "for audit_path in (ROOT/'outputs_e2e/unified/e2e_g7_compact').glob('*/evaluation/final_audit_report.json'):"
+  },
+  {
+    "file": "统一模型代码/gates/g8/legacy.py",
+    "line": 41,
+    "text": "self.run = audit_path.parents[1]"
+  },
+  {
+    "file": "统一模型代码/gates/g8/legacy.py",
+    "line": 64,
+    "text": "if not path.is_relative_to(ROOT/'outputs_e2e') or 'input_snapshot' not in path.parts:"
+  },
+  {
+    "file": "统一模型代码/gates/g8/runner.py",
+    "line": 51,
+    "text": "captured = subprocess.run([sys.executable, '-c', 'print(\"G8中文路径与日志：通过\")'],"
+  },
+  {
+    "file": "统一模型代码/gates/g8/storage.py",
+    "line": 15,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "统一模型代码/gates/g8/storage.py",
+    "line": 16,
+    "text": "BASE = ROOT/'outputs_e2e/unified/e2e_g8'"
+  },
+  {
+    "file": "统一模型代码/gates/g8/storage.py",
+    "line": 17,
+    "text": "FROZEN = Path('F:/SourceCount_DPD/outputs').resolve()"
+  },
+  {
+    "file": "统一模型代码/gates/g9/runtime.py",
+    "line": 12,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "统一模型代码/gates/g9/runtime.py",
+    "line": 13,
+    "text": "BASE = ROOT/'outputs_e2e/unified/e2e_g9'"
+  },
+  {
+    "file": "统一模型代码/gates/g9/runtime.py",
+    "line": 14,
+    "text": "FROZEN = Path('F:/SourceCount_DPD/outputs').resolve()"
+  },
+  {
+    "file": "统一模型代码/gates/g9/verify_repair.py",
+    "line": 32,
+    "text": "result=subprocess.run([sys.executable,'-c',\"print('修复版中文日志捕获通过')\"],"
+  },
+  {
+    "file": "统一模型代码/gates/g9/probes/reevaluate_baseline.py",
+    "line": 12,
+    "text": "ROOT = Path(__file__).resolve().parents[4]"
+  },
+  {
+    "file": "统一模型代码/gates/g9/probes/reevaluate_baseline.py",
+    "line": 13,
+    "text": "BASE = ROOT / 'outputs_e2e/unified'"
+  },
+  {
+    "file": "统一模型代码/gates/g9/probes/reevaluate_baseline.py",
+    "line": 87,
+    "text": "protected = ROOT/'outputs_e2e/reports/kc_ho_20261012'"
+  },
+  {
+    "file": "运行入口/E2E/历史缓存状态检查.py",
+    "line": 6,
+    "text": "ROOT = Path(__file__).resolve().parents[2]"
+  },
+  {
+    "file": "运行入口/E2E/历史缓存状态检查.py",
+    "line": 17,
+    "text": "folder = root / 'outputs_e2e/unified' / relative"
+  },
+  {
+    "file": "运行入口/E2E/G10/G10R1基线比较一键运行.py",
+    "line": 6,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "运行入口/E2E/G10/G10R1基线比较一键运行.py",
+    "line": 7,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "运行入口/E2E/G10/G10R2双候选比较一键运行.py",
+    "line": 6,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "运行入口/E2E/G10/G10R2双候选比较一键运行.py",
+    "line": 7,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "运行入口/E2E/G10/G10R2带限独立比较一键运行.py",
+    "line": 7,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "运行入口/E2E/G10/G10R2带限独立比较一键运行.py",
+    "line": 8,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "运行入口/E2E/G10/G10R3轻量AP验证一键运行.py",
+    "line": 6,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "运行入口/E2E/G10/G10R3轻量AP验证一键运行.py",
+    "line": 9,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "运行入口/E2E/G10/G10R4五候选配对一键运行.py",
+    "line": 6,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "运行入口/E2E/G10/G10R4五候选配对一键运行.py",
+    "line": 7,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "运行入口/E2E/G10/G10R4完整比较一键运行.py",
+    "line": 6,
+    "text": "ROOT=Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "运行入口/E2E/G10/G10R4完整比较一键运行.py",
+    "line": 7,
+    "text": "sys.path.insert(0,str(ROOT))"
+  },
+  {
+    "file": "运行入口/E2E/G10/G10R4近邻核验短测.py",
+    "line": 6,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "运行入口/E2E/G10/G10R4近邻核验短测.py",
+    "line": 7,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "运行入口/E2E/G10/G10多方法比较一键运行.py",
+    "line": 6,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "运行入口/E2E/G10/G10多方法比较一键运行.py",
+    "line": 7,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "运行入口/E2E/G5/G5一键继续.py",
+    "line": 9,
+    "text": "_path_sys.path.insert(0, str(_PathRoot(__file__).resolve().parents[3]))"
+  },
+  {
+    "file": "运行入口/E2E/G5/G5一键继续.py",
+    "line": 21,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "运行入口/E2E/G5/G5一键继续.py",
+    "line": 22,
+    "text": "RUN = ROOT / 'outputs_e2e/unified/e2e_g5/20260919_approved'"
+  },
+  {
+    "file": "运行入口/E2E/G5/G5资源采样.py",
+    "line": 5,
+    "text": "_path_sys.path.insert(0, str(_PathRoot(__file__).resolve().parents[3]))"
+  },
+  {
+    "file": "运行入口/E2E/G5/G5资源采样.py",
+    "line": 15,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "运行入口/E2E/G5/G5资源采样.py",
+    "line": 16,
+    "text": "RUN = ROOT / 'outputs_e2e/unified/e2e_g5/20260919_approved'"
+  },
+  {
+    "file": "运行入口/E2E/G5/G5资源采样.py",
+    "line": 43,
+    "text": "result = subprocess.run([gpu, '--query-gpu=utilization.gpu,utilization.memory,memory.used,power.draw',"
+  },
+  {
+    "file": "运行入口/E2E/G5/G5资源采样.py",
+    "line": 46,
+    "text": "creationflags=subprocess.CREATE_NO_WINDOW)"
+  },
+  {
+    "file": "运行入口/E2E/G5_R1/G5_R1一键运行.py",
+    "line": 8,
+    "text": "_path_sys.path.insert(0, str(_PathRoot(__file__).resolve().parents[3]))"
+  },
+  {
+    "file": "运行入口/E2E/G5_R1/G5_R1一键运行.py",
+    "line": 17,
+    "text": "ROOT=Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "运行入口/E2E/G5_R1/G5_R1一键运行.py",
+    "line": 19,
+    "text": "BASE=ROOT/'outputs_e2e/unified/e2e_g5_r1/20260920_approved'"
+  },
+  {
+    "file": "运行入口/E2E/G5_R1/G5_R1一键运行.py",
+    "line": 33,
+    "text": "subprocess.run(command+['--check-only'],cwd=ROOT,env=env,check=True)"
+  },
+  {
+    "file": "运行入口/E2E/G5_R1/G5_R1一键运行.py",
+    "line": 43,
+    "text": "process=subprocess.Popen(command+['--worker','--started',str(started)],cwd=ROOT,env=env)"
+  },
+  {
+    "file": "运行入口/E2E/G5_R1/G5_R1一键运行.py",
+    "line": 47,
+    "text": "except (subprocess.TimeoutExpired,KeyboardInterrupt) as exc:"
+  },
+  {
+    "file": "运行入口/E2E/G5_R1/G5_R1一键运行.py",
+    "line": 51,
+    "text": "status='BUDGET_EXCEEDED' if isinstance(exc,subprocess.TimeoutExpired) else 'USER_INTERRUPTED'"
+  },
+  {
+    "file": "运行入口/E2E/G5_R2/G5_R2一键运行.py",
+    "line": 6,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "运行入口/E2E/G5_R2/G5_R2一键运行.py",
+    "line": 7,
+    "text": "sys.path.insert(0,str(ROOT))"
+  },
+  {
+    "file": "运行入口/E2E/G6/G6_P1一键运行.py",
+    "line": 6,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "运行入口/E2E/G6/G6_P1一键运行.py",
+    "line": 7,
+    "text": "sys.path.insert(0,str(ROOT))"
+  },
+  {
+    "file": "运行入口/E2E/G6/G6_P2一键运行.py",
+    "line": 6,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "运行入口/E2E/G6/G6_P2一键运行.py",
+    "line": 7,
+    "text": "sys.path.insert(0,str(ROOT))"
+  },
+  {
+    "file": "运行入口/E2E/G7/G7一键运行.py",
+    "line": 6,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "运行入口/E2E/G7/G7一键运行.py",
+    "line": 7,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "运行入口/E2E/G7/G7小区域一键运行.py",
+    "line": 6,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "运行入口/E2E/G7/G7小区域一键运行.py",
+    "line": 7,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "运行入口/E2E/G7/G7正式训练一键运行.py",
+    "line": 6,
+    "text": "ROOT=Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "运行入口/E2E/G7/G7正式训练一键运行.py",
+    "line": 7,
+    "text": "sys.path.insert(0,str(ROOT))"
+  },
+  {
+    "file": "运行入口/E2E/G7/G7预算续跑.py",
+    "line": 12,
+    "text": "ROOT=Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "运行入口/E2E/G7/G7预算续跑.py",
+    "line": 13,
+    "text": "RUN=ROOT/'outputs_e2e/unified/e2e_g7_compact/formal_v1_40h'"
+  },
+  {
+    "file": "运行入口/E2E/G7/G7预算续跑.py",
+    "line": 18,
+    "text": "sys.path.insert(0,str(ROOT))"
+  },
+  {
+    "file": "运行入口/E2E/G8/G8场景核验一键运行.py",
+    "line": 12,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "运行入口/E2E/G8/G8场景核验一键运行.py",
+    "line": 13,
+    "text": "sys.path.insert(0, str(ROOT))"
+  },
+  {
+    "file": "运行入口/E2E/G9/G9修复后正式比较一键运行.py",
+    "line": 7,
+    "text": "ROOT=Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "运行入口/E2E/G9/G9修复后正式比较一键运行.py",
+    "line": 9,
+    "text": "CONTRACT=ROOT/'outputs_e2e/unified/e2e_g9/repair_prepare_20261011_01/frozen_contract.json'"
+  },
+  {
+    "file": "运行入口/E2E/G9/G9修复后正式比较一键运行.py",
+    "line": 19,
+    "text": "result=subprocess.run(command,cwd=str(ROOT),env=env,text=True,encoding='utf-8',errors='replace')"
+  },
+  {
+    "file": "运行入口/E2E/G9/G9修复后正式比较一键运行.py",
+    "line": 22,
+    "text": "print('完成：请回读outputs_e2e/unified/e2e_g9/formal_20261011_repaired中的运行摘要及报告。')"
+  },
+  {
+    "file": "运行入口/E2E/G9/G9正式比较一键运行.py",
+    "line": 7,
+    "text": "ROOT = Path(__file__).resolve().parents[3]"
+  },
+  {
+    "file": "运行入口/E2E/G9/G9正式比较一键运行.py",
+    "line": 9,
+    "text": "PREPARED = ROOT/'outputs_e2e/unified/e2e_g9/prepare_20261010_01/frozen_contract.json'"
+  },
+  {
+    "file": "运行入口/E2E/G9/G9正式比较一键运行.py",
+    "line": 20,
+    "text": "result = subprocess.run(command, cwd=str(ROOT), env=env, text=True,"
+  },
+  {
+    "file": "运行入口/E2E/G9/G9正式比较一键运行.py",
+    "line": 24,
+    "text": "print('完成。请回读 outputs_e2e/unified/e2e_g9/formal_20261010_approved 下的运行摘要与报告。')"
+  }
+]

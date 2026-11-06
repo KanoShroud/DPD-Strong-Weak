@@ -1,0 +1,1353 @@
+--- PDF PAGE 1 ---
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 50, NO. 8, AUGUST 2002
+1843
+Maximum-Likelihood Source Localization and
+Unknown Sensor Location Estimation for Wideband
+Signals in the Near-Field
+Joe C. Chen, Student Member, IEEE, Ralph E. Hudson, and Kung Yao, Fellow, IEEE
+Abstract—In this paper, we derive the maximum-likelihood
+(ML) location estimator for wideband sources in the near field
+of the sensor array. The ML estimator is optimized in a single
+step, as opposed to other estimators that are optimized separately
+in relative time-delay and source location estimations. For the
+multisource case, we propose and demonstrate an efficient alter-
+nating projection procedure based on sequential iterative search
+on single-source parameters. The proposed algorithm is shown
+to yield superior performance over other suboptimal techniques,
+including the wideband MUSIC and the two-step least-squares
+methods, and is efficient with respect to the derived Cramér–Rao
+bound (CRB). From the CRB analysis, we find that better source
+location estimates can be obtained for high-frequency signals than
+low-frequency signals. In addition, large range estimation error
+results when the source signal is unknown, but such unknown
+parameter does not have much impact on angle estimation. In
+some applications, the locations of some sensors may be unknown
+and must be estimated. The proposed method is extended to
+estimate the range from a source to an unknown sensor location.
+After a number of source-location frames, the location of the
+uncalibrated sensor can be determined based on a least-squares
+unknown sensor location estimator.
+Index
+Terms—Array
+shape
+calibration,
+beamforming,
+Cramér–Rao bound, source localization.
+I. INTRODUCTION
+S
+OURCE localization using sensor arrays has been one of
+the central problems in radar, sonar, navigation, geophysics,
+and acoustic tracking. For the past few decades, a wide variety
+of techniques have been proposed for the estimation of the di-
+rection-of-arrival (DOA) of narrowband sources in the far-field
+[1]–[5]. In [6], the authors provided an excellent review and
+comparison of the various narrowband techniques. Recently,
+there has been an interest in locating wideband sources in the
+near field, including both the range and the DOA. One obvious
+application is to locate nearby acoustic sources using a micro-
+phone array.
+For wideband signals, e.g., acoustic or seismic, the algorithms
+need to be tailored to account for the large bandwidth. Many
+Manuscript received June 11, 2001; revised April 18, 2002. This work was
+supported in part by the Defense Advanced Research Projects Agency SensIT
+Program under Contract N66001-00-1-8937, NASA-Dryden under Grant
+NCC2-374, an UC DIMI grant sponsored by STMicroelectronics, Inc., and a
+Raytheon Doctoral Fellowship. The associate editor coordinating the review of
+this paper and approving it for publication was Dr. Joseph Tabrikian.
+The authors are with the Electrical Engineering Department, University
+of California, Los Angeles, CA 90045 USA (e-mail: jcchen@ee.ucla.edu;
+yao@ee.ucla.edu; ralph@ucla.edu).
+Publisher Item Identifier 10.1109/TSP.2002.800420.
+have proposed to use focusing matrices to transform the wide-
+band signal subspaces into a predefined narrowband subspace
+[7]–[9]. Then, the MUSIC algorithm can be applied afterwards
+as if it was the narrowband case. This class of methods is re-
+ferred to as the coherent signal subspace method (CSM). Other
+techniques that evolved from the CSM method include the use of
+steered covariance matrix [10] and interpolated array [11]. How-
+ever, the drawback of these methods is the preprocessing that
+must be performed beforehand. For instance, the CSM methods
+need to construct the focusing matrices that require focusing an-
+gles that are not far from the true DOAs. The interpolated array
+technique requires the construction of the interpolation matrix,
+which is also a function of angle. Furthermore, these techniques
+have never been tested for the near-field case. Recently, an ex-
+tension of the above methods, but without any preprocessing
+step, has been studied for the near-field case [12]. It is a nat-
+ural wideband extension of the conventional MUSIC algorithm;
+thus, we refer to this method as the wideband MUSIC algorithm
+and compare it with the proposed method of this paper. It is
+shown that wideband MUSIC yields poor estimation results (es-
+pecially in range) for a finite number of data samples (limited
+due to moving source) and low SNR.
+Another class of wideband source localization algorithms is
+based on time delays (usually for a single source only). These
+techniques include two independent steps, namely, estimating
+relative time delays between sensor data and then source loca-
+tion based on the relative time-delay estimates. Closed-form so-
+lutions can be derived for the second step based on spherical
+interpolation [13], [14], hyperbolic intersection [15], or linear
+intersection [16]. However, these algorithms require the knowl-
+edge of the speed of propagation (e.g., the acoustic case). In
+[17] and [18], closed-form least-squares (LS) and constrained
+least-squares (CLS) solutions are derived for the case of un-
+known speed of propagation (e.g., the seismic case). The CLS
+method improves the performance from that of the LS method
+by forcing an equality constraint on two components of the
+unknowns. When the speed of propagation is known, the LS
+method in [17] and [18], after removing such unknowns, be-
+comes the method independently derived later in [19]. In [19],
+the authors show that their method is mathematically equivalent
+to the spherical interpolation technique [13], [14] but with less
+computational complexity. We refer to the method in [19] as the
+LS method of known speed of propagation and use it to com-
+pare with the proposed method of this paper. In theory, these
+two-step methods can work for multiple sources, as long as the
+relative time delays can be estimated from the data. However,
+1053-587X/02$17.00 © 2002 IEEE
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 04:38:12 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 2 ---
+1844
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 50, NO. 8, AUGUST 2002
+this remains to be a challenging task in practice. Recently, the
+use of higher order statistics to estimate the relative time delays
+for multiple independent sources has been studied in [20].
+In this paper, we derive the “optimal” parametric ML solution
+to locate wideband sources in the near field. The wideband data
+is transformed to the frequency domain, and the signal spectrum
+can be represented by the narrowband model for each frequency
+bin. This allows a direct optimization for the source location
+under the assumption of i.i.d. noise instead of the two-step opti-
+mization that involves relative time-delay estimation. However,
+in practice, we apply the DFT, and thus, there are a few artifacts.
+The circular shift property of the DFT introduces an edge effect
+problem for the actual linear time shift, and this edge effect is
+not negligible for a small block of data. To remove the edge ef-
+fect, appropriate zero padding can be applied. However, it is also
+known that zero padding destroys the orthogonality of the DFT
+transform, which makes the noise spectrum appear correlated
+across frequency. As a result, an exact ML solution for data of
+finite length does not exist. Instead, we ignore these finite effects
+and derive the solution, which we refer to as the approximated
+ML (AML) solution. Note a similar solution has been derived
+independently in [21] for the far-field case, but here, we con-
+sider the near-field case.
+In practice, the number of sources must be determined inde-
+pendent of any localization algorithm, but here, we assume it is
+known for the purpose of this paper. For the single-source case,
+we show the AML formulation is equivalent to maximizing the
+sum of the weighted cross-correlation functions between time
+shifted sensor data. The optimization using all sensor pairs mit-
+igates the ambiguity problem that often arises in the relative
+time-delay estimation between two widely separated sensors for
+the two-step LS methods. In the case of multiple sources, we
+apply an efficient alternating projection (AP) procedure, which
+avoids the multidimensional search by sequentially estimating
+the location of one source while fixing the estimates of other
+source locations from the previous iteration.
+Besides the development of the AML method, we also derive
+the theoretical Cramér–Rao bound (CRB) for both performance
+comparison and basic understanding purposes. The CRB shows
+that the localization variance bound can be broken down into
+two separate parts: one that depends on the signal characteris-
+tics and one that depends on the array geometry. The signal de-
+pendent part shows that theoretically, the source location RMS
+error is linearly proportional to the noise level and the speed of
+propagation and inversely proportional to the source spectrum
+and frequency. Thus, better source location estimates can be ob-
+tained for high-frequency signals than low-frequency signals. In
+further sensitivity analysis, large range estimation error is found
+when the source signal is unknown, but such an unknown pa-
+rameter does not affect the angle estimation.
+It is well known that the performance of source localization
+degrades when the sensor locations are in error. This problem
+arises in many cases where the sensors may be randomly de-
+ployed in an ad hoc network or even move to different positions
+in time. The estimation of unknown sensor locations, which are
+often called array shape calibration, has also drawn consider-
+able attention in the literature [22]–[25]. In the later section of
+this paper, we extend the AML source localization algorithm to
+output an estimate of the range from a source to one or more sen-
+sors of unknown locations. When several ranges from different
+source locations are accumulated, they can be combined by a
+least-squares calibration (LSC) method to estimate the unknown
+sensor locations. This extended AML method shows promising
+improvement over our previous method based on LS source lo-
+calization [26]. Other issues such as calibrating the sensor gain,
+phase, mutual coupling, and channel mismatch are also critical
+in practice, but we ignore them for the purpose of this paper.
+The paper is organized as follows. In Section II, we derive
+the AML solution for source localization. Then, the CRB for
+source localization is derived in Section III. In Section IV, the
+LSC unknown sensor location estimation is introduced. Then,
+simulation examples and systematic evaluations are provided to
+show the effectiveness of the proposed algorithms in Section V.
+Finally, we give our conclusions.
+II. MAXIMUM-LIKELIHOOD SOURCE LOCALIZATION
+A. Derivation of the AML Solution
+The derivation of the AML solution for real-valued signals
+generated by wideband sources in the near field is an exten-
+sion of the classical maximum-likelihood DOA estimator for
+narrowband signals. Due to the wideband nature of the signal,
+the AML metric results in a combination of each subband. Since
+we consider near-field sources, the signal strength at each sensor
+can be different due to nonuniform spatial loss in the near-field
+geometry. The sensors are assumed to be omnidirectional and
+have identical responses. For a randomly distributed array of
+sensors, the data collected by the
+th sensor at time
+can be
+given by
+(1)
+for
+,
+, and
+,
+where
+number of sources (assumed to be known and
+);
+signal gain level of the
+th source at the th sensor
+(assumed to be constant within the block of data);
+source signal;
+fractional time-delay in samples (which is allowed
+to be any real-valued number);
+zero mean i.i.d. Gaussian noise with variance
+The time delay is defined by
+, where
+th source location;
+th sensor location;
+speed of propagation in length unit per sample.
+Define the relative time-delay between the th and the th sen-
+sors by
+A block of
+samples in each sensor data can be transformed to
+the frequency domain by a DFT of length
+. As discussed ear-
+lier, the DFT creates a circular time shift rather than the actual
+time shift. When
+, severe edge effect results for small
+, but it becomes a good approximation for large
+. We can
+apply zero padding for small
+to remove such edge effect, i.e.,
+, where
+is the maximum relative time-delay among
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 04:38:12 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 3 ---
+CHEN et al.: MAXIMUM-LIKELIHOOD SOURCE LOCALIZATION
+1845
+all sensor pairs. However, the zero-padding removes the orthog-
+onality of the noise component across frequency. In practice, the
+size of
+is limited due to the nonstationarity of the source lo-
+cation. Thus, in the following derivation, we assume that either
+is large enough or that the noise is almost uncorrelated across
+frequency and claim such a formulation as an approximation
+to the maximum-likelihood solution. Throughout this paper, we
+denote superscript
+as the transpose,
+as the complex conju-
+gate transpose, and
+as the complex conjugate operation.
+In the frequency domain, the array signal model is given by
+(2)
+for
+, where the array data spectrum is
+given by
+, the steering matrix
+is given by
+, the steering
+vector is given by
+,
+, and the source spectrum is given
+by
+. The noise spectrum
+vector
+is zero mean complex white Gaussian distributed
+with variance
+in each element. Note due to the transforma-
+tion to the frequency domain,
+asymptotically approaches
+a Gaussian distribution by the central limit theorem, even if
+the actual time-domain noise has an arbitrary i.i.d. distribution
+(with bounded variance) other than Gaussian. This asymptotic
+property in the frequency domain provides a more reliable noise
+model than the time-domain model in some practical cases. For
+convenience of notation, we define
+. By
+stacking up the
+positive frequency bins (zero frequency
+bin is not important and the negative frequency bins are merely
+mirror images) of the signal model in (2) into a single column,
+we can rewrite the sensor data into a
+space–tem-
+poral frequency vector as
+, where
+, and
+.
+We assume, initially, that the unknown parameter space is
+, where the source locations
+are denoted by
+, and the source signal
+spectrum is denoted by
+The signal gain levels
+are assumed to be known in
+this derivation, and the effect of not knowing
+will be
+discussed in a later section. The log-likelihood function of
+the complex Gaussian noise vector
+, after ignoring irrelevant
+constant terms, is given by
+. The
+maximum-likelihood estimation of the source locations and
+source signals is given by the following optimization criterion:
+(3)
+which is equivalent to finding
+for all
+bins,
+where
+(4)
+The minima of
+with respect to the source signal vector
+must satisfy
+; hence, the estimate of
+the source signal vector that yields the minimum residual at any
+source location is given by
+(5)
+where
+is the pseudo-in-
+verse of the steering matrix
+. Define the orthogonal
+projection
+and the complement
+orthogonal projection
+By sub-
+stituting (5) into (4), the minimization function becomes
+. After substituting the estimate of
+, the AML source locations estimate can be obtained by
+solving the following maximization problem:
+(6)
+Note that the AML metric
+has an implicit form for the es-
+timation of
+, whereas the metric
+shows the explicit
+form. Once the AML estimate of
+is obtained, the AML esti-
+mate of the source signals can be given by (5). It is interesting
+that when zero-padding is applied, the covariance matrix
+is
+no longer diagonal and is indeed singular; thus, an exact ML so-
+lution cannot be derived without the inverse of
+. In the above
+formulation, we derive the AML solution using only a single
+block. A different AML solution using multiple blocks could
+also be formed with some possible computational advantages.
+When the speed of propagation is unknown, as in the case of
+seismic media, we may expand the unknown parameter space
+to include it, i.e.,
+.
+B. Single-Source Case
+In the single-source case, the AML metric in (6) be-
+comes
+, where
+is the beam-steered beamformer output in the
+frequency-domain [27],
+is the normalized
+steering vector, and
+is the normalized
+signal gain level at the th sensor. It is interesting to note that in
+the near-field case, the AML beamformer output is the result of
+forming a focused spot (or area) on the source location rather
+than a beam since range is also considered. In Appendix A,
+the AML criterion is shown to be equivalent to maximizing
+the weighted cross correlations between sensor data, which is
+commonly used for estimating relative time delays.
+The source location can be estimated based on where
+is maximized for a given set of locations. Define the normalized
+metric
+(7)
+where
+, which is useful to
+verify estimated peak values. Without any prior information on
+possible region of the source location, the AML metric should
+be evaluated on a set of grid points. A nonuniform grid is sug-
+gested to reduce the number of grid points. For the 2-D case,
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 04:38:12 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 4 ---
+1846
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 50, NO. 8, AUGUST 2002
+polar coordinates with nonuniform sampling of the range and
+uniform sampling of the angle can be transformed to Cartesian
+coordinates that are dense near the array and sparse away from
+the array. When the crude estimate of the source location is ob-
+tained from the grid-point search, iterative methods can be ap-
+plied to reach the global maximum (without running into local
+maxima given appropriate choice of grid points). In some cases,
+grid-point search is not necessary since a good initial location
+estimate is available, e.g., from the estimate of the previous data
+frame for a slowly moving source. One simple iterative gradient
+algorithm can be formulated in the following:
+(8)
+where
+is the step size that depends on the shape of
+and
+initial estimate
+(9)
+is the gradient of the normalized
+,
+, and
+.
+Other advanced and robust methods may be used without
+specifying a step size, e.g., the Nelder–Mead direct search
+method [28]. Note that the efficiency and complexity of these
+iterative methods are beyond the scope of this paper and, thus,
+will not be discussed.
+Note that in the derivation of the AML solution, we have
+assumed known sensor gain levels
+, or the normalized
+sensor gains
+, for
+. However, in practice,
+they are also unknown. The signal model in the far-field case
+usually ignores this scale factor since the SNR is assumed to
+be uniform across the array when the source is far away (for
+omni-directional sensors). When the source is in the near field,
+the SNR at each sensor is different due to the different spatial
+loss from the source to each sensor. Thus, the maximization
+on the AML metric
+is indeed based on a weighted
+least-squares criterion, where each sensor data is weighted
+by its signal strength in the overall metric. When the
+are
+unknown, they can be replaced by their estimates. Two simple
+but biased estimators using the
+and
+norms for the
+can
+be given by
+and
+, respec-
+tively. In Appendix B, an extended AML solution is derived
+to incorporate unknown
+for the single-source case. It is
+shown that the extended AML metric involves finding the
+principle singular value of a newly defined data spectrum
+matrix. The resulting source location estimate using this metric
+yields a weighted least-squares solution, where the
+are also
+implicitly estimated at the same time. Although this new metric
+can effectively estimate the sensor gain levels, we find that
+the source location estimation degrades when we expand the
+parameter space to include the
+. Based on our simulation
+results, we find that it is better to use separately estimated
+or
+simply assume uniform gains, i.e.,
+, for the single source
+AML method. The uniform gain assumption makes the AML
+solution a least-squares one instead of a weighted least-squares
+one. However, we find that such an assumption does not give
+much performance degradation for the single-source case when
+the actual gain is merely modeled by the spatial loss.
+C. Multiple-Source Case
+For the multiple-source case, the parameter estimation is a
+challenging task. Although iterative multidimensional param-
+eter search methods, such as the Nelder–Mead direct search
+method, can be applied to avoid an exhaustive multidimen-
+sional grid search, finding the initial source location estimates
+is not trivial. Since iterative solutions for the single-source case
+are more robust and the initial estimate is easier to find, we
+extend the alternating projection method in [2] to the near-field
+problem. The alternating projection approach breaks the
+multidimensional parameter search into a sequence of single
+source parameter search and yields fast convergence rate. The
+following describes the alternating projection algorithm for the
+two-source case, but it can be easily extended to the case of
+sources.
+Alternating Projection Algorithm:
+Step 1) Estimate the location of the stronger source on a
+single source grid
+(10)
+Step 2) Estimate the location of the weaker source on a
+single source grid under the assumption of a two-
+source model while keeping the first source location
+estimate from step 1) constant:
+(11)
+For
+, repeat steps 3) and 4) until conver-
+gence.
+Step 3) Do an iterative AML parameter search (direct search
+or gradient) for the location of the first source while
+keeping the estimate of the second source location
+from the previous iteration constant:
+(12)
+Step 4) Do an iterative AML parameter search (direct search
+or gradient) for the location of the second source
+while keeping the estimate of the first source loca-
+tion from step 3) constant:
+(13)
+Similar to the single-source case, the sensor gain levels
+can be nonuniform and unknown when all the sources are in
+the near field. However, when there are multiple sources, the
+gains are not easily determined (still an open issue). Thus, we
+may assume uniform gains, i.e.,
+. In our simulations,
+when the signal gains are modeled by the spatial loss, we find
+the location estimates of two sources to be off from the actual lo-
+cations by quite a significant amount. Therefore, the gains
+are crucial parameters in the multisource case, as opposed to the
+single-source case.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 04:38:12 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 5 ---
+CHEN et al.: MAXIMUM-LIKELIHOOD SOURCE LOCALIZATION
+1847
+III. CRAMÉR–RAO BOUND FOR SOURCE LOCALIZATION
+The CRB is most often used as a theoretical lower bound for
+any unbiased estimator [29]. Most of the derivations of the CRB
+for wideband source localization found in the literature are in
+terms of relative time-delay estimation error. In this section, we
+derive a more general CRB directly from the signal model. By
+developing a theoretical lower bound in terms of signal charac-
+teristics and array geometry, we not only bypass the involvement
+of the intermediate time-delay estimator but also offer useful in-
+sights into the physics of the problem.
+We consider the following three cases:
+1) known signal and known speed of propagation;
+2) known signal but unknown speed of propagation;
+3) known speed of propagation but unknown signal.
+The comparison of the three conditions (see Section V) provides
+a sensitivity analysis that explains the fundamental differences
+of different problems, e.g., unknown speed of propagation for
+seismic sensing and known signal for some applications. The
+case of unknown signal and unknown speed of propagation is
+not too different from the case of unknown signal and known
+speed of propagation; thus, it is not considered. For all cases,
+we can construct the Fisher information matrix [29] from the
+signal model defined in Section II by
+Re
+Re
+(14)
+where
+for the first case, assuming that
+is the
+only unknown in the single-source case. In this case,
+,
+where
+is the scale
+factor that is proportional to the total power in the derivative
+of the source signal
+(15)
+is the array matrix, and
+is the unit
+vector indicating the direction of the source from the th sensor.
+The
+matrix provides a measure of geometric relations be-
+tween the source and the sensor array. Poor array geometry may
+lead to degeneration in the rank of matrix
+. It is clear from the
+scale factor , as will be shown later, that the performance does
+not solely depend on the SNR but also the signal bandwidth and
+spectral density. Thus, source localization performance is better
+for signals with more energy in the high frequencies.
+For the second case, when the speed of propagation is also un-
+known, i.e.,
+, the
+matrix for this case is given by
+. The Fisher information block matrix
+is given by
+(16)
+where
+,
+diag
+, and
+. By applying the well-known block matrix
+inversion lemma (see [30, App.]), the leading
+submatrix
+of the inverse Fisher information block matrix can be given by
+(17)
+where the penalty matrix due to unknown speed of propagation
+is defined by
+. The matrix
+is non-negative definite; therefore, the source localization error
+of the unknown speed of propagation case is always larger than
+that of the known case.
+For the third case, when the source signal is also un-
+known, i.e.,
+, the
+matrix is
+given by
+, where
+, and
+and
+are the magni-
+tude and phase part of
+, respectively. The Fisher information
+matrix can then be explicitly given by
+(18)
+where
+and
+are not explicitly given since they are not needed
+in the final expression. By applying the block matrix inversion
+lemma, the leading
+submatrix of the inverse Fisher in-
+formation block matrix can be given by
+(19)
+where the penalty matrix due to unknown source signal is de-
+fined by
+(20)
+The CRB with unknown source signal is always larger than that
+with known source signal, as discussed later. This can be easily
+shown since the penalty matrix
+is non-negative definite.
+The
+matrix acts as a penalty term since it is the average
+of the square of weighted
+vectors. The estimation variance
+is larger when the source is far away since the
+vectors are
+similar in directions to generate a larger penalty matrix, i.e.,
+vectors add up. When the source is inside the convex hull of
+the sensor array, the estimation variance is smaller since
+approaches the zero matrix, i.e.,
+vectors cancel each other.
+For the 2-D case, the CRB for the distance error of the estimated
+location
+from the true source location can be given by
+(21)
+where
+. By further expanding
+the parameter space, the CRB for multiple source localizations
+can also be derived, but its analytical expression is much more
+complicated. Note that when both the source signal and sensor
+gains are unknown, it is not possible to determine the values of
+the source signal and the sensor gains (they can only be esti-
+mated up to a scaled constant).
+By transforming to the polar coordinate system in the 2-D
+case, the CRB for the source range and DOA can also be
+given. Denote
+as the source range from a
+reference position such as the array centroid. The DOA can be
+given by
+with respect to the
+-axis. The
+time delay from the source to the
+th sensor is then given by
+, where
+is
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 04:38:12 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 6 ---
+1848
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 50, NO. 8, AUGUST 2002
+the polar position of the th sensor. We can form a polar array
+matrix
+, where
+(22)
+Similarly, the polar penalty matrix due to unknown source signal
+can be given by
+(23)
+The leading 2
+2 submatrix of the inverse polar Fisher infor-
+mation block matrix can be given by
+(24)
+Then, the lower bound of range estimation variance can be given
+by
+and the lower bound of DOA estima-
+tion variance can be given by
+The polar
+array matrix shows that a good DOA estimate can be obtained at
+the broadside of a linear array, and a poor DOA estimate results
+at the endfire of a linear array. A two-dimensional (2-D) array is
+required for better range and DOA estimations, e.g., a circular
+array.
+IV. UNKNOWN SENSOR LOCATION ESTIMATION
+In this section, we propose a method for estimating the un-
+known sensor location using an extended AML method fol-
+lowed by the LSC method. Although the following formulation
+is only for a single sensor of unknown location, it can be ex-
+tended to estimate other unknown sensor locations in sequential
+steps one at a time. We assume the locations of
+sensors are
+known a priori, but the calibrating source is an unknown signal
+at an unknown location (i.e., online calibration). The AML es-
+timator is extended to include the parameters
+,
+where
+is the distance from the source to the
+unknown sensor location
+. The source location is estimated
+using the
+sensors of known locations, and the distance
+is
+estimated using the sensor of unknown location. Only the dis-
+tance
+is added to the parameter space since an ambiguity ex-
+ists in a circle around the source. The extended AML metric
+can be given by
+, where
+,
+,
+is the data spectrum of the sensor of unknown location, and
+is the normalized sensor gain level at this sensor.
+For the 2-D case, the unknown sensor location
+can be
+obtained by the intersection of the circles drawn from three or
+more source locations, as depicted in Fig. 1. The estimation
+then becomes a two-step process. The extended AML method
+is used to sequentially estimate
+sets of parameters, i.e.,
+, where
+is the number of
+sources. Note that the estimation of these parameters can be
+done either separately or jointly for all sources, but we only
+consider the separate case for simplicity. The source locations
+Fig. 1.
+Geometry of three source locations and one unknown sensor location.
+may be of distinct ones or one traveling source recorded at dif-
+ferent times. Then, the source locations
+and the distances
+are used in the LSC method to estimate the unknown sensor
+location.
+The LSC unknown sensor location estimator is derived by
+expanding and manipulating the circle relations shown in Fig. 1.
+Consider the 2-D case, where
+, and
+. The equation of a circle from the
+th source with
+radius
+is given by
+(25)
+By expanding the circle equation in (25) and some manipula-
+tions, we can write
+(26)
+and in matrix form, it becomes
+(27)
+where
+...
+...
+...
+(28)
+and
+. Note that (27) is also applicable for the
+3-D case by defining
+and
+as three-dimensional (3-D)
+vectors. An overdetermined solution to the unknown sensor lo-
+cation
+and
+can be given by
+, where
+is the pseudoinverse of
+. However, when the
+source locations form a straight line,
+degenerates, and the
+above formulation does not apply.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 04:38:12 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 7 ---
+CHEN et al.: MAXIMUM-LIKELIHOOD SOURCE LOCALIZATION
+1849
+When the source locations form a straight line, e.g., a source
+traveling in a linear path, the circles drawn from the source lo-
+cations will intersect at two locations and result in an ambiguity.
+However, it can be resolved if we know a priori that one of
+the intersections is a more probable candidate for the unknown
+sensor location. In this case, the proposed estimator needs to be
+slightly modified. By taking the difference of (26) for the
+th
+source from that of the first source, we obtain
+(29)
+where
+. Let
+without loss of gen-
+erality, e.g., source locations form a straight line on the
+-axis,
+we obtain the estimate of the
+-position of the unknown sensor
+by
+, where
+, and
+.
+The
+estimate is then given by the circle equations in (25)
+with
+, which becomes
+, for
+. The
+estimate is given by
+(30)
+If
+is positive, two solutions for
+with equal magnitude
+but opposite signs are given, thus providing two ambiguous un-
+known sensor location estimates. By having prior knowledge of
+which side the unknown sensor is located, the ambiguity can be
+resolved.
+V. SIMULATION EXAMPLES AND EVALUATIONS
+For all simulation examples and evaluations, we only con-
+sider acoustic sources. In principle, the AML method can be
+applied to signals of other nature, e.g., seismic, but they will
+not be considered for the purpose of this paper. In all cases, the
+sampling frequency is set to be 1 KHz. The speed of propagation
+is 345 m/s. A prerecorded tracked vehicle signal, with signifi-
+cant spectral content of about 50 Hz bandwidth centered about
+a dominant frequency at 100 Hz, is considered. For an arbitrary
+array of five sensors, we simulate the array data (with uniform
+gain
+) using this tracked vehicle signal with appropriate time
+delays. The data length
+(which corresponds to 0.2 s),
+the DFT size
+(zero-padding), and all positive fre-
+quency bins are considered in the AML metric. In Fig. 2, the
+normalized
+in (7) is evaluated at different near-field po-
+sitions and plotted for a source inside the convex hull of the array
+(overlaid on top) under 20 dB SNR. A high peak shows up at
+the source location, thus indicating good estimation. When the
+source moves away from the array, the peak broadens and re-
+sults in more range estimation error since it is more sensitive to
+noise. As depicted in Fig. 3 (for the same setting), the image plot
+of
+evaluated at different positions show that the range es-
+timation error is likely to occur in the source direction when the
+source moves away from the array. However, the angle estima-
+tion is not greatly impacted.
+In the following, we consider a single traveling source sce-
+nario for a circular array (uniformly spaced on the circumfer-
+Fig. 2.
+Three-dimensional plot of J (r ) for a source inside the convex hull
+of the array. Square: sensor locations.
+Fig. 3.
+Image plot of J (r ) for a distant source. Square: sensor locations.
+Circle: actual source location. : source location estimate.
+ence), as depicted in Fig. 4. In this case, we consider the spatial
+loss that is a function of the distance from the source location to
+each sensor location; thus, the gains
+are no longer uniform.
+For each frame of
+samples, we simulate the array data
+for one of the 12 source locations. We apply the AML method,
+assuming unity
+, and estimate the source location at each
+frame. A 2-D polar grid point system is being used, where the
+angle is uniformly sampled, and the range is uniformly sampled
+in log-scale (to be physically meaningful). This 2-D grid-point
+search provides the initial estimate of the direct search method
+[28]; thus, global maximum is guaranteed. In addition, we apply
+the LS method [19] and the wideband MUSIC method [12] and
+compute the CRB using (21) for comparison purposes. Note the
+complexities of these methods are not compared in this paper.
+The wideband MUSIC divides the 200 samples into four subin-
+tervals of 50 samples each for the computation of the sample
+correlation matrix and uses the same grid-point search and direct
+search method as the AML case. As depicted in Fig. 5 [(a) for
+and (b) for
+], both the AML and LS methods ap-
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 04:38:12 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 8 ---
+1850
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 50, NO. 8, AUGUST 2002
+Fig. 4.
+Single traveling source scenario.
+Fig. 5.
+Source localization performance comparison for known speed of
+propagation case. (a) R = 5. (b) R = 7.
+proach the CRB when the source is near the array (high SNR and
+short range), but the AML outperforms the LS method. How-
+ever, the wideband MUSIC yields much worse estimates than
+those of the LS and AML methods, especially when the source is
+far from the array. The wideband MUSIC requires large number
+of samples for good performance, but in this case,
+is limited
+by the moving source. Note that when the source is far from the
+array (low SNR and long range), the CRB is too idealistic since
+it does not take into account other factors such as the edge effect
+or correlated noise across frequency. Thus, the reader should not
+get the impression that the AML performs poorly in this region.
+When we assume that the speed of propagation is unknown,
+we apply the extended AML method with unknown parameters
+. In this case, the CLS method in [18] is compared
+with the extended AML method. In Fig. 6, we show the AML
+method yields better overall performance in both source location
+and DOA estimations for
+. To compare the theoretical
+performance of source localization under different conditions,
+Fig. 6.
+(a) Source localization and (b) DOA estimations for unknown speed of
+propagation performance comparison (R = 7).
+Fig. 7.
+CRB comparison for the traveling source scenario (R = 7). (a)
+Localization bound. (b) DOA bound.
+we compare the CRB for the known source signal and speed
+of propagation, unknown speed of propagation, and unknown
+source signal cases using seven sensors for the same single trav-
+eling source scenario. As depicted in Fig. 7, the unknown source
+signal is shown to have a much more significant degrading ef-
+fect than the unknown speed of propagation in source location
+estimation. However, these parameters are not significant in the
+DOA estimations. Furthermore, the theoretical performance of
+the estimator is analyzed for different signal characteristics. For
+the same setting as the one shown in Fig. 3, we replace the
+tracked vehicle signal by a Gaussian signal after bandpass filter
+(with fixed SNR of 20 dB). The center frequency of the source
+signal is first set to 250 Hz, and then, we let the bandwidth of this
+signal vary from 50 to 450 Hz. As shown in Fig. 8(a), the theo-
+retical performance improves as the bandwidth increases. Then,
+for a fixed bandwidth of 100 Hz, we vary the center frequency
+from 50 to 450 Hz and observe the performance improvement
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 04:38:12 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 9 ---
+CHEN et al.: MAXIMUM-LIKELIHOOD SOURCE LOCALIZATION
+1851
+Fig. 8.
+CRB comparison for different signal characteristics (for scenario in
+Fig. 3). (a) Bandwidth. (b) Center frequency.
+Fig. 9.
+Joint two-source location estimation using the AML alternating
+projection of five iterations (unit sensor gain case).
+for higher center frequency in Fig. 8(b). The theoretical perfor-
+mance analysis applies to the AML estimator since the AML
+estimator approaches the CRB asymptotically.
+For two coherent sources of equal power near the array [with
+uniform gains
+and
+], we apply the alternating projection
+method (10)–(13) of only five iterations for the AML method
+and show converging solution in Fig. 9. The same grid-point
+search is applied to obtain the initial estimate of one source
+and then the initial estimate of another source in the second
+step. The direct search method is applied in the following steps
+to reach the converging solution. In this case, the wideband
+MUSIC yields a false peak (not shown) since the two sources
+are coherent (which is a well-known problem with MUSIC-type
+algorithms). The RMS error of the two-source AML estimates
+for the first ten alternating projection iterations are plotted in
+Fig. 10(a) after an average of 100 realizations. The alternating
+projection converges in only a few iterations. However, when
+Fig. 10.
+RMS error of the two-source location estimates in each alternating
+projection iteration. (a) Unit sensor gains case. (b) Variable sensor gains case.
+Fig. 11.
+Three single-source location estimations and unknown sensor
+location estimation.
+the sensor gains
+are modeled by the spatial loss and we as-
+sume they are uniform in the AML metric, the source location
+estimates are slightly biased, i.e., converging to an offset loca-
+tion, as depicted in Fig. 10(b).
+To demonstrate the effectiveness of the unknown sensor lo-
+cation estimation method, we consider a similar scenario to the
+first example with one additional sensor of unknown location.
+As depicted in Fig. 11, the expanded parameters
+for
+are estimated separately using the extended AML
+method. From the estimated source locations and distances, the
+LSC method, i.e., (27), is applied, and a good estimate of the
+unknown sensor location is shown. Systematic evaluations via
+computer simulations are performed for the same scenario by
+placing sources uniformly within a 4
+4 m2 area around the
+array. The performance of the LSC using the extended AML
+method (which we refer to as AML-LSC) is compared with our
+previously proposed method using LS source location estimates
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 04:38:12 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 10 ---
+1852
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 50, NO. 8, AUGUST 2002
+Fig. 12.
+Unknown sensor location estimation RMS error versus (a) number of
+sources and (b) SNR.
+(which we refer to as LS-LSC) [26]. In Fig. 12(a), the unknown
+sensor location estimation RMS error is plotted with respect a
+different number of sources or source locations under 20 dB
+SNR. The proposed AML-LSC method yields improved esti-
+mates that are closer to the theoretical lower bound (derived in
+Appendix C). In Fig. 12(b), the RMS error is plotted with respect
+to the SNR for ten sources or source locations. The AML-LSC
+result is again better than the LS-LSC result.
+VI. CONCLUSIONS
+In this paper, the AML source localization solution is de-
+rived for wideband sources in the near field. In the single-source
+case, the AML solution maximizes the weighted cross-correla-
+tion functions of the array signal and yields the beam-steered
+beamformer output. We have shown its superior performance
+over suboptimal techniques and its efficiency with respect to
+the CRB. For the two-source case, we have shown good results
+using the alternating projection procedure of only a few itera-
+tions. We have shown that the different signal gain levels due to
+spatial loss are not sensitive parameters to source localization
+in the single-source case but are more significant in the case of
+multiple sources. When combining the extended AML method
+with the LSC unknown sensor location estimator, significant
+improvement is observed over other previous time-delay-based
+methods. The derived CRB also proves the physical observa-
+tions that favor high energy in the higher frequency components
+of a signal. The sensitivity of source localization to different un-
+known parameters has also been analyzed. It has been shown
+that an unknown source signal results in a much larger error
+than that of unknown speed of propagation. The CRB supports
+the physical understanding of the performance in terms of the
+signal nature and source/array geometry.
+APPENDIX A
+WEIGHTED CROSS-CORRELATION CRITERION
+As discussed in Section II-B, the AML criterion can be shown
+to be equivalent to the maximum weighted cross-correlation cri-
+terion. The weighted cross-correlation function of the
+th and
+the th sensors is defined by
+(31)
+where the weight
+,
+is the
+normalized signal gain level at the
+th sensor, and
+is the weighted cross-power spectral density.
+The maximum weighted cross-correlation criterion maximizes
+the sum of the weighted cross-correlation functions with the rel-
+ative time delays for parameter
+, which can be given by
+(32)
+Since the zero frequency bin only produces a constant term
+that is independent of
+and the negative frequency bins are
+complex conjugated versions of the positive frequency bins,
+is equivalent to the AML metric.
+APPENDIX B
+EXTENDED SINGLE-SOURCE AML SOLUTION FOR UNKNOWN
+SIGNAL GAIN LEVEL
+When the
+are unknown, we can expand the pa-
+rameter space to
+, where
+and
+In this
+case, the frequency-domain data (positive frequency bins only)
+is grouped into a
+data spectrum matrix
+with the
+following elements:
+(33)
+where
+is the element of the phase matrix
+,
+is the element of the noise matrix
+,
+,
+and
+. By multiplying the conjugate of the phase
+term on both sides of (33), we obtain the elements of the trans-
+formed data spectrum matrix as
+(34)
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 04:38:12 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 11 ---
+CHEN et al.: MAXIMUM-LIKELIHOOD SOURCE LOCALIZATION
+1853
+Note that the transformed noise matrix
+is still white
+Gaussian
+distributed
+with
+the
+same
+mean
+and
+vari-
+ance. The transformed data spectrum matrix is given by
+By the singular value decomposition,
+can be decomposed to
+(35)
+where
+is the singular value, and
+and
+are the
+th column of the left and right singular matrices, respec-
+tively. The Frobenius norm square of
+can be given by
+, where
+is the sum of the square of the noise
+subspace singular values. At the true source location, the square
+of the principle singular value corresponds to the total array
+signal power plus the noise power in the signal subspace. In
+this transformed formulation, the AML solution is given by the
+parameter set that minimizes the metric
+(36)
+with the constraint that
+is a rank-one matrix (i.e., outer
+product). At any source location
+, the optimal estimate of the
+rank-one outer product of the source spectrum vector and sensor
+gain vector is given by
+(37)
+where
+and
+are the principle left and right singular
+vectors of
+, respectively. By substituting (37) into (36),
+the resulting AML metric for the source location is given by
+(38)
+Since
+is a constant term, we can define an equivalent
+metric
+, and the source location is
+estimated by finding the maximum of
+. The normalized
+sensor gain vector can be estimated by
+.
+Note that the actual sensor gain vector
+cannot be estimated
+since
+is also unknown.
+APPENDIX C
+CRB FOR UNKNOWN SENSOR LOCATION ESTIMATION
+Without loss of generality, let the sensor of unknown
+location be the
+th sensor in addition to the
+sensors
+of
+known
+locations.
+The
+array
+signal
+vector
+for the
+th source at the
+th bin can be given by
+,
+where
+,
+,
+is the signal gain level
+at the sensor of unknown location,
+is the time-delay from the
+th source to this sensor, and
+is the complex white Gaussian noise vector with
+variance
+in each element. By including the
+pos-
+itive frequency bins and
+sources, we can write the
+space–temporal frequency vector as
+, where
+,
+, and
+. The Fisher information matrix
+can be given by (14) with
+, where
+. The resulting
+leading submatrix
+of the inverse Fisher information matrix is then given by
+(39)
+where
+is the
+scale factor for the
+th source,
+is
+the source geometry matrix,
+,
+is the penalty matrix due to un-
+known source locations, and
+.
+The CRB for the 2-D unknown sensor location estimation
+variance can be given by
+(40)
+and the distance error of the unknown sensor location to its true
+location can be given by
+(41)
+where
+.
+ACKNOWLEDGMENT
+The authors would like to thank the anonymous reviewers for
+their valuable comments. J. C. Chen would like to thank Dr. A.
+G. Jaffer of Raytheon Systems for his valuable suggestions.
+REFERENCES
+[1] F. C. Schweppe, “Sensor array data processing for multiple signal
+sources,” IEEE Trans. Inform. Theory, vol. IT-14, pp. 294–305, 1968.
+[2] I. Ziskind and M. Wax, “Maximum likelihood localization of multiple
+sources by alternating projection,” IEEE Trans. Acoust., Speech, Signal
+Processing, vol. 36, pp. 1553–1560, Oct. 1988.
+[3] J. Capon, “High-resolution frequency-wavenumber spectrum analysis,”
+Proc. IEEE, vol. 57, pp. 2408–2418, Aug. 1969.
+[4] R. O. Schmidt, “Multiple emitter location and signal parameter estima-
+tion,” IEEE Trans. Antennas Propagat., vol. AP-34, pp. 276–280, Mar.
+1986.
+[5] S. S. Reddi, “Multiple source location—A digital approach,” IEEE
+Trans. Aerosp. Electron. Syst., vol. AES-15, Jan. 1979.
+[6] J. Krim and M. Viberg, “Two decades of array signal processing re-
+search: The parametric approach,” IEEE Signal Processing Mag., vol.
+13, pp. 67–94, July 1996.
+[7] H. Wang and M. Kaveh, “Coherent signal-subspace processing for
+the detection and estimation of angles of arrival of multiple wide-
+band sources,” IEEE Trans. Acoust., Speech, Signal Processing, vol.
+ASSP-33, pp. 823–831, Aug. 1985.
+[8] H. Hung and M. Kaveh, “Focusing matrices for coherent signal-sub-
+space processing,” IEEE Trans. Acoust., Speech, Signal Processing, vol.
+36, pp. 1272–1281, Aug. 1988.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 04:38:12 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 12 ---
+1854
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 50, NO. 8, AUGUST 2002
+[9] S. Valaee and P. Kabal, “Wideband array processing using a two-sided
+correlation transformation,” IEEE Trans. Signal Processing, vol. 43, pp.
+160–172, Jan. 1995.
+[10] J. Krolik and M. Eizenman, “Minimum variance spectral estimation for
+broadband source location using steered covariance matrices,” in Proc.
+IEEE ICASSP, vol. 5, Apr. 1988, pp. 2841–2844.
+[11] B. Friedlander and A. J. Weiss, “Direction finding for wide-band signals
+using an interpolated array,” IEEE Trans. Signal Processing, vol. 41, pp.
+1618–1634, Apr. 1993.
+[12] T. L. Tung, K. Yao, D. Chen, R. E. Hudson, and C. W. Reed, “Source
+localization and spatial filtering using wideband MUSIC and maximum
+power beamforming for multimedia applications,” in Proc. IEEE SiPS,
+Oct. 1999, pp. 625–634.
+[13] H. C. Schau and A. Z. Robinson, “Passive source localization
+employing intersecting spherical surfaces from time-of-arrival differ-
+ences,” IEEE Trans. Acoust., Speech, Signal Processing, vol. ASSP-35,
+pp. 1223–1225, Aug. 1987.
+[14] J. O. Smith and J. S. Abel, “Closed-form least-squares source location
+estimation from range-difference measurements,” IEEE Trans. Acoust.,
+Speech, Signal Processing, vol. ASSP-35, pp. 1661–1669, Dec. 1987.
+[15] Y. T. Chan and K. C. Ho, “A simple and efficient estimator for hyperbolic
+location,” IEEE Trans. Signal Processing, vol. 42, pp. 1905–1915, Aug.
+1994.
+[16] M. S. Brandstein, J. E. Adcock, and H. F. Silverman, “A closed-form
+location estimator for use with room environment microphone arrays,”
+IEEE Trans. Speech Audio Processing, vol. 5, pp. 45–50, Jan. 1997.
+[17] K. Yao, R. E. Hudson, C. W. Reed, D. Chen, and F. Lorenzelli, “Blind
+beamforming on a randomly distributed sensor array system,” IEEE J.
+Select. Areas Commun., vol. 16, pp. 1555–1567, Oct. 1998.
+[18] J. C. Chen, K. Yao, R. E. Hudson, T. L. Tung, C. W. Reed, and D. Chen,
+“Source localization of a wideband source using a randomly distributed
+beamforming sensor array,” in Proc. ISIF, Aug. 2001, pp. TuC1: 11–18.
+[19] Y. Huang, J. Benesty, and G. W. Elko, “Passive acoustic source local-
+ization for video camera steering,” in Proc. IEEE ICASSP, vol. 2, June
+2000, pp. 909–912.
+[20] B. Emile, P. Common, and J. Le Roux, “Estimation of time-delays with
+fewer sensors than sources,” IEEE Trans. Signal Processing, vol. 46, pp.
+2012–2015, July 1998.
+[21] P. J. Chung, M. L. Jost, and J. F. Böhme, “Estimation of seismic wave
+parameters and signal detection using maximum likelihood methods,”
+Comput. Geosci., vol. 27, pp. 147–156, Mar. 2001.
+[22] Y. Rockah and P. M. Schultheiss, “Array shape calibration using sources
+in unknown locations—I: Far-field sources,” IEEE Trans. Acoust.,
+Speech, Signal Processing, vol. ASSP-35, pp. 286–299, Mar. 1987.
+[23]
+, “Array shape calibration using sources in unknown locations—II:
+Near-field sources and estimator implementation,” IEEE Trans. Acoust.,
+Speech, Signal Processing, vol. ASSP-35, pp. 724–735, June 1987.
+[24] C. M. S. See and B. K. Poh, “Parametric sensor array calibration using
+measured steering vectors of uncertain locations,” IEEE Trans. Signal
+Processing, vol. 47, pp. 1133–1137, Apr. 1999.
+[25] S. Gazor, S. Affes, and Y. Grenier, “Wideband multi-source beam-
+forming with adaptive array location calibration and direction finding,”
+in Proc. IEEE ICASSP, vol. 3, May 1995, pp. 1904–1907.
+[26] J. C. Chen, T. L. Tung, R. E. Hudson, and K. Yao, “Randomly dis-
+tributed sensor self-calibration using least squares methods,” in Proc.
+Adv. Sensor Consort.: ARL Fed. Lab.: , Mar. 2000, pp. 105–109.
+[27] D.
+H.
+Johnson
+and
+D.
+E.
+Dudgeon,
+Array
+Signal
+Pro-
+cessing.
+Englewood Cliffs, NJ: Prentice-Hall, 1993.
+[28] J. A. Nelder and R. Mead, “A simplex method for function minimiza-
+tion,” Comput. J., vol. 7, pp. 308–313, 1965.
+[29] S. M. Kay, Fundamentals of Statistical Signal Processing: Estimation
+Theory.
+Englewood Cliffs, NJ: Prentice-Hall, 1993.
+[30] T.
+Kailath,
+A.
+H.
+Sayed,
+and
+B.
+Hassibi,
+Linear
+Estima-
+tion.
+Englewood Cliffs, NJ: Prentice-Hall, 2000.
+Joe C. Chen (S’00) was born in Taipei, Taiwan,
+R.O.C., in 1975. He received the B.S. (with honors),
+M.S., and Ph.D. degrees in electrical engineering
+from the University of California, Los Angeles
+(UCLA), in 1997 and 1998, and 2002, respectively.
+Since 1997, he has been with the Sensors and Elec-
+tronics Systems Group of Raytheon Systems Com-
+pany (formerly Hughes Aircraft), El Segundo, CA.
+From 1998 to 2002, he was a Teaching Assistant at
+UCLA. He is currently also a part-time post-doctoral
+researcher at UCLA. His research interests include
+estimation theory and statistical signal processing as applied to sensor array
+systems and radar systems.
+Dr. Chen is a member of the Tau Beta Pi and Eta Kappa Nu honor societies.
+Ralph E. Hudson received the B.S. degree in elec-
+trical engineering from the University of California,
+Berkeley, in 1960 and the Ph.D. degree from the U.S.
+Naval Postgraduate School, Monterey, CA, in 1969.
+In the U.S. Navy, he attained the rank of Lieutenant
+Commander and served with the Office of Naval Re-
+search and the Naval Air Systems Command. From
+1973 to 1993, he was with Hughes Aircraft Com-
+pany and, since then, has been a Research Associate
+with the Electrical Engineering Department, Univer-
+sity of California, Los Angeles. His research interests
+include signal and acoustic and seismic array processing, wireless radio, and
+radar systems.
+Dr. Hudson received the Legion of Merit and Air Medal and the Hyland Patent
+Award in 1992.
+Kung Yao (S’59–M’65–SM’91–F’94) received the
+B.S.E., M.A., and Ph.D. degrees in electrical engi-
+neering from Princeton University, Princeton, NJ.
+He has worked at the Princeton-Penn Accelerator,
+Brookhaven National Laboratory, Brookhaven, NY,
+and the Bell Telephone Labs, Murray Hill, NJ. He
+was a NASA-NRC Post-Doctoral Research Fellow
+at the University of California, Berkeley. He was a
+Visiting Assistant Professor at the Massachusetts In-
+stitute of Technology, Cambridge, and a Visiting As-
+sociate Professor at the Eindhoven Technical Univer-
+sity, Eindhoven, The Netherlands. From 1985 to 1988, he was an Assistant Dean
+of the School of Engineering and Applied Science at the University of Cali-
+fornia, Los Angeles (UCLA). Presently, he is a Professor with the Electrical En-
+gineering Department, UCLA. His research interests include sensor array sys-
+tems, digital communication theory and systems, wireless radio systems, chaos
+communications and system theory, and digital and array signal processing. He
+has published more than 250 papers. He is the co-editor of High Performance
+VLSI Signal Processing (New York: IEEE Press, 1997).
+Dr. Yao received the IEEE Signal Processing Society’s 1993 Senior Award
+in VLSI Signal Processing. He was on the IEEE Information Theory Society’s
+Board of Governors and is a member of the Signal Processing System Tech-
+nical Committee of the IEEE Signal Processing Society. He has been on the
+editorial boards of various IEEE Transactions, with the most recent being IEEE
+COMMUNICATIONS LETTERS.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 08,2026 at 04:38:12 UTC from IEEE Xplore.  Restrictions apply. 

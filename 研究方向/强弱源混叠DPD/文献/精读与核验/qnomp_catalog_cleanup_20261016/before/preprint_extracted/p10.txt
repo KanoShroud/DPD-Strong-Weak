@@ -1,0 +1,96 @@
+                                                                                                                                                 10
+
+
+
+
+
+        0                                                                            0                                                                                              -5
+
+                                              OMP                                                            OMP                                                            OMP
+         -5                                       NOMPQNOMP                           -5                                       NOMPQNOMP                        -10                                        NOMPQNOMP
+                                                 QNOMP+BR                                                          QNOMP+BR                                                          QNOMP+BR
+       -10                                                  OG-ISTA                       -10                                                  OG-ISTA                                                                          OG-ISTA
+                                                                                                                                                                                         -15
+
+       -15                                                                                      -15
+                                                                                                                                                                                         -20
+
+       -20                                                                                      -20             NMSE/dB                                                                                                                                                                                                                                                                          NMSE/dB                                                                                                                                                                                                                                                                          NMSE/dB -25
+       -25                                                                                      -25
+
+                                                                                                                                                                                         -30
+       -30                                                                                      -30
+
+       -35                                                                                      -35                                                                                      -35
+
+
+       -40                                                                                      -40                                                                                      -40
+          -10          -5        0         5        10        15        20                   -10          -5        0         5        10        15        20                   -10          -5        0         5        10        15        20
+                              SNR/dB                                                           SNR/dB                                                           SNR/dB
+
+                       (a) Scenario 1. k = 1 Channel NMSE                                              (b) Scenario 2. k = 1 Channel NMSE                                                (c) Scenario 3. k = 1 Channel NMSE
+
+
+
+
+        0                                                                            5                                                                            5
+
+
+         -5                                                                            0
+                                                                                                                                                                  0
+
+       -10
+                                                                                                          -5
+
+                                                                                                                                                                                                          -5
+       -15
+
+                                                                                                -10             NMSE/dB -20                                                                                                                                                                                                                                                                                              NMSE/dB
+                 OMP                                                                                OMP                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              NMSE/dB -10          OMP
+                 NOMP                                                                   -15          NOMP                                                           NOMP
+       -25          QNOMP                                                          QNOMP                                                          QNOMP
+                  QNOMP+BR                                                          QNOMP+BR                                                          QNOMP+BR
+                      OG-ISTA                                                                 -20            OG-ISTA                                                                 -15            OG-ISTA
+       -30
+
+
+
+       -35                                                                                      -25                                                                                      -20
+          -10          -5        0         5        10        15        20                   -10          -5        0         5        10        15        20                   -10          -5        0         5        10        15        20
+                              SNR/dB                                                           SNR/dB                                                           SNR/dB
+
+                       (d) Scenario 1. k = 2 Channel NMSE                                              (e) Scenario 2. k = 2 Channel NMSE                                                            (f) Scenario 3. k = 2 Channel NMSE
+
+Fig. 2. Estimation and extrapolation error of different algorithms for three typical scenarios in clustered simulated channel. Scenario 1 has a sparse delay and
+angle distribution with C1 = 2, C2 = 2. Scenario 2 has a dense delay distribution and sparse angle distribution with C1 = 1, C2 = 2. Scenario 3 has a dense
+delay and angle distribution with C1 = 1, C2 = 0.5. (a)(b)(c): Estimation error with respect to (w.r.t.) SNR for Scenarios 1, 2, 3. (d)(e)(f): Extrapolation
+error w.r.t. SNR for Scenarios 1, 2, 3. The channel is extrapolated to bandwidth with label 48 (K = 2).
+
+
+   It is worth noting that the sparsity in delay domain does   so that the extrapolation error decreases. This suggests that
+affect on the extrapolation performance. From Fig. 2(d) and  QNOMP  is a powerful algorithm for super-resolution and
+(e), one can  find  that  as C1  reduces from 2  to  1,  the   extrapolation.
+extrapolation gets worse for both QNOMP with or without
+block reweighting. On the other hand, given C1, the sparsity
+of angular block has little effect on extrapolation. This can be   C. On CDL-C Model
+verified by comparing Fig. 2(e) and (f). Since extrapolation                                                               Simulations of the Clustered Delay Line (CDL) models in
+is required in the frequency domain rather than space/antenna                                             3GPP [41] are performed using Matlab 5G NR Toolbox. The
+domain, the estimation accuracy of the time delay is more                                                           channel in this model has dense delay clusters, and the angles
+important than the angle. Therefore, the density of time delays                                                     on the clusters are concentrated within some angular blocks.
+poses a  greater challenge  for  super-resolution and  is  the                                                   The CDL-C model we used has a root mean square (RMS)
+main factor affecting the accuracy of extrapolation. The pilot                                                           time delay spreads of 100ns. The channel subcarrier spacing
+spreads in the entire antenna domain and does not require                                                                               is 30kHz and the sampling interval is 60kHz.
+extrapolation, so the resolution in the angular domain has less                                                     The setting of QNOMP and NOMP iterations includes: the
+impact on the accuracy of channel extrapolation.                                                                    local refinement rate k1 = k2 = 10, refinement times nLR =
+  We also examine the estimation error of the virtual delay   1, the iteration numbers nin = 3 and nout = 40 for BFGS;
+τ to verify the relation between delay estimation and extrap-  Rs = 1, Rc = 3, nout = 40 for NOMP; and nit = 200 for
+olation error. The estimation error of delay under different   the OG-ISTA iteration number. As a comparison, the grid size
+SNR is shown in Fig. 3, in which the CRB is also plotted as   of conventional OMP is 0.1∆τ,θdft , which is the same as the
+reference. It can be seen in Fig. 3(a) that as SNR increases,   finest resolution of QNOMP’s on-grid module. The thresholds
+the delay estimation error of OMP stays at a almost constant   of block reweighting are ϵ = 0.001. The block width is ∆=
+level. Correspondingly, the extrapolation of OMP also stays at  6∆θ, ∆θ = ∆θdft.
+a constant level, as shown in Fig. 2. Similarly, the comparisons    The estimation and extrapolation performance of different
+of Fig. 3(b)(c) and Fig. 2(e)(f) show that, as delay gets denser,   algorithms for CDL-C channel with 100ns RMS delay spread
+OMP and NOMP cannot take benefit from the increase of   are shown in Fig. 4. Here we take M = 96 and ∆f = 60KHz.
+SNR on estimating delay, so the extrapolations are also poor.  As in simulated channel cases, QNOMP significantly enhances
+However, the QNOMP still benefits from the increase of SNR   the estimation and extrapolation performance. CDL-C channel

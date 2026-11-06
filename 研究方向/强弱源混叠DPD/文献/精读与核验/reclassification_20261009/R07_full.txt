@@ -1,0 +1,6513 @@
+--- PDF PAGE 1 ---
+IEEE SENSORS JOURNAL, VOL. XX, NO. XX, MONTH X, XXXX 
+ 
+XXXX-XXXX © XXXX IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. 
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information. 
+ 
+Abstract—To 
+address 
+the 
+performance 
+degradation caused by grid mismatch and 
+unknown channel attenuation, we propose a 
+time difference of arrival (TDOA)-based direct 
+position determination (DPD) method with 
+parametric 
+dictionary 
+learning. 
+First, 
+the 
+off-grid error and the model parameter error are 
+uniformly modeled as the dictionary offset 
+problem. Subsequently, the DPD problem under 
+dictionary perturbation is transformed into a 
+joint optimization problem involving parametric 
+dictionary 
+learning 
+and 
+sparse 
+signal 
+reconstruction, which is solved within the sparse Bayesian learning (SBL) framework. Furthermore, the Cramér-Rao 
+bounds (CRB) for TDOA-based DPD are derived, serving as a benchmark for performance evaluation. Simulation 
+results demonstrate that the proposed method effectively localizes off-grid sources under unknown channel 
+attenuation. The positioning accuracy can approach the CRB under high signal-to-noise ratio (SNR) and can be 
+improved by over 20% compared with the existing methods under low SNR. 
+ 
+Index Terms—Direct position determination (DPD), sparse Bayesian learning (SBL), parametric dictionary learning, 
+off-grid error. 
+ 
+ 
+I.  INTRODUCTION 
+assive positioning technology is widely used in 
+communications, radar, navigation, and trajectory tracking 
+[1], [2]. Existing passive positioning systems predominantly 
+adopt a two-step localization approach. First, positioning 
+parameters are estimated from raw signals, such as direction of 
+arrival (DOA) [3], time difference of arrival (TDOA) [4], and 
+frequency difference of arrival (FDOA) [5]. Then, the position 
+of the target is further determined based on these parameters. 
+This two-step method does not require transmitting all signal 
+data to a central processing station, thereby relaxing demands 
+on communication bandwidth and computational load. 
+However, the two-step approach also has several limitations. 
+ 
+This work was supported in part by the National Natural Science 
+Foundation of China under Grant 62171469 and Grant 62071029, and 
+in part by the Provincial and Ministerial High-Level Scientific and 
+Technological Innovation Talent Independent Research Project under 
+Grant A8124. (Corresponding author: Ding Wang.)  
+Zeyu Wang is with the Institute of Information System Engineering, 
+Information Engineering University, Zhengzhou 450001, China. (e-mail: 
+wwwzy181@163.com ).  
+Ding Wang is with the Institute of Information System Engineering, 
+Information Engineering University, Zhengzhou 450001, China, and 
+also with the National Digital Switching System Engineering and 
+Technology Research Center, Zhengzhou 450001, China. (e-mail: 
+wang_ding814@aliyun.com ). 
+Fuquan Nie is with the Institute of Mechanical and Electrical 
+Engineering, Henan Institute of Science and Technology, Xinxiang 
+453000, China. (e-mail: lyywlnyx@sina.com ). 
+Nae Zheng is with the Institute of Data and Target Engineering, 
+Information Engineering University, Zhengzhou 450001, China. (e-mail: 
+13837122426@163.com ). 
+First, information loss occurs at each processing stage, which 
+adversely 
+affects 
+final 
+positioning 
+accuracy. 
+Second, 
+independent estimation at individual stations leads to the loss of 
+inter-station data correlation. Finally, in multi-target scenarios, 
+the two-step method faces data association challenges between 
+targets and measurements. 
+In response to the above challenges, Weiss and Amar 
+introduced a single-step localization approach — the direct 
+position determination (DPD) method [6], [7]. This method 
+departs from the conventional two-step process by directly 
+processing raw sampled signals and constructing a positioning 
+model based on the location information embedded within the 
+signals, thereby effectively mitigating the accumulation of 
+errors from intermediate parameter estimation. It demonstrates 
+superior performance, particularly under low SNR conditions. 
+Weiss et al. primarily focused on DPD using DOA/TDOA or 
+TDOA/FDOA frameworks. However, the utilization of DOA 
+requires each station to be equipped with multi-element, 
+multi-channel antennas, resulting in increased system 
+complexity. Similarly, FDOA is only applicable when there is 
+relative motion between the receiving stations and the radiation 
+source. For scenarios where receiving stations employ single 
+antennas and remain relatively stationary to the source, Naresh 
+and Kay proposed a maximum likelihood (ML) based DPD 
+method that relies solely on TDOA information [8]. This 
+approach establishes a cost function for each grid point 
+according to the ML criterion, with the grid point yielding the 
+maximum value identified as the estimated source position. To 
+address the high computational complexity associated with grid 
+TDOA-Based Direct Position Determination 
+Method with Parametric Dictionary Learning 
+Zeyu Wang, Ding Wang*，Fuquan Nie，Nae Zheng 
+P 
+This article has been accepted for publication in IEEE Sensors Journal. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/JSEN.2026.3693237
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on May 26,2026 at 03:46:47 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 2 ---
+ 
+ 
+IEEE SENSORS JOURNAL, VOL. XX, NO. XX, MONTH X, XXXX 
+ 
+searches, Reference [9] proposed an adaptive TDOA-based 
+DPD method. However, this method requires all data to be 
+transmitted to a central station for processing, imposing 
+significant demands on communication capabilities. Building 
+upon this, Reference [10] introduced local data transmission 
+between 
+adjacent 
+sensors, 
+distributing 
+computational 
+complexity across individual sensors and thereby improving 
+computational efficiency. It is worth noting that the methods 
+mentioned above generally require a sufficiently large number 
+of signal samples to achieve satisfactory positioning accuracy, 
+which exhibit limitations when dealing with scenarios 
+characterized by small samples. 
+Compressive sensing (CS) technology demonstrates superior 
+performance over traditional signal processing methods when 
+dealing with limited samples. By exploiting the sparsity of 
+targets in the spatial domain, many researchers have 
+reformulated the 
+DPD problem as a sparse signal 
+reconstruction 
+problem and proposed improved DPD 
+algorithms, which mainly incorporates two categories: 
+p
+l 
+norm based optimization [11], [12] and sparse Bayesian 
+learning 
+(SBL) 
+[13], 
+[14]. 
+However, 
+the 
+successful 
+reconstruction of signals using these methods hinges on the 
+precise alignment between the positioning dictionary and the 
+true signal propagation model. References [15], [16] 
+investigated localization scenarios where radiation sources are 
+precisely located on predefined grid points, ensuring a matched 
+state between the signal and the dictionary. In practical 
+scenarios, it is difficult to obtain a completely accurate 
+positioning dictionary, leading to a basis mismatch within the 
+dictionary matrix. There are two main causes of basis mismatch 
+in DPD. On one hand, the actual target often does not lie 
+exactly on the predefined grid points, resulting in off-grid 
+errors. On the other hand, the signal propagation model may be 
+partially unknown; for example, when affected by unknown 
+channel attenuation, the directly constructed sparse dictionary 
+will also be partially unknown, thereby causing model 
+parameter errors. In sparse reconstruction, the dictionary matrix 
+should be known and accurate; otherwise, the reconstruction 
+accuracy will be reduced due to basis mismatch. 
+To 
+address 
+the 
+off-grid 
+problem, 
+Reference 
+[17] 
+parameterized the steering vector dictionary using first-order 
+Taylor expansion and estimate the target position via an 
+alternating iteration method. Based on the concept of 
+importance sampling (IS), Reference [18] introduced a novel 
+non-iterative 
+ML-DPD 
+method 
+that 
+leverages 
+linear 
+interpolation to mitigate off-grid errors. However, the 
+optimization-based approaches represented by [17] and [18] 
+fundamentally fall within the deterministic processing 
+paradigm. These methods treat the target position as an 
+unknown, fixed parameter to be determined, seeking an optimal 
+point estimation through cost function minimization while 
+ignoring the inherent uncertainties in the inference process. For 
+this reason, Yang et al. [19] first proposed the off-grid sparse 
+Bayesian inference (OGSBI) algorithm for DOA estimation, 
+which treats the target orientation to be determined as a random 
+variable and assigns it a specific probability distribution. Li et 
+al. [20] adapted the OGSBI framework to the localization of 
+off-grid radiation sources and incorporated a grid refinement 
+strategy to reduce computational load. Addressing DPD using 
+DOA information in multipath environments, Hao et al. [21] 
+employed an expectation-maximization (EM) approach to 
+decouple the multi-dimensional optimization problem. They 
+further integrated a gradient descent mechanism within the EM 
+steps to iteratively update the coordinates of the grid points, 
+thereby effectively eliminating off-grid errors. It is noteworthy 
+that references [17-21] focus on the position offset correction of 
+grid points and usually assume that the channel attenuation is a 
+fixed value. However, in practical localization scenarios, 
+channel attenuation is often unknown and varies with position. 
+If only the position offset is corrected while ignoring the 
+attenuation error, it will still lead to a mismatch between the 
+dictionary and the real signal model, thereby limiting 
+localization accuracy. 
+To address model parameter errors, Reference [22] treated 
+the propagation process at each receiving station as a dictionary, 
+converted partially unknown dictionary components into part 
+of the unknown signal, and leveraged the shared sparsity of 
+radiation sources in different dictionaries to estimate their 
+locations. However, the coupling of dictionary and signal 
+uncertainties in the observed data prevents the algorithm from 
+guaranteeing a unique and correct solution. In Reference [23], 
+for scenarios with unknown gain and phase errors, the position 
+parameters were decoupled from the gain-phase errors, 
+rendering the dictionary fully known without requiring learning. 
+Nevertheless, the accuracy of this method entirely depends on 
+the effectiveness of the decoupling, resulting in limited 
+robustness. Reference [24] introduced a learning rule for the 
+channel attenuation factor (i.e., the unknown part of the 
+dictionary) during the localization process, which treated the 
+unknown dictionary components as parameters to be estimated 
+via SBL and updated the sparse dictionary iteratively. However, 
+this approach does not jointly update the attenuation factor and 
+position parameters, thus constraining its learning capability. 
+Methods addressing channel uncertainty in references [22-24] 
+typically learn attenuation as an additional parameter 
+independent of position estimation. However, they often fail to 
+jointly model off-grid errors, which may cause the learning 
+process to fall into local optima and result in significant 
+performance degradation under high off-grid conditions. 
+In summary, both off-grid errors and model parameter errors 
+are critical factors affecting DPD accuracy. However, existing 
+methods often optimize for only one type of error in isolation 
+and fail to adequately address the basis mismatch problem 
+when both errors coexist and are coupled, leading to limited 
+localization accuracy. To solve the DOA estimation problem 
+for hydrophone arrays with position errors, Reference [25] 
+established a SBL model to formulate a joint probability 
+density function for array position errors and angular grid errors 
+and employed the EM algorithm to estimate the unknown 
+parameters. Inspired by Reference [25], in this work we 
+propose a TDOA-based DPD method with parametric 
+dictionary learning (DPD-PDL) for off-grid radiation sources 
+localization under unknown channel attenuation conditions. 
+This article has been accepted for publication in IEEE Sensors Journal. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/JSEN.2026.3693237
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on May 26,2026 at 03:46:47 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 3 ---
+ 
+ 
+IEEE SENSORS JOURNAL, VOL. XX, NO. XX, MONTH X, XXXX 
+ 
+This method unifies channel attenuation and off-grid effects as 
+the deviation between the true dictionary and the constructed 
+dictionary, and leverages the SBL framework to achieve joint 
+optimization of parametric dictionary learning and sparse 
+signal recovery. The main contributions and innovations of this 
+work include: 
+(1) We propose a SBL model tailored for TDOA-based 
+single-antenna DPD systems and establish a joint sparse 
+representation model that simultaneously characterizes off-grid 
+errors and channel attenuation errors. 
+(2) We formulate the DPD problem as a joint optimization of 
+parametric dictionary learning and sparse signal reconstruction. 
+By introducing hierarchical priors within the SBL framework, 
+the 
+method 
+adaptively 
+learns 
+parametric 
+dictionary 
+incorporating both off-grid and model errors, thereby 
+effectively improving positioning accuracy when both types of 
+errors coexist. 
+(3) The CRB for TDOA-based DPD are derived. Simulation 
+results demonstrate that the proposed method achieves over 
+20% higher positioning accuracy compared to existing methods, 
+particularly under low SNR conditions. 
+The rest of this paper is organized as follows. The 
+TDOA-based DPD signal model and its off-grid model are 
+presented in Section Ⅱ. Section Ⅲ introduces the proposed 
+DPD-PDL method. Section Ⅳ derives the CRB for target 
+localization. Section Ⅴ validates the performance of the 
+proposed algorithm through numerical simulations. Finally, the 
+conclusion is drawn in Section Ⅵ. 
+To enhance the readability of the paper, the commonly used 
+symbols are summarized in Table Ⅰ before proceeding with 
+in-depth formula derivations: 
+TABLE Ⅰ 
+DESCRIPTION OF KEY SYMBOLS 
+Type 
+Symbol 
+Explanation 
+Received 
+signal related 
+kr 
+Received signal 
+ks 
+Sparse vector 
+k
+n 
+Noise vector 
+Sparse model 
+related 
+Π 
+Set of grid points 
+k
+Φ 
+Overcomplete dictionary 
+xθ /
+y
+θ /
+w
+θ 
+Bias in x -direction / bias in y -direction 
+/ attenuation bias 
+Mathematical 
+notation 
+T
+( )/
+H
+( )
+ 
+Transpose and conjugate transpose 
+Re{ }/ Im{ } 
+Real and imaginary part of the element 
+
+E  
+Expectation operator 
+diag{} 
+Diagonal matrix composed of all 
+elements 
+tr( ) 
+Trace of matrix 
+[ ]
+⊥•
+Π
+ 
+Orthogonal projection matrix of the 
+columnar complement space 
+/  
+Hadamard product / Kronecker product 
+nI 
+Identity matrix of order n 
+CN 
+ 
+Complex gaussian distribution 
+II. SIGNAL MODEL 
+A. TDOA-Based DPD Model 
+Consider a two-dimensional localization scenario, L 
+receiving 
+stations 
+with 
+known 
+position 
+T
+[ ,
+] (
+1,2,
+, )
+l
+l
+l
+x y
+l
+L
+=
+=
+u
+
+ are deployed to locate N 
+radiation 
+sources 
+with 
+unknown 
+position 
+T
+[
+,
+] (
+1,2,
+,
+)
+n
+n
+n
+x
+y
+n
+N
+=
+=
+p
+
+. The localization scenario is 
+shown in Fig. 1. 
+ 
+Fig. 1. Schematic of the localization scenario 
+Assuming that the signals from the emitter arrive at each 
+receiving station via line-of-sight propagation, and that 
+high-precision clock synchronization has been achieved among 
+the receiving stations through GPS timing modules. The signal 
+received at the l th observation station can be expressed as 
+ 
+,
+1
+( )
+(
+(
+))
+( )    0
+N
+l
+l n
+n
+l
+n
+l
+n
+r t
+w s t
+τ
+n t
+t
+T
+=
+=
+−
++
+
+
+p
+ 
+(1) 
+where 
+( )
+lr t
+ is the receiving signal vector, 
+( )
+ns t
+ is the 
+waveform of the n th radiation signal at the time t , 
+,l n
+w
+ is the 
+channel attenuation coefficient from the n th signal to the l th 
+station, 
+( )
+ln t is the zero mean complex Gaussian white noise. 
+(
+)
+/ c
+l
+n
+n
+l
+τ
+=
+−
+p
+p
+u
+ represents the signal propagation delay 
+from the n th source signal to the l th station, c is the 
+propagation speed. 
+In third-party localization scenarios, the propagation delay of 
+the source signal is generally unknown. By designating the first 
+station as the reference station, we obtain: 
+ 
+1
+Δ (
+)
+(
+)
+(
+)
+l
+n
+l
+n
+n
+τ
+τ
+τ
+=
+−
+p
+p
+p
+ 
+(2) 
+Consequently, the received signal can be reformulated as: 
+ 
+,
+1
+( )
+(
+Δ (
+))
+( )    0
+N
+l
+l n
+n
+l
+n
+l
+n
+r t
+w s t
+τ
+n t
+t
+T
+=
+=
+−
++
+
+
+p
+
+ 
+(3) 
+where 
+1
+(
+(
+))
+n
+n
+s t
+τ
+−
+p
+
+ denotes the signal waveform of the n th 
+source arriving at the reference station. Subsequently, the 
+signal is sampled at time 
+(
+1,2,
+,
+)
+s
+s
+t
+nT n
+N
+=
+=
+
+, with 
+sT 
+denoting the sampling interval, yielding the discrete form of (3) 
+as follows:  
+ 
+,
+1
+( )
+(
+Δ (
+))
+( )
+N
+l
+l n
+n
+s
+l
+n
+l
+n
+r n
+w s nT
+τ
+n n
+=
+=
+−
++
+
+p
+
+ 
+(4) 
+This article has been accepted for publication in IEEE Sensors Journal. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/JSEN.2026.3693237
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on May 26,2026 at 03:46:47 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 4 ---
+ 
+ 
+IEEE SENSORS JOURNAL, VOL. XX, NO. XX, MONTH X, XXXX 
+ 
+Applying the discrete Fourier transform (DFT) to the 
+discrete form of (4), the k th frequency component of the 
+received signal at the l th station is expressed as 
+ 
+Δ (
+)
+,
+,
+,
+,
+1
+  
+1,2,
+,
+k
+l
+n
+N
+jω
+τ
+l k
+l n
+n k
+l k
+n
+r
+w s
+e
+n
+k =
+K
+−
+=
+=
++
+
+p
+
+ 
+(5) 
+where 
+,
+n k
+s
+ represents the Fourier coefficient of the signal, 
+k
+ω 
+is the angular frequency of the k th frequency component, and 
+,l k
+n
+ denotes the frequency-domain noise. The above 
+expression can be further rewritten as 
+ 
+T
+,
+,
+,
+l k
+l
+l k
+k
+l k
+r
+n
+=
++
+w Γ s
+ 
+(6) 
+where 
+ 
+2
+T
+,1
+,2
+,
+Δ (
+)
+Δ (
+)
+Δ (
+)
+,
+T
+1,
+2,
+,
+[
+,
+,
+,
+]
+diag{
+,
+,
+,
+}
+[
+,
+,
+,
+]
+k
+l
+n
+k
+l
+k
+l
+N
+l
+l
+l
+l N
+jω
+τ
+jω
+τ
+jω
+τ
+l k
+k
+k
+k
+N k
+w
+w
+w
+e
+e
+e
+s
+s
+s
+−
+−
+−
+
+=
+
+=
+
+
+=
+
+p
+p
+p
+w
+Γ
+s
+
+
+
+ 
+(7) 
+By aggregating the received signals from all L base stations, 
+we obtain the joint representation: 
+ 
+k
+k
+k
+k
+=
++
+r
+Φ s
+n 
+(8) 
+where 
+ 
+T
+1,
+2,
+,
+T
+T
+T
+T
+T
+T T
+1
+1,
+2
+2,
+,
+T
+1,
+2,
+,
+[
+,
+,
+,
+]
+[(
+) ,(
+) ,
+,(
+) ]
+[
+,
+,
+,
+]
+k
+k
+k
+L k
+k
+k
+k
+L
+L k
+k
+k
+k
+L k
+r
+r
+r
+n
+n
+n
+
+=
+
+=
+
+
+=
+
+r
+Φ
+w Γ
+w Γ
+w Γ
+n
+
+
+
+ 
+(9) 
+To facilitate target localization, the target region is typically 
+divided into a set of multiple discrete grid points denoted by 
+{
+1,2,
+}
+q q
+Q
+=
+Π = g
+
+, where Q is the total number of grid 
+points and 
+q
+g represents the coordinates of the q th grid point. 
+Then, the sparse extension of (8) becomes: 
+ 
+k
+k
+k
+k
+=
++
+r
+Φ s
+n 
+(10) 
+where 
+ 
+1
+2
+T
+T
+T
+T
+T
+T T
+1
+1,
+2
+2,
+,
+T
+,1
+,2
+,
+Δ (
+)
+Δ (
+)
+Δ (
+)
+,
+T
+1,
+2,
+,
+[(
+) ,(
+) ,
+,(
+) ]
+[
+,
+,
+,
+]
+diag{
+,
+,
+,
+}
+[
+,
+,
+,
+]
+k
+l
+Q
+k
+l
+k
+l
+k
+k
+k
+L
+L k
+l
+l
+l
+l Q
+jω
+τ
+jω
+τ
+jω
+τ
+l k
+k
+k
+k
+Q k
+w
+w
+w
+e
+e
+e
+s
+s
+s
+−
+−
+−
+
+=
+
+=
+
+=
+
+
+=
+
+p
+p
+p
+Φ
+w Γ
+w Γ
+w Γ
+w
+Γ
+s
+
+
+
+
+ 
+(11) 
+The target positions exhibit sparsity in the discretized spatial 
+domain when N
+Q
+
+. Therefore, the multi-source localization 
+problem can be abstracted as the CS problem shown in (10), 
+where CS recovery algorithms can be employed to determine 
+the target positions. 
+B. Off-Grid Model 
+It should be noted that (10) holds only when targets are 
+perfectly located at predefined grid points. However, in 
+practical scenarios, radiation sources rarely fall exactly on these 
+discretized positions, leading to a basis mismatch between the 
+overcomplete dictionary matrix 
+k
+Φ
+ and the actual grid 
+distribution in (10). Beyond target position offset, true channel 
+attenuation introduces an additional deviation from the preset 
+channel attenuation when building a dictionary, further 
+exacerbating the basis mismatch problem. Off-grid errors are 
+essentially 
+geometric 
+deviations 
+introduced 
+by 
+the 
+discretization of spatial sampling, while channel attenuation 
+errors pertain to uncertainty in signal amplitude modeling. 
+Although these two types of errors have different physical 
+meanings, they both cause the true steering vector to deviate 
+from the predefined dictionary basis vectors in the actual 
+observation model. Therefore, in this section, based on grid 
+point offsets, attenuation errors are incorporated into the 
+off-grid model to achieve joint estimation and compensation of 
+these two error sources: 
+ 
+(
+,
+)
+k
+k
+k
+k
+=
++
+r
+Φ Π w s
+n 
+(12) 
+Unlike the model in (8), the dictionary 
+k
+Φ in (12) is 
+explicitly parameterized by Π and w . Therefore, it is 
+necessary to jointly estimate of the sparse vector 
+ks and the 
+dictionary parameters Π , w when solving the multi-source 
+localization problem. When N
+Q
+
+, the target exhibits sparsity 
+in the discretized spatial domain. To exploit this sparsity, the 
+localization problem is transformed into a sparse recovery 
+problem of recovering the vector 
+ks from the observations 
+kr . 
+By minimizing the following 0l -norm, the solution maintains 
+sparsity while fitting the observed data and optimizes the 
+dictionary parameters to reduce mismatch. 
+ 
+2
+0
+,
+,
+min
+k
+k
+k
+k
+k
+κ
+−
++
+s
+Π w r
+Φ s
+s
+ 
+(13) 
+where κ is the Lagrange multiplier.  
+The joint optimization problem formulated in (13) 
+establishes a closed-loop optimization integrating sparse 
+inference and dictionary learning. In this formulation, the 
+0l -norm enforces sparsity, which theoretically can effectively 
+alleviate the basis mismatch problem caused by grid offset and 
+model parameter errors. 
+Let 
+x
+θ and 
+y
+θ denote the offsets between Π and the initial 
+grid points 
+0
+Π on the x- and y-axes, and 
+w
+θ represents the 
+deviation between the actual channel attenuation and the set 
+attenuation. The true overcomplete dictionary can be linearly 
+approximated via a first-order Taylor expansion of the original 
+dictionary: 
+(
+1)
+(
+1)
+( )
+( )
+( )
+( )
+0,
+,
+( )
+( )
+( )
+( )
+,
+,
+(
+,
+)
+(
+,
+)
+(
+,
+)diag{ }
+            
+(
+,
+)diag{
+}+
+(
+,
+)diag{
+}
+[
+,
+],
+[
+,
+]
+i
+i
+i
+i
+i
+i
+k
+k
+x k
+x
+i
+i
+i
+i
+y k
+y
+w k
+w
+x
+x
+x
+y
+y
+y
+LB UB
+LB UB
++
++
+
+
++
+
+
++
+
+
+Φ Π
+w
+Φ
+Π
+w
+Φ
+Π
+w
+θ
+Φ
+Π
+w
+θ
+Φ
+Π
+w
+θ
+          θ
+θ
+(14) 
+where 
+,x k
+Φ
+, 
+,y k
+Φ
+, and 
+,
+w k
+Φ
+ are the partial derivative matrices 
+of 
+k
+Φ
+ with respect to the x-axis, y-axis, and channel 
+attenuation, respectively. 
+( )i
+Π
+ and 
+( )i
+w
+ denote the dictionary 
+parameters at the i th iteration. 
+χ
+LB and 
+χ
+UB represent the 
+lower and upper bounds of the 
+χ
+θ , with 
+, ,
+χ
+x y w
+=
+. 
+The grid points and channel attenuation parameters are then 
+updated iteratively according to (15) and (16) until 
+convergence: 
+ 
+(
+1)
+( )
+i
+i
+g
++ =
++
+Π
+Π
+θ 
+(15) 
+ 
+(
+1)
+( )
+i
+i
+w
++
+=
++
+w
+w
+θ 
+(16) 
+This article has been accepted for publication in IEEE Sensors Journal. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/JSEN.2026.3693237
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on May 26,2026 at 03:46:47 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 5 ---
+ 
+ 
+IEEE SENSORS JOURNAL, VOL. XX, NO. XX, MONTH X, XXXX 
+ 
+III. TDOA-BASED DPD METHOD WITH PARAMETRIC 
+DICTIONARY LEARNING 
+The sparsity of targets in the spatial domain provides the 
+foundation for signal reconstruction. However, the dictionary 
+mismatch problem caused by off-grid effects and attenuation 
+deviations poses significant challenges for conventional 
+reconstruction algorithms. For the joint optimization problem 
+formulated in (13), traditional 
+pl -norm minimization methods 
+are sensitive to noise. Therefore, this paper adopts SBL 
+reconstruction algorithm, primarily due to its three advantages: 
+1) Its hierarchical Bayesian model can uniformly characterize 
+signal sparsity, observation noise, and dictionary parameter 
+uncertainties, enabling joint inference within a unified 
+framework rather than stepwise processing; 2) It automatically 
+learns hyperparameters through EM, avoiding manual 
+regularization tuning; 3) Compared to 
+pl -norm minimization, 
+SBL yields sparser and more stable solutions, demonstrating 
+superior recovery performance in off-grid and perturbed 
+environments. 
+Compared with sparse models that only consider off-grid 
+errors, we additionally incorporate a learning rule for channel 
+attenuation factors. Leveraging the principles of SBL, the joint 
+optimization of sparse signal reconstruction and dictionary 
+parameter inference is achieved. 
+The proposed method consists of two phases. In phase 1, a 
+hierarchical prior model is imposed on (12), and a Laplace 
+distribution containing parameter prior information is 
+constructed to enhance sparsity. In phase 2, we utilize Bayesian 
+inference to perform iterative updates of dictionary parameters 
+given the observed values. The detailed derivation of the 
+proposed method is presented below.  
+A. Hierarchical Prior Model 
+The hierarchical probabilistic model constructed in this 
+paper is illustrated in Fig. 2, comprising three components: the 
+model for sparse signal, the model for additive noise, and the 
+model for parametric dictionary. 
+Fig. 2. Hierarchical probabilistic model 
+(1) Noise Model 
+As previously assumed, the noise follows a Gaussian 
+distribution. Thus, we define: 
+ 
+1
+(
+)
+(0,
+)
+k
+L
+p
+β
+CΝ
+β−
+=
+n
+I
+ 
+(17) 
+where 
+1
+2
+β
+σ
+−=
+ denotes the noise variance. For conjugate 
+prior considerations, we assume β follows a Gamma 
+distribution governed by hyperparameters 
+0
+a 
+ and 
+0
+b 
+: 
+ 
+( ; , )
+(
+, )
+p β a b
+Gamma β a b
+=
+ 
+(18) 
+Combining (17) and (18), the likelihood function of 
+kr can 
+be expressed as: 
+ 
+1
+(
+, ;
+, )
+(
+(
+, ),
+)
+k
+k
+k
+k
+L
+p
+β
+CΝ
+β−
+=
+r s
+Π w
+r Φ Π w
+I
+ 
+(19) 
+(2) Sparse Signal Model 
+The source signal 
+ks is assumed to follow a zero-mean 
+Gaussian distribution: 
+ 
+(
+)
+(
+)
+0,
+k
+p
+N
+=
+s 
+ 
+(20) 
+where 
+diag( )
+=
+
+
+, 
+(
+)
+T
+1
+2
+,
+,
+,
+Q
+=
+
+
+
+
+is the variance 
+vector. We further assume  follows a Gamma distribution: 
+ 
+1
+(
+)
+(
+1, / 2)
+Q
+i
+i
+p
+λ
+Gamma α
+λ
+=
+=
+
+ 
+(21) 
+The marginal probability density of 
+ks can then be obtained 
+by integrating over the hyperparameters : 
+ 
+(
+)
+(
+)
+2
+,
+0
+1
+T
+(
+; )
+( ; )d
+1
+exp
+exp
+d
+2
+2
+2
+2
+exp
+2
+k
+k
+Q
+i k
+i
+i
+i
+i
+i
+k
+k
+p
+λ
+p
+p
+λ
+s
+λ
+λ
+λ
+λ
++
+=
+=
+
+
+
+
+=
+−
+−
+
+
+
+
+
+
+
+
+
+
+
+=
+−
+
+
+s
+s
+s s
+
+
+
+
+
+
+
+(22) 
+Note that this marginal distribution corresponds to a Laplace 
+distribution, which exhibits strong peak at the origin and 
+therefore promotes sparsity by driving most elements of 
+ks to 
+zero. 
+(3) Dictionary Parameter Model 
+Since the target positions are random relative to grid points 
+in the absence of prior information, we impose uniform priors 
+on the offsets 
+x
+ and 
+y
+: 
+ 
+,
+,
+2 2
+2 2
+Q
+Q
+x
+y
+r r
+r r
+U
+U
+
+
+
+
+
+
+
+
+−
+−
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+ 
+(23) 
+where r represents the grid interval. 
+Since this paper assumes line-of-sight propagation, the 
+channel attenuation errors fluctuate slightly around an 
+unknown systematic bias, whose statistical property is more 
+appropriately modeled using a Gaussian distribution. 
+ 
+(
+)
+1
+,
+w
+CN μ γ−
+
+
+ 
+(24) 
+This article has been accepted for publication in IEEE Sensors Journal. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/JSEN.2026.3693237
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on May 26,2026 at 03:46:47 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 6 ---
+ 
+ 
+IEEE SENSORS JOURNAL, VOL. XX, NO. XX, MONTH X, XXXX 
+ 
+where μ represents the non-zero systematic error, and γ 
+denotes the variance. 
+Based on the hierarchical model above, we derive the joint 
+probability density function (PDF) as follows: 
+1
+( , , , , ;
+,
+)
+(
+,
+;
+,
+) (
+)
+          
+( ) ( ) ( )
+          
+(
+,
+;
+,
+) (
+) ( ) ( ) ( )
+K
+k
+k
+k
+k
+p
+β λ
+p
+β
+p
+p
+p λ p β
+p
+β
+p
+p
+p λ p β
+=
+
+
+= 
+
+
+
+
+=
+
+R S
+Π w
+r s
+Π w
+s
+R S
+Π w
+S
+
+
+
+
+
+(25) 
+ 
+1
+2
+[ ,
+,
+,
+]
+K
+=
+R
+r r
+r
+
+ 
+(26) 
+ 
+1
+2
+[ ,
+,
+,
+]
+K
+=
+S
+s s
+s
+
+ 
+(27) 
+B. Sparse Bayesian Interference 
+The Bayesian inference process in this paper involves the 
+estimation of two distinct parameter categories: the 
+probabilistic model hyperparameters ( , , )
+β λ
+
+ and the 
+dictionary model parameters (
+,
+)
+Π w . Unlike existing methods 
+(e.g., [22]) that couple Π and w during estimation, our 
+method establishes separate parametric models for Π and w, 
+thereby avoiding the non-convex optimization problems that 
+may arise from coupled modeling. Then, the EM method is 
+employed to solve the relevant parameters. In the E-step, S is 
+estimated based on the current Π and to infer the probability 
+and intensity of the presence of sources. In the M-step, using 
+the posterior distribution obtained from the E-step, the 
+dictionary parameters Π , w and hyperparameters 
+, ,β λ
+
+ are 
+updated. These two steps alternate iteratively, gradually 
+approaching the true dictionary and target positions. 
+(1) Update for Probability Model Parameter  and β 
+By integrating the off-grid model in (12) with the 
+hierarchical prior model in Section Ⅲ-A, the joint optimization 
+problem in (13) can be solved through Bayesian inference. The 
+process 
+begins 
+with 
+the 
+posterior 
+probability 
+( , ,
+;
+, )
+p
+β
+S
+R Π w
+
+, which factorizes as: 
+( , ,
+;
+, )
+(
+, , ;
+, ) ( ,
+;
+, )
+p
+β
+p
+β
+p
+β
+=
+S
+R Π w
+S R
+Π w
+R Π w
+
+
+
+(28) 
+Based on the relevant derivations in Appendix A, we have 
+(
+)
+1
+(
+, ;
+,
+) (
+)
+(
+, , ;
+,
+)
+,
+(
+, ;
+,
+)
+K
+k
+k
+k
+k
+p
+β
+p
+p
+β
+N
+p
+β
+=
+=
+=
+R S
+Π w
+S
+S R
+Π w
+s
+R
+Π w
+
+
+
+
+(29) 
+where 
+ 
+(
+)
+1
+T
+1
+k
+k
+k
+β
+−
+−
+=
++
+Φ Φ
+
+
+ 
+(30) 
+ 
+T
+k
+k
+k
+k
+β
+=
+Φ r
+
+
+ 
+(31) 
+By incorporating channel attenuation w , the resulting 
+dictionary 
+(
+,
+)
+k
+Φ
+Π w more accurately captures the underlying 
+physical process. Consequently, the posterior distribution 
+(
+, , ;
+, )
+p
+β
+S R
+Π w
+
+ derived from this refined dictionary yields 
+more reliable estimation of the sparse signals. 
+Thus, the maximum a posteriori (MAP) estimation of the 
+sparse matrix S is: 
+ 
+1
+2
+ˆ
+argmax (
+, , ;
+, )
+[
+,
+,
+,
+]
+K
+p
+β
+=
+=
+S
+S =
+S R
+Π w
+U
+
+
+
+
+ (32) 
+To calculate 
+k
+ and 
+k
+, it is necessary to estimate the 
+dictionary parameters Π , w and the probabilistic model 
+hyperparameters , β . Using the type-II ML approach, the 
+estimation of Π , w,, β are obtained via MAP:  
+, ,
+,
+, ,
+,
+, ,
+,
+ˆ ˆ
+ˆ
+ˆ
+( , ,
+,
+)
+argmax
+( ,
+;
+,
+)
+argmax
+( , , ;
+,
+)
+argmaxln
+( , , ;
+,
+)
+β
+β
+β
+β
+p
+β
+p
+β
+p
+β
+=
+=
+=
+Π w
+Π w
+Π w
+Π w
+R Π w
+R
+Π w
+R
+Π w
+
+
+
+
+
+
+
+(33) 
+Since 
+the 
+objective 
+function 
+ln ( , , ;
+,
+)
+p
+β
+R
+Π w
+
+ is 
+multimodal and non-convex, direct optimization by seeking 
+stationary points is complex and potentially non-convergent. 
+Therefore, treating S as a latent variable, the update formulas 
+for  and β can be obtained as follows according to the 
+derivations in Appendix B: 
+ 
+(
+)
+(
+)
+2
+1
+new
+new
+2
+T
+2
+1
+1
+4
+( )
+1
+2
+2
+2
+2
+tr(
+)
+K
+qq
+q
+k
+q
+K
+k
+k
+k
+k
+k
+k
+k
+λ
+k
+λ
+a
+KL
+β
+b
+=
+=
+
++
++
+−
+
+
+=
+
+−
++
+
+=
+
++
+−
++
+
+
+
+μ
+r
+Φ
+Φ
+Φ
+
+
+
+
+ 
+(34) 
+(2) Update for Dictionary Model Parameter Π and w 
+The localization dictionary is parameterized by Π and w, 
+hence learning the sparse localization dictionary is equivalent 
+to learning these parameters. From (25), we have 
+ 
+,
+T
+,
+1
+T
+T
+1
+ˆ
+ˆ
+{
+, }
+argmax {ln (
+,
+;
+,
+)}
+           
+argmin 
+(
+) (
+)
+            =
+(
+) (
+)
+tr(
+)
+K
+k
+k
+k
+k
+k
+k
+k
+K
+k
+k
+k
+k
+k
+k
+k
+k
+k
+k
+E
+p
+β
+E
+=
+=
+=
+
+
+
+
+=
+−
+−
+
+
+
+
+
+
+
+
+−
+−
++
+
+
+
+
+Π w
+Π w
+Π w
+R S
+Π w
+r
+Φ s
+r
+Φ s
+r
+Φ s
+r
+Φ s
+Φ
+Φ
+
+ (35) 
+According to the derivations in Appendix C, (35) can be 
+reformulated as solving the following bounded linear 
+least-squares problem: 
+T
+T
+T
+T
+T
+T
+T
+T
+T
+,
+,
+2
+2
+argmin
+      
+2
+2
+2
+2
+s.t. 
+[
+,
+],
+[
+,
+]
+x
+y
+w
+x
+xx
+x
+y
+yy
+y
+w
+ww
+w
+x
+xy
+y
+x
+xw
+w
+y
+yw
+w
+x
+x
+y
+y
+w
+w
+x
+x
+x
+y
+y
+y
+LB UB
+LB UB
+
+
++
++
++
++
+
+
+
+
++
++
++
++
+
+
+
+
+
+
+P
+P
+P
+P
+P
+P
+v
+v
+v
+θ
+θ
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(36) 
+The specific expressions for the symbols in this equation 
+are detailed in Appendix C. 
+Let f denote the objective function in (44). The partial 
+derivative of f with respect to 
+x
+ is 
+ 
+2(
+)
+xx
+x
+xy
+y
+xw
+w
+x
+x
+
+=
++
++
+
+f
+P
+P
+P
++ v
+
+
+
+
+ 
+(37) 
+This article has been accepted for publication in IEEE Sensors Journal. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/JSEN.2026.3693237
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on May 26,2026 at 03:46:47 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 7 ---
+ 
+ 
+IEEE SENSORS JOURNAL, VOL. XX, NO. XX, MONTH X, XXXX 
+ 
+If matrix 
+xx
+P is invertible, we set (46) zero and obtain 
+(
+)
+1
+x
+xx
+xy
+y
+xw
+w
+x
+−
+= −
++
++
+P
+P
+P
+v
+
+
+
+
+. Meanwhile, if 
+,
+2 2
+x
+r r
+
+
+−
+
+
+
+
+
+
+, 
+we have ˆ
+x
+x
+= 
+
+.  
+If these two assumptions are not met, 
+xx
+P cannot be directly 
+inverted. In this case, we decompose the inversion problem into 
+several scalar division problems and perform an element-wise 
+update on the parameters. Given that element 
+)
+x
+j
+(
+ requires 
+updating, 
+)
+x
+j
+−
+(
+ is fixed; that is, all other elements besides 
+)
+x
+j
+(
+ are held fixed in vector 
+x
+
+. By taking the partial 
+derivative with respect to 
+)
+x
+j
+(
+ and setting it to zero, we can 
+obtain 
+ 
+(
+) (
+)
+(
+)
+)
+(
+)
+j
+xx
+j
+x
+j
+xy
+y
+yw
+w
+x
+j
+x
+j
+xx
+jj
+−
+−+
++
+(
+= −P
+P
+P
++ v
+P
+
+
+
+
+ 
+(38) 
+If 
+)
+,
+2 2
+x
+j
+r r
+
+
+(
+−
+
+
+
+
+
+, then 
+ˆ )
+)
+x
+j
+x
+j
+(
+= (
+
+
+. Otherwise, the 
+nearest endpoint value is taken. The update rule for 
+x
+ is 
+summarized as 
+ 
+) ,(C1) :
+is
+,
+2 2
+) ,(C2) :(C1) is not satisfied and
+)
+,
+2 2
+ˆ )
+,(C3) :(C1)(C2) is not satisfied and 
+)
+2
+2
+,(C4) :(C1)(C2) is not satisfied an
+invertible an 
+d 
+2
+d
+Q
+x
+j
+xx
+x
+x
+j
+x
+j
+x
+j
+x
+j
+r r
+r r
+r
+r
+r
+
+
+(
+−
+
+
+
+
+
+
+(
+(
+−
+
+
+
+
+(
+=
+−
+(
+−
+(
+P
+
+  
+ 
+
+
+
+
+
+
+)
+2
+x
+j
+r
+
+
+
+
+
+
+
+
+
+−
+
+
+(39) 
+Similarly, the update rules for 
+y
+ is derived as: 
+ 
+) ,(C1) :
+is
+,
+2 2
+) ,(C2) : (C1) is not satisfied and
+)
+,
+2 2
+ˆ )
+,(C3) : (C1)(C2) is not satisfied and 
+)
+2
+2
+,(C4) : (C1)(C2) is not satisfied an
+invertible an 
+d 
+2
+d
+Q
+y
+j
+yy
+y
+y
+j
+y
+j
+y
+j
+y
+j
+r r
+r r
+r
+r
+r
+
+
+(
+−
+
+
+
+
+
+
+(
+(
+−
+
+
+
+
+(
+=
+−
+(
+−
+(
+P
+
+  
+ 
+
+
+
+
+
+
+)
+2
+y
+j
+r
+
+
+
+
+
+
+
+
+
+−
+
+
+(40) 
+where 
+ 
+(
+)
+1
+T
+y
+yy
+xy
+x
+yw
+w
+y
+−
+= −
++
++
+P
+P
+P
+v
+
+
+
+
+ 
+(41) 
+ 
+T
+(
+) (
+)
+(
+)
+)
+(
+)
+j
+yy
+j
+y
+j
+xy
+x
+yw
+w
+y
+j
+y
+j
+yy
+jj
+−
+−+
++
+(
+= −P
+P
+P
++ v
+P
+
+
+
+
+ 
+(42) 
+The partial derivative of f with respect to 
+w
+ is 
+ 
+T
+T
+2(
+)
+ww
+w
+xw
+x
+yw
+y
+w
+w
+
+=
++
++
+
+f
+P
+P
+P
++ v
+
+
+
+
+ 
+(43) 
+If matrix 
+ww
+P
+ is invertible, we set (52) zero and obtain 
+(
+)
+1
+T
+T
+w
+ww
+xw
+x
+yw
+y
+w
+−
+= −
++
++
+P
+P
+P
+v
+
+
+
+
+. If this assumption is not met, 
+we also perform an element-wise update similar to 
+x
+, which 
+yields 
+ 
+T
+T
+(
+) (
+)
+(
+)
+)
+(
+)
+j
+ww
+j
+w
+j
+xw
+x
+yw
+y
+w
+j
+w
+j
+ww
+jj
+−
+−+
++
+(
+= −P
+P
+P
++ v
+P
+
+
+
+
+ 
+(44) 
+The update rule for 
+w
+ is summarized as 
+ 
+s
+inverti
+a
+ble
+) ,(C1):
+is
+ˆ )
+) ,(C2):(C1) i
+ 
+s not s ti fied
+w
+j
+ww
+w
+j
+w
+j
+(
+
+(
+= (
+
+P
+
+  
+
+
+
+ 
+(45) 
+At this point, all parameter update formulas have been 
+derived in this section. Define the residual energy at the i th 
+iteration as 
+( )
+( )
+2
+1
+( )
+(
+,
+)
+K
+i
+i
+k
+k
+k
+k
+p i
+=
+=
+−
+r
+Φ Π
+w
+s
+. The iteration 
+terminates if the change rate of the residual energy between the 
+i th and 
+1
+i −th iterations is less than the threshold ε , or if the 
+number of iterations reaches the upper limit max
+i
+. Otherwise, 
+the algorithm returns to (11) for another iteration. 
+In the SBL framework, the posterior distribution of the 
+sparse signal 
+ks is characterized by 
+k
+ and 
+k
+. Since each 
+element in 
+ks corresponds to the signal strength at a grid point, 
+and 
+k
+ represents the mean estimation of the signal strength, 
+the power of each grid point 
+q
+g is compared by summing 
+k
+: 
+ 
+tar
+1
+K
+q
+q
+k
+k =
+= 
+p
+μ 
+(46) 
+The positions corresponding to the top N values in 
+tar
+q
+p
+ are 
+identified as the target locations. The complete procedure of the 
+proposed algorithm is summarized as Algorithm 1. 
+Algorithm 1: TDOA-Based Direct Position Determination 
+Method with Parametric Dictionary Learning 
+Input: received signal 
+kr , initial grid points set 
+0
+Π
+, 
+positions of receiving station u, number of target N . 
+Output: The estimated position ˆ (
+1,2,
+,
+)
+n n
+N
+=
+p
+
+, adaptive 
+grid points set Π , attenuation coefficient set w. 
+Initialization: hyper-parameter 
+(0)
+
+,
+(0)
+β
+,
+6
+10
+a
+b
+−
+=
+=
+, 
+0
+x =
+θ
+,
+0
+y =
+θ
+,
+0
+w =
+θ
+,
+0
+i =
+. 
+Step 1: According to (11), compute 
+0,k
+Φ
+, 
+,x k
+Φ
+, 
+,y k
+Φ
+ and 
+,
+w k
+Φ
+ utilizing 
+( )i
+Π
+ and 
+( )i
+w
+. 
+Step 2: According to (30) and (31), calculate 
+k
+u , 
+k
+Σ 
+utilizing 
+( )i
+
+,
+( )i
+β
+ and 
+( )
+( )
+(
+,
+)
+i
+i
+k
+Φ
+Π
+w
+. 
+Step 3: According to (40), update 
+(
+1)
+i+
+
+ and 
+(
+1)
+i
+β
++ utilizing 
+( )i
+
+,
+( )i
+β
+, 
+( )
+( )
+(
+,
+)
+i
+i
+k
+Φ
+Π
+w
+, 
+k
+u , 
+k
+Σ . 
+Step 4: Update 
+x
+, 
+y
+, 
+w
+ according to (48), (49), (54). 
+Step 5: Update 
+(
+1)
+i+
+Π
+ and 
+(
+1)
+i+
+w
+ according to (15), (16). 
+Step 6: Compute and check the termination condition 
+This article has been accepted for publication in IEEE Sensors Journal. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/JSEN.2026.3693237
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on May 26,2026 at 03:46:47 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 8 ---
+ 
+ 
+IEEE SENSORS JOURNAL, VOL. XX, NO. XX, MONTH X, XXXX 
+ 
+( )
+(
+1)
+(
+1)
+i
+i
+i
+p
+p
+ε
+p
+−
+−
+−
+ or
+max
+i
+i
+
+. If the termination condition 
+is satisfied, exit the iteration and proceed to Step 7; 
+otherwise, set 
+1
+i
+i
+= + and return to Step 1. 
+Step 7: According to (55), calculate power estimation 
+tar
+q
+p
+ for 
+every grid point 
+q
+g . The grid positions corresponding 
+to the largest N values in Π are identified as the 
+estimated target locations. 
+Regarding the proposed localization method, the following 
+two remarks are provided: 
+Remark 1: The computation of 
+k
+ in (30) involves the 
+inversion of a Q
+Q
+
+ matrix. By applying the Woodbury 
+matrix identity, it can be transformed into: 
+ 
+T
+1
+k
+k
+k
+−
+=
+−
+Φ Ξ Φ
+
+
+
+ 
+(47) 
+ 
+1
+T
+L
+k
+k
+β−
++
+Ξ =
+I
+Φ
+Φ
+
+ 
+(48) 
+Thus, the complexity of calculating 
+k
+ can be significantly 
+reduced from 
+3
+(
+)
+O Q
+ to 
+3
+(
+)
+O L
+. 
+Remark 2: In the practical computation of Step 4, it is only 
+necessary to adjust the offsets 
+x
+θ ,
+y
+θ and 
+w
+θ
+ corresponding 
+to the grid points associated with the top N largest spectral 
+peaks, rather than updating offsets for all grid points. This 
+reduces the dimensionality of the optimization problem in (44) 
+from 2
+1
+Q + to 2
+1
+N + . 
+C. Computational Complexity Analysis 
+In this subsection, we only consider the count of complex 
+multiplications as the complexity metric. Based on the 
+implementation details of the algorithm, the computational 
+complexities of the main steps are as follows: The 
+computational complexity of dictionary update in Step 1 is 
+(
+)
+O LQ . The cost of calculating 
+k
+u and 
+k
+Σ in Step 2 is 
+2
+2
+(
+)
+O QL
+LQ
+LQK
++
++
+ and 
+2
+2
+3
+(
+)
+O QL
+LQ
+L
++
++
+, respectively. 
+Updating 
+(
+1)
+i+
+
+ and 
+(
+1)
+i
+β
++
+ in Step 3 require 
+( )
+O Q
+ and 
+(
+)
+O LQK
+LK
+Q
++
++
+. In Step 4, computing offset cost 
+2
+(
+)
+O NL
+. 
+The computational complexity of dictionary update in Step 5 is 
+(
+)
+O NL . In most conditions, the number of grid points Q 
+significantly exceeds other parameters. Therefore, the overall 
+computational complexity of the proposed algorithm is 
+2
+(
+)
+O LQ
+. For comparison, we analyze the computational 
+complexity of the methods in [15] and [20], which are 
+(
+)
+O LQ 
+and 
+2
+(
+)
+O LQ
+, respectively. The analysis shows that the 
+computational complexity of the proposed algorithm is slightly 
+higher than these two methods. 
+IV. CRB DERIVATION 
+In this section, we derive the CRB for the variance of target 
+position estimates based on the frequency-domain signal model 
+in (5), where the CRB is given by the inverse of the Fisher 
+information matrix (FIM). First, the following data vectors are 
+defined: 
+H
+H
+H H
+1
+2
+H
+1,1
+2,1
+,1
+1,2
+2,2
+,2
+1,
+2,
+,
+H
+H
+H H
+1
+2
+,
+H
+H
+H
+H
+1
+1
+1,1
+2,1
+,1
+1,2
+2 2
+,2
+1,
+2,
+,
+1
+1
+1
+H
+1
+,1
+1,2
+2
+,
+= [
+]
+  
+[
+]
+= [
+]
+[
+]
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+,
+[
+,
+,
+LK
+NK
+N
+N
+K
+K
+N K
+NL
+N
+K
+L
+L
+K
+K
+L K
+K
+L
+r
+r
+r
+r
+r
+r
+r
+r
+r
+s
+s
+s
+s
+s
+s
+s
+s
+s
+w
+w
+w
+
+
+
+
+=
+
+=
+
+
+=
+
+
+
+=
+r
+r
+r
+r
+s
+β
+s
+s
+s
+w
+w
+w
+
+
+
+
+
+
+
+
+2,1
+2,2
+2,
+,1
+,2
+,
+T
+T
+T
+2
+1
+T
+T
+T
+T
+2
+1
+1
+2
+H]
+= Re { },Im { }
+= [
+,
+,
+,
+]
+,
+,
+,
+,
+,
+,
+N
+L
+L
+L N
+NL
+N
+N
+w
+w
+w
+w
+w
+w
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+β
+β
+β
+p
+p
+p
+p
+
+
+
+
+(49) 
+A vector containing all unknown parameters is defined as: 
+ 
+T
+T
+T
+T
+T
+Re { },Im { },
+,
+
+
+= 
+
+s
+s
+β
+p
+
+
+ 
+(50) 
+According to the signal model assumptions, the expectation 
+of the data vector is: 
+ 
+T
+H
+T
+H
+T
+H
+1
+1,1 1
+2
+2,1 1
+,1 1
+T
+H
+T
+H
+T
+H H
+1
+1,
+2
+2,
+,
+{ }
+[(
+) ,(
+) ,
+,(
+) ,
+,
+               (
+) (
+) ,
+,(
+) ]
+L
+L
+K
+K
+K
+K
+L
+L K
+K
+E
+=
+=
+r
+m
+w Γ s
+w Γ
+s
+r
+w Γ
+s
+w Γ
+s
+w Γ
+s
+w Γ
+s
+
+
+(51) 
+Following the results in [26], the CRB matrix for the joint 
+estimation variance of the unknown parameter vector , ,
+p β s
+
+ 
+can be expressed as: 
+ 
+2
+H
+1
+(Re{
+})
+2
+Re{ }
+Im{ }
+σ
+−
+
+
+
+
+
+
+
+
+
+
+
+=
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+s
+s
+p
+Ω
+β
+Ω
+
+CRB
+ 
+(52) 
+where 
+ 
+T
+T
+T
+1
+2
+3
+4
+T
+Re{ })
+I {
+=
+[
+ 
+ 
+]
+m
+})
+(
+(
+
+
+
+
+
+
+=
+
+
+
+
+
+
+
+
+r
+r
+r
+r
+Ω
+s
+s
+p
+m
+m
+m
+m
+Ω
+β
+Ω Ω Ω
+
+(53) 
+The expressions for the submatrices in (62) are given in 
+Appendix D.  
+Since (61) does not exhibit a block-diagonal structure, it is 
+difficult to directly extract the CRB for the estimation variance 
+of the target position vector p . Therefore, following the 
+analytical approach in [27], we redefine a new parameter vector 
+whose CRB matrix possesses a block-diagonal form. This 
+vector is defined as: 
+ 
+T
+T
+T T
+T
+[(
+) ,
+       
+Re{ }+ Re{ }
+Re{
+}
+Im{ }+ Im{ }
+Im{
+(
+,
+,
+]
+}
+)
+
++
+
++
+
+=
+
+η
+s
+G
+β
+H
+p
+s
+G
+β
+H
+p
+β
+p
+
+
+ (54) 
+where 
+ 
+†
+†
+†
+†
+3
+3
+1
+1
+2
+†
+†
+†
+†
+4
+4
+1
+1
+2
+= blkdiag{
+,
+,
+,
+=
+}
+= blkdiag{
+,
+,
+,
+}
+=
+K
+K
+
+
+
+
+
+
+Ω
+Ω
+Φ Φ
+Φ
+Ω
+Ω
+G
+Ω
+Φ Φ
+Φ
+Ω
+H
+
+
+ 
+(55) 
+Consequently, from (65) we can obtain 
+This article has been accepted for publication in IEEE Sensors Journal. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/JSEN.2026.3693237
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on May 26,2026 at 03:46:47 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 9 ---
+ 
+ 
+IEEE SENSORS JOURNAL, VOL. XX, NO. XX, MONTH X, XXXX 
+ 
+ 
+Re{ }
+Im{ }
+
+
+
+
+
+
+=
+
+
+
+
+
+
+η
+s
+s
+β
+p
+F
+
+ 
+(56) 
+where 
+ 
+Re{ }
+Re{
+}
+Im{ }
+Im{
+=
+}
+
+
+
+
+
+
+
+
+
+
+
+
+F
+G
+H
+G
+H
+I
+Ο
+Ο
+I
+Ο
+Ο
+I
+O
+Ο
+Ο
+Ο
+I
+ 
+(57) 
+Thus, the CRB matrix for the estimation variance of vector 
+η can be expressed as 
+ 
+( )
+2
+1 H
+1
+1
+(Re{(
+) (
+)})
+2
+σ
+−
+−
+−
+=
+
+η
+ΩF
+ΩF
+CRB
+ 
+(58) 
+where 
+ 
+1
+Re{ }
+Re{
+}
+Im{ }
+Im{
+}
+=
+−
+−
+−
+−
+−
+
+
+
+
+
+
+
+
+
+
+
+
+I
+Ο
+Ο
+I
+F
+Ο
+Ο
+I
+O
+Ο
+Ο
+Ο
+I
+G
+H
+G
+H
+ 
+(59) 
+Then, we have 
+ 
+1
+1
+1
+1
+3
+1
+4
+=
+j
+[
+]
+[
+]
+−
+⊥
+⊥
+
+
+
+
+
+
+
+ΩF
+Ω
+Ω
+Ω
+Ω
+Ω
+Ω
+Π
+Π
+ (60) 
+Substituting (71) into (69) yields 
+ 
+( )
+1
+2
+1
+2
+2
+σ
+−
+
+
+=
+
+
+
+
+Q
+O
+η
+O
+Q
+CRB
+ 
+(61) 
+where 
+ 
+H
+H
+1
+1
+1
+1
+1
+H
+H
+1
+1
+1
+1
+H
+H
+3
+1
+3
+3
+1
+4
+2
+H
+H
+4
+1
+3
+4
+1
+4
+Re{
+}
+Im{
+}
+Im{
+}
+Re{
+}
+Re{
+[
+]
+}
+Re{
+[
+]
+}
+Re{
+[
+]
+}
+Re{
+[
+]
+}
+⊥
+⊥
+⊥
+⊥
+
+
+
+−
+=
+
+
+
+
+
+
+
+
+
+
+= 
+
+
+
+
+
+Ω Ω
+Ω Ω
+Q
+Ω Ω
+Ω Ω
+Ω
+Ω Ω
+Ω
+Ω Ω
+Q
+Ω
+Ω Ω
+Ω
+Ω Ω
+Π
+Π
+Π
+Π
+ (62) 
+Using the block matrix inversion formula, the CRB matrix 
+for the estimation variance of the target position vector p can 
+be expressed as follows: 
+( )
+2
+H
+H
+4
+1
+4
+4
+1
+3
+H
+1
+H
+1
+3
+1
+3
+3
+1
+4
+(Re{
+[
+]
+}
+Re{
+[
+]
+}
+2
+                (Re{
+[
+]
+})
+Re{
+[
+]
+})
+σ
+⊥
+⊥
+⊥
+−
+⊥
+−
+=
+
+−
+
+
+p
+Ω
+Ω Ω
+Ω
+Ω Ω
+Ω
+Ω Ω
+Ω
+Ω Ω
+CRB
+Π
+Π
+Π
+Π
+ 
+(63) 
+V. SIMULATION RESULTS 
+In this section, simulation experiments are presented to 
+validate the performance of the proposed DPD algorithm. 
+Three radiation sources are located at
+T
+1
+[539,1844]
+=
+p
+m, 
+T
+2
+[659,1256]
+=
+p
+m, 
+T
+3
+[ 1356, 569]
+= −
+−
+p
+m, respectively. 
+Four 
+stationary 
+receiving 
+stations 
+are 
+positioned 
+at 
+T
+1
+[0,0]
+=
+u
+m, 
+T
+2
+[ 3464,2000]
+= −
+u
+m, 
+T
+3
+[3464,2000]
+=
+u
+m, 
+T
+4
+[0, 4000]
+=
+−
+u
+m. The corresponding localization scenario is 
+illustrated in Fig. 3. The sources transmit narrowband signals, 
+with 
+attenuation 
+coefficients 
+to 
+each 
+station 
+being 
+T
+1
+[0.88
+0.39j  0.70
+0.21j  0.79
+0.29j  0.57
+0.08j]
+=
++
++
++
++
+w
+,
+T
+2
+[0.95
+0.45j  0.66
+0.17j  0.80
+0.31j   0.65
+0.13j]
+=
++
++
++
++
+w
+,
+T
+3
+[0.93
+0.42j  0.75
+0.26j  0.61 0.11j   0.72
+0.24j]
+=
++
++
++
++
+w
+. 
+The channel attenuation is initialized as 
+,
+,
+0.7
+l q
+l q
+w
+δ
+=
++
+, where 
+,l q
+δ
+ is a complex Gaussian variable with zero mean and 
+variance 0.5. The grid interval and sample number are set to 
+100 m and 100, respectively. Unless otherwise specified, all 
+parameters follow these settings. 
+To evaluate the effectiveness of the proposed method, we 
+compare it with a correlation-domain sparse DPD method [16] 
+(DPD-CD) and an off-grid sparse Bayesian DPD method [20] 
+(DPD-OG). Among these, DPD-CD method makes fixed 
+dictionary, incapable of inferring grid offsets or channel 
+attenuation, while DPD-OG method is a sparse recovery 
+algorithm for joint inference of the grid set, but it cannot infer 
+channel attenuation. 
+All Monte Carlo simulations consist of 500 independent 
+trials. The localization accuracy is assessed using the 
+root-mean-square error (RMSE): 
+ 
+2
+,
+2
+1
+1
+1
+ˆ
+RMSE =
+N
+M
+n
+n m
+n
+m
+MN
+=
+=
+−
+p
+p
+ 
+(64) 
+where 
+,
+ˆ n m
+p
+ represents the estimation of 
+np in the m th Monte 
+Carlo trial. 
+ 
+Fig. 3. Schematic diagram of the location distribution of observation 
+stations and radiation sources 
+A. Validation of Effectiveness 
+Since targets 1 and 2 are closely spaced, we set region 1 as a 
+square area of (0,1000) m×(1000,2000) m and region 2 as a 
+square area of (-2000,-1000) m×(-1000,0) m. Here we use 
+region 1 to demonstrate the localization results. 
+The initial grid point division and the grid adaptation results 
+after processing with the proposed DPD-PDL under 
+100
+s
+N =
+, 
+SNR=10 dB are presented in Fig. 4 and Fig. 5. Fig. 6 compares 
+the localization results of all algorithms using the same initial 
+grid configuration. 
+A comparison between Fig. 4 and Fig. 5 reveals that for 
+targets deviating from the initial grid points, the DPD-PDL 
+algorithm automatically adjusts the grid points closest to the 
+targets, moving them toward the true positions and 
+This article has been accepted for publication in IEEE Sensors Journal. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/JSEN.2026.3693237
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on May 26,2026 at 03:46:47 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 10 ---
+ 
+ 
+IEEE SENSORS JOURNAL, VOL. XX, NO. XX, MONTH X, XXXX 
+ 
+demonstrating effective grid adaptation. Notably, this 
+adaptation is achieved by modifying only a small subset of grid 
+points, contributing to computational efficiency. From Fig. 6, 
+we can find that the DPD-CD algorithm, based on a fixed grid, 
+can only estimate positions at the grid points nearest to the 
+actual targets. The DPD-OG algorithm, despite incorporating 
+grid offset learning, exhibits limited correction capability due 
+to unmodeled channel attenuation effects. In contrast, the 
+proposed DPD-PDL algorithm accurately estimates channel 
+attenuation while performing grid adaptation, which enables 
+the adjusted grid points to move closer to the true target 
+positions and yields superior localization accuracy. 
+ 
+Fig. 4. Initial grid point division 
+ 
+Fig. 5. The result of grid adaptive adjustment 
+ 
+Fig. 6. The positioning results of each algorithm 
+B. Impacts of Different SNR 
+This section evaluates the localization performance of the 
+algorithms under different SNR, with the SNR range set from 
+-10 dB to 20 dB in steps of 5 dB. 
+Fig. 7 shows the RMSE of various algorithms, with the CRB 
+included for comparison. As observed, the RMSE of all 
+algorithms gradually decreases with increasing SNR and 
+approaches the CRB. Under low SNR conditions, two-step 
+localization 
+methods 
+exhibit 
+significantly 
+degraded 
+performance. The DPD-CD algorithm, which relies on a fixed 
+grid with 100 m spacing, reaches a minimum localization error 
+of 61.02 m at high SNR due to grid resolution limitations. In 
+contrast, the proposed DPD-PDL method adaptively updates 
+both the grid and channel attenuation, enabling it to better 
+address energy leakage caused by off-grid sources. As a result, 
+even at high SNR, DPD-PDL achieves a RMSE that surpasses 
+the grid constraint, yielding lower localization errors. The 
+performance improvement of DPD-PDL over DPD-OG stems 
+from its consideration of attenuation effects at grid points, 
+while its advantage over DPD-CD highlights the benefit of 
+off-grid processing. This is particularly evident at low SNRs, 
+where DPD-PDL demonstrates significantly superior accuracy. 
+For instance, at SNR=-5 dB, the RMSE of DPD-PDL is 
+approximately 168.32 m, compared to 211.49 m for DPD-OG 
+and 248.05 m for DPD-CD—corresponding to reductions of 
+about 20.4% and 32.1%, respectively. These results fully 
+demonstrate the superiority and robustness of the proposed 
+DPD-PDL algorithm in low SNR scenarios. 
+ 
+Fig. 7. Localization RMSE and CRB versus SNR 
+To provide a clearer and more intuitive performance 
+comparison, Fig. 8 presents the cumulative distribution 
+function (CDF) of localization errors for different algorithms at 
+SNR=-5 dB. It can be seen that the proposed algorithm 
+achieves a positioning error within 160 m with 80% probability, 
+and within 180 m with over 95% probability. The two step 
+localization algorithm performs the worst, while the proposed 
+DPD-PDL method outperforms all others under low-SNR 
+conditions. 
+This article has been accepted for publication in IEEE Sensors Journal. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/JSEN.2026.3693237
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on May 26,2026 at 03:46:47 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 11 ---
+ 
+ 
+IEEE SENSORS JOURNAL, VOL. XX, NO. XX, MONTH X, XXXX 
+ 
+ 
+Fig. 8. Localization error CDF 
+Fig. 9 illustrates the runtime of each algorithm versus SNR. 
+All subsequent experiments on runtime are conducted on a 
+computer with an Intel i7-9750H CPU using MATLAB 2022b 
+software. It can be observed that at low SNR levels, the 
+computational time of SBL-based algorithms decreases as SNR 
+increases. This trend occurs because higher SNR values 
+provide initial position estimation that are closer to the true 
+targets, thus reducing the number of iterations required for 
+convergence. Conventional two-step localization methods 
+maintain the shortest runtime, which remains largely unaffected 
+by SNR variations. Due to the incorporation of parametric 
+dictionary learning, the proposed algorithm requires slightly 
+more computational time compared to both DPD-CD and 
+DPD-OG. 
+ 
+Fig. 9. Running time versus SNR 
+C. Impacts of Different Grid Interval 
+Since the grid interval is a scheduled parameter that controls 
+the trade-off between complexity and accuracy in SBL 
+algorithms, this section investigates its impact on localization 
+performance. The SNR is fixed at 10 dB, while grid intervals of 
+10 m, 25 m, 50 m, 100 m, 200 m, and 250 m are evaluated. 
+Fig. 10 presents the localization RMSE of each algorithm 
+under different grid intervals. As the grid interval decreases 
+from 250 m to 25 m, the localization accuracy of all algorithms 
+improves. This is because a smaller grid interval increases the 
+probability of the algorithm capturing off-grid sources. 
+Benefiting from the joint inference of attenuation coefficients 
+and candidate grid points, the proposed DPD-PDL algorithm 
+achieves the smallest localization error, with its RMSE 
+approaching the CRB. However, when the interval is further 
+reduced to 10 m, the localization error begins to increase. This 
+degradation occurs because excessively small grid interval 
+violates the incoherence assumption essential for CS —
+specifically, the Restricted Isometry Property (RIP) condition. 
+Fig. 11 illustrates the runtime of each algorithm versus grid 
+interval. It is evident that smaller grid intervals lead to longer 
+computational times. Due to the simultaneous learning of grid 
+offsets and attenuation coefficients, DPD-PDL exhibits higher 
+computational complexity compared to other methods. 
+Furthermore, by comparing Fig. 10 and Fig. 11, we can 
+conclude that although reducing the grid interval from 100 m to 
+25 m improves localization accuracy, the resulting overly dense 
+grid 
+partitioning 
+significantly 
+increases 
+computational 
+complexity. Therefore, in practical applications, grid interval 
+should be carefully selected to balance localization accuracy 
+and computational efficiency. 
+ 
+Fig. 10. Localization RMSE and CRB versus grid interval 
+ 
+Fig. 11. Running time versus grid interval 
+D. Impacts of Different Perturbation Value 
+The distance between an off-grid radiation source and its 
+nearest grid point lies within the interval 
+2
+[0,
+]
+2 r . Here, the 
+perturbation value is defined as the ratio of the source's distance 
+This article has been accepted for publication in IEEE Sensors Journal. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/JSEN.2026.3693237
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on May 26,2026 at 03:46:47 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 12 ---
+ 
+ 
+IEEE SENSORS JOURNAL, VOL. XX, NO. XX, MONTH X, XXXX 
+ 
+to its nearest grid point divided by 
+2
+2 r . A perturbation value 
+of 0 indicates that the source is perfectly aligned with a grid 
+point, while larger values signify greater deviation and more 
+pronounced off-grid effects. 
+With the SNR fixed at 10 dB and perturbation values ranging 
+from 0 to 1 in steps of 0.2, Fig. 12 shows the RMSE of different 
+source localization methods under varying perturbation values. 
+The RMSE of all methods increases with rising perturbation 
+values. This degradation stems from two main factors: the 
+increasing physical distance between sources and their nearest 
+grid points, and the distribution of actual attenuation values 
+across multiple adjacent grid points at larger perturbations, 
+which biases attenuation estimation and further degrades 
+off-grid localization accuracy. 
+The proposed method achieves the most accurate 
+localization of off-grid sources by simultaneously correcting 
+both off-grid errors and attenuation errors. The DPD-OG 
+method exhibits slower error growth at smaller perturbation 
+values due to its inherent off-grid learning capability. In 
+contrast, the DPD-CD method demonstrates significantly larger 
+localization errors as it is limited to estimating positions only at 
+the nearest grid points. 
+ 
+Fig. 12. Localization RMSE versus perturbation value 
+E. Impacts of Attenuation Uncertainty Level 
+Under SNR=10 dB, different levels of attenuation 
+uncertainty are simulated by varying the standard deviation of 
+the channel attenuation bias. Fig. 13 illustrates the trend of the 
+localization RMSE of each method as a function of the standard 
+deviation σ . It can be observed that as σ increases, the RMSE 
+of all methods exhibits an upward trend. However, compared 
+with the other two methods, the RMSE of the proposed method 
+increases most gradually. This indicates that the proposed 
+method exhibits stronger robustness against attenuation errors. 
+ 
+Fig. 13. Localization RMSE versus standard deviation of attenuation 
+bias 
+VI. CONCLUSION 
+Building upon the TDOA-based DPD framework, this paper 
+proposes a DPD method with parametric dictionary learning for 
+off-grid 
+radiation 
+sources. 
+The 
+presented 
+approach 
+simultaneously addresses both off-grid errors and channel 
+attenuation errors by formulating the overcomplete dictionary 
+matrix as a function of both grid points and attenuation 
+parameters. Within the SBL framework, joint optimization of 
+parametric dictionary learning and sparse signal reconstruction 
+is achieved. Simulation results demonstrate that the proposed 
+method achieves over 20% improvement in localization 
+accuracy compared to existing methods under low SNR.  
+While the proposed approach shows effectiveness in 
+localizing 
+off-grid 
+sources, 
+the 
+first-order 
+Taylor 
+approximation used for dictionary construction exhibits 
+limitations under coarse grid conditions. Future research will 
+focus on developing improved dictionary approximation 
+strategies to accommodate more complex signal environments 
+and meet higher precision localization requirements. 
+APPENDIX 
+A. Derivation of (29) 
+From (28), the posterior PDF of the unknown parameters 
+S ,, β is given by 
+ 
+( , ,
+)
+(
+, , ) ( ,
+)
+p
+β
+p
+β p
+β
+=
+S
+R
+S R
+R
+
+
+
+ 
+(A.1) 
+For the first term on the right-hand side of (A.1) 
+(
+, , )
+p
+β
+S R 
+, 
+we expand it using Bayesian criterion: 
+(
+, , ) ( , , )
+( ,
+, , )
+(
+, , )
+( , , )
+(
+, ) ( , )
+(
+, , ) (
+, ) ( , )
+(
+, ) (
+)
+                   
+(
+, ) ( , )
+(
+, )
+p
+β p
+β
+p
+β
+p
+β
+p
+β
+p
+β p
+β
+p
+β p
+β p
+β
+p
+β p
+p
+β p
+β
+p
+β
+=
+=
+=
+=
+R S
+S
+S R
+S R
+R
+R
+R S
+S
+R S
+S
+R
+R
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+(A.2) 
+The denominator in (A.2) is a normalization constant. In the 
+numerator, 
+(
+, )
+p
+β
+R S
+ is the likelihood function of the 
+observation matrix, and 
+(
+)
+p S  is the prior distribution of the 
+weight vector. From (19) and (20), it can be seen that both 
+This article has been accepted for publication in IEEE Sensors Journal. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/JSEN.2026.3693237
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on May 26,2026 at 03:46:47 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 13 ---
+ 
+ 
+IEEE SENSORS JOURNAL, VOL. XX, NO. XX, MONTH X, XXXX 
+ 
+(
+, )
+p
+β
+R S
+ and 
+(
+)
+p S  are Gaussian distribution functions. 
+Therefore, 
+(
+, , )
+p
+β
+S R 
+ follows a Gaussian distribution with 
+respect to S . By completing the exponential part in the 
+numerator in the form of a Gaussian distribution with respect to 
+S , we obtain 
+ 
+(
+)
+1
+(
+, , )
+,
+K
+k
+k
+k
+k
+p
+β
+N
+=
+=
+S R
+s
+
+
+ 
+(A.3) 
+where the mean 
+k
+ and covariance matrix 
+k
+ are given by 
+ 
+(
+)
+1
+T
+1
+k
+k
+k
+β
+−
+−
+=
++
+Φ Φ
+
+
+T
+k
+k
+k
+k
+β
+=
+Φ r
+
+
+ 
+(A.4) 
+B. Solution of (33) 
+The EM algorithm is employed to solve (33): 
+ 
+EM
+, ,
+,
+ˆ ˆ
+ˆ
+ˆ
+( , ,
+, )
+argmax {ln ( , , , ;
+, )}
+β
+β
+E
+p
+β
+=
+Π w
+Π w
+R S
+Π w
+
+
+
+ (B.1) 
+From the joint PDF in (25), we can obtain 
+ 
+,
+ˆ
+argmax {ln (
+)
+ln ( )}
+ˆ
+argmax {ln (
+,
+;
+,
+)
+ln ( )}
+ˆ
+ˆ
+{
+, }
+argmax {ln (
+,
+;
+,
+)}
+β
+E
+p
+p
+β
+E
+p
+β
+p β
+E
+p
+β
+
+=
++
+
+
+=
++
+
+
+
+=
+
+Π w
+S
+R S
+Π w
+Π w
+R S
+Π w
+
+
+
+
+ 
+(B.2) 
+By 
+( )
+{ln (
+, ;
+, ) ln ( )}
+Q β
+E
+p
+β
+p β
+=
++
+R S
+Π w
+, we have 
+ 
+(
+)
+2
+T
+2
+1
+( )
+(
+1
+)ln
+2
+        
+tr(
+)
+C
+2
+K
+k
+k
+k
+k
+k
+k
+k
+KL
+Q β
+a
+β
+β
+bβ
+=
+=
+−+
+−
+−
++
+−
++
+r
+Φ
+Φ
+Φ
+
+
+ (B.3) 
+where C is a constant term independent of the parameters. Let 
+( )
+0
+Q β
+β
+
+=
+
+, we obtain: 
+ 
+(
+)
+new
+2
+T
+2
+1
+2
+2
+2
+tr(
+)
+K
+k
+k
+k
+k
+k
+k
+k
+a
+KL
+β
+b
+=
+−+
+=
++
+−
++
+r
+Φ
+Φ
+Φ
+
+
+ 
+(B.4) 
+Similarly, by 
+( )
+{ln (
+) ln ( )}
+Q
+E
+p
+p
+=
++
+S
+
+
+
+, we have 
+(
+)
+(
+)
+T
+1
+1
+1
+2
+1
+1
+1
+1
+1
+( )
+ln
+ln
+C
+2
+2
+1
+ln
+( )
+ln
+C
+2
+2
+Q
+K
+k
+k
+q
+k
+q
+Q
+Q
+Q
+K
+q
+q
+qq
+q
+k
+q
+q
+q
+λ
+Q
+E
+λ
+λ
+k
+λ
+−
+=
+=
+=
+=
+=
+=
+
+
+
+
+=
+−
++
++
+−
++
+
+
+
+
+
+
+
+
+
+
+
+
+= −
++
++
++
+−
++
+
+
+
+
+
+
+
+
+
+
+
+
+
+s
+s
+μ
+
+
+
+
+
+
+
+(B.5) 
+Setting 
+( )
+0
+q
+Q
+
+=
+
+
+
+, we get 
+ 
+(
+)
+2
+1
+new
+1 4
+( )
+1
+2
+K
+qq
+q
+k
+q
+λ
+k
+λ
+=
++
++
+−
+=
+
+μ
+
+
+ 
+(B.6) 
+C.  The formation of Bounded Linear Least-Squares 
+Problem 
+Substituting (14) into (35), the first and second terms of (35) 
+can be decomposed as 
+(
+)
+(
+)
+(
+)
+(
+)
+(
+)
+(
+)
+T
+T
+T
+T
+T
+T
+T
+,
+,
+,
+,
+, ,
+T
+T
+T
+T
+T
+T
+,
+,
+,
+,
+T
+0,
+,
+, ,
+(
+) (
+)
+2
+2
+2
+2
+diag
+C
+k
+k k
+k
+k k
+χ
+χ k
+χ k
+k
+k
+χ
+x
+k
+k
+x k
+y k
+y
+χ x y w
+x
+k
+k
+x k
+w k
+w
+y
+k
+k
+y k
+w k
+w
+k
+k
+k
+χ k
+k
+χ
+χ x y w
+=
+=
+
+
+
+
+−
+−
+=
++
+
+
+
+
++
++
+
+−
+−
++
+
+
+r
+Φ s
+r
+Φ s
+Φ Φ
+Φ Φ
+Φ
+Φ
+Φ Φ
+r
+Φ
+Φ
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(C.1) 
+(
+)
+(
+)
+(
+)
+(
+)
+(
+)
+T
+T
+T
+T
+T
+T
+,
+,
+,
+,
+, ,
+T
+T
+T
+T
+T
+T
+,
+,
+,
+,
+T
+,
+0,
+, ,
+tr(
+)
+2
+2
+2
+2
+diag
+C
+k
+k
+k
+χ
+χ k
+χ k
+k
+χ
+x
+x k
+y k
+k
+y
+χ x y w
+x
+x k
+w k
+k
+w
+y
+y k
+w k
+k
+w
+χ k
+k
+k
+χ
+χ x y w
+=
+=
+
+
+
+
+=
+
++
+
+
+
+
++
++
+
++
++
+
+
+Φ
+Φ
+Φ Φ
+Φ Φ
+Φ Φ
+Φ Φ
+Φ Φ
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(C.2) 
+Substituting (C.1) and (C.1) into (35) leads to solving the 
+following bounded linear least-squares problem 
+T
+T
+T
+T
+T
+T
+T
+T
+T
+,
+,
+2
+2
+argmin
+      
+2
+2
+2
+2
+s.t. 
+[
+,
+],
+[
+,
+]
+x
+y
+w
+x
+xx
+x
+y
+yy
+y
+w
+ww
+w
+x
+xy
+y
+x
+xw
+w
+y
+yw
+w
+x
+x
+y
+y
+w
+w
+x
+x
+x
+y
+y
+y
+LB UB
+LB UB
+
+
++
++
++
++
+
+
+
+
++
++
++
++
+
+
+
+
+
+
+P
+P
+P
+P
+P
+P
+v
+v
+v
+θ
+θ
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(C.3) 
+where 
+T
+T
+T
+T
+,
+,
+,
+,
+1
+1
+T
+T
+T
+T
+,
+,
+,
+,
+1
+1
+T
+T
+T
+T
+,
+,
+,
+,
+1
+1
+(
+),
+(
+)
+(
+),
+(
+)
+(
+),
+(
+)
+     
+dia
+K
+K
+xx
+x k
+x k
+k
+k
+k
+yy
+y k
+y k
+k
+k
+k
+k
+k
+K
+K
+ww
+w k
+w k
+k
+k
+k
+xy
+x k
+y k
+k
+k
+k
+k
+k
+K
+K
+xw
+x k
+w k
+k
+k
+k
+yw
+y k
+w k
+k
+k
+k
+k
+k
+x
+=
+=
+=
+=
+=
+=
+
+
+
+
+=
++
+=
++
+
+
+
+
+=
++
+=
++
+
+
+
+
+=
++
+=
++
+=
+
+
+
+
+
+
+P
+Φ Φ
+P
+Φ Φ
+P
+Φ Φ
+P
+Φ Φ
+P
+Φ Φ
+P
+Φ Φ
+v
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(
+)
+(
+)
+(
+)
+(
+)
+(
+)
+(
+)
+(
+)
+(
+)
+(
+)
+T
+T
+T
+T
+,
+0,
+0,
+,
+1
+T
+T
+T
+T
+,
+0,
+0,
+,
+1
+T
+T
+T
+T
+,
+0,
+0,
+,
+1
+g(
+)
+diag
+diag(
+)
+diag
+diag(
+)
+diag
+K
+x k
+k
+k
+k
+k
+k
+x k
+k
+k
+K
+y
+y k
+k
+k
+k
+k
+k
+y k
+k
+k
+K
+w
+w k
+k
+k
+k
+k
+k
+w k
+k
+k
+=
+=
+=
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+−
+−
+
+
+
+
+
+
+=
+−
+−
+
+
+
+
+
+
+
+
+=
+−
+−
+
+
+
+
+
+
+
+Φ Φ
+r
+Φ
+Φ
+     v
+Φ Φ
+r
+Φ
+Φ
+     v
+Φ Φ
+r
+Φ
+Φ
+
+
+
+
+
+
+
+
+
+ 
+(C.4) 
+D.  The expressions for the submatrices in (53) 
+The expressions for the submatrices in (53) are given by 
+T
+T
+T
+T
+T
+1,1
+2,1
+1,
+,
+1
+1
+2
+(
+,
+,
+,
+,
+(
+(
+(
+(
+blkdiag{
+,
+,
+,
+}
+Re{ })
+Re{
+})
+Re{
+})
+Re{
+})
+Re{
+})
+N
+K
+N K
+K
+s
+s
+s
+s
+−
+
+= 
+
+
+
+
+
+
+= 
+
+
+
+
+
+
+
+=
+r
+r
+r
+r
+r
+m
+Ω
+m
+m
+m
+m
+Φ Φ
+s
+Φ
+
+
+ 
+(D.1) 
+T
+T
+T
+T
+1,1
+2,1
+2
+2
+1
+,
+1
+,
+,
+,
+Im{ })
+Im{
+})
+Im{
+})
+Im{
+(
+(
+(
+(
+j blkdiag{
+,
+,
+,
+}
+j
+})
+N K
+K
+s
+s
+s
+
+
+
+
+
+
+=
+= 
+
+
+
+
+
+
+
+= 
+= 
+r
+r
+r
+r
+m
+m
+m
+m
+Ω
+Φ
+s
+Φ
+Φ
+Ω
+
+
+ 
+(D.2) 
+ 
+T
+3
+T
+T
+Re{ })
+(
+{
+ 
+m
+})
+(
+I
+
+
+
+
+
+=
+= 
+
+
+
+
+
+
+r
+r
+r
+m
+m
+m
+Ω
+β
+β
+β
+ 
+(D.3) 
+where 
+This article has been accepted for publication in IEEE Sensors Journal. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/JSEN.2026.3693237
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on May 26,2026 at 03:46:47 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 14 ---
+ 
+ 
+IEEE SENSORS JOURNAL, VOL. XX, NO. XX, MONTH X, XXXX 
+ 
+T
+T
+1
+2
+,
+T
+1
+1
+1,
+1
+,1 1
+,
+2
+2
+,
+2
+T
+,
+T
+T
+,
+Re{
+})
+Re{
+})
+Re{ })
+Re{
+})
+,
+,
+(
+(
+(
+,
+,
+(
+(
+                  
+blkdiag{ ,
+,
+,
+}
+[(
+)
+Re{
+}
+,(
+),
+,(
+)
+)]
+N
+L
+l
+l
+l
+l K
+K
+L N
+L
+w
+w
+w
+w
+−
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=
+
+=
+
+r
+r
+r
+r
+r
+m
+m
+m
+m
+m
+J J
+J
+J
+Γ s
+Γ s
+β
+Γ
+s
+
+
+
+(D.4) 
+H
+H
+4
+1,1
+1
+2
+2,1
+1
+2
+H H
+,
+2
+T
+[(
+( ) (diag{ }
+)) ,(
+( ) (diag{ }
+)) ,
+                       
+,(
+( ) (diag{
+}
+)) ]
+L K
+K
+
+=
+=
+
+
+
+
+
+
+
+r
+m
+Ω
+h
+p
+s
+I
+h
+p
+s
+I
+h
+p
+s
+I
+p
+
+
+
+ 
+(D.5) 
+where 
+ 
+,
+1
+,
+2
+,
+,
+T
+T
+T
+1
+2
+Δ (
+)
+,
+,
+(
+)
+(
+)
+(
+)
+( ) =
+,
+,
+,
+(
+) =
+k
+l
+n
+l k
+l k
+l k
+N
+l k
+N
+jω
+τ
+l k
+n
+l n
+h
+h
+h
+h
+w e−
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+p
+p
+p
+p
+h
+p
+p
+p
+p
+p
+
+
+ 
+(D.6) 
+REFERENCES 
+[1] Q. Zhou, W. Yi, Y. Yuan, J. Ding, L. Kong and J. Yang, “Distributed 
+multistatic passive radar signal-level synergy target localization 
+technology,” Modern Radar, vol. 46, no. 9, pp. 64-78, Sep. 2024. 
+[2] Y. Sun, K.C. Ho, T. Xing, Y. Yang, L. Chen, “Projection-based algorithm 
+and performance analysis for TDOA localization in MPR,” IEEE 
+Transactions on Signal Processing, vol 72, no. 2, pp. 896-911, Jan. 2024. 
+[3] C. Zhang, W. Wang, X. Hong, J. Zhou, “A multi-sources DOA localization 
+method based on UAV cluster systems,” IEEE Transactions on Vehicular 
+Technology, vol. 73, no. 6, pp. 8681-8692, Jun. 2024. 
+[4] Y. Liu, P. Chen, Z. Chen and J. Xu, “Fang-Based 3D TDOA localization 
+method for large-scale UAV cluster,” IEEE Communications Letters, vol. 
+28, no. 1, pp. 58-62, Jan. 2024. 
+[5] Y. Pei, X. Li, F. Guo and M. Zhang, “Moving source localization using 
+frequency difference of arrival measurements only,” IEEE Transactions 
+on Vehicular Technology, vol. 74, no. 1, pp. 1052-1063, Jan. 2025. 
+[6] A. Amar and A. J. Weiss, “Direct position determination of multiple radio 
+signals,” in 2004 IEEE International Conference on Acoustics, Speech, 
+and Signal Processing. (ICASSP), May. 2004, pp. 81-84. 
+[7] A. J. Weiss, “Direct geolocation of wideband emitters based on delay and 
+Doppler,” IEEE Transactions on Signal Processing, vol. 59, no. 6, pp. 
+2513-2521, June 2011 
+[8] N. Vankayalapati, S. Kay and Q. Ding, “TDOA based direct positioning 
+maximum likelihood estimator and the cramer-rao bound,” IEEE 
+Transactions on Aerospace and Electronic Systems, vol. 50, no. 3, pp. 
+1616-1635, July. 2014. 
+[9] S. Zhong, W. Xia and Z. He, “Adaptive direct position determination of 
+emitters based on time differences of arrival,” in Proc. IEEE China 
+Summit and International Conference on Signal and Information 
+Processing. (China SIP), Jul. 2013, pp. 230-234. 
+[10] F. Ma, Z. Liu, F. Guo, “Distributed direct position determination,” IEEE 
+Transactions on Vehicular Technology, vol. 69, no. 11, pp. 14007-14012, 
+Nov. 2020. 
+[11] Z. Wang, H. Guo, Y. Miao, J. Zhang, “Direct position determination of 
+multiple sources using a moving virtual interpolation array,” Digital 
+Signal Processing, vol. 159, no. 104973, Apr. 2025. 
+[12] W. Ke, T. Wang and L. Wu, “Multi-target direct localisation via 
+approximate 
+0l norm minimization,” Electronics Letters, vol. 48, no. 23, 
+pp. 1498-1500, Nov. 2012. 
+[13] H. Ye, H. Guo, H. Guan, S. Zhang, W. Wang, “Multi-emitters direct 
+localization method via multi-dictionaries and hierarchical block sparse 
+Bayesian framework,” Journal of Radars, vol. 11, no. 3, pp. 434-442, Jan. 
+2022. 
+[14] F. Ma, Y. Wang, L. Wang and C. Han, “Sparse Bayesian learning for direct 
+position determination with mutual coupling,” in Proc. IEEE USNC-URSI 
+Radio Science Meeting. (USNC-URSI), pp. 116-117, Dec. 2021. 
+[15] J. Li，Y. Shi and X. Zhang, “Direct localization of UAV targets in dense 
+urban areas based on sparse Bayesian inference,” Journal of Signal 
+Processing，vol. 40, no. 5, pp. 815-825, May. 2024. 
+[16] H. Jiang, J. Li, K. Zhu, Y. Li, “Sparse direct position determination based 
+on TDOA information in correlation-domain,” Remote Sensing, vol. 15, 
+no. 15, pp. 1-14, Jul. 2023. 
+[17] J. Deng, J. Yin, B. Yang, T. Chen, “Direct position determination of 
+non-circular signals based on off-grid sparse reconstruction,” in Proc. 5th 
+International Conference on Information Science, Electrical, and 
+Automation Engineering. (ISEAE), Mar. 2023, pp. 1-7. 
+[18] Z. Wang, Y. Sun, Q. Wan, L. Xie and N. Liu, “A modest power 
+consumption maximum likelihood direct position determination approach 
+for multiple targets with moving sensor arrays,” IEEE Sensors Journal, 
+vol. 22, no. 22, pp. 21885-21898, Nov. 2022. 
+[19] Z. Yang, L. Xie and C. Zhang, “Off-Grid direction of arrival estimation 
+using sparse Bayesian inference,” IEEE Transactions on Signal 
+Processing, vol. 61, no. 1, pp. 38-43, Jan. 2013. 
+[20] J. Li, X. Dong, X. Shi, X. Zhang, “An enhanced direct position 
+determination of non-circular sources via sparse Bayesian inference and 
+grid refinement strategy,” Digital Signal Processing, vol. 151, pp. 1-12, 
+Aug. 2024. 
+[21] K. Hao and Q. Wan, “Sparse Bayesian inference-based direct off-grid 
+position determination in multipath environments,” IEEE Wireless 
+Communications Letters, vol. 10, no. 6, pp. 1148-1152, June. 2021. 
+[22] R. Hincapie et al., “Sparse framework for hybrid TDOA/DOA multiple 
+emitter localization,” in Proc. IEEE International Symposium on Signal 
+Processing and Information Technology. (ISSPIT), Dec. 2017, pp. 
+174-179. 
+[23] Y. Wang, Q. Shi, C. Han, L. Wang and C. Tellambura, “Sparse Bayesian 
+learning-based direct localization for distributed sensor arrays with 
+unknown gain and phase errors,” in Proc. IEEE International Conference 
+on Acoustics, Speech and Signal Processing. (ICASSP), Apr. 2024, pp. 
+8761-8765. 
+[24] M. Chen, X. Mao and C. Zhao, “Direct localization of emitters based on 
+sparse Bayesian learning,” IEEE Transactions on Vehicular Technology, 
+vol. 68, no. 6, pp. 5769-5781, June. 2019. 
+[25] Y. Tian, “A new sparse Bayesian learning-based direction of arrival 
+estimation method with array position errors,” Mathematics, vol. 12, no. 4, 
+pp. 1-17, Feb. 2024. 
+[26] P. Stoica and E. G. Larsson, “Comments on “Linearization method for 
+finding Cramer-Rao bounds in signal processing,” IEEE Transactions on 
+Signal Processing, vol. 49, no. 12, pp. 3168-3169, Dec. 2001. 
+[27] M. Pesavento, A. B. Gershman, K. M. Wong, “Direction Finding in Partly 
+Calibrated Sensor Arrays Composed of Multiple Subarrays,” IEEE 
+Transactions on Signal Processing, vol. 50, no. 9, pp. 2103-2115, Sep. 
+2002. 
+ 
+ 
+ 
+ 
+Zeyu Wang received the B.S. degree from 
+Information Engineering University, Zhengzhou, 
+China, in 2023, where he is currently pursuing 
+the M.S. degree. 
+His research interests include array signal 
+processing, parameter estimation, and passive 
+location. 
+ 
+ 
+ 
+ 
+ 
+ 
+Ding Wang received the B.E., M.S., and Ph.D. 
+degrees from Information Engineering University, 
+Zhengzhou, China, in 2004, 2007, and 2011, 
+respectively.  
+From 2015 to 2018, he worked as a 
+postdoctoral 
+researcher 
+at 
+Information 
+Engineering University. He is currently an 
+Associate Professor at the Information System 
+Engineering Institute, Information Engineering 
+University and the National Digital Switching 
+System 
+Engineering 
+and 
+Technological 
+Research Center (NDSC). His main research interests include array 
+signal processing, optimization algorithms, and passive location. 
+ 
+ 
+ 
+ 
+This article has been accepted for publication in IEEE Sensors Journal. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/JSEN.2026.3693237
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on May 26,2026 at 03:46:47 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 15 ---
+ 
+ 
+IEEE SENSORS JOURNAL, VOL. XX, NO. XX, MONTH X, XXXX 
+ 
+Fuquan Nie received the B.S. degree in 
+mechanical and electrical engineering from 
+Henan Institute of Science and Technology, 
+Xinxiang, China, in 1992, and the M.S. degree in 
+industrial automation from Henan University of 
+Science and Technology, Luoyang, China, in 
+2005.  
+Currently, he is working as a Professor with 
+Henan Institute of Science and Technology, 
+Xinxiang, China. His main research focuses on 
+engineering machinery design and target 
+positioning. 
+ 
+ 
+ 
+ 
+Nae Zheng received the B.E., M.S., and Ph.D. 
+degrees from Information Engineering University, 
+Zhengzhou, China, in 2007, 2010 and 2014 
+respectively. 
+She is currently a Lecturer at the Institute of 
+Data 
+and 
+Target 
+Engineering 
+Information 
+Engineering University. Her research interests 
+include wireless signal localization and radar 
+signal processing. 
+ 
+ 
+This article has been accepted for publication in IEEE Sensors Journal. This is the author's version which has not been fully edited and 
+content may change prior to final publication. Citation information: DOI 10.1109/JSEN.2026.3693237
+© 2026 IEEE. All rights reserved, including rights for text and data mining and training of artificial intelligence and similar technologies. Personal use is permitted,
+but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on May 26,2026 at 03:46:47 UTC from IEEE Xplore.  Restrictions apply. 

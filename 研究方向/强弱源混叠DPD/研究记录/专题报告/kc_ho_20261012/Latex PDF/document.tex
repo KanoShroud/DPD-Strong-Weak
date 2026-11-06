@@ -1,0 +1,868 @@
+% !TeX program = xelatex
+% !TeX encoding = UTF-8
+% Main editable manuscript. Figures are packaged in ./figures/.
+% The original format reference is preserved in ../history/before_latex_migration/.
+\documentclass[11pt,a4paper]{article}
+\usepackage[UTF8,scheme=plain,fontset=windows]{ctex}
+\usepackage{amsmath,amssymb}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+\usepackage{geometry}
+\geometry{a4paper,margin=1in}
+\usepackage{graphicx,booktabs,tabularx,array}
+\usepackage{caption}
+\usepackage[section]{placeins}
+\usepackage{flafter}
+\usepackage{float,needspace}
+\usepackage[nocompress]{cite}
+\usepackage{etoolbox}
+\renewcommand{\citepunct}{],\,[}
+\usepackage[unicode,hidelinks]{hyperref}
+\hypersetup{pdftitle={短时强弱频谱重叠多源被动定位},pdfsubject={中文学术交流稿}}
+\numberwithin{equation}{section}
+\numberwithin{figure}{section}
+\numberwithin{table}{section}
+\renewcommand{\figurename}{图}
+\renewcommand{\tablename}{表}
+\renewcommand{\contentsname}{目录}
+\captionsetup{justification=centering,singlelinecheck=false,labelsep=quad,font=small,labelfont=bf}
+\captionsetup[table]{position=top,skip=6pt}
+\newcolumntype{Y}[1]{>{\hsize=#1\hsize\linewidth=\hsize\raggedright\arraybackslash}X}
+\patchcmd{\thebibliography}{\section*{\refname}}{}{}{}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
+\setlength{\textfloatsep}{10pt plus 2pt minus 2pt}
+\setlength{\floatsep}{8pt plus 2pt minus 2pt}
+\setcounter{tocdepth}{1}
+\setcounter{secnumdepth}{3}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{.15em}
+\setlength{\emergencystretch}{2em}
+\linespread{1.18}
+\renewcommand{\topfraction}{.9}
+\renewcommand{\bottomfraction}{.8}
+\renewcommand{\textfraction}{.08}
+\renewcommand{\floatpagefraction}{.75}
+\setcounter{topnumber}{3}        
+\setcounter{totalnumber}{5}
+\raggedbottom
+\clubpenalty=10000
+\widowpenalty=10000
+\displaywidowpenalty=10000
+\title{\bfseries 短时强弱频谱重叠多源被动定位}
+\author{}
+\date{}
+\makeatletter
+\renewcommand{\@maketitle}{\begin{center}{\LARGE\@title\par}\end{center}\vspace{1em}}
+\makeatother
+
+\begin{document}
+\maketitle
+% Source block 2
+\section*{摘要}
+
+% Source block 3
+频谱重叠和接收功率差异增加了非合作多源定位中时延提取与跨站关联的困难。本文面向四个同步单天线站和两个辐射源，采用确定性自由空间相对幅度与基带时延模型，消去未知源波形，建立四维联合最小二乘定位目标，并说明空间谱、条件投影和连续搜索与该模型的关系。在12个布局上固定弱源功率及噪声，将接收功率差由0 dB增加至15 dB，对八种方法进行配对比较。60 s节点下，交替投影方法（AP）的弱源和双源成功数分别为58/72与55/72，弱源RMSE为17.80 m；5 s时已获得57/72的弱源成功数。块NOMP的弱源成功数为41/72，平均完整耗时8.70 s，但仍有较大误差长尾。孤立源参照表明，强源干扰损失与原有单源误差需按布局区分。结果支持进一步分析候选覆盖、循环更新和计算分配对困难样本的影响。
+
+% Source block 7
+\section{引言}\label{sec:1}
+
+% Source block 8
+\subsection{应用背景与强弱源重叠}\label{sec:1.1}
+
+% Source block 9
+在分布式频谱监测和非合作辐射源定位中，接收端通常无法获得发射波形和发送时刻，需要利用多个站的观测估计位置。同一接收带宽内可能同时存在多个发射源，各站记录因而包含多源叠加。发射功率和传播距离不同，又使这些源的接收功率出现差异。本文所称频谱重叠是信号频率支持的交叠，不涉及欠采样造成的频谱混叠。
+
+% Source block 10
+本文关注弱源单独存在时能够定位、与强源叠加后却容易误定位的情形。强弱按全网平均接收功率区分，并不要求同一源在每个站都更强。观测时间较短时，样本相关的波动和源间交叉项也会影响后续估计。需要在有限处理时间内同时找到两个源，而不能仅依据强源精度评价方法。
+
+% Source block 11
+\subsection{两步定位的困难与DPD思路}\label{sec:1.2}
+
+% Source block 12
+常规两步定位先从站间信号估计到达时间差（time difference of arrival，TDOA），再利用相应的几何约束求解位置。广义互相关提供了时延估计的基本框架\cite{ref01}；Chan与Ho的双曲定位方法及后续偏差分析则研究了给定时延量测后的定位求解\cite{ref02,ref03}。
+
+% Source block 13
+在强弱混合观测中，站间互相关包含各源的自相关移位项、有限样本交叉项及噪声项。较弱源对应的峰可能被强源项掩盖；即使保留多个峰，还需判断不同站对的时延是否来自同一个源。独立选取每个站对的最大峰，可能得到无法对应同一位置的时延组合，影响后续几何定位。
+
+% Source block 14
+DPD直接利用多站接收信号与候选位置的传播响应构造估计目标，使跨站观测在求解过程中共同约束位置。Weiss与Amar讨论了直接定位与传统分步量测处理的差异，以及多源量测关联问题\cite{ref04}。对本文而言，采用DPD是为了减少前端过早选定唯一时延峰的影响；强弱源耦合和多峰目标的搜索困难仍然存在。
+
+% Source block 15
+\subsection{相关研究与本文问题}\label{sec:1.3}
+Chen等从宽带接收信号建立最大似然定位模型，通过消去未知波形处理联合估计\cite{ref05}。Weiss与Amar的多源DPD利用信号子空间构造位置评分\cite{ref04}；DPD-HR结合直接定位与最小方差思想，通过逆协方差提高空间分辨能力\cite{ref06}。本研究在位置确定相对响应的条件下，比较匹配能量谱、宽带子空间谱、已知响应MVDR及联合最小二乘求解。
+
+参数化字典学习将稀疏估计与离网位置细化结合。DPD-PDL同时估计位置偏移和未知复衰减\cite{ref13}；本文在确定性相对响应下构造共享稀疏先验及精确证据下降的位置更新，形成SBL-PDL-known比较方法。
+
+投影抑制、候选保留和循环精修也是多源估计的重要求解方式。Round-robin定位采用投影及位置回访\cite{ref07}，NOMP结合分量检测与连续精修\cite{ref08}，SRP与组稀疏方法保留多个方向候选\cite{ref09}。本文将连续精修用于逐频位置响应块，并设置多初值及遗传算法求解同一四维联合目标，比较逐源更新与联合搜索的实际表现。
+
+本文先推导模型与方法的对应关系，再以孤立源和混合源的配对实验考察功率差的影响。比较显示AP在较早时间已获得较高弱源成功率，块NOMP具有较短完整耗时和较明显误差长尾。讨论围绕困难布局、候选搜索和循环更新展开。附录\ref{sec:2}--\ref{sec:4}保留原有搜索策略及其全部实验，其信号中心频率、功率和样本条件与正文分别说明。
+
+\input{known_response_main.tex}
+
+\FloatBarrier
+\section{参考文献}\label{sec:5}
+\begin{thebibliography}{99}
+\small
+\bibitem{ref01}C. H. Knapp and G. C. Carter, ``The generalized correlation method for estimation of time delay,'' \emph{IEEE Trans. Acoust., Speech, Signal Process.}, vol. 24, no. 4, pp. 321--327, 1976, doi: \href{https://doi.org/10.1109/TASSP.1976.1162830}{\nolinkurl{10.1109/TASSP.1976.1162830}}.
+
+\bibitem{ref02}Y. T. Chan and K. C. Ho, ``A simple and efficient estimator for hyperbolic location,'' \emph{IEEE Trans. Signal Process.}, vol. 42, no. 8, pp. 1905--1915, 1994, doi: \href{https://doi.org/10.1109/78.301830}{\nolinkurl{10.1109/78.301830}}.
+
+\bibitem{ref03}K. C. Ho, ``Bias reduction for an explicit solution of source localization using TDOA,'' \emph{IEEE Trans. Signal Process.}, vol. 60, no. 5, pp. 2101--2114, 2012, doi: \href{https://doi.org/10.1109/TSP.2012.2187283}{\nolinkurl{10.1109/TSP.2012.2187283}}.
+
+\bibitem{ref04}A. J. Weiss and A. Amar, ``Direct position determination of multiple radio signals,'' \emph{EURASIP J. Appl. Signal Process.}, vol. 2005, no. 1, pp. 37--49, 2005, doi: \href{https://doi.org/10.1155/ASP.2005.37}{\nolinkurl{10.1155/ASP.2005.37}}.
+
+\bibitem{ref05}J. C. Chen, R. E. Hudson, and K. Yao, ``Maximum-likelihood source localization and unknown sensor location estimation for wideband signals in the near-field,'' \emph{IEEE Trans. Signal Process.}, vol. 50, no. 8, pp. 1843--1854, 2002, doi: \href{https://doi.org/10.1109/TSP.2002.800420}{\nolinkurl{10.1109/TSP.2002.800420}}.
+
+\bibitem{ref06}T. Tirer and A. J. Weiss, ``High resolution direct position determination of radio frequency sources,'' \emph{IEEE Signal Process. Lett.}, vol. 23, no. 2, pp. 192--196, 2016, doi: \href{https://doi.org/10.1109/LSP.2015.2503921}{\nolinkurl{10.1109/LSP.2015.2503921}}.
+
+\bibitem{ref13} Z. Wang, D. Wang, F. Nie, and N. Zheng, ``TDOA-based direct position determination method with parametric dictionary learning,'' \emph{IEEE Sensors J.}, 2026, doi: \href{https://doi.org/10.1109/JSEN.2026.3693237}{\nolinkurl{10.1109/JSEN.2026.3693237}}.
+
+\bibitem{ref07}W. Mantzel, J. Romberg, and K. G. Sabra, ``Round-robin multiple-source localization,'' \emph{J. Acoust. Soc. Am.}, vol. 135, no. 1, pp. 134--147, 2014, doi: \href{https://doi.org/10.1121/1.4835795}{\nolinkurl{10.1121/1.4835795}}.
+
+\bibitem{ref08}B. Mamandipoor, D. Ramasamy, and U. Madhow, ``Newtonized orthogonal matching pursuit: Frequency estimation over the continuum,'' \emph{IEEE Trans. Signal Process.}, vol. 64, no. 19, pp. 5066--5081, 2016, doi: \href{https://doi.org/10.1109/TSP.2016.2580523}{\nolinkurl{10.1109/TSP.2016.2580523}}.
+
+\bibitem{ref09}E. Tengan, T. Dietzen, F. Elvander, and T. van Waterschoot, ``Multi-source direction-of-arrival estimation using steered response power and group-sparse optimization,'' \emph{IEEE/ACM Trans. Audio, Speech, Lang. Process.}, vol. 32, pp. 3517--3531, 2024, doi: \href{https://doi.org/10.1109/TASLP.2024.3419417}{\nolinkurl{10.1109/TASLP.2024.3419417}}.
+
+\bibitem{ref15}J. Capon, ``High-resolution frequency-wavenumber spectrum analysis,'' \emph{Proc. IEEE}, vol. 57, no. 8, pp. 1408--1418, 1969, doi: \href{https://doi.org/10.1109/PROC.1969.7278}{\nolinkurl{10.1109/PROC.1969.7278}}.
+
+\bibitem{ref16}K. Deb and R. B. Agrawal, ``Simulated binary crossover for continuous search space,'' \emph{Complex Syst.}, vol. 9, no. 2, pp. 115--148, 1995. [Online]. Available: \url{https://www.complex-systems.com/abstracts/v09_i02_a02/}.
+
+\bibitem{ref10}D. Zachariah and P. Stoica, ``Cramér--Rao bound analog of Bayes rule,'' \emph{IEEE Signal Process. Mag.}, vol. 32, no. 2, pp. 164--168, 2015, doi: \href{https://doi.org/10.1109/MSP.2014.2365593}{\nolinkurl{10.1109/MSP.2014.2365593}}.
+
+\bibitem{ref12}A. S. Rahmathullah, Á. F. García-Fernández, and L. Svensson, ``Generalized optimal sub-pattern assignment metric,'' in \emph{Proc. 20th Int. Conf. Inf. Fusion (FUSION)}, Xi'an, China, 2017, pp. 1--8, doi: \href{https://doi.org/10.23919/ICIF.2017.8009645}{\nolinkurl{10.23919/ICIF.2017.8009645}}.
+
+\bibitem{ref11}E. Weinstein and A. J. Weiss, ``Fundamental limitations in passive time-delay estimation---Part II: Wide-band systems,'' \emph{IEEE Trans. Acoust., Speech, Signal Process.}, vol. 32, no. 5, pp. 1064--1078, 1984, doi: \href{https://doi.org/10.1109/TASSP.1984.1164429}{\nolinkurl{10.1109/TASSP.1984.1164429}}.
+\end{thebibliography}
+
+\clearpage
+\appendix
+\section{已知相对增益模型及求解}\label{sec:2}
+
+本附录保留原有搜索策略及条件评分的补充分析。传播相对响应与正文一致，以下使用未归一化响应$\mathbf A_m$及其源系数表示。基本LS关系见正文第\ref{sec:current-model}节；原有A--D策略及附录\ref{sec:3}的实验独立保留。
+
+% Source block 21
+\subsection{场景、符号与假设}\label{sec:2.1}
+
+% Source block 22
+考虑$L$个已知位置的同步接收站和$K$个静止源，本文仿真取$L=4$、$K=2$。站位置为$\mathbf{r}_\ell\in\mathbb{R}^2$，源位置为$\mathbf{p}_k\in\mathbb{R}^2$，待估位置向量为
+% Source block 23
+\begin{equation}\label{eq:2.1}
+\theta = [\mathbf{p}_1^{T},\ldots,\mathbf{p}_K^{T}]^{T} \in\mathbb{R}^{2K}.
+\end{equation}
+
+% Source block 24
+假设信号经直达路径传播，各站噪声为相互独立的白色圆对称复高斯噪声。源波形、发射功率和公共初相均未知，并包含在源信号中。仿真与集中最小二乘方法采用相同的$1/d$衰减和基带时延相位，不设逐站幅相偏差。图\ref{fig:2.1}给出一个双源场景，仿真参数见表\ref{tab:3.1}。
+
+% Source block 25
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_2_1.pdf}
+\caption{四站单天线场景与两类频谱重叠。}\label{fig:2.1}
+\begin{minipage}{\linewidth}\small
+（a）四站位于半径500 m的圆周上；强、弱源位置分别为 $(215.85,483.29)$ m 和 $(72.77,-270.30)$ m，取自仿真中的一个双源场景。（b）、（c）符号率10 MHz、滚降系数0.25的理想根升余弦（RRC）成形信号功率谱，单源支持宽度均为12.5 MHz。图示功率为6 dBm和0 dBm，仅用于表现6 dB强弱差；纵轴为功率谱密度 dBm/MHz。IoU按频率支持的交集宽度除以并集宽度定义，而非按曲线重叠面积定义：中心频率间隔为 $12.5/3$ MHz时，交集与并集分别为 $25/3$ 和 $50/3$ MHz，IoU恰为0.5；中心重合时IoU为1。仿真的位置范围及功率定义见表\ref{tab:3.1}。
+\end{minipage}
+\end{figure}
+
+% Source block 28
+\begin{table}[H]
+\centering
+\caption{主要符号与维度。}\label{tab:2.1}
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{Y{0.85}Y{1.35}Y{0.8}}
+\toprule
+\textbf{符号} & \textbf{含义} & \textbf{维度或单位} \\
+\midrule
+$\mathbf{r}_\ell,\mathbf{p}_k$ & 站位置、源位置 & $2\times1$，m \\
+$d_{\ell k},\tau_{\ell k}$ & 传播距离、传播时延 & m，s \\
+$F_s,T_s,T$ & 采样率、采样间隔、观测时长 & Hz，s，s \\
+$\mathbf{x}_m,\mathbf{s}_m$ & 第 $m$ 个频点的站观测、源系数 & $L\times1$、$K\times1$ \\
+$\mathbf{A}_m$ & 位置参数化的响应矩阵 & $L\times K$ \\
+$\Pi_m^\perp$ & 响应列空间的正交补投影 & $L\times L$ \\
+$\mathbf{D}_m$ & 均值对实位置参数的导数 & $L\times2K$ \\
+$\mathbf{J}_{\theta}^{\mathrm{eff}}$ & 消去未知波形后的位置信息 & $2K\times2K$，m$^{-2}$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% Source block 30
+上标$T$、$H$和$\dagger$分别表示转置、共轭转置和Moore–Penrose伪逆；$\|\cdot\|$表示欧氏范数。
+
+% Source block 31
+\subsection{接收信号模型}\label{sec:2.2}
+
+% Source block 32
+参照宽带联合定位模型\cite{ref05}，设连续复基带源信号为$s_k(t)$，传播距离、时延和幅度衰减为
+% Source block 33
+\begin{equation}\label{eq:2.2}
+d_{\ell k}=\|\mathbf{p}_k-\mathbf{r}_\ell\|, \qquad \tau_{\ell k}=\frac{d_{\ell k}}{c}, \qquad g_{\ell k}=\frac{1}{d_{\ell k}}.
+\end{equation}
+
+% Source block 34
+衰减的公共比例常数并入$s_k(t)$。每站记录$N$个采样点，观测模型为
+% Source block 35
+\begin{equation}\label{eq:2.3}
+x_\ell[n] =\sum_{k=1}^{K}g_{\ell k} s_k(nT_s-\tau_{\ell k})+w_\ell[n], \quad n=0,\ldots,N-1, \qquad w_\ell[n]\sim\mathcal{CN}(0,\sigma_t^2).
+\end{equation}
+
+% Source block 36
+其中$T_s=1/F_s$，观测时长为$T=NT_s$，$c$为传播速度。复噪声满足$\mathbb{E}|w_\ell[n]|^2=\sigma_t^2$，实部和虚部方差均为$\sigma_t^2/2$。仿真中的两源采用独立二进制相移键控（BPSK）数据、符号时序及初相，经RRC脉冲成形产生；定位算法不使用比特或逐源频谱真值。源的统计独立性不意味着有限记录的交叉项恰为零。
+
+% Source block 37
+采用除以$N$的DFT约定，
+% Source block 38
+\begin{equation}\label{eq:2.4}
+X_{\ell m} =\frac{1}{N}\sum_{n=0}^{N-1}x_\ell[n]e^{-j2\pi mn/N}, \qquad \sigma_f^2=\frac{\sigma_t^2}{N}.
+\end{equation}
+
+% Source block 39
+正负频率均保留，$f_m$为带符号基带频率。采用忽略观测窗边缘效应的频域近似模型\cite{ref04,ref05}，将各站的同一频点观测叠成向量，得到
+% Source block 40
+\begin{equation}\label{eq:2.5}
+\mathbf{x}_m =\mathbf{A}_m(\theta)\mathbf{s}_m +\mathbf{n}_m, \qquad \mathbf{n}_m\sim\mathcal{CN}(\mathbf{0},\sigma_f^2\mathbf{I}_L),
+\end{equation}
+% Source block 41
+\begin{equation}\label{eq:2.6}
+[\mathbf{a}_m(\mathbf{p}_k)]_\ell =\frac{e^{-j2\pi f_m d_{\ell k}/c}}{d_{\ell k}}, \qquad \mathbf{A}_m=[\mathbf{a}_m(\mathbf{p}_1),\ldots,\mathbf{a}_m(\mathbf{p}_K)].
+\end{equation}
+
+% Source block 42
+本文载频相位约定为$f_c=0$，下文的似然推导与信息分析均基于式（\ref{eq:2.5}）所采用的频域模型。
+
+% Source block 43
+每个频点的源系数$\mathbf{s}_m$独立拟合，位置在所有频点之间共享。响应列缩放由源系数吸收，与正文的单位范数响应表示等价。
+
+\subsection{波形消元的对应关系}\label{sec:2.3}
+正文式\eqref{eq:2.8}--\eqref{eq:2.7}已给出波形消元与集中LS目标。将单位列响应$\mathbf Q_m$换为未归一化响应$\mathbf A_m$，相应系数按列尺度调整，集中目标保持不变。下文记$\Pi_m^\perp=\mathbf I-\mathbf A_m\mathbf A_m^\dagger$，用于条件评分和搜索界的推导。
+
+% Source block 54
+\subsection{逐源搜索与联合更新}\label{sec:2.4}
+
+% Source block 55
+直接枚举$K$个二维位置组合的计算量随源数迅速增加。本文采用逐源初始化与交替位置更新，并周期性重新搜索已估源的位置。更新一个位置时，先固定其他位置，其响应记为$\mathbf{B}_m$，并定义
+% Source block 56
+\begin{equation}\label{eq:2.11}
+\begin{aligned}
+&\Pi_{B,m}^\perp =\mathbf{I}-\mathbf{B}_m\mathbf{B}_m^\dagger, \\
+& \mathbf{r}_m=\Pi_{B,m}^\perp\mathbf{x}_m, \quad \mathbf{u}_m(\mathbf{p})=\Pi_{B,m}^\perp\mathbf{a}_m(\mathbf{p}).
+\end{aligned}
+\end{equation}
+
+% Source block 57
+新增源的系数和原有源系数均允许重新拟合。线性LS消元后，新增位置带来的残差下降量为
+% Source block 58
+\begin{equation}\label{eq:2.12}
+Q(\mathbf{p}\mid\mathbf{B}) = \sum_m \frac{|\mathbf{a}_m(\mathbf{p})^H\Pi_{B,m}^\perp\mathbf{x}_m|^2} {\mathbf{a}_m(\mathbf{p})^H\Pi_{B,m}^\perp\mathbf{a}_m(\mathbf{p})}.
+\end{equation}
+
+% Source block 59
+分母为投影后候选响应的能量，因此该式与联合LS的增量一致。投影及候选响应归一化也见于Round-robin多源定位\cite{ref07}。当$\mathbf{u}_m=\mathbf{0}$时，新增响应没有增加列空间，该频点的增量定义为零；其余情况下有
+% Source block 60
+\begin{equation}\label{eq:2.13}
+0\leq \frac{|\mathbf{u}_m^H\mathbf{r}_m|^2}{\|\mathbf{u}_m\|^2} \leq\|\mathbf{r}_m\|^2.
+\end{equation}
+
+% Source block 61
+实现中以尺度检查处理退化频点，并用观测总能量$E_x=\sum_m\|\mathbf{x}_m\|^2$归一化评分。同一记录内这一归一化不改变候选排序。
+
+表\ref{tab:methods}定义本文比较的完整定位方法。普通DPD直接选取空间谱峰；A、B、C、D采用集中最小二乘目标，其主要差别在候选搜索。表中的AP表示交替投影（alternating projection）求解。
+
+\begin{table}[H]
+\centering
+\caption{定位方法与候选搜索策略。}\label{tab:methods}
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{Y{0.85}Y{1.05}Y{1.1}}
+\toprule
+\textbf{方法} & \textbf{候选搜索} & \textbf{目标函数与位置更新} \\
+\midrule
+普通DPD & 时延补偿相关矩阵的最大特征值评分、粗细搜索 & 双峰选取与分别精修，不作逐源投影 \\
+A：多初值AP & 粗网格、多初值 & 集中LS、L-BFGS-B、交替更新及循环搜索 \\
+B：普通区域搜索 & 按当前得分细分区域，保留全局探索 & 与A相同 \\
+C：响应变化引导搜索 & 在B中加入响应变化量排序 & 与A相同 \\
+D：补充全局搜索 & 完整B后逐源5 m扫描及前5个候选精修 & 同一集中LS目标，再作2轮局部交替更新 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+普通DPD以站间能量归一化后的时延补偿相关矩阵最大特征值评分，经粗细选峰与分别精修输出位置。其与A、B、C的比较反映完整求解流程的差异。
+
+A、B、C使用相同的普通DPD初始候选搜索，耗时计入总时间。共同配置为5个初值、最多5轮交替更新、每次局部优化最多30次迭代，第3、5轮重新搜索已估源。B、C每次最多细分48个区域，每4次保留1次全局探索；C的响应变化量定义见第\ref{sec:2.5.3}节，排序权重固定为0.25。
+
+原始混合观测先经逐站RMS归一化产生最大特征值谱候选，随后A--C在原始观测的集中LS目标下执行多初值、逐源搜索、连续精修及全部波形重估。搜索不限于初始位置邻域，第3、5轮还有重新搜索；D进一步补充全区域扫描。初始化可能影响有限预算下的结果，但现有比较未单独量化这一影响。
+
+% Source block 62
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_2_2.pdf}
+\caption{共同联合求解流程。}\label{fig:2.2}
+\begin{minipage}{\linewidth}\small
+候选搜索提供初值，连续优化更新位置，所有源的频率系数重新拟合；回访时重新计算条件投影。A、B、C、D使用同一集中最小二乘目标，候选覆盖范围和计算量不同。
+\end{minipage}
+\end{figure}
+
+% Source block 65
+每次接受位置更新后，重新拟合所有源系数，再更新其他位置。保留新旧解中联合残差较小者，可保证残差不增加，但不能保证进入真实位置附近的吸引域。
+
+为考察候选覆盖不足的影响，方法D在完整方法B的输出上增加一轮全局位置更新：依次固定另一个源，在全区域5 m网格上计算式（\ref{eq:2.12}），保留前5个候选并连续精修；两个位置均更新后，再作两轮局部交替更新。每一步均保留联合残差较小的解。该过程只使用观测和当前估计，真实位置仅用于结果评价。
+
+% Source block 66
+\subsection{当前的理论与算法难点}\label{sec:2.5}
+
+% Source block 67
+\subsubsection{局部可辨识性与全局搜索}\label{sec:2.5.1}
+
+% Source block 68
+若$K\geq L$且响应矩阵满行秩，逐频自由系数可拟合任意观测，集中目标退化。本文$L=4,K=2$时，满列秩响应每频点保留两个复残余维度，但位置能否在局部辨识仍取决于响应导数。
+
+% Source block 69
+令$\mathbf{D}_m=\partial(\mathbf{A}_m\mathbf{s}_m)/\partial\theta^T$，求导时保持源系数固定。在响应局部满列秩、噪声协方差已知且与参数无关的条件下，消去未知复波形的等效位置信息为\cite{ref05,ref10}
+% Source block 70
+等效信息的表达式见正文式\eqref{eq:new-information}，其中可等价使用本附录的$\mathbf D_m$和$\Pi_m^\perp$。
+
+% Source block 71
+当该矩阵正定时，其逆给出正则、局部无偏位置估计的Cramér--Rao下界（CRLB）。该界描述真实位置附近的精度，不说明求解器能否进入这一邻域。远处局部极值和阈值效应还需另行分析\cite{ref11}。
+
+% Source block 72
+\subsubsection{投影损失与强源位置误差}\label{sec:2.5.2}
+
+% Source block 73
+设单频点的强、弱源响应分别为$\mathbf{a}_s$和$\mathbf{a}_w$。固定真实强源响应，令$\Pi_s^\perp=\mathbf{I}-\mathbf{a}_s\mathbf{a}_s^H/\|\mathbf{a}_s\|^2$，则响应相关系数与弱源能量保留比例为
+% Source block 74
+\begin{equation}\label{eq:2.15}
+\rho =\frac{\mathbf{a}_s^H\mathbf{a}_w}{\|\mathbf{a}_s\|\|\mathbf{a}_w\|}, \qquad \eta =\frac{\|\Pi_s^\perp\mathbf{a}_w\|^2}{\|\mathbf{a}_w\|^2} =1-|\rho|^2.
+\end{equation}
+
+% Source block 75
+响应相似时，消去强源也会移除部分弱源能量。宽带保留比例需按各频点的实际弱源能量加权，不能用一个频点代表全部观测。固定投影下的噪声协方差为$\sigma_f^2\Pi_s^\perp$，在投影保留子空间的正交基中仍可作同方差LS处理。
+
+% Source block 76
+若强源位置估计误差为$\delta\mathbf{p}_s$，记$\mathbf{H}_{s,m}=\partial\mathbf{a}_m(\mathbf{p}_s)/\partial\mathbf{p}_s^T$，$s_{sm}$为该源在第$m$个频点的系数。在小误差条件下，残留强源能量的主导项为
+% Source block 77
+\begin{equation}\label{eq:2.16}
+E_{\mathrm{leak}} \approx \sum_m |s_{sm}|^2 \|\Pi_{s,m}^\perp\mathbf{H}_{s,m}\delta\mathbf{p}_s\|^2.
+\end{equation}
+
+% Source block 78
+残留随强源功率和误差方向变化。因此，满足定位成功判据的强源估计，仍可能干扰弱源评分。由于投影位置通常由同一观测估计，其误差与残余之间存在统计依赖。
+
+% Source block 79
+\subsubsection{窄峰采样与候选保留}\label{sec:2.5.3}
+
+% Source block 80
+式（\ref{eq:2.13}）保证增量评分有界，但当投影响应范数较小时，其归一化方向仍可能随位置迅速变化。固定其他位置，设二维位置偏移为$\delta$；在光滑局部极大点$\mathbf{p}_\star$附近，令$\mathbf{H}_\star=-\nabla^2Q(\mathbf{p}_\star)\succ0$，有
+% Source block 81
+\begin{equation}\label{eq:2.17}
+Q(\mathbf{p}_\star+\delta) =Q(\mathbf{p}_\star) -\frac12\delta^T\mathbf{H}_\star\delta +O(\|\delta\|^3).
+\end{equation}
+
+% Source block 82
+二维正方网格间隔为$h$时，最近格点满足$\|\delta\|^2\leq h^2/2$。在局部展开有效的范围内，
+% Source block 83
+\begin{equation}\label{eq:2.18}
+Q(\mathbf{p}_\star)-Q(\mathbf{p}_{\mathrm{grid}}) \leq\frac{\lambda_{\max}(\mathbf{H}_\star)h^2}{4}+O(h^3).
+\end{equation}
+
+% Source block 84
+即使真实位置附近存在高峰，邻近格点也可能因采样损失排在远处候选之后。统一缩小网格间隔能减少此类损失，但二维评分点数随$h^{-2}$增长。需要在有限计算量下判断哪些区域值得继续搜索。
+
+% Source block 85
+本文比较的一种区域选择规则使用投影响应的空间变化量。设参与评分的频点数为$M$，$\partial_i$表示对位置坐标$p_i$求导。固定其他位置，定义
+% Source block 86
+\begin{equation}\label{eq:2.19}
+\zeta(\mathbf{p}) =\frac{1}{M}\sum_{m=1}^{M}\sum_{i\in\{x,y\}} \left[ \frac{\|\partial_i\mathbf{u}_m\|^2}{\|\mathbf{u}_m\|^2} - \frac{|\mathbf{u}_m^H\partial_i\mathbf{u}_m|^2}{\|\mathbf{u}_m\|^4} \right].
+\end{equation}
+
+% Source block 87
+该量扣除纯整体幅相变化后，衡量响应方向的局部敏感性。方法C将其乘以区域半宽的平方，转为排名后与评分排名加权组合。它未直接使用残余观测，因而响应变化快不一定意味着该区域包含高评分候选。其作用需通过同预算实验检验。
+
+\subsubsection{区域评分上界与候选排除}\label{sec:region-bound}
+
+为判断未充分采样的区域是否仍可能包含更高分位置，考虑固定其他源时的条件评分上界。设正方形区域$\mathcal C$的中心为$\mathbf p_c$、半边长为$h$，区域内任一点到中心的距离不超过$\Delta_{\mathcal C}=\sqrt{2}h$。数值搜索以$d_0=1$ m截断站点附近的距离，避免$1/d$奇异；区域界采用同一响应。记$d_\ell^c=\max(\|\mathbf p_c-\mathbf r_\ell\|,d_0)$、$d_{\ell,-}=\max(d_\ell^c-\Delta_{\mathcal C},d_0)$。由距离变化界和复指数相位差界，单站响应变化不超过
+\begin{equation}\label{eq:response-bound}
+\begin{aligned}
+\varepsilon_{\ell m}
+&=\frac{\Delta_{\mathcal C}}{d_\ell^c d_{\ell,-}}
++\frac{2}{d_\ell^c}\sin\!\left[\frac12\min\!\left(\pi,\frac{2\pi|f_m|\Delta_{\mathcal C}}{c}\right)\right],\\
+\varepsilon_m&=\left(\sum_{\ell=1}^{L}\varepsilon_{\ell m}^2\right)^{1/2}.
+\end{aligned}
+\end{equation}
+
+正交投影不增加向量范数，因此$\|\mathbf u_m(\mathbf p)-\mathbf u_m(\mathbf p_c)\|\leq\varepsilon_m$。以下以$\mathbf u_m^c=\mathbf u_m(\mathbf p_c)$简记中心响应，并定义
+\begin{equation}\label{eq:cone-parameters}
+t_m=\min\!\left(1,\frac{\varepsilon_m}{\|\mathbf u_m^c\|}\right),\qquad
+v_m=\frac{|(\mathbf u_m^c)^H\mathbf r_m|}{\|\mathbf u_m^c\|\,\|\mathbf r_m\|}.
+\end{equation}
+
+当$t_m<1$时，响应方向的偏转角不超过$\arcsin t_m$。据此限制候选响应与残余的夹角，得到归一化评分的区域上界
+\begin{equation}\label{eq:cell-upper}
+\begin{aligned}
+\frac{Q(\mathbf p\mid\mathbf B)}{E_x}&\leq U(\mathcal C)
+=\frac{1}{E_x}\sum_m\|\mathbf r_m\|^2 H(v_m,t_m),\quad \mathbf p\in\mathcal C,\\
+H(v,t)&=\begin{cases}
+\bigl(v\sqrt{1-t^2}+t\sqrt{1-v^2}\bigr)^2,&t<\sqrt{1-v^2},\\
+1,&t\geq\sqrt{1-v^2}.
+\end{cases}
+\end{aligned}
+\end{equation}
+
+残余为零时，该频点贡献为零；中心投影响应退化时，取该频点的残余能量作为上界。若$U(\mathcal C)$低于已找到的最佳评分，即可排除该区域；否则可优先细分上界较高的区域。上界是否足够紧、其计算代价是否低于直接补点评分，需要由实验判断。第\ref{sec:3.10}节将其与得分优先细分、均匀及错位网格搜索比较。
+
+% Source block 88
+本文要解决的问题是：在给定观测和计算预算下，发现可能被粗搜索遗漏的弱源候选，并通过联合位置更新减轻强源估计误差的影响。
+
+% Source block 90
+\section{已知相对增益条件下的实验结果}\label{sec:3}
+
+本附录完整保留既有实验。原比较组、新布局比较组与固定诊断组分别统计，分母、成功判据和处理时间沿用原记录。原信号采用随机共同中心频率，包含6/12 dB功率差、3 dB弱源带内SNR及不同记录长度和频谱重叠条件；正文采用零中心完全重叠、6 dB弱源带内SNR及六档功率差，两组结果分别解释。
+
+% Source block 91
+\subsection{仿真设置}\label{sec:3.1}
+
+% Source block 92
+本章先在32个独立布局上比较方法A、B、C，并分析其失败记录；随后在六个新布局上比较完整方法B与D。区域上界的比较则使用固定24条诊断记录，仅更新弱源位置。三类结果分别统计。第\ref{sec:3.7}节另给出投影机理的频域数值示例。
+
+% Source block 93
+\begin{table}[!htbp]
+\centering
+\caption{主要仿真参数与第一组方法比较设置。}\label{tab:3.1}
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{Y{0.65}Y{1.35}}
+\toprule
+\textbf{项目} & \textbf{设置} \\
+\midrule
+接收几何 & 四站：约 $(500,0),(0,500),(-500,0),(0,-500)$ m \\
+空间范围 & $[-1000,1000]^2$ m²，连续源位置 \\
+源数与间距 & 已知 $K=2$；源间距至少 300 m，源站距离至少 150 m \\
+波形 & 两个独立 BPSK／RRC 源，符号率 10 MHz，滚降系数 0.25 \\
+采样与长度 & $F_s=100$ MHz；$N=4096,16384$ \\
+标称带宽与重叠 & 12.5 MHz；频谱支持 IoU 为 0.5、1 \\
+弱源功率 & 全网平均带内信噪比（SNR）为3 dB \\
+强弱差 & 全网平均接收功率差为 6、12 dB \\
+独立布局与实现 & 32 个布局，每布局 2 组波形／噪声实现 \\
+混合条件数 & $32\times2\times2\times2\times2=512$ 条 \\
+单源对照 & 每种长度各 128 条孤立弱源、128 条孤立强源 \\
+主预算 $T_0$ & 4096 点为 3.7216 s；16384 点为 11.5376 s \\
+预算曲线 & $0.5T_0,T_0,2T_0$，取截止时已经完成的输出 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% Source block 95
+短、长记录使用同一连续波形与噪声流的前缀。比较两档功率差时，弱信号和噪声逐样本保持不变，只改变强源幅度。独立性以布局为单位，置信区间采用按布局成组的配对重采样。
+
+% Source block 96
+方法参数在各组比较前固定。第一组的失败诊断用于选择补充搜索配置；方法D的5 m网格、候选数和更新轮数在六个新布局的结果计算前固定。孤立／混合对照保持弱信号及噪声不变，用于分析加入强源后的额外损失。
+
+方法D的比较使用完整执行的B作为基线，不沿用第一组的预算截止输出。B、D采用相同的分块双精度评分实现；D的完整耗时包含B及后续补充搜索。计算平台为NVIDIA RTX 4070 Ti SUPER，PyTorch 2.8.0，CPU线程数为4。
+
+% Source block 100
+\subsection{评价指标}\label{sec:3.2}
+
+% Source block 101
+令真实集合与输出集合分别为 $\mathcal{P}$ 和 $\widehat{\mathcal{P}}$。在半径 $r$ 内，成功评价先最大化可匹配源数，再以平方距离及固定规则打破平局。令$I_{w,j}(r)$和$I_{s,j}(r)$分别表示第$j$条记录中弱、强源是否按此规则成功匹配的指示量，弱源成功率和双源同时成功率为
+% Source block 102
+\begin{equation}\label{eq:3.1}
+\begin{aligned}
+&R_w(r)=\frac{1}{n_{\mathrm{rec}}}\sum_{j=1}^{n_{\mathrm{rec}}}I_{w,j}(r), \\
+& R_{\mathrm{both}}(r) =\frac{1}{n_{\mathrm{rec}}}\sum_{j=1}^{n_{\mathrm{rec}}}I_{s,j}(r)I_{w,j}(r).
+\end{aligned}
+\end{equation}
+
+% Source block 103
+其中 $n_{\mathrm{rec}}$ 为记录数。成功半径取最大站间基线的2\%，即$r=0.02\max_{\ell,q}\|\mathbf{r}_\ell-\mathbf{r}_q\|=20$ m。均方根误差（RMSE）、95\%分位数（P95）和误差累积分布函数（CDF）另用平方距离最优匹配，保留全部匹配误差。两种匹配分别用于成功判断和距离误差统计。
+
+% Source block 104
+集合误差采用广义最优子模式分配（GOSPA）距离\cite{ref12}，参数为$p=2,\alpha=2,\kappa=100$ m。其部分匹配形式为
+% Source block 105
+\begin{equation}\label{eq:3.2}
+d_{\mathrm G}^2(\mathcal{P},\widehat{\mathcal{P}}) = \min_{\gamma} \left[ \sum_{(i,j)\in\gamma}\|\mathbf{p}_i-\widehat{\mathbf{p}}_j\|^2 +\frac{\kappa^2}{2}(K+\widehat K-2|\gamma|) \right],
+\end{equation}
+
+% Source block 106
+其中 $\gamma$ 为一对一部分匹配，$\kappa$是GOSPA的截断参数，与20 m成功半径分别定义。表中的GOSPA是逐记录$d_{\mathrm G}$的平均值；RMSE是未截断平方距离误差均值的平方根。
+
+% Source block 107
+完整在线时间包含共同候选前端、物理评分、投影、搜索与连续精修。三档预算快照来自同一次运行轨迹，统计时仍使用原布局分组。
+
+% Source block 108
+\subsection{孤立弱源与混合弱源}\label{sec:3.3}
+
+% Source block 109
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_3_1.pdf}
+\caption{同一弱信号与噪声条件下的孤立／混合对照。}\label{fig:3.1}
+\begin{minipage}{\linewidth}\small
+每种长度包含128条孤立弱源及256条混合条件；混合条件的两档功率差共享对应弱信号。混合结果取主预算$T_0$，评价半径20 m。
+\end{minipage}
+\end{figure}
+
+% Source block 112
+\begin{table}[!htbp]
+\centering
+\caption{孤立弱源与混合弱源成功数。}\label{tab:3.3}
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{Y{0.6}Y{1.4}Y{1}Y{1}}
+\toprule
+\textbf{长度} & \textbf{孤立弱源，共同参照} & \textbf{B混合弱源} & \textbf{C混合弱源} \\
+\midrule
+4096点 & 116/128（90.625\%） & 87/256（33.984\%） & 88/256（34.375\%） \\
+16384点 & 122/128（95.313\%） & 98/256（38.281\%） & 95/256（37.109\%） \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% Source block 114
+两种长度下，孤立弱源的成功率分别为90.63\%和95.31\%，加入强源后，方法B、C降至约34\%—38\%。对照保持弱信号和噪声不变，反映了强源叠加后的额外损失。记录长度由4096增加至16384点时，混合弱源成功率有所提高，但与孤立弱源之间仍有较大差距。
+
+% Source block 115
+站间强弱关系由几何及发射功率共同形成。当前按全网平均接收功率定义强弱，不要求同一源在每站都占优。因此还需结合实际响应分析源间竞争，而不能仅由一个全局功率比预测成败。
+
+% Source block 116
+\subsection{逐源处理与候选排序}\label{sec:3.4}
+
+% Source block 117
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_3_2.pdf}
+\caption{主预算下的完整方法比较。}\label{fig:3.2}
+\begin{minipage}{\linewidth}\small
+合并两种长度，每方法512条混合条件，评价半径20 m。A、B、C采用共同的逐源投影和联合更新；方法D在另一组新布局上单独比较，见第\ref{sec:3.9}节。
+\end{minipage}
+\end{figure}
+
+% Source block 120
+\begin{table}[!htbp]
+\centering
+\caption{主预算 $T_0$ 下的总体结果。}\label{tab:3.4}
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{Y{0.95}Y{1.05}Y{1.15}Y{1.05}Y{1.1}Y{0.85}Y{0.85}}
+\toprule
+\textbf{方法} & \textbf{弱源成功率} & \textbf{双源同时成功率} & \textbf{强源成功率} & \textbf{平均GOSPA / m} & \textbf{RMSE / m} & \textbf{P95 / m} \\
+\midrule
+普通DPD & 0.00\% & 0.00\% & 93.75\% & 101.73 & 807.21 & 1684.03 \\
+A & 31.25\% & 31.05\% & 94.92\% & 64.16 & 259.85 & 616.25 \\
+B & 36.13\% & 35.74\% & 94.92\% & 60.46 & 256.71 & 612.58 \\
+C & 35.74\% & 35.35\% & 95.51\% & 61.36 & 242.01 & 579.53 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% Source block 122
+普通DPD大多能够定位强源，但弱源未满足20 m成功判据。A、B、C采用逐源投影和联合更新后，弱源成功率提高至31.25\%—36.13\%。C相对A提高4.49个百分点，按32个布局配对重采样得到的95\%区间为$[0.59,8.79]$个百分点；相对B则降低0.39个百分点，区间为$[-5.27,3.91]$个百分点。
+
+% Source block 123
+逐例比较中，C恢复了B的22条弱源失败记录，同时使B原先成功的24条记录失败，净减少2条成功。C的RMSE较低，但GOSPA与20 m成功率未同步改善。因此，新增响应变化量排序相对普通区域搜索B尚未显示稳定收益。
+
+% Source block 124
+
+% Source block 125
+\subsection{条件评分与失败原因}\label{sec:3.5}
+
+% Source block 126
+对方法B的512条混合记录作条件评分分析，固定其主预算输出。在327条弱源失败中，分别比较原强源估计下的真实弱源与返回点评分、固定真实强源后的两点评分，以及真实位置对与返回位置对的联合目标。真实位置仅用于诊断，不参与候选生成。
+
+% Source block 127
+\begin{table}[!htbp]
+\centering
+\caption{全部失败记录的条件评分分析。}\label{tab:3.5}
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{Y{0.65}Y{0.8}Y{1.15}Y{1.2}Y{1.2}}
+\toprule
+\textbf{记录长度} & \textbf{B弱源失败数} & \textbf{原强源估计下真弱源评分更高} & \textbf{真实强源位置下真弱源评分更高} & \textbf{真实位置对的联合拟合更好} \\
+\midrule
+4096点 & 169 & 147 & 159 & 158 \\
+16384点 & 158 & 145 & 155 & 155 \\
+合计 & 327 & 292 & 314 & 313 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% Source block 129
+292/327条，即89.30\%的失败，在保持原强源估计与评分函数不变时，真实弱源位置的评分已高于返回点。以真实弱源位置为初值作局部精修，得到评分更高且误差不超过20 m的局部解的记录共295条；两项统计允许重叠。这些比较表明，大部分失败记录存在求解器未找到的更优位置。
+
+% Source block 130
+在原强源估计下真弱源评分不占优的35条记录中，22条在替换为真实强源位置后获得评分优势，其中1条原强源误差已小于20 m。这说明定位成功半径并不能直接作为强源精修的停止条件，弱源评分仍可能受到强源位置误差影响。
+
+% Source block 131
+327条失败中，313条的真实位置对具有更小的联合拟合残差。其余记录不能仅凭真实位置处的评分归因于搜索遗漏，还需区分局部估计偏差与错误吸引域。以下加密搜索对照用于进一步检验候选覆盖的作用。
+
+% Source block 132
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=.92\linewidth]{figures/fig_3_3.pdf}
+\caption{从评分地形到搜索归因。}\label{fig:3.3}
+\begin{minipage}{\linewidth}\small
+（a）辅助长记录示例：IoU=0.5、$N=65536$，全区域10 m评分图，标出真实弱源与密搜输出；该例不计入两种主记录长度的统计。（b）方法B全部327条弱源失败的条件评分。（c）预先选定的16条失败记录中，加密搜索在20 m判据下的恢复数；另8条历史对照在更新后均达到20 m。（d）窄峰案例：$N=4096$、IoU=1、功率差12 dB，固定真实强源，比较四类位置的评分。
+\end{minipage}
+\end{figure}
+
+% Source block 135
+\subsection{加密搜索与窄峰遗漏}\label{sec:3.6}
+
+% Source block 136
+搜索诊断使用此前按100 m判据选定的24条记录，不从当前327条失败中重新抽样。样本按长度、重叠和功率差分成8组，每组包含2条历史失败和1条历史对照，共涉及4个布局。16条历史失败的初始误差均超过20 m；8条对照中，初始只有6条满足20 m，另2条误差为61.42 m和63.37 m。以下保留这两个固定分组，并统一按20 m评价更新结果。诊断固定强源位置，以全区域10 m扫描、前5个候选及连续精修重求弱源。
+
+% Source block 137
+\begin{table}[!htbp]
+\centering
+\caption{固定样本的搜索诊断。}\label{tab:3.6}
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{Y{1}Y{0.6}Y{1.15}Y{1.1}Y{1.15}}
+\toprule
+\textbf{条件} & \textbf{记录数} & \textbf{固定原强源后密搜成功} & \textbf{固定真实强源后密搜成功} & \textbf{真实位置对初始化后双源成功} \\
+\midrule
+历史失败组 & 16 & 14 & 15 & 16 \\
+历史对照组 & 8 & 8 & 8 & 8 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% Source block 139
+保持原强源位置不变，加密搜索使16条选定失败中的14条定位成功。这表明这些记录可通过改变搜索恢复，但目的抽样的恢复比例不能作为全部失败记录的成功率估计。
+
+% Source block 140
+两个剩余案例揭示了不同原因。在4096点、IoU=1、功率差6 dB的耦合案例中，原强源误差为558.73 m；固定该位置时，弱源密搜误差仍为1095.56 m；改用真实强源位置后降至0.828 m。这是强源位置耦合的具体实例。
+
+% Source block 141
+在4096点、IoU=1、功率差12 dB的窄峰案例中，强源误差仅0.073 m，10 m密搜仍返回约125.48 m的弱源误差。固定真实强源位置时，其评分关系如下。
+
+% Source block 142
+\begin{table}[!htbp]
+\centering
+\caption{一个窄峰遗漏案例的评分。}\label{tab:3.7}
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{Y{1.1}Y{1}Y{0.9}}
+\toprule
+\textbf{位置} & \textbf{归一化增量评分} & \textbf{与真实弱源的距离} \\
+\midrule
+最近10 m格点 & 0.08159913 & 4.523 m \\
+密搜返回位置 & 0.08704823 & 125.36 m \\
+真实弱源位置 & 0.08989170 & 0 m \\
+真值附近局部解 & 0.08992482 & 0.803 m \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% Source block 144
+最近格点与真实位置仅相距4.523 m，评分却低于远处返回点。该例中，从正确区域启动局部精修可达到亚米级误差，但10 m网格加Top5没有保留相应候选。这一现象与式（\ref{eq:2.17}）—（\ref{eq:2.18}）描述的采样损失及排名变化相符。
+
+% Source block 145
+在同一组24条记录上，进一步比较网格间隔与候选保留数。固定原强源估计，采用同一分块评分实现时，10 m网格与前5个候选恢复14/16条历史失败；将候选数增至32仍恢复14条，而5 m网格与前5个候选恢复15条。三种配置均使8条历史对照达到20 m，包括初始未达标的2条记录。对应16条失败的单次弱源补充搜索平均耗时分别为2.95、3.61和11.29 s，不包含此前求得强源位置的耗时。这表明，对该组样本，扩大候选数不能替代更细的空间采样。
+
+辅助长记录诊断在另16个选定条件中，固定评分、改变搜索使20 m弱源恢复数从3增至8。该组仅用于说明相似的候选遗漏现象，不与本章主样本合并统计。
+
+% Source block 146
+\subsection{强源位置偏差的投影数值示例}\label{sec:3.7}
+
+% Source block 147
+为说明小位置误差如何产生强源残留，采用式（\ref{eq:2.6}）的频域响应，计算投影后的能量。四站坐标与图\ref{fig:2.1}相同，强、弱源分别位于$(650,-300)$ m和$(-800,-700)$ m。65个频点均匀覆盖$[-6.25,6.25]$ MHz，复噪声方差取1，每频点全网平均SNR分别为15、3 dB；固定随机相位的源谱作为未知确定性系数处理。该例用于说明投影机理，不参与BPSK定位成功率统计。
+
+% Source block 148
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=.85\linewidth]{figures/fig_3_4.pdf}
+\caption{投影机理的数值示例。}\label{fig:3.4}
+\begin{minipage}{\linewidth}\small
+采用本节所列频域参数。（a）各频点的弱源能量保留比例$\eta_m$；（b）强源沿$x$方向偏移0.01—50 m时，强源残留能量与准确投影后弱源能量之比，并比较式（\ref{eq:2.16}）的一阶响应近似。小偏差区间呈现近似二次增长。
+\end{minipage}
+\end{figure}
+
+% Source block 151
+小偏差区间内，强源残留与式（\ref{eq:2.16}）的二次能量近似相符。它解释了为什么强源误差虽小于定位成功阈值，仍可能影响弱源搜索；但没有给出实际求解中何时停止强源精修的判据。第\ref{sec:3.5}节的条件评分分析与这一误差传播关系相呼应。
+
+% Source block 152
+\subsection{成功率、处理时间与误差分布}\label{sec:3.8}
+
+% Source block 153
+\begin{figure}[H]
+\centering
+\includegraphics[width=.94\linewidth]{figures/fig_3_5.pdf}
+\caption{三档预算下的弱源成功率与在线耗时。}\label{fig:3.5}
+\begin{minipage}{\linewidth}\small
+每种长度、每方法256条混合条件，横轴为$0.5T_0,T_0,2T_0$三档预算。上排为弱源20 m成功率；下排为计入该预算窗口的平均在线时间，提前完成时取实际耗时，否则取预算截止时间。评价采用截止前最近一次已完成的输出。表\ref{tab:3.8}另列整个运行窗口内的实测耗时。
+\end{minipage}
+\end{figure}
+
+% Source block 156
+\begin{table}[!htbp]
+\centering
+\caption{以$2T_0$为运行上限的实际平均耗时。}\label{tab:3.8}
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{Y{1}Y{1}Y{1}Y{1}Y{1}}
+\toprule
+\textbf{长度} & \textbf{A / s} & \textbf{B / s} & \textbf{C / s} & \textbf{C/B} \\
+\midrule
+4096点 & 3.739 & 4.933 & 7.446 & 约1.51 \\
+16384点 & 11.248 & 14.154 & 23.078 & 约1.63 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% Source block 158
+C在507/512条混合任务中用尽$2T_0$窗口，相对B的耗时增加未带来成功率优势。三档预算下，各方法的弱源成功率变化很小，说明在当前配置中，仅延长同一搜索过程的运行时间并不足以改善候选覆盖。
+
+% Source block 159
+\begin{figure}[H]
+\centering
+\includegraphics[width=.94\linewidth]{figures/fig_3_6.pdf}
+\caption{未截断误差与条件分层。}\label{fig:3.6}
+\begin{minipage}{\linewidth}\small
+上排：各长度下的弱源平方距离最优匹配误差CDF，每曲线256条；下排：各长度、重叠和功率差条件下，C相对B的弱源20 m成功率差（单位：百分点），每格64条。误差横轴覆盖全部观测值。
+\end{minipage}
+\end{figure}
+
+% Source block 162
+图\ref{fig:3.6}显示，误差分布仍有明显长尾，C相对B的成功率变化依条件而异。RMSE较低与成功率提高并不等价，因而需结合成功率、未截断误差和处理时间评价搜索策略。
+
+% Source block 163
+\subsection{充分搜索的收益与代价}\label{sec:3.9}
+
+根据第\ref{sec:3.6}节的诊断，固定方法D的5 m网格、前5个候选和更新轮数，在六个新布局上检查其作用。每个布局包含两种观测长度、两种频谱重叠和两档功率差，共$6\times2\times2\times2=48$个条件，每条件使用一组波形与噪声实现。完整方法B与D处理相同观测，均执行预定流程，不使用第一组实验的预算截止输出。
+
+\begin{table}[!htbp]
+\centering
+\caption{六个新布局上的完整求解结果，成功半径20 m。}\label{tab:3.9}
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{Y{0.55}Y{0.85}Y{0.85}Y{1.05}Y{1.05}Y{1.05}Y{1.05}Y{1.05}}
+\toprule
+方法 & \shortstack[l]{弱源\\成功数} & \shortstack[l]{双源\\成功数} & \shortstack[l]{强源\\成功数} & \shortstack[l]{GOSPA\\ / m} & \shortstack[l]{RMSE\\ / m} & \shortstack[l]{P95\\ / m} & \shortstack[l]{平均时间\\ / s} \\
+\midrule
+B & 8/48 & 8/48 & 48/48 & 69.16 & 128.56 & 343.98 & 8.04 \\
+D & 40/48 & 40/48 & 48/48 & 18.37 & 64.28 & 121.40 & 31.10 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+方法D恢复了B的32条弱源失败记录，并保留B原有的8条成功记录。弱源成功率由16.67\%升至83.33\%，总体RMSE由128.56 m降至64.28 m，但平均完整处理时间增至原来的3.87倍。该结果反映补充全局搜索与联合更新的合并作用，尚未分别量化两部分的收益。
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=.95\linewidth]{figures/fig_3_7.pdf}
+\caption{六个新布局中方法B与D的弱源成功数。}\label{fig:3.7}
+\begin{minipage}{\linewidth}\small
+每布局8个条件，成功半径20 m；圆点为B，方点为D。位置重合的标记作少量纵向错位，横坐标保持真实成功数。布局编号仅用于本组比较。
+\end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=.95\linewidth]{figures/fig_3_8.pdf}
+\caption{两种观测长度下的成功率与完整处理时间。}\label{fig:3.8}
+\begin{minipage}{\linewidth}\small
+每种长度24个条件。4096点下，B与D的平均时间分别为3.91 s和12.94 s；16384点下分别为12.17 s和49.26 s。D的时间包含完整B及后续搜索，未按预算截断。
+\end{minipage}
+\end{figure}
+
+两种长度下，方法D的弱源成功数均为20/24。剩余8条失败集中于布局2，弱源误差为83.72—290.93 m；该布局在两种长度、两种重叠和两档功率差下均未恢复。这种集中性表明失败与布局条件有关，但现有结果尚不能区分更细的候选遗漏、错误局部极值及位置耦合各自的作用。该组与前述32布局的样本不同，成功率和耗时均分别解释。
+
+\subsection{固定样本上的区域细分比较}\label{sec:3.10}
+
+为检验式（\ref{eq:cell-upper}）能否减少搜索量，在第\ref{sec:3.6}节的同一组24条诊断记录上比较四种单次弱源搜索策略：5 m均匀网格、横纵坐标各偏移5 m的10 m错位网格、得分优先细分和上界优先细分。各策略均固定原强源估计，保留前5个候选并采用相同的连续精修，保留评分不低于原估计的结果。这里的5 m扫描仅更新一次弱源位置，与逐源搜索并联合更新的完整方法D不同。
+
+两种区域细分均从50 m网格开始，每个初始区域半边长为25 m，每次细分至多32个区域，网格评分上限为16384点，最小半边长为1.5625 m。得分优先细分按中心评分排序；上界优先细分按$U(\mathcal C)$排序，并在区域上界低于当前最佳评分时剪枝。与其对应的数值核验覆盖两种记录长度、零至两个固定源及四种区域尺度，共24组，未出现采样评分超过区域界的情况。这一核验检查数值实现的一致性，不用于评价搜索性能。
+
+\begin{table}[!htbp]
+\centering
+\caption{固定强源估计下的单次弱源搜索比较。}\label{tab:region-search}
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{Y{1.25}Y{0.95}Y{0.95}Y{1.15}Y{1.0}Y{0.7}}
+\toprule
+策略 & \shortstack[l]{历史失败组\\达标数} & \shortstack[l]{历史对照组\\达标数} & \shortstack[l]{平均网格\\评分点数} & \shortstack[l]{平均更新\\时间 / s} & \shortstack[l]{剪枝\\区域数} \\
+\midrule
+5 m均匀网格 & 15/16 & 8/8 & 160689.5 & 11.2231 & --- \\
+10 m错位网格 & 14/16 & 8/8 & 39971.2 & 2.8870 & --- \\
+得分优先细分 & 2/16 & 6/8 & 16384 & 1.2901 & --- \\
+上界优先细分 & 9/16 & 6/8 & 16384 & 1.5700 & 0 \\
+\bottomrule
+\end{tabularx}
+\par\smallskip
+\begin{minipage}{\linewidth}\small
+达标均指弱源误差不超过20 m。时间与评分点数按全部24条记录平均，时间包含候选精修，不包含先前的强源估计；网格评分点数不含连续优化中的函数评价。剪枝仅用于上界优先策略，该策略24条记录的剪枝数均为零。
+\end{minipage}
+\end{table}
+
+在相同的16384点评分上限下，上界优先细分恢复9/16条历史失败，多于得分优先的2/16条，说明该上界有助于区域排序。但两者均用尽评分上限，且上界优先策略没有排除任何区域。其平均更新时间约为5 m扫描的14.0\%，恢复数却少6条，尚未达到相近的恢复能力。当前上界虽满足所采用响应模型下的约束，仍过于宽松，未实现有效剪枝。
+
+10 m错位网格以5 m扫描约25.7\%的更新时间恢复14/16条历史失败，与第\ref{sec:3.6}节普通10 m扫描的恢复数相同。在两种网格结果不同的窄峰案例中，5 m扫描误差为0.805 m，错位10 m网格为48.54 m。错位采样可以改变候选位置，但该结果不足以说明其能够稳定替代加密网格。两种细分策略的历史对照达标数均为6/8，保留了原有6条20 m成功记录；5 m与错位10 m扫描还使另外2条对照达到20 m。
+
+这组结果仅比较固定强源后的单次弱源更新，样本按历史失败与对照目的选取。相应恢复比例不能视为总体成功率，更新时间也不能直接解释为完整定位算法的加速比。
+
+\subsection{阶段性结论}\label{sec:3.11}
+
+% Source block 164
+在32布局的比较中，逐源投影和联合更新将弱源20 m成功率提高至31\%—36\%，但仍低于孤立弱源的91\%—95\%。条件评分表明，大部分失败存在未被求解器找到的更优位置；部分记录的弱源评分还受到强源位置误差影响。
+
+% Source block 165
+响应变化量排序C相对普通区域搜索B未显示稳定收益。补充5 m全局搜索的方法D在六个新布局中将弱源成功数由8/48增至40/48，代价是平均完整处理时间增至3.87倍。在固定诊断样本上，区域上界改善了细分次序，但没有实现剪枝，恢复能力也低于加密网格。后续搜索设计需要同时减少无效评分和保留窄峰候选，仅延长运行时间或改变区域排序尚不足以解决这一问题。
+
+% Source block 166
+完整加密搜索后仍有一个布局的全部条件失败。固定强源的单次搜索比较不能解释这组剩余失败，仍需区分候选遗漏与位置耦合，并判断何时需要同时改变两个源的位置。
+
+% Source block 168
+\section{已知增益实验的讨论}\label{sec:4}
+
+以下讨论对应附录\ref{sec:3}的既有搜索实验。正文第\ref{sec:new-results}节在新的信号与样本条件下比较了八种方法，第\ref{sec:new-discussion}节据此讨论后续问题。
+
+% Source block 169
+\subsection{窄峰宽度与搜索尺度}\label{sec:4.1}
+
+% Source block 170
+表\ref{tab:3.7}中，距真实位置4.523 m的格点评分低于远处错误峰，而真实位置附近的局部解误差为0.803 m。式（\ref{eq:2.17}）描述峰顶附近的二阶变化，但峰顶和曲率在搜索前都未知，尚不能直接据此确定网格间隔。
+
+% Source block 171
+式（\ref{eq:cell-upper}）已给出响应扰动下的区域评分上界，但现有比较中没有产生剪枝。当投影响应范数较小或区域内相位变化较大时，方向约束容易退化为残余能量上界。当前问题是如何利用中心评分、响应导数和残余收紧这一约束，同时控制计算代价。等效Fisher信息描述局部统计精度，评分Hessian描述单次观测的峰形；二者能否在可检验的条件下用于选择搜索尺度，仍需明确。
+
+% Source block 172
+\subsection{候选选择与计算分配}\label{sec:4.2}
+
+% Source block 173
+327条弱源失败中，292条在原强源估计下已有评分更高的真实位置。方法D在新布局上获得较多恢复，但平均耗时约为B的3.87倍。固定样本中的上界优先细分又弱于简单的错位网格，说明较复杂的区域规则未必能以相近计算量保留更多有效候选。需要判断中心评分较低时，哪些观测信息足以支持继续细分，以及少量补点评分、残余相关性或曲率估计能否减少全区域加密的开销。
+
+% Source block 174
+时延多假设可作为候选生成的一种选择。相对于参考站1，位置满足
+% Source block 175
+\begin{equation}\label{eq:4.1}
+\Delta\tau_{\ell1}(\mathbf{p}) = \frac{\|\mathbf{p}-\mathbf{r}_\ell\|-\|\mathbf{p}-\mathbf{r}_1\|}{c}.
+\end{equation}
+
+% Source block 176
+可以保留多个相关峰，以几何一致性生成位置候选，再用联合残差筛选\cite{ref01,ref02,ref03}。尚需讨论的是：在原始混合观测还是强源投影后的残余上提取时延更合适，何时施加跨站约束才能减少错误组合而不提前丢失弱源？这类方法的相关计算、假设组合和信号域验证均应计入耗时。
+
+% Source block 177
+同一组选例中，10 m网格将候选数从5增至32未增加恢复数，而5 m网格保留5个候选恢复了更多记录。因此，候选保留数与采样密度需要分别考虑。新的选择规则应保留均匀和错位网格作为参照，在相同连续优化配置下比较恢复能力与耗时，并在完整求解中核算总时间。
+
+% Source block 178
+\Needspace{.23\textheight}
+\subsection{强源精度与联合位置更新}\label{sec:4.3}
+
+% Source block 179
+条件评分分析中，22条记录在替换真实强源位置后恢复了真弱源的评分优势，其中1条原强源误差小于20 m。式（\ref{eq:2.16}）给出小误差下的残留近似，但实际求解时真实误差未知，定位成功阈值也不能作为停止精修的依据。方法D剩余失败集中于同一布局，尚需判断逐源更新是否受到耦合局部解的限制。
+
+% Source block 180
+能否根据估计位置附近的曲率、响应导数和残余，判断继续精修强源与重新搜索弱源各自可能带来的改善？交替更新一次只改变一个位置，可能反复返回同一局部解；何时应保留多个强源位置假设，或联合更新四个位置坐标，仍需研究。四站系统中，扩大抑制子空间还会减少保留维数\cite{ref07}，因此比较这些做法时，需要同时考察强源残留、弱源信息损失和新增计算量。
+
+% Source block 182
+\clearpage
+\end{document}

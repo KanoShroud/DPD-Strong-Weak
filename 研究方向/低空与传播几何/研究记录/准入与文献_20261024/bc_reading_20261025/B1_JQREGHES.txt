@@ -1,0 +1,1733 @@
+
+=== PDF PAGE 1 ===
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 70, 2022
+5265
+Location Estimates From Channel State Information
+via Binary Programming
+Muhammed Tahsin Rahman
+, Graduate Student Member, IEEE, and Shahrokh Valaee
+, Fellow, IEEE
+Abstract—Recent years have witnessed a marked increase in the
+efﬁcacy and speed to solution of binary program solvers. Leverag-
+ingthesedevelopments,weproposeconvertingthesparsemodelling
+problem to a binary program, and we derive the conditions under
+which such a conversion yields the optimal signal support. Further-
+more, we derive an upper bound on this condition, which we can
+minimize by designing a structured tight frame as the dictionary.
+We apply these theoretical insights to binary optimization of angle
+of arrival and time of ﬂight estimation (BOAT) using channel
+state information (CSI), with the goal of localizing a transmitter
+in an indoor multipath-rich environment. Finally, we show how
+a covariance array processing approach, together with the novel
+binary programming paradigm, results in a system that outper-
+forms two state-of-the-art solutions. Our claims are substantiated
+using both simulated data and experimental data collected using
+“off-the-shelf” WiFi IEEE 802.11ac routers.
+Index Terms—Binary program, sparsity, compressed sensing,
+angle of arrival estimation, channel state information.
+I. INTRODUCTION
+T
+HE inverse problem may be stated as follows: a sensor
+system reports an observation, which is modelled as the
+weighted combination of several primary “atoms”. The goal is to
+disentangle the atoms that formed the observation, a task that is
+increasingly difﬁcult when the number of observations is small.
+Notice that the weights by which to combine the atoms tend
+to act like nuisance parameters; they make the problem more
+difﬁcult, but they can easily be determined once the atoms
+themselves are found. This fact motivates our entire approach.
+In an under-determined linear system, the atoms are vectors
+and the dictionary of atoms is a collection of these vectors
+stacked column-wise. Our focus will be on such systems that
+exhibit a degree of sparsity in the number of constituent vectors.
+It has been shown that these vectors can be recovered optimally
+under the compressed sensing (CS) framework. The best known
+measure for quantifying such a notion of sparsity is the ℓ0-norm,
+which counts the number of non-zero components. Minimizing
+this quantity is a form of regularization that penalizes non-
+parsimonious estimates.
+Manuscript received 17 February 2022; revised 17 July 2022 and 23 Septem-
+ber 2022; accepted 13 October 2022. Date of publication 19 October 2022;
+date of current version 14 November 2022. The associate editor coordinating
+the review of this manuscript and approving it for publication was Dr. Chiara
+Ravazzi. This work was supported by Fujitsu Consulting Canada Inc. (Corre-
+sponding author: Muhammed Tahsin Rahman.)
+The authors are with the Department of Electrical and Computer Engineering,
+University of Toronto, Toronto, ON M5S, Canada (e-mail: mt.rahman@mail.
+utoronto.ca; valaee@ece.utoronto.ca).
+Digital Object Identiﬁer 10.1109/TSP.2022.3215651
+However, such an optimization problem is combinatorial in
+nature and a wealth of literature has focused on relaxing the
+ℓ0-norm using ℓp-norm regularization (0 < p ≤1). The most
+interesting case, termed Basis Pursuit (BP), is when p = 1 as
+the optimization problem becomes convex. Contrary to what we
+shall develop, BP puts greater emphasis on the weights than on
+explicitly selecting the constituent vectors.
+We will discuss a particularly promising application of the
+CS framework, namely integrated sensing and communications
+(ISAC). In this paper, we consider localizing a transmitter using
+channel state information (CSI), which is a signal that is essential
+for recovering symbols in a multipath-rich environment. In an
+orthogonal frequency division multiplexing (OFDM) system,
+CSI represents the complex signal attenuation between each pair
+of transmit and receive antennas at each subcarrier frequency.
+The phase shifts of CSI components can be parametrized by
+linear combinations of angle of arrival (AoA) and time of ﬂight
+(ToF) steering vectors. To recover the AoA and ToF from this
+parametrization, one needs to solve an inverse problem.
+A. Contributions and Organization
+In this paper, we fully develop preliminary ideas that we ex-
+plored in a previous conference paper [1]. A central contribution
+of this work is to show a counter-intuitive, but highly effective,
+system: we further constrain the inverse sparse modelling prob-
+lem to leverage the efﬁcacy of recent solvers. Instead of relaxing
+the problem and exposing the method to resulting inaccuracies,
+we show that an appropriate constraint will guarantee an optimal
+solution.
+In particular, (i) we give a complete exposition of the con-
+ditions under which a binary program will recover the signal
+support of the sparsity-regularized inverse problem; (ii) we
+design a covariance array processing system that satisﬁes the
+derived constraints, allowing for binary optimization of AoA
+and ToF (BOAT) parameters; (iii) we study system performance
+in a variety of simulated scenarios and using real experimental
+data collected from commercially available routers.
+We close this section by formally stating the problem. Then,
+Section II traces the development of CS and binary programming
+with a brief mention of how recent works have used CSI for
+localization. Section III derives conditions on the signal and
+the dictionary such that binary programming for the inverse
+problem is optimal. These insights guide the development of a
+localization system based on CSI data. The focus of Section IV
+is the dictionary’s spectrum and structure, the cost function,
+1053-587X © 2022 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.
+See https://www.ieee.org/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:15 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 2 ===
+5266
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 70, 2022
+and different approaches to solving the binary program. Finally,
+in Section V we study the performance of this system under
+different signal to noise ratios (SNR) and with varying number
+of observations. We also test the approach using experimental
+data collected in a typical indoor environment.
+B. Notation
+Uppercase boldface A represents matrices, and lowercase
+boldface a represents column vectors; superscripts T, ∗, H,
+and † represent transpose, conjugate, transpose conjugate, and
+pseudo-inverse operations, respectively; italicized A represents
+a set; regular typeface A or a represents a scalar. ℜ{·} is for the
+real component and ℑ{·} for the imaginary component of the
+argument; ∥· ∥p is the ℓp-norm, ∥· ∥F is the Frobenius norm,
+and | · | is for the cardinality of the argument if it is a set and the
+magnitude otherwise; 1[ · ] denotes the indicator function that
+returns 0 when its argument is false and 1 when it is true.
+C. Problem Formulation
+Let the signal of interest be x ∈RN. We aim to solve
+ˇx = arg min
+x
+∥y −Φx∥2
+2
+s.t. ∥x∥0 ≤L,
+(1)
+where ∥· ∥0 is the ℓ0 pseudo-norm, y ∈CM is the observation,
+L ∈N,andΦ = [φ1, . . ., φN]isthesteeringmatrixthatconsists
+of steering vectors φn ∈CM ∀n ∈{1, . . ., N} as its columns.
+The matrix Φ is the dictionary, and throughout this commu-
+nication we assert that the dictionary is ‘overcomplete,’ with
+N > M, and that the dictionary is full rank. Each of the steering
+vectors may themselves be parametrized on some quantity of
+interest.
+We seek the conditions under which converting (1) to a
+binary program recovers the support of ˇx and hence the pa-
+rameters of interest. If we replace x by z ∈{0, 1}N, with zn =
+1[xn̸ = 0] ∀n, then ∥x∥0 = ∥z∥0. However, the cost function
+∥y −Φx∥2
+2 and ∥y −Φz∥2
+2 will not be equal in general, and
+optimizing over the different domains may lead to different
+solutions.
+If we can show that ˇzn = 1[ˇxn̸ = 0] is the result of solving
+ˇz = arg min
+z
+∥y −Φz∥2
+2
+s.t. ∥z∥0 ≤L and
+z ∈{0, 1}N,
+(2)
+thenwehaveeffectivelyrecoveredthesteeringvectorsandhence
+the parameters that they are derived from. Formulation (2) is the
+binary equivalent of (1) when the support sets of ˇx and ˇz are
+the same.
+II. RELATED WORK
+To select from the inﬁnite solutions to an underdetermined
+system requires knowledge from outside the system. It has been
+observed that many signals display sparsity in some domain,
+and incorporating this notion of sparsity has been an active area
+of research for the past few decades. Early on, the Tikhonov
+regularizer [2] was developed that preferred solutions with a
+sparse energy proﬁle or those with better smoothness properties.
+This technique and subsequent developments proved useful in
+recovering images from noise [3], solving integral equations [4],
+and in support vector machines [5]. It has permeated even deeper
+into current machine learning practices in the form of weight
+decay regularization. On the other hand, our understanding of
+compression algorithms suggests a different form of sparsity,
+one that exists in the signal support rather than the power. Some
+researches, such as Donoho, Candès, Tao, and Romberg [6], [7],
+further explored this deceptively simple concept, and they have
+shown that the problem is quite intricate and nuanced. Named
+compressed sensing (CS), it is the focus of our work, and further
+references to sparsity will be in this context.
+After Chen, Donoho, and Saunders [8] formulated the basis
+pursuit problem, replacing the ℓ0-norm with the ℓ1-norm in
+(1), the restricted isometry property (RIP) surfaced as a key
+property of the dictionary Φ that ensured exact recovery [9]. By
+considering the sparsity of x and the isometry constant of Φ,
+one can determine whether the original problem or its convex
+relaxation will result in exact signal recovery. A great deal
+of effort has gone into constructing such dictionaries, whether
+deterministically [10] or otherwise [11]. Deﬁnitions such as the
+matrix spark and coherence are naturally related to the RIP and
+serve as windows to how and why CS works. In this paper,
+we will attempt headway to an additional constraint on x under
+which the binary program of (2) will also result in exact recovery.
+It is worth noting that the sparse modelling paradigm can be
+rendered “off-grid” [12]. The key is to select entities from some
+sparse representation, whether that representation is over canon-
+ical basis vectors, unit-norm rank one matrices [13], atoms [14],
+etc. Based on the formulation, different characterizations and
+recovery solutions emerge.
+Far from being relegated to the annals of theory, CS has seen
+widespread use in a range of applications. One of the earliest is
+in magnetic resonance image (MRI) reconstruction, which has
+now been adopted in FDA-approved imaging protocols [15].
+Another is in outlier detection, where a subset of the data
+that best conforms to a pre-existing model is selected from
+the entire dataset [16]. Perhaps the most striking application
+is its appearance as dropout regularization and pruning in neural
+networks [17]; in a similar vein to what we are proposing,
+Salehinejad and Valaee [18] implemented a binary program to
+quantify a notion of network energy and select the best nodes or
+edges to drop based on the change in network energy.
+Directly relevant to our work is the application of CS to
+the age-old problem of source localization [8]. Spaced appro-
+priately, an array of receiver elements capture a narrowband
+signal generated by a source of unknown location. Methods
+for recovering the signal’s AoA abound in the literature, but
+one of the foundational works is the MUSIC algorithm [19],
+which is a subspace-based method that requires computing
+the covariance matrix of the data. AoA estimation in the CS
+paradigm [20] works on the observations themselves rather
+than the covariance matrix, circumventing the need for a large
+number of observations. To deal with wideband CSI data, the
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:15 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 3 ===
+RAHMAN AND VALAEE: LOCATION ESTIMATES FROM CHANNEL STATE INFORMATION VIA BINARY PROGRAMMING
+5267
+technique called SpotFi [21] extended the MUSIC algorithm
+while RoArray [22] extended the CS-based algorithm. These
+are two state-of-the-art works in CSI-based localization and we
+shall use them as benchmarks by which to study the performance
+of binary programming for AoA and ToF estimation using CSI
+data.
+It is worth recounting that most current applications of
+sparsity-based signal recovery rely on the ℓ1-norm, which
+serves to relax the ℓ0-norm. This is necessary for computational
+tractability. Bourguignon et al. [23] have pointedly revisited this
+taken-for-granted fact, and they showed that a regularized un-
+derdetermined system can be cast as a multi object optimization
+problem. To this end, they proposed a mixed-integer quadratic
+program (MIQP). Two years later the MIQP computational
+efﬁciency was improved [24] using the alternating direction
+method instead of the branch-and-cut method as implemented
+in the commercial CPLEX solver [25].
+Indeed, it was previously observed by Blumensath and
+Davies [26], and later by Dong and Zhu [27], that sparse signal
+estimation was more accurate when the ℓ0-norm was considered
+directly. They approximated the solution to the ℓ0-norm using
+a suboptimal approach called iterative hard thresholding (ITH).
+Karahano˘glu, Erdo˘gan, and Birbil [28] made use of this fact
+to develop a mixed-integer linear program (MILP) for sparse
+signal recovery; however, their formulation introduced auxiliary
+variables and needed apriori knowledge of the range of signal
+amplitudes. Mazumder and Radchenko [29] studied the Discrete
+Dantzig Selector as another MILP formulation without these
+drawbacks. They replaced the ℓ2-norm data ﬁdelity constraint
+with the ℓ∞-norm constraint to handle problems with upto
+10,000 variables, and they concluded that the improved com-
+putational efﬁciency and solution accuracy owed to the maturity
+of MILP solvers over MIQP solvers.
+This is our point of departure, where we seek instead a binary
+programming framework for sparse signal recovery. An advan-
+tage of such a framework is that it allows one to conceptualize the
+problem in terms of the well known Ising model [30]. The Ising
+model is a quadratic energy-based model for binary variables
+and emerges naturally in many physical systems. Recent years
+have witnessed a reinvigoration of interest in solving binary
+programs in general, and the Ising model in particular: extending
+the oft-used notion of simulated annealing [31] is the quantum
+annealer [32], which uses quantum ﬂuctuation-based computa-
+tions to tackle the Ising energy Hamiltonian, with the speculation
+of a signiﬁcant speed up. This quantum speed up has yet to be
+conclusively demonstrated [33], [34], and other technologies are
+surfacing such as the Digital Annealer (DA) [35], which uses
+a parallel architecture to implement the Markov Chain Monte
+Carlo (MCMC) search algorithm. With such solutions increas-
+ingly in the mainstream, converting (1) to a binary program
+is bound to yield more accurate and computationally efﬁcient
+answers.
+III. RECOVERY CONDITIONS
+Recall that the spark, denoted spark(·), of a matrix is the
+smallest number of linearly dependant columns of the matrix.
+Lemma 1 (Uniqueness [36]): A solution ˇx to y = Φx
+with ∥ˇx∥0 < spark(Φ)/2 will be the unique sparsest solution.
+Any other of the inﬁnite set of solutions must have ∥x∥0 ≥
+spark(Φ)/2.
+Inthispaper,wewillassumethatthereexistsauniquelysparse
+solution ˇx, with ∥ˇx∥0 = L < spark(Φ)/2. We may estimate L
+using minimum descriptor length (MDL), Akaike information
+criteria(AIC),andothersuchmethods[37].Therefore,itsufﬁces
+to restrict the discussion to sparse vectors with this known level
+of sparsity.
+Indeed, if Lemma 1 is not satisﬁed, then there is no unique so-
+lution to the underdetermined system Φx that has a well deﬁned
+sparsity proﬁle. In other words, we cannot distinguish between
+the inﬁnitely many solutions. Computing the matrix spark is
+itself combinatorial, and one usually relies on bounds through
+mutual coherence. Nevertheless, in Section IV, we shall seek
+to increase the number of rows M of the dictionary through a
+vectorized covariance approach so that the sparsity requirement
+may be met more easily.
+We detail our exposition based on the representation prob-
+lem y = Φx. To our knowledge, one of the ﬁrst to extend
+sparse modelling theory to account for noisy observations y =
+Φx + n is the work by Donoho, Elad, and Temlyakov [38].
+Extending the notion of uniqueness is that of stability; i.e.
+given bounded noise, deﬁne the region around the ground truth
+that admits feasible solutions rather than a single unique one.
+We shall empirically study the effects of noisy observations in
+localization, but the theoretical underpinnings are suggested as
+future work.
+Note that the binary formulation does not present an inﬁnite
+set of solutions, since the binary representation is a ﬁnite (but
+potentially large) combination of 0 s and 1 s. The goal is to
+show that ˇz is the solution to (2). In general, however, we cannot
+guarantee that (1) and (2) have the same support if x ∈RN.
+Lemma 2: Let ˇx be the unique sparse solution to y = Φx
+and let ˇz be the binary representation of ˇx. Then, ∀z′ ∈{0, 1}N
+such that ∥z′∥0 = L and z′̸ = ˇz, we have
+∥ˇx −ˇz∥2
+2 = ∥ˇx −z′∥2
+2 −2
+
+i∈Nˇx\Nz′
+ˇxi,
+where Nˇx and Nz′ are the set of indices where ˇx and z′ are
+non-zero, respectively.
+Proof: See Appendix A.
+□
+Theorem 1: For binary equivalence over the set of orthonor-
+mal dictionaries, it is necessary and sufﬁcient that the signal
+domain be ˇx ∈RN
+≥0.
+Proof: Under an orthonormal dictionary, let ˇx be the unique
+sparse solution to y = Φx. Then, the cost function for z′ ∈
+{0, 1}N may be written as
+∥y −Φz′∥2
+2 = ∥Φ(ˇx −z′)∥2
+2 = (ˇx −z′)HΦHΦ(ˇx −z′)
+= ∥ˇx −z′∥2
+2,
+since ΦHΦ is the identity matrix. A similar result holds for
+∥y −Φˇz∥2
+2 = ∥ˇx −ˇz∥2
+2. Using this relationship, and applying
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:15 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 4 ===
+5268
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 70, 2022
+Fig. 1.
+Example of a unit-norm equiangular frame in R2.
+Lemma 2, yields
+∥y −Φˇz∥2
+2 = ∥y −Φz′∥2
+2 −2
+
+i∈Nˇx\Nz′
+ˇxi.
+(3)
+Assume ∃ˇxi < 0 for some indices i ∈I ⊆Nˇx. We may
+select z′
+i = 0 ∀i ∈I, so that the right most term of (3) is posi-
+tive. Therefore, ∃z′ : ∥y −Φˇz∥2
+2 > ∥y −Φz′∥2
+2, so ˇx ∈RN
+≥0
+is necessary by contradiction.
+On the other hand, if ˇxi > 0 ∀i ∈Nˇx then ∥y −Φˇz∥2
+2 <
+∥y −Φz′∥2
+2 ∀z′̸ = ˇz, so ˇx ∈RN
+≥0 is also sufﬁcient.
+□
+To build intuition regarding overcomplete dictionaries in gen-
+eral, consider the 3-vector frame Φ = [φ1, φ2, φ3], such as that
+shown in Fig. 1. Let the observation
+y =
+
+0.866
+−0.866
+0
+−0.5
+−0.5
+1
+ ⎡
+⎢⎣
+−1
+0
+0
+⎤
+⎥⎦.
+The binary equivalent solution is ˇz = [1, 0, 0]T, which re-
+sults in an error ∥2φ1∥2
+2 = 4. However, an alternate vector
+z′ = [0, 1, 0]T has error ∥−φ1 −φ2∥2
+2 = 1. Therefore, ∥y −
+Φˇz∥2
+2 > ∥y −Φz′∥2
+2 and the binary representation of ˇx is not
+the binary equivalent one.
+Deﬁne the equivalence gap for some selection z′ as
+χ(z′ | Φ, ˇx) = ∥y −Φˇz∥2
+2 −∥y −Φz′∥2
+2.
+(4)
+Note from Theorem 1 that maxz′{χ(z′ | Φ, ˇx)} = −2 min+(ˇx)
+for an orthonormal dictionary with ˇx ∈RN
+≥0, where min+(·) is
+the minimum positive value of the argument. However, note
+that there are additional terms when considering an overcom-
+plete dictionary, since the steering vectors are not orthonormal.
+We shall return to the construction of appropriate dictionaries
+next, but assuming ∃Φ : χ(z′ | Φ, ˇx) < 0 ∀z′̸ = ˇz the follow-
+ing theorem holds.
+Theorem 2: ˇx ∈RN
+≥0 is a necessary condition over the set of
+overcomplete dictionaries that achieve binary equivalence.
+Proof: We proceed similar to Theorem 1, except that ΦHΦ
+is no longer the identity matrix. Under some selection z′,
+∥y −Φz′∥2
+2 = ∥ˇx −z′∥2
+2
++ 2
+ 
+i,j∈Nˇx∪Nz′
+j>i
+(ˇxi −z′
+i)(ˇxj −z′
+j)ℜ{φH
+i φj}.
+The cross-terms in the expression above will also appear in ∥y −
+Φˇz∥2
+2, except that the indices in the summation will be i, j ∈
+Nˇx, j > i.
+Let |Nz′\Nˇx| = 1. Without loss of generality, we may set
+Nˇx\Nz′ = {1} and an alternate selection Nz′\Nˇx = {L + 1}.
+We are considering a single shift of indices, but the exposition
+may be extended for general 1 < |Nz′\Nˇx| ≤L by an induction
+argument. From (4) and Lemma 2,
+1
+2χ(z′ | Φ, ˇx)
+=
+L
+
+i=1
+L
+
+i>i
+(ˇxi −1)(ˇxi −1)ℜ{φH
+i φi}
+−
+L+1
+
+i=1
+L+1
+
+i>i
+(ˇxi −z′
+i)(ˇxi −z′
+i)ℜ{φH
+i φi} −ˇx1
+=
+L
+
+i=2
+(ˇx1−1)(ˇxi−1)ℜ{φH
+1 φi}−
+L
+
+i=2
+(ˇx1)(ˇxi −1)ℜ{φH
+1 φi}
++ ˇx1ℜ{φH
+1 φL+1} +
+L
+
+i=2
+(ˇxi −1)ℜ{φH
+i φL+1} −ˇx1
+=
+L
+
+i=2
+(ˇxi −1)
+
+ℜ{φH
+i φL+1} −ℜ{φH
+1 φi}
+
++ ˇx1
+
+ℜ{φH
+1 φL+1} −1
+
+.
+Now, let ˇx+
+i > 0 ∀i ∈Nˇx and ˇx−
+i < 0 when i = 1 and ˇx−
+i =
+ˇx+
+i otherwise. Then,
+χ(z′ | Φ, ˇx+) −χ(z′ | Φ, ˇx−)
+= 2(|ˇx+
+1 | + |ˇx−
+1 |)
+
+ℜ{φH
+1 φL+1} −1
+
+.
+Since we are assuming a unique solution from Lemma 1,
+the
+mutual
+coherence
+|φH
+i φj| < 1/(2L −1) < 1, i̸ = j.
+Therefore, ℜ{φH
+1 φL+1} −1 ≤|φH
+1 φL+1| −1 < 0, and so
+χ(z′ | Φ, ˇx+) < χ(z′ | Φ, ˇx−).
+It follows that if ˇx has any negative components such that
+χ(z′ | Φ, ˇx−) < 0, then the corresponding ˇx with those com-
+ponents being positive must also have χ(z′ | Φ, ˇx+) < 0, but
+the converse is not true. We conclude that ˇx+ is necessary for
+binaryequivalenceoverthesetofovercompletedictionarieswith
+χ(z′ | Φ, ˇx) < 0.
+□
+While this necessary condition may seem overly restrictive,
+one may set the dictionary as [Φ, −Φ] to handle cases where
+the elements of x might have negative sign. The disadvantage
+of such an approach is that it doubles the number of decision
+variables N. We shall present a different approach in Section IV,
+one where x represents the signal power and not the amplitude.
+For ˇx ∈RN
+≥0, a corollary to Lemma 2 and Theorem 1 is
+∥ˇx −z′∥2
+2 ≥∥ˇx −ˇz∥2
+2 + 2 min+(ˇx).
+(5)
+This lower bound suggests that the ﬁdelity of the best alternate
+solution depends not only on how “close” the signal components
+are to 1 but also on the signal’s minimum component. We will
+ﬁnd the following characterization of a signal, which we term a
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:15 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 5 ===
+RAHMAN AND VALAEE: LOCATION ESTIMATES FROM CHANNEL STATE INFORMATION VIA BINARY PROGRAMMING
+5269
+collation parameter, useful
+γ(ˇx) = min+(ˇx)
+∥ˇx −ˇz∥2
+2
+.
+(6)
+Recall that the condition number, denoted cond(·), of a matrix
+is the ratio of the maximum eigenvalue to the minimum eigen-
+value of the matrix. Also, we mention the inclusion principle,
+which follows from the Courant-Fischer theorem.
+Lemma 3 (Inclusion Principle [39]): Let A be an N-by-N
+Hermitian matrix, let r be an integer with 1 < r < N, and let
+Ar denote any r-by-r principal submatrix of A (obtained by
+deleting N −r rows and the corresponding columns from A).
+For each integer k such that 1 < k < r we have
+λk(A) ≤λk(Ar) ≤λk+N−r(A),
+where λk(A) is the kth eigenvalue of A sorted in non-decreasing
+order.
+Theorem 3: For ∥ˇx∥0 = L, denote G2L as the set of all
+2L-by-2L principal submatrices of ΦHΦ, with Φ ∈CM×N
+and N > M. For some collation parameter γ(ˇx) ∈R>0, binary
+equivalence is when
+max
+G∈G2L cond(G) < 1 + 2γ(ˇx).
+Proof: The main idea of the proof is to show that
+χ(z′ | Φ, ˇx) < 0 is achieved when Φ has a certain spectral
+property. Since y = Φˇx, recall that the cost function in (2) may
+be expanded using its quadratic form
+∥Φˇx −Φz′∥2
+2 = ∥Φ(ˇx −z′)∥2
+2 = (ˇx −z′)TΦHΦ(ˇx −z′).
+We denote (ˇx −z′)s as the vector with only the non-zero
+entries in ˇx −z′. The zero components of ˇx −z′ do not con-
+tribute to the quadratic form, and so the corresponding rows
+and columns may be eliminated from ΦHΦ. Based on this
+observation, the principal submatrix G of ΦHΦ will preserve
+(ˇx −z′)TΦHΦ(ˇx −z′) = (ˇx −z′)T
+s G(ˇx −z′)s.
+The Rayleigh-Ritz theorem [39] may be used to bound the above
+expression using the minimum eigenvalue ¯λmin of G:
+¯λmin∥ˇx −z′∥2
+2 ≤(ˇx −z′)T
+s G(ˇx −z′)s.
+(7)
+Similar to the above, denote ˇ
+G as the principle submatrix of
+ΦHΦ that corresponds to the non-zero entries in ˇx −ˇz. We may
+boundthequadraticformaboveusingthelargesteigenvalue ˇλmax
+of ˇ
+G by
+(ˇx −ˇz)T
+s ˇ
+G(ˇx −ˇz)s ≤ˇλmax∥ˇx −ˇz∥2
+2.
+(8)
+We require ∥Φ(ˇx −ˇz)∥2
+2 < ∥Φ(ˇx −z′)∥2
+2 ∀z′̸ = ˇz. There-
+fore, from the two bounds (7) and (8), it follows that
+ˇλmax∥ˇx −ˇz∥2
+2 < ¯λmin∥ˇx −z′∥2
+2
+=⇒
+ˇλmax
+¯λmin
+< ∥ˇx −z′∥2
+2
+∥ˇx −ˇz∥2
+2
+.
+(9)
+Observe that ˇ
+G is itself a principal submatrix of G. One may
+visualize this by seeing ˇ
+G as the matrix formed by deleting the
+rows and columns of G that correspond to Nz′\Nˇx. With this
+in mind, the inclusion principle, mentioned above in Lemma 3,
+holds.
+¯λmin ≤ˇλmin ≤ˇλmax ≤¯λmax.
+(10)
+Therefore, we may modify (9) as
+¯λmax
+¯λmin
+= cond(G) < ∥ˇx −z′∥2
+2
+∥ˇx −ˇz∥2
+2
+,
+and substitute the result from (5) and (6) to give,
+cond(G) < 1 + 2γ(ˇx).
+From the triangle inequality [40],
+∥ˇx −z′∥0 ≤∥ˇx∥0 + ∥z′∥0 = 2L.
+The above inequality states that the number of non-zero entries
+in ˇx −z′ cannot exceed 2L. As a direct consequence of (10),
+we have cond(G ∈GK) ≤cond(G ∈G2L) for K ≤2L. It suf-
+ﬁces to bound every 2L-by-2L submatrix of ΦHΦ.
+□
+Knowing the collation parameter γ(ˇx) requires knowledge
+of the signal itself. In the best case, the signal ˇx ∈{0, 1}N;
+clearly, in this case the binary formulation is exactly the l0-norm
+formulation. This is reﬂected in Theorem 3 where the condition
+number of every 2L-by-2L principle submatrix can be arbitrarily
+large. However, in the worse case scenario, we may assume that
+γ(ˇx)issmallandthenumberofsignalsL = ⌈spark(Φ)/2 −1⌉,
+and so our objective becomes to minimize the condition number
+of all principal 2L-by-2L submatrices of ΦHΦ. For condition
+numbers close to 1, we will thus guarantee equivalence for even
+small amplitude signals.
+Even so, constructing such a dictionary is infeasible for non-
+trivial problems. Theorem 3, similar to most results in sparse
+modelling, is a worst-case bound and presents a combinatorial
+design problem. Therefore, for tractability, we present a tight
+upper bound on the maximum condition number of G ∈G2L.
+Theorem 4: Denote G ∈G2L as per the statement of Theo-
+rem 3 and let q = λ1(G)/λN−M(ΦHΦ), where the eigenvalues
+are ordered as per Lemma 3. Then,
+max
+G∈G2L cond(G) ≤cond(ΦΦH)
+q
+.
+(11)
+Proof: The dictionary Φ is overcomplete and full rank, with
+rank(Φ) = M. Therefore, the M eigenvalues of ΦΦH equal the
+non-zero eigenvalues of ΦHΦ. The condition number of ΦΦH
+is
+cond(ΦΦH) =
+λN(ΦHΦ)
+λN−M(ΦHΦ)
+=⇒λN(ΦHΦ) = cond(ΦΦH)λN−M(ΦHΦ).
+(12)
+From Lemma 3, and because G is a 2L-by-2L principal
+submatrix of ΦHΦ, λ2L(G) ≤λN(ΦHΦ) and we have
+cond(G) = λ2L(G)
+λ1(G) ≤cond(ΦΦH)λN−M(ΦHΦ)
+λ1(G)
+.
+The matrix G is guaranteed to be full rank since we are assum-
+ing a unique solution as per Lemma 1, with 2L < spark(Φ).
+Therefore, the smallest eigenvalue of G satisﬁes, λ1(G) > 0.
+Setting q = λ1(G)/λN−M(ΦHΦ) completes the proof.
+□
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:15 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 6 ===
+5270
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 70, 2022
+Ideally, we would like to design Φ so as to minimize the
+maximum eigenvalue of ΦHΦ, given by λN(ΦHΦ). This is a
+difﬁcult problem in general, and instead we shall consider the
+design of a tight frame [41] such that cond(ΦΦH) = 1. In this
+case, from Theorem 4,
+max
+G∈G2L cond(G) ≤1
+q , q ∈(0, 1].
+(13)
+To see this, apply the inclusion principle so that
+q =
+λ1(G)
+λN−M(ΦHΦ) ≤λN−2(L−1)(ΦHΦ)
+λN−M(ΦHΦ)
+.
+If cond(ΦΦH) = 1, then λN−2(L−1)(ΦHΦ) = λN−M(ΦHΦ)
+and q ∈(0, 1]. In Section IV-B we shall present the alternating
+projections algorithm [42] and empirically show how cond(G)
+reduces as cond(ΦΦH) →1.
+IV. SYSTEM DESIGN
+We now focus on using OFDM-based CSI data. We will
+restrict our discussion to the WiFi IEEE 802.11ac standard,
+where a multi antenna receiver operates over several narrowband
+frequencies, termed subcarriers.
+Across a uniform linear antenna array (ULA) with Na an-
+tennas, the phase of a signal incoming at an angle of θ can
+be modelled using the steering vector α(θ) = [αi(θ)] ∈CNa
+containing elements
+αi(θ) = exp(−jkd(i −1) sin(θ)),
+(14)
+where k is the wave number and d is the antenna spacing. The
+overcomplete representation over a grid of Nθ possible AoA is
+denoted as A = [αi(θj)] ∈CNa×Nθ.
+Across Nf subcarriers spaced at fδ, a signal incoming with a
+ToF τ can be modelled using the steering vector β = [βi(τ)] ∈
+CNf containing elements
+βi(τ) = exp(−j2πfδ(i −1)τ).
+(15)
+Similar to the AoA grid, the overcomplete representation for a
+grid of Nτ possible ToF is B = [βi(τj)] ∈CNf ×Nτ .
+For a point source emitter at an AoA-ToF tuple (θ, τ), the
+observed CSI vector can be modelled by the Kronecker product,
+denoted by ⊗, of (14) and (15). The resulting dictionary over
+the set L of (θ, τ) grid points is given by
+Φ = A ⊗B ∈CNaNf ×NθNτ .
+(16)
+Each vector of the dictionary Φ is φ(θ, τ) = α(θ) ⊗β(τ).
+Finally, the number of vectors in Φ corresponds to the number
+of grid points |L| = N = NθNτ.
+An observation at the receiver y = Φx is in the form man-
+dated by (1). Solving this would lead to the true signal emitter
+locations Ls. As assumed in Theorem 3, Ls ⊂L, such that
+|Ls| = L. The points in Ls simply correspond to the non-zero
+components of x. In [22], the authors apply the basis pursuit al-
+gorithm to this formulation. In our case, converting this problem
+to a binary program (2) presents two challenges: (i) under this
+model, x refers to the signal amplitudes, which are complex and
+do not satisfy Theorem 1; and (ii) the dictionary created from
+an arbitrary set L will not satisfy Theorem 4, in general.
+A. Non-Negative Signal
+Instead of raw CSI values, let us examine the covariance
+matrix of the observation,
+E
+
+yyH
+= Φ E
+
+xxH
+ΦH,
+where E[·] refers to the expectation operator. If the signal emit-
+ters are non-coherent, and E[xxH] is diagonal, then we may vec-
+torize the above expression: by the Khatri-Rao relationship [43],
+[44]
+vec
+
+E
+
+yyH
+= (Φ∗⊙Φ) diag
+
+E
+
+xxH
+.
+(17)
+The Khatri-Rao product of two matrices A ⊙B = [ai] ⊙
+[bi] = [ai ⊗bi]. If E[xxH] is not diagonal, then we may diago-
+nalize it using a suitable smoothing procedure, such as the one
+presented in [21]. Note that xp = diag(E[xxH]) is the vector of
+signal powers at each of the N grid points in L, and so xp ∈RN
+≥0.
+Let yc be the vectorized covariance matrix. Then, (17) may
+be written as
+yc = (Φ∗⊙Φ) xp.
+(18)
+While this is now in the form of (1), Φ∗⊙Φ is rank deﬁcient.
+Theorem 5: For a system with Na antennas and Nf subcar-
+riers, and for Φ deﬁned according to (16), rank(Φ∗⊙Φ) =
+(2Na −1)(2Nf −1).
+Proof: See Appendix B.
+□
+This result extends the works of Ma et. al. [45] and
+Heet.al.[46]tocovariancearrayprocessingfortwodimensional
+sampling, over both space and frequency. Indeed, the rank of a
+dictionary is indicative of the number of resolvable signals. Pal
+and Vidyanathan [47] showed that, for sampling over a single
+dimension, covariance array processing is able to resolve signals
+on the order of the squared of that resolvable over raw measure-
+ment processing. Jiang et. al. [48] showed that, for sampling
+over multiple dimensions, raw measurement processing is able
+to resolve signals on the order of the product of the number
+of samples taken from each dimension. Certainly, bridging the
+works of [47] and [48] may provide a more general theory of
+signal identiﬁability under multi-dimensional covariance array
+processing.
+To satisfy our assumption of a full rank dictionary, we can
+multiply (18) on the left by P , a matrix with dimension (2Na −
+1)(2Nf −1)-by-N 2
+aN 2
+f . This matrix is similar to that in [45],
+but the difference lies in the fact that we have generalized the
+formulation to wideband signals on multiple subcarriers. Note
+that P is a selection matrix that eliminates duplicate rows in
+(Φ∗⊙Φ), thereby resulting in a full rank dictionary. The pseudo
+code for generating P can be found in Algorithm 1, and an
+example for Na = 2 and Nf = 2 is given in Appendix C.
+Finally, let ˜yc = P yc and ˜Φ = P (Φ∗⊙Φ). Then, the sys-
+tem model is
+˜yc = ˜Φxp.
+(19)
+Under the modiﬁed dictionary ˜Φ, each constituent vector
+is ˜φ(θ, τ) = ˜α(θ) ⊗˜β(τ), with individual steering vectors
+˜α(θ) = [˜αi(θ)] ∈C2Na−1 and ˜β(τ) = [˜βi(τ)] ∈C2Nf −1. The
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:15 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 7 ===
+RAHMAN AND VALAEE: LOCATION ESTIMATES FROM CHANNEL STATE INFORMATION VIA BINARY PROGRAMMING
+5271
+individual elements of these vectors are
+˜αi(θ) =
+1
+√2Na −1 exp(−jkd(−Na + i) sin(θ)) and
+˜βi(τ) =
+1
+
+2Nf −1 exp(−j2πfδ(−Nf + i)τ).
+For added clarity, we show the unit norm steering vector ˜φ(θ, τ)
+in (20) shown at the bottom of this page.
+B. Tight Dictionary
+In order to satisfy (13), achieved by constructing a tight
+frame as our dictionary, we split our dictionary constraints into
+two sets, namely the spectral constraint set and the structural
+constraint set.
+We deﬁne the spectral constraint set as
+S = {S ∈CM×N : SSH has all eigenvalues = N/M}.
+(21)
+To achieve cond(ΦΦH) = 1, all the eigenvalues must be equal.
+There are a total of N unit norm steering vectors in Φ, hence
+tr(ΦΦH) = N. Since the trace of a matrix is equal to the sum
+Fig. 2.
+AoA and ToF grid used to satisfy (13). |L| = 1200.
+of the eigenvalues, and there are a total of M eigenvalues, each
+eigenvalue of ΦΦH should be N/M.
+The structural constraint set is based on the system construc-
+tion as developed in the previous subsection. We may represent
+it as
+T = {T ∈CM×N : tn = ˜φ(θn, τn), ∀n = 1, 2, . . . , N}.
+(22)
+The alternating projections algorithm [42] looks to satisfy
+two sets of constraints by ﬁrst satisfying one and then the other,
+iteratively. For each iteration of the algorithm, which we may
+identify using the superscript (k), one must solve two matrix
+nearness problems. Finding the closest matrix in (21) to some
+initial matrix T (k) can be represented as
+S(k) = arg min
+S∈S
+∥S −T (k)∥F .
+Fortunately, a closed form solution to this problem exists:
+S(k) = N/M(T (k)T (k)H)−1/2T (k). Our application does not
+involve adapting the grid in real time, and so we shall sufﬁce
+with this solution over more efﬁcient ones [49], [50]. Then, using
+S(k) as an initialization, we seek to satisfy (22) by
+T (k+1) = arg min
+T ∈T
+∥T −S(k)∥F .
+Notice that ∀T ∈T , each column tn is parameterized inde-
+pendently on (θ, τ). Therefore, the matrix optimization can be
+reduced to the following vector optimizations:
+(θn, τn)(k+1) = arg min
+(θ,τ)
+∥˜φ(θ, τ) −¯s(k)
+n ∥2,
+where ¯s(k)
+n
+is the normalized nth column of S(k) and n =
+1, 2, . . . , N. We can solve this problem using gradient de-
+scent on (θ, τ), initialized with the previous iteration’s solution
+(θn, τn)(k). For Na = 3 and Nf = 2, we show convergence
+of the alternating projection iterations in Fig. 2(a); we also
+˜φ(θ, τ) =
+1
+√2Na −1
+
+exp(−jkd(−Na + 1) sin(θ)), . . . , 1, . . . , exp(−jkd(Na −1) sin(θ))
+T
+⊗
+1
+
+2Nf −1
+
+exp(−j2πfδ(−Nf + 1)τ), . . . , 1, . . . , exp(−j2πfδ(Nf −1)τ)
+T
+(20)
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:15 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 8 ===
+5272
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 70, 2022
+sample 1 million different combinations of 6-by-6 matrices G
+and compute their median condition number at each iteration.
+Clearly, the grid improves and will better be able to satisfy
+Theorem 3 for more values of γ(ˇx). The ﬁnal grid L is shown
+in Fig. 2(b).
+Algorithm 2 summarizes the alternating projections algorithm
+for designing the appropriate grid. We have found that initial-
+ization L(0) based on a uniform AoA and ToF grid converges to
+cond(ΦΦH) = 1. However, to keep the algorithm generic, we
+have used 1, . . . , N as the subscript of grid points in L. Note
+that the initial range of AoA in L(0) was [−45, 45] to ensure
+identiﬁability given our experimental setup, which we shall
+detail in the next section. Line 5 in Algorithm 2 solves for (θ, τ)
+that are closest to an unstructured tight frame; in other words,
+it imposes the system structure of (22) on a tight frame (21).
+A different system model, for example using coprime arrays
+instead of uniform linear arrays, will have different steering
+vectors φ and may result in a different grid.
+C. Binary Program Solvers
+One of the most well known optimization softwares as of this
+writing is the Gurobi [51] solver. While the algorithms employed
+are proprietary, Gurobi typically uses the branch-and-cut algo-
+rithm for MIQPs, and has the option of restricting the decision
+variables’ domain to only binary. We shall use this solver and
+publish results under the name ‘BOAT - Gurobi’.
+Another promising solver is the Digital Annealer (DA) [35]
+developed by Fujitsu. The DA uses a different class of algo-
+rithms,knownasMarkovChainMonteCarlo(MCMC),forsolv-
+ing the quadratic unconstrained binary optimization (QUBO)
+problem. This solver requires that the problem be represented
+using an Ising energy formulation. For our application, the Ising
+energy is
+E(z1, . . . , zN) = −
+N
+
+i=1
+N
+
+j=1
+Wijzizj −
+N
+
+i=1
+bizi,
+Wij = −λregℜ{[ ˜Φ ˜Φ
+H]ij}, and
+bi = −1 + 2λregℜ{ ˜yc
+H ˜Φ}i,
+where λreg is a Lagrangian multiplier that incorporates con-
+straints into the cost function. A detailed derivation of these
+quantities may be found in [52]. Results using this solver are
+published as ‘BOAT - DAU3’.
+Finally, we develop a simple variation on the well known
+Matching Pursuit (MP) algorithm [40]. Perform a linear search
+over the dictionary vectors ˜φ ∈˜Φ such that the error ∥˜yc −˜φ∥2
+is minimized. In the subsequent iteration, this chosen vector is
+removed from the dictionary; scaled1 and subtracted from the
+observation; and the search is performed again using the modi-
+ﬁed observation vector. The process is repeated until L vectors
+have been chosen, at which point the algorithm terminates. The
+algorithm is summarized in Algorithm 3, and results using this
+method are published as ‘BOAT - MP’.
+Note that we will use out-of-the-box solvers in two cases
+(Gurobi and DA) and we suggest a simple heuristic as a third
+case, but our focus is on the formulation and not on a particular
+solver per-se. In light of this, BOAT refers to the formulation
+based on our proposed system, and for added context we have
+mentioned the solver used to solve the resulting optimization
+problem.
+V. PERFORMANCE VALIDATION
+A major contribution that brought AoA estimation using
+CSI to commercial “off-the-shelf” devices was the work by
+Kotaru et. al. [21]. Two deﬁning characteristics of their work
+were (i) the introduction of ToF as a parameter to improve the
+estimation resolution and (ii) the development of a CSI smooth-
+ing method to restore the rank of the signal covariance matrix in
+a coherent environment, such as indoors. They leveraged these
+two ideas and implemented multi signal classiﬁcation (MUSIC)
+to resolve a large number of signals in a multipath-rich indoor
+environment. Their approach is termed ‘SpotFi,’ and it is the
+ﬁrst algorithm to which we shall compare our designed system.
+The second work that we shall use as a benchmark was
+completed by Gong and Liu, which they termed ‘RoArray’ [22].
+Their main contribution was to leverage the sparse modelling
+1The optimal scale can be found by a simple non-negative least squares
+quadratic program.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:15 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 9 ===
+RAHMAN AND VALAEE: LOCATION ESTIMATES FROM CHANNEL STATE INFORMATION VIA BINARY PROGRAMMING
+5273
+Fig. 3.
+Phase difference ambiguity in (14) and (15) owing to different system
+parameters.
+paradigm and apply it to the formulation we have presented
+in (16), relaxing it using the ℓ1-norm Basis Pursuit (BP), and
+solving it using a second order cone program (SOCP). They built
+on the work of Maliotouv [20], extending AoA estimation to
+wideband systems with a small number of antennas in the array.
+While they did not need a smoothing procedure as in SpotFi,
+they also introduced ToF as a parameter in the estimation.
+Finally we provide a direct comparison between (1) and (2) by
+implementingtheorthogonalmatchingpursuit(OMP)algorithm
+and the BOAT - MP algorithm developed previously.
+A. Receiver’s Physical Characteristics
+We will use the ASUS RT-AC86 U router, which comes
+equipped with three antennas and the capability to run IEEE
+802.11ac MU-MIMO. This choice is mainly due to the Nexmon
+ﬁrmware [53], that enables the router to push CSI data to
+userspace, where it can be easily accessed and stored as packet
+capture (pcap) ﬁles. We use the Raspberry Pi4 to send ICMP
+ping packets at 100 Hz to a nearby device, and conﬁgure the
+ASUS RT-AC86 U router to ﬁlter the appropriate channel and
+MAC address. In this way, the router acts as a receiver.
+It is important to mention that the router antenna spacing is
+8.7 cm. For channel 1 centred at 2.412 GHz, the ‘ideal’ and
+mostfrequentlyassumedspacingisthehalf-wavelengthspacing,
+which is 6.2 cm. This is because, at half-wavelength spacing,
+there is no phase ambiguity for θ ∈[−90◦, 90◦] owing to the
+structure of steering vectors (14). On the other hand, a larger
+spacing improves the sensitivity of the system to small variations
+in θ. This can be veriﬁed by considering Fig. 3(a): as the spacing
+increases from quarter-wavelength to half-wavelength the slope
+of the phase difference versus AoA curve increases, which leads
+to a larger observed phase difference for the same change in
+AoA. Effectively, larger spacing leads to better signal-to-noise
+ratio (SNR). Due to the physical limitation of the device we use,
+to avoid phase ambiguities we shall limit the ground truth AoA
+that we consider to the range [−24◦, 24◦], and we limit the range
+of the AoA grid θ1, θ2, . . . , θNθ each to [−45◦, 45◦].
+Although the antenna spacing is ﬁxed, we have more ﬂex-
+ibility in selecting which subcarriers to use. For 20 MHz of
+bandwidth, 64 subcarriers are considered by the transceivers for
+the FFT operation, out of which 52 are actively utilized [54].
+Adjacent subcarriers are spaced at 312.5 kHz. Analogous to
+antenna spacing, utilizing closely spaced subcarriers will in-
+crease the range at which phase wrapping occurs in the steering
+vectors (15), but it will reduce the slope of the phase difference
+versus ToF curve, thereby reducing the SNR. This is illustrated
+in Fig. 3(b). We will assume that the expected range of our WiFi
+router is about 30 m. So, to improve SNR, we select the maxi-
+mum subcarrier spacing fδ such that the phase wrap occurs at or
+beyond 35 m, allowing us to grid the space in the range [0, 35].
+This corresponds to 8.4375 MHz spacing, which amounts to 27
+subcarriers. For example, CSI of subcarrier number −26 and
+subcarrier number 1 are used. The rest of the subcarriers’ CSI
+are used in the smoothing procedure to restore the rank of the
+covariancematrix.WhileNf = 2mayseemlikeasmallnumber,
+from Theorem 5 and (19) the effective length of an observation
+vector using our system is (2Na −1)(2Nf −1) = 15, which is
+considerable.
+Finally, the receiver and transmitter are not synchronized, and
+several deleterious effects appear in the CSI phase, such as signal
+timing offset (STO), sampling frequency offset (SFO), center
+frequency offset (CFO), etc [21], [55]. These non-idealities may
+be compensated for by removing the linear component of the
+phase across subcarriers for each antenna. Doing so introduces a
+large unknown bias to the ToF estimates, hampering a complete
+localization system using a single router. This bias does not
+appear in the AoA estimates, however, since they rely on the
+phase difference between antennas, which subtracts out the
+phase contamination. In our simulation results we are able to
+recover accurate AoA and ToF estimates, but using experimental
+data we shall rely only on the AoA estimates.
+B. Simulation Results
+For a systematic study of performance we generate data based
+on (16), for two incoming signals L = 2, with l1 = (−10◦, 9 m)
+and l2 = (25◦, 16 m). The sources do not lie on the designed
+equivalence grid. The wireless parameters are identical to the
+physical characteristics of the ASUS RT-AC86 U router, with
+the length of an observation y equal to 3 × 52 = 156. From
+the above discussion, the ﬁve algorithms we test are ‘SpotFi
+(MUSIC),’ ‘RoArray (l1 Relax.),’ ‘Orthogonal - MP,’ ‘BOAT -
+Gurobi,’ ‘BOAT - DAU3,’ and ‘BOAT - MP’. We shall quantify
+accuracy using the root mean square error,
+RMSE =
+
+1
+LNs
+Ns
+n=1
+L
+j=1 min
+i
+ˆl
+n
+i −lj
+
+2
+2
+
+,
+(23)
+where Ns is the number of simulation instances, which we set to
+100, andˆl
+n
+i = (ˆθn
+i , ˆτ n
+i ) is the ith estimated tuple at the simulation
+instance n. Note that the minimum is over the vector of errors
+between each estimated tuple and the true locations. We have
+observed that the number of estimates produced by the different
+algorithms do not always match the actual number of signals.
+Therefore, we select the closest estimates to the ground truth in
+evaluating the RMSE.
+To study support recovery performance we also use a version
+of the Jaccard index, which is the cardinality of the intersection
+of two sets divided by the cardinality of their union. For some
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:15 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 10 ===
+5274
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 70, 2022
+Fig. 4.
+RMSE and Jaccard index versus SNR for two incoming signals using 100 packets to estimate the covariance matrix.
+set of estimated support indices Nˆz,
+Jaccard Index = |Nˇx ∩Nˆz|
+|Nˇx ∪Nˆz|.
+(24)
+This criteria is not suitable as-is because i) in our simulations
+and experiments the sources do not lie on the grid and ii) any
+noise in the observations may push the estimation to a grid point
+adjacent to the ground truth, in which case the Jaccard index will
+read 0 even though the estimation error is very small. Therefore,
+when computing the Jaccard index, we shall consider a 0.8 m
+grid: estimates falling within this threshold of the true source
+locations will be considered as being in the set intersection.
+1) Signal-to-Noise Ratio: Firstly, we varied the SNR and
+used (23) and (24) to compute the RMSE and Jaccard index
+for each estimator, respectively. The angle estimation error and
+localization error are shown in Fig. 4(a) and (b), while the
+Jaccard index is shown in Fig. 4(c). For low SNR, less than
+7 dB for Gurobi and less than 13 dB for SpotFi, the estimators
+did not produce any estimates: Gurobi returned a vector of all
+zeros and SpotFi’s MUSIC-based pseudo-spectrum was ﬂat.
+The clear ‘waterfall’-like [56] performance of the MUSIC-based
+SpotFi algorithm is visible in both localization error and AoA
+estimation error plots. At lower SNRs, typically under 10 dB,
+RoArray showed the best performance, as observed by the origi-
+nal paper [22]. At higher values of SNR, RoArray’s performance
+improved only very slightly or not at all. This may be due to
+the bias in the algorithm or due to insufﬁcient tuning of the
+regularization parameter inherent in the ℓ1-norm approach. This
+is a clear disadvantage of the algorithm, as the tuning was done to
+the best of our ability. RoArray and OMP perform very similarly,
+as noted in previous works [40], but with OMP having slighltly
+larger errors overall.
+The BOAT-MP algorithm had similar localization error to
+BOAT-Gurobi after 10 dB SNR. In general, the DA-based esti-
+mator was better than SpotFi. However, the DA-based estimator
+performance matched Gurobi’s only after 13 dB SNR. It is inter-
+esting to note that the BOAT-MP method had lower localization
+error but higher AoA estimation than the Gurobi method. Also,
+for low noise scenarios, the BOAT-MP algorithm’s performance
+did not converge to a Jaccard index of 1. Nevertheless, sub-meter
+accuracy was achieved by all the BOAT solvers at and above
+16 dB SNR.
+2) No. of Packets: Next, we compare performance for 20 dB
+SNR using different number of packets to generate the co-
+variance matrix. Our results for the angle estimation error and
+localization error are shown in Fig. 5(a) and (b), respectively,
+while the Jaccard index is shown in Fig. 5(c).
+For a small number of packets, the BOAT-MP method has
+the lowest error and achieves sub-meter accuracy using only
+20 packets. The Gurobi solver performs better than the DA
+when using 5 and 10 packets; however, using 30 packets or
+more, the DA’s performance is comparable to the BOAT-MP
+algorithm’s performance. Then, at 50 packets, the Gurobi solver
+matches the DA. Similar to the case with varying SNR, the
+BOAT-MP algorithm does not converge to a Jaccard coefﬁcient
+of 1, even when using a large number of packets. The SpotFi
+algorithm’s accuracy does not signiﬁcantly increase as do the
+BOAT solvers when large number of packets are used, even
+though both systems rely on covariance matrix computations.
+Both Gurobi and the DA have very similar performance when
+it comes to estimating the angles; the differences are more
+pronounced when ToF is taken into account for localization.
+In any case, it is clear that the solvers perform differently under
+different circumstances. This is promising because it suggests
+that as solvers get more accurate, then so too will BOAT’s
+performance.
+C. Experimental Results
+We setup the ASUS router and Raspberry Pi4 10 m apart in
+a 3 m wide corridor. The devices were placed on two stands,
+1.2 m high, and for each of the angular offsets the router was
+turned in place and CSI data was collected for 5 minutes. The
+transmitter was set to ping at 100 Hz, so this amounted to about
+30,000 packets at each angular offset. The actual number was
+slightly lower due to packet loss. We performed AoA and ToF
+estimation at a rate of 1 estimate per second, which was about
+80-100 packets of CSI for computing the covariance matrix.
+The corridor had low foot trafﬁc throughout the experiment and
+the line-of-sight (LoS) between transmitter and receiver was not
+blocked. Since the ToF estimates have an inherent bias due to
+the hardware effects, we shall only report the AoA estimates.
+Note that the Pi4 did not lie on the designed equivalence grid.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:15 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 11 ===
+RAHMAN AND VALAEE: LOCATION ESTIMATES FROM CHANNEL STATE INFORMATION VIA BINARY PROGRAMMING
+5275
+Fig. 5.
+RMSE and Jaccard index versus number of packets for two incoming signals at 20 dB SNR.
+Fig. 6.
+Experimental setup with an example estimation using the BOAT-MP
+algorithm. A close-up of the transmitter shows the closest selected AoA on the
+grid.
+Fig. 7.
+RMSE at different angular offsets using a total of 30,000 CSI at each
+offset. The shaded region represents the standard deviation. Each estimation is
+performed using 1 s of CSI data, which equals 80–100 packets.
+In Fig. 6, we show the experimental setup as an overlay on a
+map. For an example estimation using 1 s of data at 24◦offset,
+we plot the estimated AoA under the BOAT-MP algorithm. The
+5 estimated AoA are shown together with a zoom in to the
+transmitter. This highlights the grid of AoA and the closest AoA
+to the transmitter that was selected.
+Each point in Fig. 7, and each subﬁgure in Fig. 8, represents
+the aggregated results from an experimental run, which consists
+of 5mins of data. The closest estimated AoA to the ground
+truth at each estimation instance, performed once per second,
+is aggregated over the 5mins and used to generate Fig. 7. All the
+AoA estimated throughout the 5mins are used to generate each
+subﬁgure in Fig. 8.
+Fig. 7 shows the AoA RMSE, where the shaded region
+represents the standard deviation of the closest estimate to the
+ground truth. These results corroborate the simulation analyses.
+BOAT-MP tends to have lower RMSE than the other methods.
+Interestingly, SpotFi’s estimates are close to the other binary
+solvers, except at an offset of 24◦,where it is considerably worse.
+In each case, we have calculated the RMSE in (23) using only
+the ground truth angle.
+To get a better idea of the performance, we also plot a kernel
+density estimate (KDE) [57] of all the AoA estimated by an
+algorithmataparticularangularoffset.TheKDEmaybethought
+of as a smoothed histogram. These are shown in Fig. 8, where
+the solid red line represents the ground truth AoA. The y-axis
+of these plots are normalized so that the area under each curve
+adds up to 1. These ﬁgures show a clearer distinction between
+the algorithms. The algorithms using BOAT show a clear spike
+near the ground truth location and at a few other points. We
+conjecture that the large number of estimates at points other than
+the ground truth are due to static environmental scatterers, such
+as the surrounding walls. On the other hand, SpotFi’s KDE is
+ﬂatter throughout the domain, which suggests that it has reduced
+resolution. Interestingly, RoArray also shows a large number of
+consistent estimations, but these do not coincide directly with
+the ground truth. The possible explanation is that the RoArray
+algorithm relies on the ℓ1-norm relaxation of (1), which is known
+to be a biased estimator.
+As a ﬁnal note, the Gurobi and DA solvers have quite
+similar performance. From the KDE ﬁgures it may seem like
+the BOAT-MP estimator should exhibit reduced performance.
+However, in the experimental runs we assumed the number of
+signals L = 5. This meant that the BOAT-MP algorithm would
+always ﬁt 5 steering vectors to any observation, regardless of
+the estimation error. This is unlike the Gurobi and DA solvers,
+which adjust the number of non-zero components of xp to
+minimize the estimation error. In effect, BOAT-MP estimates
+a larger number of non-zero signal components compared to
+either BOAT-Gurobi or BOAT-DA. This is not clear in the ﬁgures
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:15 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 12 ===
+5276
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 70, 2022
+Fig. 8.
+Density of estimates for each of the ﬁve tested methods. The bottom row in each subﬁgure (a)–(d) represents the BOAT formulation developed in this
+paper and solved using different solvers. The top row has two state-of-the-art solutions that we benchmark against.
+TABLE I
+AVERAGE TIME TO SOLUTION
+because the y-axis is normalized, but it is reﬂected in the RMSE
+computations.
+D. Timing
+We have measured the time to solution for each of the meth-
+ods, presented in Table I. As the solution by Gurobi was initially
+taking too long we had to limit the time to 30 s. No other
+estimator was time limited. Being a simple greedy algorithm
+with linear time complexity O(LN), the BOAT-MP method
+was signiﬁcantly faster than other methods. Interestingly, it is
+an order of magnitude faster than the OMP algorithm, which
+needs to compute the optimal scaling at each iteration. The DA
+was faster than both the Gurobi and, surprisingly, the ℓ1-norm
+SOCP. SpotFi, based on a 2D exhaustive search over the pseudo
+spectrum, was the second fastest estimator.
+VI. CONCLUSION
+We have explored solving the sparse inverse problem using
+a binary programming approach, termed BOAT. The key devel-
+opments of this paper were the conditions under which such
+a program recovers the signal support, the design of a system
+using these conditions, and a thorough evaluation of the sys-
+tem performance using both simulated and experimental data.
+Our application domain was localization using channel state
+information (CSI) data that is needed for symbol recovery in an
+OFDM-based communication system such as WiFi. Compared
+to two state-of-the-art solutions in this area, our system shows
+an improvement in both the localization accuracy and speed to
+solution.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:15 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 13 ===
+RAHMAN AND VALAEE: LOCATION ESTIMATES FROM CHANNEL STATE INFORMATION VIA BINARY PROGRAMMING
+5277
+APPENDIX A
+Proof of Lemma 2. We can expand
+∥ˇx −z′∥2
+2 =
+
+i∈Nˇx∩Nz′
+(ˇxi −1)2 +
+
+i∈Nz′\Nˇx
+1 +
+
+i∈Nˇx\Nz′
+(ˇxi)2
+=
+
+i∈Nˇx∩Nz′
+(ˇx2
+i −2ˇxi) +
+
+i∈Nˇx\Nz′
+(ˇxi)2 + L
+=
+
+i∈Nˇx
+ˇx2
+i −2
+
+i∈Nˇx∩Nz′
+ˇxi + L.
+Similarly, because ˇx and ˇz share the same support,
+∥ˇx −ˇz∥2
+2 =
+
+i∈Nˇx
+(ˇxi −1)2
+=
+
+i∈Nˇx
+ˇx2
+i −2
+
+i∈Nˇx
+ˇxi + L
+To complete the proof, compare the two expressions above:
+∥ˇx −ˇz∥2
+2 = ∥ˇx −z′∥2
+2 −2
+
+i∈Nˇx\Nz′
+ˇxi.
+APPENDIX B
+Proof of Theorem 5. We have the following three properties
+regarding the Kronecker product and the Khatri-Rao product.
+P1: For matrices C ∈Cm×n, D ∈Cp×q, E ∈Cr×n, F ∈
+Ck×q, (C ⊗D) ⊙(E ⊗F ) is permutationally equivalent to
+(C ⊙E) ⊗(D ⊙F ). This is similar to the mixed-product
+property [43], except that the two expression are equivalent
+only upto a reordering of the rows. This property can be readily
+veriﬁed by writing out the partitioned multiplications.
+P2 [43]: For C ∈Cm×n and D ∈Cp×q,
+rank(C ⊗D) = rank(C) rank(D).
+P3 [45]: For a Vandermonde matrix V ∈Cn×k,
+rank(V ∗⊙V ) = min{2n −1, k}.
+Based on the AoA grid A and ToF grid B, and because
+equivalence upto a permutation guarantees rank preservation,
+we may apply P1 and P2 to write
+rank(Φ∗⊙Φ) = rank((A∗⊗B∗) ⊙(A ⊗B))
+= rank((A∗⊙A) ⊗(B∗⊙B))
+= rank(A∗⊙A) rank(B∗⊙B).
+Both A and B are overcomplete Vandermonde matrices, with
+respectively Na and Nf rows. k is large because the dictionaries
+are overcomplete, so from P3
+rank(A∗⊙A) rank(B∗⊙B) = (2Na −1)(2Nf −1).
+APPENDIX C
+For Na = 2 and Nf = 2, the selection matrix is
+P T =
+⎡
+⎢⎢⎢⎢⎢⎢⎢⎢⎢⎢⎢⎢⎢⎢⎢⎢⎢⎢⎢⎢⎢⎢⎢⎢⎢⎢⎣
+0
+0
+0
+0
+0.25
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0.5
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0.5
+0
+0
+0
+0
+0
+0
+0
+0
+0
+1
+0
+0
+0
+0.5
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0.25
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0.5
+0
+0
+0.5
+0
+0
+0
+0
+0
+0
+0
+0
+0
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0.25
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0.5
+0
+0
+0
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0.5
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0.5
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0.25
+0
+0
+0
+0
+⎤
+⎥⎥⎥⎥⎥⎥⎥⎥⎥⎥⎥⎥⎥⎥⎥⎥⎥⎥⎥⎥⎥⎥⎥⎥⎥⎥⎦
+.
+REFERENCES
+[1] M. T. Rahman and S. Valaee, “Sparse signal recovery using a binary
+program,” in Proc. 12th IEEE Sensor Array Multichannel Signal Process.
+Workshop, 2022, pp. 430–434.
+[2] A. N. Tikhonov, Numerical Methods for the Solution of Ill-Posed Prob-
+lems. Norwell, MA, USA: Kluwer, 1995.
+[3] M. Lashgari, M. Shahmoradi, H. Rabbani, and M. Swain, “Missing surface
+estimation based on modiﬁed tikhonov regularization: Application for
+destructed dental tissue,” IEEE Trans. Image Process., vol. 27, no. 5,
+pp. 2433–2446, May 2018.
+[4] Y. Zhang, C. Liao, Y. Shang, W. Du, and A. R. Huan, “Analysis of
+the high-frequency response of thin wires irradiated by electromagnetic
+waves through tikhonov regularization technique,” IEEE Access, vol. 7,
+pp. 183800–183811, 2019.
+[5] R. Fan, K. Chang, C. Hsieh, X. Wang, and C. Lin, “LIBLINEAR: A library
+for large linear classiﬁcation,” J. Mach. Learn. Res., vol. 9, pp. 1871–1874,
+Aug. 2008.
+[6] E. J. Candes, J. Romberg, and T. Tao, “Robust uncertainty principles: Exact
+signal reconstruction from highly incomplete frequency information,”
+IEEE Trans. Inf. Theory, vol. 52, no. 2, pp. 489–509, Feb. 2006.
+[7] D. L. Donoho, “Compressed sensing,” IEEE Trans. Inf. Theory, vol. 52,
+no. 4, pp. 1289–1306, Apr. 2006.
+[8] S. S. Chen, D. L. Donoho, and M. A. Saunders, “Atomic decomposition by
+basis pursuit,” SIAM J. Sci. Comput., vol. 20, no. 1, pp. 33–61, Aug. 1998.
+[9] H. Rauhut, K. Schnass, and P. Vandergheynst, “Compressed sensing
+and redundant dictionaries,” IEEE Trans. Inf. Theory, vol. 54, no. 5,
+pp. 2210–2219, May 2008.
+[10] R. A. DeVore, “Deterministic constructions of compressed sensing matri-
+ces,” J. Complexity, vol. 23, pp. 918–925, Aug.–Dec. 2007.
+[11] E. C. Candes and Y. Plan, “A probabilistic and RIPless theory of com-
+pressed sensing,” IEEE Trans. Inf. Theory, vol. 57, no. 11, pp. 7235–7254,
+Nov. 2011.
+[12] G.Tang,B.N.Bhaskar,P.Shah,and B.Recht,“Compressed sensing off the
+grid,” IEEE Trans. Inf. Theory, vol. 59, no. 11, pp. 7465–7490, Nov. 2013.
+[13] B.Recht,M.Fazel,andP.A.Parrilo,“Guaranteedminimum-ranksolutions
+of linear matrix equations via nuclear norm minimization,” SIAM Rev.,
+vol. 52, no. 3, pp. 471–501, 2010.
+[14] V. Chandrasekaran, B. Recht, P. A. Parrilo, and A. S. Willsky, “The convex
+algebraic geometry of linear inverse problems,” Found. Comput. Math.,
+vol. 12, no. 7, pp. 806–849, Feb. 2012.
+[15] B. Deka and S. Datta, Compressed Sensing Magnetic Resonance Image
+Reconstruction Algorithms A Convex Optimization Approach. Berlin, Ger-
+many: Springer, 2019.
+[16] M. T. Rahman, S. Han, N. Tadayon, and S. Valaee, “Ising model for-
+mulation of outlier rejection, with application in WiFi based position-
+ing,” in Proc. IEEE Int. Conf. Acoust. Speech Signal Process., 2019,
+pp. 4405–4409.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:15 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+=== PDF PAGE 14 ===
+5278
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 70, 2022
+[17] A. Labach, H. Salehinejad, and S. Valaee, “Survey of dropout methods for
+deep neural networks,” 2019. [Online]. Available: https://arxiv.org/abs/
+1904.13310
+[18] H. Salehinejad and S. Valaee, “Ising-dropout: A regularization method for
+training and compression of deep neural networks,” in Proc. IEEE Int.
+Conf. Acoust. Speech Signal Process., 2019, pp. 3602–3606.
+[19] R. Schmidt, “Multiple emitter location and signal parameter estimation,”
+IEEE Trans. Antennas Propag., vol. 34, no. 3, pp. 276–280, Mar. 1986.
+[20] D. Malioutov, M. Cetin, and A. S. Willsky, “A sparse signal reconstruction
+perspective for source localization with sensor arrays,” IEEE Trans. Signal
+Process., vol. 53, no. 8, pp. 3010–3022, Aug. 2005.
+[21] M. Kotaru, K. Joshi, D. Bharadia, and S. Katti, “Spotﬁ: Decimeter level lo-
+calization using WiFi,” ACM SIGCOMM Comput. Commun. Rev., vol. 45,
+no. 4, pp. 269–282, Aug. 2015.
+[22] W. Gong and J. Liu, “RoArray: Towards more robust indoor localization
+using sparse recovery with commodity WiFi,” IEEE Trans. Mobile Com-
+put., vol. 18, no. 6, pp. 1380–1392, Jun. 2019.
+[23] S. Bourguignon, J. Ninin, H. Carfantan, and M. Mongeau, “Exact sparse
+approximation problems via mixed-integer programming: Formulations
+and computational performance,” IEEE Trans. Signal Process., vol. 64,
+no. 6, pp. 1405–1419, Mar. 2016.
+[24] S. Park and H. Lee, “Fast mixed integer quadratic programming for sparse
+signal estimation,” IEEE Access, vol. 6, pp. 58439–58449, 2018.
+[25] “User’s Manual for CPLEX V20.1.0,” Int. Business Machines Corpora-
+tion, 2021. [Online]. Available: https://www.ibm.com/docs/en/icos/20.1.
+0?topic=cplex-users-manual
+[26] T. Blumensath and M. E. Davies, “Normalized iterative hard threshold-
+ing: Guaranteed stability and performance,” IEEE J. Sel. Topics Signal
+Process., vol. 4, no. 2, pp. 298–309, Apr. 2010.
+[27] Z. Dong and W. Zhu, “Homotopy methods based on l0-norm for com-
+pressed sensing,” IEEE Trans. Neural Netw. Learn. Syst., vol. 29, no. 4,
+pp. 1132–1146, Apr. 2018.
+[28] N. B. Karahanoglu, H. Erdogan, and S. I. Birbil, “A mixed integer linear
+programming formulation for the sparse recovery problem in compressed
+sensing,” in Proc. IEEE Int. Conf. Acoust. Speech Signal Process., 2013,
+pp. 5870–5874.
+[29] R.MazumderandP.Radchenko,“Thediscretedantzigselector:Estimating
+sparse linear models via mixed integer linear optimization,” IEEE Trans.
+Inf. Theory, vol. 63, no. 5, pp. 3053–3075, May 2017.
+[30] A. Lucas, “Ising formulations of many np problems,” Front. Phys., vol. 2,
+no. 5, pp. 1–15, Feb. 2014.
+[31] S. Kirkpatrick, C. D. Gelatt, and M. P. Vecchi, “Optimization by simulated
+annealing,” Science, vol. 220, no. 4598, pp. 671–680, 1983.
+[32] M. W. Johnson et al., “Quantum annealing with manufactured spins,”
+Nature, vol. 473, pp. 194–205, 2011.
+[33] A. Cho, “Quantum or not, controversial computer yields no speedup,”
+Science, vol. 344, no. 6190, pp. 1330–1331, Jun. 2014.
+[34] R. Y. Li, R. Di Felice, R. Rohs, and D. A. Lidar, “Quantum annealing
+versus classical machine learning applied to a simpliﬁed computational
+biology problem,” Nature, vol. 4, no. 1, 2018, Art. no. 14.
+[35] S. Matsubara et al., “Digital annealer for high-speed solving of combi-
+natorial optimization problems and its applications,” in Proc. 25th Asia
+South Paciﬁc Des. Automat. Conf., 2020, pp. 667–672.
+[36] I. Rish and G. Grabarnik, Sparse Modeling: Theory, Algorithms, and
+Applications. Boca Raton, FL, USA: CRC Press, 2014.
+[37] S. Valaee and P. Kabal, “An information theoretic approach to source
+enumeration in array signal processing,” IEEE Trans. Signal Process.,
+vol. 52, no. 5, pp. 1171–1178, May 2004.
+[38] D. L. Donoho, M. Elad, and V. N. Temlyakov, “Stable recovery of sparse
+overcomplete representations in the presence of noise,” IEEE Trans. Inf.
+Theory, vol. 52, no. 1, pp. 6–18, Jan. 2006.
+[39] R. A. Horn and C. R. Johnson, Matrix Analysis. New York, NY, USA:
+Cambridge Univ. Press, 1985.
+[40] M. Elad, Sparse and Redundant Representations: From Theory to Appli-
+cations in Signal and Image Processing. Berlin, Germany: Springer, 2010.
+[41] D. V. Sarwate, Meeting the Welch Bound With Equality, Sequences and
+Their Applications. Berlin, Germany: Springer, 1998.
+[42] J. A. Tropp, I. S. Dhillon, R. W. Heath, and T. Strohmer, “Designing
+structured tight frames via an alternating projection method,” IEEE Trans.
+Inf. Theory, vol. 51, no. 1, pp. 188–209, Jan. 2005.
+[43] R. A. Horn and C. R. Johnson, Topics in Matrix Analysis. Cambridge,
+U.K.: Cambridge Univ. Press, 1991.
+[44] M. Jansson, B. Goransson, and B. Ottersten, “A subspace method for
+direction of arrival estimation of uncorrelated emitter signals,” IEEE Trans.
+Signal Process., vol. 47, no. 4, pp. 945–956, Apr. 1999.
+[45] W.-K. Ma, T.- H. Hsieh, and C.-Y. Chi, “DOA estimation of quasi-
+stationary signals with less sensors than sources and unknown spatial
+noise covariance: A Khatri–Rao subspace approach,” IEEE Trans. Signal
+Process., vol. 58, no. 4, pp. 2168–2180, Apr. 2010.
+[46] Z. Q. He, Q. H. Liu, L. N. Jin, and S. Ouyang, “Low complexity method
+for DOA estimation using array covariance matrix sparse representation,”
+IEE Electron. Lett., vol. 49, no. 3, pp. 228–230, Jan. 2013.
+[47] P.PalandP.P.Vaidyanathan,“Pushingthelimitsofsparsesupportrecovery
+using correlation information,” IEEE Trans. Signal Process., vol. 63, no. 3,
+pp. 711–726, Feb. 2015.
+[48] T. Jiang, N. D. Sidiropoulos, and J. M. F. T. Berge, “Almost-sure iden-
+tiﬁability of multidimensional harmonic retrieval,” IEEE Trans. Signal
+Process., vol. 49, no. 9, pp. 1849–1859, Sep. 2001.
+[49] N. J. Higham, “Computing the polar decomposition - with applica-
+tions,” SIAM J. Sci. Statist. Comput., vol. 7, no. 4, pp. 1160–1174,
+Oct. 1986.
+[50] N. J. Higham, “A parallel algorithm for computing the polar decomposi-
+tion,” Parallel Comput., vol. 20, no. 8, pp. 1161–1173, Aug. 1994.
+[51] Gurobi Optimization, LLC, “Gurobi optimizer reference manual V9.5,”
+2022. [Online]. Available: https://www.gurobi.com/documentation/9.5/
+refman/index.html
+[52] S. Han, “Angle of arrival estimation as an ising energy minimiza-
+tion problem,” M.S. thesis, Univ. of Toronto, Toronto, ON, Canada,
+Nov. 2020.
+[53] F. Gringoli, M. Schulz, J. Link, and M. Hollick, “Free your CSI: A channel
+state information extraction platform for modern Wi-Fi chipsets,” in Proc.
+13th Workshop Wireless Netw. Testbeds Exp. Eval. Characterization, 2019,
+pp. 21–28.
+[54] E. Perahia and R. Stacey, Next Generation Wireless LANs: 802.11n
+and 802.11ac, 2nd ed. New York, NY, USA: Cambridge Univ. Press,
+2013.
+[55] N. Tadayon, M. T. Rahman, S. Han, S. Valaee, and W. Yu, “Decimeter
+ranging with channel state information,” IEEE Trans. Wireless Commun.,
+vol. 18, no. 7, pp. 3453–3468, May 2019.
+[56] M. Trinh-Hoang, M. Viberg, and M. Pesavento, “Partial relax-
+ation approach: An eigenvalue-based DOA estimator framework,”
+IEEE
+Trans.
+Signal
+Process.,
+vol.
+66,
+no.
+23,
+pp. 6190–6203,
+Dec. 2018.
+[57] M. A. Carreira-Perpinan, “Mode-ﬁnding for mixtures of Gaussian dis-
+tributions,” IEEE Trans. Pattern Anal. Mach. Intell., vol. 22, no. 11,
+pp. 1318–1323, Nov. 2000.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:56:15 UTC from IEEE Xplore.  Restrictions apply. 

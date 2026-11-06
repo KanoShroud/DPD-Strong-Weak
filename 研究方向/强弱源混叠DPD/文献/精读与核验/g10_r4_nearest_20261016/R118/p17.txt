@@ -1,0 +1,67 @@
+                                                                                          Y. Zeng et al.: QNOMP: A Quasi-Newton-Based Joint Multipath Optimization Method
+
+
+
+impact on computational complexity. For iteration counts,    APPENDIX A
+nin = 5 and nout = 40 generally suffice under normal SNR    DERIVATION OF LMMSE
+conditions. While more challenging scenarios may benefit    Consider the following generalization of the finite-rank r
+from additional iterations, the default settings nin = 3 and     basis LMMSE problem:
+nout = 40 already provide satisfactory performance for most
+                                                           min min   min  L = E∥X −Fa∥2.
+practical applications.                                                F∈CK×r A,b a=A(Y0)+b
+  The uniform energy distribution in (32) serves primarily
+                                                         Without loss of generality, we assume EY0 = EX = 0.as an initialization. High precision in this initial allocation
+                                                      Denote G = FHF. The loss function L can be rewritten as:
+is unnecessary, as the subsequent reweighting procedure
+automatically refines the energy distribution for improved         L = E(X −Fa)H(X −Fa)
+accuracy. In practice, the uniform distribution assumption is                                      = E[XHX + aHGa −2ℜ(XHFa)]
+not critical and can be replaced with other common priors.
+                                      = E[XHX + (AY0 + b)HG(AY0 + b)   Similarly, in the block reweighting technique, the pre-
+defined maximum block width γ  also functions as an           −2ℜ(XHF(AY0 + b))]
+initial parameter. Its influence is mitigated through iterative
+                                      = EXHX + bHb + Tr[Cov(Y0, Y0)AHGA]
+reweighting adjustments. A robust practical strategy is to
+select a moderately large value for γ to ensure comprehensive             −2ℜ(Tr[Cov(Y0, X)FA]).
+coverage of potential angular spreads.                                                          Thus, the optimal values of b, A for a given basis F are b =
+                                                          0, A =  G−1FH Cov(X, Y0) Cov(Y0, Y0)−1. Substituting
+                                                                these into the expression for L yields:
+VI. CONCLUSION
+This paper presents the Quasi-Newton Orthogonal Matching         L = EXHX −Tr[Cov(X, Y0) Cov(Y0, Y0)−1
+Pursuit (QNOMP) algorithm, a computationally efficient                          · Cov(Y0, X)FG−1FH].                   (35)
+super-resolution method for channel state information (CSI)
+estimation and extrapolation in TDD-MIMO systems. The     Setting F =  IK, Y0 =  h′, X =  Ae(τ)β, recovers the
+proposed two-stage approach comprises an on-grid sparsity   LOX in (20). Moreover, for r < K, the optimal low-rank
+selection stage followed by an  off-grid  joint parameter    approximation of LOX in (28) is also achieved. The MSE
+optimization stage. The on-grid stage incorporates a local     in (29) is exactly equal to the loss L given in (35).
+refinement  strategy  to  achieve  high  resolution  at low
+computational cost. The off-grid stage employs the BFGS    APPENDIX B
+quasi-Newton method, whose high efficiency enables the    GAUSSIAN APPROXIMATION OF POSTERIOR
+joint optimization of all channel parameters—a key factor   We  first demonstrate that in the high SNR regime, the
+in enhancing estimation and extrapolation accuracy. Further-     posterior distribution of τ|h′ can be approximated by a
+more, we derive the linear optimal extrapolation solution,    Gaussian distribution centered at τ MAP. Consider the joint
+which helps reduce extrapolation error. When angular block     posterior distribution of (τ, β), we have:
+sparsity          is present,                   the                    proposed                             block                                    reweighting                                               technique
+                                     −1effectively           leverages                         this                             structural                                       prior                                             to yields                                                       further        p(τ, β|h′) ∝exp                                                                                          ∥h′ −A(τ)β∥22 −βHE−1β                                                                                                 2                                                                    σ
+performance improvements.                                         = exp −(β −β∗)H6−1(β −β∗)
+  As the QNOMP algorithm demonstrates excellent com-
+putational efficiency and performance in the considered            −1                                                                                      ∥h′∥22 + (β∗)H6−1β∗ ,                                                                                                  2                                                                    σscenarios,  its robustness in more complex environments
+will be  investigated  in  future  studies. A key  research    where 6(τ)  =  (AHA/σ 2 + E−1)−1,   β∗(τ)  =
+direction  involves enhancing  its  adaptability  to  various    6AHh′/σ 2. The marginal posterior for τ  is p(τ|h′) ∝
+structured  sparse  priors and  hyperparameter  configura-    det(6) exp (β∗)H6−1β∗ with the corresponding MAP esti-
+tions. Furthermore, practical wireless MIMO systems often    mator given by τ MAP = arg maxτ log det(6)+(β∗)H6−1β∗.
+require channel extrapolation across multiple time  slots,    For the joint posterior p(τ, β|h′), the MAP estimator is
+which necessitates the development of advanced dynamic
+                                                    MAP                     MAPchannel tracking techniques. Such an extension introduces               ˜τ   = arg max (β∗)H6−1β∗, ˜β   = β∗(˜τ MAP).
+                                                                                           τ
+new challenges, including the non-stationary evolution of
+channel parameters and imperfection  factors over  time.     In the high SNR regime (σ ≪1), we have 6 ∼O(σ 2),
+Consequently, a  central objective  for future work  is  to   β∗∼O(1), making the term log det(6) negligible compared
+generalize the QNOMP framework into a robust algorithm for    with (β∗)H6−1β∗. Furthermore, if the separation distance
+dynamic channel super-resolution and extrapolation, capable  1 := mini̸=j |τi −τj| is sufficiently large, then AHA ≈MI,
+of addressing these challenges in complex communication   6 ≈ (M/σ 2I + E−1)−1, which remains approximately
+environments.                                                    constant. In this case, the log-determinant term  is again
+
+
+
+
+212668                                                                                                              VOLUME 13, 2025

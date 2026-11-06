@@ -1,0 +1,1846 @@
+--- PDF PAGE 1 ---
+5066
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 64, NO. 19, OCTOBER 1, 2016
+Newtonized Orthogonal Matching Pursuit: Frequency
+Estimation Over the Continuum
+Babak Mamandipoor, Dinesh Ramasamy, and Upamanyu Madhow
+Abstract—We propose a fast sequential algorithm for the fun-
+damental problem of estimating frequencies and amplitudes of a
+noisy mixture of sinusoids. The algorithm is a natural general-
+ization of Orthogonal Matching Pursuit (OMP) to the continuum
+using Newton reﬁnements, and hence is termed Newtonized OMP
+(NOMP). Each iteration consists of two phases: detection of a new
+sinusoid, and sequential Newton reﬁnements of the parameters of
+already detected sinusoids. The reﬁnements play a critical role in
+two ways: 1) sidestepping the potential basis mismatch from dis-
+cretizing a continuous parameter space and 2) providing feedback
+for locally reﬁning parameters estimated in previous iterations. We
+characterize convergence and provide a constant false alarm rate
+(CFAR) based termination criterion. By benchmarking against the
+Cram´er–Rao Bound, we show that NOMP achieves near-optimal
+performance under a variety of conditions. We compare the per-
+formance of NOMP with classical algorithms such as MUSIC and
+more recent Atomic norm Soft Thresholding (AST) and Lasso al-
+gorithms, both in terms of frequency estimation accuracy and run
+time.
+Index Terms—Gridless compressed sensing, orthogonal match-
+ing pursuit, sparse approximation, line spectral estimation, fre-
+quency estimation, Newton reﬁnement, decision-feedback.
+I. INTRODUCTION
+F
+REQUENCY estimation from a mixture of sinusoids in
+AWGN is a fundamental problem that arises in a variety
+of communication and radar applications, including estimation
+of spatial channels (e.g., for phased arrays), temporal multipath
+channels (e.g., for equalization), and spatiotemporal channels
+(e.g., range and direction of arrival estimation for a target). In
+all of these applications, the spectrum of the measured signal
+consists of multiple discrete frequencies over a continuous inter-
+val. The problem of estimating the frequencies of such a signal
+is also known as line spectral estimation.
+In this paper, we propose an algorithm to estimate frequencies
+from N equi-spaced noisy samples in time, denoted by y ∈CN .
+Deﬁning the unit norm sinusoid of frequency ω ∈[0, 2π), by
+x (ω) ≜
+1
+√
+N
+
+1 ejω · · · ej(N −1)ωT
+,
+(1)
+Manuscript received September 07, 2015; revised April 22, 2016 and June
+03, 2016; accepted June 04, 2016. Date of publication June 14, 2016; date of
+current version August 06, 2016. The associate editor coordinating the review
+of this manuscript and approving it for publication was Prof. Pascal Larzabal.
+This work was supported in part by Systems on Nanoscale Information fabriCs
+(SONIC), one of the six SRC STARnet Centers, sponsored by MARCO and
+DARPA.
+B. Mamandipoor and U. Madhow are with the Department of Electrical and
+Computer Engineering, University of California Santa Barbara, Santa Barbara,
+CA 93106 USA (e-mail: bmamandi@ece.ucsb.edu; madhow@ece.ucsb.edu).
+D. Ramasamy is with Amazon Corporation, Sunnyvale, CA 94089, USA
+(e-mail: dineshr@ece.ucsb.edu).
+Color versions of one or more of the ﬁgures in this paper are available online
+at http://ieeexplore.ieee.org.
+Digital Object Identiﬁer 10.1109/TSP.2016.2580523
+the observed signal is a mixture of K sinusoids:
+y =
+K
+
+l=1
+glx (ωl) + z, z ∼CN
+
+0, σ2IN
+
+,
+(2)
+where gl ∈C are the unknown complex gains. The signal
+to noise ratio for lth sinusoid is given by SNRl = |gl|2/σ2.
+The goal of the algorithm is to provide reliable estimates of
+{(gl, ωl) : l = 1, 2, . . . , K} and K, the number of sinusoids in
+the mixture.
+The preceding model and its variants have many applica-
+tions. For a linear array with N elements with inter-element
+spacing d, the response corresponding to angle of arrival or
+departure θ relative to broadside is given by x (ω), where
+ω = 2π (d/λ) sin (θ) is the spatial frequency corresponding to
+θ, and λ denotes the carrier wavelength. For estimation of a
+multipath channel h (t) = K
+l=1 glδ (t −τl), the channel trans-
+fer function is given by H (f) = K
+l=1 gle−j2πf τl . Sampling
+uniformly in the frequency domain with spacing Δf, yields a
+mixture of sinusoids with ωl = −2πΔfτl, reducing the prob-
+lem of estimating delays to that of frequency estimation. This
+directly models the operation of stepped frequency continu-
+ous wave (SFCW) for imaging a collection of point scatter-
+ers. When the channel is “seen through” a pulse p (t), as is
+often the case for channel estimation in communication appli-
+cations, then the noiseless frequency domain signal is given by
+Y (f) = K
+l=1 glP (f) e−j2πf τl . A simple extension of our al-
+gorithm to handle weighted sinusoids applies to this setting. We
+do not provide detailed discussion here due to lack of space,
+but the code that we have made available [1] does provide the
+required ﬂexibility.
+In this paper, we are interested in the setting where K is a
+small integer, so that the underlying signal has a sparse repre-
+sentation in the atomic set of unit norm sinusoids. The goal is
+to ﬁnd the best sparse approximation of y using atoms in the
+dictionary of sinusoids. A promising algorithm in sparse approx-
+imation theory is Orthogonal Matching Pursuit (OMP) [2], [3],
+a greedy algorithm that iteratively identiﬁes the atom that yields
+the greatest improvement in approximation quality. If the struc-
+ture of the atomic set is “simple,” so that identifying the “best”
+atom in each iteration needs a small amount of computation,
+then OMP becomes computationally attractive. Unfortunately,
+for our atomic set, searching over a continuum of atoms is not
+possible. An approximation that is often employed to overcome
+this problem is to discretize the set of frequencies, hoping that
+the signal still admits a sparse representation in this ﬁnite set.
+However, as discussed in [4], no matter how ﬁnely we grid the
+parameter space, the true underlying atoms of y need not lie
+on the grid. This “off-grid effect,” or basis mismatch, degrades
+the performance of reconstruction algorithms signiﬁcantly. The
+authors in [5] propose inserting a gradient-based local search in
+a Matching Pursuit [6] framework, as a means of alleviating the
+1053-587X © 2016 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.
+See http://www.ieee.org/publications standards/publications/rights/index.html for more information.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:38 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 2 ---
+MAMANDIPOOR et al.: NEWTONIZED ORTHOGONAL MATCHING PURSUIT: FREQUENCY ESTIMATION OVER THE CONTINUUM
+5067
+off-grid effect. In this paper, we go one step further by incor-
+porating a Newton-based Cyclic Reﬁnement step into the OMP
+framework: this not only sidesteps the off-grid effect, but also
+enhances performance by reﬁning previously estimated atoms
+in each iteration.
+A. Contributions
+Our key contributions are as follows:
+1) We propose Newtonized OMP (NOMP), which detects
+the best atom over a discrete grid, but avoids basis mis-
+match by adding a Newton reﬁnement step, thus emu-
+lating pursuit over the continuum. In addition, we go
+beyond OMP by locally reﬁning all estimated atoms in
+each iteration, thus re-evaluating estimates of previously
+detected sinusoids to incorporate the effect of the newly
+detected sinusoid. This second reﬁnement step can be
+interpreted as feedback presented to the atoms we have
+already detected. We show that this feedback mecha-
+nism plays a crucial role in handling interference among
+the underlying atoms of y, yielding estimation accura-
+cies far better than what would be possible by standard
+greedy pursuit algorithms (e.g., OMP and Matching Pur-
+suit). We do not require explicit estimates of model order,
+and provide a stopping criterion based on CFAR (con-
+stant false alarm rate) based on an estimate of the noise
+variance.
+2) We prove convergence of NOMP by providing upper
+bounds on the number of iterations. Moreover, we de-
+rive a bound on the convergence rate, showing that by
+choosing a ﬁne enough grid for detection, the bound
+approaches the rate of convergence for OMP on the
+continuum.
+3) We show that the algorithm is near-optimal by numerical
+comparisons against the Cram´er Rao Bound (CRB) [7] in
+a variety of settings. When the frequencies of the sinusoids
+in the mixture are well-separated, NOMP is able to achieve
+the CRB for any sinusoid that has an SNR greater than
+a certain threshold. Moreover, NOMP is able to resolve
+closely-spaced frequencies with near-optimal accuracy, as
+long as there is enough disparity in the SNRs of different
+sinusoids.
+4) We analyze the computational complexity of NOMP. Our
+numerical experiments show that its run time is signiﬁ-
+cantly smaller than that of recently proposed state-of-the-
+art Atomic norm Soft Thresholding (AST) algorithm [8],
+and is even smaller than that of the classical MUSIC al-
+gorithm [9]. We evaluate the run time of the algorithm
+in a variety of settings. A freely downloadable software
+package implementing the proposed algorithm can be
+found in [1].
+B. Related Work
+Line spectral estimation is a fundamental problem in statisti-
+cal signal processing. Classical (and popular) subspace methods
+such as MUSIC and ESPRIT [9], [10] exploit the low-rank struc-
+ture of the autocorrelation matrix. One of the major advantages
+of these methods is the capability of resolving multiple closely-
+spaced frequencies at high SNR. Both MUSIC and ESPRIT
+have been shown to be asymptotically optimal in the limit of
+inﬁnite SNR [11], but their performance degrades at medium
+and low SNRs. Another family of DFT-based classical meth-
+ods [12], [13], typically have lower computational complexity
+and estimation accuracy similar to that of subspace methods
+[13], [14].
+More recent techniques using convex optimization cast the
+frequency estimation problem as that of ﬁnding a sparse ap-
+proximation of the received signal using an inﬁnite-dimensional
+dictionary of sinusoids. It is shown in [15] that, in the absence
+of noise, total-variation norm is able to locate frequencies with
+inﬁnite precision, as long as the minimum frequency sepa-
+ration exceeds 4 × Δdft where Δdft = 2π/N is the Discrete
+Fourier Transform (DFT) grid spacing. The sufﬁcient condition
+on required minimum separation has been recently improved
+to 2.52 × Δdft in [16]. An extension to noisy scenarios is pro-
+vided in [17]. Another approach is Atomic norm Soft Thresh-
+olding (AST) [8], [18], which provides theoretical guarantees
+of noise robustness in terms of mean squared error (MSE). Both
+total-variation norm and atomic norm are generalizations of the
+ℓ1 norm to inﬁnite-dimensional settings. Solving these opti-
+mization problems involves solving the Lagrange dual which
+takes the form of a semi-inﬁnite program (SIP) with ﬁnite-
+dimensional decision variables and inﬁnitely many constraints.
+For the sparse frequency estimation problem, [17] and [8] refor-
+mulate the dual as a semideﬁnite program (SDP), which enables
+numerical optimization. Similar reformulation for other prob-
+lems seems to be difﬁcult [18]. A pragmatic approach is to use
+Lasso optimization on a highly oversampled grid as an approxi-
+mation for AST [8], [18]. Both AST and Lasso are benchmarks
+that we compare our proposed algorithm against in our numeri-
+cal experiments.
+NOMP can be viewed as coordinate optimization over a
+continuum. Coordinate-wise descent has been widely used for
+sparse approximation; for example, such methods are compet-
+itive for solving Lasso type problems [19], [20]. Preliminary
+results in [21] show that coordinate descent to a relaxation of
+the AST problem can be a means to speed up implementation.
+There is a large body of work on feedback for improving the
+performance of iterative greedy algorithms for sparse approxi-
+mation [22]–[27]: information from recent iterations is used to
+remove errors introduced by previous steps. For example, [23]
+introduces a forward-backward greedy algorithm that allows
+aggressive backward steps (discarding small-magnitude atoms)
+after a greedy forward step. In contrast, NOMP, by virtue of its
+continuous parameterization, can employ a mild form of feed-
+back by locally reﬁning the set of estimated atoms, thus allowing
+an atom to be replaced by a nearby, highly correlated atom, in
+the continuum. The idea of embedding a local reﬁnement step
+in OMP has been proposed in [28] in a discrete setting, but this
+algorithm does not address basis mismatch, and assumes that
+the model order is known a priori.
+Many theoretical results on OMP [3], [29], [30] are based on
+assumptions such as incoherence or Restricted Isometry Prop-
+erty (RIP) for the underlying dictionary. Such approaches do not
+work for analyzing NOMP, since nearby atoms are highly corre-
+lated for continuous frequency estimation. Instead, our conver-
+gence analysis borrows tools from analysis of AST-based line
+spectral estimation [8], along with observations following from
+our CFAR-based design.
+For a single sinusoid, frequency estimation using coarse de-
+tection followed by Newton reﬁnement was proposed three
+decades ago by Abatzoglou [31]. This was recently adapted
+for estimation of a single delay in [32], and shown to ap-
+proach estimation-theoretic bounds. In prior work involving
+some of the authors, we have used sequential algorithms similar
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:38 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 3 ---
+5068
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 64, NO. 19, OCTOBER 1, 2016
+to NOMP for millimeter wave spatial channel estimation with
+compressive measurements [33], [34]. The NOMP algorithm in
+the present paper is an improvement on these, with a princi-
+pled CFAR-based stopping criterion. We present NOMP within
+an application-independent abstraction, recognizing the funda-
+mental nature and widespread utility of the frequency estimation
+problem. We have reported on a version of NOMP in a recent
+conference paper [35] (although the algorithm in [35] omits a
+least squares step included here for establishing convergence
+rate results, but with little impact on practical performance).
+The present paper goes beyond [35] in providing a detailed con-
+vergence analysis, and a comprehensive comparison with the
+state of the art.
+A closely related algorithm to NOMP is proposed in [36],
+which employs a Bayesian framework for frequency estimation,
+using Newton reﬁnements for updating the frequencies. The
+details are different from our non-Bayesian, CFAR framework,
+and convergence analysis is not provided, but the beneﬁts of
+Newtonization are also evident in the numerical results in [36].
+Outline: We present our algorithm in Section II. In Sec-
+tion III, we present the CFAR-based stopping criterion, together
+with a simpliﬁed analytical characterization of false alarm and
+miss probabilities. In Section IV, we show why oversampling
+is essential for discretization followed by reﬁnement to em-
+ulate pursuit over the continuum. We discuss convergence in
+Section V. In Section VI, we report on numerical experiments,
+and compare NOMP with other methods in terms of estimation
+accuracy and computational complexity. Section VII discusses
+extension of the algorithm to more general settings, with illus-
+trative numerical results for compressive measurements. Sec-
+tion VIII concludes the paper.
+We set N = 256 throughout in our numerical results (other
+values of N yield entirely similar trends).
+Notation: Complex conjugate transpose of v is denoted by
+vH . ℜ{a} is the real part of complex number a. The Moore-
+Penrose pseudo-inverse of matrix A is denoted by A†. The
+distance between any two frequencies {ωl, ωk} is deﬁned by
+dist (ωk, ωl) ≜mina∈Z|ωk −ωl + 2πa|, i.e., the wrap-around
+distance when we restrict frequencies to lie in [0, 2π). The DFT
+matrix with unit norm columns and the corresponding grid spac-
+ing are denoted by F and Δdft, respectively. The inner product
+between v, u ∈CN is deﬁned as ⟨v, u⟩= uH v.
+II. NOMP ALGORITHM
+We ﬁrst discuss estimation of a single sinusoid, and then build
+on it to generalize to a mixture of sinusoids.
+A. Single Frequency
+We have y = gx (ω) + z. The Maximum Likelihood (ML)
+estimate of the gain and frequency are obtained by minimizing
+the residual power ∥y −gx (ω) ∥2, or equivalently, by maxi-
+mizing the function
+S (g, ω) = 2ℜ
+
+yH gx (ω)
+	
+−|g|2∥x (ω)∥2.
+(3)
+Directly optimizing S (g, ω) over all gains and frequencies is
+difﬁcult. Therefore, we adopt a two stage procedure: (1) Detec-
+tion stage, where we ﬁnd a coarse estimate of ω by restricting it
+to a discrete set, (2) Reﬁnement stage, in which we iteratively
+reﬁne gain and frequency estimates.
+For any given ω, the gain that maximizes S (g, ω) is given
+by ˆg =
+
+x(ω)H y
+
+/∥x (ω) ∥2. Substituting ˆg in S (g, ω) yields
+that the generalized likelihood ratio test (GLRT) estimate of
+ω (treating g as a nuisance parameter) is the solution to the
+following optimization problem:
+ˆω = arg max
+ω
+Gy (ω) ,
+(4)
+where
+Gy (ω) = |x (ω)H y|2/∥x (ω)∥2
+(5)
+is the GLRT cost function. We use this observation to ﬁnd a
+coarse estimate of (g, ω) in the Detection stage.
+Detection: We obtain a coarse estimate of ω by re-
+stricting
+it
+to
+a
+ﬁnite
+discrete
+set
+denoted
+by
+Ω ≜
+{k (2π/γN) : k = 0, 1, . . . , (γN −1)}, where γ is the over-
+sampling factor relative to the DFT grid. For our simulation
+results, we set γ = 4. The outputs of this stage are ωc ∈Ω that
+maximizes the GLRT cost function (4), and the corresponding
+gain
+
+x(ωc)H y
+
+/∥x (ωc) ∥2.
+Reﬁnement: Since ω can take any value in interval [0, 2π),
+we add a Newton-based reﬁnement stage for estimation on the
+continuum. Let (ˆg, ˆω) denote the current estimate. The Newton
+step for frequency reﬁnement is given by
+ˆω′ = ˆω −˙S (ˆg, ˆω) / ¨S (ˆg, ˆω)
+(6)
+where
+˙S (g, ω) = ℜ
+
+(y −gx (ω))H g (dx (ω) /dω)
+
+(7)
+¨S (g, ω) = ℜ
+
+(y −gx (ω))H g
+
+d2x (ω) /dω2
+(8)
+−|g|2∥dx (ω) /dω∥2.
+As we want to maximize S (g, ω), we only apply the update
+rule (6) when the function is locally concave (i.e., ¨S (ˆg, ˆω)
+< 0). The gain parameter is then updated to maximize S (g, ˆω′):
+ˆg′ =
+
+x(ˆω′)H y
+
+/∥x (ˆω′) ∥2.
+Reﬁnement Acceptance Condition (RAC): We accept a re-
+ﬁnement only if it leads to a strict improvement in Gy (ω); that
+is, if Gy (ˆω′) > Gy (ˆω). This ensures that an accepted reﬁne-
+ment can only decrease the overall residual energy, and that the
+residual energy is non-increasing throughout the course of the
+algorithm, which ensures convergence, as shown in Section V.
+B. Multiple Frequencies
+Let P = {(gl, ωl) , l = 1, . . . , k} denote a set of estimates of
+the parameters of the sinusoids in the mixture. Let
+yr (P) = y −
+l=k
+
+l=1
+glx (ωl)
+(9)
+denote the residual measurement corresponding to this estimate.
+The following procedure is a direct generalization of the single
+sinusoid reﬁnement algorithm to multiple frequencies. It pro-
+ceeds by employing the single sinusoid algorithm to perform
+Newtonized coordinate descent on the overall residual energy
+∥yr (P) ∥2. One step of this coordinate descent involves cycling
+through all sinusoids in P in a predetermined order. In this pro-
+cess, suppose that we wish to reﬁne the l-th sinusoid: we treat
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:38 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 4 ---
+MAMANDIPOOR et al.: NEWTONIZED ORTHOGONAL MATCHING PURSUIT: FREQUENCY ESTIMATION OVER THE CONTINUUM
+5069
+yr (P \ {(gl, ωl)}) as our measurement y and employ the single
+frequency update step to reﬁne (gl, ωl).
+Algorithm 1: Newtonized Orthogonal Matching Pursuit.
+1: Procedure EXTRACTSPECTRUM (y, τ):
+2: m ←0, P0 = {}
+3: while maxω∈DFTGyr (Pm ) (ω) > τ do
+4:
+m ←m + 1
+5:
+IDENTIFY
+ˆω = arg maxω∈ΩGyr (Pm −1 ) (ω).
+and its corresponding gain
+ˆg ←
+
+x(ˆω)H yr (Pm−1)
+
+/∥x (ˆω) ∥2
+6:
+P′
+m ←Pm−1 ∪{(ˆg, ˆω)}
+7:
+SINGLE REFINEMENT: Reﬁne (ˆg, ˆω) using single
+frequency Newton update algorithm (Rs Newton
+steps) to obtain improved estimates (ˆg′, ˆω′).
+8:
+P′′
+m ←Pm−1 ∪{(ˆg′, ˆω′)}
+9:
+CYCLIC REFINEMENT: Reﬁne parameters in P′′
+m one
+at a time: For each (g, ω) ∈P′′
+m we treat
+yr (P′′
+m \ {(g, ω)}) as the measurement y, and
+apply single frequency Newton update algorithm. We
+perform Rc rounds of cyclic reﬁnements. Let P′′′
+m
+denote the new set of parameters.
+10:
+UPDATE all gains in P′′′
+m by least squares:
+X ≜[x (ω1) . . . x (ωm)] , {ωl} are the frequencies in
+P′′′
+m [g1 . . . gm]T = X†y
+Let Pm denote the new set of parameters.
+11: return Pm
+The NOMP procedure is summarized in Algorithm 1. We
+now brieﬂy discuss the role of its main components:
+r SINGLE REFINEMENT (Step 7): Ideally, we want to iden-
+tify ˆω which maximizes the GLRT cost function over the
+continuum. The SINGLE REFINEMENT step emulates search
+over the continuum by locally reﬁning the estimate of ˆω
+obtained by picking the maximum over the discrete set Ω.
+r CYCLIC REFINEMENT (Step 9) is where NOMP diverges
+from forward greedy methods [37] (in particular OMP)
+by providing feedback for local reﬁnements of previously
+detected sinusoids. This gives them an opportunity to better
+explain the received signal in light of new information
+regarding the presence of another sinusoid. This feedback
+is presented in the form of an updated residue. As we
+see in Sections V.C and VI, this step is crucial for fast
+convergence and high estimation accuracy.
+r UPDATE by least squares (Step 10): Here we update gains
+by projecting the received signal y onto the subspace
+spanned by the estimated frequencies. This ensures that
+the residual energy is the minimum possible for the cur-
+rent set of estimated frequencies. We see in Section V that
+performing this projection step just prior to detecting a new
+sinusoid enables us to lower bound the convergence rate of
+NOMP by mirroring arguments used to establish bounds
+on OMP convergence [37].
+We have left the number of reﬁnement steps unspeciﬁed so
+far. For the simulations in this paper, we set Rs = 1 for every
+newly detected sinusoid in the SINGLE REFINEMENT step, and
+Rc ∈{1, 3, 5} reﬁnement rounds in the CYCLIC REFINEMENT
+step, depending on the difﬁculty of the estimation problem.
+C. Complexity Analysis
+We analyze the computational complexity of the main steps of
+NOMP assuming that the algorithm runs for exactly K iterations
+(i.e., perfect stopping). Checking whether the stopping criterion
+is satisﬁed is efﬁciently implemented using Fast Fourier Trans-
+form (FFT), with complexity O (KN log (N)). The IDENTIFY
+Step involves computing the GLRT cost function over the set
+of frequencies deﬁned by Ω. This can also be computed using
+FFTs in O (γKN log (γN)) time. The SINGLE REFINEMENT
+Step takes only O (RsN) operations per sinusoid, hence the
+total cost for SINGLE REFINEMENT is O (RsKN). The CYCLIC
+REFINEMENT involves reﬁning all frequencies that have been
+estimated so far, and has overall complexity O
+
+RcRsK2N
+
+.
+If we directly compute the pseudo-inverse and apply it to the
+vector of observation (i.e., X†y) in the UPDATE Step, the com-
+plexity is O
+
+NK2 + K3
+per iteration, and the overall cost
+is O
+
+NK3 + K4
+. However, we note that iterative methods
+(such as Richardson’s iteration or conjugate gradient [22]) are
+extremely efﬁcient in computing the least squares solution and
+can be used for speeding up the UPDATE Step. Empirical ob-
+servations suggest that the CYCLIC REFINEMENT step dominates
+the overall computational cost of NOMP.
+Minimum Frequency Separation: When two frequencies,
+say ω1 and ω2, are “very close”, intuitively, the mixture
+g1x (ω1) + g2x (ω2) is explained “very well” by a single fre-
+quency, say as (g1 + g2) x (ω1). Thus, a natural metric to char-
+acterize regimes for testing algorithms for mixture frequency
+estimation is the minimum frequency separation between any
+two sinusoids. We denote this by Δωmin = mink̸=ldist (ωk, ωl)
+and we would like our algorithms to work well even for small
+values of Δωmin.
+Without a minimum frequency separation condition, the esti-
+mation problem can be hopelessly ill-posed. This has been stud-
+ied in detail in [15] using Slepian’s work on prolate spheroidal
+sequences [38]. It has been shown that if the frequencies are
+clustered together, it becomes impossible for any method to
+recover the information from the noisy observations. It is im-
+portant to note that in the limit of inﬁnite SNR, however, one
+can still estimate a sparse clustered set of frequencies regardless
+of their separation (e.g., using Prony’s method of polynomial
+interpolation [39]).
+Estimation Theoretic Bounds: Estimation theoretic quanti-
+ties such as Cram´er Rao Bound (CRB) and Ziv-Zakai Bound
+(ZZB) [40] provide lower bounds on the variance of estimators.
+For single frequency estimation, these bounds are given by [41]
+CRB (SNR)=
+6
+SNR × (N 2 −1),
+(10)
+and
+ZZB (SNR) =
+ π
+0
+Q
+
+SNR
+
+1 −
+
+sin (Nh/2)
+N sin (h/2)
+
+
+h dh.
+(11)
+In Fig. 1, we plot estimation error bounds as a function of
+SNR = ∥x (ω) ∥2/σ2 = 1/σ2. The ZZB has a distinct threshold
+behavior: large frequency estimation errors are inevitable in a
+“low SNR” regime below a threshold, while the ZZB converges
+to the CRB when the SNR is large enough compared to this
+threshold. In Section VI, we compare algorithms in terms of
+high SNR behavior relative to the CRB, and low SNR behavior
+relative to the ZZB threshold. Note that even if per sinusoid
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:38 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 5 ---
+5070
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 64, NO. 19, OCTOBER 1, 2016
+Fig. 1.
+CRB and ZZB for estimating the frequency of a single sinusoid.
+SNRs are higher than the ZZB threshold, the joint estimation
+problem for multiple sinusoids may still be ill-posed (e.g., if the
+frequency separation is too small).
+Remark 1: We have deﬁned “integrated SNR” obtained by
+dividing the total power of a sinusoid by the noise power per
+complex dimension, i.e., SNR = E||x(ω)||2
+σ 2
+. An alternative def-
+inition of signal to noise ratio is the “per-sample SNR”, given
+by SNRsample = E[xi (ω)]2
+E[zi ]2
+= 1
+N SNR. For example, SNR =
+25 dB (which is the nominal SNR value in our simulations),
+corresponds to SNRsample ≈1 dB.
+III. CFAR-BASED STOPPING CRITERION
+Detection problems face a tension between false alarm and
+missed detection (or miss, for short). In many detection prob-
+lems, a model for the signal can be elusive. Thus, a common
+strategy is based on the Constant False Alarm Rate (CFAR) cri-
+terion [42], [43], which only requires a model for noise. Here,
+we use the CFAR criterion to estimate model order (i.e., number
+of sinusoids in the mixture K): if the residual signal can be ex-
+plained “well enough” by noise, up to a target false alarm rate,
+then we stop. We show by simulation that the actual false alarm
+rate is close to the nominal being designed for.
+We also estimate the probability of miss, taking into account
+the effect of noise but ignoring “interference” from other si-
+nusoids. The resulting receiver operating characteristic (ROC)
+turns out to be in remarkable agreement with simulations. This
+shows that, when the sinusoids are separated beyond a minimum
+separation, and when their SNRs exceed the ZZB thresholds
+for individual sinusoids, then the probabilities of false alarm
+and miss are dominated by noise rather than by inter-sinusoid
+interference.
+A. Stopping Criterion
+The algorithm terminates when
+Gyr (P) (ω) = |⟨yr (P) , x (ω)⟩|2 < τ
+for all DFT frequencies {2πk/N : k = 0, . . . , N −1}. In other
+words, we stop when ∥Fyr (P) ∥2
+∞< τ, where Fa is the Dis-
+crete Fourier Transform of a, and report P as our estimate of
+the sinusoids in the mixture.
+Suppose that we have already correctly detected all sinusoids
+in the mixture. In this case, the residual is yr (P) ≈z, where
+z ∼CN
+
+0, σ2IN
+
+(since F is a projection matrix, the statistics
+Fig. 2.
+Nominal v.s. measured probability of false alarm.
+of WGN are unchanged by it). It is easy to show that
+Pr
+
+∥Fyr (P)∥2
+∞> τ
+
+= 1 −
+
+1 −exp
+
+−τ/σ2N . (12)
+We choose our stopping criterion threshold τ
+so that
+Pr
+
+∥Fyr (P) ∥2
+∞> τ
+
+= Pfa, where Pfa is a nominal false
+alarm rate. Using (12), we can explicitly compute this threshold
+as
+τ = −σ2 log
+
+1 −(1 −Pfa)1/N 
+.
+A more easily interpreted expression can be obtained via
+asymptotics for large N [44] (which provide excellent ap-
+proximations for the moderate values of N used in our nu-
+merical results). Let MN ≜||Fyr (P) ||2
+∞. If yr (P) ≈z, we
+have E [MN ] = σ2 N
+k=1
+1
+k ≈σ2 log N, and the asymptotic
+distribution of E ≜MN −σ2 log N is given by Pr {E ≤x}
+= exp
+
+−exp
+
+−x/σ2
+. We set τ = σ2 log (N) + x, for x so
+that Pr {E ≥x} is equal to the nominal false alarm rate Pfa.
+This is given by x = −σ2 log log (1/ (1 −Pfa)) and the result-
+ing expression for the threshold τ is
+τ = σ2 log (N) −σ2 log log (1/ (1 −Pfa)) .
+(13)
+The “measured” versus “nominal” false alarm rates for differ-
+ent values of nominal Pfa, are shown in Fig. 2. Each point in the
+plot is generated by 300 runs of NOMP algorithm for estimating
+frequencies in a mixture of K = 16 sinusoids of ﬁxed nominal
+SNR. The minimum frequency separation Δωmin = 2.5Δdft.
+We declare a false alarm whenever NOMP overestimates the
+model order K. As shown in Fig. 2, the empirical false alarm
+rate closely follows the nominal value at various SNRs.
+B. Probability of Miss
+Deﬁne neighborhood Nωi around each true frequency ωi by
+Nωi ≜{ω : dist (ω, ωi) < 0.25 × Δdft}. We declare successful
+detection of ωi if at least one of the estimated frequencies lies
+in Nωi , otherwise we declare a miss for ωi. A miss results from
+noise and inter-sinusoid interference, but we only model noise
+here. For the minimum separation considered here, we show
+using simulations that the empirical probability of miss is only
+a little higher than the analytical estimate that we derive below.
+A sinusoid of amplitude A leads to a maximum FFT value
+of αA, where α ∈[0, 1] captures the amplitude reduction due
+to the grid mismatch. The magnitude of the maximum FFT
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:38 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 6 ---
+MAMANDIPOOR et al.: NEWTONIZED ORTHOGONAL MATCHING PURSUIT: FREQUENCY ESTIMATION OVER THE CONTINUUM
+5071
+Fig. 3.
+Measured v.s. computed ROCs.
+coefﬁcient, denoted by Mﬀt, is Rician with Pr {Mﬀt < x}
+= 1 −Q1
+
+ √
+2αA
+σ
+,
+√
+2x
+σ
+
+, where Q1 is Marcum Q-function. The
+sinusoid is not detected by the algorithm if Mﬀt < √τ, hence
+Pmiss = 1 −Q1
+
+α
+√
+2SNR,
+
+2τ/σ2
+
+.
+(14)
+Assuming
+uniform
+distribution
+for
+a
+frequency
+within
+a
+DFT
+grid
+interval
+gives
+us
+E [α] = E [sin (Nω/2) /
+(N sin (ω/2))] = 0.88,
+where
+ω ∼Uniform [−π/N, π/N].
+Therefore,
+Pmiss ≈1 −Q1
+
+0.88
+√
+2SNR,
+
+2τ/σ2
+
+.
+(15)
+Putting (13) and (15) together, we can characterize the ROC at
+various SNRs as shown in Fig. 3. The simulation parameters are
+the same as Fig. 2. We see that for SNR = 18 dB the probability
+of miss is negligible. When SNR goes below the ZZB threshold
+e.g., SNR = 14 dB, the probability of miss is bounded away
+from zero. This behavior is predicted by the ZZB threshold and
+our ROC analysis for single frequency estimation. However, as
+we see in Fig. 3, they serve as excellent approximations for
+multiple frequency estimation.
+Remark 2: For the simulations in this paper, we have used
+the CFAR-based stopping criteria for the NOMP algorithm.
+However, a variety of other stopping rules, e.g., Bayesian In-
+formation Criteria (BIC) [45] and Akaike Information Criteria
+(AIC) [46], can be easily adapted for use with the NOMP algo-
+rithm. In Section VI.D, we investigate the performance of the
+BIC stopping rule (see Appendix I for a quick overview) as well
+as CFAR-based stopping criteria for NOMP.
+IV. THE NEED TO OVERSAMPLE
+In this section, we show that oversampling is indeed required
+at the detection stage, in order for Newton reﬁnements to con-
+verge to the maximum of the GLRT cost function. We ignore
+noise in these discussions. The GLRT cost function is given
+by Gy (ω) = | K
+l=1 glh (ω −ωl) |
+2, where h (ω) = sin(N ω/2)
+N sin(ω/2)
+is the Dirichlet kernel. Characterizing the minimum required
+oversampling factor for this general setting is difﬁcult because
+of the highly non-convex nature of Gy (ω). Hence, we focus on
+a single frequency setting (K = 1).
+We wish to arrive at ω1 by optimizing Gy (ω) using Newton
+reﬁnements starting on a coarse grid. We note that arg maxωGy
+Fig. 4.
+Dirichlet kernel h (x) and its derivatives.
+(ω) = arg maxω|g1h (ω −ω1) |2 = arg maxω|h (ω −ω1) |2.
+We would like to characterize the minimum oversampling
+factor such that if we start off from the best guess of the
+maximum of Gyr (ω) on the grid, the Newton reﬁnement stage
+will take us to ω1. That is, we must characterize how close to
+ω1 must the nearest grid point lie, so that Newton reﬁnements
+will always take us to ω1 from this grid point. Without loss of
+generality, we set ω1 = 0 (since we have shifted our frequency
+axis such that ω1 = 0, no grid point may lie on 0).
+We start by normalizing frequencies by the DFT spacing.
+In this scaled frequency axis, the Dirchelet kernel is given by
+h (x) =
+sin(πx)
+N sin(πx/N ) , where x = ω/Δdft is sometimes referred
+to as the normalized frequency. As shown in [47], the Newton
+method converges to the solution of h′ (x) = 0 quadratically, if
+the initial guess x0 lies in an interval I around the true solution
+where the following conditions are met:
+r h′′ (x)̸ = 0
+∀x ∈I.
+r h′′′ (x) is ﬁnite ∀x ∈I.
+r |x0| < 1/M where M ≜supx∈I 0.5| h′′′(x)
+h′′(x) |.
+Fig. 4 shows the function h (x) and its derivatives in a window
+around the origin. The ﬁrst two conditions are met for any
+interval I ⊂(−1, 1). Therefore, it only remains to satisfy the
+third condition. By simple algebra one can see that if we set
+I = (−0.45, +0.45), then we have |x0| < 1/M for any x0 ∈
+I. Therefore the maximum acceptable grid spacing is about
+0.9 which is equivalent to minimum oversampling factor ≈
+1.12. This simple analysis shows that, even for a single sinusoid
+and no noise, we must sample beyond the DFT grid to ensure
+that the two-stage detection/reﬁnement procedure successfully
+identiﬁes the maximum of the GLRT cost function, thereby
+imitating pursuit over the continuum. Our simulations show
+that setting the oversampling factor at γ = 4 or more works
+very well, independent of the number of the sinusoids in the
+observations.
+V. CONVERGENCE
+In this section, we ﬁrst characterize convergence by providing
+upper bounds on the number of iterations of NOMP. We then
+provide a bound on the rate of convergence of NOMP as a
+function of the “atomic norm” of y, and the oversampling factor
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:38 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 7 ---
+5072
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 64, NO. 19, OCTOBER 1, 2016
+γ. Our convergence results are pessimistic, in that they do not
+account for the effect of the reﬁnement steps. We show by
+simulations the dramatic improvement due to reﬁnements, by
+comparing NOMP to the following variants of OMP:
+Discretized OMP (DOMP): This is standard OMP applied
+to the oversampled grid of sinusoids Ω. We use our NOMP
+implementation with number of reﬁnement steps set to zero,
+increasing the oversampling factor to γ = 20. Since DOMP
+can be interpreted as a special case of NOMP, the convergence
+analysis presented here is valid for DOMP as well.
+NOMP Without Cyclic Reﬁnements (NOMP): If we skip the
+CYCLIC REFINEMENT step of NOMP, then we get an algorithm
+that emulates OMP over the continuum of atoms. Note that
+NOMP–s does not have a feedback mechanism, hence it lies in
+the class of forward greedy methods. Our convergence analysis
+also holds here.
+A. Proof of Convergence
+A trivial upper bound on the number of iterations of NOMP
+is the number of the observations N. This is a direct result
+of solving the least squares at Step 10 of the algorithm. After
+N iterations, X is a square full-rank matrix (no frequency is
+detected twice), hence the residue is zero for (N + 1)th iteration
+and the algorithm terminates.
+The following theorem states another upper bound on the
+number of iterations, obtained by characterizing the amount
+by which the residual energy decreases when adding a new
+frequency to the set of estimated sinusoids.
+Theorem 1: The reduction of residual energy due to one it-
+eration (adding a new sinusoid) is at least τ. Consequently,
+min
+
+N, ∥y∥2/τ
+
+is an upper bound on the number of itera-
+tions of the algorithm.
+Proof: The residue at mth iteration of the algorithm is given
+by yr (Pm) = y −l=m
+l=1 glx (ωl). The energy of the residue
+in each iteration of the algorithm satisﬁes the following,
+∥yr (Pm−1)∥2 (a)
+= ∥yr (P′
+m)∥2 + Gyr (Pm −1 ) (ˆω)
+(b)
+≥∥yr (P′′′
+m)∥2 + Gyr (Pm −1 ) (ˆω)
+(c)
+≥∥yr (Pm)∥2 + Gyr (Pm −1 ) (ˆω)
+(16)
+(d)
+≥∥yr (Pm)∥2 + τ.
+(17)
+where (a) follows from Step 5 of the algorithm where we project
+yr (Pm−1) orthogonal to the subspace spanned by x (ˆω) to get
+yr (P′
+m). Inequalities in (b) follow from (RAC) checks per-
+formed whenever the single frequency reﬁnement algorithm is
+invoked and (c) from the fact that least squares UPDATE can only
+lead to a decrease in energy of the residual signal. (d) is a direct
+consequence of the stopping criteria of the algorithm.
+Inequality (17) shows that the reduction of the residual en-
+ergy due to detecting a new sinusoids is always greater than
+τ. This result bounds the number of iterations of the algorithm
+from above by ∥y∥2/τ, proving convergence. Combining this
+observation with the trivial upper-bound N completes the proof.
+B. Rate of Convergence
+We ﬁrst bound the maximum of the GLRT cost function
+Gy (ω) over the continuum of frequencies, in terms of that over
+the oversampled grid. To this end, we borrow ideas used in
+[8] (Appendix C) for proving a similar property for the dual
+atomic norm. We brieﬂy introduce the notion of atomic norm
+(also known as dictionary norm) [37] and specialize to the line
+spectral estimation problem.
+The atomic set of unit norm sinusoids is given by A
+=
+
+ejφx (ω) : φ, ω ∈[0, 2π)
+	
+. The atomic norm for y is de-
+ﬁned by
+∥y∥A ≜inf {t > 0 : y ∈t conv (A)} .
+(18)
+where conv (A) denotes the convex hull of the points in A. Since
+the centroid of the conv (A) is at the origin, the atomic norm
+can be rewritten as [48], [49]
+∥y∥A ≜inf
+ 
+l
+|gl| : y =
+
+l
+glx (ωl) , x (ωl) ∈A
+
+. (19)
+Note that this is not the ℓ1 norm of y, but the ℓ1 norm on the
+coefﬁcients of the representation of y by elements of A. The
+atomic norm is typically small when its argument has a good
+sparse approximation [2]. The dual norm of ∥· ∥A is deﬁned by
+∥y∥∗
+A = sup
+a∈A
+ℜ{⟨a, y⟩} .
+(20)
+It is easy to see that
+∥y∥∗
+A =
+sup
+ω∈[0,2π)
+sup
+φ∈[0,2π)
+ℜ
+
+eiφ⟨x (ω) , y⟩
+	
+=
+sup
+ω∈[0,2π)
+|⟨x (ω) , y⟩|
+=
+sup
+ω∈[0,2π)
+
+Gy (ω).
+(21)
+Directly borrowing from [8] gives us the following Theorem.
+Theorem 2: [8] Maximizing the GLRT cost function (for the
+dictionary of unit norm sinusoids) over [0, 2π) is consistent with
+that over the oversampled grid Ω with oversampling factor γ.
+That is, we have
+max
+ω∈Ω
+
+Gy (ω) ≤
+sup
+ω∈[0,2π)
+
+Gy (ω)
+(22)
+≤
+
+1 −2π
+γ
+−1
+max
+ω∈Ω
+
+Gy (ω).
+(23)
+See ([8], Appendix C) for a proof.
+We need the following lemma to prove Theorem 3, which
+provides a pessimistic characterization of the convergence rate.
+Lemma 1: Assume {an}n≥0 is a decreasing sequence of
+nonnegative numbers such that a0 ≤U and
+an ≤an−1
+
+1 −an−1
+U
+
+,
+∀n > 0,
+then we have an ≤
+U
+n+1 for all n ≥0.
+The proof is by induction [37]. Suppose an−1 ≤U
+n . Either
+an−1 ≤
+U
+n+1 , in which case an ≤
+U
+n+1 , or an−1 ≥
+U
+n+1 , in
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:38 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 8 ---
+MAMANDIPOOR et al.: NEWTONIZED ORTHOGONAL MATCHING PURSUIT: FREQUENCY ESTIMATION OVER THE CONTINUUM
+5073
+which case
+an ≤an−1
+
+1 −an−1
+U
+
+≤U
+n
+
+1 −
+U
+n+1
+U
+
+=
+U
+n + 1.
+Hence, an ≤
+U
+n+1 for all n ≥0.
+Theorem 3: For all y such that ∥y∥A < ∞, the residual en-
+ergy of NOMP at the mth iteration satisﬁes
+∥yr (Pm) ∥≤(m + 1)−1/2
+
+1 −2π
+γ
+−1
+∥y∥A.
+(24)
+Proof: From (16), we have
+∥yr (Pm)∥2 ≤∥yr (Pm−1)∥2 −Gyr (Pm −1 ) (ˆω) .
+(25)
+yr (Pm−1) is the result of projecting y orthogonal to the sub-
+space spanned by Pm−1, therefore
+∥yr (Pm−1)∥2= ⟨yr (Pm−1) , y⟩
+(a)
+≤∥y∥A∥yr (Pm−1)∥∗
+A
+= ∥y∥A
+sup
+ω∈[0,2π)
+
+Gyr (Pm −1 ) (ω)
+(b)
+≤∥y∥A
+
+1 −2π
+γ
+−1
+max
+ω∈Ω
+
+Gyr (Pm −1 ) (ω),
+where (a) follows by H¨older’s inequality [50], and (b) is by
+Theorem 2. Let η ≜∥y∥A
+
+1 −2π
+γ
+−1
+. From Step 5 of the al-
+gorithm we have
+ˆω = arg maxω∈Ω
+
+Gyr (Pm −1 ) (ω),
+hence,
+∥yr (Pm−1)∥2 ≤η
+
+Gyr (Pm −1 ) (ˆω).
+(26)
+Combining (25) and (26), gives
+∥yr (Pm)∥2 ≤∥yr (Pm−1)∥2 
+1 −η−2∥yr (Pm−1)∥2
+.
+(27)
+Using Lemma 1 and the fact that
+∥yr (P0) ∥2 = ∥y∥2 ≤∥y∥2
+A ≤η2,
+(28)
+we have
+∥yr (Pm)∥2 ≤
+η2
+m + 1.
+(29)
+In other words,
+∥yr (Pm)∥≤(m + 1)−1/2
+
+1 −2π
+γ
+−1
+∥y∥A.
+(30)
+This proves the Theorem.
+For the simulations we set γ = 4, but it is worth mentioning
+that, since we employ FFTs for detection over the oversampled
+grid, increasing γ has marginal effect on the runtime of the
+algorithm. In fact setting γ = 20 leads to only about 5% increase
+Fig. 5.
+Convergence rates at noiseless case.
+in runtime. If we compare (30) to the rate of convergence of
+OMP over the continuum given by [37],
+∥yr (Pm) ∥2 ≤(m + 1)−1∥y∥2
+A,
+(31)
+we see that by choosing γ large enough, the bound on the
+convergence rate speciﬁed in (30) approaches that of OMP over
+the continuum. Note that, in the derivation of (30) we have not
+considered the effect of the reﬁnement steps, but imposing RAC
+ensures that reﬁnements can only help speed up convergence.
+C. Empirical Rate of Convergence
+We use numerical simulations to highlight the convergence
+beneﬁts of the reﬁnement steps in NOMP compared to the bound
+speciﬁed in (30). We plot the mean residual energy (averaged
+over 1000 runs) as a function of the number of iterations in
+a noiseless setting. We set K = 16, and Δωmin = 2.5 × Δdft.
+Fig. 5 shows that light oversampling (γ = 4) followed by SIN-
+GLE REFINEMENT step (NOMP-) leads to a better convergence
+rate than having a large oversampling factor (γ = 20) and no
+reﬁnements (DOMP). On the other hand, NOMP enjoys an ex-
+tremely fast convergence rate due to the CYCLIC REFINEMENT
+step. In fact we see that for the setting where Δωmin is fairly
+large, the residual energy essentially drops to machine precision
+after 16 iterations, which equals the number of sinusoids in the
+mixture.
+VI. SIMULATION RESULTS
+Our performance measure is the mean squared error (MSE)
+of frequency estimation, and we compare the performance of
+NOMP against a number of benchmarks in various settings.
+Benchmarks: The MUSIC algorithm is implemented using a
+modiﬁed version of the MATLAB routine rootmusic. The modi-
+ﬁcations are two-fold: (1) we use Minimum Description Length
+(MDL) criterion [51] for estimating the number of sinusoids in
+the mixture; (2) MUSIC operates by constructing an estimate of
+the autocorrelation matrix of the observed data vector. To this
+end, we use a sliding window of size W, to generate multiple
+snapshots from the observation vector y ∈CN . The choice of
+W has a signiﬁcant impact on the performance of the algorithm,
+both in terms of estimation accuracy and run time: W too large
+leads to an inaccurate estimate of the autocorrelation matrix
+and the signal subspace, whereas too small a value effectively
+reduces the size of the observation window in time, degrading
+frequency estimation accuracy. We have found (empirically) that
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:38 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 9 ---
+5074
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 64, NO. 19, OCTOBER 1, 2016
+TABLE I
+SETTINGS OF DIFFERENT SCENARIOS
+setting W = 96 results in the best estimation accuracy for the
+nominal settings in our simulations.
+For sparse convex optimization, we consider Atomic norm
+Soft Thresholding (AST) [8], [52]. We use the alternating
+direction method of multipliers (ADMM) [53] to implement
+AST, as suggested in [8]. The updates in ADMM are itera-
+tive (typically 100–200 iterations for each simulation run), and
+each iteration includes an eigenvalue thresholding step for an
+(N + 1) × (N + 1) matrix. This O
+
+N 3
+step dominates the
+computational cost of the ADMM method, and becomes very
+expensive for large N.
+The authors in [8] suggest solving Lasso as an alternative
+to the semi-deﬁnite program induced by AST. Lasso is solved
+on an oversampled frequency grid, using the highly optimized
+ℓ2 −ℓ1 software package SpaRSA [54]. We set the tolerance
+parameter to be 10−3 (other than this, we use the default pa-
+rameters): smaller values of the tolerance parameter (e.g., 10−4)
+increase runtime signiﬁcantly, while providing marginal perfor-
+mance improvement. The regularization parameter in AST and
+Lasso formulation, suggested in [8], is set to
+reg = σ
+
+1 +
+1
+log N
+ 
+log N + log (4π log N).
+The oversampling factor for the Lasso solver is set to 10 in our
+simulations. While increasing the oversampling factor improves
+Lasso performance, as mentioned in [8], for an oversampled
+grid, the frequencies estimated by Lasso cluster around the true
+frequencies. In order to avoid drastically overestimating model
+order, we implement a simple clustering scheme. In our simula-
+tions, we group frequencies into the largest number of clusters
+possible so that the frequency separation between any two sinu-
+soids in different clusters is no smaller than 0.25 × Δdft. After
+clustering, we update the gains of the cluster centers by solving
+the least squares problem minimize{gl }∥y −
+l glx (ωl) ∥2.
+Newtonized Lasso (NLasso): We also compare the results of
+NOMP algorithm with an extension of the Lasso formulation.
+In this scheme, we ﬁrst apply the Lasso solver to identify the
+frequencies over the highly oversampled grid. Then we run
+the CYCLIC REFINEMENT step of the NOMP algorithm in order
+to reﬁne the estimated frequencies, in order to prevent error
+ﬂoors caused by the off-grid effect. The parameters of Lasso
+are unchanged and the number of reﬁnement steps is set to
+5. Our simulations show that, for well-separated frequencies,
+the reﬁnement step signiﬁcantly improves estimation accuracy
+while incurring a small increase in runtime compared to Lasso.
+However, the beneﬁt of reﬁnement for Lasso diminishes as we
+increase the difﬁculty of the estimation problem (small Δωmin).
+Simulation Set-Up: We consider a mixture of K = 16 sinu-
+soids of length N = 256. We perform 300 simulation runs for
+each of the four scenarios characterized by Δωmin and SNR
+values. The settings for different scenarios are summarized in
+Table I.
+In Scenarios 1 and 2, the nominal SNR for each sinusoid
+is set as SNRnom = 25 dB, whereas for Scenarios 3 and 4, the
+TABLE II
+NOMP PARAMETERS AT DIFFERENT SCENARIOS
+Fig. 6.
+CCDF of the frequency MSE for Scenario 1. (a), (b) Zoomed in.
+SNR values are chosen uniformly from [15, 35] dB, with mean
+equal to the nominal SNR of 25 dB. In each simulation run,
+the gain magnitudes are set to |gl| = σ√SNRl, while the phases
+{∠gl} are chosen uniformly from [0, 2π). The frequencies are
+chosen uniformly at random from [0, 2π)K while respecting
+the minimum separation constraints speciﬁed by Δωmin (if the
+minimum separation criterion is not met, we sample again from
+[0, 2π)K ). We plot the Complementary Cumulative Distribution
+Function (CCDF) of the squared frequency estimation error for
+all algorithms, along with the CRB (also a random variable,
+since it differs across realizations), and also compare against the
+DFT spacing, which is the resolution provided by coarse peak
+picking. See Appendix II for a quick overview of Cram´er Rao
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:38 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 10 ---
+MAMANDIPOOR et al.: NEWTONIZED ORTHOGONAL MATCHING PURSUIT: FREQUENCY ESTIMATION OVER THE CONTINUUM
+5075
+Fig. 7.
+CCDF of the frequency MSE for Scenario 2. (a), (b) Zoomed in.
+Bound. The parameters of NOMP algorithm are set according
+to Table II for different scenarios.
+A. Frequency Estimation Accuracy
+1) Distribution of Error: Let us ﬁrst examine the CCDF
+of squared frequency estimation error in each scenario. Fig. 6
+shows that NOMP, AST and NLasso lead to very similar er-
+ror distributions in Scenario 1, while outperforming the other
+methods. Unlike Lasso and DOMP, which suffer from the off-
+grid effect, MUSIC picks frequencies over the continuum, and
+achieves better estimation accuracy. Another observation is that
+if the frequencies are well separated (as in Scenario 1), then
+adding a reﬁnement stage at the output of Lasso leads to a sig-
+niﬁcant improvement in estimation accuracy. As we move to
+more difﬁcult Scenarios, however, the performance of NLasso
+degrades compared to NOMP and AST as shown in Fig. 7 for
+Scenario 2. The reason is that the reﬁnement stage of NLasso
+is able to improve the estimation accuracy only when the initial
+estimates provided by Lasso are close to the true frequencies.
+When Lasso fails in providing good initial estimates, there is no
+beneﬁt in locally reﬁning the frequencies.
+Fig. 8.
+CCDF of the frequency MSE for Scenario 3. (a), (b) Zoomed in.
+Fig. 8 shows the distribution of error in Scenario 3. We see
+that the overall gap in the performance of different algorithms is
+reduced compared to the ﬁrst two scenarios, with AST, NOMP
+and NLasso still achieving the highest estimation accuracy. In
+Scenario 4, NOMP achieves superior performance compared to
+all of the other methods, as shown in Fig. 9.
+2) Mean Squared Error: Here we examine the performance
+of different algorithms in terms of frequency estimation accu-
+racy by looking at the normalized Mean Squared Error (MSE),
+deﬁned by E
+
+(ωtrue −ωest)2
+/Δ2
+dft, in different scenarios. In
+Scenarios 1 and 3, where frequencies are well-separated, one
+hopes to get to the estimation accuracy of a single sinusoid (as
+if the other sinusoids did not exist). We therefore use the CRB
+and ZZB corresponding to a single sinusoid, computed by (10)
+and (11), respectively, as measures of optimality. In Scenarios 2
+and 4, where frequencies can get close to one another, we com-
+pute the CRB empirically for each realization of the problem,
+and employ the mean CRB as a measure of optimality.
+Fig. 10 shows the MSE of frequency estimation in
+Scenarios 1 and 2, for SNRnom taking values from 13 dB to
+35 dB. In Scenario 1, if the nominal SNR is high enough, AST,
+NOMP, and NLasso all achieve the CRB. As we decrease the
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:38 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 11 ---
+5076
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 64, NO. 19, OCTOBER 1, 2016
+Fig. 9.
+CCDF of the frequency MSE for Scenario 4. (a), (b) Zoomed in.
+nominal SNR, all of the algorithms exhibit threshold behavior,
+well predicted by the ZZB threshold. The threshold SNR of
+AST is lower than that of other methods, showing its noise re-
+silience. MUSIC does not achieve the CRB, but closely follows
+the bound for all SNR values in this scenario. DOMP and Lasso
+on the other hand, reach performance ﬂoors. We examine this
+ﬂoor more closely in Section VI.C to see whether it is a fun-
+damental algorithmic limitation, or happens due to the off-grid
+effect. Fig. 10(b) corresponds to Scenario 2, where the separa-
+tion between frequencies can be very small. We see that MUSIC
+is the only algorithm that beneﬁts from increasing the nominal
+SNR. This goes back to the asymptotic optimality of MUSIC:
+for SNR →∞and K ≪N, MUSIC is able to precisely deter-
+mine the frequencies in the mixture, regardless of the separation
+between them [11].
+In Scenarios 3 and 4, the SNRs are drawn independently
+and uniformly at random from the interval [15, 35] dB. In order
+Fig. 10.
+Normalized frequency MSE for Scenarios 1 and 2. (a) Scenario 1,
+(b) Scenario 2.
+to evaluate the frequency MSE in these scenarios, we ﬁx the
+SNR of one of the sinusoids in the mixture at a given value,
+while letting the other (K −1) SNRs to be realized randomly.
+Fig. 11(a) shows the frequency MSE curves corresponding to
+Scenario 3. As we expected from error distribution plots in
+Fig. 8, the gap in the performance of different algorithms has
+decreased compared to the ﬁrst scenario. Fig. 11(b) corresponds
+to Scenario 4, in which NOMP outperforms all of the other
+algorithms, and tightly follows the CRB. This indicates that
+NOMP is highly successful in exploiting the disparity in SNRs
+across sinusoids in the mixture, in order to estimate closely-
+spaced frequencies. AST achieves the best performance at very
+low SNRs; however, its MSE curve stays bounded away from
+the CRB, with an expanding gap as we increase SNR.
+3) Number of Cycles of Newton Reﬁnement (Rc): We have
+seen that NOMP is able to achieve the CRB in Scenarios 1 and
+3, with one cycle of reﬁning the sinusoids in each iteration, i.e.,
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:38 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 12 ---
+MAMANDIPOOR et al.: NEWTONIZED ORTHOGONAL MATCHING PURSUIT: FREQUENCY ESTIMATION OVER THE CONTINUUM
+5077
+Fig. 11.
+Normalized frequency MSE for Scenarios 3 and 4. (a) Scenario 3,
+(b) Scenario 4.
+Rc = 1. In this subsection, we want to highlight the effect of
+increasing Rc in improving the frequency estimation accuracy
+of NOMP in Scenarios 2 and 4 where Δωmin = 0.5 × Δdft.
+Fig. 12 shows the frequency MSE of NOMP for Rc ∈{1, 3, 5}.
+We see that NOMP enjoys the beneﬁts of having more rounds
+of reﬁnement, but exhibits diminishing return as Rc increases.
+In particular, increasing Rc beyond 3 cycles gives marginal
+improvement in estimation accuracy.
+B. Computation Time
+Table III summarizes the time needed for running 300 simula-
+tions for each of the algorithms in different scenarios. We see that
+DOMP is extremely fast at the expense of estimation accuracy.
+NOMP is faster than all of the other methods in all four Scenar-
+ios, while achieving remarkable frequency estimation accuracy.
+As we discussed in Section II.C, the CYCLIC REFINEMENT step
+Fig. 12.
+Performance improvement of NOMP with increasing the number of
+cyclic reﬁnements in Scenarios 2 and 4. (a) Scenario 2, (b) Scenario 4.
+has the complexity O
+
+RcRsK2N
+
+, and dominates the compu-
+tational cost of NOMP. Table IV shows the time needed for 300
+simulation runs of NOMP for different values of Rc. Note that
+as we increase the difﬁculty of the estimation scenario, AST,
+Lasso and NLasso tend to take more time, while MUSIC and
+NOMP are unaffected.
+C. Asymptotic Regime
+It is interesting to see the effect of increasing the oversam-
+pling factor for Lasso and DOMP. Fig. 13 corresponds to Sce-
+nario 1, with the change being that the oversampling factor for
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:38 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 13 ---
+5078
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 64, NO. 19, OCTOBER 1, 2016
+TABLE III
+TIME [SEC] FOR 300 RUNS OF EACH ALGORITHM. PARAMETERS OF NOMP
+ARE SET BY TABLE II
+TABLE IV
+TIME [SEC] FOR 300 RUNS OF NOMP ALGORITHM, FOR DIFFERENT NUMBERS
+OF CYCLIC REFINEMENTS Rc
+Fig. 13.
+Frequency MSE for Scenario 1 and highly over-sampled grid for
+Lasso and DOMP.
+these two algorithms is increased. We observe an improvement
+in the performance of both algorithms in terms of estimation
+accuracy, with that for Lasso being especially signiﬁcant. Com-
+paring these results to those in Fig. 10(a), we see that the MSE
+performance of DOMP is marginally improved by increasing γ
+from 10 to 100. This performance plateau shows a fundamen-
+tal algorithmic limitation of DOMP, and highlights the critical
+role of cyclic Newton reﬁnements in NOMP. In other words,
+the performance limitation of DOMP is not just due to the off-
+grid error, but also a consequence of making “hard-decisions”
+at each iteration. The computational complexity of DOMP is
+insensitive to oversampling factor. For example, computation
+time increases from 3.25 to about 7.96 seconds as we go from
+γ = 20 to γ = 100.
+In theory, Lasso is only limited by the oversampling fac-
+tor γ, and as γ →∞, the result of Lasso converges to that of
+AST, as a consequence of the convergence of the correspond-
+ing atomic norms [8]. In practice, however, the performance of
+Lasso solved on a moderate size grid might be far from that of
+AST. Fig. 13 shows that, at large enough oversampling factors,
+Lasso approaches the CRB, but the computational cost becomes
+prohibitive. For example, the computation time of Lasso for 300
+runs, increases from 72.16 seconds to 191.22 seconds as we go
+from γ = 20 to γ = 50.
+Fig. 14.
+CDF of the estimates of the model order for AST and MUSIC.
+D. Model Order Estimation
+Estimating the model order K (the true number of non-
+zero atoms in the mixture) has signiﬁcant importance in sparse
+approximation. Here we examine the Cumulative Distribution
+Function (CDF) of the estimated model order by different al-
+gorithms. As shown in Fig. 14, both AST and MUSIC perform
+well, with MUSIC performance slightly degrading in scenarios
+with small Δωmin. Note that the mean of the distributions are
+very close to the truth (small bias), and they have a small spread
+around the mean (small variance). Fig. 15 shows the model order
+estimates for NOMP using both CFAR and BIC-based stopping
+criteria. We see that both criteria are very accurate in all four
+scenarios.
+On the other hand, Lasso and DOMP perform poorly in es-
+timating the model order, especially in scenarios with small
+Δωmin. As shown in Fig. 16, DOMP tends to overestimate
+the model order when some of the frequencies are placed too
+closely. This is again the result of a fundamental algorithmic
+limitation. DOMP does not allow for correcting errors that have
+happened in the previous iterations; instead, it tries to explain
+the residual energy by overestimating the number of non-zero
+atoms.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:38 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 14 ---
+MAMANDIPOOR et al.: NEWTONIZED ORTHOGONAL MATCHING PURSUIT: FREQUENCY ESTIMATION OVER THE CONTINUUM
+5079
+Fig. 15.
+CDF of the estimates of the model order for NOMP using CFAR and
+BIC criteria.
+In Scenario 2, Lasso tends to underestimate the model or-
+der. The main reason is that for two closely spaced frequen-
+cies, Lasso generates two overlapping clusters of estimated
+frequencies, which are later replaced by a single frequency by
+our clustering algorithm. On the other hand, if we do not employ
+clustering, Lasso signiﬁcantly overestimates the model order.
+VII. EXTENSIONS OF THE ALGORITHM
+In this section we point out an immediate extension of NOMP
+algorithm. Speciﬁcally, we can replace the manifold of sinusoids
+{x (ω) : ω ∈[0, 2π)} by {Ax (ω) /∥Ax (ω) ∥: ω ∈[0, 2π)},
+where A ∈CM ×N is a known measurement matrix. This is
+motivated by the measurement setup y = K
+l=1 glAx (ωl).
+A. Compressive Measurements
+We consider a compressive measurement model in which
+the number of measurements M ≪N. As in the bulk of
+literature on compressive sensing, we assume that the el-
+ements of A are chosen i.i.d from appropriate zero-mean
+Fig. 16.
+CDF of the estimates of the model order for Lasso and DOMP with
+γ = 20.
+Fig. 17.
+CCDF of the frequency MSE for Scenario 1 with Compressive
+measurements.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:38 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 15 ---
+5080
+IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. 64, NO. 19, OCTOBER 1, 2016
+distributions (with variance conveniently scaled to 1/N such
+as
+Uniform
+
+± 1/
+√
+N
+	
+,
+Uniform
+
+± 1/
+√
+N, ±j/
+√
+N
+	
+,
+N (0, 1/N) , etc.,) so that certain concentration results hold. It
+has been shown in [41] that when A satisﬁes certain isometry
+conditions (related to the estimation problem at hand), the CRB
+and ZZB are approximately preserved for compressive estima-
+tion, except for an SNR degradation of M/N due to randomly
+projecting down the signal to a smaller space. The number
+of compressive measurements needed to estimate continuous
+frequencies scales as M = O (K log N) [41]. In order to get
+concrete numerical intuition, we set M = N/4 = 64 with the
+elements of A chosen uniformly and independently at random
+from
+
+± 1/
+√
+N, ±j/
+√
+N
+	
+and run NOMP with atoms
+{s (ω) = Ax (ω) /∥Ax (ω) ∥: ω ∈[0, 2π)}.
+We
+consider
+Scenario 1 with Rc = 3, with number of sinusoids set to
+K = 13 and K = 16. Our algorithm approaches the CRB in the
+setting where K = 13, whereas we incur large estimation errors
+when K = 16; see Fig. 17. The large estimation errors for
+K = 16 occur because the compressive measurement matrix
+A fails to preserve the structure of the estimation problem:
+M = 64 compressive measurements is too few for K = 16
+sinusoids.
+VIII. CONCLUSION
+We have shown that NOMP is fast and near-optimal for fre-
+quency estimation in AWGN. It performs better than classical
+methods such as MUSIC, and more recent convex optimization
+based methods such as AST, in terms of both estimation accu-
+racy and run time. The algorithm uses a fundamental element of
+OMP, ensuring that the residue is orthogonal to the signal space
+spanned by the current set of frequencies. However, NOMP
+avoids the error ﬂoors of naively discretized OMP by reﬁne-
+ment over the continuum. Speciﬁcally, it searches for a signal
+subspace in the “neighborhood” of our current signal space
+which can better explain the observed measurements. The algo-
+rithm has a natural “decision feedback” interpretation in which
+it gives the already detected sinusoids a chance to adjust their
+frequencies in light of new evidence which is presented in the
+form of an updated residue after we add the next sinusoid.
+We believe that the ideas underlying NOMP are broadly ap-
+plicable to problems of sparse approximation over continuous
+dictionaries, but further work is required to justify this assertion.
+An open problem is to go beyond the pessimistic convergence
+rate estimates provided here by analytically quantifying the ben-
+eﬁts of reﬁnement.
+APPENDIX I: BAYESIAN INFORMATION CRITERIA
+The BIC balances an increase in the likelihood with the num-
+ber of parameters used to achieve that increase. Namely,
+BIC = 2 ln L2 (θ1, . . . , θm 2 )
+L1 (φ1, . . . , φm 1 ) −(m2 −m1) ln (N) ,
+(32)
+where L1 (φ1, . . . , φm 1 ) and L2 (θ1, . . . , θm 2 ) are likelihood
+functions and {φi}m 1
+i=1 and {θj}m 2
+j=1 are their corresponding pa-
+rameters. For our measurement model, y = K
+l=1 glx (ωl) + z,
+where z ∼N
+
+0, σ2IN
+
+, we have
+L
+
+{gl, ωl}K
+l=1
+
+=
+1
+(πσ2)N exp
+
+−||yr||2/σ2
+,
+where
+yr = y −K
+l=1 glx (ωl)
+is
+the
+residual.
+There-
+fore,
+BIC =
+2
+σ 2 Δ||yr||2 −2 ln (N),
+where
+Δ||yr||2
+= ||yr(old) ||2 −||yr (new) ||2
+is
+the
+reduction
+in
+resid-
+ual energy after detecting a new sinusoid. If BIC > 10, it is a
+strong evidence that the most recent reduction in the residual
+energy corresponds to a newly detected sinusoid. Therefore,
+when BIC < 10, we stop the algorithm.
+APPENDIX II: CRAM´ER RAO BOUND
+In this Appendix we ﬁrst review the Cram´er Rao Bound [7]
+for an unbiased estimator in a general setting, then specialize
+to the frequency estimation problem. Let a ∈Rλ. If aT ˆθ (y)
+is an unbiased estimator of aT θ, then the variance of the es-
+timator given by Ey|θ[(aT ˆθ(y) −aT θ)
+2] is lower bounded by
+aT F −1(θ)a, where F (θ) is the Fisher Information Matrix. The
+(m, n)th element of F (θ) is given by
+Fm,n (θ) = Ey|θ
+∂ln p (y|θ)
+∂θm
+∂ln p (y|θ)
+∂θn
+
+.
+(33)
+For parameter estimation in additive white Gaussian noise i.e.,
+y = s (θ) + z, z ∼CN
+
+0, σ2I
+
+, (33) simpliﬁes to,
+Fm,n (θ) = 2
+σ2 ℜ
+∂s (θ)
+∂θm
+H ∂s (θ)
+∂θn
+
+.
+(34)
+For our frequency estimation problem in (2), θ is the vector
+of all parameters, namely {|gl|, ∠gl, ωl : l = 1, . . . , K}, and
+s (θ) = K
+l=1 |gl|ej∠gl x (ωl). We form F (θ) for this measure-
+ment model then choose those diagonal elements of F −1 (θ)
+that correspond to the frequencies {ωl : l = 1, . . . , K}.
+REFERENCES
+[1] “NOMP Software,” 2016, [Online]. Available: https://bitbucket.org/
+wcslspectralestimation/continuous-frequency-estimation/src/NOMP
+[2] J. A. Tropp and S. J. Wright, “Computational methods for sparse solution
+of linear inverse problems,” Proc. IEEE, vol. 98, no. 6, pp. 948–958, 2010.
+[3] J. A. Tropp and A. C. Gilbert, “Signal recovery from random measure-
+ments via orthogonal matching pursuit,” IEEE Trans. Inf. Theory, vol. 53,
+no. 12, pp. 4655–4666, 2007.
+[4] Y. Chi, L. L. Scharf, A. Pezeshki, and A. R. Calderbank, “Sensitivity
+to basis mismatch in compressed sensing,” IEEE Trans. Signal Process.,
+vol. 59, no. 5, pp. 2182–2195, 2011.
+[5] L. Jacques and C. De Vleeschouwer, “A geometrical study of matching
+pursuit parametrization,” IEEE Trans. Signal Process., vol. 56, no. 7,
+pp. 2835–2848, 2008.
+[6] S. G. Mallat and Z. Zhang, “Matching pursuits with time-frequency dic-
+tionaries,” IEEE Trans. Signal Process., vol. 41, no. 12, pp. 3397–3415,
+1993.
+[7] H. L. Van Trees, Detection, Estimation, and Modulation Theory.
+New York, NY, USA: Wiley, 2004.
+[8] B. N. Bhaskar, G. Tang, and B. Recht, “Atomic norm denoising with
+applications to line spectral estimation,” IEEE Trans. Signal Process.,
+vol. 61, no. 23, pp. 5987–5999, 2013.
+[9] R. O. Schmidt, “Multiple emitter location and signal parameter estima-
+tion,” IEEE Trans. Antennas Propag., vol. 34, no. 3, pp. 276–280, 1986.
+[10] R. Roy and T. Kailath, “Esprit-estimation of signal parameters via ro-
+tational invariance techniques,” IEEE Trans. Acoust., Speech, Signal
+Process., vol. 37, no. 7, pp. 984–995, 1989.
+[11] H. Teutsch, Modal Array Signal Processing: Principles and Applications
+of Acoustic Waveﬁeld Decomposition, ser. Lecture Notes in Control and
+Information Sciences. Berlin, Germany: Springer, 2007.
+[12] K. Duda, L. B. Magalas, M. Majewski, and T. P. Zieli´nski, “Dft-
+based estimation of damped oscillation parameters in low-frequency me-
+chanical spectroscopy,” IEEE Trans. Instrum. Meas., vol. 60, no. 11,
+pp. 3608–3618, 2011.
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:38 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 16 ---
+MAMANDIPOOR et al.: NEWTONIZED ORTHOGONAL MATCHING PURSUIT: FREQUENCY ESTIMATION OVER THE CONTINUUM
+5081
+[13] T. Zieli´nski and K. Duda, “Frequency and damping estimation methods-an
+overview,” Metrol. Meas. Syst., vol. 18, no. 4, pp. 505–528, 2011.
+[14] D. Vu, L. Xu, M. Xue, and J. Li, “Nonparametric missing sample spectral
+analysis and its applications to interrupted SAR,” IEEE J. Sel. Topics
+Signal Process., vol. 6, no. 1, pp. 1–14, 2012.
+[15] E. J. Cand`es and C. Fernandez-Granda, “Towards a mathematical theory of
+super-resolution,” Commun. Pure Appl. Math., vol. 67, no. 6, pp. 906–956,
+2014.
+[16] C. Fernandez-Granda, “Super-resolution of point sources via convex pro-
+gramming,” 2015, arXiv preprint arXiv:1507.07034.
+[17] E. J. Cand`es and C. Fernandez-Granda, “Super-resolution from noisy
+data,” J. Fourier Anal. Appl., vol. 19, no. 6, pp. 1229–1254, 2013.
+[18] G. Tang, B. N. Bhaskar, and B. Recht, “Sparse recovery over continuous
+dictionaries-just discretize,” in Proc. IEEE Asilomar Conf. Signals, Syst.,
+Comput., 2013, pp. 1043–1047.
+[19] J. Friedman, T. Hastie, H. H¨oﬂing, and R. Tibshirani, “Pathwise coordinate
+optimization,” Ann. Appl. Statist., vol. 1, no. 2, pp. 302–332, 2007.
+[20] T. T. Wu and K. Lange, “Coordinate descent algorithms for lasso penalized
+regression,” Ann. Appl. Statist., pp. 224–244, 2008.
+[21] A. Panahi, M. Viberg, and B. Hassibi, “A numerical implementation of
+gridless compressed sensing,” in Proc. IEEE Int. Conf. Acoust., Speech,
+Signal Process. (ICASSP), 2015, pp. 3342–3346.
+[22] D. Needell and J. A. Tropp, “Cosamp: Iterative signal recovery from in-
+complete and inaccurate samples,” Appl. Comput. Harmon. Anal., vol. 26,
+no. 3, pp. 301–321, 2009.
+[23] T. Zhang, “Adaptive forward-backward greedy algorithm for learn-
+ing sparse representations,” IEEE Trans. Inf. Theory, vol. 57, no. 7,
+pp. 4689–4708, 2011.
+[24] T. Blumensath and M. E. Davies, “Iterative thresholding for sparse ap-
+proximations,” J. Fourier Anal. App., vol. 14, no. 5–6, pp. 629–654, 2008.
+[25] P. Jain, A. Tewari, and I. S. Dhillon, “Orthogonal matching pursuit with
+replacement,” Adv. Neural Inf. Process. Syst., pp. 1215–1223, 2011.
+[26] J. Li and P. Stoica, “Efﬁcient mixed-spectrum estimation with applications
+to target feature extraction,” IEEE Trans. Signal Process., vol. 44, no. 2,
+pp. 281–295, 1996.
+[27] T. Yardibi, J. Li, P. Stoica, M. Xue, and A. B. Baggeroer, Source Localiza-
+tion and Sensing: A Nonparametric Iterative Adaptive Approach Based
+on Weighted Least Squares. New York, NY, USA: IEEE, 2010.
+[28] A. Fannjiang and W. Liao, “Coherence pattern-guided compressive sens-
+ing with unresolved grids,” SIAM J. Imag. Sci., vol. 5, no. 1, pp. 179–202,
+2012.
+[29] J. A. Tropp, “Greed is good: Algorithmic results for sparse approxima-
+tion,” IEEE Trans. Inf. Theory, vol. 50, no. 10, pp. 2231–2242, 2004.
+[30] M. A. Davenport and M. B. Wakin, “Analysis of orthogonal matching
+pursuit using the restricted isometry property,” IEEE Trans. Inf. Theory,
+vol. 56, no. 9, pp. 4395–4401, 2010.
+[31] T. J. Abatzoglou, “A fast maximum likelihood algorithm for frequency
+estimation of a sinusoid based on Newton’s method,” IEEE Trans. Acoust.,
+Speech, Signal Process., vol. 33, no. 1, pp. 77–89, 1985.
+[32] P. Bidigare, U. Madhow, R. Mudumbai, and D. Scherber, “Attaining fun-
+damental bounds on timing synchronization,” in Proc. IEEE Int. Conf.
+Acoust., Speech, Signal Process. (ICASSP), 2012, pp. 5229–5232.
+[33] D. Ramasamy, S. Venkateswaran, and U. Madhow, “Compressive adapta-
+tion of large steerable arrays,” in Proc. IEEE Inf. Theory Appl. Workshop
+(ITA), 2012, pp. 234–239.
+[34] D. Ramasamy, S. Venkateswaran, and U. Madhow, “Compressive tracking
+with 1000-element arrays: A framework for multi-Gbps mm wave cellular
+downlinks,” in Proc. 50th IEEE Annu. Allerton Conf. Commun., Control,
+Comput. (Allerton), 2012, pp. 690–697.
+[35] B. Mamandipoor, D. Ramasamy, and U. Madhow, “Frequency estimation
+for a mixture of sinusoids: A near-optimal sequential approach,” Proc.
+IEEE Global Conf. Signal Inf. Process. (GlobalSIP), Orlando, FL, USA,
+pp. 205–209, 2015.
+[36] T. L. Hansen, M. A. Badiu, B. H. Fleury, and B. Rao, “A sparse Bayesian
+learning algorithm with dictionary parameter estimation,” in Proc. 8th
+IEEE Sensor Array Multichannel Signal Process. Workshop (SAM), 2014,
+pp. 385–388.
+[37] A. R. Barron, A. Cohen, W. Dahmen, and R. A. DeVore, “Approximation
+and learning by greedy algorithms,” Ann. Statist., pp. 64–94, 2008.
+[38] D. Slepian, “Prolate spheroidal wave functions, fourier analysis, and
+uncertaintyv: The discrete case,” Bell Syst. Tech. J., vol. 57, no. 5,
+pp. 1371–1430, 1978.
+[39] F. B. Hildebrand, Introduction to Numerical Analysis. New York, NY,
+USA: Dover, 1987.
+[40] H. L. Van Trees and K. L. Bell, “Bayesian Bounds for Parameter Estima-
+tion and Nonlinear Filtering/Tracking.” New York, NY, USA: Wiley-IEEE
+Press, 2007.
+[41] D. Ramasamy, S. Venkateswaran, and U. Madhow, “Compressive param-
+eter estimation in awgn,” IEEE Trans. Signal Process., vol. 62, no. 8,
+pp. 2012–2027, 2014.
+[42] P. P. Gandhi and S. A. Kassam, “Analysis of cfar processors in homoge-
+neous background,” IEEE Trans. Aerosp. Electron. Syst., vol. 24, no. 4,
+pp. 427–445, 1988.
+[43] H. Rohling, “Radar cfar thresholding in clutter and multiple target situa-
+tions,” IEEE Trans. Aerosp. Electron. Syst., no. 4, pp. 608–621, 1983.
+[44] B. Eisenberg, “On the expectation of the maximum of iid geometric ran-
+dom variables,” Statist. Probab. Lett., vol. 78, no. 2, pp. 135–143, 2008.
+[45] G. Schwarz, “Estimating the dimension of a model,” Ann. Statist., vol. 6,
+no. 2, pp. 461–464, 1978.
+[46] H. Akaike, “A new look at the statistical model identiﬁcation,” IEEE
+Trans. Autom. Control, vol. 19, no. 6, pp. 716–723, 1974.
+[47] V. S. Ryaben’kii and S. V. Tsynkov, A Theoretical Introduction to Numer-
+ical Analysis. Boca Raton, FL, USA: CRC Press, 2006.
+[48] V. Chandrasekaran, B. Recht, P. A. Parrilo, and A. S. Willsky, “The convex
+geometry of linear inverse problems,” Found. Comput. Math., vol. 12,
+no. 6, pp. 805–849, 2012.
+[49] F. F. Bonsall, “A general atomic decomposition theorem and Banach’s
+closed range theorem,” Quart. J. Math., vol. 42, no. 1, pp. 9–14, 1991.
+[50] P. Shah, B. N. Bhaskar, G. Tang, and B. Recht, “Linear system identiﬁ-
+cation via atomic norm regularization,” in Proc. IEEE 51st Annu. Conf.
+Decision Control (CDC), 2012, pp. 6265–6270.
+[51] M. Wax and T. Kailath, “Detection of signals by information theoretic
+criteria,” IEEE Trans. Acoust., Speech, Signal Process., vol. 33, no. 2,
+pp. 387–392, 1985.
+[52] G. Tang, B. N. Bhaskar, and B. Recht, “Near minimax line spectral esti-
+mation,” IEEE Trans. Inf. Theory, vol. 61, no. 1, pp. 499–512, 2015.
+[53] S. Boyd, N. Parikh, E. Chu, B. Peleato, and J. Eckstein, “Distributed
+optimization and statistical learning via the alternating direction method
+of multipliers,” Found. Trends Mach. Learn., vol. 3, no. 1, pp. 1–122,
+2011.
+[54] S. J. Wright, R. D. Nowak, and M. A. Figueiredo, “Sparse reconstruction
+by separable approximation,” IEEE Trans. Signal Process., vol. 57, no. 7,
+pp. 2479–2493, 2009.
+Babak Mamandipoor received his B.Sc. degree in
+electrical engineering from Iran University of Sci-
+ence and Technology (IUST), Tehran, Iran, in 2010,
+and the M.A.Sc. degree in electrical and computer
+engineering from University of Waterloo, Canada,
+in 2013. He started his Ph.D. in communications
+and signal processing at the University of Califor-
+nia, Santa Barbara (UCSB), USA, in Fall 2013. His
+main research interests lie within the areas of mil-
+limeter wave communications and imaging systems,
+sparse approximation and information theory.
+Dinesh Ramasamy received his Bachelor’s degree
+in electrical engineering from the Indian Institute
+of Technology, Madras, in 2009 and his Ph.D. de-
+gree from the University of California, Santa Barbara
+(UCSB) in 2014. He is interested in machine learn-
+ing, millimeter wave communication and inference
+from large scale networks.
+Upamanyu Madhow received his bachelor’s degree
+in electrical engineering from the Indian Institute of
+Technology, Kanpur, in 1985, and his Ph.D. degree
+in electrical engineering from the University of Illi-
+nois, Urbana-Champaign in 1990. He has worked as a
+research scientist at Bell Communications Research,
+Morristown, NJ, and as a faculty at the University
+of Illinois, Urbana-Champaign. He is currently Pro-
+fessor of Electrical and Computer Engineering at the
+University of California, Santa Barbara. His research
+interests broadly span communications, signal pro-
+cessing and networking, with current emphasis on millimeter wave commu-
+nication, and on distributed and bio-inspired approaches to networking and
+inference. Dr. Madhow is a recipient of the 1996 NSF CAREER award, and
+co-recipient of the 2012 IEEE Marconi prize paper award in wireless commu-
+nications. He has served as Associate Editor for the IEEE TRANSACTIONS ON
+COMMUNICATIONS, the IEEE TRANSACTIONS ON INFORMATION THEORY, and
+the IEEE TRANSACTIONS ON INFORMATION FORENSICS AND SECURITY. He is
+the author of two textbooks published by Cambridge University Press, Funda-
+mentals of Digital Communication (2008) and Introduction to Communication
+Systems (2014).
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 09,2026 at 05:41:38 UTC from IEEE Xplore.  Restrictions apply. 

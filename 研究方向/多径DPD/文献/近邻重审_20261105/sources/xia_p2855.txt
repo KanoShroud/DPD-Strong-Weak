@@ -1,0 +1,90 @@
+IEEE SYSTEMS JOURNAL, VOL. 15, NO. 2, JUNE 2021                                                                                                2855
+
+Short Papers
+
+
+      A Direct Localization Method in the Presence of Cochannel
+                       Interference and Multipath Fading
+
+                              Nan Xia    , Bo Li, and Jue Wang
+
+
+   Abstract—Cochannel signals separation is an important topic in the ﬁeld     The TDOA localization methods mentioned above are traditional
+of radio monitoring. A direct geolocation method based on random spatial   two-step methods, which ﬁrst estimate the TDOAs and then estimate the
+spectrum is proposed in this paper for multiple cochannel sources in the
+                                                                                target’s location based on the results obtained in the ﬁrst step. However,multipath wireless environment. A random spatial spectrum function is
+constructed based on a set of position particles. The cochannel signals   the two-step methods are not guaranteed to be optimal, especially
+are transformed to the spatial spectrum, which can signiﬁcantly suppress   for the TDOA estimation step [11]. Ouyang et al. [12] introduced a
+the multipath components. A spatial sparse method based on clustering is    direct localization method for cochannel transmitters based on a cross
+then proposed to separate the sources in the spatial domain. Simulation
+                                                                           correlation function matrix in frequency domain. However, the method
+results are given to demonstrate that the proposed algorithm outperforms
+other localization algorithms and approaches the Cramér Rao lower bound   needs to restrict the search region, which would be impractical for
+(CRLB) of the considered problem.                              unknown sources localization. In our previous work, a direct tracking
+                                                           method [13] was proposed, which ﬁrst connected the particle ﬁltering
+   Index Terms—Cochannel interference, cochannel signals separation,
+                                                             and the cyclic cross-spectrum for mobile cochannel sources, and adirect  geolocation,  multipath  fading,  spatial  sparsiﬁcation,  spatial
+spectrum.                                                                     spatial sparse method [14] was proposed for cochannel signals that
+                                                                  completely overlap in both time and frequency domains. However,
+                                                                     they have been addressed mainly for one-delay wireless channel and
+                               I. INTRODUCTION                               their tracking performance will be reduced for the multipath fading
+                                                                          scenarios.
+  Time difference of arrival (TDOA) based techniques are widely used
+                                                                         In this paper, we develop the direct geolocation scheme based on
+in the ﬁeld of source localization, such as wireless communications
+                                                                               spatial sparse method in the presence of cochannel interference and
+[1], indoor localization [2], and passive localization systems [3]. In the
+                                                                     multipath fading. Compared with [14], the contributions of this paper
+wireless environments, the multipath fading and cochannel interference
+                                                               mainly include the following.
+lead to larger errors in TDOA estimation and source localization. If
+                                                                         1) The system model of the direct localization of the cochannel
+the cochannel signals completely overlap in both time and frequency
+                                                                                signals in a multipath wireless environment is formulated and
+domains, the situation is even worse.
+                                                                              the corresponding Cramér Rao lower bound (CRLB) is derived.
+   In order to increase the positioning accuracy, many solutions have
+                                                                         2) A new expression of random spatial spectrum is proposed, which
+been addressed for multipath delay estimation. A joint time-delay
+                                                                     can signiﬁcantly suppress the multipath components.
+and channel estimation technique based on maximum likelihood was
+                                                                         3) A direct localization method based on clustering is proposed to
+introduced in [4]. Shi et al. [5] proposed a super resolution method
+                                                                              separate and locate the cochannel sources in the sparse spatial
+based on a multidimensional cross-correlation function. Additionally,
+                                                                     domain.
+Jiang et al. [6] proposed a sparse reconstruction algorithm to estimate
+                                                           The remainder of this paper is organized as follows. Section II intro-
+multipath time delays in the deep-sea environments. Regarding the
+                                                                duces the signal model for the considered problem. The corresponding
+problem of cochannel interference, Wan et al. [7] addressed a blind
+                                             CRLB is given in Section III. Then, a spatial sparse method is developed
+source separation method for TDOA estimation in the presence of
+                                                                           in IV. The numerical simulations of the localization performance are
+uncorrelated interference source signals, but it assumed that the po-
+                                                                  analyzed in Section V. Finally, Section VI gives a brief conclusion
+sition of one source is known, which could restrict the application of
+                                                                  about this paper.
+localization of multiple unknown sources. Liu et al. [8] proposed a
+TDOA estimation method based on the fractional lower order cyclo-
+stationarity, with respect to the cochannel signals with different cyclic
+                                                                                                                   II. SYSTEM MODELfrequencies. Then, based on the TDOA estimation results, the least
+square based schemes in [6], [9], and [10] can be utilized for target       In this paper, we focus on two cochannel signals that completely
+localization.                                                          overlap in both time and frequency domains. They have the same
+                                                                modulation type, carrier frequency, and symbol rate, but they have
+  Manuscript received January 24, 2020; revised May 23, 2020; accepted June    totally different locations, which are denoted in a 2-D Cartesian co-
+26, 2020. Date of publication July 22, 2020; date of current version June 16,   ordinate system as xj = [xj, yj]T , with j = 1 being the target sig-
+2021. This work was supported by Natural Science Foundation of Liaoning   nal and j = 2 being the interference. The signals are collected by
+Province under Grant 2019-ZD-0289. (Corresponding author: Nan Xia.)    M  distributed base stations (BSs) with time synchronization. The
+  The  authors  are with  the School  of  Information Science and Engi-
+                                                                         positions of BSs are denoted by θm = [xm, ym]T , m = 1, 2, . . ., M.neering,  Dalian  Polytechnic  University,  Dalian  116034,  China  (e-mail:
+xianan0520@aliyun.com; libo_219vip@163.com; ragnarok1876@163.com).     Especially, θ1 denotes the position of the reference. We take into
+   Digital Object Identiﬁer 10.1109/JSYST.2020.3005918                    account  the multipath  wireless channel  as described  in  Fig.  1,
+
+
+
+                     1937-9234 © 2020 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.
+                                   See https://www.ieee.org/publications/rights/index.html for more information.
+
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 27,2026 at 04:51:29 UTC from IEEE Xplore. Restrictions apply.

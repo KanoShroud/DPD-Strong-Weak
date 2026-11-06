@@ -1,0 +1,534 @@
+--- PDF PAGE 1 ---
+AN EFFICIENCY-IMPROVED TDOA-BASED DIRECT POSITION DETERMINATION
+METHOD FOR MULTIPLE SOURCES
+Kegang Hao and Qun Wan
+Department of Information and Communication Engineering
+University of Electronic Science and Technology of China
+ABSTRACT
+It is well known that the direct position determination (D-
+PD) method outperforms the most common two-step local-
+ization method when the signal-to-noise ratio (SNR) is low.
+The advantage comes from the fact that the DPD method
+avoids estimating the intermediate parameters for localiza-
+tion. However, the DPD method has heavy computation load
+because of depending on exhaustive searching, especially in
+the multiple sources localization scenario where the problem
+is a high-dimensional optimization problem. In this paper, we
+constructed a cost function using the orthogonal relationship
+between received signals and noise. We reveal that the na-
+ture of the cost function is to verify the column-correlation of
+the matrix. Finally, we got the Determinant-based cost func-
+tion which is more efﬁcient and requires less computation re-
+sources in searching phase.
+Index Terms— Direct position determination, efﬁcient
+multiple sources localization, TDOA
+1. INTRODUCTION
+Multiple sources localization has been study for several
+decades and developed as the demand of Location-Based
+Services (LBS) in communication systems grew explosive-
+ly. The emerging Technology such as Internet of Cars and
+Unmanned Aerial Vehicle require much more location infor-
+mation which promotes the development of multiple sources
+localization Technology ulteriorly. The classical localization
+methods are two-step processing [1, 2]. Firstly, intermedi-
+ate parameters that rely on the locations of the sources are
+estimated from the received signals. These parameters are
+usually the angle of arrival (AOA), TDOA, Doppler frequen-
+cy shift (DFS) or received signal strength (RSS). And then the
+previously estimated parameters are used to estimate the lo-
+cation of sources, using geometric or statistic considerations.
+The two-step method is suboptimal because the intermediate
+parameters are estimated by each of the observation stations
+Corresponding author: wanqun@uestc.edu.cn.
+This work was supported in part by the National Natural Science
+Foundation of China under Grant U1533125, Grant 61471153, and Grant
+61771108.
+independently and the global constraint that all intermedi-
+ate parameters relate to the same source is not effective.
+Therefore the two-step method has to associate estimated
+parameters with their relevant sources in multiple sources lo-
+calization. Fortunately, the DPD methods, proposed in [3] for
+single source and proposed in [4] for multiple sources, can
+solve the two previous problems of two-step method perfectly
+since it direct parameterizes the received signal data by the
+location of sources. There is no intermediate parameters to
+estimate and the association of the parameters and location
+of sources are realized implicitly. It is easy to know that the
+DPD method outperforms the two-step method, especially
+at low SNR. On the other hand, the localization capacity
+of DPD method is expanded by using all observations to-
+gether to increase the degree of freedom of data. A DPD
+method uses the Maximum Likelihood (ML) criterion on
+the location-parameterized data model and ends with a cost
+function which requires the exhaustive searching. Therefore
+the DPD method can be considered achieving better perfor-
+mance by costing more computational resources. It is a high
+dimensional searching in multiple sources localization sce-
+nario, which costs too much computational resources. It is
+necessary to design the efﬁcient algorithm.
+In [4], the authors solved the high dimensional searching
+for multiple sources localization problem by two dimensional
+searching based on the subspace decomposition. In [5], the
+authors separated signal corresponding to each source one
+another and then estimated the position of each source us-
+ing an iterative processing respectively. In [6], the authors
+decoupled the sources by Minimum Variance Distortionless
+Response (MVDR) approach and then acquire a high res-
+olution localization algorithm.
+In [7], the authors solved
+the high-dimensional optimization by a sequence of low-
+dimensional optimizations using the alternating projection
+technique. These decoupling methods improved the efﬁcien-
+cy of DPD for multiple sources but all end with calculating a
+low order Eigen-decomposition at every grid point. If the or-
+der is low, the computation load can be accepted even though
+the number of grid points could be large. However, the order
+is equal to the number of the observation stations. In TDOA-
+based multiple sources localization scenario, the number of
+the observation stations has to be larger than the number of
+4425
+978-1-5386-4658-8/18/$31.00 ©2019 IEEE
+ICASSP 2019
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 08:39:55 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 2 ---
+sources [8] which make it possible that the order of matrix
+for Eigen-decomposition is large and lots of computation re-
+sources are required. In order to reduce the computation load
+of the TDOA-based multiple sources localization method, we
+constructed a cost function using the orthogonal relationship
+between received signals and noise based on the subspace
+decomposition and reveal that the nature of the cost function
+is to verify the column-correlation of some matrix. Finally,
+we got a Determinant-based cost function which leads to less
+computation load than Eigen-decomposition-based one.
+2. PROBLEM FORMULATION
+Consider P transmitters whose positions are denoted by the
+vectors of coordinates lp, p = 1, . . . , P and N observation
+stations whose positions are denoted by the vectors of co-
+ordinates pn, n = 1, . . . , N. Every observation station is
+equipped with single sensor. The complex envelope of the
+waveform observed by the n-th station is given as
+xn(t) =
+P
+X
+p=1
+ηnpsp(t −τn(lp)) + wn(t)
+0 < t ≤T
+(1)
+where ηnp is an unknown complex scalar representing the sig-
+nal attenuation due to path loss between the n-th station and
+the p-th transmitter. sp(t −τn(lp)) is the p-th emission sig-
+nal delayed by τn(lp) = ∥pn −lp∥/c, c is the light velocity.
+wn(t) represents zero-mean, white, circular complex Gaus-
+sian noise. The observed signal time interval [0, T] can be
+partitioned into K sections, each of length T/K. It is as-
+sumed that T/K ≫maxp τn(lp), which can be obtained by
+using long enough observation interval for the region of in-
+terest. Therefore the n-th observed signal in k-th section de-
+noted by the M × 1 vector of Fourier coefﬁcients is given
+by
+¯xn(k) = An(L)¯s(k) + ¯wn(k)
+(2)
+where
+An(L) ≜[ηn1Qn1
+ηn2Qn2
+· · ·
+ηnP QnP ] ∈CM×MP
+Qnp ≜diag(ej2πf1τn(lp), . . . , ej2πfMτn(lp)) ∈CM×M
+¯s(k) ≜[¯sT
+1 (k)
+¯sT
+2 (k)
+¯sT
+P (k)]T ∈CMP
+(3)
+therein ¯sp(k) ∈CM and ¯wn(k) ∈CMrepresents M Fourier
+coefﬁcients of the p-th emission signal and the n-th received
+noise respectively corresponding to frequencies f1, . . . , fM.
+L is the set of all transmitters’ position vectors.
+Now, concatenate Fourier-coefﬁcient vectors from all ob-
+servation stations
+¯x(k) ≜[¯xT
+1 (k)
+¯xT
+2 (k)
+¯xT
+N(k)]T ∈CMN
+A(L) ≜[AT
+1 (L)
+AT
+2 (L)
+AT
+N(L)]T ∈CMN×MP
+¯w(k) ≜[ ¯wT
+1 (k)
+¯wT
+2 (k)
+¯wT
+N(k)]T ∈CMN
+(4)
+We get
+¯x(k) = A(L)¯s(k) + ¯w(k)
+(5)
+The column-space of A(L) is known as local manifold of the
+received signal. Without loss of generality, we can assume in
+A(L) that
+N
+X
+n=1
+|ηnp|2 = 1
+(6)
+The problem considered here may be stated brieﬂy: Given
+a series of samples ¯x(1), ¯x(2), . . . , ¯x(K) and the data model
+in (5), estimate all transmitters’ position vectors L efﬁciently.
+3. THE EFFICIENCY-IMPROVED DPD METHOD
+3.1. Decoupling the transmitters
+We start with approximating the covariance of the received
+signal using the covariance of examples ˆR , which is a good
+approximation when the number of sections K is big enough
+ˆR ≜1
+K
+K
+X
+k=1
+¯x(k)¯xH(k)
+(7)
+And then apply the Eigen-decomposition technique
+ˆR = USΛSU H
+S + UNΛNU H
+N
+(8)
+where the diagonal matrices ΛS ∈RMP ×MP and ΛN ∈
+RM(N−P )×M(N−P ) consist of the group of P bigger eigen-
+values and the rest of eigen-values respectively. The signal
+subspace consists of columns of US ∈CMN×MP and the
+noise subspace consists of columns of UN ∈CMN×M(N−P ).
+Note that the number of transmitters P can be estimated by
+model order determination based on frequency-domain MDL
+criterion, as described in [9].
+The orthogonal relationship between the local manifold of
+the received signal and the noise subspace is given as
+U H
+N A(L) = 0
+(9)
+According to (3) and (4), the local manifold of the received
+signal A(L) can be divided into P blocks
+A(L) ≜[V (l1)
+V (l2)
+V (lP )]
+(10)
+then there are P orthogonal relationships corresponding to P
+transmitters respectively
+U H
+N V (lp) = 0, p = 1, . . . , P
+(11)
+where
+V (lp) ≜
+
+
+η1pQ1p
+η2pQ2p
+...
+ηNpQNp
+
+
+(12)
+4426
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 08:39:55 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 3 ---
+It is worthy mentioning that the subspace-decomposition
+technique is also applied in [4] but we construct a more ef-
+ﬁcient cost function using the noise subspace instead of the
+signal subspace.
+3.2. Construct the efﬁcient cost function
+In subsection 3.1, the P transmitters are decoupled to satisfy
+P orthogonal relationships respectively. Furthermore, the P
+equations are the same except for the locations of transmitters
+and the attenuation. Therefore a basic cost function with re-
+spect to the location variable l and the attenuation variable ηl
+can be construct to verify those orthogonal relationships
+f0(l, ηl) ≜∥U H
+N V (l, ηl)∥F
+(13)
+where
+ηl ≜[η1l
+η2l
+· · ·
+ηNl]T ,
+∥ηl∥= 1
+and ∥· ∥F denotes the Frobenius norm. the ∥ηl∥= 1 is from
+(6). Dividing U H
+N into N blocks,
+U H
+N ≜
+G1
+G2
+· · ·
+GN
+
+(14)
+and substituting (12) and (14) in the cost function (13), we get
+f0(l, ηl) = ∥
+N
+X
+n=1
+ηnlGnQn(l)∥F
+(15)
+= ∥
+N
+X
+n=1
+ηnlVec(GnQn(l))∥F
+where the notation Vec(·) denotes the vectorization operation.
+The second equation is true because ∥· ∥F is an entrywise
+norm.
+Deﬁning
+Ψ(l) ≜
+
+
+Vec(G1Q1(l))T
+Vec(G2Q2(l))T
+...
+Vec(GNQN(l))T
+
+
+T
+∈CM 2(N−P )×N
+the cost function in (15) can be rewritten as
+f0(l, ηl) = ∥Ψ(l)ηl∥F
+(16)
+The purpose of the cost function is to ﬁnd out the set of solu-
+tion pairs (lp, ηlp) of equation f0(l, ηl) = 0 which means the
+orthogonal relationships in (11). Equivalently, we have the
+homogeneous linear equations
+Ψ(l)ηl = 0
+(17)
+Given ∥ηl∥= 1, equation (17) having nontrivial solutions
+means that the columns of Ψ(l) are linear correlation, i.e.,
+rank(Ψ(l)) < N. Therefore, the new objective function is
+just with respect to the location variable l
+f1(l) ≜
+(
+rank(Ψ(l)) < N
+if
+l ∈L
+rank(Ψ(l)) = N
+if
+l /∈L
+(18)
+Next, two linear algebraic lemmas, Theorem 5.2.1 and equa-
+tion 5.2.27 in [10], are used to get the ﬁnal efﬁcient cost func-
+tion
+F(l) ≜det(ΨH(l)Ψ(l))
+(
+= 0
+if
+l ∈L
+> 0
+if
+l /∈L
+(19)
+Considering the estimation error of the noise subspace,
+we can achieve a pseudo spectrum over the region of interest
+P(l) =
+1
+det(ΨH(l)Ψ(l))
+(20)
+The P higher peaks of P(l) correspond to the locations set of
+multiple transmitters L.
+Compared with the eigenvalue-based pseudo spectrum
+proposed in [4],
+Q(l) = λmax(D)
+(21)
+where matrix D has the same size as ΨH(l)Ψ(l). it is de-
+terminant that is computed in our pseudo spectrum instead of
+Eigen-decomposition at every grid point. Note that the com-
+plexity of Eigen-decomposition is about O(N 3) while that of
+determinant algorithm in [11] is about O(N 2). Furthermore,
+the calculation will be performed thousands of times because
+of thousands of location points in region of interest, which
+make the calculation in searching phase costs the main part
+of the total calculation time. Therefore, our improved method
+will save much more calculation time and get more efﬁcient.
+4. NUMERICAL SIMULATION RESULTS
+In order to present the improved efﬁciency of our method
+(20), Fig. 1a shows that the calculation time of determinan-
+t operation (red line) and Eigen-decomposition (green line)
+increase with the order of the complex matrix and the im-
+provement of efﬁciency at every order value. The order is
+varied from 4 to 24. At each order value, the two operations
+were performed twenty thousand of times respectively, which
+is about the amount of searching a region of 200 × 100m2
+by 1m2. It is clearly seen that the improved efﬁciency (blue
+line) is more than 85% when the order of the complex matrix
+varies between 4 and 24.
+Consider four single sensors located at coordinates (-250,-
+150),(-250,150),(250,150) and (250,-150)m, and two trans-
+mitters transmitting unknown Gaussian signals. The channel
+attenuation is a circular, complex Gaussian, random variable,
+with mean of 1 and standard deviation of 0.1 and independent
+4427
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 08:39:55 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 4 ---
+4
+6
+8
+10
+12
+14
+16
+18
+20
+22
+24
+the order of the complex matrix
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+the calculation time/s
+0
+10
+20
+30
+40
+50
+60
+70
+80
+90
+100
+the percent of the reduced calculation time/%
+eigenDec-time
+det-time
+efficiency
+(a) calculation time vs. the order of the matrix
+-5
+0
+5
+10
+15
+20
+SNR/dB
+0
+5
+10
+15
+20
+25
+30
+RMSE/m
+DPD-DET-80m
+DPD-EIGEN-80m
+DPD-SML-80m
+DPD-DET-45m
+DPD-EIGEN-45m
+DPD-SML-45m
+(b) RMSE vs. SNR
+Fig. 1: the performance of the proposed spectrum
+among the pairs of sensor and transmitter. The location esti-
+mation is based on K = 1280 sections of M = 32 Fourier
+coefﬁcients associated with frequencies up to 2MHz. the S-
+NR is varied from −10dB to 20dB. we performed 200 Monte
+Carlo simulations at each SNR to compare the performance
+of our pseudo spectrum (20), denoted by DPD-DET and the
+one in [4], denoted by DPD-EIGEN. The single emitter ML
+estimator in [3, 6], denoted by DPD-SML, is also compared
+with the proposed method in this paper. Fig. 1b shows two
+group of the Root Mean Square of Error (RMSE). The ful-
+l line group denotes the distance of two transmitters is 80m
+and the imaginary line group denotes 45m.
+It can be seen that the accuracy of DPD-DET and DPD-
+EIGEN is approximate at every SNR value in both groups and
+they both outperform the SML estimator, which indicates that
+the proposed method and DPD-EIGEN decoupled the trans-
+mitters while the SML estimator attempted to ﬁt both signals.
+The derivation of our efﬁcient objective function is based
+on the subspace decomposition which is the fundamental of
+the classical Multiple Signal Classiﬁcation (MUSIC) algo-
+rithm. It is well-known that MUSIC has the super resolu-
+tion. In order to examine the resolution of DPD-DET, con-
+(a) the DPD-SML spectrum
+(b) the DPD-DET spectrum
+Fig. 2: the resolution of the proposed spectrum
+sider three neighboring transmitters located at (-97.5,-72.5),(-
+97.5,-27.5) and (-152.5,-37.5)m respectively and increasing
+four more observation stations. Fig. 2a and Fig. 2b demon-
+strate the spectrums of SML estimator and the DPD-DET
+spectrum (20) at SNR of 20dB. It is clearly seen that there
+are three sharp peaks in the DPD-DET spectrum (20) while
+only one wide main lobe in the spectrum of SML estimator.
+5. CONCLUSION
+In this paper, we constructed a determinant-based cost func-
+tion using the noise subspace. The improved estimator re-
+serves the accuracy and super resolution of the MUSIC-like
+method and the reduced calculation load was more than 85%
+in our simulation, which make the improved method reliable
+and more real-time. Furthermore, the idea of the determinant-
+based objective function can be also used in AOA-based lo-
+calization.
+4428
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 08:39:55 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+--- PDF PAGE 5 ---
+6. REFERENCES
+[1] Y. Sun, K. C. Ho, and Q. Wan, “Solution and analysis
+of tdoa localization of a near or distant source in closed
+form,” IEEE Transactions on Signal Processing, vol.
+67, no. 2, pp. 320–335, Jan. 2019.
+[2] Y. Sun and Q. Wan, “Position determination for moving
+transmitter using single station,” IEEE Access, vol. 6,
+no. 1, pp. 61103–61116, Oct. 2018.
+[3] A. J. Weiss, “Direct position determination of narrow-
+band radio frequency transmitters,” IEEE Signal Pro-
+cessing Letters, vol. 11, no. 5, pp. 513–516, 2004.
+[4] A. Amar and A. J. Weiss, “Direct position determina-
+tion of multiple radio signals,” in IEEE International
+Conference on Acoustics, Speech, and Signal Process-
+ing, 2004. Proceedings, 2004, pp. ii–81–4 vol.2.
+[5] A Amar and A. J Weiss, “Efﬁcient position determina-
+tion of multiple emitters,” in Electrical and Electronics
+Engineers in Israel, 2006 IEEE Convention of, 2006, pp.
+11–15.
+[6] Tom Tirer and Anthony J. Weiss, “High resolution di-
+rect position determination of radio frequency sources,”
+IEEE Signal Processing Letters, vol. 23, no. 2, pp. 192–
+196, 2015.
+[7] M. Oispuu and U. Nickel, “Direct detection and posi-
+tion determination of multiple sources with intermittent
+emission ,” Signal Processing, vol. 90, no. 12, pp. 3056–
+3064, 2010.
+[8] Alon Amar and Anthony J. Weiss, “Fundamental limi-
+tations on the number of resolvable emitters using a ge-
+olocation system,” IEEE Transactions on Signal Pro-
+cessing, vol. 55, no. 5, pp. 2193–2202, 2007.
+[9] Mati Wax and Thomas Kailath, “Detection of signal-
+s by information criteria,”
+IEEE Trans on Acoustics
+Speech and Signal Processing, vol. 33, no. 2, pp. 387–
+392, 1985.
+[10] Xianda Zhang, Matrix analysis and applications, Ts-
+inghua University Press, 2013.
+[11] Vissarion Fisikopoulos and Luis Pearanda, “Faster ge-
+ometric algorithms via dynamic determinant computa-
+tion,” in European Conference on Algorithms, 2012, pp.
+1–16.
+4429
+Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on September 26,2026 at 08:39:55 UTC from IEEE Xplore.  Restrictions apply. 

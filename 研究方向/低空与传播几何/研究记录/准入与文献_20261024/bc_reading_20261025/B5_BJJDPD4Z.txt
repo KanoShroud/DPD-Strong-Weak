@@ -1,0 +1,1043 @@
+
+=== PDF PAGE 1 ===
+Citation: Zhu, K.; Jiang, H.; Huo, Y.;
+Yu, Q.; Li, J. A Direct Position
+Determination Method Based on
+Subspace Orthogonality in
+Cross-Spectra under Multipath
+Environments. Sensors 2022, 22, 7245.
+https://doi.org/10.3390/s22197245
+Academic Editors: Fangqing Wen, Jin
+He, Veerendra Dakulagi and Wei Liu
+Received: 19 August 2022
+Accepted: 20 September 2022
+Published: 24 September 2022
+Publisher’s Note: MDPI stays neutral
+with regard to jurisdictional claims in
+published maps and institutional afﬁl-
+iations.
+Copyright:
+© 2022 by the authors.
+Licensee MDPI, Basel, Switzerland.
+This article is an open access article
+distributed
+under
+the
+terms
+and
+conditions of the Creative Commons
+Attribution (CC BY) license (https://
+creativecommons.org/licenses/by/
+4.0/).
+sensors
+Article
+A Direct Position Determination Method Based on Subspace
+Orthogonality in Cross-Spectra under Multipath Environments
+Kehui Zhu 1
+, Hang Jiang 1, Yuchong Huo 1, Qin Yu 2 and Jianfeng Li 1,*
+1
+College of Electronic Information Engineering, Nanjing University of Aeronautics and Astronautics,
+Nanjing 211106, China
+2
+Hai Hua Electronic Enterprise (China) Corporation, Guangzhou 510670, China
+*
+Correspondence: lijianfeng@nuaa.edu.cn
+Abstract: Without the estimation of the intermediate parameters, the direct position determina-
+tion (DPD) method can achieve higher localization accuracy than conventional two-step methods.
+However, multipath environments are still a key problem, and complex high-dimensional matrix
+operations are required in most DPD methods. In this paper, a time-difference-of-arrival-based
+(TDOA-based) DPD method is proposed based on the subspace orthogonality in the cross-spectra
+between the different sensors. Firstly, the cross-spectrum between the segmented received signal and
+reference signal is calculated and eigenvalue decomposition is performed to obtain the subspaces.
+Then, the cost functions are constructed by using the orthogonality of subspace. Finally, the location
+of the radiation source is obtained by searching the superposition of these cost functions in the target
+area. Compared with other DPD methods, our proposed DPD method leads to better localization
+accuracy with less complexity. The superiority of this method is veriﬁed by both simulated and real
+measured data when compared to other TDOA and DPD algorithms.
+Keywords: direct position determination; subspace orthogonality; cross-spectra; multipath environ-
+ment; distributed sensors
+1. Introduction
+Passive location technology has increasingly become an important location method be-
+cause of its strong concealment, and it has been widely studied and applied in both military
+and civil ﬁelds [1]. The positioning stations can be classiﬁed into array-based and single-
+sensor-based, and single-sensor-based stations are lower-cost. As a signiﬁcant composition
+of passive location, the two-step location method ﬁrst requires a measurement of interme-
+diate parameters, such as direction of arrival (DOA) [2–5], time of arrival (TOA) [6,7], time
+difference of arrival (TDOA) [8–10], or received signal strength (RSS) [11], which are then
+used to establish the positioning equation and calculate the target position.
+In a multi-station positioning scenario, the TDOA-based method is famous for its
+low complexity and availability in real time, the key technology of which is time delay
+estimation (TDE). The most classical TDE method is based on generalized cross-correlation
+(GCC), in which the similarity of two signals is compared by cross-correlation technol-
+ogy [12]. In [13], a new method for effectively estimating maximum likelihood frequency
+weighting is proposed in the framework of GCC time delay estimation. Another typical
+TDE method is based on the construction of a cost function with optimization criteria such
+as maximum likelihood (ML) and minimum mean square error (MMSE) [14,15], using
+searching or iterative operations to obtain the TDE. In the practical application scenario,
+due to the complexity and diversity of channel propagation and the environment around
+the receiver, there tends to be multipath propagation between the source signal and the
+observation stations [16]. In [17], a TDE method based on ML is proposed for application
+in multipath environments. In order to overcome the inﬂuence of multipath enviroments,
+Sensors 2022, 22, 7245. https://doi.org/10.3390/s22197245
+https://www.mdpi.com/journal/sensors
+
+
+=== PDF PAGE 2 ===
+Sensors 2022, 22, 7245
+2 of 15
+a kind of super-resolution TDE method is proposed on the basis of subspace decompo-
+sition [18,19] inspired by multiple signal classiﬁcation (MUSIC) [20,21]. In [22], a ﬁeld
+programmable gate array (FPGA) implementation is introduced based on TDOA, which is
+suitable for multipath environments. In recent years, deep learning (DL) has been applied
+to estimate the emitter location, especially in the indoor positioning scenario. In [23], a
+convolutional neural network (CNN) is trained with raw channel impulse response (CIR)
+and ground truth positional data, and this CNN is proven to be useful in position estima-
+tion for multipath effects. In [24], a robust TOA estimation method is proposed based on
+CNN on randomized channel models, which outperforms the classic positioning methods
+in low-SNR situation.
+In two-step methods, the measurement process of intermediate parameters is indepen-
+dent of the calculation to the target position, which leads to the lack of spatial geometric
+constraints between the target and observation stations. Different from two-step methods,
+the one-step direct position determination (DPD) method does not need to estimate the
+intermediate parameters and is proven superior to traditional two-step methods in accuracy
+for low signal-to-noise ratios (SNRs) [25,26]. In [27], the performance of DPD is discussed
+by Amar and Weiss when model errors exist, and it is concluded that the DPD method
+performs better than conventional DOA methods in multipath propagation situations. The
+authors in [28] propose a DPD method based on a single moving coprime array by applying
+subspace data fusion (SDF), which outperforms traditional two-step methods. In [29], a
+multi-array data fusion based (MDF) DPD method is proposed by using quantum-behaved
+particle swarm optimization (QPSO) to search for the best array response. In [30], a high
+resolution DPD method of multiple emitters based on minimum-variance-distortionless-
+response (MVDR) is proposed, which does not require the prior knowledge of the number
+of signals. In [31], the DPD methods in the light of coherent and noncoherent pre-processing
+techniques of wideband signals are proposed, increasing the location accuracy of DPD.
+In [32], the DPD estimator of indoor radio sources for hybrid antennae is derived, which
+has better robustness to multipath interference in indoor environments. The DPD methods
+are originally presented on the basis of arrays, which tend to have high hardware cost.
+In order to avoid the expensive hardware cost caused by array-based DPD methods,
+TDOA-based DPD methods emerge, in which each observation station is equipped with sin-
+gle sensor. In [33], the authors construct an efﬁcient determinant-based cost function with
+an orthogonal relationship between the received signals and noise in distributed sensor
+scenarios. TDOA-based DPD method can be realized by the maximum likelihood estima-
+tion (MLE) cost function [34,35], which requires a lower amount of calculation. In [36], a
+maximum correlation cumulative DPD method is proposed for four-station TDOA location
+scenarios based on electronic elevation map search. In [37], a DPD method for multiple
+emitters transmitting unknown linear frequency modulation (LFM) signals is proposed
+based on short time Fourier transform (STFT) and Hough transform (HT). In practice, clock
+biases may appear in TDOA location scenarios, which may negatively affect the positioning
+accuracy. In [38], the authors calibrate clock biases jointly by exploiting anchor sources,
+and perform coarse and reﬁned parameter estimation with an expectation-maximization
+(EM) algorithm and a Gauss–Newton algorithm respectively. In [39], the authors proposed
+a DL-based direct position estimation to the mobile objects by the CIR extracted at the
+receivers, which works well even under harsh multipath propagation. Though TDOA-
+based DPD methods outperform the conventional two-step methods in accuracy, their
+complexity is still higher than TDOA methods because of the high dimensional matrix
+operation. Moreover, in most of the TDOA-based DPD methods, performance in multipath
+environments is not presented, which may make them hard to apply in practice.
+In this paper, a TDOA-based DPD method in multipath environments is proposed
+based on the subspace orthogonality in cross-spectra between received signals and reference
+signal. The received long data are ﬁrst segmented to reduce the complexity of subsequent
+data processing. The cross-spectrum is obtained by performing Fourier transform (FT) on
+cross-correlation between received and reference data. The effective part with ﬁxed length
+
+
+=== PDF PAGE 3 ===
+Sensors 2022, 22, 7245
+3 of 15
+is selected in each cross-spectrum, and its covariance matrix is decomposed into signal
+and noise subspace. The cost function of each spectrum is built based on the subspace
+orthogonality, and the target position can be obtained by searching the superposition of
+cost functions in the interested area. In this paper, the low complexity is realized by data
+segmentation and screening of the effective parts of the data, and the data coherent is
+solved by the process of spatial smoothing. The proposed method is compared with the
+TDOA method based on GCC in [12], the TDOA method based on the normalized cross-
+spectrum (NCS) in [18], and the determinant-based DPD method in [33] with simulated
+data. The effectiveness and superiority of the proposed method are veriﬁed by simulation
+and real-world test results.
+2. Signal Model
+The TDOA-based location scenario consisting of several single-sensor stations in a
+multipath environment is shown in Figure 1. The number of sensors is L(L ≥3), the
+positions of which are denoted by q1,q2, . . . ,qL, and the source location is denoted by p.
+Set q1 as the reference sensor. After receiving the signals from the target source, the sensors
+send them to the central station for uniﬁed processing. The discrete received signal in the
+multipath environment of the sensors can be expressed by
+(
+x1(n) = ∑M
+m=1 λ1ms(n −τ1m) + σ1(n)
+xl(n) = ∑M
+m=1 λlms(n −τlm) + σl(n)
+l = 2, 3, . . . , L, n = 1, 2, . . . , Nl
+(1)
+where M represents the number of multipath components, which is obtained by the
+Akaike information criterion (AIC) or minimum description length (MDL) criterion and is
+considered as a known quantity to simplify the subsequent deduction, Nl is the length of the
+received signal, λ1m and λlm(m = 1, 2, . . . , M) are the amplitude coefﬁcients in multipath
+environment, s(n) is the unknown transmit signal, σ1(n) and σl(n) are zero-mean additive
+Gaussian noise, and τ1m and τlm are the time delay between the m-th multipath component
+in the corresponding received signal and transmit signal.
+Figure 1. Diagram of a TDOA-based location scenario in a multipath environment.
+Assume that there is no multipath component in the reference signal for the conve-
+nience of derivation. In fact, the signal with prior information is chosen to be the reference
+signal. We have λ1m = λ1, τ1m = τ1. Then, Equation (1) can be rewritten as
+(
+x1(n) = s1(n) + σ1(n)
+xl(n) = ∑M
+m=1 µlms1(n −∆τlm) + σl(n)
+l = 2, 3, . . . , L, n = 1, 2, . . . , Nl
+(2)
+
+
+=== PDF PAGE 4 ===
+Sensors 2022, 22, 7245
+4 of 15
+where s1(n) = λ1s(n −τ1), µlm = λlm/λ1, ∆τlm = τlm −τ1 is the time delay difference
+between other multipath signal and the reference signal, τ1 = ∥q1 −p∥/c; and c represents
+light’s velocity.
+3. Proposed Scheme
+3.1. Data Pre-Processing
+In order to reduce the amount of subsequent matrix operations, the received data with
+length Nl are evenly segmented into K parts, each part with length N0 = Nl/K. The premise
+of data segmentation to each received signal is that it does not change the correlation
+between the received signals. Deﬁne the k-th part of x1(n) and xl(n) as x1k(nk) and
+xlk(nk), k = 1, 2, . . . , K, nk = 1 + (k −1)N0, 2 + (k −1)N0, . . . , kN0; they can be expressed by
+(
+x1k(nk) = s1(nk) + σ1k(nk)
+xlk(nk) = ∑M
+m=1 µlms1(nk −∆τlm) + σlk(nk)
+(3)
+The cross-correlation function of the k-th segmented received data and reference data is
+Rx1kxlk(τ) = E
+h
+x1k(nk)xH
+lk(nk + τ)
+i
+(4)
+where E(·) denotes expectation and (·)H represents conjugate transpose. Assuming that the
+signal and noise are independent, substitute Equation (3) with Equation (4), and Rx1kxlk(τ)
+can be rewritten as
+Rx1kxlk(τ) =
+M
+∑
+m=1
+µH
+lmE
+h
+s1(nk)sH
+1 (nk −∆τlm + τ)
+i
+=
+M
+∑
+m=1
+µH
+lmRs1k(τ −∆τlm)
+(5)
+where Rs1k(τ) is the self-correlation functions of s1(nk). Since x1k(nk) = s1(nk) + σ1(nk),
+we have Gs1k(ω) = Gx1k(ω) −Gσ1k(ω), where Gs1k(ω), Gx1k(ω) and Gσ1k(ω) are the self-
+spectra of s1(nk), x1k(nk) and σ1k(nk), respectively. Perform discrete Fourier transform
+(DFT) on Rx1kxlk(τ) and the cross-spectrum of x1k(nk) and xlk(nk) is obtained
+Gx1kxlk(ω) = Gs1k(ω)
+M
+∑
+m=1
+µH
+lme−jω∆τlm =
+
+Gx1k(ω) −Gσ1k(ω)
+
+M
+∑
+m=1
+µH
+lme−jω∆τlm
+(6)
+where ∑M
+m=1 µH
+lme−jω∆τlm is the factor containing multipath delay information.
+3.2. A DPD Method Based on Subspace Orthogonality in Cross-Spectra
+In Equation (6), the time difference of multipath signals and reference signal is sepa-
+rated by the acquisition of the cross-spectra between them. Equation (6) can be rewritten as
+Gx1kxlk(ω) = Gx1k(ω)
+M
+∑
+m=1
+µH
+lme−jω∆τlm −εlk(ω)
+(7)
+where εlk(ω) = Gσ1k(ω) ∑M
+m=1 µH
+lme−jω∆τlm can be seen as the noise term that obeys the
+Gaussian distribution. Since the cross-spectrum model (7) between segmented signals is
+obtained, high resolution spectrum estimation can be used to estimate the target position.
+In order to suppress the inﬂuence of the noise term εlk(ω), Gx1kxlk(ω) is considered to
+be sampled uniformly to obtain the effective observation vectors. The effective part of
+Gx1kxlk(ω) is sampled in frequency domain:
+ylk(nd) =
+M
+∑
+m=1
+µH
+lmGx1k
+
+ωkd+(nd−1)D
+
+e−jω∆τlm −εlk
+
+ωkd+(nd−1)D
+
+, nd = 1, 2, . . . , Nd
+(8)
+where ylk is the observation vector of the k-th section of the l-th received data, kd is the index
+of the lower bound angle frequency of the cross-spectrum, which is obtained by observation
+
+
+=== PDF PAGE 5 ===
+Sensors 2022, 22, 7245
+5 of 15
+and threshold detection of the cross-spectrum, D(D > M) is the data selection interval,
+and Nd is the dimension of the observation vector. Rewrite Equation (8) in vector form:
+ylk = Alkµl + εlk ∈CNd×1
+(9)
+where
+Alk = [alk1,alk2, . . . ,alkM] ∈CNd×M
+(10)
+alkm =
+h
+Gx1k
+ ωkd
+
+e−jωkd ∆τlm, Gx1k
+ ωkd+D
+
+e−jωkd+D∆τlm, . . . , Gx1k
+
+ωkd+(Nd−1)D
+
+e−jωkd+(Nd−1)D∆τlmiT
+∈CNd×1
+(11)
+µl =
+h
+µH
+l1, µH
+l2, . . . , µH
+lM
+iT
+∈CM×1
+(12)
+εlk =
+h
+−εlk
+ ωkd
+
+, −εlk
+ ωkd+D
+
+, . . . , −εlk
+
+ωkd+(Nd−1)D
+iT
+∈CNd×1
+(13)
+where (·)T represents transpose. Therefore, the covariance matrix of ylk in Equation (9) is
+Rlk = E
+h
+ylkyH
+lk
+i
+= E
+h
+(Alkµl + εlk)
+
+µH
+l AH
+lk + εH
+lk
+i
+= AlkE
+h
+µlµH
+l
+µlµH
+l
+µlµH
+l
+i
+AH
+lk + E
+h
+εlkεH
+lk
+εlkεH
+lk
+εlkεH
+lk
+i
+= AlkPlAH
+lk + σ2
+lkI
+(14)
+where Rlk ∈CNd×Nd, Pl = E
+
+µlµH
+l
+
+and σ2
+lkI = E
+
+εlkεH
+lk
+
+. It should be noticed that data
+segmentation does not change the data correlation, which means the cross-spectrum of
+each segment of data and reference data should be consistent theoretically. In the same way,
+the self-spectra of x1k(nk) should consistent in all the segments. However, the additive
+noise leads to the difference between the cross-spectra of each segment. In order to balance
+the inﬂuence of noise, replace Gx1k(ω) with its average G11(ω):
+G11(ω) = 1
+K
+K
+∑
+k=1
+Gx1k(ω)
+(15)
+Hence, it can be seen that Alk and alkm are independent of the different segments; that
+is, the index k can be omitted and they can be rewritten as
+Al = [al1,al2, . . . ,alM] ∈CNd×M
+(16)
+alm =
+h
+G11(ωkd)e−jωkd ∆τlm, G11(ωkd+D)e−jωkd+D∆τlm, . . . , G11(ωkd+(Nd−1)D)e−jωkd+(Nd−1)D∆τlmiT
+∈CNd×1
+(17)
+Add up the covariance matrices of all the segments and obtain the average covari-
+ance matrix:
+Rl = 1
+K
+K
+∑
+k=1
+Rlk = AlPlAH
+l + 1
+K
+K
+∑
+k=1
+σ2
+lkI ∈CNd×Nd
+(18)
+When Pl is nonsingular, Rl after eigen-decomposition can be rewritten as
+Rl = UlSΛlSU H
+lS + UlNΛlNU H
+lN
+(19)
+where UlS ∈CNd×M is the signal subspace and UlN ∈CNd×(Nd−M) is the noise subspace
+that are respectively spanned by the eigenvectors corresponding to the M largest and
+Nd −M smallest eigenvalues, and ΛlS and ΛlN are the diagonal matrices composed of
+the M biggest eigenvalues and Nd −M smallest eigenvalues. Based on the orthogonal
+relation in signal and noise subspace, we have AH
+l UlN = 0. From Equation (16), the relation
+between alm and UlN is
+aH
+lmUlN = 0
+(20)
+In a real-world location scenario, the existence of noise leads to the approximate
+orthogonal relation between alm and UlN. Thus, the estimation of the target source can be
+obtained by searching the point that satisﬁes the approximate orthogonal relation. The cost
+function of any point q0 in the chosen region can be established
+
+
+=== PDF PAGE 6 ===
+Sensors 2022, 22, 7245
+6 of 15
+Q(q0) =
+L
+∑
+l=2
+1
+aH
+l (q0)UlNU H
+lNal(q0)
+(21)
+where
+al(q0) =
+h
+G11
+ ωkd
+
+e−jωkd ∆τl(q0), G11
+ ωkd+D
+
+e−jωkd+D∆τl(q0), . . . , G11
+
+ωkd+(Nd−1)D
+
+e−jωkd+(Nd−1)D∆τl(q0)iT
+∈CNd×1
+(22)
+∆τl(q0) = ∥ql −q0∥
+c
+−∥q1 −q0∥
+c
+(23)
+In a multipath environment, Pl is not necessarily nonsingular; the solution to this prob-
+lem is to obtain the smoothed covariance matrix. The speciﬁc forward spatial smoothing
+[40] process is shown in Figure 2, where ylkd(d = 1, . . . , D) ∈CNd×1 is the d-th observation
+vector of Gx1kxlk(ω) and its expression is:
+ylkd =
+h
+Gx1kxlk
+ ωkd+d−1
+
+, Gx1kxlk
+ ωkd+d−1+D
+
+, . . . , Gx1kxlk
+
+ωkd+d−1+(Nd−1)D
+iT
+(24)
+Figure 2. Schematic diagram of the forward spatial smoothing process.
+The smoothed covariance matrix is expressed as
+eRl = 1
+K
+K
+∑
+k=1
+YlkYH
+lk = eUlS eΛlS eU
+H
+lS + eUlN eΛlN eU
+H
+lN ∈CNd×Nd
+(25)
+where Ylk
+= [ylk1,ylk2, . . . ,ylkD] ∈CNd×D.
+Replace Rl, UlS, UlN, ΛlS, ΛlN from
+Equations (19)–(21) with eRl, eUlS, eUlN, eΛlS, eΛlN, which are the corresponding results after
+spatial smoothing. The coordinate of the target source can be obtained by searching the
+spectral peak of the values of the cost functions over the meshed region.
+3.3. Detailed Procedures
+The main steps of the proposed method are as follows:
+•
+Data pre-processing: The reference signal x1(n) is selected and the received long data
+are segmented as in Equation (3);
+•
+Acquisition of cross-spectra: The cross-correlation Rx1xl(τ) between l-th segmented
+received data and the reference data is calculated in Equation (5); then, the cross-
+spectrum Gx1xl(ω) is obtained by performing DFT to Rx1xl(τ). In order to reduce
+the inﬂuence of interference, the effective parts in the cross-spectra are selected in
+Equation (8). In a multipath environment, spatial smoothing is used to avoid the data
+coherence in Equation (24);
+•
+Construction of cost function and estimation of the source position: The noise subspace
+is obtained by eigen-decomposition to the screened cross-spectrum. Choose the area
+
+
+=== PDF PAGE 7 ===
+Sensors 2022, 22, 7245
+7 of 15
+of positioning and build the cost function in Equation (20) at each grid point based on
+the orthogonal relationship between noise and signal subspace. Then the estimation
+of the target source is obtained by searching the spectral peak of values of the cost
+functions at all points.
+4. Performance Analysis
+4.1. Complexity Analysis
+In this section, the complexity of the proposed DPD method is compared with those of
+the TDOA method based on generalized cross-correlation (denoted by TDOA-GCC-SCOT)
+in [12], the TDOA method based on cross-spectrum (denoted by TDOA-MUSIC-NCS) in
+[18] and the determinant-based DPD method (denoted by DPD-MUSIC-DET) in [33]. The
+complexities of different methods are listed in Table 1, where T is the one-dimensional
+search times. Speciﬁcally, in the proposed and TDOA-MUSIC-NCS methods, the pro-
+cess of cross-spectrum acquisition between two signals with length (2N0 −1) requires
+O((2N0 −1)log(2N0 −1)). Element multiplication of two vectors with length (2N0 −1)
+requires O(2N0 −1). The process of covariance matrix acquisition of a (Nd × D) matrix
+requires O
+ N2
+d D
+
+. The eigenvalue decomposition to a (Nd × Nd) matrix requires O
+ N3
+d
+
+.
+The complexity of 2-D peak search of the cost function values in the proposed method
+is O
+ (L −1)T2Nd(2Nd −2M + 1)
+
+, while that of the DPD-MUSIC-DET method requires
+O
+ L(L −1)T2 N3
+d + LN2
+d + L3
+.
+Table 1. Complexities of different methods.
+Method
+Complexity
+Proposed
+O(KL(2N0 −1)log(2N0 −1) + K(L −1)(N2
+d D + 2N0 −1)) + (L −1)(N3
+d + T2Nd(2Nd −2M + 1))
+DPD-MUSIC-DET
+O(LKN0logN0 + K2NdL2 + N3
+d L3 + (LNd +
+ L2 −L
+ N3
+d + LN2
+d + L3
+T2)
+TDOA-MUSIC-NCS
+O((L −1)(K(2(2N0 −1)log(2N0 −1) + 2N0 −1 + N2
+d D) + N3
+d + TNd(2(Nd −M) + 1))
+TDOA-GCC-SCOT
+O((L −1)(3(2Nl −1) log (2Nl −1) + 2(2Nl −1)))
+In order to compare the computational complexities of the different methods more
+intuitively, the variation curves of complexities with Nd are shown in Figure 3, where L = 4,
+Nl = 16,128, N0 = 256, K = 63, T = 50, M = 2. It can be seen from Figure 3 that the
+computational complexity of the proposed DPD method has roughly the same order of
+magnitude as that of two TDOA methods. Compared with the DPD-MUSIC-DET method,
+the computational complexity of the proposed DPD method is reduced by two orders of
+magnitude. Therefore, the proposed DPD method provides an appreciable contribution
+in reducing the computational complexity, especially compared with other same-type
+DPD methods.
+The real-time performance of the proposed method can be veriﬁed by the comparison
+of the operation time. Perform the four methods 10 times and record their operation time in
+Table 2, where L = 4, Nl = 12,288, N0 = 256, K = 48, T = 100, M = 2. Since the proposed
+method is based on 2-D peak search, it shows poorer real-time performance than the two
+TDOA methods. However, compared with the DPD-MUSIC-DET method, the proposed
+DPD method has a signiﬁcant improvement in real-time performance, which lies in the
+great reduction of the dimensions of eigenvalue decomposition and peak search. Therefore,
+the satisfactory real-time performance of the proposed DPD method is conﬁrmed. In this
+section, it is demonstrated that the proposed DPD method can reduce the complexity
+effectively, which guarantees its real-time performance.
+
+
+=== PDF PAGE 8 ===
+Sensors 2022, 22, 7245
+8 of 15
+Table 2. Comparison of operation time.
+Method
+Proposed
+DPD-MUSIC-DET
+TDOA-MUSIC-NCS
+TDOA-GCC-SCOT
+Operation time (s)
+1.585086
+162.280677
+0.371173
+0.005917
+4.2. Simulation Results
+In this section, a quadrature amplitude modulation (QAM) signal whose modulation
+order is 16 (hereinafter referred to as 16QAM) is used to simulate the transmit signal of the
+radiation source. The sampling frequency is fs = 125 MHz, the signal bandwidth is B =
+40 MHz, the data length is Nl = 12,288, the number of DFT points is N0 = 256, and the
+number of data segments is K = 48. The positioning result of the proposed method is shown
+in Figure 4, where the signal-to-noise ratio is snr = −5 dB, kd = 200, M = 3, Nd = 20,
+and D = 6. The coordinates of the observation stations are (−500, −300) m, (−500, 300)
+m, (500, −300) m and (500, 300) m. The estimation of the source position is (26, 45) m,
+while the real position is (26.5, 41.5) m. This simulation testiﬁes to the effectiveness of the
+proposed DPD method.
+Nd
+Complexity
+proposed
+TDOA-GCC-SCOT
+TDOA-MUSIC-NCS
+DPD-MUSIC-DET
+20
+30
+40
+50
+60
+Nd
+0
+1
+2
+3
+4
+5
+6
+Complexity
+107
+Figure 3. Variation curves of complexities of different methods with Nd.
+x-label
+y-label
+Observation station
+Source
+Source estimation
+Figure 4. The positioning result of the proposed method (M = 3).
+
+
+=== PDF PAGE 9 ===
+Sensors 2022, 22, 7245
+9 of 15
+The root mean square error (RMSE) is used to evaluate the performance of the pro-
+posed method. The RMSE of the estimated position denoted by rmse is given by
+rmse =
+v
+u
+u
+t 1
+Nt
+Nt
+∑
+i=1
+∥ˆpi −p∥2
+(26)
+where Nt are the simulation times under the same SNR, ˆpi is the i-th estimation to the
+radiation source, and p is the real position of the source. The RMSE curves of the different
+methods in a multipath-free environment are shown in Figure 5, where L = 4, fs = 125
+MHz, Nl = 12,288, N0 = 256, K = 48, Nd = 20, D = 10, T = 100, and M = 1. Perform
+Nt = 200 simulations with SNR varying from −10 dB to 15 dB. The RMSE curves versus
+SNR in a multipath environment are shown in Figure 6, where M = 3.
+snr/dB
+rmse/m
+proposed
+DPD-MUSIC-DET
+TDOA-MUSIC-NCS
+TDOA-GCC-SCOT
+Figure 5. RMSE curves versus SNR in a simulated multipath-free environment (M = 1).
+snr/dB
+rmse/m
+proposed
+DPD-MUSIC-DET
+TDOA-MUSIC-NCS
+TDOA-GCC-SCOT
+Figure 6. RMSE curves versus SNR in a simulated multipath environment (M = 3).
+From Figure 5, it is exhibited that the DPD methods performs better than the TDOA
+methods for the reason of the limitation of the sampling rate in TDE estimation. It can
+also be seen that the proposed method shows the highest positioning accuracy among
+these methods. In Figure 6, the RMSE curve of the DPD-MUSIC-DET method becomes
+higher than that of the TDOA-GCC-NCS method when snr ≥0 dB. It is evident that the
+positioning performance of DPD-MUSIC-DET decreases because of the existence of the
+multipath components. However, the proposed method is not affected by the multipath
+signals. By comparing Figure 5 with Figure 6, the trend of the RMSE curve of the proposed
+
+
+=== PDF PAGE 10 ===
+Sensors 2022, 22, 7245
+10 of 15
+method remains almost unchanged, which testiﬁes to its effectiveness in resistance to
+multipath environments.
+In order to analyze the relationship between the number of the multipath components
+and the positioning performance, the RMSE curves versus the number of the multipath
+components, i.e., M, are plotted in Figure 7, where snr = −3 dB. The number of multipath
+components is increased from M = 1 to M = 5. At this SNR, the traditional TDOA method
+cannot estimate the position of the radiation source. The RMSE curves of the four methods
+rise with the increase of M. It is worth mentioning that the TDOA-MUSIC-NCS method
+performs better than the DPD-MUSIC-DET method when 1 < M ≤4, which means that
+the TDOA-MUSIC-NCS has a limited effect against multipath environments. From Figure 7,
+it can be seen that the RMSE curve versus M of the proposed method is the lowest and is
+hardly rising, which indicates its applicability to multipath environments.
+M
+rmse/m
+proposed
+DPD-MUSIC-DET
+TDOA-MUSIC-NCS
+TDOA-GCC-SCOT
+Figure 7. RMSE curves versus the number of multipath components (snr = −3 dB).
+Through a comprehensive comparison of Figures 5–7, it can be found that multipath
+components have little effect on the proposed method, while the other methods are affected
+to varying degrees. Therefore, the positioning performance of the proposed method in
+accuracy is considered better than the other methods both in multipath and multipath-free
+environments.
+4.3. Real-World Test Results
+This section veriﬁes the performance of the proposed method in real-world positioning
+scenarios, and the schematic diagram of the real-world positioning scenario is shown in
+Figure 8. The campus positioning scenario is basically composed of four sensors and
+a radiation source, and the physical drawings of them are shown in Figure 8a,b. Each
+sensor is equipped with an omnidirectional antenna whose operating frequency band
+covers 80–8000 MHz and whose power capacity is 25 W. Set Sensor 1 as the reference
+station, and convert the longitude and latitude coordinates of the four sensors and the
+radiation source into Cartesian coordinates. The coordinates of the four sensors and
+source are (0, 0) m, (23.5975, −95.4008) m, (−60.1265, 32.0600) m, (5.3802, −188.3525) m,
+and (−94.5789, −97.4045) m, respectively, after the conversion. The source transmits the
+signal to the sensors and the received signals of the sensors are processed in a central site.
+The modulation mode of the transmit signal is 16QAM and the bandwidth and central
+frequency are 20 MHz and 720 MHz. In the measured scenario, the overall site is relatively
+open and there are few multipaths. Figure 8c exhibits the heatmap of the positioning
+result of the proposed method, where L = 4, fs = 125 MHz, Nl = 30,720, N0 = 2048,
+K = 15, D = 20, T = 400, and Nt = 20. The parameters Nd and kd about the effective part
+adaptively change with the cross-spectra by setting the threshold value. As is shown in
+
+
+=== PDF PAGE 11 ===
+Sensors 2022, 22, 7245
+11 of 15
+Figure 8c, the blue-shaded square represents the region of search, and the red-shaded part
+is the estimation of the radiation source position, which is close to the real position.
+In order to further reﬂect the superiority of the proposed method, the error cumulative
+distribution function (CDF) curves are compared among different methods. The error CDF
+represents the probability of being less than the error value. According to the deﬁnition of
+a CDF curve, it can be concluded that the closer the curve is to the longitudinal axis, the
+smaller the overall error is. As exhibited in Figure 9, the overall trend of CDF curves is
+consistent with the RMSE curves in the simulation tests. The error CDF of the proposed
+method is closest to the longitudinal axis, and nearly 85 percent of the error values are
+smaller than 10 m. Meanwhile, the other three methods have large error values that are
+more than 20 m, meaning the failure of the positioning. In fact, the number of multipath
+components in the real-world test scenario is very few, but the environment noise is more
+complex. Thus, the DPD-MUSIC-DET method performs better than the TDOA-MUSIC-
+NCS method in terms of robustness in low-SNR environments. The RMSE of the real-world
+test is shown in Figure 10. It is clear that the error caused by the proposed method is the
+smallest in the real-world test. In this section, the superiority in estimation accuracy and
+availability in practice of the proposed method are proven.
+Figure 8. The real-world positioning scenario. (a) Physical drawing of a sensor. (b) Physical drawing
+of the radiation source. (c) Heatmap of the positioning result by the proposed method.
+Error/m
+CDF
+proposed
+DPD-MUSIC-DET
+TDOA-MUSIC-NCS
+TDOA-GCC-SCOT
+Figure 9. The comparison of error CDF curves in a real-world positioning scenario.
+
+
+=== PDF PAGE 12 ===
+Sensors 2022, 22, 7245
+12 of 15
+7.8737
+12.3225
+14.8101
+35.37
+rmse/m
+Figure 10. The comparison of RMSE in a real-world positioning scenario.
+5. Conclusions
+This paper proposes a TDOA-based DPD method based on the subspace orthogonality
+of cross-spectra in multipath environments. The data model under multipath environments
+is built and the method of data processing is introduced. The cost function based on the
+subspace orthogonal relationship of each cross-spectrum between signals is constructed,
+and the estimation to the radiation source is obtained by grid search. The computational
+complexity of the proposed method is proven to be much lower than DPD-MUSIC-DET
+and slightly higher than TDOA-GCC-SCOT and TDOA-MUSIC-NCS by numerical analysis.
+Further, RMSE and CDF are used as evaluation indices to testify to the estimation perfor-
+mance in accuracy by simulation test and real-world test. The test results demonstrate the
+superiority of the proposed method in both multipath and multipath-free environments.
+The presentation of the TDOA-based DPD method is helpful to realize high accuracy
+real-time positioning in practice.
+Author Contributions: Conceptualization, J.L.; methodology, K.Z.; software, K.Z. and H.J.; investiga-
+tion, Q.Y.; data curation, Y.H.; writing—original draft preparation, K.Z.; writing—review and editing,
+J.L. All authors have read and agreed to the published version of the manuscript.
+Funding: This research was funded by National Key Research and Development Project under Grant
+2020YFB1807602 and 2020YFB1807604, Jiangsu Planned Projects for Postdoctoral Research Funds
+(2020Z013), China Postdoctoral Science Foundation (2020M681585).
+Institutional Review Board Statement: Not applicable.
+Informed Consent Statement: Not applicable.
+Data Availability Statement: Not applicable.
+Conﬂicts of Interest: The authors declare no conﬂict of interest.
+Abbreviations
+The following abbreviations are used in this manuscript:
+
+
+=== PDF PAGE 13 ===
+Sensors 2022, 22, 7245
+13 of 15
+DPD
+Direct Position Determination
+TDOA
+Time Difference of Arrival
+DOA
+Direct of Arrival
+TOA
+Time of Arrival
+RSS
+Received Signal Strength
+TDE
+Time Delay Estimation
+GCC
+Generalized Cross-correlation
+ML
+Maximum Likelihood
+MMSE
+Minimum Mean Square Error
+MUSIC
+MUltiple SIgnal Classiﬁcation
+FPGA
+Field Programmable Gate Array
+DL
+Deep Learning
+CNN
+Convolutional Neural Network
+CIR
+Channel Impulse Response
+SNR
+Signal-to-Noise Ratio
+SDF
+Subspace Data Fusion
+MDF
+Multi-array Data Fusion
+QPSO
+Quantum-behaved Particle Swarm Optimization
+MVDR
+Minimum Variance Distortionless Response
+MLE
+Maximum Likelihood Estimation
+LFM
+Linear Frequency Modulation
+STFT
+Short Time Fourier Transform
+HT
+Hough Transform
+EM
+Expectation-Maximization
+FT
+Fourier Transform
+NCS
+Normalized Cross-Spectrum
+AIC
+Akaike Information Criterion
+MDL
+Minimum Description Length
+DFT
+Discrete Fourier Transform
+QAM
+Quadrature Amplitude Modulation
+RMSE
+Root Mean Square Error
+CDF
+Cumulative Distribution Function
+References
+1.
+Jie, Z.; Dong, Z.; Huang, X.; Shi, X. Continuous passive TDOA location method based on multi-ﬂight-vehicle cooperation. In
+Proceedings of the 2018 Chinese Control and Decision Conference (CCDC), Shenyang, China, 9–11 June 2018; pp. 2972–2976.
+2.
+Avitabile, G.; Florio, A.; Coviello, G. Angle of Arrival Estimation Through a Full-Hardware Approach for Adaptive Beamforming.
+IEEE Trans. Circuits Syst. II Exp. Briefs 2020, 67, 3033–3037.
+3.
+Mestre, X.; Vallet, P. On the Resolution Probability of Conditional and Unconditional Maximum Likelihood DoA Estimation.
+IEEE Trans. Signal Process. 2020, 68, 4656–4671.
+4.
+Lin, J.; Ma, X.; Yan, S.; Hao, C. Time-Frequency Multi-Invariance ESPRIT for DOA Estimation. IEEE Antennas Wirel. Propag. Lett.
+2016, 15, 770–773.
+5.
+Yang, X.; Wang, Y.; Chargé, P. Improved Coprime Linear Array Conﬁguration for Moving Platform in DOA Estimation. IEEE
+Commun. Lett. 2021, 25, 470–473.
+6.
+Wang, Y.; Ma, S.; Chen, C.L.P. TOA-Based Passive Localization in Quasi-Synchronous Networks. IEEE Commun. Lett. 2014,
+18, 592–595.
+7.
+Krishnaveni, B.V.; Reddy, K.S.; Reddy, P.R. An Introduction to the TOA measurement for UWB indoor localization Systems. In
+Proceedings of the 2021 5th Conference on Information and Communication Technology (CICT), Kurnool, India, 10–12 December
+2021; pp. 1–4.
+8.
+Zang, L; Shen, C.; Zhang, K.; Xu, L.; Chen, Y. Research on Hybrid Algorithm Based on TDOA. In Proceedings of the 2020 IEEE
+20th International Conference on Communication Technology (ICCT), Nanning, China, 28–31 October 2020; pp. 539–542.
+9.
+Zhou, R.; Sun, H.; Li, H.; Luo, W. Time-difference-of-arrival Location Method of UAV Swarms Based on Chan-Taylor. In
+Proceedings of the 2020 3rd International Conference on Unmanned Systems (ICUS), Harbin, China, 27–28 November 2020;
+pp. 1161–1166.
+10.
+Ran, Q.; Feng, N.; Yu, N.; Wu, Y. A weighted least squares source localization algorithm using TDOA measurements in
+wireless sensor networks. In Proceedings of the 2016 6th International Conference on Electronics Information and Emergency
+Communication (ICEIEC), Beijing, China, 17–19 June 2016; pp. 10–13.
+
+
+=== PDF PAGE 14 ===
+Sensors 2022, 22, 7245
+14 of 15
+11.
+Chen, M.; Zhao, J.; Wang, X. An Optimal Algorithm Design of RSSI Indoor Location based on Neural Network. In Proceedings of
+the 2020 International Conference on Artiﬁcial Intelligence and Computer Engineering (ICAICE), Beijing, China, 23–25 October
+2020; pp. 84–88.
+12.
+Knapp, C.; Carter, G. The generalized correlation method for estimation of time delay. IEEE Trans. Acoust. Speech Signal Process.
+1976, 24, 320–327.
+13.
+Lee, B.; Said, A.; Kalker, T.; Schafer, R.W. Maximum Likelihood Time Delay Estimation with Phase Domain Analysis in the
+Generalized Cross Correlation Framework. In Proceedings of the 2008 Hands-Free Speech Communication and Microphone
+Arrays (HSCMA), Trento, Italy, 6–8 May 2008; pp. 89–92.
+14.
+Masmoudi, A.; Bellili, F.; Affes, S.; Stephenne, A. A Non-Data-Aided Maximum Likelihood Time Delay Estimator Using
+Importance Sampling. IEEE Trans. Signal Process. 2011, 59, 4505–4515.
+15.
+Soltanmohammadi, E.; Dastgerdi, S.M.H.; Rezaie, A.H. DSP Implementation of Time Delay Estimation Based on Bufferable
+Average Square Difference Matrix. In Proceedings of the 2010 12th International Conference on Computer Modelling and
+Simulation, Cambridge, UK, 24–26 March 2010; pp. 227–232.
+16.
+Zhu, Q.; Zhao, Z.; Mao, K.; Chen, X.; Liu, W.; Wu, Q. A Real-Time Hardware Emulator for 3D Non-Stationary U2V Channels.
+IEEE Trans. Circuits Syst. I Reg. Pap. 2021, 68, 3951–3964.
+17.
+Bellili, F.; Amor, S.B.; Affes, S.; Samet, A. A new importance-sampling ML estimator of time delays and angles of arrival in
+multipath environments. In Proceedings of the 2014 IEEE International Conference on Acoustics, Speech and Signal Processing
+(ICASSP), Florence, Italy, 4–9 May 2014; pp. 4219–4223.
+18.
+Zhong, S.; Xia, W.; Song, J.; He, Z. Super-resolution time delay estimation in multipath environments using normalized cross
+spectrum. In Proceedings of the 2013 International Conference on Communications, Circuits and Systems (ICCCAS), Chengdu,
+China, 15–17 November 2013; pp. 288–291.
+19.
+Ge, F.X.; Shen, D.; Peng, Y.; Li, V.O.K. Super-Resolution Time Delay Estimation in Multipath Environments. IEEE Trans. Circuits
+Syst. I Reg. Pap. 2007, 54, 1977–1986.
+20.
+Schmidt, R. Multiple emitter location and signal parameter estimation. IEEE Trans. Antennas Propag. 1986, 34, 276–280.
+21.
+Rangarao, K.V.; Venkatanarasimhan, S. gold-MUSIC: A Variation on MUSIC to Accurately Determine Peaks of the Spectrum.
+IEEE Trans. Antennas Propag. 2013, 34, 2263–2268.
+22.
+Piccinni, G.; Avitabile, G.; Coviello, G.; Talarico, C. Real-Time Distance Evaluation System for Wireless Localization. IEEE Trans.
+Circuits Syst. I Reg. Pap. 2020, 67, 3320–3330.
+23.
+Niitsoo, A.; Edelhäußer, T.; Mutschler, C. Convolutional Neural Networks for Position Estimation in TDoA-Based Locating
+Systems. In Proceedings of the 2018 International Conference on Indoor Positioning and Indoor Navigation (IPIN), Nantes,
+France, 24–27 September 2018; pp. 1–8.
+24.
+Feigl, T.; Eberlein, E.; Kram, S.; Mutschler, C. Robust ToA-Estimation using Convolutional Neural Networks on Randomized
+Channel Models. In Proceedings of the 2021 International Conference on Indoor Positioning and Indoor Navigation (IPIN),
+Lloret De Mar, Spain, 29 November–2 December 2021; pp. 1–8.
+25.
+Weiss, A.J. Direct position determination of narrowband radio frequency transmitters. IEEE Signal Process. Lett. 2004, 11, 513–516.
+26.
+Li, J.; He, Y.; Zhang, X.; Wu, Q. Simultaneous Localization of Multiple Unknown Emitters Based on UAV Monitoring Big Data.
+IEEE Trans. Industr. Inform. 2021, 17, 6303–6313.
+27.
+Amar, A.; Weiss, A.J. Advances in direct position determination. In Proceedings of the Processing Workshop Proceedings, 2004
+Sensor Array and Multichannel Signal, Barcelona, Spain, 18–21 July 2004; pp. 584–588.
+28.
+Zhang, X.; Wang, Q.; Huang, Z.; Yuan, N.; Hu, W. Direct Position Determination of Emitters using Single Moving Coprime Array.
+In Proceedings of the 2021 14th International Congress on Image and Signal Processing, BioMedical Engineering and Informatics
+(CISP-BMEI), Shanghai, China, 23–25 October 2021; pp. 1–5.
+29.
+Huang, Z.; Wu, J. Multi-array Data Fusion Based Direct Position Determination Algorithm. In Proceedings of the 2014 Sev-
+enth International Symposium on Computational Intelligence and Design (ICSID), Hangzhou, China, 13–14 December 2014;
+pp. 121–124.
+30.
+Tirer, T.; Weiss, A.J. High Resolution Direct Position Determination of Radio Frequency Sources. IEEE Signal Process. Lett. 2016,
+23, 192–196.
+31.
+Pokrajac, I.P.; Vucic, D.; Okiljevic, P. Direct position determination of wideband signals: Coherent and noncoherent approach.
+In Proceedings of the 2013 11th International Conference on Telecommunications in Modern Satellite, Cable and Broadcasting
+Services (TELSIKS), Nis, Serbia, 16–19 October 2013; pp. 77–80.
+32.
+Hao, K.; Chen, J.; Wan, Q. Direct Position Determination of Indoor Radio Sources Using Hybrid Antenna Arrays. In Proceedings
+of the 2021 IEEE Wireless Communications and Networking Conference (WCNC), Nanjing, China, 29 March–1 April 2021;
+pp. 1–5.
+33.
+Hao, K.; Wan, Q. An Efﬁciency-improved Tdoa-based Direct Position Determination Method for Multiple Sources. In Proceedings
+of the 2019 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), Brighton, UK, 12–17 May 2019;
+pp. 4425–4429.
+34.
+Vankayalapati, N.; Kay, S.; Ding, Q. TDOA based direct positioning maximum likelihood estimator and the cramer-rao bound.
+IEEE Trans. Aerosp. Electron. Syst. 2014, 50, 1616–1635.
+
+
+=== PDF PAGE 15 ===
+Sensors 2022, 22, 7245
+15 of 15
+35.
+Li, S.; Qi, C.; Zhang, Y. A Low Computation Direct Position Determination Based on TDOA. In Proceedings of the 2021
+3rd International Academic Exchange Conference on Science and Technology Innovation (IAECST), Guangzhou, China,
+10–12 December 2021; pp. 63–67.
+36.
+Qi, S.R.; Yuan, C.S.; Liang, B.J.; Gao, L.; Li, H.; Sun, H. A Direct Position Determination Method for Four-station TDOA
+Location System. In Proceedings of the 2019 IEEE International Conference on Signal, Information and Data Processing (ICSIDP),
+Chongqing, China, 11–13 December 2019; pp. 1–5.
+37.
+Chen, F.; Zhou, T.; Yi, W.; Kong, L.; Zhai, B. Passive direct position determination of multiple emitters transmitting unknown
+LFM signals. In Proceedings of the 2018 IEEE Radar Conference (RadarConf18), Oklahoma City, OK, USA, 23–27 April 2018;
+pp. 1129–1133.
+38.
+Ma, F.; Liu, Z.M.; Guo, F. Direct Position Determination in Asynchronous Sensor Networks. IEEE Trans. Veh. Technol. 2019,
+68, 8790–8803.
+39.
+Niitsoo, A.; Edelhäußer, T.; Eberlein, E.; Hadaschik, N.; Mutschler, C. A Deep Learning Approach to Position Estimation from
+Channel Impulse Responses. Sensors 2019, 19, 1064. https://doi.org/10.3390/s19051064.
+40.
+Wen, F.; Shi, J.; Zhang, Z. Generalized spatial smoothing in bistatic EMVS-MIMO radar. Signal Process. 2022, 193, 108406.

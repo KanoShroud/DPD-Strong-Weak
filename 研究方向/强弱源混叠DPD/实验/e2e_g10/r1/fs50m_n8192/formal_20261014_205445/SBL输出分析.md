@@ -1,0 +1,28 @@
+# SBL共同状态比较
+
+FORMAL_FIXED_LAYOUT_COMPARISON
+
+本报告不改变SBL内部优化。分组γ与单点γ比较分组作用；相干聚合另与单点后验功率比较，避免混淆评分变化。
+
+| Candidate | Reference | Target | Subset | N | Rescued | Harmed | Difference | 95% CI |
+|---|---|---|---|---:|---:|---:|---:|---|
+| SBL_GROUP_GAMMA | SBL | both | all | 120 | 0 | 0 | 0.0 | [0.0, 0.0] |
+| SBL_GROUP_GAMMA | SBL | both | duplicate_triggered | 109 | 0 | 0 | 0.0 | [0.0, 0.0] |
+| SBL_GROUP_GAMMA | SBL | weak | all | 120 | 0 | 0 | 0.0 | [0.0, 0.0] |
+| SBL_GROUP_GAMMA | SBL | weak | duplicate_triggered | 109 | 0 | 0 | 0.0 | [0.0, 0.0] |
+| SBL_GROUP_GAMMA | SBL | strong | all | 120 | 0 | 0 | 0.0 | [0.0, 0.0] |
+| SBL_GROUP_GAMMA | SBL | strong | duplicate_triggered | 109 | 0 | 0 | 0.0 | [0.0, 0.0] |
+| SBL_GROUP_COHERENT | SBL_GROUP_GAMMA | both | all | 120 | 0 | 5 | -0.041666666666666664 | [-0.07500000000000001, -0.008333333333333333] |
+| SBL_GROUP_COHERENT | SBL_GROUP_GAMMA | both | duplicate_triggered | 109 | 0 | 3 | -0.028333333333333335 | [-0.05500000000000001, -0.008333333333333333] |
+| SBL_GROUP_COHERENT | SBL_GROUP_GAMMA | weak | all | 120 | 0 | 4 | -0.03333333333333333 | [-0.06666666666666667, -0.008333333333333333] |
+| SBL_GROUP_COHERENT | SBL_GROUP_GAMMA | weak | duplicate_triggered | 109 | 0 | 3 | -0.028333333333333335 | [-0.05500000000000001, -0.008333333333333333] |
+| SBL_GROUP_COHERENT | SBL_GROUP_GAMMA | strong | all | 120 | 0 | 1 | -0.008333333333333333 | [-0.025, 0.0] |
+| SBL_GROUP_COHERENT | SBL_GROUP_GAMMA | strong | duplicate_triggered | 109 | 0 | 0 | 0.0 | [0.0, 0.0] |
+| SBL_GROUP_COHERENT | SBL_POINT_POWER_AUX | both | all | 120 | 2 | 0 | 0.016666666666666666 | [0.0, 0.03333333333333333] |
+| SBL_GROUP_COHERENT | SBL_POINT_POWER_AUX | both | duplicate_triggered | 109 | 2 | 0 | 0.016666666666666666 | [0.0, 0.03333333333333333] |
+| SBL_GROUP_COHERENT | SBL_POINT_POWER_AUX | weak | all | 120 | 0 | 0 | 0.0 | [0.0, 0.0] |
+| SBL_GROUP_COHERENT | SBL_POINT_POWER_AUX | weak | duplicate_triggered | 109 | 0 | 0 | 0.0 | [0.0, 0.0] |
+| SBL_GROUP_COHERENT | SBL_POINT_POWER_AUX | strong | all | 120 | 5 | 0 | 0.041666666666666664 | [0.041666666666666664, 0.041666666666666664] |
+| SBL_GROUP_COHERENT | SBL_POINT_POWER_AUX | strong | duplicate_triggered | 109 | 5 | 0 | 0.041666666666666664 | [0.041666666666666664, 0.041666666666666664] |
+
+首次重复仅指保存检查点观察到。详见sbl_output_metrics.csv和sbl_first_observed.csv。

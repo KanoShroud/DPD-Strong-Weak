@@ -1,0 +1,63 @@
+14056                                                              IEEE TRANSACTIONS ON MOBILE COMPUTING, VOL. 23, NO. 12, DECEMBER 2024
+
+
+systems but also makes them a practical and reliable alterna-   extra steps of estimating separate AoA or ToF values, these
+tive to traditional localization methods, particularly in indoor  methods signiﬁcantly expedite the localization process, making
+settings where traditional methods may be less effective. The  them particularly suitable for applications that demand real-time
+use of existing Wi-Fi infrastructure for these systems ensures  and precise location tracking. The continued development and
+they are both cost-effective and scalable, making Wi-Fi-based   optimization of direct localization methods are integral to the
+indoor positioning an increasingly viable option for a wide   evolution of wireless networks, particularly in scenarios that
+range of applications, from indoor navigation to smart building   require high levels of accuracy and efﬁciency in localization.
+management.                                                     In the ﬁeld of localization in wireless communication, struc-
+  CSI-based localization includes a wide range of wireless   tured sparsity within sparse modeling has been identiﬁed as a key
+communication techniques. These methods range from those   methodological advancement [26], [27]. This approach extends
+that estimate intermediate variables like angle-of-arrival (AoA)  beyond the foundational principles of traditional sparsity by
+and time-of-ﬂight (ToF), to more direct approaches that ﬁnd the   incorporating the selection of input variables based on their
+location of the device without intermediate estimation steps [3].   inherent structural patterns, such as groups or interconnected
+Subspace-based methods, such as MUSIC [6] and ESPRIT [7],   networks [28], [29], [30]. This selection process not only en-
+along with their variations [8], [9], [10], [11], form a signiﬁcant   hances the interpretability of the resulting models but also signif-
+part of this spectrum. These approaches are characterized by   icantly reduces computational complexity. The structured spar-
+their dependence on the computation of the covariance matrix of   sity methods are particularly capable of handling the complex
+the received signal, which typically requires extensive data col-  and high-dimensional data characteristic of indoor localization
+lection. Such methods are well-suited for environments where   scenarios, where environmental variables can greatly inﬂuence
+signal characteristics can lead to accurate extraction of AoA and   signal behavior.
+ToF.                                                              In this paper, we introduce a new method for directly local-
+  In scenarios characterized by sparse signal distribution across   izing a mobile user by jointly processing signals received at
+certain grid points, recent advancements have shifted towards   multiple antenna arrays. To model the problem more accurately
+sparse signal recovery techniques in different domains [12],  we need to take into account the fact that the line-of-sight
+[13]. The sparsity of the signal in the angular domain has been   (LoS) signal, which travels directly from the mobile user to the
+explored in studies like [14], [15], while [16], [17], [18], [19]   antennas, originates from the same point in space for all the
+have focused on investigating the spatial sparsity of the received   anchors. However, non-line-of-sight (NLoS) signals, which are
+signals. These methods typically employ an ℓ0-pseudo-norm   reﬂections from various objects, tend to be more random.
+formulation, known for its computational complexity, but of-     Preliminary results of this study were previously published
+fering an accurate approach for signal recovery in multipath   in [31]. In this paper, we offer a more detailed explanation
+environments. To address the computational demands of the   of the method and extend the analysis to include performance
+ℓ0-pseudo-norm formulation, an ℓ1-norm relaxation has been  and robustness tests using experimental data from an indoor
+proposed as a more tractable alternative, with some level of bias   environment. Moreover, we evaluate the statistical efﬁciency of
+into the localization solution [20], [21]. Despite this limitation,   the method by calculating the Cramer-Rao Bound (CRB) and
+the ℓ1-norm relaxation is favored in indoor settings where ac-  compare its performance against other existing methods in the
+curately capturing the signal propagation can be challenging.   literature.
+The continuous advancement and diversiﬁcation of CSI-based    The approach involves deﬁning a grid over the area of interest.
+localization methodologies highlight their growing signiﬁcance   This turns the localization problem into a problem of identifying
+in enhancing the precision and reliability of indoor localization   the sparsest set of grid points that can explain the observed sig-
+systems within the broader scope of wireless networking tech-   nals, a problem well-suited for compressed sensing techniques.
+nologies.                                            The main contribution of this approach is deﬁning a constraint
+  Direct localization methods represent a signiﬁcant advance-   that captures the sparse structure caused by the observation we
+ment in wireless communication, offering an efﬁcient solution   have about the signal paths. Typically, such a problem is NP-
+by directly determining the location of the user from the received   hard, which is challenging to solve efﬁciently. In this work, we
+signal, thus eliminating the need for intermediate parameter   reformulatethelocalizationproblemasabinaryℓ0-pseudo-norm
+estimation such as angle-of-arrival (AoA) and time-of-ﬂight   minimization problem and then translate it to a quadratic uncon-
+(ToF) [22], [23], [24]. This approach, which was ﬁrst introduced   strained binary optimization (QUBO) problem. Although still
+in [25], has been improved to address the challenges of diverse   NP-hard, efﬁcient binary programming solvers, like branch-and-
+environments. The primary advantage of these methods lies in  bound and annealing-based methods, can solve these problems
+their ability to reduce computational complexity and enhance   effectively. In this paper, we solve the problem using Markov
+the speed and accuracy of determining the position of the user.   Chain Monte Carlo (MCMC)-based annealing solvers.
+  One of the prominent works of this approach is the Di-    The proposed  binary group  structured  sparsity method
+rect Source Localization (DiSouL) methodology [16], which   presents a robust alternative to conventional approaches like
+is an application of direct localization in challenging multipath  Group Lasso [28]. By converting the optimization process into
+environments. DiSouL, along with similar direct localization   a QUBO problem, it signiﬁcantly enhances computational ef-
+techniques, utilizes the raw signal data captured by antennas   ﬁciency. This transformation simpliﬁes parameter tuning and
+to accurately localize the signal source. By eliminating the   improves the interpretability of the model. Moreover, the binary
+
+
+        Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:02:23 UTC from IEEE Xplore. Restrictions apply.

@@ -1,0 +1,63 @@
+14400                                                      IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS, VOL. 23, NO. 10, OCTOBER 2024
+
+                                                               𝑑                   𝑑
+  Given that the received signal measurements across all the         +    ( ˜𝑥𝑢−˜𝑥𝑝) sin 𝜃∗𝑝𝑚2 +    ( ˜𝑦𝑢−˜𝑦𝑝) cos 𝜃∗𝑝𝑚2]2.
+                                                                                                     𝑟∗𝑝                             𝑟∗𝑝access points are independent, the joint likelihood function for
+these measurements is given by                                                                                         (34)
+                              𝑃                     The details of the derivations of these elements are given in
+              𝑓(y1, y2, · · · , y𝑃| ¯𝜼) = Ö 𝑓(y𝑝| ¯𝜼).         (27)  Appendix A. Then, the CRB of the localization error is given
+                                   𝑝=1                     by
+  The log-likelihood function, Ly( ¯𝜼), can be found by taking                                            𝐶𝑅𝐵= tr(J−1( ¯𝜼)) = 𝐽−111 + 𝐽−122            (35)the natural logarithm of (25) as
+                        𝑃                             where 𝐽−111 and 𝐽−122  are the diagonal elements of the inverse
+               Ly( ¯𝜼) = ∑︁ ln 𝑓(y𝑝| ¯𝜼).               (28)   of the FIM and are given by:
+                            𝑝=1                                                                                            𝐽˜𝑦𝑢˜𝑦𝑢                                                                      𝐽−1                                                                                           11 =                                    (36)  We need to calculate the Fisher information matrix (FIM) to                               𝐽˜𝑥𝑢˜𝑥𝑢𝐽˜𝑦𝑢˜𝑦𝑢−𝐽˜𝑥𝑢˜𝑦𝑢𝐽˜𝑥𝑢˜𝑦𝑢
+find the CRB. The FIM is the covariance of the derivative of                                                       and
+the log-likelihood function with respect to the variables. The                                               𝐽˜𝑥𝑢˜𝑥𝑢
+FIM is given by:                                                       𝐽−122 =                                         .           (37)                                                                                                           𝐽˜𝑥𝑢˜𝑥𝑢𝐽˜𝑦𝑢˜𝑦𝑢−𝐽˜𝑥𝑢˜𝑦𝑢𝐽˜𝑥𝑢˜𝑦𝑢
+              J( ¯𝜼) = E{∇¯𝜼Ly( ¯𝜼)∇¯𝜼Ly( ¯𝜼)𝐻}                                                       Theorem 1: For 𝑀≫1, the CRB can be approximated by
+              = −E{∇¯𝜼∇𝐻¯𝜼Ly( ¯𝜼)}                 (29)   the following equation:
+                                                                                                                               cos 𝜃∗𝑝
+where ∇¯𝜼= [𝜕/𝜕˜𝑥𝑢, 𝜕/𝜕˜𝑦𝑢]𝑇. In this case, the matrix J( ¯𝜼) is                    Í𝑃𝑝=1(  𝑟∗𝑝)2a 2 × 2 matrix with the following form:                  𝐶𝑅𝐵≈3𝜎2𝜆2                                    (38)
+                                                        10𝜋2𝑀  𝑔(𝜃∗1, 𝜃∗2, · · · 𝜃∗𝑃, 𝑟∗1, · · · , 𝑟∗𝑃)
+                                      𝐽˜𝑥𝑢˜𝑥𝑢     𝐽˜𝑥𝑢˜𝑦𝑢                 J( ¯𝜼) =                              .              (30)  where
+                                      𝐽˜𝑦𝑢˜𝑥𝑢     𝐽˜𝑦𝑢˜𝑦𝑢
+                                                           𝑔(𝜃∗1, 𝜃∗2, · · · 𝜃∗𝑃, 𝑟∗1, · · · , 𝑟∗𝑃)  Next, we derive each element of the matrix J( ¯𝜼). Assume
+                                                        𝑃  𝑃
+                                                                      cos 𝜃∗𝑝cos 𝜃∗𝑞that the covariance of the noise across all access points is the
+                                          ∑︁ ∑︁ (                                                                                    )2(4 sin2 𝜃∗𝑞cos2 𝜃∗𝑝−sin 2𝜃∗𝑝sin 2𝜃∗𝑞)same. To be more specific, Σ𝑝= Σ = 𝜎2I, 𝑝= 1, 2, · · · , 𝑃.   =                                                                                                          𝑟∗𝑝𝑟∗𝑞
+                                                                   𝑝=1 𝑞=1Therefore, the second derivative of Ly( ¯𝜼) with respect to ¯𝜂𝑘
+and ¯𝜂𝑙is given by:                                                                                                     (39)
+                                                                  Proof: The proof is given in Appendix B.        □
+                            𝑃
+             𝜕2                            𝜕𝜇𝐻𝑝( ¯𝜼) 𝜕𝜇𝑝( ¯𝜼)                         2                         o                                       n                     ∑︁                                                         o .       According  to  (38),  the CRB  of  the  localization  error                 ℜ                   =  𝐽𝑘,𝑙= −E n               Ly( ¯𝜼)                 𝜕¯𝜂𝑘¯𝜂𝑙        𝜎2           𝜕¯𝜂𝑘      𝜕¯𝜂𝑙         decreases with increasing SNR and also by increasing the                                 𝑝=1
+                                                    number of antenna elements. We should also consider that
+                                                         (31)                                                     0 ≤cos 𝜃∗𝑝≤1, 𝑝= 1, 2, · · · , 𝑃. Thus, we have the following
+                                                                      corollary.  Based on (31), we can define each element of FIM as
+follows. Note that 𝜃∗𝑝and 𝑟∗𝑝are the estimated AoA and the     Corollary 1: Among the P access points, the one closer to
+                                                                 the source will contribute more to the localization error.range of the 𝑝-th access point from the estimated location of
+                                                     The Corollary 1 is a direct result of Theorem 1. To elaboratethe user, ¯𝜼:
+                                                                        further, Equation (38) exhibits an inverse relationship with the
+           𝑃             𝑀−1
+        2                                                     distance between the source and the access points.
+                           𝜃∗𝑝)2 ∑︁ [2( ˜𝑦𝑢−˜𝑦𝑝)𝑚 𝐽˜𝑥𝑢˜𝑥𝑢=   ∑︁ (𝜋𝑑  cos
+       𝜎2      𝜆𝑟∗2𝑝             𝑝=1               𝑚=0
+          𝑑                                                            V. PERFORMANCE EVALUATION       +    ( ˜𝑦𝑢−˜𝑦𝑝) sin 𝜃∗𝑝𝑚2 −𝑑 ( ˜𝑥𝑢−˜𝑥𝑝) cos 𝜃∗𝑝𝑚2]2,
+               𝑟∗𝑝                              𝑟∗𝑝                            In this part, we evaluate the performance of our method
+                                                     by comparing it to other benchmarks in the literature. In our
+                                                         (32)
+                                                         method, which we  call ℓ0-CS DLE, we provide a binary
+                   𝑃             𝑀−1
+                          ∑︁ [2( ˜𝑦𝑢−˜𝑦𝑝)𝑚     relaxation for the compressed sensing-based cooperative direct              ∑︁ (𝜋𝑑  cos 𝜃∗𝑝)2 𝐽˜𝑥𝑢˜𝑦𝑢= 𝐽˜𝑦𝑢˜𝑥𝑢= −2
+               𝜎2      𝜆𝑟∗2𝑝                                  localization and use the DA to solve the problem. All exper-                       𝑝=1               𝑚=0
+                                                           iments were conducted on the DA environment prepared for          𝑑       +    ( ˜𝑦𝑢−˜𝑦𝑝) sin 𝜃∗𝑝𝑚2 −𝑑 ( ˜𝑥𝑢−˜𝑥𝑝) cos 𝜃∗𝑝𝑚2]      the research use. Note that other QUBO solvers can be used
+               𝑟∗𝑝                              𝑟∗𝑝                                                                    to solve this problem. We first demonstrate the experimental
+                       𝑑
+      × [2( ˜𝑥𝑢−˜𝑥𝑝)𝑚+    ( ˜𝑥𝑢−˜𝑥𝑝) sin 𝜃∗𝑝𝑚2               setup and then provide the performance evaluation for the
+                                     𝑟∗𝑝                                 simulated environment and the real environment data.
+          𝑑                                          The first method, ℓ1-CS DLE, that we use as a benchmark       +    ( ˜𝑦𝑢−˜𝑦𝑝) cos 𝜃∗𝑝𝑚2],                      (33)
+               𝑟∗𝑝                                                              is proposed in [23]. In this method, authors designed a com-
+           𝑃             𝑀−1                           pressed sensing-based algorithm to estimate the location of
+        2
+                           𝜃∗𝑝)2 ∑︁ [2( ˜𝑥𝑢−˜𝑥𝑝)𝑚              the user in a multipath environment. The proposed technique 𝐽˜𝑦𝑢˜𝑦𝑢=   ∑︁ (𝜋𝑑  cos       𝜎2                  𝜆𝑟∗2𝑝             𝑝=1                             𝑚=0                               jointly processes the received data at each access point and
+
+         Authorized licensed use limited to: XIDIAN UNIVERSITY. Downloaded on October 25,2026 at 04:02:33 UTC from IEEE Xplore. Restrictions apply.

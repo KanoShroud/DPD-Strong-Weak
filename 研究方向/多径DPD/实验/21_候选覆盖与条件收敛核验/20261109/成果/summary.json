@@ -1,0 +1,522 @@
+{
+  "schema": "R21_REMOTE_READONLY_REVIEW_V1",
+  "source_commit": "4fce5ee0f1fa6cc84c199288da9242416fbc1836",
+  "source_run": "pilot3_20261109_163703_315218",
+  "review_date": "2026-11-09",
+  "provenance": "Repository original JSON, no new IQ solving",
+  "status": "R21_DIAGNOSTIC_FINISHED",
+  "selftest": "PASS",
+  "source_identity_verified": true,
+  "protocol": {
+    "specs": [
+      {
+        "index": 0,
+        "tag": "IN_100_R00_L0",
+        "k_checkpoints": [
+          0,
+          4
+        ]
+      },
+      {
+        "index": 8,
+        "tag": "IN_102_R00_L2_P075",
+        "k_checkpoints": [
+          4,
+          16
+        ]
+      },
+      {
+        "index": 16,
+        "tag": "IN_105_R00_L1_P075",
+        "k_checkpoints": [
+          4,
+          8
+        ]
+      }
+    ],
+    "budgets": [
+      70,
+      300
+    ],
+    "pg_gate": 1e-7,
+    "full_band": true,
+    "training_frequency_split": false,
+    "formal_batch": false
+  },
+  "counts": {
+    "iq_records": 3,
+    "blind_branches": 6,
+    "offline_oracle_branches": 3,
+    "checkpoints": 18,
+    "checkpoint_stationary": 1,
+    "checkpoint_stationary_non_degenerate": 0,
+    "complete_pools_with_under_2m_oracle": 3,
+    "blind_pairs_with_under_20m_rmse": 0
+  },
+  "solver": {
+    "budget70": {
+      "pairs": 93,
+      "stationary_stages": 3,
+      "accepted_stages": 73,
+      "iteration_limit_stages": 74,
+      "total_solver_seconds": 39.8477779001696,
+      "termination_counts": {
+        "Iteration limit reached": 74,
+        "Optimization terminated successfully": 19
+      }
+    },
+    "budget300": {
+      "pairs": 93,
+      "stationary_stages": 11,
+      "accepted_stages": 83,
+      "iteration_limit_stages": 17,
+      "total_solver_seconds": 89.2905037997989,
+      "termination_counts": {
+        "Rank-deficient equality constraint subproblem HFTI": 1,
+        "Optimization terminated successfully": 75,
+        "Iteration limit reached": 17
+      }
+    },
+    "paired_stages": 93,
+    "stages_where_budget300_lower_cost": 64,
+    "stages_where_budget300_higher_cost": 4,
+    "stages_where_cost_tied": 25
+  },
+  "cases": [
+    {
+      "tag": "IN_100_R00_L0",
+      "complete_pool_size": 86,
+      "complete_pool_oracle_rmse_m": 1.8804912768961095,
+      "six_point_oracle_rmse_m": 22.128215479165732,
+      "blind_pair_results": [
+        {
+          "label": "LOS_BEST",
+          "rmse_m": 2904.378752676298
+        },
+        {
+          "label": "LOS_RANK_CONTRAST",
+          "rmse_m": 3863.393781784998
+        }
+      ],
+      "checkpoints": [
+        {
+          "tag": "IN_100_R00_L0",
+          "arm": "LOS_BEST",
+          "position_rmse_m": 2904.378752676298,
+          "cp": [
+            {
+              "K": 0,
+              "value": 0.1772365167077805,
+              "pg": 0.00001204698501267032,
+              "stationary": false,
+              "selected_optimizer_budget": 300,
+              "path_count": 0
+            },
+            {
+              "K": 4,
+              "value": 0.17512846913431881,
+              "pg": 9.875765144551352e-7,
+              "stationary": false,
+              "selected_optimizer_budget": 70,
+              "path_count": 4
+            }
+          ]
+        },
+        {
+          "tag": "IN_100_R00_L0",
+          "arm": "LOS_RANK_CONTRAST",
+          "position_rmse_m": 3863.393781784998,
+          "cp": [
+            {
+              "K": 0,
+              "value": 0.6495828044212957,
+              "pg": 2.7755575615628914e-17,
+              "stationary": true,
+              "selected_optimizer_budget": 70,
+              "path_count": 0
+            },
+            {
+              "K": 4,
+              "value": 0.20674554038920723,
+              "pg": 0.0008171407250162096,
+              "stationary": false,
+              "selected_optimizer_budget": 300,
+              "path_count": 4
+            }
+          ]
+        },
+        {
+          "tag": "IN_100_R00_L0",
+          "arm": "ORACLE",
+          "position_rmse_m": 1.8804912768961095,
+          "cp": [
+            {
+              "K": 0,
+              "value": 0.07579905015665316,
+              "pg": 2.0190167639502765e-7,
+              "stationary": false,
+              "selected_optimizer_budget": 70,
+              "path_count": 0
+            },
+            {
+              "K": 4,
+              "value": 0.07337250810648807,
+              "pg": 1.1471371497151495e-7,
+              "stationary": false,
+              "selected_optimizer_budget": 300,
+              "path_count": 4
+            }
+          ]
+        }
+      ],
+      "info_label": "oracle is truth selected after blind save"
+    },
+    {
+      "tag": "IN_102_R00_L2_P075",
+      "complete_pool_size": 102,
+      "complete_pool_oracle_rmse_m": 0.5374760304588633,
+      "six_point_oracle_rmse_m": 1462.5333381658174,
+      "blind_pair_results": [
+        {
+          "label": "LOS_BEST",
+          "rmse_m": 2001.3617116106511
+        },
+        {
+          "label": "LOS_RANK_CONTRAST",
+          "rmse_m": 2006.57535729305
+        }
+      ],
+      "checkpoints": [
+        {
+          "tag": "IN_102_R00_L2_P075",
+          "arm": "LOS_BEST",
+          "position_rmse_m": 2001.3617116106511,
+          "cp": [
+            {
+              "K": 4,
+              "value": 0.11287999850610547,
+              "pg": 0.000012100144444106113,
+              "stationary": false,
+              "selected_optimizer_budget": 300,
+              "path_count": 4
+            },
+            {
+              "K": 16,
+              "value": 0.07040780707870578,
+              "pg": 0.09573248027525658,
+              "stationary": false,
+              "selected_optimizer_budget": 70,
+              "path_count": 16
+            }
+          ]
+        },
+        {
+          "tag": "IN_102_R00_L2_P075",
+          "arm": "LOS_RANK_CONTRAST",
+          "position_rmse_m": 2006.57535729305,
+          "cp": [
+            {
+              "K": 4,
+              "value": 0.22001487899884403,
+              "pg": 8.701350093787141e-7,
+              "stationary": false,
+              "selected_optimizer_budget": 300,
+              "path_count": 4
+            },
+            {
+              "K": 16,
+              "value": 0.11598954794022366,
+              "pg": 0.04790777497484039,
+              "stationary": false,
+              "selected_optimizer_budget": 70,
+              "path_count": 16
+            }
+          ]
+        },
+        {
+          "tag": "IN_102_R00_L2_P075",
+          "arm": "ORACLE",
+          "position_rmse_m": 0.5374760304588633,
+          "cp": [
+            {
+              "K": 4,
+              "value": 0.08635815930830863,
+              "pg": 8.856096410658765e-7,
+              "stationary": false,
+              "selected_optimizer_budget": 300,
+              "path_count": 4
+            },
+            {
+              "K": 16,
+              "value": 0.05546823860656964,
+              "pg": 8.844504238436635e-7,
+              "stationary": false,
+              "selected_optimizer_budget": 300,
+              "path_count": 16
+            }
+          ]
+        }
+      ],
+      "info_label": "oracle is truth selected after blind save"
+    },
+    {
+      "tag": "IN_105_R00_L1_P075",
+      "complete_pool_size": 129,
+      "complete_pool_oracle_rmse_m": 0.6370983887081839,
+      "six_point_oracle_rmse_m": 33.16539648644814,
+      "blind_pair_results": [
+        {
+          "label": "LOS_BEST",
+          "rmse_m": 46.77754319532196
+        },
+        {
+          "label": "LOS_RANK_CONTRAST",
+          "rmse_m": 2080.1064864508703
+        }
+      ],
+      "checkpoints": [
+        {
+          "tag": "IN_105_R00_L1_P075",
+          "arm": "LOS_BEST",
+          "position_rmse_m": 46.77754319532196,
+          "cp": [
+            {
+              "K": 4,
+              "value": 0.11760698643443865,
+              "pg": 4.94735155023851e-7,
+              "stationary": false,
+              "selected_optimizer_budget": 70,
+              "path_count": 4
+            },
+            {
+              "K": 8,
+              "value": 0.09439999460390026,
+              "pg": 7.113849427031749e-7,
+              "stationary": false,
+              "selected_optimizer_budget": 300,
+              "path_count": 8
+            }
+          ]
+        },
+        {
+          "tag": "IN_105_R00_L1_P075",
+          "arm": "LOS_RANK_CONTRAST",
+          "position_rmse_m": 2080.1064864508703,
+          "cp": [
+            {
+              "K": 4,
+              "value": 0.19538426884937474,
+              "pg": 0.000005796955095282996,
+              "stationary": false,
+              "selected_optimizer_budget": 300,
+              "path_count": 4
+            },
+            {
+              "K": 8,
+              "value": 0.17245712170226557,
+              "pg": 0.000050737711660531204,
+              "stationary": false,
+              "selected_optimizer_budget": 70,
+              "path_count": 8
+            }
+          ]
+        },
+        {
+          "tag": "IN_105_R00_L1_P075",
+          "arm": "ORACLE",
+          "position_rmse_m": 0.6370983887081839,
+          "cp": [
+            {
+              "K": 4,
+              "value": 0.0969827386442011,
+              "pg": 5.653740571265331e-7,
+              "stationary": false,
+              "selected_optimizer_budget": 300,
+              "path_count": 4
+            },
+            {
+              "K": 8,
+              "value": 0.059122812278668585,
+              "pg": 1.2503460677937284e-7,
+              "stationary": false,
+              "selected_optimizer_budget": 300,
+              "path_count": 8
+            }
+          ]
+        }
+      ],
+      "info_label": "oracle is truth selected after blind save"
+    }
+  ],
+  "support_occupancy": [
+    {
+      "tag": "IN_100_R00_L0",
+      "arm": "LOS_BEST",
+      "finalK": 4,
+      "occupied_links": 3,
+      "links_more_than_two_paths": [],
+      "maximum_paths_per_link": 2
+    },
+    {
+      "tag": "IN_100_R00_L0",
+      "arm": "LOS_RANK_CONTRAST",
+      "finalK": 4,
+      "occupied_links": 4,
+      "links_more_than_two_paths": [],
+      "maximum_paths_per_link": 1
+    },
+    {
+      "tag": "IN_100_R00_L0",
+      "arm": "ORACLE",
+      "finalK": 4,
+      "occupied_links": 3,
+      "links_more_than_two_paths": [],
+      "maximum_paths_per_link": 2
+    },
+    {
+      "tag": "IN_102_R00_L2_P075",
+      "arm": "LOS_BEST",
+      "finalK": 16,
+      "occupied_links": 5,
+      "links_more_than_two_paths": [
+        {
+          "link": "2-1",
+          "path_count": 3
+        },
+        {
+          "link": "3-1",
+          "path_count": 4
+        },
+        {
+          "link": "3-0",
+          "path_count": 5
+        }
+      ],
+      "maximum_paths_per_link": 5
+    },
+    {
+      "tag": "IN_102_R00_L2_P075",
+      "arm": "LOS_RANK_CONTRAST",
+      "finalK": 16,
+      "occupied_links": 5,
+      "links_more_than_two_paths": [
+        {
+          "link": "3-0",
+          "path_count": 4
+        },
+        {
+          "link": "3-1",
+          "path_count": 7
+        }
+      ],
+      "maximum_paths_per_link": 7
+    },
+    {
+      "tag": "IN_102_R00_L2_P075",
+      "arm": "ORACLE",
+      "finalK": 16,
+      "occupied_links": 5,
+      "links_more_than_two_paths": [
+        {
+          "link": "2-0",
+          "path_count": 4
+        },
+        {
+          "link": "1-1",
+          "path_count": 4
+        },
+        {
+          "link": "3-0",
+          "path_count": 4
+        }
+      ],
+      "maximum_paths_per_link": 4
+    },
+    {
+      "tag": "IN_105_R00_L1_P075",
+      "arm": "LOS_BEST",
+      "finalK": 8,
+      "occupied_links": 4,
+      "links_more_than_two_paths": [
+        {
+          "link": "2-1",
+          "path_count": 3
+        }
+      ],
+      "maximum_paths_per_link": 3
+    },
+    {
+      "tag": "IN_105_R00_L1_P075",
+      "arm": "LOS_RANK_CONTRAST",
+      "finalK": 8,
+      "occupied_links": 4,
+      "links_more_than_two_paths": [
+        {
+          "link": "1-0",
+          "path_count": 3
+        }
+      ],
+      "maximum_paths_per_link": 3
+    },
+    {
+      "tag": "IN_105_R00_L1_P075",
+      "arm": "ORACLE",
+      "finalK": 8,
+      "occupied_links": 5,
+      "links_more_than_two_paths": [],
+      "maximum_paths_per_link": 2
+    }
+  ],
+  "read_only_round20": [
+    {
+      "tag": "IN_100_R00_L0",
+      "fold": 0,
+      "pool_best_rmse_m": 1.974236578175523,
+      "six_points_best_rmse_m": 1083.9805354648615,
+      "six_pairs_best_rmse_m": 1475.9035214860367
+    },
+    {
+      "tag": "IN_100_R00_L0",
+      "fold": 1,
+      "pool_best_rmse_m": 1.8062142662238596,
+      "six_points_best_rmse_m": 18.540289247724036,
+      "six_pairs_best_rmse_m": 18.540289247724036
+    },
+    {
+      "tag": "IN_102_R00_L2_P075",
+      "fold": 0,
+      "pool_best_rmse_m": 194.45381189728533,
+      "six_points_best_rmse_m": 194.45381189733777,
+      "six_pairs_best_rmse_m": 194.45381189733777
+    },
+    {
+      "tag": "IN_102_R00_L2_P075",
+      "fold": 1,
+      "pool_best_rmse_m": 1.095631493920164,
+      "six_points_best_rmse_m": 1404.5394530789888,
+      "six_pairs_best_rmse_m": 2298.955523250643
+    },
+    {
+      "tag": "IN_105_R00_L1_P075",
+      "fold": 0,
+      "pool_best_rmse_m": 0.7233822336563276,
+      "six_points_best_rmse_m": 130.51800134622974,
+      "six_pairs_best_rmse_m": 137.3964450228898
+    },
+    {
+      "tag": "IN_105_R00_L1_P075",
+      "fold": 1,
+      "pool_best_rmse_m": 0.6677010812388507,
+      "six_points_best_rmse_m": 82.53880206595065,
+      "six_pairs_best_rmse_m": 82.53880206595065
+    }
+  ],
+  "main_findings": [
+    "Full-frequency blind frontend has near-truth pair below 2m for each of three development IQ samples",
+    "All six registered blind position pairs remain over 20m from truth",
+    "At six matched K conditions, truth-guided nearest-pool candidate attains lower finite-run VP loss than LOS_BEST blind candidate",
+    "Only 1/18 checkpoint output meets strict PG<=1e-7, at degenerate coincident-two-source K0 branch; no meaningful near-true vs wrong-position checkpoint comparison meets the numerical gate",
+    "Large K does not enforce <=2 reflections for every link; K16 tends to concentrate on 5 of 8 links, making model class overly flexible",
+    "No theoretical global identifiability proof, no deployable method, no formal runtime or statistical guarantee"
+  ]
+}

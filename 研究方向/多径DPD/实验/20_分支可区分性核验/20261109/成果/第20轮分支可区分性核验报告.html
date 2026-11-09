@@ -1,0 +1,43 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第20轮｜分支可区分性核验报告</title>
+<style>
+:root{color-scheme:light;--ink:#172331;--sub:#5c6979;--border:#dce4ec;--blue:#2364a6;--bg:#f4f7fa;--panel:#fff;--red:#a23736;--green:#207462}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Microsoft YaHei","PingFang SC",sans-serif;color:var(--ink);background:var(--bg);line-height:1.72}.wrap{max-width:1100px;margin:0 auto;padding:42px 24px 80px}.eyebrow{font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--blue)}h1{font-size:36px;line-height:1.25;margin:8px 0 18px}h2{font-size:23px;margin:36px 0 14px}h3{font-size:17px;margin:22px 0 8px}p{margin:12px 0;color:#344455}a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}.lead{font-size:18px;max-width:900px}.meta{color:var(--sub);font-size:13px}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:24px 0}.kpi,.panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:19px}.kpi .v{font-size:29px;font-weight:750;line-height:1.25}.kpi .label{font-size:13px;color:var(--sub);margin-top:7px}.kpi .warn{color:var(--red)}.panel{margin:18px 0}.panel h3:first-child{margin-top:0}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.aside{border-left:4px solid var(--blue);padding:6px 18px;background:#edf4fb;border-radius:0 8px 8px 0}.warning{border-left-color:var(--red);background:#fdf1f0}.table-wrap{overflow-x:auto;background:#fff;border:1px solid var(--border);border-radius:10px}table{width:100%;border-collapse:collapse;min-width:950px;font-size:13px}td,th{padding:11px 12px;border-bottom:1px solid #e7edf3;text-align:right;white-space:nowrap}th{background:#eef3f7;color:#4f5f70;font-weight:650}td:first-child,th:first-child{text-align:left}tbody tr:last-child td{border-bottom:0}.bad{color:var(--red);font-weight:700}.good{color:var(--green)}.small{font-size:13px;color:var(--sub)}.pill{display:inline-block;border:1px solid #d9b7b5;background:#fcf0ee;color:#933a34;border-radius:30px;padding:3px 10px;font-size:12px;font-weight:700}ol{padding-left:24px}li{padding-left:3px;margin:10px 0}footer{border-top:1px solid var(--border);margin-top:40px;padding-top:15px;font-size:12px;color:var(--sub)}@media(max-width:780px){h1{font-size:27px}.wrap{padding:24px 14px 50px}.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+</style></head><body><main class="wrap">
+<div class="eyebrow">MULTIPATH DPD · ROUND 20 · 2026-11-09</div>
+<h1>分支可区分性：已跑通流程，但尚未通过科研判别门</h1>
+<p class="lead">3条冻结开发IQ的运行及保存核对完成。实际受测分支几乎未保留近真位置对，且所有盲分支及真值辅助控制的固定位置条件优化均未达到预定驻点标准。因此，<strong>不能宣称已经证实或否定原IQ目标的分支可区分性。</strong></p>
+<p class="meta">只读分析来源：pilot3_20261109_150611_409393 · GitHub提交 80573c9 · <span class="pill">NUMERICAL_GATE_NOT_PASSED</span></p>
+<div class="kpis"><div class="kpi"><div class="v">3/3</div><div class="label">冻结IQ执行完成</div></div>
+<div class="kpi"><div class="v">36</div><div class="label">盲位置对 · 两折共计</div></div>
+<div class="kpi"><div class="v warn">0/36</div><div class="label">固定位置条件PG ≤ 1e−7</div></div>
+<div class="kpi"><div class="v warn">1/36</div><div class="label">实际受测近真位置对（≤20m）</div></div></div>
+<div class="aside"><strong>必须区分的三项事实：</strong>运行成功不等于优化收敛；Oracle候选是事后真值辅助控制而不是盲算法；两频率折不是相互独立的IQ随机重复。</div>
+<h2>01 · 执行合同与身份</h2>
+<div class="panel"><p>四同步单天线站、二维凸包内双源；复用旧 <code>common18</code> 的 <strong>IN100 L0、IN102 L2_P075、IN105 L1_P075</strong>。每条按有效频点的交错8-bin块拆分两个训练/留出折，由训练频率掩蔽的IQ独立产生候选。每折选最多6个位置点、6个有序位置对；固定位置独立构建最多K=4条反射（全站两源合计），每个阶数条件SLSQP上限70轮，公共额外时延上界20微秒。<br><strong>原运行状态：</strong>PILOT3_COMPLETED、自检PASS、合成控制PASS、源码身份验证通过。没有修改公共定位器或重跑本轮IQ。</p></div>
+<h2>02 · 六折原始比较</h2>
+<div class="table-wrap"><table><thead><tr><th>条件</th><th>折</th><th>完整池位置数</th><th>Oracle池最近对 RMSE/m</th><th>受测近真对数</th><th>验证选优RMSE/m</th><th>盲验证损失</th><th>Oracle验证损失</th></tr></thead><tbody><tr><td><strong>IN100 · L0</strong></td><td>0</td><td>59</td><td class="good">1.974</td><td>0</td><td>1900.506</td><td>0.162426</td><td>0.075402</td></tr>
+<tr><td><strong>IN100 · L0</strong></td><td>1</td><td>65</td><td class="good">1.806</td><td>1</td><td>18.540</td><td>0.154790</td><td>0.075854</td></tr>
+<tr><td><strong>IN102 · L2</strong></td><td>0</td><td>114</td><td class="bad">194.454</td><td>0</td><td>194.454</td><td>0.086380</td><td>0.086380</td></tr>
+<tr><td><strong>IN102 · L2</strong></td><td>1</td><td>106</td><td class="good">1.096</td><td>0</td><td>2707.341</td><td>0.115136</td><td>0.087689</td></tr>
+<tr><td><strong>IN105 · L1</strong></td><td>0</td><td>100</td><td class="good">0.723</td><td>0</td><td>137.396</td><td>0.166953</td><td>0.163265</td></tr>
+<tr><td><strong>IN105 · L1</strong></td><td>1</td><td>106</td><td class="good">0.668</td><td>0</td><td>82.539</td><td>0.158526</td><td>0.105336</td></tr></tbody></table></div>
+<p class="small">损失为各折留出频点归一化原IQ投影残差。全部受测与Oracle候选均未通过统一PG数值门，因此损失对照仅描述当前受限求解策略，不代表充分优化的似然排序。IN102折0完整池欠缺某一源的近真位置，Oracle仍约194m。</p>
+<h2>03 · 失败归因：必须分成不同层级</h2>
+<div class="grid"><section class="panel"><h3>完整候选池覆盖</h3><p>6折中5折的完整池存在近真位置对，最近双源匹配RMSE约0.67–1.97m。<strong>IN102 L2折0</strong>的完整池缺少一源，最近单源位置距离约275m；此折首先是训练-only前端覆盖失败。</p></section>
+<section class="panel"><h3>候选压缩遗漏</h3><p>每折由完整池压缩到6个位置、6个位置对后，36个盲受测分支仅1个落在20m内。不能把这一层的遗漏归咎于最终验证评分。</p></section>
+<section class="panel"><h3>条件拟合数值状态</h3><p>180个固定位置条件拟合阶段中，137个触及70轮上限，55个优化终点没有通过模型验收回退。36个盲最终分支与6个Oracle控制均未达到PG≤1e−7。</p></section>
+<section class="panel"><h3>真实分支评分尚未判明</h3><p>当前受限求解中Oracle的验证成本均不高于对应折的盲选优成本，但它们来自事后真值选择，且仍未收敛。<strong>不能据此证明最优物理解释的模型评分优势。</strong></p></section></div>
+<h2>04 · 下一步：先修实验判别条件，不急于扩量</h2>
+<div class="panel"><ol>
+<li>只读复核完整池→6个点→6个位置对的筛选轨迹，确定哪一环失去近真候选；不得用真实位置事后改选盲分支。</li>
+<li>预登记少量固定位置、同K、同训练IQ的条件收敛诊断，比较SLSQP与可靠物理约束求解，核验实际梯度/可行性与PG，而不是放宽1e−7阈值。</li>
+<li>注意本轮K=4为全网络总自由反射条数，而生成L1/L2为<strong>每链路</strong>反射数；欠拟合可能严重，不能把固定K=4结论外推到原完整模型。</li>
+<li>数值与覆盖门达标后，再决定是否可以研究低成本源—位置—路径联合提案；暂不放行其余15条或任何正式480/640/780/3120扩量。</li>
+</ol></div>
+<div class="aside warning"><strong>科研判断：</strong>第20轮不是新方法失效的反证，也不是新方法有效的正证；它确定了当前原型中同时存在候选生成/筛选问题和数值求解不足，尚未分离这两类问题对评分判别的影响。</div>
+<h2>05 · 复核入口</h2>
+<p><a href="summary.json">结构化汇总 summary.json</a> · <a href="第20轮实验结果与科研判断.md">完整Markdown报告</a> · <a href="../运行数据/pilot3_20261109_150611_409393/运行状态.json">运行状态</a> · <a href="../运行数据/pilot3_20261109_150611_409393/冻结IQ诊断/completion.json">完成记录</a> · <a href="../运行数据/pilot3_20261109_150611_409393/冻结IQ诊断/protocol.json">协议与源码SHA</a></p>
+<p class="small">逐例原始JSON：<a href="../运行数据/pilot3_20261109_150611_409393/冻结IQ诊断/blind/IN_100_R00_L0.json">IN100盲分支</a> · <a href="../运行数据/pilot3_20261109_150611_409393/冻结IQ诊断/evaluation/IN_100_R00_L0.json">IN100评价</a> · <a href="../运行数据/pilot3_20261109_150611_409393/冻结IQ诊断/blind/IN_102_R00_L2_P075.json">IN102盲分支</a> · <a href="../运行数据/pilot3_20261109_150611_409393/冻结IQ诊断/evaluation/IN_102_R00_L2_P075.json">IN102评价</a> · <a href="../运行数据/pilot3_20261109_150611_409393/冻结IQ诊断/blind/IN_105_R00_L1_P075.json">IN105盲分支</a> · <a href="../运行数据/pilot3_20261109_150611_409393/冻结IQ诊断/evaluation/IN_105_R00_L1_P075.json">IN105评价</a>。</p>
+<footer>第20轮只读研究复核报告。报告由已提交GitHub JSON构成；没有新执行IQ求解、变更实验参数、修改公共源码或覆盖历史记录。三条开发IQ的六折不能作独立样本显著性或泛化判断。</footer>
+</main></body></html>

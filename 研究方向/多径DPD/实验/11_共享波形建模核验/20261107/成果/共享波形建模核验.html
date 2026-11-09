@@ -1,0 +1,42 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>共享波形建模核验</title><style>body{background:#f4f5f1;color:#23383f;font:16px/1.8 "Segoe UI","Microsoft YaHei",sans-serif;margin:0}main{max-width:1080px;margin:auto;padding:32px 24px}header{background:#17424a;color:white;border-radius:16px;padding:28px}h1{font-size:30px}h2{margin-top:32px;border-bottom:1px solid #cbd8d4;padding-bottom:8px}h3{color:#086774}a{color:#086774}nav{display:flex;gap:20px;flex-wrap:wrap;margin:22px 0}.note{background:#fff0d4;padding:18px;border-left:4px solid #b98324}table{border-collapse:collapse;width:100%;font-size:14px}td,th{border:1px solid #d5e1da;padding:10px;text-align:left;vertical-align:top}th{background:#e2ece6}.scroll{overflow-x:auto}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#e5eeeb;border-radius:8px;padding:16px}li{margin-bottom:8px}footer{font-size:13px;color:#64747a;margin-top:28px}</style><main><header><div>多径DPD · 第11轮 · 2026-11-07</div><h1>先确认新模型确实是新的</h1><p>共享波形表示 → 与旧目标的等价检查 → 松弛边界 → 统计信息合同</p></header><nav><a href="#checks">数学检查</a><a href="#reasoning">完整推导</a><a href="#sources">文献入口</a><a href="执行合同.md">合同</a><a href="数学核验结果.json">数值记录</a></nav><div class="note">本轮停在新的统计适用条件需要确认之处。没有启动新定位器，也没有把过去的正则目标换名后重新跑实验。</div><section id="checks"><h2>本轮数学检查</h2>
+<div class="scroll"><table><tr><th>检查</th><th>实测值</th><th>解释</th></tr><tr><td>原模型与秩一提升观测相对差</td><td>1.95e-16</td><td>同一个模型的重写</td></tr><tr><td>旧正则与提升后反射列范数相对差</td><td>3.35e-16</td><td>罚项也未改变</td></tr><tr><td>去秩一松弛的相对残差</td><td>9.95e-17</td><td>任意相位映射可拟合，并非定位成功</td></tr><tr><td>两个松弛源矩阵的秩</td><td>4、4</td><td>已违反每源共享一个波形</td></tr><tr><td>功率约束中点</td><td>不可行</td><td>绝对增益坐标下非凸</td></tr><tr><td>旋转前/后混合四阶累积量</td><td>0 / −1</td><td>二阶统计相同仍可存在高阶差异</td></tr></table></div>
+<p>100组代数单元检查，固定种子2026110713。不是新的定位实验、不是简化场景的性能证据。没有生成新的RMSE或耗时成绩。</p></section><section id="reasoning"><h2>共享波形稀疏分解：目标层核验与下一决策</h2>
+<h3>本轮结论</h3>
+<p>已执行目标推导、与旧方案对照、100组代数单元测试，以及定向方法文献检索。没有启动新定位批次，也没有改动场景或公共算法。</p>
+<p><strong>最直接的“共享波形提升＋反射组稀疏”目标，与11月5日已测试的接收分量正则目标等价。</strong> 放弃秩一结构以求方便，会放弃同源共享波形；单条直达最强在绝对增益坐标也不是联合凸约束。因此没有把它包装成新方法、没有继续开发该松弛定位器。</p>
+<p>这只否决了两个具体构造：等价重写被称为新目标、删除秩一后的无约束松弛。没有证明所有结构化分解、核范数松弛或原确定性模型都无研究价值。</p>
+<h3>1. 共享波形如何写成一个精确对象</h3>
+<p>固定位置与候选时延，将源q在全部站的直达/反射系数依次堆为c_q，未知频域波形为s_q。定义</p>
+<pre>X_q = s_q c_qᵀ,  rank(X_q)=1.
+Y = A₁(p₁,δ₁)[X₁] + A₂(p₂,δ₂)[X₂] + W.</pre>
+<p>A_q把每列分量按其所属站放入观测，并乘上位置传播与额外时延相位。反射列不论在哪个站都共享同一个s_q，这正由秩一条件表达。非零秩一矩阵可分解回这两个因子，仍有共同复尺度歧义；约束与规范化须一同带回。零源、消失分量另外处理，不能借分解制造可辨识性。</p>
+<p>对反射列集合R_q，</p>
+<pre>Σ_(q,k∈R_q) ||X_q[:,k]||₂
+  = Σ_(q,k∈R_q) |c_q[k]| ||s_q||₂.</pre>
+<p>右边就是11月5日的接收反射分量正则R。因此保留秩一约束时，拟合项和罚项都只是旧目标的重写；它可能启发不同数值求解器，但没有自动增加物理信息、消除坏极值或形成新估计准则。</p>
+<p>旧结果不能简单概括为“整个正则路线失败”：此前软目标实验是在固定信道等条件控制下，没有建立普遍RMSE收益。本轮等价推导说明不能把同一目标当成未研究过的新方案，而不是证明任何新求解方式无效。</p>
+<h3>2. 删除秩一以后，为什么不能直接拿去定位</h3>
+<p>考虑仅有LOS列、但不约束各列共享波形的松弛。对任意两个候选位置，分别设</p>
+<pre>X_q(f,m) = ½ exp(+j2πfτ_m(p_q)) Y_m(f), q=1,2.</pre>
+<p>各自经过传播相位后贡献一半Y，两源都非零，总残差为零、反射罚项也为零；位置完全不需要正确。这些X一般秩大于一，已不是两个未知源通过信道的物理模型。</p>
+<p>数值检查得到两个X均秩4，残差约机器精度。<strong>这个结论针对“删秩一且未加其他限制”的松弛。</strong> 加核范数后目标已经不同，不能沿用零目标结论；但也必须重新证明松弛紧性/定位意义，而不能引用已知源特异码本的盲解混定理。</p>
+<h3>3. 物理约束也不能在换变量时丢掉</h3>
+<p>单条反射不强于直达为|b|≤|g|。可行点(g,b)=(1,0.8)和(−1,0.8)的中点(0,0.8)不可行，故该集合非凸。</p>
+<p>在旧相对系数ρ=b/g坐标中，|ρ|≤1是凸圆盘，但观测里出现gρ的乘积，不能同时声称观测对全部变量线性。提升后相应列范数比较也不自动变凸。</p>
+<p>因此“采用成熟凸工具就能低成本全局求解”尚无依据。条件凸子问题可以继续使用，不能冒充整体凸性。当前环境未安装CVXPY，本轮没有安装依赖；结论来自代数构造，不依赖某个优化软件失败。</p>
+<h3>4. 文献给出的另一种信息：源的统计独立性</h3>
+<p>现有确定性VP把两个波形当未知数拟合，但没有要求恢复后的两路在统计上独立。独立波形已经是我们的生成事实；若要把非高斯统计用于算法及理论，则必须公开适用条件，不能因生成器恰好使用BPSK就偷偷使用BPSK符号或恒模先验。</p>
+<p>一个精确的瞬时混合例子：s₁、s₂独立等概率取±1，令u=(s₁+s₂)/√2，v=(s₁−s₂)/√2。旋转前后协方差均为I，二阶统计不能区分；但cum(u,u,v,v)=−1，而原独立对的混合四阶累积量为0。</p>
+<p>这只说明高阶统计在该例子里有判别信息，<strong>不是当前卷积多径DPD的分离定理</strong>。高阶统计估计还受有限长度、成形滤波、循环平稳性、噪声和跨频排列/滤波歧义影响；非高斯也不保证某个四阶累积量必定非零。分离波形的质量不是最终目标，必须检查分离后是否保留跨站定位时延及RMSE收益。</p>
+<h3>5. 本轮定向文献核对</h3>
+<p>这不是新的全面检索或逐篇精读，不改变既有69篇记录的阅读状态。下列来源仅按实际阅读范围使用，未检查它们是否已在整个Zotero库中，也未新增条目。</p>
+<div class="scroll"><table><tr><th>文献</th><th>实际核对范围</th><th>对当前决定的作用</th></tr><tr><td>Hyvärinen与Oja，Independent Component Analysis: Algorithms and Applications，2000</td><td>作者全文中的基本模型、独立性与非高斯假设部分</td><td>数据未知不等于不能使用统计结构；瞬时ICA不直接等于卷积DPD</td></tr><tr><td>Florian、Chevreuil、Loubaton，Blind source separation of convolutive mixtures of non-circular linearly modulated signals with unknown baud rates</td><td>作者预印本摘要、引言及模型§2.1定向读取；未复证全部定理</td><td>同符号率、同载频BPSK会使普通Godard/CMA存在非分离局部极小，不能直接套恒模算法；其修订需要频偏等条件</td></tr><tr><td>Zhang等，Independent vector analysis for convolutive blind noncircular source separation，Signal Processing，2012</td><td>出版页面摘要与预览；正文访问403</td><td>非圆通信信号的频域分离已有直接方法近邻；尚不能据预览确认适配正确性</td></tr><tr><td>Castella与Moreau，Generalized identifiability conditions for blind convolutive MIMO separation，IEEE TSP，2009</td><td>作者机构元数据与摘要</td><td>高阶统计可在非i.i.d.条件下研究，但本文使用参考信号，具体条件需全文核验</td></tr></table></div>
+<p>原始入口（正式版本优先；不能访问全文不等于已经精读）：</p>
+<ul><li>ICA： https://doi.org/10.1016/S0893-6080(00)00026-5 ，作者稿 https://www.cs.helsinki.fi/u/ahyvarin/papers/NN00new.pdf</li><li>非圆线性调制盲分离： https://doi.org/10.1016/j.sigpro.2011.09.013 ，作者稿 https://arxiv.org/abs/1102.2706 。正式DOI由检索线索获得，本轮出版页未访问成功；方法判断依据作者预印本。</li><li>非圆IVA： https://doi.org/10.1016/j.sigpro.2012.02.020</li><li>卷积MIMO辨识： https://doi.org/10.1109/TSP.2009.2016259</li></ul>
+<p>尤其注意：原文已提醒，未知循环频率下普通时间平均不能无条件替代所需循环累积量。因此，本轮没有对当前IQ随手计算一个四阶分数并按结果挑规则，也没有运行FastICA后称为新定位器。</p>
+<h3>6. 到达需要确认的信息合同</h3>
+<p>原审批允许重构目标，但不自动授权增加信号统计假设。现在有两个真实可选方向：</p>
+<div class="scroll"><table><tr><th>方向</th><th>保留与增加什么</th><th>代价和边界</th></tr><tr><td>保持当前确定性未知波形口径</td><td>不增加分布假设，继续研究几何/稀疏物理结构下的分支与关联求解</td><td>并非不可行，但尚未得到区别于旧目标且有清晰优势的构造；不承诺全局恢复或3秒</td></tr><tr><td>明确利用独立、非高斯数字调制源的统计结构</td><td>仍未知数据、码本、路径和真实符号率；所需特征从观测估计，所有对照获知同样适用条件</td><td>适用范围会收窄，需重新论证卷积/循环平稳及有限记录条件；ICA/IVA本身不是新贡献</td></tr></table></div>
+<p>建议优先核验第二方向是否能为当前几何模型提供<strong>现有平方拟合没有利用的判别信息</strong>。不是照搬“先分离再定位”：需要判断物理通道和位置约束能否消除分离后的滤波/排列歧义，并验证最终定位精度与完整成本。第一方向保留，不据本轮宣布失效。</p>
+<p>请用户确认是否允许该统计适用条件。在确认前，不构建统计分离定位器、不向任何基线提供额外真值、不更改正式场景，也不开展大规模测试。</p>
+<p>本轮为AI辅助推导与自检，没有外部独立复核；标准代数等价和瞬时统计例子不列作论文原创定理。</p></section><section id="sources"><h2>本轮定向核对入口</h2><ul><li><a href="https://www.cs.helsinki.fi/u/ahyvarin/papers/NN00new.pdf">ICA作者全文</a></li><li><a href="https://arxiv.org/abs/1102.2706">非圆线性调制分离：作者稿</a></li><li><a href="https://doi.org/10.1016/j.sigpro.2012.02.020">非圆IVA：出版入口</a></li><li><a href="https://doi.org/10.1109/TSP.2009.2016259">卷积MIMO辨识：IEEE DOI</a></li></ul></section><footer>已有研究记录与公开文献定向核对；AI辅助推导。未声称完成这些新增文献的逐篇精读或新算法验证。</footer></main></html>

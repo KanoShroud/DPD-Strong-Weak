@@ -48,6 +48,7 @@ def check():
     nodes=np.array([e[0] for e in a]); coeff=np.array([e[1] for e in a])
     V=np.exp(-2j*np.pi*f[:,None]*nodes[None,:])
     relative=np.linalg.norm(V@coeff-target)/np.linalg.norm(target)
+    min_sv=float(np.linalg.svd(V,compute_uv=False)[-1])
     assert relative<1e-9 and len(set(np.round(nodes,15)))==8
     maxspan=2*(6000*np.sqrt(2)/c+3e-6)
     assert maxspan<1/df
@@ -71,6 +72,7 @@ def check():
         two_frequency_relative_complex_fit_error=float(err),
         alternative_max_echo_amplitude_ratio=ratio,
         eight_tone_cross_relation_relative_error=float(relative),
+        eight_tone_cross_relation_min_singular_value=min_sv,
         alias_period_us=float(1e6/df),max_cross_support_us=float(1e6*maxspan),
         anchored_three_mode_kruskal_ranks=[2,2,2],
         near_delay_condition_numbers=cond,

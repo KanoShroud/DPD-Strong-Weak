@@ -1,0 +1,87 @@
+{
+  "schema": "M0_M2_STRUCTURAL_MATH_AUDIT_V1",
+  "source_file": "M0_M2_math_audit.py",
+  "tested_source_sha256": "ab0d0760a9fc6c4e0af0197eaf751d9cd784cdbf1f69368861bd367e9184cf9d",
+  "source_identical_to_executed_by_length_and_fnv32": true,
+  "executed_in": "independent Python+NumPy environment, no project IQ",
+  "full_sample_IQ_used": false,
+  "location_algorithm_run": false,
+  "scope": "deterministic structural proofs and numeric algebra checks, NO project IQ",
+  "status": "PASS",
+  "tests": [
+    {
+      "statement": "unitary candidate delay compensation preserves every unfolding singular value and Frobenius norm",
+      "max_singular_value_delta": 1.915134717478395e-15,
+      "frobenius_norm_delta": 0
+    },
+    {
+      "ideal_root_raised_cosine_rolloff": 0.25,
+      "symbol_rate_normalized_spectral_overlap_widths": {
+        "0": 1.25,
+        "1": 0.25,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "-4": 0,
+        "-3": 0,
+        "-2": 0,
+        "-1": 0.25
+      },
+      "nonzero_harmonics": [
+        -1,
+        0,
+        1
+      ],
+      "beta_zero_first_cycle_overlap": 0
+    },
+    {
+      "statement": "clock estimate at O(1/N) can leave O(1) cyclic-coefficient bias",
+      "data": [
+        {
+          "N": 128,
+          "delta_c_over_N_bias": 1.1788469282456628,
+          "delta_c_over_N3over2_bias": 0.13746291621675283
+        },
+        {
+          "N": 512,
+          "delta_c_over_N_bias": 1.1837988664200942,
+          "delta_c_over_N3over2_bias": 0.0692474412475212
+        },
+        {
+          "N": 2048,
+          "delta_c_over_N_bias": 1.1850351267123773,
+          "delta_c_over_N3over2_bias": 0.034688433026503394
+        },
+        {
+          "N": 8192,
+          "delta_c_over_N_bias": 1.1853440846064087,
+          "delta_c_over_N3over2_bias": 0.017352312287585957
+        }
+      ]
+    },
+    {
+      "lag_dependence_radius_D": 3,
+      "exact_mean_variance": 0.0004125642776489258,
+      "generic_upper_bound": 0.00206787109375
+    },
+    {
+      "margin": 1.4142135623730951,
+      "statistical_perturbation": 0.1772004514666935,
+      "true_model_observed_distance": 0.17720045146669353,
+      "wrong_model_observed_distance": 1.3897481786280563,
+      "warning": "only conditional on positive model separation margin"
+    },
+    {
+      "statement": "if source-specific channel ratio is observable, bounded echo amplitude gives a LOS-TDOA chord-phase error bound without estimating echo delays",
+      "reflection_amplitude_ratio_r": 0.5,
+      "reflection_power_ratio_r2": 0.25,
+      "bandwidth_hz": 12500000,
+      "analytic_max_time_difference_error_ns": 26.666666666666675,
+      "distance_difference_error_scale_m": 7.994465546666669,
+      "max_error_in_1000_algebraic_parameter_checks_ns": 25.7505634711564,
+      "WARNING": "requires exact unwrapped source-specific H_m/H_ref, not raw mixed IQ; it is not a location RMSE guarantee"
+    }
+  ],
+  "interpretation": "Algebra and conditional theorems only; main finite-IQ mixed-source identification and positive geometric statistical margin not established",
+  "next_gate": "prove nonzero observable clock line and positive distance between true and wrong dual-position physical statistical model sets; do not optimize CP rank alone"
+}

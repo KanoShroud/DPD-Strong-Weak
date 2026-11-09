@@ -1,0 +1,71 @@
+{
+  "status": "PASS",
+  "scope": "standalone exact algebra and numerical checks, no RF IQ",
+  "source_sha256": "84fe0e0cac6de887bf01e9d36641e4b0a42bba39f1c59438f6f181a742dca3cf",
+  "code_identical_to_executed_source": true,
+  "environment": "isolated current tool container with NumPy; NOT the user's PyCharm environment",
+  "tests": [
+    {
+      "case": "naive_zero_lag_FOC_rank",
+      "sources": 2,
+      "innovations_per_source": 2,
+      "spatial_cumulant_matrix_rank": 4,
+      "max_exact_enumeration_error": 1.0658141036401503e-14,
+      "warning": "zero-lag four-sensor tensor is not generically CP-rank-two"
+    },
+    {
+      "case": "ideal_frequency_fourway_tensor",
+      "sources": 2,
+      "unfold_rank": 2,
+      "mode_kruskal_ranks": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "third_order_grouped_kruskal_sum": 6,
+      "third_order_unique_threshold": 6,
+      "warning": "assumed population tensor, not an estimator on finite IQ"
+    },
+    {
+      "case": "BPSK_DFT_fourth_cumulant_shrinks",
+      "exact_enumerations": [
+        {
+          "symbol_count": 4,
+          "cumulant_real": -0.5,
+          "target": -0.5,
+          "error": 1.387778780781446e-17
+        },
+        {
+          "symbol_count": 8,
+          "cumulant_real": -0.25,
+          "target": -0.25,
+          "error": 1.124490529347901e-18
+        },
+        {
+          "symbol_count": 12,
+          "cumulant_real": -0.16666666666666696,
+          "target": -0.16666666666666666,
+          "error": 3.053126307637146e-16
+        }
+      ],
+      "approx_magnitude_at_6554_symbols": 0.0003051571559353067,
+      "warning": "population information nonzero; naive full-frame one-shot estimation is ill-conditioned"
+    },
+    {
+      "case": "square_four_station_TDOA_inverse",
+      "positions_checked": 2005,
+      "max_position_reconstruction_error_m": 4.871311687506638e-9,
+      "warning": "numerical sanity only; analytic injectivity proof is in the Markdown memo"
+    },
+    {
+      "case": "frequency_scalar_gauge_and_cross_relation",
+      "same_position_arbitrary_shared_filter_closure": 1.1432712040383042e-16,
+      "different_position_trial_closure": 1.2193738006095307,
+      "warning": "illustration only; arbitrary wrong channels may approach the true manifold in noise"
+    }
+  ],
+  "negative_results_are_preserved": true,
+  "local_iq_used": false,
+  "future_IQ_performance_claims": false
+}

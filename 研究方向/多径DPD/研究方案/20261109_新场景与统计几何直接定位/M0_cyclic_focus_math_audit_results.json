@@ -1,0 +1,63 @@
+{
+  "schema": "M0_CYCLIC_GEOMETRY_AUDIT_V1",
+  "status": "PASS",
+  "research_stage": "mathematical algebra only; not IQ experiment or source localization",
+  "executed_in": "isolated NumPy environment, no frozen IQ",
+  "source_file": "M0_cyclic_focus_math_audit.py",
+  "source_sha256": "d39cfaf0b4f0cd1e625dd855127d6603fac0edf28b8277a5736d191a99215be3",
+  "source_verified_remote_same_length_and_FNV32_as_executed": true,
+  "project_IQ_read": false,
+  "new_position_estimator": false,
+  "checks": [
+    {
+      "name": "cycle_average_cumulant_exact",
+      "phase_count": 8,
+      "true_average_real_imag": [
+        2.11830690625,
+        6.54107859375
+      ],
+      "naive_bias_abs": 3.657161910460412,
+      "cyclic_correction_abs_error": 9.930136612989092e-16,
+      "independent_source_additivity_abs_error": 4.440892098500626e-16,
+      "note": "Exact two-source independent BPSK enumeration; not finite-IQ estimator"
+    },
+    {
+      "name": "flat_subband_fourway_tensor",
+      "sources": 2,
+      "innovations_per_source": 3,
+      "matrix_unfold_rank": 2,
+      "max_exact_enumeration_error": 4.808647507754992e-13,
+      "note": "Exact when H is flat within each band; not true unconditionally"
+    },
+    {
+      "name": "geometry_focusing_bandwidth_bound",
+      "subband_width_hz": 130000,
+      "details": [
+        {
+          "candidate": "correct",
+          "max_frequency_variation": 0.10501627700077636,
+          "max_analytical_upper_bound": 0.10549666246633464,
+          "max_relative_station_delay_error_us": 0
+        },
+        {
+          "candidate": "wrong",
+          "max_frequency_variation": 1.6066358893997073,
+          "max_analytical_upper_bound": 3.3504357063371883,
+          "max_relative_station_delay_error_us": 9.437603724224319
+        }
+      ],
+      "note": "Numerical check of spectral inequality; not a position discrimination experiment"
+    },
+    {
+      "name": "abstract_moment_mean_covariance_bound",
+      "N": 400,
+      "exact_variance_for_AR1_covariance": 0.010604224376731301,
+      "summability_upper_bound": 0.010657894736842106,
+      "note": "Verifies generic inequality; not that PAM+RRC obeys its assumptions"
+    }
+  ],
+  "conclusion": "Population correction and candidate-dependent flatness mechanism are valid with stated assumptions; unknown cycle estimation, finite-IQ variance, and a joint two-position DPD criterion remain open",
+  "switch_to_other_route": false,
+  "model_Q": "general independent sources, target Q=2",
+  "model_M": "general synchronized distributed receivers, target M=4 single antenna each"
+}

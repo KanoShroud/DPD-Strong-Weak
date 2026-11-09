@@ -1,0 +1,67 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>M0–M2理论推进｜四站双源多径直接定位</title>
+<style>
+:root{--bg:#f5f7fa;--paper:#fff;--ink:#172b3e;--text:#3c5265;--muted:#647587;--line:#dce5ec;--teal:#127363;--amber:#aa6924;--blue:#176e97}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.78 system-ui,-apple-system,"Microsoft YaHei","PingFang SC",sans-serif}
+main{max-width:1100px;padding:42px 24px 75px;margin:auto}h1{font-size:34px;line-height:1.3;margin:9px 0 12px}h2{font-size:23px;margin:35px 0 13px}h3{font-size:17px;margin:0 0 8px}p{margin:11px 0;color:var(--text)}
+a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}.eyebrow{color:var(--teal);font-weight:800;font-size:12px;letter-spacing:.15em}.small{color:var(--muted);font-size:12px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0}.stat{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:17px}.stat strong{font-size:25px;display:block;line-height:1.3}.stat span{color:var(--muted);font-size:12px}
+.box{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:20px;margin:15px 0}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.formula{background:#edf3f7;border-radius:8px;padding:13px 15px;font:12px/1.75 Consolas,"Courier New",monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.callout{margin:17px 0;padding:15px 18px;border-left:4px solid var(--teal);background:#e6f3ed;border-radius:0 8px 8px 0}
+.warning{border-left-color:var(--amber);background:#fbf1e5}.tablewrap{background:#fff;border:1px solid var(--line);border-radius:10px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:13px}td,th{padding:10px 12px;border-bottom:1px solid #e8eff2;text-align:left;vertical-align:top}th{background:#e9f0f4;color:#506478}tbody tr:last-child td{border-bottom:0}
+.pill{display:inline-block;border-radius:20px;font-weight:700;background:#e4efec;color:#147260;padding:3px 10px;font-size:12px}.pill.fail{background:#f7ece3;color:#a36523}
+li{margin:10px 0}footer{font-size:12px;color:var(--muted);padding-top:14px;margin-top:40px;border-top:1px solid var(--line)}
+@media(max-width:750px){main{padding:23px 13px 52px}h1{font-size:26px}.stats,.grid{grid-template-columns:1fr}}
+</style></head><body><main>
+<div class="eyebrow">MULTI-SOURCE DIRECT POSITION DETERMINATION · THEORY 2026-11-09</div>
+<h1>数学M0–M2：从统计可估性到可辨识的双源位置准则</h1>
+<p>四个异址同步单天线站、两个同时同频未知源、有限非零多径保持不变。当前只推导模型性质和错误路线反例，不接触冻结IQ，不把盲源分离、多径恢复或张量拟合当成最终成果。</p>
+<span class="pill">6项独立数学审计通过</span>　<span class="pill fail">完整双源DPD仍未建立</span>
+<div class="stats"><div class="stat"><strong>无效方案已排除</strong><span>候选补偿后比较自由FOC秩，分数严格不变</span></div><div class="stat"><strong>3个循环谐波</strong><span>理想0&lt;β&lt;1，双源同未知符号率</span></div><div class="stat"><strong>26.67 ns</strong><span>理想已知源方向，核心ρ=0.25时的有限频带时差扰动界</span></div></div>
+<div class="callout warning"><strong>重要纠错：</strong>先对混合IQ做位置补偿，再比较每个四频张量的CP秩或奇异值，无法找到位置。位置补偿仅相当于四模酉变换，不改变这些量。新准则必须对<strong>不同频率使用同一组LOS几何和合法稀疏反射参数</strong>，不能对各子带随意自由拟合。</div>
+<h2>01 · 五项数学结论与状态</h2>
+<div class="tablewrap"><table><thead><tr><th>结果</th><th>证据级别</th><th>直接定位研究意义</th></tr></thead><tbody><tr><td>T1：只用候选相位补偿的FOC秩评分</td><td>严格否定</td><td>CP秩、展开奇异值、无约束低秩残差对任何候选位置均不变</td></tr><tr><td>T2：理想SRRC滚降小于1</td><td>条件严格成立</td><td>同符号率双未知源的所有二阶矩只有0和±一个未知循环频率</td></tr><tr><td>T3：单条有限IQ四阶循环校正</td><td>条件性充分</td><td>固定统计切片可达到根N误差；实际周期估计和脉冲截断仍待处理</td></tr><tr><td>T4：有限带宽LOS-TDOA的反射扰动界</td><td>条件严格成立</td><td>已知源特异通道比值且反射相对幅度<1，不需要逐条恢复反射时延</td></tr><tr><td>T5：统计误差到双源位置错误概率</td><td>条件严格成立</td><td>必须先证明真实/错误位置物理统计模型集的正分离间隔</td></tr></tbody></table></div>
+<h2>02 · 定理T1：相位补偿不产生自由低秩位置分数</h2>
+<div class="box"><p>对任意候选位置r及四频元组，用酉对角矩阵D_r(f)补偿各接收站的几何时延。补偿后的张量是原四模统计的逐模可逆变换，CP秩、最优无约束秩Q近似误差和各模展开奇异值全部保持不变。</p>
+<div class="formula">C_r = C ×₁D_r(f1) ×₂D_r(f2) ×₃D_r*(f3) ×₄D_r*(f4)
+rank_CP(C_r) = rank_CP(C)
+min_{rank(X)≤Q} ||C_r−X||_F = min_{rank(X)≤Q} ||C−X||_F</div>
+<p>这是一个<strong>结构性No-Go定理</strong>，不应通过第22轮短测或频带数调参挽救。若使用有限子带聚焦，必须把近似误差与位置合法物理模型的差异明确分开。</p></div>
+<h2>03 · 定理T2：未知共同符号率不代表未知的无限循环统计维度</h2>
+<div class="box"><p>对于两个独立同符号周期T的未知源，如果源脉冲具有理想带宽(1+β)/T、0&lt;β&lt;1，则包括站间二阶矩和伪协方差在内的时相变化，只可能含有直流与±1/T三个循环频率。异址LTI多径不增加源频带，不会创造额外的二阶循环谐波。</p>
+<div class="formula">R_ab(t) = r_{ab,−1} exp(−j2πt/T) + r_{ab,0}
+        + r_{ab,1} exp(+j2πt/T)
+C̄4 = ⟨M4⟩ − Σpair Σ(k=−1,0,1) r_ab,k · r_cd,−k</div>
+<p>这提供了不先分离源的有限维统计校正思路。**但是**真实有限长度截断RRC不再严格带限；二阶循环线也可能被两源相位和传播增益抵消。应先证明可观测的非零循环特征条件，不能从生成器提供真实符号率。</p></div>
+<h2>04 · 定理T3：一条混叠记录的有限统计切片可以有一致性</h2>
+<div class="grid"><div class="box"><h3>已知真实周期的条件定理</h3><p>对固定数量的二阶与四阶乘积，如果高阶矩存在、统计序列具有有限依赖半径D或可求和协方差，则样本矩方差可按(D+1)/N缩小。以已知周期进行三谐波校正，理想情况下四阶累积量误差为Oₚ(√((D+1)/N))。</p></div>
+<div class="box"><h3>未知周期的关键精度门</h3><p>用从整个混合IQ估计的角频率ω̂代替真实ω₀时，需要N|ω̂−ω₀|趋于0才能保持一致性；若要维持根N估计误差，则通常需要约N⁻³ᐟ²的频率精度。是否满足非零循环线和谐波回归条件仍待证明。</p></div></div>
+<div class="callout warning"><strong>不能混用两个理想假设：</strong>严格带限RRC通常不是有限时域支持；有限截断RRC可以具有有限依赖，却会引入更高阶循环谐波泄漏。要么证明谱尾引起的偏差足够小，要么扩展有限校正谐波，不能同时默认二者完全为零。</div>
+<h2>05 · 定理T4：有限带宽LOS-TDOA的条件稳定界</h2>
+<div class="box"><p>对于已识别源的跨站信道比值H_m(f)/H_1(f)，任何源共同未知频率滤波因子自动消去。若单反射幅度比r_m、r_1都小于1，则反射因子1+a exp(−j2πfδ)的相位总处于不含原点的圆盘内，绝对值≤arcsin r。</p>
+<div class="formula">|τ̃_m−(τ_m−τ_1)| ≤ [arcsin(r_m)+arcsin(r_1)] / (π B)
+r_m=r_1=0.5, B=12.5MHz
+⇒ |时差误差| ≤26.67ns，距离差尺度≤7.99m</div>
+<p>这一界<strong>不要求先恢复反射时延</strong>，但必须已得到可靠、连续解缠的源特异信道方向。7.99m是站间距离差尺度，不是双源位置RMSE，也不包含从混合IQ估计方向的噪声误差。</p></div>
+<h2>06 · 定理T5：统计精度必须转化为错误位置判别间隔</h2>
+<div class="box"><p>对某一有限维可估统计向量c及双位置假设p，令M(p)为同一组LOS几何与合法反射参数允许的全部理论统计。直接位置准则是统计观测到该物理模型集的距离，而不是某个自由CP分解的拟合误差。</p>
+<div class="formula">D_c(p) = inf_{z ∈ M(p)} ||c−z||
+Δ_ε = inf_{dist_permutation(p,p*)≥ε} D_c(p)
+若Δ_ε&gt;0 且 ||ĉ−c||&lt;Δ_ε/2，则全局最小化的位置误差&lt;ε
+P(位置误差≥ε) ≤ 4 E||ĉ−c||² / Δ_ε²</div>
+<p><strong>决定性未证条件：</strong>我们尚未证明四站双源多径模型在选取的有限统计切片下确实存在正间隔Δ_ε。若模型允许过度自由的源谱/每频通道，这个间隔可能为0。下一步需要用物理有限多径和联合跨频约束证明或否定它。</p></div>
+<h2>07 · 研究路线与下一个门槛</h2>
+<div class="box"><ol>
+<li>在原始混合IQ上找到至少一种非零、可测的公共时钟循环线；构造未知符号率的统计估计充分条件及截断RRC偏差界。</li>
+<li>选取有限个二阶/四阶时滞与跨频切片，使统计向量具有可证明的有限记录误差界，不必实现巨大四阶频率张量。</li>
+<li>证明合法双源位置模型集对错误位置存在正统计间隔，或者明确给出几何/统计反例；先分析同路线可修复的原因。</li>
+<li>理论通过后，才设计直接以两个位置联合优化的DPD方法及最终有限样本误差和运行时间验证。</li>
+</ol></div>
+<div class="callout"><strong>决策：</strong>继续主线，不切换到B1—B4，不启动仿真调参。数学方面已有进展，但真实混叠IQ→源特异跨站统计→两个位置的全部环节尚未闭合。</div>
+<h2>08 · 证据与完整证明</h2>
+<p><a href="M0_M2理论推进_秩不变性_未知时钟_相位时差界.md">完整中文数学证明与20项编号公式</a> · <a href="M0_M2_math_audit.py">六项纯NumPy审计脚本</a> · <a href="M0_M2_math_audit_results.json">实际执行结果JSON</a></p>
+<p><a href="数学审查_M0_M1_首轮.md">首轮M0–M1理论</a> · <a href="M0深化_循环累积量与几何子带聚焦.md">循环统计与子带聚焦</a> · <a href="研究共识与场景合同.md">研究共识及场景合同</a></p>
+<footer>数学研究文档，2026-11-09。全部代数检查均不使用冻结IQ；Kruskal唯一性、循环统计和谐波估计本身均有经典先例。完整新DPD算法的理论创新及有限样本定位性能待建立。旧common18与1—21轮失败证据保留。</footer>
+</main></body></html>

@@ -168,6 +168,5 @@ def run():
     return {'status':'PASS','scope':'exact moment algebra and deterministic analytic checks only',
             'project_IQ_read':False,'new_position_estimator':False,'checks':results}
 
-
 if __name__=='__main__':
     print(json.dumps(run(),ensure_ascii=False,indent=2))

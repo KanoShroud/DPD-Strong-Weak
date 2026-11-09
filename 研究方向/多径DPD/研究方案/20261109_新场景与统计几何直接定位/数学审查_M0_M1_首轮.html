@@ -1,0 +1,56 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>M0–M1数学审查｜四站双源多径DPD</title>
+<style>
+:root{--bg:#f5f7fa;--fg:#1a2b3c;--muted:#637587;--line:#d9e3ea;--ok:#176e5c;--warn:#95622f;--bad:#ac4b3d;--link:#126989;--paper:#fff}*{box-sizing:border-box}body{margin:0;background:var(--bg);font:15px/1.72 system-ui,"Microsoft YaHei","PingFang SC",sans-serif;color:var(--fg)}main{max-width:1070px;margin:auto;padding:40px 22px 72px}h1{font-size:33px;line-height:1.3;margin:8px 0 14px}h2{font-size:22px;margin:34px 0 12px}h3{font-size:17px;margin:8px 0}p{color:#3b4a5b;margin:10px 0}a{color:var(--link);text-decoration:none}a:hover{text-decoration:underline}.eyebrow{color:var(--ok);font-size:12px;font-weight:800;letter-spacing:.14em}.small{font-size:13px;color:var(--muted)}.callout{background:#eaf4f1;border-left:4px solid var(--ok);padding:14px 18px;border-radius:0 9px 9px 0;margin:20px 0}.callout.warning{background:#fbf1e9;border-left-color:var(--warn)}.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}.kpi{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:17px}.kpi strong{font-size:24px;display:block}.kpi span{font-size:13px;color:var(--muted)}.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:white}table{border-collapse:collapse;width:100%;min-width:790px;font-size:13px}td,th{text-align:left;vertical-align:top;border-bottom:1px solid #e7edf1;padding:11px 13px}th{background:#eaf0f4;color:#52677a}tr:last-child td{border:0}.ok{color:var(--ok);font-weight:700}.bad{color:var(--bad);font-weight:700}.warn{color:var(--warn);font-weight:700}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}.box{background:white;border:1px solid var(--line);border-radius:11px;padding:18px}.equation{font-family:Consolas,"Courier New",monospace;white-space:pre-wrap;overflow-wrap:anywhere;background:#edf2f7;padding:14px 16px;border-radius:9px;font-size:13px}ol{padding-left:24px}li{margin:9px 0}.pill{display:inline-block;padding:3px 11px;background:#e6efe9;border-radius:30px;font-size:12px;color:var(--ok);font-weight:700}.pill.pending{background:#f9ebdf;color:var(--warn)}footer{margin-top:38px;border-top:1px solid var(--line);padding-top:15px;color:var(--muted);font-size:12px}@media(max-width:720px){main{padding:23px 13px 50px}h1{font-size:26px}.kpis,.grid{grid-template-columns:1fr}}
+</style></head><body><main>
+<div class="eyebrow">FOUR SINGLE-ANTENNA STATIONS · TWO SOURCES · UNKNOWN MULTIPATH</div>
+<h1>数学审查M0–M1：已建立条件唯一性链，但有限IQ统计估计仍是硬瓶颈</h1>
+<p>这一阶段在独立计算环境完成，不读取本地冻结IQ，不更改物理生成器，也不运行第22轮定位。研究目标仍是从原始混叠IQ<strong>直接估计两个二维位置</strong>，不是独立盲分离或多径估计。</p>
+<p><span class="pill">两个严格条件命题</span>　<span class="pill">一个重要反例</span>　<span class="pill pending">M0有限样本未通过</span></p>
+<div class="kpis"><div class="kpi"><strong>4 × 1</strong><span>四站各一根天线，全部同步</span></div><div class="kpi"><strong>Rank 4</strong><span>两个源的零时差FOC可出现的矩阵展开秩</span></div><div class="kpi"><strong>−2/N</strong><span>BPSK归一化整窗DFT四阶累积量</span></div></div>
+<h2>01 · 数学审查准入表</h2>
+<div class="tablewrap"><table><thead><tr><th>数学问题</th><th>当前状态</th><th>不能越过的边界</th></tr></thead><tbody><tr><td>独立BPSK＋RRC的源间四阶累积量加性</td><td class="warn">总体成立</td><td>并非平均原始四阶矩后的自动无偏量</td></tr>
+<tr><td>零时差四站FOC必为秩二</td><td class="bad">反例否定</td><td>两源各2份创新，精确展开秩4</td></tr>
+<tr><td>理想跨频4模FOC的双源CP结构</td><td class="warn">有条件成立</td><td>非零源四阶谱，4×2因子列独立，锚频连接</td></tr>
+<tr><td>同源信道方向是否保留LOS-TDOA</td><td class="ok">严格条件证明</td><td>各链路最早非零项为LOS，反射严格更晚</td></tr>
+<tr><td>四角正方形站内TDOA能否确定位置</td><td class="ok">严格证明</td><td>全局单射，轴上采用单调反演</td></tr>
+<tr><td>有限32768 IQ能否可靠估计四阶张量</td><td class="bad">未通过</td><td>整窗DFT单频四阶核−2/N，缺少低方差估计器</td></tr>
+<tr><td>已得到可运行的新双源DPD算法</td><td class="bad">没有</td><td>M2只有代数候选，未验证可计算性或精度</td></tr></tbody></table></div>
+<h2>02 · 反例：普通四站零时差FOC不能直接套秩二分解</h2>
+<div class="box"><p>宽带异址传播导致不同站点在同一时刻看到一个源的不同BPSK符号，多径还会带来额外的时间创新。若每源贡献两个独立符号，则总体四阶空间张量含四个秩一分量；精确枚举2⁴个符号得到16×16展开<strong>秩4</strong>，等式误差1.07×10⁻¹⁴。</p>
+<div class="equation">C(i,j,k,l) = −2 Σ(q=1,2) Σ(n=1,2) a(i,q,n)a(j,q,n)a(k,q,n)a(l,q,n)</div>
+<p>这不是Hu 2024的窄带嵌套阵列快拍模型；不能把物理源数2直接当成零时差四阶张量秩2。</p></div>
+<h2>03 · 可利用的理想结构：跨频四阶统计</h2>
+<div class="box"><p>在正确的长期线性时不变频域模型及非零源四阶频谱核条件下，四频四站四阶累积量按两独立源相加；同源的四个因子分别是四站信道向量在四个频率的取值。把四阶张量合并为4×4×16后，三个因子的Kruskal列秩皆为2，合计6，达到二源三阶CP唯一性充分条件。</p>
+<div class="equation">C4(f₁,f₂,f₃,f₄) = Σ(q=1,2) κq · hq(f₁) ⊗ hq(f₂) ⊗ hq*(f₃) ⊗ hq*(f₄)
+kA + kB + kD = 2 + 2 + 2 = 6 = 2R + 2，R=2</div>
+<p><strong>仅在总体、非零谱、列独立和共享频率锚定可匹配条件下</strong>，源特异信道方向可以在置换和尺度之外唯一识别；这不是32768样本的算法保证。</p></div>
+<h2>04 · 条件命题一：任意共同源滤波不改变LOS站间时差</h2>
+<div class="box"><p>设每条源—站链路的最早非零冲激为真实LOS，其余反射都有严格正附加时延。若同一源两组物理信道在各个频率仅差一个<strong>站间共同的频率相关复标度</strong>d(f)，那么将两组信道交叉相乘，变换到时域后，左右卷积最早非零冲激的时刻必须相同。</p>
+<div class="equation">H'm(f) H1(f) = Hm(f) H'1(f)
+⇒ h'm * h1 = hm * h'1
+⇒ τ'm + τ1 = τm + τ'1
+⇒ τ'm − τ'1 = τm − τ1</div>
+<p>所以即便无法恢复每源的共同时间滤波与幅相尺度，也能在<strong>理想信道方向已识别</strong>条件下确定该源的LOS相对传播时差。这个逻辑不需要逐条恢复未知反射。</p></div>
+<h2>05 · 条件命题二：正方形四角站点的LOS-TDOA在凸包内唯一定位</h2>
+<div class="box"><p>取四角站位(±a,±a)，a=3000m，定义Δᵢ为第i站至源距离减第1站距离。三个时差约束可直接反解r₁、x、y；当分母恰为0时，必有Δ₂Δ₄=0，即源在x=0或y=0轴上，再由该轴上严格单调的剩余时差确定唯一坐标。</p>
+<div class="equation">D = Δ₃ − Δ₂ − Δ₄
+r₁ = (Δ₂² + Δ₄² − Δ₃²) / (2D)，D≠0
+x = Δ₂(2r₁+Δ₂)/(4a)
+y = Δ₄(2r₁+Δ₄)/(4a)</div>
+<p>已对2005个站内位置做数值回代，最大误差约4.87×10⁻⁹m。此结果是理想几何核验，不代表有限IQ可达到该精度；D接近0时反解会数值病态。</p></div>
+<h2>06 · 有限记录的硬风险：第四阶非高斯量随整窗长度下降</h2>
+<div class="callout warning"><p>一个不容忽略的数学事实：N个独立BPSK符号的归一化DFT系数，其满足频率守恒的联合四阶累积量恰为−2/N。N=4/8/12的全部符号枚举已核对。对新32768 IQ约6554符号间隔的直观尺度，该抽象量仅约3.05×10⁻⁴。单独一组整窗FFT频率系数没有独立重复样本，不能从它直接获得可靠总体四阶张量。</p></div>
+<p>这并不否定高阶统计路线：它要求寻找<strong>基于滞后累积量、重复子窗或有严格偏差控制的频率平滑</strong>的可估统计切片。还必须处理未知BPSK符号时相、RRC循环结构、源谱四阶核是否为零和3μs多径造成的边界截断。</p>
+<h2>07 · 后续只进行数学工作，不用小样本调参弥补信息缺口</h2>
+<div class="grid">
+<div class="box"><h3>下一理论任务：M0有限IQ</h3><p>推导可从单段32768 IQ统计一致或有界方差估计的低维跨站滞后FOC／频率切片；不使用真实符号率。比较二阶统计与高阶统计估计的样本数量级，明确若不可估应立即停止。</p></div>
+<div class="box"><h3>接续理论任务：M1完整位置</h3><p>只有M0真实统计可估后，才将上面的条件CP方向识别与LOS几何桥梁结合为完整双源位置可辨识命题，检查全球假位置、有限带宽和未知滤波歧义。</p></div>
+<div class="box"><h3>暂时冻结M2算法实现</h3><p>频率统计残差的双源位置准则只得到可行的代数模板，没有可审查估计误差和计算成本。不能现在写一套多频四阶张量DPD并靠调权重救回已见案例。</p></div>
+<div class="box"><h3>明确保留备选</h3><p>如果M0低方差可估性不能成立，转向有独立功率变化条件的B1多块二阶协方差，或B2/B3几何约束多视图与无参考互谱。全部方案最终必须输出两个位置。</p></div>
+</div>
+<h2>08 · 原始完整证明和可复现审计</h2>
+<p><a href="数学审查_M0_M1_首轮.md">正式数学备忘录（含命题假设、证明、反例、适用限制）</a></p>
+<p><a href="M0_M1_math_audit.py">纯NumPy数学审计代码</a> · <a href="M0_M1_math_audit_results.json">已实际执行的五项审计结果</a> · <a href="研究共识与场景合同.md">研究场景与Gate合同</a></p>
+<footer>研究文档，2026-11-09。数学审计在独立当前环境完成，无冻结IQ，无本地PyCharm依赖。经典Kruskal唯一性与因果最早支撑事实不是本研究新理论；任何投稿新颖性需要进一步核对近邻和形成真正可计算的有限IQ直接定位算法。</footer>
+</main></body></html>

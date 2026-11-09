@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="多径DPD核心研究场景与数学先行研究路线：四站单天线双源多径不变。">
+<title>四站双源多径DPD｜2026-11-09 研究共识与方法路线</title>
+<style>
+:root{--bg:#f5f7f9;--fg:#1c2b3b;--muted:#667586;--line:#dce5e9;--link:#0d7087;--teal:#14726b;--amber:#ac6b25;--paper:#fff;--soft:#edf4f3}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.75 system-ui,"Microsoft YaHei","PingFang SC",sans-serif}a{color:var(--link);text-decoration:none}a:hover{text-decoration:underline}main{max-width:1110px;margin:auto;padding:35px 24px 76px}header{border-bottom:1px solid var(--line);padding:6px 0 24px}.eyebrow{font-size:12px;letter-spacing:.15em;font-weight:800;color:var(--teal)}h1{font-size:35px;line-height:1.28;margin:8px 0 13px}h2{font-size:23px;margin:35px 0 12px}h3{font-size:17px;margin:22px 0 8px}.lead{font-size:17px;color:#374b5b;max-width:880px}.muted{color:var(--muted)}.small{font-size:13px;color:var(--muted)}nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:19px}nav a{border:1px solid var(--line);border-radius:30px;padding:5px 13px;background:#fff;font-size:13px}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}.kpi{background:white;border:1px solid var(--line);border-radius:10px;padding:14px}.kpi strong{font-size:28px;display:block;color:var(--teal);line-height:1.3}.kpi span{font-size:12px;color:var(--muted)}.panel{padding:20px;background:var(--paper);border:1px solid var(--line);border-radius:11px;margin:16px 0}.panel h3:first-child{margin-top:0}.callout{border-left:4px solid var(--teal);background:#e9f4f1;border-radius:0 9px 9px 0;padding:14px 18px;margin:18px 0}.callout.warn{border-left-color:var(--amber);background:#fcf3e8}.tablebox{overflow-x:auto;background:#fff;border:1px solid var(--line);border-radius:12px}table{border-collapse:collapse;width:100%;font-size:13px;min-width:800px}th,td{border-bottom:1px solid #e8eff2;padding:11px 12px;text-align:left;vertical-align:top}th{background:#eaf1f4;color:#4c6475}tbody tr:last-child td{border:0}td:first-child{white-space:nowrap}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.chip{display:inline-block;border-radius:30px;background:#e4efec;color:#126457;padding:2px 11px;font-size:12px;font-weight:700}.chip.pending{background:#faeee0;color:#955a1d}.formula{background:#f1f5f7;border:1px solid #e5ebef;border-radius:8px;padding:13px 15px;overflow-x:auto;font-family:Consolas,monospace;font-size:13px;white-space:pre}ol,ul{padding-left:23px}li{margin:9px 0}footer{margin-top:44px;border-top:1px solid var(--line);padding-top:18px;font-size:12px;color:var(--muted)}@media(max-width:760px){main{padding:24px 13px 55px}h1{font-size:27px}h2{font-size:20px}.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+</style></head>
+<body><main>
+<header><div class="eyebrow">MULTIPATH DPD · RESEARCH CONTRACT · 2026-11-09</div>
+<h1>四站、单天线、双源、多径：固定核心问题，重新聚焦直接定位</h1>
+<p class="lead">本页记录研究共识与后续方法路线。保留四个异址同步单天线站与两个未知同频源，在有限真实多径下从原始混合IQ<strong>直接输出两个二维位置</strong>。先建立数学可辨识性，再考虑算法实现；不继续以更多候选、增径与优化迭代追逐旧数据。</p>
+<p class="small"><span class="chip">研究场景已讨论确认</span>　<span class="chip pending">数学可行性待证明</span>　<span class="chip pending">新IQ及算法尚未运行</span></p>
+<nav><a href="#scene">场景参数</a><a href="#correction">关键澄清</a><a href="#method">首选方法</a><a href="#gates">数学准入</a><a href="#backup">备选路线</a><a href="#sources">近邻与历史</a></nav>
+</header>
+<div class="kpis"><div class="kpi"><strong>4 × 1</strong><span>4个异址同步单天线站</span></div><div class="kpi"><strong>2</strong><span>未知同频、同时存在的发射源</span></div><div class="kpi"><strong>0.25</strong><span>核心反射/LOS功率比</span></div><div class="kpi"><strong>32768</strong><span>核心IQ样本数／站</span></div></div>
+<section id="scene"><h2>01 · 新核心场景参数</h2><div class="tablebox"><table><thead><tr><th>因素</th><th>核心合同</th><th>扩展或限制</th></tr></thead><tbody><tr><td><strong>接收与几何</strong></td><td>4个同步异址单天线站，6 km方形；双源二维全内</td><td>不增加阵元、站数和额外参考</td></tr><tr><td><strong>双源波形</strong></td><td>BPSK+RRC；两源同频、同波形类型、标称同符号率</td><td>所有符号、真实符号率、发射时刻均未知；QPSK仅泛化对照</td></tr><tr><td><strong>IQ与信道</strong></td><td>50 MHz采样、12.5 MHz有效带宽、32768点/站</td><td>655.36 μs；8192、65536作样本量消融</td></tr><tr><td><strong>主反射条件</strong></td><td>每链路≤1条未知反射；反射/LOS功率比0.25</td><td>0.5与0.75为压力；L0为无反射控制，L2为历史困难扩展</td></tr><tr><td><strong>额外时延</strong></td><td>典型0.25–1.5 μs，各链路独立</td><td>无人工避免TDOA重叠；自然/受控碰撞分开评价</td></tr><tr><td><strong>时延搜索</strong></td><td>拟采用3 μs公开上界</td><td>以单次近端≤400m局部散射为条件，否则重新审查</td></tr><tr><td><strong>源功率</strong></td><td>两源跨站标称LOS均6 dB，平均差0 dB</td><td>几何天然造成功率差；3/6 dB、极端10–15 dB后期压力</td></tr><tr><td><strong>未知信息</strong></td><td>2源数及每链路反射上界可知，其他路径、波形、源位置未知</td><td>不得给真实支持/时延、已知训练序列或分离参考信号</td></tr></tbody></table></div>
+<p class="small">此表描述未来新版本生成/比较合同，绝不回写旧scene.py和common18。每源—站链路的反射存在状态未知，LOS真实路径仍可见。数学研究阶段可先抽象0/1反射模型；压力实验须保留全部自然失败样本。</p></section>
+<section id="correction"><h2>02 · 旧问题的四处关键澄清</h2>
+<div class="grid">
+<div class="panel"><h3>不更换核心BPSK</h3><p>现有确定性VP按频点解析消元任意复波形，并没有使用E[s²]或星座先验。理想BPSK基带虽具有非圆性，但并不构成旧MP算法的已知信息。QPSK可作为泛化对照，不必改主场景；新方法如使用非圆性须明确说明。</p></div>
+<div class="panel"><h3>旧主场景没有刻意加入强弱源平均差</h3><p>旧代码按各源跨4站的平均自由空间功率增益分别调整发射功率，使两源平均LOS SNR标称均6 dB；单站内仍存在自然近远功率差。额外3/6 dB差异只是后续鲁棒性压力，不是本次核心可辨识性的前提。</p></div>
+<div class="panel"><h3>站点间传播时差不等于反射附加延迟</h3><p>6km站间基线约20.014μs，对角站间约28.304μs；这些是LOS几何站对TDOA范围。仅凭接收站坐标无法普遍限定一个远处未知散射点的额外路径延迟。</p></div>
+<div class="panel"><h3>3μs搜索范围必须有公开物理假设</h3><p>限定单次散射体处于发射源或接收站400m以内，三角不等式给出额外时延≤2R/c≈2.67μs，公开3μs搜索上界便具有环境模型依据。该约束不是站间距推导，也不能由RMS时延扩展指标直接推出。</p></div>
+</div>
+<div class="callout warn"><strong>避免场景陷入人为“全可分辨”：</strong>对自然随机源—站反射时延不设置站对路径峰隔离门。应将自然样本的整体失败率与预登记碰撞压力层（轻微、中等、严重、同中心旧样本）分别报告；碰撞标签只允许真值端离线计算，不能参与盲选择。</div>
+<p>同源站对RR—DD碰撞可采用无量纲指标 <code>χ(i,j,q)=B·|δ(i,q)−δ(j,q)|</code>；例如χ&lt;0.5、0.5≤χ&lt;1、χ≥1为待锁定分层。跨源、RD/DR及LOS—反射近碰撞须另外统计；单个χ不能代表全部难度。自然生成的所有长尾必须留在总体结果里。</p>
+</section>
+<section id="method"><h2>03 · 首选方法：统计—几何共同约束的双源直接定位</h2>
+<div class="callout"><strong>定位目标优先：</strong>未知复增益、反射时延和源统计谱都是消元变量。算法最终只给出两位置；不要求完整源信号分离、所有反射TDOA精确提取或事先判断路径归属。</div>
+<p>保留原始四站、两个独立非高斯源的混合接收模型。二阶多站互谱用于稳定的整体信道子空间结构；四阶跨站/跨频累积量在适当统计条件下对独立源具有加性，用于限制同谱源在二阶模型中的源身份旋转歧义。</p>
+<div class="formula">R_y(f) = Σ_{q=1,2} P_q(f) h_q(f) h_q(f)ᴴ + σ²I
+C₄(f₁,f₂,f₃) = Σ_{q=1,2} T_q · h_q(f₁) ⊗ h_q(f₂) ⊗ h_q*(f₃) ⊗ h_q*(f₄)
+f₄ = f₁+f₂−f₃</div>
+<p><strong>这只是待证的总体统计形式。</strong> RRC成形引入时间相关/循环平稳性，必须核查源统计量与可观测四阶谱的定义；短IQ、6dB下的四阶估计方差及弱源功率平方缩放可能致命。不能宣称已具备CP唯一性或定位保证。</p>
+<div class="grid">
+<div class="panel"><h3>数学命题A · 源空间唯一性</h3><p>四站上的两个混合向量是否可利用4模高阶结构在统计非零、列秩足够时唯一恢复至源置换与尺度？跨频标签能否一致？不得借用嵌套阵列虚拟孔径和长时间语音快拍。</p></div>
+<div class="panel"><h3>数学命题B · 由源空间到位置</h3><p>跨站比值h(m,q,f)/h(1,q,f)能否抵消未知源特异频率尺度，并在每链路最多一反射时识别各站LOS相对传播时延？需对全局假位置、相位零点、近反射抵消给出可证边界。</p></div>
+<div class="panel"><h3>数学命题C · 干扰参数消元</h3><p>对两个位置共四个连续坐标，剔除未知谱统计、复增益及路径时延后，位置有效信息矩阵是否满秩？局部充分条件之外还要研究全局非唯一反例。</p></div>
+<div class="panel"><h3>数学命题D · 有限IQ可计算性</h3><p>设计少量可估统计切片和合理权重，而非巨大频率四阶张量；并明确为什么更长IQ能降低误差。高阶检验通过不等于弱源定位性能自动通过。</p></div>
+</div>
+</section>
+<section id="gates"><h2>04 · 先证明，再允许仿真</h2>
+<div class="panel"><ol>
+<li><strong>M0 观测自洽：</strong>清楚写出独立非高斯BPSK+RRC的允许统计模型及循环性、未知符号率、未知源统计谱的影响；不借事后真值。</li>
+<li><strong>M1 位置可辨识：</strong>先纯LOS，再每链路0/1未知反射；证明源置换/尺度/滤波歧义如何映射至真实位置、哪些假位置仍存在。需要正式命题与证明或反例，不接受“看起来可行”。</li>
+<li><strong>M2 可计算直接定位：</strong>给出二维双源联合位置准则、干扰参数的有限计算消元、与经典VP/FOC-DPD/IVA的非等价性、复杂度与数据量要求。</li>
+<li><strong>M3 仅M0—M2通过后另行批准：</strong>用新冻结自然场景及独立压力场景完成双源RMSE、两源均定位成功率、严重错位长尾及完整成本。不得以ICA-SIR、路径NMSE、相关峰指标代替位置精度。</li>
+</ol></div>
+<div class="callout warn"><strong>硬停止：</strong>如果未知统计谱可以任意吸收几何，或统计估计的可用样本根本不支持四阶判别，应停止主候选并转入备选路线。不靠增加Top-K、K、SLSQP轮数或调整新权重挽救数学上没有信息的模型。</div></section>
+<section id="backup"><h2>05 · 完整保留的备选路线</h2>
+<div class="grid">
+<div class="panel"><span class="chip">B1 · 第一备选</span><h3>多块二阶协方差＋几何联合DPD</h3><p>只在两个源具有独立的短时功率变化、且始终同时发射的物理类别下研究。先证明协方差多样性与位置可辨识，不把“给定源独占时隙”偷偷加入模型。不能仅迁移旧联合对角化算法。</p></div>
+<div class="panel"><span class="chip">B2</span><h3>候选位置驱动的CCA共同子空间</h3><p>借Delay-locking思想但移除共址多阵元、用户前导和已知相对时延假设。证明错误位置不会普遍得到相同共同子空间，再谈计算；不是先盲分离后定位。</p></div>
+<div class="panel"><span class="chip">B3</span><h3>无干净参考的全站对互谱DPD</h3><p>借Li/Chai直接位置结构，不使用Chai的无多径参考，也不套单源PARAFAC唯一性。研究两个独立同频未知源如何形成可计算的几何—频域响应。</p></div>
+<div class="panel"><span class="chip">B4 · 保留但不优先</span><h3>源—径联合测度与几何约束</h3><p>仅当其新的数学结构超出第10—21轮的旧VP、贪婪增径和候选重评分时才继续；不得反复优化旧错误分支流程。</p></div>
+</div>
+</section>
+<section id="sources"><h2>06 · 论文和历史证据边界</h2>
+<p>本方向已精读69篇近邻，并收到Delay-locking、Li 2023 PARAFAC、Luo 2022 IVA、Xie 2020跨频张量、Hu 2024高阶统计DPD、Chai 2025宽带互谱DPD等原文。所有研究与基线须按其真实已知信息条件比较。</p>
+<ul>
+<li><a href="../../文献/近邻精读_20261106/精读结论与下一步.md">69篇文献分级与完整核查</a>；<a href="../../实验/12_独立性统计准入/20261107/成果/理论边界.md">第12轮统计歧义与循环性反例</a>。</li>
+<li><a href="../../实验/17_IQ分量接口核验/20261107/成果/机制分析.md">第17轮反射—反射TDOA近碰撞</a>；<a href="../../实验/14_公开信道记忆核验/20261107/成果/结论与推进判断.md">第14轮20μs上界来源与失败边界</a>。</li>
+<li><a href="../../实验/20_分支可区分性核验/20261109/成果/第20轮实验结果与科研判断.md">第20轮</a>、<a href="../../实验/21_候选覆盖与条件收敛核验/20261109/成果/第21轮结果与科研判断.md">第21轮</a>：近真候选存在但少候选压缩及数值拟合不足，不应继续只加迭代/路径数。</li>
+</ul>
+<p>**明确不迁移的特殊信息**：无反射的参考接收通道、额外阵列自由度、已知发射符号或导频、可分源的不同循环频率、已知反射地图、精确真值路径数；已有FOC、IVA、PARAFAC和Taylor补偿本身不构成原创。</p>
+<p><a href="研究共识与场景合同.md"><strong>阅读完整版研究共识与场景合同（Markdown）</strong></a></p></section>
+<footer>研究范围归档日：2026-11-09。本报告仅为远端文档交付；未修改公共mp_dpd、未生成新IQ、未运行第22轮、未建立位置可辨识定理。3μs物理条件为局部400m单次散射类别，不是普适传播上界。新方法仍须经过M0—M3书面准入。</footer>
+</main></body></html>

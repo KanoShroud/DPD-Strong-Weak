@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>双源多径DPD有限频点可辨识性｜八频点定理与双频反例</title>
+<style>
+:root{--bg:#f5f7fa;--paper:#fff;--ink:#1d2f40;--sub:#597083;--line:#dce6ef;--teal:#196d61;--blue:#185e91;--warn:#a45a38}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.78 system-ui,"Microsoft YaHei","PingFang SC",sans-serif}main{max-width:1090px;margin:auto;padding:40px 24px 75px}h1{font-size:33px;line-height:1.32;margin:9px 0 15px}h2{font-size:23px;margin:36px 0 12px}h3{font-size:17px;margin:8px 0}p{color:#354b60;margin:11px 0}a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}.small{font-size:13px;color:var(--sub)}.eyebrow{font-size:12px;color:var(--teal);font-weight:800;letter-spacing:.13em}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:23px 0}.kpi{background:white;border:1px solid var(--line);padding:14px;border-radius:11px}.kpi strong{font-size:27px;display:block;line-height:1.3}.kpi span{font-size:12px;color:var(--sub)}.box{background:white;border:1px solid var(--line);border-radius:11px;padding:20px;margin:14px 0}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.formula{font:12px/1.7 Consolas,"Courier New",monospace;background:#edf2f6;padding:14px 15px;border-radius:8px;white-space:pre-wrap;overflow-wrap:anywhere}.callout{border-left:4px solid var(--teal);padding:14px 18px;background:#e8f4f1;border-radius:0 9px 9px 0;margin:18px 0}.warning{border-left-color:var(--warn);background:#fdf2e9}.tablebox{overflow-x:auto;background:white;border:1px solid var(--line);border-radius:11px}table{min-width:650px;width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;border-bottom:1px solid #e6edf2;padding:10px 12px}th{color:#4b6074;background:#eaf1f5}tr:last-child td{border:0}.chart-row{display:grid;grid-template-columns:170px 1fr;align-items:center;gap:12px;padding:8px 0}.bar{height:18px;border-radius:4px;background:#e9eff3;overflow:hidden}.bar i{display:block;height:18px;background:#217b76;border-radius:4px}.v{font-size:12px;color:var(--sub)}.badge{font-size:12px;display:inline-block;padding:3px 11px;background:#e3f0ed;color:#1b6c5d;border-radius:28px;font-weight:700}.badge.warn{background:#faeee4;color:#945226}ul,ol{padding-left:24px}li{margin:9px 0}footer{border-top:1px solid var(--line);padding-top:17px;margin-top:39px;font-size:12px;color:var(--sub)}@media(max-width:780px){main{padding:23px 13px 52px}h1{font-size:26px}.kpis,.grid{grid-template-columns:repeat(2,1fr)}.chart-row{grid-template-columns:120px 1fr}}
+</style></head><body><main>
+<div class="eyebrow">MULTIPATH DPD · FINITE-FREQUENCY THEORY · 2026-11-09</div>
+<h1>八频点条件唯一性与双频等价假位置</h1>
+<p>研究对象仍然是四个异址单天线站、同时存在的两路未知同频信号及未知非零多径，最终只输出两个二维源位置。本报告完成了有限频点理想统计的可辨识性证明和反例，<strong>并未从有限混叠IQ成功实现新的定位器</strong>。</p>
+<span class="badge">数学证明已归档</span>　<span class="badge warn">含噪稳定性仍是硬门槛</span>
+<div class="kpis"><div class="kpi"><strong>2</strong><span>频点下可构造完全相同的错误位置通道</span></div>
+<div class="kpi"><strong>8</strong><span>每链路≤1反射时的充分频点数</span></div>
+<div class="kpi"><strong>13.89 m</strong><span>双频等价错误位置的距离</span></div>
+<div class="kpi"><strong>~10⁻¹⁵</strong><span>示例8频点Vandermonde最小奇异值量级</span></div></div>
+<div class="callout"><strong>核心理论链：</strong>有效四频总体统计→秩二CP恢复源特异跨站信道方向→有限个频点交叉卷积恒等式→LOS相对时延→四站双源位置。每一步都具有明示的数学假设，不能把链条的终点当作单段IQ定位精度保证。</div>
+<h2>01 · 预备结构：一个源的多径信道</h2>
+<div class="formula">H_mq(f) = Σ(ℓ=0..L_mq) g_mqℓ exp(−j2πf[τ_m(p_q)+δ_mqℓ])
+δ_mq0=0，δ_mqℓ&gt;0，g_mq0≠0</div>
+<p>证明先使用一般站数M、源数Q、每链路反射上界L和频率点数K，不预先代入32768样本、反射比0.25或3μs。每个源的跨站信道方向只需识别至一个频率相关的共同复标度。</p>
+<h2>02 · 定理：有限频率可消除未知源频谱</h2>
+<div class="box">
+<h3>逐源通道方向一致 ⇒ LOS-TDOA一致</h3>
+<p>若真实与另一个位置假设在K个频点的通道列仅相差每频率的共同复标度d_q(f_k)，则参考站交叉相乘消去这一标度：</p>
+<div class="formula">F_m(f_k) = H'_mq(f_k) H_1q(f_k) − H_mq(f_k) H'_1q(f_k) = 0</div>
+<p>当每链路至多L条反射，两项展开合计最多<strong>2(L+1)²个指数</strong>。在没有时延别名的连续等间隔频率网格上，K达到该上界，Vandermonde满列秩强制整个指数和恒零。最早非零卷积支撑只来自LOS，因此各站相对传播时差相同。</p>
+<div class="tablebox"><table><thead><tr><th>每链路最大反射条数L</th><th>对应充分频点数K</th><th>解释</th></tr></thead><tbody>
+<tr><td>0</td><td>2</td><td>理想无反射参照</td></tr>
+<tr><td>1</td><td><strong>8</strong></td><td>当前新核心多径模型</td></tr>
+<tr><td>2</td><td>18</td><td>旧双反射场景的理论扩展</td></tr>
+</tbody></table></div>
+<p class="small">上界只是充分而非紧必要数目。真实无反射并不意味着定位器知道反射数为0。</p>
+</div>
+<h2>03 · 从双源四阶统计到两个位置的条件证明</h2>
+<div class="box"><p>在四站、双源、四频高阶谱非零条件下，锚定频率f_a与另一频率f_k的四模张量可写为两个源的秩一项之和。把后两模合并，三因子的Kruskal列秩都是2，和为6，等于二源CP唯一性充分阈值。</p>
+<div class="formula">T_k = Σ(q=1..2) γ_qk h_q(f_a)⊗h_q(f_k)⊗h_q*(f_a)⊗h_q*(f_k)
+k_A + k_B + k_C = 2+2+2 = 6 = 2Q+2</div>
+<p>通过公共f_a对齐八个频率的源身份，得到每源八频率的跨站方向。应用上述交叉关系定理和正方形四站TDOA几何单射，位置集合在交换两个源标签之外唯一。</p>
+<p><strong>不要求两源不同符号率、不同星座或不同四阶源强度。</strong> 但要求真实总体张量可获得、每个频点混合列独立、四阶源系数非零以及非零LOS最早到达。</p></div>
+<h2>04 · 反例：两个频点甚至不能确定已知复信道的位置</h2>
+<div class="box"><p>当每链路允许一条反射时，两个频率对应两条复方程，而一条链路的LOS和反射复增益本身就是两个复未知数。对任意足够接近的错误源位置，都能固定同一反射时延并重新求出两复增益，精确复现两个频点上的全部四站通道。</p>
+<div class="formula">[ 1  exp(−j2πf0δ) ] [g'LOS]  = [ H(f0) exp(j2πf0 τ'(p')) ]
+[ 1  exp(−j2πf1δ) ] [g'ECHO]   [ H(f1) exp(j2πf1 τ'(p')) ]</div>
+<p>数值代数示例：真实位置(450,−930)m，错误位置(462,−937)m；反射附加时延0.32–1.23μs。替代反射幅度比最大0.488&lt;1，两频复信道相对误差约3.91×10⁻¹⁵。</p></div>
+<h2>05 · 精确唯一性不意味着稳定可估</h2>
+<div class="callout warning"><strong>最关键的风险：</strong>使用50MHz/32768≈1525.88Hz间隔的八个连续FFT频点，观测跨度只有10.68kHz。虽然交叉关系时间支持至多约62.61μs，远低于655.36μs的DFT别名周期，Vandermonde仍可能在机器精度附近病态。估计误差会被放大；何况我们还需从同一条混合IQ估计非高斯高阶谱。</div>
+<div class="box"><h3>两列指数节点近碰撞时的条件数</h3>
+<div class="chart-row"><span>10 ns　9.1×10³</span><div class="bar"><i style="width:95%"></i></div></div>
+<div class="chart-row"><span>100 ns　9.1×10²</span><div class="bar"><i style="width:74%"></i></div></div>
+<div class="chart-row"><span>1000 ns　91</span><div class="bar"><i style="width:50%"></i></div></div>
+<div class="chart-row"><span>10000 ns　9.1</span><div class="bar"><i style="width:26%"></i></div></div>
+<p class="small">根据8频点、两复指数的代数矩阵计算；条形仅作对数数量级的示意，不属于场景Monte Carlo成功率。</p>
+</div>
+<h2>06 · 条件正位置统计间隔</h2>
+<div class="box"><p>将八个四阶总体张量的全部条目作为有限统计向量c，在位置p和全部合法信道/源谱干扰参数下定义模型集M(p)。若位置域、复增益、反射延迟、有效源四阶谱都限制在闭有界、非退化的参数集，且所有候选混合列维持满秩，条件唯一性说明错误位置的模型像集与真实统计不相交；紧性进一步保证距离严格为正。</p>
+<div class="formula">Δ_ε = inf_{dist_perm(p,p*)≥ε} inf_{z∈M(p)} ||c*−z|| &gt; 0</div>
+<p>这是<strong>模型间隔的存在性</strong>，不是数值可用的统一下界。要由它得到有限IQ的正确定位概率，仍需统计估计误差界及全局的两个位置联合优化方法。</p></div>
+<h2>07 · 接下来的数学任务</h2>
+<div class="box"><ol>
+<li>研究在不违反物理假设时，如何使用跨越更宽带宽的多组频率切片，提高指数系统的条件数，同时保证全候选位置的可辨识性。</li>
+<li>明确从有限混叠IQ估计八个锚定四阶张量所需的循环修正、窗口偏差及统计协方差；不能用单次FFT外积冒充总体统计。</li>
+<li>在每链路单反射、两源信道可能接近共线时，为联合双位置物理统计模型推导可验证的局部有效信息或正间隔下界。</li>
+<li>只有稳定性和统计可估性获得支持，才研究不先完整盲分离或逐径恢复的直接位置准则；暂不启动第22轮IQ调参。</li>
+</ol></div>
+<h2>08 · 原始证明和数学核验文件</h2>
+<p><a href="有限频点双源DPD位置可辨识_定理与反例.md">完整数学备忘录（引理、3个定理、双频反例及证明）</a></p>
+<p><a href="finite_dpd_math_check.py">可独立运行的纯NumPy审计脚本</a> · <a href="finite_dpd_math_check_results.json">本次实际执行结果JSON</a></p>
+<p><a href="M0_M2理论推进_秩不变性_未知时钟_相位时差界.md">前一阶段数学审查：低秩不变性、时钟和有限带宽界</a> · <a href="研究共识与场景合同.md">固定研究场景及Gate合同</a></p>
+<footer>条件理论研究成果，2026-11-09。没有修改旧MP-DPD、生成器、冻结common18或正式实验数据。Vandermonde/Prony、交叉关系与Kruskal均有经典先例，现有条件合成不等于已经完成SCI方法创新，也不等于证明一段噪声IQ可实现精准双源定位。</footer>
+</main></body></html>

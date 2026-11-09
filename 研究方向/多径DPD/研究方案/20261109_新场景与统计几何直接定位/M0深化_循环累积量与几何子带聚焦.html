@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>M0深化｜循环统计与几何聚焦多源DPD</title>
+<style>
+:root{--fg:#1b2b3c;--muted:#60758a;--bg:#f5f7fa;--line:#dce5ee;--accent:#175f7b;--ok:#137563;--warn:#a66e22;--card:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.75 system-ui,-apple-system,"Microsoft YaHei","PingFang SC",sans-serif}
+main{max-width:1060px;margin:auto;padding:42px 25px 70px}.eyebrow{color:var(--accent);font-weight:800;font-size:12px;letter-spacing:.14em}
+h1{font-size:34px;line-height:1.27;margin:8px 0 15px}h2{font-size:23px;margin:35px 0 12px}h3{font-size:17px;margin:5px 0 10px}
+p{margin:10px 0;color:#33495c}a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}.small{font-size:13px;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:20px;margin:14px 0}.gr{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}.kpi{border:1px solid var(--line);border-radius:10px;background:white;padding:13px 15px}.kpi strong{font-size:25px;display:block;color:var(--ok)}.kpi span{font-size:12px;color:var(--muted)}
+.equation{background:#edf2f7;border-radius:9px;padding:14px 15px;font-family:Consolas,"Courier New",monospace;font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}
+.callout{background:#e7f4f0;border-left:4px solid var(--ok);padding:15px 18px;border-radius:0 8px 8px 0;margin:15px 0}
+.warn{background:#fcf2e4;border-left-color:var(--warn)}.step{border:1px solid var(--line);border-radius:9px;padding:12px;background:white;text-align:center}.arrow{text-align:center;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:10px 12px;border-bottom:1px solid #e3ebef;text-align:left;vertical-align:top}th{background:#edf2f6;color:#496276}
+.tablewrap{overflow-x:auto;background:white;border:1px solid var(--line);border-radius:11px}tr:last-child td{border:0}.pending{color:var(--warn);font-weight:700}.yes{color:var(--ok);font-weight:700}
+footer{margin-top:38px;border-top:1px solid var(--line);padding-top:15px;color:var(--muted);font-size:12px}
+@media(max-width:780px){main{padding:26px 13px 50px}h1{font-size:26px}.kpis{grid-template-columns:repeat(2,1fr)}.gr{grid-template-columns:1fr}}
+</style></head><body><main>
+<div class="eyebrow">RESEARCH NOTE · M0 THEORY DEEPENING · 2026-11-09</div>
+<h1>从原始四站混叠IQ到有效统计：循环校正与位置驱动子带聚焦</h1>
+<p>本阶段继续按“一般统计模型→源分量识别→几何位置唯一性→联合双源DPD→有限样本理论”的顺序研究。保留<strong>4个异址同步单天线站、2路未知同频源和非零未知多径</strong>。本页是数学研究报告，不是新定位器或仿真结果。</p>
+<div class="kpis"><div class="kpi"><strong>4 / 4</strong><span>数学审计执行并通过</span></div><div class="kpi"><strong>10⁻¹⁵</strong><span>精确循环校正的代数误差数量级</span></div><div class="kpi"><strong>Rank 2</strong><span>理想子带平坦的双源总体张量</span></div><div class="kpi"><strong class="pending">未完成</strong><span>单条有限IQ高阶统计可估性</span></div></div>
+<div class="callout"><strong>主要变化：</strong>上一轮正确区分了理想多频张量和错误零时差FOC；本轮进一步给出统计定义的循环相位修正，并证明候选位置可以改变子带通道非平坦误差。两者均无需把独立源分离作为前置步骤。</div>
+<h2>01 · 为什么普通时间平均四阶累积量有偏差？</h2>
+<div class="card">
+<p>独立BPSK经未知脉冲成形和传播时移后，二阶矩可能随符号时相周期变化。若先把各二阶矩跨时相平均再相乘，通常不等于平均其逐时相乘积。</p>
+<div class="equation">C̄₄ = ⟨M₄(t)⟩ − Σ_pairings ⟨R_ab(t)R_cd(t)⟩
+C_naive − C̄₄ = Σ_pairings (⟨R_ab R_cd⟩ − ⟨R_ab⟩⟨R_cd⟩)</div>
+<p>如果二阶矩有循环频率傅里叶展开，长期平均的二阶矩乘积可以表示为正负循环频率系数乘积之和。</p>
+<div class="equation">C̄₄ = ⟨M₄⟩ − Σ_pairings Σ_α R_ab^(α) R_cd^(−α)</div>
+<p class="small">这是既有高阶循环统计理论的特例；未提供真实符号率，必须在实际IQ中估计需要的循环系数。</p></div>
+<div class="gr"><div class="card"><h3>精确双源反例</h3><p>两路完全独立BPSK、8种周期时相、4站复增益：普通全时平均FOC的误差模为<strong>3.65716</strong>。</p></div><div class="card"><h3>循环修正后</h3><p>完整保留正负循环频率系数，误差约<strong>9.93×10⁻¹⁶</strong>；与独立源累积量加性结果一致。</p></div></div>
+<h2>02 · 正确时相累积量的理想跨频双源结构</h2>
+<div class="card"><p>对独立非高斯创新序列经LTI多径信道，先取时相条件累积量再长时间平均，可以严格推导三滞后四阶统计。做混合符号的三维傅里叶变换后，同一源的四个通道响应分别出现在四个频率上。</p>
+<div class="equation">T(f1,f2,f3) = Σ_q γ_q · h_q(f1) ⊗ h_q(f2)
+                              ⊗ h_q*(f3) ⊗ h_q*(f1+f2−f3)</div>
+<p>这是一条<strong>理想总体统计因子化恒等式</strong>，不表示普通零时差FOC秩等于源数，也不说明三维多谱能由32768点无偏、低方差地估计。未知源谱和RRC成形被包含在每源共同因子γ_q中，信道方向与频率耦合仍需后续研究。</p></div>
+<h2>03 · 新的直接定位机制：位置驱动子带聚焦</h2>
+<div class="gr">
+<div class="card"><h3>正确候选位置</h3><p>按预测LOS站间时差对<strong>整个混合IQ</strong>做相对时延补偿。该源的四站LOS频率相位被消除，子带内残余变化主要来自额外反射时延。</p><p class="small">另一未知源仍在同一观测内；没有预先完成分离。</p></div>
+<div class="card"><h3>错误候选位置</h3><p>由于站间几何时差失配，通常存在额外跨频相位旋转；拟合宽频子带时更难同时满足同一位置及有限多径条件。</p><p class="small">不是全局可辨识性保证；多径相消与特殊构型可能造成假位置。</p></div>
+</div>
+<div class="card"><h3>严格的带内误差上界</h3>
+<div class="equation">ε_mq(r)=d_m(p_q)−d_m(r)
+sup_{f in band}|F_mq^(r)(f)−F_mq^(r)(fc)|
+≤ π w [|a_mq,0||ε_mq(r)| + |a_mq,1||ε_mq(r)+δ_mq|]</div>
+<p>当r等于真实位置时ε=0，LOS项的带内非平坦误差为零。频带宽度w仍有统计代价，不能仅选最窄频带。</p>
+<div class="tablewrap"><table><thead><tr><th>数学核验</th><th>实际频响最大变化</th><th>严格上界</th></tr></thead><tbody>
+<tr><td>正确位置示意</td><td>0.105016</td><td>0.105497</td></tr>
+<tr><td>错误位置示意</td><td>1.606636</td><td>3.350436</td></tr>
+</tbody></table></div><p class="small">只是复指数不等式代数核验，不是IQ定位或算法正确率。</p></div>
+<h2>04 · 为什么有限IQ仍是硬关口？</h2>
+<div class="tablewrap"><table><thead><tr><th>因素</th><th>扩大子带宽度w</th><th>缩小子带宽度w</th></tr></thead><tbody>
+<tr><td>站间物理响应的平坦性</td><td>易产生通道模型偏差</td><td>平坦近似较好</td></tr>
+<tr><td>有效时间频带自由度</td><td>通常增加</td><td>通常减少</td></tr>
+<tr><td>理想窄带滤波源的归一化FOC</td><td>一般可更强</td><td>可能随w/Rs衰减</td></tr>
+<tr><td>位置聚焦的意义</td><td colspan="2">对正确几何位置移除LOS带来的大时延相位旋转，为更宽的可用频带创造可能，但并不增加独立信息。</td></tr>
+</tbody></table></div>
+<p>对固定有限统计切片，若乘积过程的协方差绝对可求和，可证明样本平均方差至多为K/N；但完整统计张量的维数、未知循环频率搜索和滤波时间相关性仍然需要独立误差理论。</p>
+<h2>05 · 先诊断并修复，不立即换题</h2>
+<div class="card"><div class="step"><strong>障碍1：四阶统计定义错误</strong><br>查清二阶循环项及样本校正的可估性</div><div class="arrow">↓</div><div class="step"><strong>障碍2：频带不平坦或FOC过弱</strong><br>利用几何聚焦、低维频率切片和有界误差权衡</div><div class="arrow">↓</div><div class="step"><strong>障碍3：仍存在等价假位置</strong><br>给出反例、物理信道条件和局部/全局唯一性分析</div><div class="arrow">↓</div><div class="step"><strong>只有严格证明不能合理修复</strong><br>才评估B1多块协方差、B2共同子空间、B3无参考互谱及B4源—径测度备选</div></div>
+<div class="callout warn"><strong>当前决策：</strong>M0有两项数学机制进展，但有限IQ下可估计的源特异四阶统计尚未建立；M1完整多源位置唯一性和M2新双源DPD仍待研究。不得用SIR、四阶张量拟合误差、局部数值检查代替双源精准定位结果，也不启动第22轮IQ算法调参。</div>
+<h2>06 · 正式证明及复现入口</h2>
+<p><a href="M0深化_循环累积量与几何子带聚焦.md">完整数学备忘录与公式(1)—(11)</a> · <a href="M0_cyclic_focus_math_audit.py">四项确定性数学审计脚本</a> · <a href="M0_cyclic_focus_math_audit_results.json">审计结果JSON</a></p>
+<p><a href="数学审查_M0_M1_首轮.md">前一轮M0—M1条件唯一性证明</a> · <a href="研究共识与场景合同.md">完整研究合同与场景参数</a></p>
+<footer>经典循环统计与跨频因子分解已有大量文献；本阶段只是把正确总体统计结构与异址四站双源几何定位条件连接起来。新颖性、数值准确度和最终3–5秒开销尚未证明。没有修改旧MP、common18、生成器或正式实验数据。</footer>
+</main></body></html>

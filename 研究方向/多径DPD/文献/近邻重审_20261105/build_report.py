@@ -12,16 +12,17 @@ def esc(s):
 
 def main():
     rows = json.loads((ROOT / '文献矩阵.json').read_text(encoding='utf-8'))
-    stats = json.loads((ROOT / 'matrix_summary.json').read_text(encoding='utf-8'))
+    stats = {'total': len(rows), 'read': sum(bool(r.get('close_reading')) for r in rows)}
     body = []
     for r in rows:
         official = 'https://doi.org/' + r['doi'] if r['doi'] else r['url']
         links = f'<a href="{esc(official)}" target="_blank" rel="noopener">正式书目 / DOI ↗</a>'
         if r.get('fulltext_url'):
             links += f' · <a href="{esc(r["fulltext_url"])}" target="_blank" rel="noopener">公开全文线索 ↗</a>'
-        need = '0' if r['local_pdf'] else '1'
+        need = '0' if r.get('close_reading') else '1'
+        state = r['library_status'] if r.get('close_reading') else '本轮未读；入库状态未刷新'
         body.append(f'''<article class="paper" data-grade="{r['grade']}" data-need="{need}">
-<div class="paperhead"><span class="tag">{r['id']} · {esc(r['grade_name'].split('｜')[0])}</span><span class="state">{esc(r['library_status'])}</span></div>
+<div class="paperhead"><span class="tag">{r['id']} · {esc(r['grade_name'].split('｜')[0])}</span><span class="state">{esc(state)}</span></div>
 <h3>{esc(r['title'])}</h3><p class="muted">{esc(r['venue'])} · {esc(r['year'])} · {esc(r.get('priority',''))}</p>
 <p>{esc(r['information_conditions'])}</p><p><b>借鉴点：</b>{esc(r['idea'])}</p>
 <details><summary>阅读范围与库内记录</summary><p>{esc(r['evidence_scope'])}</p><p>Zotero键：{esc(', '.join(r['zotero_keys']) or '未匹配')}</p><p>{esc(r['action'])}</p></details>
@@ -44,7 +45,21 @@ outputs_e2e/mp_dpd/          数据、运行、冻结证据</pre><p>先建时间
 <section id="next"><h2>下一步明确停在哪里</h2><ol><li>优先补齐第一批12项，特别是Xia信道来源、源径关联、SAGE自适应阶数和盲解混条件。</li><li>核心近邻全文齐备后，逐篇按统一模板核对模型、先验、理论、完整流程和仿真，再形成最终综述与建议。</li><li>随后完成有限Xia锚定与公平比较合同，不按结果选择实现约定，不为让自家方法胜出而改基线。</li><li>目录搬移方案等待审批。当前0/1/2反射和其他场景设定不变，不启动480/780/3120或640条实验。</li></ol><a href="阅读与研究推进安排.md">完整状态与逐篇精读模板 →</a></section>
 <footer>来源：本轮Zotero只读快照、原文PDF、公开出版社/作者资料、历史证据与目录盘点。由AI辅助整理并核对，获取全文、机器解析、语义精读和实验验证分开记录。<br><a href="执行协议.md">执行协议</a> · <a href="audit_v2.json">交付与分类核查</a></footer>
 <script>const papers=[...document.querySelectorAll('.paper')];function filter(){const q=document.querySelector('#query').value.toLowerCase(),g=document.querySelector('#grade').value,need=document.querySelector('#missing').checked;let n=0;papers.forEach(p=>{const show=(!g||p.dataset.grade===g)&&(!need||p.dataset.need==='1')&&p.textContent.toLowerCase().includes(q);p.hidden=!show;n+=show});document.querySelector('#counter').textContent=`显示 ${n} / ${papers.length} 篇`;}document.querySelectorAll('input,select').forEach(x=>x.addEventListener('input',filter));filter();</script></main></body></html>'''
-    for key, value in {'TOTAL': stats['total'], 'NEW': stats['new_to_old_matrix'], 'PDF': stats['local_pdf'], 'NEED': stats['need_fulltext'], 'PAPERS': ''.join(body)}.items():
+    doc = doc.replace('2026.11.05 · LITERATURE & REPRODUCIBILITY', '2026.11.06 · CLOSE READING')
+    doc = doc.replace('Xia原文已回读；文献分级库已建立；历史目录已盘点。新定位实验和文件搬移均未启动。', '目录内69篇正文阅读已完成；本次续读第二批12篇、第三批9篇。未启动新定位实验。')
+    doc = doc.replace('相对旧46表新增', '本次续读').replace('库内PDF可打开', '正文阅读完成').replace('待补库 / 全文', '目录内未读')
+    start = doc.index('<div class="notice"><b>完成边界：')
+    end = doc.index('</div>', start) + len('</div>')
+    doc = doc[:start] + '<div class="notice"><b>本轮成果：</b><a href="../近邻精读_20261106/近邻文献精读矩阵.xlsx">下载四级Excel精读矩阵</a> · <a href="../近邻精读_20261106/精读结论与下一步.md">综合结论与待补材料</a>。正文精读不等于算法复现；部分外置补充件未取得，逐篇注明。一级也不等于同信息可直接比较。</div>' + doc[end:]
+    doc = doc.replace('复用37条现有记录，不改旧分类，不添加阅读状态。', '本专题按正文调整相关性；保留其他专题分类，不添加阅读状态标签。')
+    doc = doc.replace('33项补全文清单（分三批）', '原补全文批次及最新状态').replace('只看待补全文', '只看本轮未读')
+    start = doc.index('<section id="archive">')
+    end = doc.index('</section>', start) + len('</section>')
+    doc = doc[:start] + '<section id="archive"><h2>文件整理已完成</h2><p>现用代码与历史轮次已按研究方向归位；本页不再保留已失效的搬移待审批状态。<a href="../../研究记录/轮次导航.md">代码与轮次导航</a>。</p></section>' + doc[end:]
+    start = doc.index('<section id="next">')
+    end = doc.index('</section>', start) + len('</section>')
+    doc = doc[:start] + '<section id="next"><h2>下一步</h2><p>三批论文正文阅读已完成，外置补充件及证明核验范围逐篇注明。后续围绕同信息完整基线与源—路径关联问题形成方案；不自动启动新的算法路线或正式扩量。</p><p><a href="阅读与研究推进安排.md">阅读状态</a> · <a href="../近邻精读_20261106/精读结论与下一步.md">本轮判断</a></p></section>' + doc[end:]
+    for key, value in {'TOTAL': stats['total'], 'NEW': 21, 'PDF': stats['read'], 'NEED': stats['total']-stats['read'], 'PAPERS': ''.join(body)}.items():
         doc = doc.replace('@@' + key + '@@', str(value))
     (ROOT / '文献重审与整理报告.html').write_text(doc, encoding='utf-8')
 

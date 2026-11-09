@@ -1,358 +1,360 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>双源盲多径DPD · 文献重审与整理</title>
 <style>
-:root{--ink:#193544;--muted:#657782;--green:#006c68;--paper:#fff;--bg:#f2f5f5;--line:#d9e3e5}*{box-sizing:border-box}body{margin:0;font:16px/1.75 system-ui,'Microsoft YaHei',sans-serif;color:var(--ink);background:var(--bg)}main{max-width:1120px;margin:auto;padding:40px 24px 70px}a{color:var(--green);text-underline-offset:4px}h1{font-size:36px;line-height:1.35;letter-spacing:-.6px;margin:12px 0}h2{font-size:25px;margin:32px 0 16px}h3{font-size:18px;line-height:1.5;margin:12px 0}.eyebrow{color:var(--green);font-size:13px;letter-spacing:1.5px}.lead{font-size:19px;max-width:900px}.muted,.state{color:var(--muted);font-size:14px}.notice{padding:18px 22px;border-left:4px solid #bd8e40;background:#fff8e9;border-radius:8px}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:25px 0}.card,.panel,.paper{background:var(--研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿);border:1px solid var(--line);border-radius:14px;padding:22px}.card strong{display:block;font-size:32px;color:var(--green)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.paperhead{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.tag{font-size:12px;background:#e6f2ef;padding:2px 9px;border-radius:20px;color:var(--green)}nav{display:flex;flex-wrap:wrap;gap:20px;margin:22px 0}.toolbar{display:flex;flex-wrap:wrap;gap:10px;background:#e8eeee;padding:15px;border-radius:12px;margin-bottom:14px}input,select,button{font:inherit;padding:9px 12px;border:1px solid #b9cecf;border-radius:7px;background:white;color:var(--ink);min-width:0}input{flex:1;min-width:180px}button{cursor:pointer}.研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿 p{margin:10px 0}.links{font-size:14px}details{margin-top:12px}summary{cursor:pointer;color:var(--green)}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65;background:#f5f8f8;padding:16px;border-radius:9px;font-size:14px}li{margin:6px 0}.listlinks{display:flex;flex-wrap:wrap;gap:16px;margin:18px 0}footer{border-top:1px solid var(--line);padding-top:20px;margin-top:35px;font-size:13px;color:var(--muted)}.paper[hidden]{display:none}@media(max-width:700px){main{padding:24px 14px 40px}h1{font-size:27px}.cards{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.card,.panel,.paper{padding:17px}.lead{font-size:17px}.state{font-size:12px}input{width:100%}}
-</style></head><body><main><div class="eyebrow">2026.11.05 · LITERATURE & REPRODUCIBILITY</div><h1>先把近邻与信息条件核清，<br>再决定怎样改算法。</h1><p class="lead">Xia原文已回读；文献分级库已建立。文献由用户手动补入，未启动新的研究实验。</p><div class="notice"><b>2026-11-06 整理更新：</b>下方原迁移方案已执行：现用代码移入源码区，历史结果按主题和原轮次归档，原目录已移除。<a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E5%A4%9A%E5%BE%84DPD/%E7%A0%94%E7%A9%B6%E8%AE%B0%E5%BD%95/%E8%BD%AE%E6%AC%A1%E5%AF%BC%E8%88%AA.md">打开新的代码与轮次导航</a>。只完成工程运行核对，不代表已有算法的失败问题已解决。</div>
+:root{--ink:#193544;--muted:#657782;--green:#006c68;--paper:#fff;--bg:#f2f5f5;--line:#d9e3e5}*{box-sizing:border-box}body{margin:0;font:16px/1.75 system-ui,'Microsoft YaHei',sans-serif;color:var(--ink);background:var(--bg)}main{max-width:1120px;margin:auto;padding:40px 24px 70px}a{color:var(--green);text-underline-offset:4px}h1{font-size:36px;line-height:1.35;letter-spacing:-.6px;margin:12px 0}h2{font-size:25px;margin:32px 0 16px}h3{font-size:18px;line-height:1.5;margin:12px 0}.eyebrow{color:var(--green);font-size:13px;letter-spacing:1.5px}.lead{font-size:19px;max-width:900px}.muted,.state{color:var(--muted);font-size:14px}.notice{padding:18px 22px;border-left:4px solid #bd8e40;background:#fff8e9;border-radius:8px}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:25px 0}.card,.panel,.paper{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:22px}.card strong{display:block;font-size:32px;color:var(--green)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.paperhead{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.tag{font-size:12px;background:#e6f2ef;padding:2px 9px;border-radius:20px;color:var(--green)}nav{display:flex;flex-wrap:wrap;gap:20px;margin:22px 0}.toolbar{display:flex;flex-wrap:wrap;gap:10px;background:#e8eeee;padding:15px;border-radius:12px;margin-bottom:14px}input,select,button{font:inherit;padding:9px 12px;border:1px solid #b9cecf;border-radius:7px;background:white;color:var(--ink);min-width:0}input{flex:1;min-width:180px}button{cursor:pointer}.paper p{margin:10px 0}.links{font-size:14px}details{margin-top:12px}summary{cursor:pointer;color:var(--green)}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65;background:#f5f8f8;padding:16px;border-radius:9px;font-size:14px}li{margin:6px 0}.listlinks{display:flex;flex-wrap:wrap;gap:16px;margin:18px 0}footer{border-top:1px solid var(--line);padding-top:20px;margin-top:35px;font-size:13px;color:var(--muted)}.paper[hidden]{display:none}@media(max-width:700px){main{padding:24px 14px 40px}h1{font-size:27px}.cards{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.card,.panel,.paper{padding:17px}.lead{font-size:17px}.state{font-size:12px}input{width:100%}}
+</style></head><body><main><div class="eyebrow">2026.11.06 · CLOSE READING</div><h1>先把近邻与信息条件核清，<br>再决定怎样改算法。</h1><p class="lead">目录内69篇正文阅读已完成；本次续读第二批12篇、第三批9篇。未启动新定位实验。</p>
 <nav><a href="#xia">Xia核对</a><a href="#papers">分级文献 / 下载</a><a href="#archive">整理方案</a><a href="#next">下一步</a></nav>
-<div class="cards"><div class="card"><strong>68</strong>候选书目条目</div><div class="card"><strong>22</strong>相对旧46表新增</div><div class="card"><strong>35</strong>库内PDF可打开</div><div class="card"><strong>33</strong>待补库 / 全文</div></div>
-<div class="notice"><b>完成边界：</b>不是68篇全部精读完毕。Xia2021四页已逐项重读并视觉核对，其余逐项注明历史阅读、当前定向核读或摘要。检索扩展了覆盖，不保证绝无遗漏，也未证明创新风险已消除。</div>
-<section id="xia"><h2>Xia：没有发现一项被漏掉的“万能开关”</h2><div class="grid"><div class="panel"><h3>原文确实写了什么</h3><p>五个同步站、参考站原点；BPSK，1MHz采样、200kbps符号率、2000点；1000初始粒子；五反射表内总功率比约0.254。</p><p>图2与图3(a)纵轴是10log10(RMSE)，主要统计第一个目标。完整双源RMSE和缺失输出要另外报告。</p></div><div class="panel"><h3>哪些仍不能假装知道</h3><p>绝对损耗与SNR怎样联用、成形与分数延迟、复相位统计、G计数和空簇输出等仍有未明示项。聚类严格“增量&lt;ε”与ε=0的组合也需公开解释。</p><p>旧实现属于公开信息重建；后来的大粒子数尺度适配，不等于已经复现作者原曲线。</p></div></div><p><a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E5%A4%9A%E5%BE%84DPD/%E6%96%87%E7%8C%AE/%E8%BF%91%E9%82%BB%E9%87%8D%E5%AE%A1_20261105/Xia%E5%8E%9F%E6%96%87%E9%80%90%E9%A1%B9%E5%A4%8D%E6%A0%B8.md">查看全文逐项复核：正文、公式、图表与前作 →</a></p></section>
-<section id="papers"><h2>分级文献与下载清单</h2><p>四级是场景距离，阅读优先级另列。一级也不等于全部同信息可比；有些四级理论论文必须优先读。</p><p class="muted">Zotero：多源定位研究｜文献导航 → 03 双源盲多径DPD｜近邻分级。复用37条现有记录，不改旧分类，不添加阅读状态。</p>
-<div class="listlinks"><a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E5%A4%9A%E5%BE%84DPD/%E6%96%87%E7%8C%AE/%E8%BF%91%E9%82%BB%E9%87%8D%E5%AE%A1_20261105/%E5%88%86%E7%BA%A7%E6%96%87%E7%8C%AE%E7%9F%A9%E9%98%B5.md">完整Markdown矩阵</a><a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E5%A4%9A%E5%BE%84DPD/%E6%96%87%E7%8C%AE/%E8%BF%91%E9%82%BB%E9%87%8D%E5%AE%A1_20261105/%E5%BE%85%E5%AF%BC%E5%85%A5%E4%B8%8E%E5%85%A8%E6%96%87%E7%BC%BA%E5%8F%A3.md">33项补全文清单（分三批）</a><a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E5%A4%9A%E5%BE%84DPD/%E6%96%87%E7%8C%AE/%E8%BF%91%E9%82%BB%E9%87%8D%E5%AE%A1_20261105/search_expansion/%E6%89%A9%E5%B1%95%E6%A3%80%E7%B4%A2%E8%AE%B0%E5%BD%95%E4%B8%8E%E5%88%A4%E8%AF%BB.md">检索路径与限制</a><a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E5%A4%9A%E5%BE%84DPD/%E6%96%87%E7%8C%AE/%E8%BF%91%E9%82%BB%E9%87%8D%E5%AE%A1_20261105/%E6%96%87%E7%8C%AE%E7%9F%A9%E9%98%B5.json">结构化JSON</a></div>
-<div class="toolbar"><input id="query" placeholder="搜索题名、先验、方法或年份" aria-label="搜索文献"><select id="grade" aria-label="分级"><option value="">全部级别</option><option value="A">一级 · 核心场景</option><option value="B">二级 · 关联与盲分离</option><option value="C">三级 · 不同信息条件</option><option value="D">四级 · 选模与理论</option></select><label><input id="missing" type="checkbox" style="width:auto;min-width:0"> 只看待补全文</label></div><p id="counter" class="muted"></p><div class="grid" id="catalog"><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="A" data-need="0">
-<div class="paperhead"><span class="tag">N01 · 一级</span><span class="state">在库且PDF存在</span></div>
+<div class="cards"><div class="card"><strong>69</strong>候选书目条目</div><div class="card"><strong>21</strong>本次续读</div><div class="card"><strong>69</strong>正文阅读完成</div><div class="card"><strong>0</strong>目录内未读</div></div>
+<div class="notice"><b>本轮成果：</b><a href="../近邻精读_20261106/近邻文献精读矩阵.xlsx">下载四级Excel精读矩阵</a> · <a href="../近邻精读_20261106/精读结论与下一步.md">综合结论与待补材料</a>。正文精读不等于算法复现；部分外置补充件未取得，逐篇注明。一级也不等于同信息可直接比较。</div>
+<section id="xia"><h2>Xia：没有发现一项被漏掉的“万能开关”</h2><div class="grid"><div class="panel"><h3>原文确实写了什么</h3><p>五个同步站、参考站原点；BPSK，1MHz采样、200kbps符号率、2000点；1000初始粒子；五反射表内总功率比约0.254。</p><p>图2与图3(a)纵轴是10log10(RMSE)，主要统计第一个目标。完整双源RMSE和缺失输出要另外报告。</p></div><div class="panel"><h3>哪些仍不能假装知道</h3><p>绝对损耗与SNR怎样联用、成形与分数延迟、复相位统计、G计数和空簇输出等仍有未明示项。聚类严格“增量&lt;ε”与ε=0的组合也需公开解释。</p><p>旧实现属于公开信息重建；后来的大粒子数尺度适配，不等于已经复现作者原曲线。</p></div></div><p><a href="Xia原文逐项复核.md">查看全文逐项复核：正文、公式、图表与前作 →</a></p></section>
+<section id="papers"><h2>分级文献与下载清单</h2><p>四级是场景距离，阅读优先级另列。一级也不等于全部同信息可比；有些四级理论论文必须优先读。</p><p class="muted">Zotero：多源定位研究｜文献导航 → 03 双源盲多径DPD｜近邻分级。本专题按正文调整相关性；保留其他专题分类，不添加阅读状态标签。</p>
+<div class="listlinks"><a href="分级文献矩阵.md">完整Markdown矩阵</a><a href="待导入与全文缺口.md">原补全文批次及最新状态</a><a href="search_expansion/扩展检索记录与判读.md">检索路径与限制</a><a href="文献矩阵.json">结构化JSON</a></div>
+<div class="toolbar"><input id="query" placeholder="搜索题名、先验、方法或年份" aria-label="搜索文献"><select id="grade" aria-label="分级"><option value="">全部级别</option><option value="A">一级 · 核心场景</option><option value="B">二级 · 关联与盲分离</option><option value="C">三级 · 不同信息条件</option><option value="D">四级 · 选模与理论</option></select><label><input id="missing" type="checkbox" style="width:auto;min-width:0"> 只看本轮未读</label></div><p id="counter" class="muted"></p><div class="grid" id="catalog"><article class="paper" data-grade="A" data-need="0">
+<div class="paperhead"><span class="tag">N01 · 一级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Maximum likelihood estimation for geolocation in the presence of multipath</h3><p class="muted">2014 48th Asilomar Conference on Signals, Systems and Computers · 2014 · 优先</p>
-<p>单个未知波形；未知共同反射体位置；复增益；EM。不能把多路径K误作独立源数。</p><p><b>借鉴点：</b>单个未知波形；未知共同反射体位置；复增益；EM。不能把多路径K误作独立源数。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：本轮全文5页＋公式页图核对；本轮未逐篇重读</p><p>Zotero键：KGA2WLPL</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1109/ACSSC.2014.7094643" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="A" data-need="0">
-<div class="paperhead"><span class="tag">N02 · 一级</span><span class="state">在库且PDF存在</span></div>
+<p>原始接收信号；共享未知确定性波形、未知复增益，固定给定路径数；反射时延由源—反射体—站几何表达。</p><p><b>借鉴点：</b>推论：可借鉴统一残差下的路径更新思想；从单源、固定路径数、共享反射几何到双源未知阶数随机链路，需要重新处理关联及初始化。</p>
+<details><summary>阅读范围与库内记录</summary><p>5页全文及参考文献；关键末页图核。</p><p>Zotero键：KGA2WLPL</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/ACSSC.2014.7094643" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="A" data-need="0">
+<div class="paperhead"><span class="tag">N02 · 一级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>A direct localization method in the presence of cochannel interference and multipath fading</h3><p class="muted">IEEE Systems Journal · 2021 · 优先</p>
-<p>同频未知多源、统计复多径、单天线站；当前最直接的场景近邻。</p><p><b>借鉴点：</b>同频未知多源、统计复多径、单天线站；当前最直接的场景近邻。</p>
-<details><summary>阅读范围与库内记录</summary><p>本轮4页正文、公式、图表与引用全部重读并逐页视觉核验；见Xia原文逐项复核.md</p><p>Zotero键：FRE2JXRP</p><p>本轮全文逐项复核已完成；等待信道来源补齐后决定新锚定实验</p></details>
-<p class="links"><a href="https://doi.org/10.1109/JSYST.2020.3005918" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="A" data-need="0">
-<div class="paperhead"><span class="tag">N03 · 一级</span><span class="state">在库且PDF存在</span></div>
+<p>同步接收信号；已知两个目标；无已知发射数据或反射地图。使用参考站频谱归一化，具体滤波及数值稳定细节未完全交代。</p><p><b>借鉴点：</b>推论：应先保持原评分、聚类、输出规则完成原条件核验，再明确适配四站及搜索尺度；目标1RMSE和两目标完整输出需分别记录。</p>
+<details><summary>阅读范围与库内记录</summary><p>4页全文及参考文献；表I与仿真参数图核。</p><p>Zotero键：FRE2JXRP</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/JSYST.2020.3005918" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N03 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Direct position determination of unknown signals in the presence of multipath propagation</h3><p class="muted">Sensors · 2018 · 优先</p>
-<p>未知多源，已知转发器几何，非负实路径增益；有投影ML与初始化。</p><p><b>借鉴点：</b>未知多源，已知转发器几何，非负实路径增益；有投影ML与初始化。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：复用上一轮§2/4公式审计；本轮未逐篇重读</p><p>Zotero键：FH72DMFX</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.3390/s18030892" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="A" data-need="0">
-<div class="paperhead"><span class="tag">N04 · 一级</span><span class="state">在库且PDF存在</span></div>
+<p>未知源波形；已知转发节点及接收阵列位置、固定路径结构；路径衰减采用非负实数而非任意复信道。</p><p><b>借鉴点：</b>推论：可学习归一化与防零响应退化，而不能把非负实增益或已知节点免费加入当前RF信道。</p>
+<details><summary>阅读范围与库内记录</summary><p>36页可见全文、附录A/B及参考文献；未读外置补充材料；结构完整性保留警告。</p><p>Zotero键：FH72DMFX</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.3390/s18030892" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N04 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Unified subspace fitting framework and its performance analysis for direct position determination in the presence of multipath propagation</h3><p class="muted">IEEE Access · 2019 · 优先</p>
-<p>已知转发器几何的统一子空间拟合；不是自由复多径模型。</p><p><b>借鉴点：</b>已知转发器几何的统一子空间拟合；不是自由复多径模型。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：复用上一轮§II/III全文核读；本轮未逐篇重读</p><p>Zotero键：69EEYHFF</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1109/ACCESS.2018.2889958" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="B" data-need="0">
-<div class="paperhead"><span class="tag">N05 · 二级</span><span class="state">在库且PDF存在</span></div>
+<p>波形及路径增益未知，节点几何/阵列响应/路径结构已知；假定噪声水平已知。</p><p><b>借鉴点：</b>推论：后续理论应明确归一化、干扰参数及有限样本条件；不能把局部投影公式或通用最优加权单独包装为新理论。</p>
+<details><summary>阅读范围与库内记录</summary><p>26页全文与附录A–E；关键模型页图核。</p><p>Zotero键：69EEYHFF</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/ACCESS.2018.2889958" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N05 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>A semi-blind method for localization of underwater acoustic sources</h3><p class="muted">IEEE Transactions on Signal Processing · 2022 · 次优先</p>
-<p>单源未知波形/复增益，水深决定路径时延；不能直接搬小矩阵公式。</p><p><b>借鉴点：</b>单源未知波形/复增益，水深决定路径时延；不能直接搬小矩阵公式。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：复用上一轮§II–IV核读；本轮未逐篇重读</p><p>Zotero键：CZPZD5NA</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TSP.2022.3173731" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="A" data-need="0">
-<div class="paperhead"><span class="tag">N06 · 一级</span><span class="state">在库且PDF存在</span></div>
+<p>已知声速、接收机位置、水深及平面边界；路径复增益与波形未知；并非未知环境、未知路径数。</p><p><b>借鉴点：</b>推论：优先寻找能在明确谱/几何条件下严格降低求解维数的结构；不能只改矩阵尺寸后宣称新理论。</p>
+<details><summary>阅读范围与库内记录</summary><p>17页全文、附录及参考文献；目标与命题页图核。</p><p>Zotero键：CZPZD5NA</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TSP.2022.3173731" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N06 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Direct localization and detection of multiple sources in multi-path environments</h3><p class="muted">14th International Conference on Information Fusion · 2011 · 优先</p>
-<p>多用户未知数据；已知成形脉冲和主要散射体位置；阵列时空处理。</p><p><b>借鉴点：</b>多用户未知数据；已知成形脉冲和主要散射体位置；阵列时空处理。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：本轮PDF第2页渲染核对；未全篇重读；本轮未逐篇重读</p><p>Zotero键：N9VGD3QG</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://ieeexplore.ieee.org/abstract/document/5977668" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="C" data-need="0">
-<div class="paperhead"><span class="tag">N07 · 三级</span><span class="state">在库且PDF存在</span></div>
+<p>未知数据符号；已知脉冲成形函数、阵列与主要反射体位置；过采样时空卷积模型。</p><p><b>借鉴点：</b>推论：需要先确认退化机制再设计约束；其要求至少两条有效路径的正则化不能直接用于包含无反射L0的当前协议。</p>
+<details><summary>阅读范围与库内记录</summary><p>8页全部以图像精读，公式/图/参考文献均覆盖。</p><p>Zotero键：N9VGD3QG</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://ieeexplore.ieee.org/abstract/document/5977668" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N07 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Decentralized indoor direct localization with multiple wi-fi access points</h3><p class="muted">IEEE Transactions on Wireless Communications · 2026 · 次优先</p>
-<p>单UE，ULA，已知导频得到CSI；NLOS参数作辅助量，EM/AP；同思想非同信息。</p><p><b>借鉴点：</b>单UE，ULA，已知导频得到CSI；NLOS参数作辅助量，EM/AP；同思想非同信息。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：本轮PDF第3–4页§II/III核读；本轮未逐篇重读</p><p>Zotero键：9IVDLEHJ</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TWC.2025.3601543" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="B" data-need="0">
-<div class="paperhead"><span class="tag">N08 · 二级</span><span class="state">在库且PDF存在</span></div>
+<p>由已知导频获取CSI，已知阵列响应；路径数作为输入；时延含AP时钟偏差，不能直接当绝对传播时间。</p><p><b>借鉴点：</b>推论：站内消元及位置共识可借鉴，但单天线没有其核心AoA信息，必须重新论证迁移后的可辨识性。</p>
+<details><summary>阅读范围与库内记录</summary><p>15页全文、附录与参考文献；算法1图核。</p><p>Zotero键：9IVDLEHJ</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TWC.2025.3601543" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="B" data-need="0">
+<div class="paperhead"><span class="tag">N08 · 二级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Multi-source localization and data association for time-difference of arrival measurements</h3><p class="muted">2024 32nd European Signal Processing Conference (EUSIPCO) · 2024 · 优先</p>
-<p>TDOA多峰关联；已有固定K LP可替代当前前端，不再主张前端独创。</p><p><b>借鉴点：</b>TDOA多峰关联；已有固定K LP可替代当前前端，不再主张前端独创。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：复用作者源码与共同输入配对；本轮未逐篇重读</p><p>Zotero键：6YQ38NQH</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.23919/EUSIPCO63174.2024.10715317" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="B" data-need="0">
-<div class="paperhead"><span class="tag">N09 · 二级</span><span class="state">在库且PDF存在</span></div>
+<p>输入是已经估计的TDOA集合，不是原始混叠IQ；站点位置和源数给定，未知TDOA归属。</p><p><b>借鉴点：</b>推论：可作为完整两步近邻，必须给它实际估计TDOA并计入前端成本；不能给真值TDOA与原始IQ方法混排。</p>
+<details><summary>阅读范围与库内记录</summary><p>5页全文与参考文献；OT目标及命题页图核。</p><p>Zotero键：6YQ38NQH</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.23919/EUSIPCO63174.2024.10715317" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="B" data-need="0">
+<div class="paperhead"><span class="tag">N09 · 二级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Disambiguation of TDOA estimation for multiple sources in reverberant environments</h3><p class="muted">IEEE Transactions on Audio, Speech, and Language Processing · 2008 · 优先</p>
-<p>多源混响TDOA歧义处理；几何关联思想近邻，不能因声学排除。</p><p><b>借鉴点：</b>多源混响TDOA歧义处理；几何关联思想近邻，不能因声学排除。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：复用已有全文记录；本轮未逐篇重读</p><p>Zotero键：A9X2TH3D</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TASL.2008.2004533" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="B" data-need="1">
-<div class="paperhead"><span class="tag">N10 · 二级</span><span class="state">在库但未找到可读PDF</span></div>
+<p>实信号、正传播系数、相关/白化条件及采样量化时延；使用互相关和自相关峰。</p><p><b>借鉴点：</b>推论：可借鉴必要条件软打分，而非把路径先后变成硬删峰；RF复相位下正相关峰与符号规则需重新推导。</p>
+<details><summary>阅读范围与库内记录</summary><p>11页全文与参考文献；栅格评分及必要非充分说明图核。</p><p>Zotero键：A9X2TH3D</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TASL.2008.2004533" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="B" data-need="0">
+<div class="paperhead"><span class="tag">N10 · 二级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>A graph theoretical framework for consistent time differences of arrival</h3><p class="muted">ITG-Fachtagung Sprachkommunikation, Paper 38 · 2010 · 次优先</p>
-<p>TDOA图一致性理论基础；不作为当前完整IQ方法性能参照。</p><p><b>借鉴点：</b>TDOA图一致性理论基础；不作为当前完整IQ方法性能参照。</p>
-<details><summary>阅读范围与库内记录</summary><p>本轮作者机构PDF首页/摘要确认出处；库内原Conference on Natural Language Processing元数据错误，本轮未改元数据</p><p>Zotero键：W7YUTHCP</p><p>请导入；已有公开作者稿链接</p></details>
-<p class="links"><a href="https://www.iss.uni-stuttgart.de/forschung/publikationen/kreissig_itg10.pdf" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://www.iss.uni-stuttgart.de/forschung/publikationen/kreissig_itg10.pdf" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="B" data-need="1">
-<div class="paperhead"><span class="tag">N11 · 二级</span><span class="state">当前快照未匹配入库</span></div>
+<p>输入是已提取的TDOA集合；已知麦克风位置用于后验几何残差，非直接IQ求解。</p><p><b>借鉴点：</b>回路零和只能筛除部分错配；反射形成的虚拟传感器仍可一致，需再核固定站几何。</p>
+<details><summary>阅读范围与库内记录</summary><p>4页正文、图例与算法已读；原PDF会议信息为ITG Sprachkommunikation2010，非NLP会议。</p><p>Zotero键：SIG2KUCM</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://www.iss.uni-stuttgart.de/forschung/publikationen/kreissig_itg10.pdf" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://www.iss.uni-stuttgart.de/forschung/publikationen/kreissig_itg10.pdf" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N11 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>LOS Signal Identification for Passive Multi-Target Localization in Multipath Environments</h3><p class="muted">IEEE Signal Processing Letters · 2023 · 次优先</p>
-<p>发射传感器照射被动目标，输入为多组距离；不是未知辐射源盲TDOA。</p><p><b>借鉴点：</b>发射传感器照射被动目标，输入为多组距离；不是未知辐射源盲TDOA。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：作者机构摘要核验；本轮未逐篇重读</p><p>Zotero键：未匹配</p><p>请下载导入正式全文；本轮未取得完整正文</p></details>
-<p class="links"><a href="https://doi.org/10.1109/lsp.2023.3328273" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="B" data-need="1">
-<div class="paperhead"><span class="tag">N12 · 二级</span><span class="state">当前快照未匹配入库</span></div>
+<p>已知探测波形匹配滤波后的LOS/NLOS距离集合；目标数K已知，距离误差尺度用于点恢复。</p><p><b>借鉴点：</b>保留测量来源及父集合身份，可防止把相近但不相容的交点凑成目标。</p>
+<details><summary>阅读范围与库内记录</summary><p>5页附件正文、算法与实验已读；参考书目未逐条外查。</p><p>Zotero键：JP6LX6R9</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/lsp.2023.3328273" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N12 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Robust LOS Identification for Passive Multi-Target Localization in Multipath Obstructed Environments</h3><p class="muted">IEEE Transactions on Signal and Information Processing over Networks · 2025 · 次优先</p>
-<p>上项遮挡/未知目标数扩展；保留关联机制近邻，不借其摘要证明同场景。</p><p><b>借鉴点：</b>上项遮挡/未知目标数扩展；保留关联机制近邻，不借其摘要证明同场景。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：正式元数据＋摘要线索；全文待核；本轮未逐篇重读</p><p>Zotero键：未匹配</p><p>请下载导入正式全文；本轮未取得完整正文</p></details>
-<p class="links"><a href="https://doi.org/10.1109/tsipn.2025.3600826" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="A" data-need="0">
-<div class="paperhead"><span class="tag">N13 · 一级</span><span class="state">在库且PDF存在</span></div>
+<p>主动站已知探测波形获得的距离集合；背景静态散射回波先标定去除；最大遮挡数L及噪声尺度。</p><p><b>借鉴点：</b>应分开候选可形成、关联正确和目标漏检；肘点与几何剪枝阈值需要当前噪声模型重新论证。</p>
+<details><summary>阅读范围与库内记录</summary><p>14页附件正文及附录A–C已读；关键算法和近似推导已图核后归档。</p><p>Zotero键：PCRNETRI</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/tsipn.2025.3600826" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="A" data-need="0">
+<div class="paperhead"><span class="tag">N13 · 一级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Multi-TDOA estimation and source direct position determination based on parallel factor analysis</h3><p class="muted">IEEE Internet of Things Journal · 2023 · 优先</p>
-<p>公式为一个s(t)，K为接收分段；多TDOA不是多个独立源。</p><p><b>借鉴点：</b>公式为一个s(t)，K为接收分段；多TDOA不是多个独立源。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：本轮PDF第3页§II核读＋既有记录；本轮未逐篇重读</p><p>Zotero键：JXFE2X2D</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1109/JIOT.2022.3228810" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="A" data-need="0">
-<div class="paperhead"><span class="tag">N14 · 一级</span><span class="state">在库且PDF存在</span></div>
+<p>分段记录、已知DFT结构及选定频率；未知波形和各站信道。多径定位依赖非直达分量跨站不形成同一位置一致性。</p><p><b>借鉴点：</b>推论：可用作单源机制核验；要处理两个独立波形需重新审查张量可分结构，而不能把两源视为同源反射。</p>
+<details><summary>阅读范围与库内记录</summary><p>11页全文与参考文献；多径模型及算法1图核。</p><p>Zotero键：JXFE2X2D</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/JIOT.2022.3228810" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N14 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>A direct position determination method based on subspace orthogonality in cross-spectra under multipath environments</h3><p class="muted">Sensors · 2022 · 优先</p>
-<p>单源跨谱/参考观测路线；不能把双源混合参考当作干净参考。</p><p><b>借鉴点：</b>单源跨谱/参考观测路线；不能把双源混合参考当作干净参考。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：本轮出版社正文＋既有全文记录；本轮未逐篇重读</p><p>Zotero键：XWJMZUKE</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.3390/s22197245" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="A" data-need="0">
-<div class="paperhead"><span class="tag">N15 · 一级</span><span class="state">在库且PDF存在</span></div>
+<p>参考信号被假设不含多径并据先验选取；路径数称可由AIC/MDL获得，后续按已知处理。</p><p><b>借鉴点：</b>推论：若所有站均有反射，参考谱不再代表源功率谱，原推导需修改；不能人为给其干净参考后混入同信息排名。</p>
+<details><summary>阅读范围与库内记录</summary><p>15页全文与参考文献；模型及先验页图核。</p><p>Zotero键：XWJMZUKE</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.3390/s22197245" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N15 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Direct position determination of wideband source over multipath environment: combining taylor expansion and subspace data fusion in the cross-spectrum domain</h3><p class="muted">Sensors · 2025 · 优先</p>
-<p>单源跨谱平滑/子空间/Taylor补偿；不是我们的双源IQ联合拟合。</p><p><b>借鉴点：</b>单源跨谱平滑/子空间/Taylor补偿；不是我们的双源IQ联合拟合。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：本轮出版社方法节＋既有全文记录；本轮未逐篇重读</p><p>Zotero键：CX82UIQA</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.3390/s25164967" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="A" data-need="0">
-<div class="paperhead"><span class="tag">N16 · 一级</span><span class="state">在库且PDF存在</span></div>
+<p>式(7)明确参考信号无多径；用该信号功率谱归一化任意站对跨谱，未知发射数据。</p><p><b>借鉴点：</b>推论：应区分离网误差改善与多径建模收益；可借鉴站对融合，但前端信息条件及子空间阶数需先核验。</p>
+<details><summary>阅读范围与库内记录</summary><p>16页全文与参考文献；子空间维数、Taylor定义关键页图核。</p><p>Zotero键：CX82UIQA</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.3390/s25164967" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N16 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>High accuracy source localization based on parallel factor analysis of TDOA in the cross correlation domain</h3><p class="muted">IEEE Transactions on Communications · 2025 · 优先</p>
-<p>PARAFAC跨相关TDOA延续线，须保留其参考/单源前提。</p><p><b>借鉴点：</b>PARAFAC跨相关TDOA延续线，须保留其参考/单源前提。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：复用已有全文记录；本轮引文追踪；本轮未逐篇重读</p><p>Zotero键：YNYYLNVP</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TCOMM.2025.3534582" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="C" data-need="0">
-<div class="paperhead"><span class="tag">N17 · 三级</span><span class="state">在库且PDF存在</span></div>
+<p>多径分支明确参考接收机无反射；使用跨谱实功率谱结构、频率选择与分段。</p><p><b>借鉴点：</b>推论：反射幅度0.25对应功率比0.0625，不能与当前反射总功率0.25混为一谈；近期论文的高精度仍须审查信息条件和信道难度。</p>
+<details><summary>阅读范围与库内记录</summary><p>15页全文与参考文献；多径假设及投影目标页图核。</p><p>Zotero键：YNYYLNVP</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TCOMM.2025.3534582" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N17 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>TDOA based direct positioning of Co-channel signals using cyclic cross-spectral functions</h3><p class="muted">IEEE Communications Letters · 2024 · 次优先</p>
-<p>同频但不同符号率/循环频率；当前两个同符号率BPSK不能默认可切片分开。</p><p><b>借鉴点：</b>同频但不同符号率/循环频率；当前两个同符号率BPSK不能默认可切片分开。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：本轮PDF第1–2页§II核读；本轮未逐篇重读</p><p>Zotero键：YWUTRNXK</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1109/LCOMM.2023.3347620" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="C" data-need="0">
-<div class="paperhead"><span class="tag">N18 · 三级</span><span class="state">在库且PDF存在</span></div>
+<p>未知数据，但需要可区分的循环平稳特征；由第一站循环谱估计源数及循环频率。</p><p><b>借鉴点：</b>【阅读推论】先分离统计特征再定位可避免强源干扰，但只有两源确有可分循环特征时可迁移，不能默认适用于同符号率未知波形。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文5页，方法及实验正文逐页核对。</p><p>Zotero键：YWUTRNXK</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/LCOMM.2023.3347620" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N18 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Maximum-likelihood direct position estimation in dense multipath</h3><p class="muted">IEEE Transactions on Vehicular Technology · 2013 · 次优先</p>
-<p>单目标已知发射脉冲，统计密集多径；非未知双源波形。</p><p><b>借鉴点：</b>单目标已知发射脉冲，统计密集多径；非未知双源波形。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：本轮PDF第2页§II核读；本轮未逐篇重读</p><p>Zotero键：IF3K344E</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TVT.2012.2236895" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="C" data-need="0">
-<div class="paperhead"><span class="tag">N19 · 三级</span><span class="state">在库且PDF存在</span></div>
+<p>发射脉冲已知，需PDP及噪声方差（可经验估计）；观测窗包括首达前噪声及衰减完的多径。</p><p><b>借鉴点：</b>【阅读推论】可借鉴保留完整时延似然而非仅峰值，以及统计化消除多径的思路；未知双源下必须重新说明协方差可辨识和PDP获取。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文11页含附录证明。</p><p>Zotero键：IF3K344E</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TVT.2012.2236895" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N19 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Efficient direct localization of OFDM emitters in multipath environment with mobile receivers</h3><p class="muted">IEEE Transactions on Vehicular Technology · 2022 · 次优先</p>
-<p>移动多天线接收，已知OFDM导频及角度/Doppler信息。</p><p><b>借鉴点：</b>移动多天线接收，已知OFDM导频及角度/Doppler信息。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：本轮模型/导频假设定向核读；本轮未逐篇重读</p><p>Zotero键：5KMCQ3Z7</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TVT.2021.3128612" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="C" data-need="0">
-<div class="paperhead"><span class="tag">N20 · 三级</span><span class="state">在库且PDF存在</span></div>
+<p>周期块导频已知；假定目标导频可从其他信号分离；站位/速度同步已知；子空间划分使用L+1路径维数。</p><p><b>借鉴点：</b>【阅读推论】定位不一定要恢复散射点：若能建立可估计的充分子空间，可以把干扰参数移出搜索；但本方案的可估计性由导频和跨时段路径变化提供。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文12页含CRLB附录。</p><p>Zotero键：5KMCQ3Z7</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TVT.2021.3128612" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N20 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Sparse bayesian inference-based direct off-grid position determination in multipath environments</h3><p class="muted">IEEE Wireless Communications Letters · 2021 · 次优先</p>
-<p>已知波形、混合天线阵列、单发射机；不是直接公平盲基线。</p><p><b>借鉴点：</b>已知波形、混合天线阵列、单发射机；不是直接公平盲基线。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：本轮§II明确前提核读；本轮未逐篇重读</p><p>Zotero键：2ENUNLHX</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1109/LWC.2021.3057502" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="B" data-need="0">
-<div class="paperhead"><span class="tag">N21 · 二级</span><span class="state">在库且PDF存在</span></div>
+<p>已知发射波形、阵列codebook/姿态；输入为跨频CFR；无预设信道统计，模型阶数由稀疏后验估计。</p><p><b>借鉴点：</b>【阅读推论】共享位置结构与站点局部反射结构分开建模值得借鉴；当前只有TDOA和未知波形，不能直接把CFR当作已获得输入。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文5页。</p><p>Zotero键：2ENUNLHX</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/LWC.2021.3057502" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N21 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Direct localization of emitters using widely spaced sensors in multipath environments</h3><p class="muted">2014 48th Asilomar Conference on Signals, Systems and Computers · 2014 · 次优先</p>
-<p>分布式多径稀疏直接定位；波形已知。</p><p><b>借鉴点：</b>分布式多径稀疏直接定位；波形已知。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：全文已提取，复用此前已知波形核验；本轮未逐篇重读</p><p>Zotero键：9MUIS57E</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1109/ACSSC.2014.7094537" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="B" data-need="0">
-<div class="paperhead"><span class="tag">N22 · 二级</span><span class="state">在库且PDF存在</span></div>
+<p>源数和各源波形已知、同步采样、噪声方差已知；路径数/增益/PDP未知，公开最大时延和搜索域。</p><p><b>借鉴点：</b>【阅读推论】主创新不能仅写联合位置+局部反射稀疏；需要指出未知双源下波形与路径耦合如何被处理。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文6页，视觉补全第4页优化式和权重。</p><p>Zotero键：9MUIS57E</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/ACSSC.2014.7094537" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N22 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>High precision TOA-based direct localization of multiple sources in multipath</h3><p class="muted"> · 2015 · 次优先</p>
-<p>已知多源波形；库中为arXiv版本，未另确认正式同题版本。</p><p><b>借鉴点：</b>已知多源波形；库中为arXiv版本，未另确认正式同题版本。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：复用§II全文核验；本轮未逐篇重读</p><p>Zotero键：2CI8A8RL</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.48550/arXiv.1505.03193" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="C" data-need="0">
-<div class="paperhead"><span class="tag">N23 · 三级</span><span class="state">在库且PDF存在</span></div>
+<p>各源已知波形及源数；已知噪声方差、搜索域、最大时延；理论先假设路径可辨识、真位置唯一几何一致、LOS站数已知，算法再估计LOS站数。</p><p><b>借鉴点：</b>【阅读推论】有针对性的理论是证明哪些结构能拒绝错误几何，而非泛称多径拟合更准；但其唯一性假设必须在我们的盲模型重新核验。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文17页含附录A/B；已核对预印本版本。</p><p>Zotero键：2CI8A8RL</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.48550/arXiv.1505.03193" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N23 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Direct localization of high-order QAM sources with multiple anchors: dual atomic norm minimization framework</h3><p class="muted">IEEE Transactions on Wireless Communications · 2026 · 次优先</p>
-<p>多QAM源、每站ULA、频率平坦反射、四阶统计；不能去掉阵列仍称原法。</p><p><b>借鉴点：</b>多QAM源、每站ULA、频率平坦反射、四阶统计；不能去掉阵列仍称原法。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：本轮PDF第3页§II核读；本轮未逐篇重读</p><p>Zotero键：YSMGTJV8</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TWC.2025.3599530" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="C" data-need="0">
-<div class="paperhead"><span class="tag">N24 · 三级</span><span class="state">在库且PDF存在</span></div>
+<p>调制识别已完成；独立非零四阶累积量源、ULA和大量快拍；DANM免于子空间阶数估计，但输出仍取K个峰。</p><p><b>借鉴点：</b>【阅读推论】可借鉴通过同源统计结构构造低维定位谱；若当前不允许调制统计先验，不能直接移植其保证。</p>
+<details><summary>阅读范围与库内记录</summary><p>主文17页逐页阅读；文中引用的supplement未取得。</p><p>Zotero键：YSMGTJV8</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TWC.2025.3599530" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N24 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Direct positioning of multiple targets based on electromagnetic vector sensors array</h3><p class="muted">Signal Processing · 2026 · 次优先</p>
-<p>电磁矢量传感器及张量结构，额外观测维数不属于单标量天线。</p><p><b>借鉴点：</b>电磁矢量传感器及张量结构，额外观测维数不属于单标量天线。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：本轮出版社摘要/方法介绍；全文本轮未读；本轮未逐篇重读</p><p>Zotero键：2MIXHX3L</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1016/j.sigpro.2025.110292" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="C" data-need="0">
-<div class="paperhead"><span class="tag">N25 · 三级</span><span class="state">在库且PDF存在</span></div>
+<p>使用两个电磁分量及站内ULA，源数已知；信号未知但完全极化，跨站LOS极化一致；模型明确不利用传播时延。</p><p><b>借鉴点：</b>【阅读推论】寻找额外可共享结构比自由增加路径有效，但不能把极化维度免费替换成当前不存在的数据维度。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文15页，含附录推导。</p><p>Zotero键：2MIXHX3L</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1016/j.sigpro.2025.110292" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N25 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Variational bayesian multi-source localization in complex multipath environments</h3><p class="muted">IEEE Transactions on Communications · 2026 · 次优先</p>
-<p>多源单天线，但输入是RSS/频谱地图；不等于原IQ时延盲定位。</p><p><b>借鉴点：</b>多源单天线，但输入是RSS/频谱地图；不等于原IQ时延盲定位。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：本轮PDF第3页§II核读；本轮未逐篇重读</p><p>Zotero键：4KD3RU7N</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TCOMM.2026.3679265" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="B" data-need="0">
-<div class="paperhead"><span class="tag">N26 · 二级</span><span class="state">在库且PDF存在</span></div>
+<p>多处RSS测量及其坐标；不先给反射地图，但流程重建反射边界并分组；部分对比固定已知源数。</p><p><b>借鉴点：</b>【阅读推论】环境分类必须服务定位而非只拟合RSS；当前无密集空间观测，不能照搬分类网络或反射面恢复。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文16页。</p><p>Zotero键：4KD3RU7N</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TCOMM.2026.3679265" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="B" data-need="0">
+<div class="paperhead"><span class="tag">N26 · 二级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Joint localization and source association sparse bayesian learning under multipath propagation</h3><p class="muted">IEEE Transactions on Aerospace and Electronic Systems · 2025 · 优先</p>
-<p>多径定位与关联SBL；其信息条件按旧全文记录使用，不仅按标题纳入。</p><p><b>借鉴点：</b>多径定位与关联SBL；其信息条件按旧全文记录使用，不仅按标题纳入。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：复用已核读记录，本轮未重新精读；本轮未逐篇重读</p><p>Zotero键：J2ZDTX8M</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TAES.2024.3454564" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="C" data-need="0">
-<div class="paperhead"><span class="tag">N27 · 三级</span><span class="state">在库且PDF存在</span></div>
+<p>阵列流形已知，粗源数上界Ku；未知DOA、路径数、关联及增益；实验40阵元，不能当四个单天线站。</p><p><b>借鉴点：</b>【阅读推论】可尝试以几何一致性替换角度字典中的自由关联，但须重新推导可辨识条件与成本，不能把阵列角度稀疏性当现成位置保证。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文16页。</p><p>Zotero键：J2ZDTX8M</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TAES.2024.3454564" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N27 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Direct position determination of multiple coherent sources using an iterative adaptive approach</h3><p class="muted">Signal Processing · 2019 · 次优先</p>
-<p>多相干源和阵列；相干源DOA并非未知独立波形的逐链路延迟副本。</p><p><b>借鉴点：</b>多相干源和阵列；相干源DOA并非未知独立波形的逐链路延迟副本。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：本轮出版社模型摘要＋既有记录；本轮未逐篇重读</p><p>Zotero键：PIX9ZHCJ</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1016/j.sigpro.2019.03.023" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="C" data-need="0">
-<div class="paperhead"><span class="tag">N28 · 三级</span><span class="state">在库且PDF存在</span></div>
+<p>未知波形、已知阵列及源数K；5个快拍单频，阵内角度是主要信息；弱多径并入噪声。</p><p><b>借鉴点：</b>【阅读推论】应单独验证评分与输出筛选，避免把无效试验排除后的RMSE当完整性能；不能凭IAA可处理相干源就推断多径稳健。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文11页。</p><p>Zotero键：PIX9ZHCJ</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1016/j.sigpro.2019.03.023" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N28 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>LOST-find: a spectral-space-time direct blind geolocalization algorithm</h3><p class="muted">2015 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP) · 2015 · 次优先</p>
-<p>阵列多源谱/时空DPD，式(1)为LOS；不直接处理本项目未知多径。</p><p><b>借鉴点：</b>阵列多源谱/时空DPD，式(1)为LOS；不直接处理本项目未知多径。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：本轮PDF第1页模型核读；本轮未逐篇重读</p><p>Zotero键：LH3D9LYE</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1109/ICASSP.2015.7178445" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="C" data-need="1">
-<div class="paperhead"><span class="tag">N29 · 三级</span><span class="state">当前快照未匹配入库</span></div>
+<p>阵列流形、源数/子空间维数；波形及频谱未知，LOS传播；原文两站各6天线。</p><p><b>借鉴点：</b>【阅读推论】消元不能抹掉位置敏感的跨频结构；可借鉴保留结构的原则，不宜直接引入不成立的离散可分谱先验。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文5页。</p><p>Zotero键：LH3D9LYE</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/ICASSP.2015.7178445" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N29 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Tensor-based passive localization of multiple wideband emitters using PARAFAC decomposition</h3><p class="muted">Digital Signal Processing · 2025 · 次优先</p>
-<p>多宽带源，ULA与滤波器组、DOA/TOA张量；全文尚未读。</p><p><b>借鉴点：</b>多宽带源，ULA与滤波器组、DOA/TOA张量；全文尚未读。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：本轮出版社模型节可见内容；本轮未逐篇重读</p><p>Zotero键：未匹配</p><p>请下载导入正式全文；本轮未取得完整正文</p></details>
-<p class="links"><a href="https://doi.org/10.1016/j.dsp.2025.105290" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="C" data-need="1">
-<div class="paperhead"><span class="tag">N30 · 三级</span><span class="state">在库但未找到可读PDF</span></div>
+<p>每站ULA、已知阵列流形，给定源数Q；子带窄带近似及三因子可分结构。</p><p><b>借鉴点：</b>自动站内配对不等于跨站源标签已统一；将未知多径加成张量维前，应先检查因子可分性。</p>
+<details><summary>阅读范围与库内记录</summary><p>10页附件正文、算法及实验已读；参考书目未逐条外查。</p><p>Zotero键：ZG9NN3X4</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1016/j.dsp.2025.105290" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N30 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Direct position determination of coherently distributed sources based on canonical polyadic decomposition</h3><p class="muted">Digital Signal Processing · 2025 · 次优先</p>
-<p>JATD/CPD相干分布源，结论明确单CD源；不等于双源统计多径。</p><p><b>借鉴点：</b>JATD/CPD相干分布源，结论明确单CD源；不等于双源统计多径。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：本轮出版社方法/结论可见内容；本轮未逐篇重读</p><p>Zotero键：JZ9FP5WE</p><p>请下载导入正式全文；本轮未取得完整正文</p></details>
-<p class="links"><a href="https://doi.org/10.1016/j.dsp.2025.105353" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="B" data-need="1">
-<div class="paperhead"><span class="tag">N31 · 二级</span><span class="state">当前快照未匹配入库</span></div>
+<p>已校准阵列、Gaussian角分布模型；忽略多径时延扩展，仅保留名义传播时延。</p><p><b>借鉴点：</b>先核张量每个维度的物理含义；频点秩和单源CD理论不能当双源未知路径数保证。</p>
+<details><summary>阅读范围与库内记录</summary><p>11页附件正文、命题证明及附录A已读；参考文献未逐条外查。</p><p>Zotero键：W4Z8D34S</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1016/j.dsp.2025.105353" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N31 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>A Pseudo Maximum likelihood approach to position estimation in dynamic multipath environments</h3><p class="muted">Signal Processing · 2021 · 次优先</p>
-<p>移动多天线接收机自定位，符号已知；用估计多径构造投影的思路相关。</p><p><b>借鉴点：</b>移动多天线接收机自定位，符号已知；用估计多径构造投影的思路相关。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：作者稿PDF第9页式(6)及脚注5核读；本轮未逐篇重读</p><p>Zotero键：未匹配</p><p>请下载导入正式全文；本轮未取得完整正文</p></details>
-<p class="links"><a href="https://doi.org/10.1016/j.sigpro.2020.107907" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="C" data-need="1">
-<div class="paperhead"><span class="tag">N32 · 三级</span><span class="state">当前快照未匹配入库</span></div>
+<p>锚点身份/位置及包内训练符号已知；阵列朝向对齐全局坐标，固定Dmax；两锚点情形限定粗定位区域。</p><p><b>借鉴点：</b>位置假设可参与关联；同时必须保留其训练符号、阵列与跨包积累的信息成本。</p>
+<details><summary>阅读范围与库内记录</summary><p>11页正文、算法、实验及附录已读。</p><p>Zotero键：PABX9RC2</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1016/j.sigpro.2020.107907" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N32 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Direct Location Estimation for MIMO Systems in Multipath Environments</h3><p class="muted">IEEE GLOBECOM 2008 - 2008 IEEE Global Telecommunications Conference · 2008 · 次优先</p>
-<p>收发MIMO、共同散射体、AOA/AOD与移动信息；非本场景直接对手。</p><p><b>借鉴点：</b>收发MIMO、共同散射体、AOA/AOD与移动信息；非本场景直接对手。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：作者PDF模型/ML节定向核读；本轮未逐篇重读</p><p>Zotero键：未匹配</p><p>请下载导入正式全文；本轮未取得完整正文</p></details>
-<p class="links"><a href="https://doi.org/10.1109/glocom.2008.ecp.646" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="C" data-need="1">
-<div class="paperhead"><span class="tag">N33 · 三级</span><span class="state">当前快照未匹配入库</span></div>
+<p>已知训练矩阵X、收发阵列流形；固定散射数，短时直线运动；NLOS增益采用高斯统计模型。</p><p><b>借鉴点：</b>必须分开实际估计器误差与CRB预测；NLOS收益取决于新增信息是否超过新增未知量。</p>
+<details><summary>阅读范围与库内记录</summary><p>5页正文、公式与数值例已读；外引导数未另行全文复核。</p><p>Zotero键：PKEKQ2X9</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/glocom.2008.ecp.646" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N33 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Target localization method via ANM-ADMM adapted to fluctuant multipath environment without prior knowledge</h3><p class="muted">Signal Processing · 2026 · 次优先</p>
-<p>低空雷达阵列相干DOA、未知地形反射；不能因为标题无先验就认定同问题。</p><p><b>借鉴点：</b>低空雷达阵列相干DOA、未知地形反射；不能因为标题无先验就认定同问题。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：本轮出版社摘要；本轮未逐篇重读</p><p>Zotero键：未匹配</p><p>请下载导入正式全文；本轮未取得完整正文</p></details>
-<p class="links"><a href="https://doi.org/10.1016/j.sigpro.2026.110527" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="C" data-need="1">
-<div class="paperhead"><span class="tag">N34 · 三级</span><span class="state">当前快照未匹配入库</span></div>
+<p>互质阵列流形、窄带共同包络；已测距离Rd与雷达高度用于测高。无需地形参数不等于无其他先验。</p><p><b>借鉴点：</b>求解器加速与物理模型识别分开；阵列补孔不是凭空增加独立信息。</p>
+<details><summary>阅读范围与库内记录</summary><p>13页正文、实验及附录A已读；关键秩推导已渲染核对，相关疑点未独立补证。</p><p>Zotero键：IAKPT7LM</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1016/j.sigpro.2026.110527" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N34 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Direct Position Determination with Distributed Sensor Arrays Under Multi-path Environment: Matrix Reconstruction and Subspace Data Fusion</h3><p class="muted">2024 4th International Symposium on Computer Technology and Information Science (ISCTIS) · 2024 · 次优先</p>
-<p>分布式阵列多径矩阵重构；只列补充，未作公式不重合结论。</p><p><b>借鉴点：</b>分布式阵列多径矩阵重构；只列补充，未作公式不重合结论。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：元数据＋后续论文引用；全文待核；本轮未逐篇重读</p><p>Zotero键：未匹配</p><p>请下载导入正式全文；本轮未取得完整正文</p></details>
-<p class="links"><a href="https://doi.org/10.1109/isctis63324.2024.10699283" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="C" data-need="1">
-<div class="paperhead"><span class="tag">N35 · 三级</span><span class="state">当前快照未匹配入库</span></div>
+<p>每源观测已隔离，已知阵列流形及各站反射数Vl；非当前同频同时混叠。</p><p><b>借鉴点：</b>恢复子空间需检查抵消条件；“多源”标题或引言不能替代观测是否已分源的核对。</p>
+<details><summary>阅读范围与库内记录</summary><p>6页附件正文及实验已读；符号字体抽取失真，模型与方法页改为渲染核对。</p><p>Zotero键：2PS3K7UP</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/isctis63324.2024.10699283" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N35 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Sparsity-aware multi-source RSS localization</h3><p class="muted">Signal Processing · 2014 · 次优先</p>
-<p>RSS及跨相关指纹路线；不等价无环境指纹的IQ联合拟合。</p><p><b>借鉴点：</b>RSS及跨相关指纹路线；不等价无环境指纹的IQ联合拟合。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：本轮出版社摘要/亮点；本轮未逐篇重读</p><p>Zotero键：未匹配</p><p>请下载导入正式全文；本轮未取得完整正文</p></details>
-<p class="links"><a href="https://doi.org/10.1016/j.sigpro.2014.02.010" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="D" data-need="0">
-<div class="paperhead"><span class="tag">N36 · 四级</span><span class="state">在库且PDF存在</span></div>
+<p>离线训练或解析生成环境指纹；时间域版已知共同自相关，频域版可未知源谱但仍需信道指纹。</p><p><b>借鉴点：</b>互相关能保留RSS遗漏的信息，但须说明位置到观测的约束来自物理几何还是预先测得的环境图。</p>
+<details><summary>阅读范围与库内记录</summary><p>18页附件正文、方法及实验已读；参考文献未逐条外查。</p><p>Zotero键：GA5XWQFX</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1016/j.sigpro.2014.02.010" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="D" data-need="0">
+<div class="paperhead"><span class="tag">N36 · 四级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Expectation-maximization algorithm for direct position determination</h3><p class="muted">Signal Processing · 2017 · 次优先</p>
-<p>单源LOS时延DPD，距离潜变量EM；不应把名称EM自动视为多径分离EM。</p><p><b>借鉴点：</b>单源LOS时延DPD，距离潜变量EM；不应把名称EM自动视为多径分离EM。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：本轮PDF第1–2页模型与方法概述；本轮未逐篇重读</p><p>Zotero键：A2LTFEUM</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1016/j.sigpro.2016.10.015" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="D" data-need="1">
-<div class="paperhead"><span class="tag">N37 · 四级</span><span class="state">当前快照未匹配入库</span></div>
+<p>波形s在匹配运算中已知；未知位置、发射时刻及各站复增益。</p><p><b>借鉴点：</b>可借鉴几何变量与 nuisance 参数分解，但必须重推未知波形模型；不能把换成EM本身作为新贡献。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文8页，含附录；关键公式视觉核对。</p><p>Zotero键：A2LTFEUM</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1016/j.sigpro.2016.10.015" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="D" data-need="0">
+<div class="paperhead"><span class="tag">N37 · 四级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Parameter estimation of superimposed signals using the EM algorithm</h3><p class="muted">IEEE Transactions on Acoustics, Speech, and Signal Processing · 1988 · 优先</p>
-<p>叠加分量分配与逐分量估计已有EM基础；不是新思想。</p><p><b>借鉴点：</b>叠加分量分配与逐分量估计已有EM基础；不是新思想。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：作者PDF第1–2页§I–III定向核读；本轮未逐篇重读</p><p>Zotero键：未匹配</p><p>请导入；已有公开作者稿链接</p></details>
-<p class="links"><a href="https://doi.org/10.1109/29.1552" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://www.eng.tau.ac.il/~meir/articles/3%20Parameter%20Estimation%20of%20Superimposed%20Signals%20Using%20the%20EM.pdf" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="D" data-need="1">
-<div class="paperhead"><span class="tag">N38 · 四级</span><span class="state">当前快照未匹配入库</span></div>
+<p>确定性示例的发射波形已知，分量数固定；随机源示例使用独立平稳高斯源及功率谱模型。不能把其未知参数等同于任意未知数据波形。</p><p><b>借鉴点：</b>【读者推论】可借鉴合法辅助数据的设计来组织求解；迁移时仍须处理两未知波形的共享耦合，并核验更新是否对应同一个目标。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文13页，正文、实验、附录A及参考文献已核对；关键EM公式和三路径实验图已视读。</p><p>Zotero键：ZU43MUUR</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/29.1552" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://www.eng.tau.ac.il/~meir/articles/3%20Parameter%20Estimation%20of%20Superimposed%20Signals%20Using%20the%20EM.pdf" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="paper" data-grade="D" data-need="0">
+<div class="paperhead"><span class="tag">N38 · 四级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Space-alternating generalized expectation-maximization algorithm</h3><p class="muted">IEEE Transactions on Signal Processing · 1994 · 优先</p>
-<p>SAGE小隐藏空间顺序更新；完整推导本轮未读，不声称复现。</p><p><b>借鉴点：</b>SAGE小隐藏空间顺序更新；完整推导本轮未读，不声称复现。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：作者页面/摘要；本地下载证书失败；本轮未逐篇重读；本轮查到作者原文及勘误页https://web.eecs.umich.edu/~hero/det_est.html，后续证明核验须同时读勘误</p><p>Zotero键：未匹配</p><p>请导入；已有公开作者稿链接</p></details>
-<p class="links"><a href="https://doi.org/10.1109/78.324732" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://web.eecs.umich.edu/~hero/Preprints/Space-Alternating.pdf" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="B" data-need="0">
-<div class="paperhead"><span class="tag">N39 · 二级</span><span class="state">在库且PDF存在</span></div>
+<p>每个参数块必须存在合格的隐数据空间；线性实例的观测矩阵已知。收敛速率比较另有满秩、局部光滑性及惩罚结构条件。</p><p><b>借鉴点：</b>【读者推论】可以用辅助函数证明替代逐块更新的正确性，但仅把其他分量扣除后更新当前分量，尚不足以宣称满足SAGE条件。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文14页及附录A–C已读，关键更新视读；2026-11-06已读取作者密歇根大学网页该文完整勘误，不将其1995替代论文当作已全文精读。</p><p>Zotero键：S2IBAQS8</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/78.324732" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://web.eecs.umich.edu/~hero/Preprints/Space-Alternating.pdf" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="paper" data-grade="B" data-need="0">
+<div class="paperhead"><span class="tag">N39 · 二级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Model-based expectation-maximization source separation and localization</h3><p class="muted">IEEE Transactions on Audio, Speech, and Language Processing · 2010 · 次优先</p>
-<p>MESSL依赖时频点单源主导；当前完全重叠BPSK不具有已验证的W-disjoint条件。</p><p><b>借鉴点：</b>MESSL依赖时频点单源主导；当前完全重叠BPSK不具有已验证的W-disjoint条件。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：作者稿引言定向核读；本轮未逐篇重读</p><p>Zotero键：JUHLJTTN</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TASL.2009.2029711" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="D" data-need="0">
-<div class="paperhead"><span class="tag">N40 · 四级</span><span class="state">在库且PDF存在</span></div>
+<p>已知源数；每个时频单元至多一个源占优(W-disjoint)；部分版本使用头相关ILD先验。</p><p><b>借鉴点：</b>可借鉴延迟保留关联不确定性；不能默认通信波形也满足单源时频占优，更不能用分离SDR代替定位精度。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文13页，含实验与参考文献；关键模型视觉核对。</p><p>Zotero键：JUHLJTTN</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TASL.2009.2029711" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="D" data-need="0">
+<div class="paperhead"><span class="tag">N40 · 四级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Identifiability conditions for compressive multichannel blind deconvolution</h3><p class="muted">IEEE Transactions on Signal Processing · 2020 · 优先</p>
-<p>压缩多通道盲解卷积可辨识性；不是双源全局位置唯一性的现成定理。</p><p><b>借鉴点：</b>压缩多通道盲解卷积可辨识性；不是双源全局位置唯一性的现成定理。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：复用已有全文记录；本轮未逐篇重读</p><p>Zotero键：ZIR6J5Y9</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TSP.2020.3011804" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="B" data-need="1">
-<div class="paperhead"><span class="tag">N41 · 二级</span><span class="state">当前快照未匹配入库</span></div>
+<p>稀疏度上界L、支持范围、互素条件、采样集full-spark、所选频点源谱不为零；恢复完整源还需有限长度。</p><p><b>借鉴点：</b>借鉴等价解类与交叉关系分析；双源混合时交叉卷积会出现交叉项，不能直接套用单输入定理。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文16页，含证明；定理页视觉核对。</p><p>Zotero键：ZIR6J5Y9</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TSP.2020.3011804" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="B" data-need="0">
+<div class="paperhead"><span class="tag">N41 · 二级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Dual-Blind Deconvolution for Overlaid Radar-Communications Systems</h3><p class="muted">IEEE Journal on Selected Areas in Information Theory · 2023 · 优先</p>
-<p>两个未知波形＋未知稀疏信道已有研究，但要求已知低维随机表示基；不直接等价。</p><p><b>借鉴点：</b>两个未知波形＋未知稀疏信道已有研究，但要求已知低维随机表示基；不直接等价。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：作者稿PDF第5页§II及式(20)–(22)核读；本轮未逐篇重读</p><p>Zotero键：未匹配</p><p>请下载导入正式全文；本轮未取得完整正文</p></details>
-<p class="links"><a href="https://doi.org/10.1109/jsait.2023.3287823" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="B" data-need="1">
-<div class="paperhead"><span class="tag">N42 · 二级</span><span class="state">当前快照未匹配入库</span></div>
+<p>雷达波形与通信消息分别位于已知低维随机子空间B、Dp，维数J远小于观测长度；定理还要求随机性、非相干性和相关分离条件。未知波形系数不等于未知整个波形空间。</p><p><b>借鉴点：</b>【读者推论】应寻找来自空间几何的可区分算子结构，而不是直接套原子范数；把两个源都置于相同全维未知空间后，原证明不能保留。</p>
+<details><summary>阅读范围与库内记录</summary><p>当前正式论文附件19页全文已读；未获取独立Supplementary Material，不将其扩展证明计入本轮精读。</p><p>Zotero键：SBFLP6QJ</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/jsait.2023.3287823" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="B" data-need="0">
+<div class="paperhead"><span class="tag">N42 · 二级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Multi-antenna dual-blind deconvolution for joint radar-communications via SoMAN minimization</h3><p class="muted">Signal Processing · 2024 · 次优先</p>
-<p>上一项多天线SoMAN扩展；已知T/D表示矩阵，不可默认为当前公共带限先验。</p><p><b>借鉴点：</b>上一项多天线SoMAN扩展；已知T/D表示矩阵，不可默认为当前公共带限先验。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：作者稿PDF第7页§2.4核读；本轮未逐篇重读</p><p>Zotero键：未匹配</p><p>请下载导入正式全文；本轮未取得完整正文</p></details>
-<p class="links"><a href="https://doi.org/10.1016/j.sigpro.2024.109484" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="D" data-need="1">
-<div class="paperhead"><span class="tag">N43 · 四级</span><span class="state">当前快照未匹配入库</span></div>
+<p>已知雷达/通信各自的低维基；理论另需独立、各向同性、不相干及最小间隔等条件。</p><p><b>借鉴点：</b>先回答源特定基从何而来，再比较求解器；SDP复杂度与辨识条件应分别讨论。</p>
+<details><summary>阅读范围与库内记录</summary><p>16页附件的正文、算法、主要证明链和实验已读；外引补充证明未另行取得。</p><p>Zotero键：U4EAYTCM</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1016/j.sigpro.2024.109484" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="B" data-need="0">
+<div class="paperhead"><span class="tag">N43 · 二级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Timely and Painless Breakups: Off-the-Grid Blind Message Recovery and Users’ Demixing</h3><p class="muted">IEEE Transactions on Information Theory · 2025 · 次优先</p>
-<p>离网盲消息恢复/用户解混；方法家族近邻，未确认其基结构能否满足当前模型。</p><p><b>借鉴点：</b>离网盲消息恢复/用户解混；方法家族近邻，未确认其基结构能否满足当前模型。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：本轮元数据＋作者摘要；全文待核；本轮未逐篇重读</p><p>Zotero键：未匹配</p><p>请下载导入正式全文；本轮未取得完整正文</p></details>
-<p class="links"><a href="https://doi.org/10.1109/tit.2025.3566885" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="B" data-need="1">
-<div class="paperhead"><span class="tag">N44 · 二级</span><span class="state">当前快照未匹配入库</span></div>
+<p>每用户已知码本Bi、消息维数；理论需独立随机码本、不相干性、随机单位球消息及用户内最小间隔。</p><p><b>借鉴点：</b>同用户共享波形结构值得保留；任何同信息比较须说明码本、消息维数与间隔条件是否可获得。</p>
+<details><summary>阅读范围与库内记录</summary><p>32页附件正文、算法、实验及附录证明链已读；未逐条复证外引引理或全部常数。</p><p>Zotero键：HFAFNXDE</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/tit.2025.3566885" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="B" data-need="0">
+<div class="paperhead"><span class="tag">N44 · 二级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Fast and provable simultaneous blind super-Resolution and demixing for point source signals via scaled gradient descent</h3><p class="muted">Digital Signal Processing · 2026 · 次优先</p>
-<p>低维PSF/点源、低秩盲超分辨解混；不把其收敛定理迁移成定位保证。</p><p><b>借鉴点：</b>低维PSF/点源、低秩盲超分辨解混；不把其收敛定理迁移成定位保证。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：本轮正式元数据＋作者摘要；本轮未逐篇重读</p><p>Zotero键：未匹配</p><p>请下载导入正式全文；本轮未取得完整正文</p></details>
-<p class="links"><a href="https://doi.org/10.1016/j.dsp.2026.106007" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="D" data-need="1">
-<div class="paperhead"><span class="tag">N45 · 四级</span><span class="state">当前快照未匹配入库</span></div>
+<p>每组PSF属于已知低维基Bk；K与秩r输入；理论要求随机不相干基及Hankel因子不相干。</p><p><b>借鉴点：</b>预条件改善优化速度已有近邻；新增贡献需落在物理约束、信息条件或可验证理论上。</p>
+<details><summary>阅读范围与库内记录</summary><p>15页附件的完整正文与主要定理证明链已读；附录A后半未逐式复证，参考文献未外查。</p><p>Zotero键：JH82TDRJ</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1016/j.dsp.2026.106007" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="D" data-need="0">
+<div class="paperhead"><span class="tag">N45 · 四级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>On the identifiability of multipath parameters</h3><p class="muted">Signal Processing · 1999 · 次优先</p>
-<p>单通道二阶统计多径参数可辨识；仅限条件提醒，不是当前双源定位不可辨识证明。</p><p><b>借鉴点：</b>单通道二阶统计多径参数可辨识；仅限条件提醒，不是当前双源定位不可辨识证明。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：作者/出版社摘要及作者论文章节；本轮未逐篇重读</p><p>Zotero键：未匹配</p><p>请下载导入正式全文；本轮未取得完整正文</p></details>
-<p class="links"><a href="https://doi.org/10.1016/s0165-1684(99)00027-4" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="C" data-need="1">
-<div class="paperhead"><span class="tag">N46 · 三级</span><span class="state">当前快照未匹配入库</span></div>
+<p>非整数时延的频域PSD模型要求带限；可辨识分析另用已知阶数稳定AR及|g|&lt;1等条件。</p><p><b>借鉴点：</b>优化残差小不能证明物理参数唯一；其|g|&lt;1消歧条件不能移植为当前已批准先验。</p>
+<details><summary>阅读范围与库内记录</summary><p>4页正文与推导已读；老PDF关键模型与消歧页另作渲染核对。</p><p>Zotero键：5C42F2VX</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1016/s0165-1684(99)00027-4" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N46 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Alternating minimisation approach for direct position determination in passive localisation</h3><p class="muted">IET Radar, Sonar &amp;amp; Navigation · 2023 · 次优先</p>
-<p>每记录一源的l0=1分配约束；不能直接代替同时混叠双源的联合拟合。</p><p><b>借鉴点：</b>每记录一源的l0=1分配约束；不能直接代替同时混叠双源的联合拟合。</p>
-<details><summary>阅读范围与库内记录</summary><p>历史2026-10-30记录：本轮出版社式(8)–(9)；本轮未逐篇重读</p><p>Zotero键：未匹配</p><p>请下载导入正式全文；本轮未取得完整正文</p></details>
-<p class="links"><a href="https://doi.org/10.1049/rsn2.12408" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="A" data-need="0">
-<div class="paperhead"><span class="tag">N47 · 一级</span><span class="state">在库且PDF存在</span></div>
+<p>已知平台轨迹、天线间距，频率可估；忽略脉冲重叠，源数N作为输入，模型无离散多径。</p><p><b>借鉴点：</b>避免把交替关联本身当新意；必须检验关联错误能否纠正及初始化影响。</p>
+<details><summary>阅读范围与库内记录</summary><p>8页附件正文、方法、讨论及实验已读。</p><p>Zotero键：LC47HKJY</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1049/rsn2.12408" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N47 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>A Spatial Sparse Method for Mobile Localization of Multiple Co-Channel Transmitters</h3><p class="muted">IEEE Wireless Communications Letters · 2020 · 优先</p>
-<p>多同频未知源、同步分布站，但LOS平坦信道和移动跟踪；不能回填成Xia2021静态参数</p><p><b>借鉴点：</b>对照Xia随机空间谱、聚类与重采样的来源和变化</p>
-<details><summary>阅读范围与库内记录</summary><p>本轮Zotero全文文本核读；公式图像待逐项核验</p><p>Zotero键：BY64BDQW</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1109/LWC.2020.2992078" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="B" data-need="0">
-<div class="paperhead"><span class="tag">N48 · 二级</span><span class="state">在库且PDF存在</span></div>
+<p>站时频同步、已知源数和运动模型；无已知波形要求；粒子先验范围及阈值公开设定。</p><p><b>借鉴点：</b>应区分相关评分、阈值筛选、聚类与时序先验各自作用；多源完整输出评价需另行检查。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文4页；评分与模型视觉核对。</p><p>Zotero键：BY64BDQW</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/LWC.2020.2992078" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="B" data-need="0">
+<div class="paperhead"><span class="tag">N48 · 二级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Delay-locking: Unraveling Multiple Unknown Signals in Unknown Multipath</h3><p class="muted">IEEE SPAWC · 2020 · 优先</p>
-<p>共址多天线、不同用户相对路径延迟结构、源白性等；目标是信号恢复，不直接保证分布站位置可辨识</p><p><b>借鉴点：</b>用延迟对齐后的公共子空间分离用户，而非直接套CCA到当前IQ</p>
-<details><summary>阅读范围与库内记录</summary><p>本轮IEEE作者介绍、NSF作者稿摘要/引言；库内全文待系统重读</p><p>Zotero键：8CB89C6H</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1109/SPAWC48557.2020.9154338" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://par.nsf.gov/servlets/purl/10303809" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="D" data-need="1">
-<div class="paperhead"><span class="tag">N49 · 四级</span><span class="state">当前快照未匹配入库</span></div>
+<p>已知源数/序列长度；整数采样延迟，各用户相对延迟不同、信号时间不相关及矩阵满列秩；实际对齐讨论引入用户前导。</p><p><b>借鉴点：</b>候选方向是共同子空间证据，但须先证明分布式、连续带限双源是否保留可用视图及满秩条件。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文5页；定理、算法及前导限制视觉核对。</p><p>Zotero键：8CB89C6H</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/SPAWC48557.2020.9154338" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://par.nsf.gov/servlets/purl/10303809" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="paper" data-grade="D" data-need="0">
+<div class="paperhead"><span class="tag">N49 · 四级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Sparse Variational Bayesian SAGE Algorithm With Application to the Estimation of Multipath Wireless Channels</h3><p class="muted">IEEE Transactions on Signal Processing · 2011 · 优先</p>
-<p>无线信道探测/多维参数估计，不能等同未知双源盲定位</p><p><b>借鉴点：</b>联合阶数/参数推断、逐分量稳定性及剪枝条件的理论来源</p>
-<details><summary>阅读范围与库内记录</summary><p>本轮作者机构书目、摘要与作者稿引言；全文推导待读</p><p>Zotero键：未匹配</p><p>请导入；已有公开作者稿链接</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TSP.2011.2140106" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://vbn.aau.dk/ws/files/61155739/Sparse_Variational_Bayesian_SAGE_Algorithm.pdf" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="D" data-need="1">
-<div class="paperhead"><span class="tag">N50 · 四级</span><span class="state">当前快照未匹配入库</span></div>
+<p>已知探测序列与接收噪声协方差；路径数未知，路径参数连续；变分处理中使用因子化和点估计近似。</p><p><b>借鉴点：</b>【读者推论】可借鉴从增益后验而非任意残差阈值删路径；但未知双源波形导致的估计相关性和重复搜索效应需重新核验。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文15页含内部附录已读；固定点、SNR阈值与近似条件已视读。</p><p>Zotero键：KIV5RX6H</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TSP.2011.2140106" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://vbn.aau.dk/ws/files/61155739/Sparse_Variational_Bayesian_SAGE_Algorithm.pdf" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="paper" data-grade="D" data-need="0">
+<div class="paperhead"><span class="tag">N50 · 四级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Joint Detection and Super-Resolution Estimation of Multipath Signal Parameters Using Incremental Automatic Relevance Determination</h3><p class="muted">arXiv预印本；未核到正式同题版本 · 2015 · 优先</p>
-<p>参数化叠加信号/多径估计；搜索后剪枝分布改变，不是当前完整盲DPD定理</p><p><b>借鉴点：</b>极值搜索引发误报膨胀；检验自适应增径统计解释的必要近邻</p>
-<details><summary>阅读范围与库内记录</summary><p>本轮arXiv原摘要与版本记录；仅声明投稿TSP，不冒充已发表</p><p>Zotero键：未匹配</p><p>请导入；已有公开作者稿链接</p></details>
-<p class="links"><a href="https://doi.org/10.48550/arXiv.1503.01898" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://arxiv.org/pdf/1503.01898" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="D" data-need="1">
-<div class="paperhead"><span class="tag">N51 · 四级</span><span class="state">当前快照未匹配入库</span></div>
+<p>已知信号原子s(θ)及噪声统计；A1近似增益后验独立，A2保留相关性。零假设极值推导使用N个独立候选，不能直接等同于任意过采样相关网格。</p><p><b>借鉴点：</b>【读者推论】风险线应先建立实际搜索场的统计结构，再谈阈值；未知波形和源—路径重新归属会进一步破坏独立候选假设。</p>
+<details><summary>阅读范围与库内记录</summary><p>当前26页预印本全文已读；正式发表版本未在本条确认，极值分布关键页视读。</p><p>Zotero键：S4CJ6BBV</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.48550/arXiv.1503.01898" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://arxiv.org/pdf/1503.01898" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="paper" data-grade="D" data-need="0">
+<div class="paperhead"><span class="tag">N51 · 四级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Joint estimation of multipath signal parameters using variational SBL-inspired SAGE algorithm</h3><p class="muted">Signal Processing 239,110264 · 2026 · 优先</p>
-<p>SIMO sounding、探测序列自相关、Bernoulli-Gaussian稀疏先验；不能默认为未知双源波形</p><p><b>借鉴点：</b>阶数与参数联合估计、增益/非线性参数协同更新与低成本时延计算</p>
-<details><summary>阅读范围与库内记录</summary><p>本轮出版社摘要、引言与亮点；全文后续节未获完整核读</p><p>Zotero键：未匹配</p><p>请下载导入正式全文；本轮未取得完整正文</p></details>
-<p class="links"><a href="https://doi.org/10.1016/j.sigpro.2025.110264" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="D" data-need="1">
-<div class="paperhead"><span class="tag">N52 · 四级</span><span class="state">当前快照未匹配入库</span></div>
+<p>CAZAC/ZC/m序列等已知；白高斯噪声；相关初始化利用序列自相关，并在该简化方案中采用采样间隔量化/路径可分辨设定。</p><p><b>借鉴点：</b>【读者推论】优先检查可消元参数与几何参数的耦合，而非仅增加迭代；其已知序列初始化不能原样迁移到任意未知双源。</p>
+<details><summary>阅读范围与库内记录</summary><p>正式期刊全文11页及内部附录已读；存在性筛选和部分联合更新公式视读。</p><p>Zotero键：2JC22TD7</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1016/j.sigpro.2025.110264" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="D" data-need="0">
+<div class="paperhead"><span class="tag">N52 · 四级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>A Reliable Channel Estimation Scheme Using Scattered Pilot Pattern for IEEE 802.22-Based Mobile Communication System</h3><p class="muted">IEEE Transactions on Cognitive Communications and Networking 5,935–948 · 2019 · 优先</p>
-<p>IEEE802.22移动通信信道估计，已知导频；此处只追Xia表I来源，不作盲定位基线</p><p><b>借鉴点：</b>优先核对多径表的含义、相位/衰落生成及强度归一化</p>
-<details><summary>阅读范围与库内记录</summary><p>Xia原文参考[15]与IEEE Communications Society目录核验题名/出处；全文待取</p><p>Zotero键：未匹配</p><p>请下载导入正式全文；本轮未取得完整正文</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TCCN.2019.2930594" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="B" data-need="0">
-<div class="paperhead"><span class="tag">N53 · 二级</span><span class="state">在库且PDF存在</span></div>
+<p>使用标准导频、前导和OFDM帧结构；部分上行方案需双分支MRC。</p><p><b>借鉴点：</b>信道样例可用于公开参数对照，不能据此要求所有非合作环境都弱多径；场景参数依据与算法先验必须分开。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文14页；表III六路径参数视觉核对。</p><p>Zotero键：4EUMTJVU</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TCCN.2019.2930594" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N53 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Direct TDOA geolocation of multiple frequency-hopping emitters in flat fading channels</h3><p class="muted">IET Signal Processing 11,80–85 · 2017 · 次优先</p>
-<p>未知多FH源、频域稀疏/平坦信道、全站CCF特征值；不是频率选择性多径解法</p><p><b>借鉴点：</b>源分辨椭圆和几何/带宽耦合，反省固定峰排斥尺度</p>
-<details><summary>阅读范围与库内记录</summary><p>本轮出版社§2/4/6及Xia引文；公式图片未完整核验</p><p>Zotero键：DX5GM94C</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1049/iet-spr.2016.0299" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="B" data-need="1">
-<div class="paperhead"><span class="tag">N54 · 二级</span><span class="state">当前快照未匹配入库</span></div>
+<p>未知波形、已知源数，源间不相关；观察时间覆盖站间传播差，利用FH频谱结构。</p><p><b>借鉴点：</b>候选抑制尺度可依据几何与带宽而非固定半径；但原文真值附近搜索域不能免费提供给正式盲比较。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文6页，关键公式/实验页视觉核对；结构预检未通过完整性确认，页码为本地附件页。</p><p>Zotero键：DX5GM94C</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1049/iet-spr.2016.0299" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="B" data-need="0">
+<div class="paperhead"><span class="tag">N54 · 二级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>An Iterative Implementation-Based Approach for Joint Source Localization and Association Under Multipath Propagation Environments</h3><p class="muted">IEEE Transactions on Signal Processing 71:121–135 · 2023 · P1-源路径关联</p>
-<p>阵列接收、稀疏DOA与同源相干路径关联、未知源；原稿算法输出每源DOA组及系数，不等于固定四单天线宽带时延DPD。源数与路径数先验待全文。</p><p><b>借鉴点：</b>通过相干结构组织源—路径归属，联合估计/关联后逐组精修；可指导我们区分源关联和局部多径拟合，避免只增自由参数。</p>
-<details><summary>阅读范围与库内记录</summary><p>由当前主协调者核读Akbari2025参考文献[39]追到，作者NTU出版列表和正式书目确认；作者上传稿的搜索索引可见摘要、Algorithm3及源关联段落，但未获取可逐页核查原PDF。</p><p>Zotero键：未匹配</p><p>请下载导入正式全文；本轮未取得完整正文</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TSP.2023.3241776" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="C" data-need="0">
-<div class="paperhead"><span class="tag">N55 · 三级</span><span class="state">在库且PDF存在</span></div>
+<p>已知阵列流形和源数K；未知反射数/增益；引理要求足够阵元维数。</p><p><b>借鉴点：</b>借鉴关联应由整个同源路径组解释而非逐峰强弱；需重新建立频域/几何证据，不能仅替换字典称原算法。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文15页，含附录；关联引理/流程视觉核对。</p><p>Zotero键：VSALUNZQ</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TSP.2023.3241776" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N55 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Cooperative Direct Localization in Multipath Environments Using Binary Sparse Modeling and Cayley–Menger Determinant</h3><p class="muted">IEEE Transactions on Wireless Communications 24(8):6551–6565 · 2025 · 优先</p>
-<p>本轮Zotero§III确认单源、每anchor为ULA、多子载波CSI；§VIII明确多源属未来扩展。不能直接作全部单天线未知双源基线。</p><p><b>借鉴点：</b>几何一致性约束进入结构稀疏选择，避免路径候选各自拟合而不对应共同位置；优先查其信息条件与非凸松弛。</p>
-<details><summary>阅读范围与库内记录</summary><p>本轮Zotero§III模型、§VIII边界及参考文献定向核读；未逐页全篇精读</p><p>Zotero键：275YEWZL</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TWC.2025.3554614" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="C" data-need="0">
-<div class="paperhead"><span class="tag">N56 · 三级</span><span class="state">在库且PDF存在</span></div>
+<p>阵列/子载波CSI或等效响应、位置网格、路径数上限Nm；原文提MDL/AIC估上限但未给完整未知阶数实现。</p><p><b>借鉴点：</b>【阅读推论】距离约束可拒绝跨站不一致路径组合，但任一共同二维候选的距离都满足该恒等式，不能独自排除错误位置。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文15页含附录A/B；视觉复核公式与耗时表。</p><p>Zotero键：275YEWZL</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TWC.2025.3554614" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N56 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>A Binary Structured Sparsity Approach for Multi-Anchor Direct Localization</h3><p class="muted">IEEE Transactions on Mobile Computing 23(12):14055–14070 · 2024 · P1-必须补全文后定级</p>
-<p>波形已知性、接收天线、单/多源、路径先验均待原文。</p><p><b>借鉴点：</b>与2025 Cayley–Menger论文成一条方法谱系，优先核实共同LOS支持而非随意自由路径的设计。</p>
-<details><summary>阅读范围与库内记录</summary><p>作者ORCID/Crossref书目确认；正文未取。二手摘要提到跨anchor共同LOS网格点及QUBO，仍须原文核实。</p><p>Zotero键：WJ88HLYD</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TMC.2024.3439099" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="C" data-need="0">
-<div class="paperhead"><span class="tag">N57 · 三级</span><span class="state">在库且PDF存在</span></div>
+<p>CSI/等效子载波观测，阵列流形和网格；最大稀疏度L、SNR相关一致性容限/正则；路径数估计只泛指MDL/AIC。</p><p><b>借鉴点：</b>【阅读推论】正则应只鼓励真正共享的LOS，而非强迫所有NLOS支持一致；二值化会改变幅相拟合问题，应先证明或验证适用性。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文16页。</p><p>Zotero键：WJ88HLYD</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TMC.2024.3439099" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N57 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Direct Localization With Direct-Path Interference for Reference Channel-Free Distributed Passive Radars</h3><p class="muted">IEEE Transactions on Signal Processing 73:4379–4396 · 2025 · P1-模型与联合求解思想</p>
-<p>未知非合作机会照射源波形、无参考通道、直达干扰与目标反射混叠；定位被照射目标而非两个独立辐射源，几何/波形共享关系不同。</p><p><b>借鉴点：</b>直接波既干扰又提供未知波形信息；坐标下降迭代估DPI与目标位置，CRLB刻画适度DPI可能有利。是强机制近邻，不可直接称同场景强基线。</p>
-<details><summary>阅读范围与库内记录</summary><p>作者所属Stevens机构书目及完整摘要核读；全文未取。</p><p>Zotero键：FAKCC2ZI</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TSP.2025.3595854" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="D" data-need="1">
-<div class="paperhead"><span class="tag">N58 · 四级</span><span class="state">当前快照未匹配入库</span></div>
+<p>照射源坐标已知、各照射源频带不重叠；Gaussian波形协方差和噪声协方差已知或由额外预接收训练估计；接收站同步。</p><p><b>借鉴点：</b>【阅读推论】干扰可能同时提供波形信息，需用消除干扰参数后的位置信息衡量；迁移随机波形先验必须交代协方差从何获得。</p>
+<details><summary>阅读范围与库内记录</summary><p>18页主文逐页阅读；补充附录A–E未取得，需补充附件。</p><p>Zotero键：FAKCC2ZI</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TSP.2025.3595854" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="D" data-need="0">
+<div class="paperhead"><span class="tag">N58 · 四级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Robust OFDM-SAGE Channel Estimation Algorithm With Adaptive Model Order</h3><p class="muted">IEEE Transactions on Wireless Communications 25:5275–5290; online 2025-10-09 · 2026 · P1-未知阶数与快速求解理论</p>
-<p>OFDM uplink已知pilot张量、MIMO阵列、时变Doppler/CFO；假设已知噪声统计。不是未知双源原IQ定位。</p><p><b>借鉴点：</b>用GLRT和搜索极值统计设计新路径初始化/停止门槛，利用谐波移位不变性进行精确坐标更新避免有限分辨网格。与现有逐路径增阶/阈值/停止贡献高度相关，应优先读而不是重新发明。</p>
-<details><summary>阅读范围与库内记录</summary><p>Oulu作者机构摘要、正式PDF索引方法与参考条目核读；直接open PDF返回403，因此未逐页全文精读。</p><p>Zotero键：未匹配</p><p>请导入；已有公开作者稿链接</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TWC.2025.3617244" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://oulurepo.oulu.fi/bitstream/handle/10024/58882/nbnfioulu-202510226409.pdf?isAllowed=y&amp;sequence=1" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="D" data-need="1">
-<div class="paperhead"><span class="tag">N59 · 四级</span><span class="state">当前快照未匹配入库</span></div>
+<p>已知各向同性OFDM导频、阵列结构及噪声分布，信道在处理区间内稳定；角度闭式搜索结构另依赖导频设计。</p><p><b>借鉴点：</b>【读者推论】应先检验当前模型是否已合理求解，再把残差解释为缺路径；一次增径失败不等于没有路径，也不自动意味着必须提高阶数。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文16页及内部附录已读；路径检验与全局停止的不同作用已视读。</p><p>Zotero键：KY57BMW8</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TWC.2025.3617244" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://oulurepo.oulu.fi/bitstream/handle/10024/58882/nbnfioulu-202510226409.pdf?isAllowed=y&amp;sequence=1" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="paper" data-grade="D" data-need="0">
+<div class="paperhead"><span class="tag">N59 · 四级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Super-Resolution Estimation of UWB Channels Including the Dense Component—An SBL-Inspired Approach</h3><p class="muted">IEEE Transactions on Wireless Communications 23(8):10301–10318 · 2024 · P1-自适应模型复杂度</p>
-<p>SIMO UWB信道估计，时延-到达角、镜面与密集分量及噪声；波形/测量输入细节待正文。并非已验证盲双源定位算法。</p><p><b>借鉴点：</b>将非稀疏密集分量视为有色噪声，对扫描候选的极值分布控制假路径，而不是按固定字典的卡方门槛盲用；检验拟合新增路径是否真有意义。</p>
-<details><summary>阅读范围与库内记录</summary><p>IEEE官方完整摘要及作者稿摘要/参考条目；未全篇精读。</p><p>Zotero键：未匹配</p><p>请导入；已有公开作者稿链接</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TWC.2024.3371352" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://tugraz.elsevierpure.com/files/75340865/2308.01702v3.pdf" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="B" data-need="1">
-<div class="paperhead"><span class="tag">N60 · 二级</span><span class="state">当前快照未匹配入库</span></div>
+<p>已知探测频谱和阵列；镜面参数连续；稠密分量采用可参数化相关模型。阈值理论要求中心对称孔径、已知协方差，并假定真实路径已准确恢复、伪路径近似正交。</p><p><b>借鉴点：</b>【读者推论】搜索场几何比简单网格点数更合理；但双源波形由同一IQ估计后，残差及候选相关性变化，不能直接套其渐近阈值。</p>
+<details><summary>阅读范围与库内记录</summary><p>正式全文18页及内部附录已读；随机场阈值假设和渐近结论视读。</p><p>Zotero键：LNPVXPI6</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TWC.2024.3371352" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://tugraz.elsevierpure.com/files/75340865/2308.01702v3.pdf" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="paper" data-grade="B" data-need="0">
+<div class="paperhead"><span class="tag">N60 · 二级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Blind source separation with the generalised estimation of multipath signals algorithm</h3><p class="muted">IET Radar, Sonar &amp; Navigation 8(9):1255–1266 · 2014 · P2-盲分离机制</p>
-<p>同频独立未知连续RF波形、不同节点复增益/时延/Doppler；框架讨论单天线节点，但实际盲波形估计在具有阵列的master节点，随后分发给slave节点。不可把全篇视为全部单天线可直接运行。</p><p><b>借鉴点：</b>利用同源多径的延迟/频移重复关系实现盲分离；子空间相近会放大噪声，干扰扣除需保留SOI子空间。对双源混叠分离的机制有价值。</p>
-<details><summary>阅读范围与库内记录</summary><p>出版社HTML摘要、§1、§2、§3.1及§3.3定向核读，不标记全文逐行完成。</p><p>Zotero键：未匹配</p><p>请导入；已有公开作者稿链接</p></details>
-<p class="links"><a href="https://doi.org/10.1049/iet-rsn.2014.0058" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/iet-rsn.2014.0058" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="B" data-need="1">
-<div class="paperhead"><span class="tag">N61 · 二级</span><span class="state">当前快照未匹配入库</span></div>
+<p>GEMS需总路径数Mp&lt;Np、空间向量独立、FIR子通道互素、持续激励与足够样本；有效差时延/多普勒需可区分。</p><p><b>借鉴点：</b>可用模式间一致性找共享波形；先核当前四个异址单通道能否满足其共同混合矩阵假设。</p>
+<details><summary>阅读范围与库内记录</summary><p>12页附件正文、算法及实验已读；原始实测数据未复算。</p><p>Zotero键：89EJ58DN</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1049/iet-rsn.2014.0058" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/iet-rsn.2014.0058" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="paper" data-grade="B" data-need="0">
+<div class="paperhead"><span class="tag">N61 · 二级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Simultaneous Blind Demixing and Super-resolution via Vectorized Hankel Lift</h3><p class="muted">IEEE ICC 2024:354–359 · 2024 · P1-盲解混与可辨识性</p>
-<p>各未知PSF/波形属于已知低维子空间；不同用户子空间独立/不相干，实验以独立DFT子空间等生成。不能将两源共同带限等同这些用户特异已知基。</p><p><b>借鉴点：</b>同源多径形成低秩Hankel结构，双源解混由独立观测算子保障；借鉴需先证明本场景几何能提供相应区分而不是直接换算法。</p>
-<details><summary>阅读范围与库内记录</summary><p>正式会议目录/书目及作者arXiv全文§II–IV定向核读；未逐行证明复核。</p><p>Zotero键：未匹配</p><p>请导入；已有公开作者稿链接</p></details>
-<p class="links"><a href="https://doi.org/10.1109/ICC51166.2024.10622690" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://arxiv.org/abs/2401.11805" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="B" data-need="1">
-<div class="paperhead"><span class="tag">N62 · 二级</span><span class="state">当前快照未匹配入库</span></div>
+<p>每个未知波形gk=Bkhk，Bk已知且不同；定理要求随机独立/各向同性/有界子空间与提升矩阵非相干性，分离条件可保证后者。</p><p><b>借鉴点：</b>【读者推论】可以研究由多站几何自然形成的结构是否替代子空间差异；不能从真实波形反推Bk再宣称盲估计，也不能直接照搬唯一性结论。</p>
+<details><summary>阅读范围与库内记录</summary><p>会议全文6页已读；关键假设、优化模型及定理页视读。</p><p>Zotero键：6Q8KLMJA</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/ICC51166.2024.10622690" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://arxiv.org/abs/2401.11805" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="paper" data-grade="B" data-need="0">
+<div class="paperhead"><span class="tag">N62 · 二级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Blind Deconvolution Meets Blind Demixing: Algorithms and Performance Bounds</h3><p class="muted">IEEE Transactions on Information Theory 63(7):4497–4520 · 2017 · P2-理论基础</p>
-<p>已知用户编码矩阵，未知消息和卷积信道；借助编码子空间将非适定问题可解化。</p><p><b>借鉴点：</b>将多个双线性乘积lift到多低秩矩阵，用总核范数恢复；必须区分恢复消息/信道和仅恢复位置，不能无条件搬其保证。</p>
-<details><summary>阅读范围与库内记录</summary><p>作者PDF摘要/模型及后续作者文献书目核对；未全篇精读。</p><p>Zotero键：未匹配</p><p>请导入；已有公开作者稿链接</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TIT.2017.2701342" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://www.math.ucdavis.edu/~strohmer/papers/2015/BlindDeconvDemix.pdf" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="B" data-need="1">
-<div class="paperhead"><span class="tag">N63 · 二级</span><span class="state">当前快照未匹配入库</span></div>
+<p>Ai、Bi已知，Ai独立Gaussian；Bi列正交且满足共同分块/不相干条件；信号与信道维数给定。</p><p><b>借鉴点：</b>低维先验是恢复成立的条件；源数二次充分界与数值线性相变应分开，N63随后改进该界。</p>
+<details><summary>阅读范围与库内记录</summary><p>正文模型、假设、定理、全部实验和关键证明链已读；pp.11–19集中性/证书细节及附录未逐式复证。</p><p>Zotero键：RJNFN7FT</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TIT.2017.2701342" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://www.math.ucdavis.edu/~strohmer/papers/2015/BlindDeconvDemix.pdf" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="paper" data-grade="B" data-need="0">
+<div class="paperhead"><span class="tag">N63 · 二级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Blind Demixing and Deconvolution at Near-Optimal Rate</h3><p class="muted">IEEE Transactions on Information Theory 64(2):704–727 · 2018 · P2-可辨识性边界</p>
-<p>设备采用接收端已知的独立随机高斯线性编码；多未知消息/信道而非无编码先验双源。</p><p><b>借鉴点：</b>自由度、观测算子限制与噪声稳定性；说明仅未知数计数不足，需编码/几何引入有效独立约束。</p>
-<details><summary>阅读范围与库内记录</summary><p>作者机构摘要、作者论文集相关模型/条件定向核读。</p><p>Zotero键：未匹配</p><p>请导入；已有公开作者稿链接</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TIT.2017.2784481" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://arxiv.org/abs/1704.04178" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="D" data-need="1">
-<div class="paperhead"><span class="tag">N64 · 四级</span><span class="state">当前快照未匹配入库</span></div>
+<p>已知活动用户、源特定Gaussian编码Ci和信道基Bi；正交/不相干条件，噪声范数上界给定。</p><p><b>借鉴点：</b>联合整体分析可避免逐对不相干界的r²损失；但不能把凸法定理自动赋给正文数值梯度法。</p>
+<details><summary>阅读范围与库内记录</summary><p>模型、全部主定理、算法、数值和关键证明链已读；长证明中熵界/集中性及附录未逐式复证。</p><p>Zotero键：VJWDPYME</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TIT.2017.2784481" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://arxiv.org/abs/1704.04178" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="paper" data-grade="B" data-need="0">
+<div class="paperhead"><span class="tag">N64 · 二级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Separable optimization for joint blind deconvolution and demixing</h3><p class="muted">IEEE ICASSP 2020:5989–5993 · 2020 · P2-效率思想</p>
-<p>联合盲卷积解混及归一化条件；编码/子空间及噪声细节未核。</p><p><b>借鉴点：</b>将高维凸恢复分解为小优化问题；可能启发计算组织，但需先核条件，不能作为已证明3秒解法。</p>
-<details><summary>阅读范围与库内记录</summary><p>Tel Aviv作者机构完整摘要及书目核对；全文未取。</p><p>Zotero键：未匹配</p><p>请下载导入正式全文；本轮未取得完整正文</p></details>
-<p class="links"><a href="https://doi.org/10.1109/ICASSP40776.2020.9054464" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="D" data-need="1">
-<div class="paperhead"><span class="tag">N65 · 四级</span><span class="state">当前快照未匹配入库</span></div>
+<p>已知共同B/C、源数及维数，R≥S；恢复原源另需各接收链路核等范数等单侧/双侧约束。</p><p><b>借鉴点：</b>跨站共享源仅约束共同子空间，物理源身份仍需额外结构；每链路等范数并非任意可取的尺度规范。</p>
+<details><summary>阅读范围与库内记录</summary><p>5页附件全部正文、算法关系及实验已读；p.3基变换与猜想页已图核。</p><p>Zotero键：TLAISHR3</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/ICASSP40776.2020.9054464" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="D" data-need="0">
+<div class="paperhead"><span class="tag">N65 · 四级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Model Selection for Sinusoids in Noise: Statistical Analysis and a New Penalty Term</h3><p class="muted">IEEE Transactions on Signal Processing 59(4):1333–1345 · 2011 · P1-未知阶数统计检验</p>
-<p>未知条数正弦+白高斯噪声，从已知噪声分析再扩展；非未知双源波形+未知位置多径。</p><p><b>借鉴点：</b>扫描最大谱峰的极值分布导致普通BIC/固定候选检验失配；增加loglog n与常数等项以控制虚警。是增阶检验的重要前置理论。</p>
-<details><summary>阅读范围与库内记录</summary><p>作者机构摘要、作者稿第一页问题及结论定向核读。</p><p>Zotero键：未匹配</p><p>请导入；已有公开作者稿链接</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TSP.2011.2105482" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://www.weizmann.ac.il/math/Nadler/sites/math.Nadler/files/publications/model_selection_for_sinusoids_in_noise-_statistical_analysis_and_a_new_penalty_term.pdf" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="C" data-need="1">
-<div class="paperhead"><span class="tag">N66 · 三级</span><span class="state">当前快照未匹配入库</span></div>
+<p>白噪声、足够分离且阶数相对样本量小等条件；强有色噪声不满足直接适用条件。频率在零假设下不可识别，常规Wilks卡方近似不直接适用。</p><p><b>借鉴点：</b>【读者推论】可用其思路检查参数在零假设下不可识别及搜索惩罚，但须推导我们的波形消元后几何随机场，不能把频率模型惩罚直接代入位置误差评分。</p>
+<details><summary>阅读范围与库内记录</summary><p>正式全文13页含内部附录已读；极值阈值、选阶准则及一致性区别视读。</p><p>Zotero键：85LSXBAD</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TSP.2011.2105482" target="_blank" rel="noopener">正式书目 / DOI ↗</a> · <a href="https://www.weizmann.ac.il/math/Nadler/sites/math.Nadler/files/publications/model_selection_for_sinusoids_in_noise-_statistical_analysis_and_a_new_penalty_term.pdf" target="_blank" rel="noopener">公开全文线索 ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N66 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Parametric Joint Target Detection and Localization Using Message Passing for Distributed Passive MIMO Radar</h3><p class="muted">IEEE Transactions on Signal Processing 73:2200–2215 · 2025 · P2-支持位置联合推断</p>
-<p>非合作多个机会照射源、分布式双通道被动MIMO雷达；专用reference channel用于未知波形重建。目标反射定位不同于两个辐射源。</p><p><b>借鉴点：</b>将存在变量与连续位置联合后验化，通过factor graph减少密网格代价，并处理直达干扰；可参考离散支持与连续参数耦合，不能免费给予本算法参考通道。</p>
-<details><summary>阅读范围与库内记录</summary><p>IEEE正式摘要及引言首段核读；完整正文未取。</p><p>Zotero键：未匹配</p><p>请下载导入正式全文；本轮未取得完整正文</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TSP.2025.3572903" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="C" data-need="1">
-<div class="paperhead"><span class="tag">N67 · 三级</span><span class="state">当前快照未匹配入库</span></div>
+<p>发射/接收位置已知且直达时延可补偿；每照射源有参考通道；噪声及Rayleigh/Swerling-I方差先验已知，符号或Gaussian波形先验。</p><p><b>借鉴点：</b>参数化消息可替代密网格，但收益须连同参考通道和已知发射几何一起解释。</p>
+<details><summary>阅读范围与库内记录</summary><p>16页附件的完整正文、实验及附录A–C已读；原始仿真未重跑。</p><p>Zotero键：R87QASQX</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TSP.2025.3572903" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N67 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Frequency-Domain Scalar Message Passing-Based Joint Target Detection and Localization for Distributed Passive MIMO Radar</h3><p class="muted">IEEE Transactions on Aerospace and Electronic Systems 62:10977–10992 · 2026 · P3-同系列待核</p>
-<p>属上述被动雷达系列；是否仍需双通道、波形及噪声条件须正文核实。</p><p><b>借鉴点：</b>后向/前向追踪2025消息传递工作的最新扩展，重点看频域标量化降低代价是否依赖可分离照射源或参考通道。</p>
-<details><summary>阅读范围与库内记录</summary><p>作者ORCID的Crossref书目确认；官方摘要未取，不从二手摘要下具体技术结论。</p><p>Zotero键：未匹配</p><p>请下载导入正式全文；本轮未取得完整正文</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TAES.2026.3693208" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿" data-grade="C" data-need="0">
-<div class="paperhead"><span class="tag">N68 · 三级</span><span class="state">在库且PDF存在</span></div>
+<p>已知照射源/接收位置和按源分开的RC/SC；Gaussian波形、Rayleigh/Swerling-I增益先验；噪声精度用非信息Gamma先验。</p><p><b>借鉴点：</b>复杂度降低可来自表示和近似；比较定位精度应同时报告检测率与检测条件下的误差。</p>
+<details><summary>阅读范围与库内记录</summary><p>16页附件正文、实验及附录A–C已读；关键CFAR、RMSE与噪声更新页已图核，未独立复证或复算。</p><p>Zotero键：J6KV7DGS</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TAES.2026.3693208" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="C" data-need="0">
+<div class="paperhead"><span class="tag">N68 · 三级</span><span class="state">在库且已读取本轮附件</span></div>
 <h3>Direct Position Determination Using Dual UAVs With Synchronization Error in Multipath Environments</h3><p class="muted">IEEE Transactions on Aerospace and Electronic Systems 62:2870–2882; online 2025-12-11 · 2026 · P3-相邻场景</p>
-<p>双UAV是移动接收平台，不等于双目标；同步误差、跨移动/频率子空间、Kalman用于平台位置误差。源数/波形与多径参数条件须正文。</p><p><b>借鉴点：</b>跨频率/移动观测的正交性融合降低复杂度；本项目固定四站不可挪用移动多批次信息。</p>
-<details><summary>阅读范围与库内记录</summary><p>IEEE官方完整摘要核读。</p><p>Zotero键：VMJIU7GR</p><p>等待逐篇精读/复核</p></details>
-<p class="links"><a href="https://doi.org/10.1109/TAES.2025.3642864" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article></div></section>
-<section id="archive"><h2>文件整理：先解开依赖，再搬移证据</h2><div class="grid"><div class="panel"><h3>不是一个普通的输出文件夹</h3><p>旧research_admission_20261027有14,582文件、约10.54GiB；1,826个Python文件含大量冻结快照。7个一键入口硬编码旧树，当前源码也跨轮导入。</p><p>直接按日期剪切会破坏导入、账本身份和断点续跑。相同内容的快照也不能直接去重删除。</p></div><div class="panel"><h3>建议的分离</h3><pre>研究方向/多径DPD/代码/mp_dpd/  可执行源码
-研究方向/多径DPD/运行入口/            一键入口
-项目维护\\路径与身份/mp_dpd/                 文献、时间线、阶段记录
-outputs_e2e/mp_dpd/          数据、运行、冻结证据</pre><p>先建时间线与映射 → 抽离当前必需代码 → 固定输入等价核验 → 整包复制与哈希验收 → 切换入口。旧账本不改，清退另行审批。</p></div></div><p><a href="file:///F:/DPD_Strong_Weak/%E9%A1%B9%E7%9B%AE%E7%BB%B4%E6%8A%A4/%E9%A6%96%E6%AC%A1%E7%9B%AE%E5%BD%95%E7%9B%98%E7%82%B9_20261105/%E9%9B%86%E4%B8%AD%E6%95%B4%E7%90%86%E4%B8%8E%E8%A7%A3%E8%80%A6%E6%96%B9%E6%A1%88.md">查看详细搬移方案、依赖实例、验收与回滚 →</a></p></section>
-<section id="next"><h2>下一步明确停在哪里</h2><ol><li>优先补齐第一批12项，特别是Xia信道来源、源径关联、SAGE自适应阶数和盲解混条件。</li><li>核心近邻全文齐备后，逐篇按统一模板核对模型、先验、理论、完整流程和仿真，再形成最终综述与建议。</li><li>随后完成有限Xia锚定与公平比较合同，不按结果选择实现约定，不为让自家方法胜出而改基线。</li><li>目录搬移方案等待审批。当前0/1/2反射和其他场景设定不变，不启动480/780/3120或640条实验。</li></ol><a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E5%A4%9A%E5%BE%84DPD/%E6%96%87%E7%8C%AE/%E8%BF%91%E9%82%BB%E9%87%8D%E5%AE%A1_20261105/%E9%98%85%E8%AF%BB%E4%B8%8E%E7%A0%94%E7%A9%B6%E6%8E%A8%E8%BF%9B%E5%AE%89%E6%8E%92.md">完整状态与逐篇精读模板 →</a></section>
-<footer>来源：本轮Zotero只读快照、原文PDF、公开出版社/作者资料、历史证据与目录盘点。由AI辅助整理并核对，获取全文、机器解析、语义精读和实验验证分开记录。<br><a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E5%A4%9A%E5%BE%84DPD/%E6%96%87%E7%8C%AE/%E8%BF%91%E9%82%BB%E9%87%8D%E5%AE%A1_20261105/%E6%89%A7%E8%A1%8C%E5%8D%8F%E8%AE%AE.md">执行协议</a> · <a href="file:///F:/DPD_Strong_Weak/%E7%A0%94%E7%A9%B6%E6%96%B9%E5%90%91/%E5%A4%9A%E5%BE%84DPD/%E6%96%87%E7%8C%AE/%E8%BF%91%E9%82%BB%E9%87%8D%E5%AE%A1_20261105/audit_v2.json">交付与分类核查</a></footer>
-<script>const papers=[...document.querySelectorAll('.研究方向\\强弱源混叠DPD\\论文\\AP_NOMP双语稿')];function filter(){const q=document.querySelector('#query').value.toLowerCase(),g=document.querySelector('#grade').value,need=document.querySelector('#missing').checked;let n=0;papers.forEach(p=>{const show=(!g||p.dataset.grade===g)&&(!need||p.dataset.need==='1')&&p.textContent.toLowerCase().includes(q);p.hidden=!show;n+=show});document.querySelector('#counter').textContent=`显示 ${n} / ${papers.length} 篇`;}document.querySelectorAll('input,select').forEach(x=>x.addEventListener('input',filter));filter();</script></main></body></html>
+<p>未知波形/增益，但参考UAV多径可忽略是明确先验；移动点已知，跨频共享系数和跨时共享时钟偏差。</p><p><b>借鉴点：</b>【阅读推论】需核对归一化是否保留位置结构及噪声相关性；不得为复用方法暗中给一个源隔离、无多径参考。</p>
+<details><summary>阅读范围与库内记录</summary><p>选正式排版SGRDEA47全文13页（2870–2882）；另XEU9NKHZ为作者接收稿，已核对其前3页版本身份。</p><p>Zotero键：VMJIU7GR</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TAES.2025.3642864" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article><article class="paper" data-grade="D" data-need="0">
+<div class="paperhead"><span class="tag">N69 · 四级</span><span class="state">在库且已读取本轮附件</span></div>
+<h3>Passive sensing for unknown waveforms: parameter identifiability and optimization</h3><p class="muted">IEEE Transactions on Aerospace and Electronic Systems · 2026 · 优先</p>
+<p>任意未知波形；固定阶数L、共享时延结构，源谱归一化g1=1、首时延=0；非逐链路自由延迟。</p><p><b>借鉴点：</b>优先借鉴明确等价歧义与有效通道秩；移植前需检验双源、分布式非共享时延是否保留结构。</p>
+<details><summary>阅读范围与库内记录</summary><p>全文12页，含附录；式(18)(21)由两名阅读者独立视觉核对。</p><p>Zotero键：VBLFJMVL</p><p>本轮正文精读完成；附录/勘误等边界见精读记录</p></details>
+<p class="links"><a href="https://doi.org/10.1109/TAES.2026.3748907" target="_blank" rel="noopener">正式书目 / DOI ↗</a></p></article></div></section>
+<section id="archive"><h2>文件整理已完成</h2><p>现用代码与历史轮次已按研究方向归位；本页不再保留已失效的搬移待审批状态。<a href="../../研究记录/轮次导航.md">代码与轮次导航</a>。</p></section>
+<section id="next"><h2>下一步</h2><p>三批论文正文阅读已完成，外置补充件及证明核验范围逐篇注明。后续围绕同信息完整基线与源—路径关联问题形成方案；不自动启动新的算法路线或正式扩量。</p><p><a href="阅读与研究推进安排.md">阅读状态</a> · <a href="../近邻精读_20261106/精读结论与下一步.md">本轮判断</a></p></section>
+<footer>来源：本轮Zotero只读快照、原文PDF、公开出版社/作者资料、历史证据与目录盘点。由AI辅助整理并核对，获取全文、机器解析、语义精读和实验验证分开记录。<br><a href="执行协议.md">执行协议</a> · <a href="audit_v2.json">交付与分类核查</a></footer>
+<script>const papers=[...document.querySelectorAll('.paper')];function filter(){const q=document.querySelector('#query').value.toLowerCase(),g=document.querySelector('#grade').value,need=document.querySelector('#missing').checked;let n=0;papers.forEach(p=>{const show=(!g||p.dataset.grade===g)&&(!need||p.dataset.need==='1')&&p.textContent.toLowerCase().includes(q);p.hidden=!show;n+=show});document.querySelector('#counter').textContent=`显示 ${n} / ${papers.length} 篇`;}document.querySelectorAll('input,select').forEach(x=>x.addEventListener('input',filter));filter();</script></main></body></html>

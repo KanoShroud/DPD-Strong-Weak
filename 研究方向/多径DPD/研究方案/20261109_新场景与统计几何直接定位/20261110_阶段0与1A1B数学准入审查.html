@@ -1,0 +1,284 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DPD数学准入审查 2026-11-10</title><style>
+:root{--bg:#f4f7f9;--paper:#fff;--line:#dce4e9;--ink:#203244;--muted:#596f80;--accent:#126d78}*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,'Microsoft Yahei','PingFang SC',sans-serif;font-size:15px;line-height:1.75;margin:0}
+main{max-width:1060px;margin:auto;padding:42px 24px 65px;background:var(--paper);min-height:100vh}
+h1{font-size:29px;line-height:1.35;border-bottom:2px solid var(--line);padding-bottom:17px}
+h2{font-size:23px;color:var(--accent);margin-top:40px;border-bottom:1px solid var(--line);padding-bottom:8px}
+h3{font-size:17px;margin-top:28px}p,li{color:#385264}blockquote{border-left:4px solid var(--accent);background:#ecf4f4;padding:10px 18px;margin:15px 0}
+blockquote p{margin:4px}table{border-collapse:collapse;width:100%;font-size:13px;table-layout:fixed}th,td{border:1px solid var(--line);padding:9px;vertical-align:top;overflow-wrap:anywhere}th{background:#e6eff2}
+pre,.formula{font-family:Consolas,Menlo,'Courier New',monospace;background:#f0f4f6;border:1px solid #dce5e9;border-radius:8px;padding:14px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;overflow-x:auto}
+code{font-family:Consolas,Menlo,monospace;font-size:13px;background:#eff2f5;border-radius:4px;padding:1px 3px}
+a{color:var(--accent)}strong{color:#162e3a}.inline-math{white-space:normal}footer{border-top:1px solid var(--line);margin-top:30px;padding-top:12px;color:var(--muted);font-size:12px}
+@media(max-width:700px){main{padding:20px 12px}h1{font-size:23px}h2{font-size:19px}table{display:block;overflow-x:auto}}
+</style><script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script></head><body><main><h1>2026-11-10 阶段0及1A/1B数学准入审查：异频左右配对子空间与物理参数消元边界</h1>
+<blockquote>
+<p><strong>性质</strong>：用户批准的理论数学研究；不运行任何项目IQ、不改变 <code>scene.py</code>、旧MP-DPD、冻结 <code>common18</code> 或历史试验成绩。本文将前几轮已证明的结构定理与<strong>仍需验证的统计估计器／计算流程</strong>严格分离。数学代数核验由同目录 <code>math_checks.py</code>、<code>math_checks_results.json</code> 给出。<br />
+<strong>最终目标不变</strong>：四异址同步单天线站、两路同时同频独立未知源和未知真实多径，<strong>从原始混叠IQ直接估计两个二维位置</strong>，不使用真实发射数据、真实循环频率或反射真值，不将完整盲分离作为最终结果。<br />
+<strong>研究依据</strong>：Nikias–Mendel (1993) IEEE SPM；Gardner–Spooner (1994) Part I/II IEEE TSP；Moulines等(1995) IEEE TSP；Qiu–Hua (1996) Signal Processing；Mulleti等(2020) TSP；Li等(2023)、Hu等(2024)、Chai等(2025)、Xie等(2020)、Xia等(2021)。完整近邻矩阵69篇的场景与信息差别以仓库<code>文献/近邻精读_20261106</code>为准。这里不把经典累积量、Kruskal、Wedin/Davis–Kahan、Prony或变量投影重新宣称原创。</p>
+</blockquote>
+<h2>0. 本轮结论先行：门槛没有“整体通过”</h2>
+<table>
+<thead>
+<tr>
+  <th>Gate</th>
+  <th>严格成果</th>
+  <th>状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>0：统一总体模型／校核错误表述</td>
+  <td>既有理想Hermitian配对模型正确；非高斯不等于必有非零4阶谱；正周期统计须采用正确累积量；旧8频点不是有限IQ稳定保证</td>
+  <td><strong>完成书面纠错</strong></td>
+</tr>
+<tr>
+  <td>1A-结构：绕开Hermitian锚频的二阶矩奇异贡献</td>
+  <td>提出非Hermitian<strong>非退化四频</strong>配对<code>K_off = Z_L diag(γ) Z_R^H</code>；严格证明其<strong>左列空间与原C0的 <code>Z_L</code> 完全相同</strong></td>
+  <td><strong>总体层面通过</strong></td>
+</tr>
+<tr>
+  <td>1A-估计：单条混叠IQ得到所需非Hermitian K</td>
+  <td>给出频率平滑四阶周期图<strong>候选公式</strong>、无Oracle选频条件与WSS有限记忆下间接估计一致性构造；尚无覆盖<strong>未知时钟双源PAM/截断波形</strong>的统一非Oracle误差界</td>
+  <td><strong>部分通过，不能直接实现定位</strong></td>
+</tr>
+<tr>
+  <td>1A-稳定：统计误差小于最小非零奇异值</td>
+  <td>非Hermitian <strong>左奇异子空间</strong>误差界推导成立；源谱弱/同源配对矩阵近共线会使界失效</td>
+  <td><strong>条件证明完成，量化未通过</strong></td>
+</tr>
+<tr>
+  <td>1B-线性消元</td>
+  <td>非Hermitian源谱系数为<strong>复数</strong>，可做2×2<strong>复最小二乘</strong>消元；固定多径时延且有源特异方向时复增益线性</td>
+  <td><strong>条件性部分通过</strong></td>
+</tr>
+<tr>
+  <td>1B-全部未知反射与位置低成本求解</td>
+  <td><strong>未</strong>证明8个反射附加时延、16个链路复增益能在直接联合双位置目标中低成本合法消元；2频自由复增益模型存在严格假位置</td>
+  <td><strong>未通过</strong></td>
+</tr>
+<tr>
+  <td>新算法／精准定位证据</td>
+  <td>无新统计估计器的项目IQ验证、无完整优化器、无定位RMSE、无端到端耗时</td>
+  <td><strong>未完成</strong></td>
+</tr>
+</tbody>
+</table>
+<h2>1. 统一模型：不让RRC截断等细节先于方法主线</h2>
+<p>用一般M站Q源有限因果传播模型：</p>
+<div class="formula">\[
+y_m(t)=\sum_{q=1}^{Q}\sum_{\ell=0}^{L_{mq}}g_{mq\ell}s_q(t-\tau_m(p_q)-\delta_{mq\ell})+w_m(t),
+\qquad\tau_m(p)=\|p-b_m\|/c,
+\tag{1}
+\]</div>
+<p>其中<code>L_mq</code>有限，<code>δ_mq,0=0</code>、<code>δ_mq,l&gt;0</code>、<code>g_mq,0≠0</code>；站点同步、传播期间LTI；两源独立、未知；所选零循环频率四阶累积谱（或相应平稳四阶谱）存在且非零；噪声与源独立、高斯，其<strong>总体</strong>四阶累积量为0，但<strong>有限样本估计方差不为0</strong>。</p>
+<p><strong>源统计层次必须区分</strong>：</p>
+<ul>
+<li><strong>WSS研究子模型</strong>：严格平稳且相应累积函数绝对可和，便于先建立合法直接/间接多谱估计的充分条件；不能声称它自动包含固定符号时相的BPSK+RRC。</li>
+<li><strong>实际目标覆盖的循环平稳子模型</strong>：两个独立PAM/BPSK源可以有同一<strong>未知</strong>符号率与不同未知时相。应采用Gardner–Spooner的正确<strong>零循环频率四阶累积量</strong>（不同于先把二阶矩全时平均后相乘），不能偷用分源循环频率或真实符号周期。循环统计的二阶项、时相平均、单记录估计条件必须明确。</li>
+<li>“非高斯”<strong>不充分</strong>：有非Gaussian分布却四阶累积量为0的具体反例；正式条件应是使用频率元组的<strong>有效源四阶谱非零</strong>。</li>
+</ul>
+<p>具体32768样本、RRC截断、RRC滚降、3μs和ρ=0.25只在以后有必要的数值验证阶段出现，<strong>不是总体主定理中的参数</strong>。</p>
+<h2>2. 1A核心发现：改变右侧频率可避开奇异贡献，不损失C0左子空间</h2>
+<h3>2.1 原锚定Hermitian矩阵为何统计估计困难</h3>
+<p>先前C0使用频率元组<code>(f_a, f_k, f_a, f_k)</code>，前两个频率不共轭、后两个共轭；总体上：</p>
+<div class="formula">\[
+K_{\rm diag}(a,k)=Z_{a,k}\operatorname{diag}(\gamma_{q,k})Z_{a,k}^H,
+\quad z_{q,a,k}=h_q(f_a)\otimes h_q(f_k).
+\tag{2}
+\]</div>
+<p>对正确四阶<strong>累积谱</strong>，式(2)有效。但相应原始<strong>四阶矩</strong>在零和配对<code>f_a-f_a=0, f_k-f_k=0</code>处还包含二阶谱乘积。当两个源在频点a、k的二阶信号空间均为rank2时，该断开项可为<code>R_a⊗R_k</code>，秩4；而相应<strong>连接</strong>的四阶累积量仍为rank2。故单次/简单分段FFT四阶乘积不能直接称为式(2)的估计值。</p>
+<p>Gardner–Spooner Part II §VI（PDF pp.9–12）用<code>P-submanifold</code>和循环矩/累积谱差别分析该现象，并明确指出在这些集合上的普通矩谱估计及其平滑泄漏问题。这<strong>不否定式(2)作为总体统计对象</strong>。</p>
+<h3>2.2 命题A：异频左右配对矩阵仍精确保留原C0的位置判别空间</h3>
+<p>选择四个频率满足</p>
+<div class="formula">\[
+f_1=f_a,\quad f_2=f_k,\quad
+f_3=f_a+\varepsilon,\quad f_4=f_k-\varepsilon,
+\qquad f_1+f_2=f_3+f_4,
+\tag{3}
+\]</div>
+<p>其中<code>ε≠0</code>，还应避开所有二阶配对零和或低阶循环频率构成的<strong>P子流形</strong>，所有四频均位于有效谱支撑内部。定义按站点索引的四阶总体<strong>非Hermitian</strong>矩阵：</p>
+<div class="formula">\[
+[K_{a,k}^{\rm off}]_{(i,j),(r,s)}
+=\mathrm{cum}_{\rm spec}\{Y_i(f_a),Y_j(f_k),Y_r^*(f_a+\varepsilon),Y_s^*(f_k-\varepsilon)\}.
+\tag{4}
+\]</div>
+<p>独立源的四阶谱加性与LTI结构给出</p>
+<div class="formula">\[
+\boxed{K_{a,k}^{\rm off}
+=Z_L\Gamma_{a,k,\varepsilon}Z_R^H},\quad
+Z_L=[h_q(f_a)\otimes h_q(f_k)]_{q=1}^{Q},\quad
+Z_R=[h_q(f_a+\varepsilon)\otimes h_q(f_k-\varepsilon)]_{q=1}^{Q}.
+\tag{5}
+\]</div>
+<p>这里Γ是对角矩阵，其源谱系数<strong>一般为复数</strong>。若<code>Z_L</code>、<code>Z_R</code>均满列秩且所有对角源系数非零，则：</p>
+<div class="formula">\[
+\boxed{\mathrm{rank}(K^{\rm off})=Q,
+\qquad \mathrm{range}(K^{\rm off})=\mathrm{range}(Z_L).}
+\tag{6}
+\]</div>
+<p><strong>证明</strong>：对满列秩的Z_L、Z_R取薄QR分解<code>Z_L=U_LR_L, Z_R=U_RR_R</code>；则<code>K=U_L(R_L Γ R_R^H)U_R^H</code>，括号中Q×Q矩阵可逆，故左列空间恰为U_L，即span(Z_L)。同理右行空间为span(Z_R)。证毕。</p>
+<p><strong>重要推论</strong>：如果选择公共锚频<code>f_a</code>、多个工作频率<code>f_k</code>，原C0对<strong>左</strong>配对子空间的物理几何约束及此前条件位置唯一性证明<strong>不需要改变</strong>，只需由Hermitian的绝对特征值子空间改为非Hermitian的<strong>前Q个左奇异向量</strong>。右频率可以只用于使统计测量避开低阶矩奇异子流形；它们不要求先分离未知源。</p>
+<p><strong>不可删去的条件</strong>：所选四频点的真正四阶源谱非零、右侧Z_R满列秩、频率同和、频点处于源有效频带和合法传播频域、没有落在低阶循环频率对应的奇异子流形上。非Hermitian化只改变统计对象和估计实现，不提供自动稳定性。</p>
+<h3>2.3 命题B：非Hermitian配对矩阵的弱源抗扰上界</h3>
+<p>记<code>σ_Q = σ_Q(K_off)&gt;0</code>为最小非零奇异值、<code>η=||Khat_off-K_off||_2</code>。若<code>η&lt;σ_Q/2</code>，由奇异值扰动及与命题S1相同的左侧残差方法可得：</p>
+<div class="formula">\[
+\boxed{\|\widehat P_L-P_L\|_F\le\frac{\sqrt{2Q}\,\eta}{\sigma_Q-\eta}.}
+\tag{7}
+\]</div>
+<p>将<code>K=U_L(R_LΓR_R^H)U_R^H</code>代入奇异值乘积界，得到</p>
+<div class="formula">\[
+\boxed{\sigma_Q(K_{\rm off})\ge
+\sigma_Q(Z_L)\sigma_Q(Z_R)\min_q|\gamma_q|.}
+\tag{8}
+\]</div>
+<p>这条<strong>条件</strong>结果把两源统计强弱、左右跨频通道近共线和统计矩阵估计误差联系起来。它是经典Wedin型扰动分析的直接推论，<strong>并非项目的新数学工具</strong>。既有Hermitian版本的谱隙结论仍成立，只是异频版须用式(7)而不能沿用Hermitian特征值写法。</p>
+<p><strong>代数检查</strong>：构造M=4/Q=2复杂数左/右通道矩阵，非Hermitian K rank2；真实左投影误差约<code>9.27×10^-16</code>；非Hermitian最小非零奇异值<code>47.392</code>、下界<code>22.702</code>；谱扰动<code>η=3.791</code>时左投影误差<code>0.0657</code>小于严格上界<code>0.1739</code>。这些是<strong>纯矩阵代数</strong>，不是实际IQ统计或定位。</p>
+<h2>3. 1A统计估计器预审：已有可研究公式，但“单IQ全面通过”仍未成立</h2>
+<h3>3.1 候选E1：避开P子流形的四阶周期图频率平滑</h3>
+<p>对长度N的<strong>原混叠数据</strong>，定义有限变换<code>D_m^{(N)}(f)=∑_{n=0}^{N-1}y_m[n]e^{-j2πfn}</code>。对合法四频组合定义原始四阶周期图（以离散采样、频率单位归一化为例）：</p>
+<div class="formula">\[
+I^{(4)}_{ijrs,N}(f_1,f_2,f_3)
+=\frac{1}{N}D_i^{(N)}(f_1)D_j^{(N)}(f_2)
+D_r^{(N)}(f_3)^*D_s^{(N)}(f_1+f_2-f_3)^*.
+\tag{9}
+\]</div>
+<p><strong>重要</strong>：式(9)是高方差随机周期图，<strong>不是四阶累积谱的单次无偏估计</strong>；只有在已避开低阶配对奇异子流形，且满足后述平滑/混合条件时，它的<strong>平滑版本</strong>才可能一致收敛到需要的四阶谱：</p>
+<div class="formula">\[
+\widehat K_{a,k}^{\rm off}(i,j;r,s)
+=\sum_{\nu\in\mathcal N_N}w_N(\nu)
+I^{(4)}_{ijrs,N}(\nu),\qquad\sum_\nu w_N(\nu)=1.
+\tag{10}
+\]</div>
+<p>其中邻域在三个自由频率维度围绕<code>(f_a,f_k,f_a+ε)</code>取值，第四频率由同和条件得到，不能对4个频率独立乱平滑。对严格平稳强混合、累积谱足够光滑、有限必要矩且低阶谱奇异集合有固定隔离带的模型，经典高阶谱估计理论给出令平滑宽度<code>h_N→0</code>、有效频率样本<code>Nh_N³→∞</code>时的<strong>一致性研究路径</strong>。典型偏差—方差量级为<code>O(h_N^s)</code>和<code>O((Nh_N³)^−1)</code>，其中s取决于谱光滑与核阶；<strong>本文尚未重新证明该阶数可原样用于本项目同符号率循环平稳混叠源、任意未知源和噪声</strong>。</p>
+<h3>3.2 候选E2：严格平稳有限记忆子模型的间接估计存在性</h3>
+<p>先考虑独立未知源/混合观测为严格平稳、有限依赖半径D、有限八阶矩、四阶累积量绝对可和的理论子模型。对固定三滞后向量<code>u=(u1,u2,u3)</code>，按<strong>准确三配对矩公式</strong>定义样本四阶累积量<code>\widehat C_N(u)</code>，在合法重叠时间索引上对四阶乘积作平均，再扣除二阶样本矩的三种乘积。</p>
+<p>假设<code>max|ui|≤L</code>，乘积序列的依赖半径至多增长为<code>D+2L</code>（常数因窗口端点定义而异），在统一八阶矩界下可给出每固定u的二阶估计误差<code>O((D+L)/N)</code>。取<code>(2L+1)^3</code>个滞后求和并做有界加窗傅里叶变换；只使用Minkowski/Cauchy–Schwarz的粗估计即有</p>
+<div class="formula">\[
+E|\widehat{\mathcal T}_{L,N}(f_1,f_2,f_3)
+-\mathcal T(f_1,f_2,f_3)|^2
+\lesssim \operatorname{tail}(L)^2
++\frac{(2L+1)^6(D+L)}{N}
++\text{边界/产品均值偏差项}.
+\tag{11}
+\]</div>
+<p>对固定D、累积量绝对可和、选择<code>L=L_N→∞</code>且<code>L_N^7/N→0</code>，粗界也能趋0。该条件极为保守，且遍历全部三维时滞数据<strong>可能极昂贵</strong>。这仅证明了某个<strong>严格平稳有限记忆子类</strong>在数学上可以拥有单记录一致的间接统计估计器，<strong>没有证明当前同符号率BPSK/PAM的循环平稳实际模型已通过1A</strong>；并不提倡按此慢速粗界实现定位。</p>
+<h3>3.3 非Oracle循环源必须另立准入条件（不能以WSS特例偷换）</h3>
+<p>Gardner–Spooner Part II §VI表明零循环频率四阶累积量是循环矩经低阶循环项校正的结果。对于两个<strong>同未知符号率</strong>的独立源，不能使用“彼此不同循环频率先分源”的便利先验。</p>
+<ul>
+<li><strong>路径H</strong>：保留Hermitian K，使用单记录可估的零循环频率四阶时间域累积量，必须从<strong>整个混合数据</strong>估计所需二阶循环频率项，既不能读取真实T/φ，也不能把先平均二阶矩乘积当成正确校正。</li>
+<li><strong>路径R</strong>：使用式(5)的非Hermitian异频四阶谱，要求每个所选频率组合与所有非零低阶混合循环频率的分组子流形<strong>充分分离</strong>；用整个混合IQ检测显著二阶循环线，只作<strong>频率保护/掩模</strong>而非按不同源循环频率分离信号。若未能排除所有重要循环谱线或泄漏，不能将原始四阶矩平滑结果称为累积谱。</li>
+<li>两条路径均不要求知道具体RRC截断或真实符号率，但都必须对某类未知循环源给出合法估计器及一致性条件。若只有理论上的“随机选择一般频率几乎必不精确碰撞”，这仍不解决<strong>有限样本频率平滑泄漏</strong>。</li>
+</ul>
+<p><strong>本轮1A最终评价</strong>：总体结构修复已有严格定理；严格平稳子模型的估计器存在性有数学依据；<strong>核心同率PAM场景下无Oracle、有限复杂度的异频四阶谱误差界仍未完成，不批准跳到定位性能仿真</strong>。</p>
+<h2>4. 1B：未知反射干扰参数不能靠过度放松“轻松消元”</h2>
+<h3>4.1 必须面对的参数规模</h3>
+<p>对M=4、Q=2、每源—站可有一反射，最坏共有8条源—站链路。一个物理信道由：</p>
+<ul>
+<li>两个二维位置：4个实未知；</li>
+<li>8个反射附加时延：8个实未知；</li>
+<li>8条链路的LOS及反射两个<strong>复增益</strong>：16个复数/32个实未知；</li>
+<li>若反射是否存在也未知，还要考虑离散路径支持；</li>
+<li>逐频源四阶谱系数、源共同复尺度为额外干扰/规约歧义，而不是独立定位信息。</li>
+</ul>
+<p>位置和时延合计已是12个连续实未知。C2可以在<strong>给定物理信道</strong>时通过小规模LS消元逐频γ，但它不把32个实增益和8个反射时延也自动消掉。</p>
+<h3>4.2 精确2频点无信息反例：放松复增益使假位置可精确拟合</h3>
+<p>每站一反射，在两个频率<code>f_1≠f_2</code>下：</p>
+<div class="formula">\[
+\begin{bmatrix}1&amp;e^{-j2\pi f_1\delta_m}\\1&amp;e^{-j2\pi f_2\delta_m}\end{bmatrix}
+\begin{bmatrix}a_m\\b_m\end{bmatrix}
+=\begin{bmatrix}H_m(f_1)e^{j2\pi f_1\tau_m(p)}\\ H_m(f_2)e^{j2\pi f_2\tau_m(p)}\end{bmatrix}.
+\tag{12}
+\]</div>
+<p>只要2×2矩阵非奇异，<strong>任何候选位置p</strong>及固定合法δ_m，都能逐站求得两个复增益完全拟合给定的<strong>两频精确信道</strong>。当真实增益反射比严格小于1时，足够近的假位置连续地保持相同严格不等式，故非唯一性甚至在弱反射物理类内成立。</p>
+<p>本轮纯代数实算：p与p'相隔<code>0.3606m</code>，两个宽频点的替代复信道匹配误差<code>3.22×10^-14</code>，替代最大反射/LOS幅度比<code>0.6356&lt;1</code>；保留同一复增益并新增第三个不同频点后，复信道误差升为<code>0.0528</code>。这说明<strong>跨频同一物理增益</strong>是关键约束；并不是“只用3频已全局唯一”，三频在自由δ和逐频共同尺度下仍可能有新歧义。</p>
+<p><strong>重要后果</strong>：不能在每个频率把复信道H当作自由变量并做LS，再回头用同一频率的张量秩给位置评分；这种松弛很可能抹去全部几何信息。不能把一频/两频的自由矩阵下界误认为有效剪枝准则。</p>
+<h3>4.3 非Hermitian版C2也可条件精确消元，但γ必须为复数</h3>
+<p>对新异频统计<code>K_off</code>，给定两位置、共享多径参数时，设两个源的原子为<code>A_q=z_{Lq}z_{Rq}^H</code>、堆叠矩阵<code>V=[vec(A_1),...,vec(A_Q)]</code>，则</p>
+<div class="formula">\[
+\boxed{\widehat\gamma=(V^HV)^{-1}V^H\operatorname{vec}(\widehat K_{\rm off})}
+\tag{13}
+\]</div>
+<p>在V满列秩时为精确<strong>复LS</strong>最优值；若γ受额外频率耦合先验约束，则不能再独立逐频求解。这个结果同样只是经典变量投影，没有消元位置、复增益或未知δ，且允许估计某源γ≈0可能带来<strong>单源复制/弱源被忽略</strong>问题，必须与完整rank-Q统计子空间/源覆盖条件联合考虑。</p>
+<h3>4.4 实际可行计算框架的最低要求</h3>
+<p><strong>建议下一阶段从物理参数共享的频率栈入手，而不是一次性求整个44维非凸问题</strong>：</p>
+<ol>
+<li>由1A得到跨频配对子空间及其误差后，保留<strong>每源同一锚频、跨频标签一致</strong>的约束；任何临时源方向提取只作为内部统计变量，不输出已分离IQ、也不先定位单条路径。</li>
+<li>对<strong>固定候选位置p和每链路附加时延δ</strong>，合法信道的复增益在多频栈或交叉关系中为线性参数；可做条件小规模SVD/LS，但所得<strong>无物理约束</strong>最小值只是一种松弛下界，不自动等于原C0/C2 profile。</li>
+<li>对未知的8个δ，先研究<strong>非Oracle且有下界的物理松弛/低维结构</strong>，并检查它是否由于自由度过大变成对所有p均为零。允许用多于两个且覆盖频带的频率点形成超定结构，但不能凭频点增加就宣称数值稳定。</li>
+<li>只有出现<strong>合法可实现的候选上界</strong>和<strong>确实能排除错误位置的下界</strong>，才考虑安全剪枝/层级搜索。若只有经验Top-K，不能声称不会丢失近真候选。</li>
+<li>若反射时延无法安全降维，需要明确报告参数维数、最坏复杂度和不可行原因，优先在原主线研究共享统计、几何下界或结构化连续时延方法，而不是立即转B1–B4。</li>
+</ol>
+<p><strong>本轮1B最终评价</strong>：复杂度来源和错误放松方式已明确；非Hermitian源谱系数可以精确消元；但在所有合法单反射未知时延上获得一个<strong>非Oracle、低成本、保持位置判别能力</strong>的内层问题仍未完成。不能把条件SVD当成已经解决1B。</p>
+<h2>5. 频率设计与阶段0旧命题的一致性</h2>
+<p>原“八个等间隔无别名频点的<strong>精确信道方向</strong>在每链路最多一反射时确定LOS-TDOA”定理继续有效，但不保证八个<strong>相邻FFT频点</strong>有足够条件数。对于新异频方案，将<strong>左侧</strong><code>Z_L(a,k)</code>选择为含八个共同等间隔工作频率的集合，使用公共锚频a连接两个源标签；<strong>右侧</strong><code>(a+ε,k−ε)</code>只需用于非Hermitian统计构造并满足秩/非零/避开低阶子流形条件。于是既有总体位置条件唯一性可保留。不能把此结论偷换成8个单次FFT观测即可稳定定位。</p>
+<p><strong>同频双源并非可用各源不同符号率分离</strong>：所有频率掩模必须通过混合观测构造；未知信道/增益/路径真值不能帮助选择“效果最好的频点”。</p>
+<h2>6. 独立数学审计范围及结果</h2>
+<p><code>math_checks.py</code>对<strong>代数模型而非IQ性能</strong>进行四组核验，结果在<code>math_checks_results.json</code>：</p>
+<table>
+<thead>
+<tr>
+  <th>检查</th>
+  <th>观测结果</th>
+  <th>严格含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>四组频率Z_L、Z_R的非Hermitian配对K</td>
+  <td>rank2；左投影误差<code>9.27e-16</code>；扰动投影误差<code>0.06572</code>≤理论界<code>0.17391</code></td>
+  <td>异频不丢总体左同源配对子空间，并有条件抗扰界</td>
+</tr>
+<tr>
+  <td>二阶矩污染</td>
+  <td>真实连接四阶累积量rank2；断开二阶乘积rank4；普通矩合成rank4</td>
+  <td>直接用普通四阶矩替代累积量会破坏模型</td>
+</tr>
+<tr>
+  <td>复四阶源谱系数LS</td>
+  <td>2×2条件复杂数LS解小于真值代入残差</td>
+  <td>仅γ可解析消元；物理增益/时延仍未知</td>
+</tr>
+<tr>
+  <td>两频弱反射假位置</td>
+  <td>错位置<code>0.3606m</code>，两频复拟合误差<code>3.22e-14</code>且反射比&lt;1</td>
+  <td>自由复增益的2频放松没有位置识别能力</td>
+</tr>
+</tbody>
+</table>
+<p><strong>代数PASS不是1A/1B整体准入PASS</strong>，不涉及项目IQ、源统计估计方差、几何优化时间或定位RMSE。</p>
+<h2>7. 与近邻论文的具体借鉴方式和创新边界</h2>
+<ul>
+<li><strong>Nikias–Mendel (1993)</strong>, IEEE Signal Processing Magazine, pp.20–23：定义/估计高阶谱，分别讨论直接与间接谱估计及分辨率—方差折中；具体渐近公式大量针对双谱，<strong>不可直接套四阶配对矩阵</strong>。</li>
+<li><strong>Gardner–Spooner (1994) Part I/II</strong>, IEEE TSP 42(12)：时间平均与循环累积量不可混淆，Part II §VI（PDF pp.9–13）讨论单记录周期累积谱、P子流形、直接/间接估计及泄漏。不同循环频率源的选择性<strong>不适用于两源同未知符号率的免费分离</strong>。</li>
+<li><strong>Moulines等(1995)</strong>, IEEE TSP 43(2)：先以有限FIR结构建立可辨识条件，再给出具体二次型/EVD或线性系统求解；其问题是<strong>单输入多通道盲FIR</strong>，没有直接适用的双源位置定理。</li>
+<li><strong>Qiu–Hua (1996)</strong>, Signal Processing 50：在已有求解器上推渐近误差和复杂度，结论显示SS在病态信道通常优于CR，而CR计算较低；不能因为<code>54×8</code> SVD小就断言本DPD算法稳健。</li>
+<li><strong>Mulleti等(2020)</strong>, TSP：频点数量的Vandermonde/互素充分条件和激励谱非零是辨识条件，与我方8频点界接近；它是<strong>单未知输入、压缩多通道盲反卷积</strong>，不是同率双源多径DPD。</li>
+<li><strong>Xie等(2020)、Luo等(2022)</strong>：跨频源标签与混合卷积已有先例；仍无四异址单天线双源未知有限反射的直接位置模型。</li>
+<li><strong>Xia等(2021)、Hu等(2024)、Li等(2023)、Chai等(2025)</strong>：当前问题的最重要定位近邻。Xia已有未知双源同频多径；Hu的多源FOC需要站内阵列，Li为单源多站PARAFAC，Chai单源且有干净参考。因此，统计源配对、Kruskal/QR/SVD/变量投影<strong>都不是独立创新点</strong>。潜在新贡献只能是<strong>可由实际混合IQ估计、在未知同率双源多径下可计算的跨频统计—共享LOS几何联合直接位置目标</strong>。</li>
+</ul>
+<h2>8. 明确的后续行动顺序及失败处理</h2>
+<h3>S1（最高优先级）：把异频统计定义转化为真正无Oracle的单记录估计器</h3>
+<ul>
+<li>在一般循环平稳混合模型中，明确可观测零循环频率统计的低阶P子流形；只从混合观测估计所需保护频率，不依赖源身份或真实T。</li>
+<li>针对固定有限个<code>(a,k,a+ε,k−ε)</code>元组，选择直接平滑或间接累积量计算的一种具体公式，推导可引用且可核验的<strong>一致性假设、统计方差/偏差界</strong>。若复杂度为完整三维大张量，先设计只估所需小矩阵条目的计算组织。</li>
+<li>把这个误差传播至式(7)的左配对子空间；同时给出弱源谱隙和宽频布局的理论可行区间。</li>
+<li><strong>通过标准</strong>：非Oracle、统计定义正确、同率未知PAM包含在条件中、误差随N可控，并具备合理计算复杂度；仅WSS特例不足以通过。</li>
+</ul>
+<h3>S2（与S1并行的小规模数学预审）：合法物理内层计算</h3>
+<ul>
+<li>不用项目IQ，证明固定p和δ哪些复增益/谱系数可<strong>严格等价</strong>消去，哪些只是松弛下界或初始化。</li>
+<li>推导在8个未知δ下有效的非平凡位置下界或其他结构约束，检验是否因过多自由变量使整个位置谱趋平；明确复杂度（不允许仅写<code>inf_η</code>）。</li>
+<li><strong>通过标准</strong>：具体的<strong>可计算</strong>且保留全局双源覆盖的物理统计目标/有保证的近似，不能依靠经验Top-K选择。</li>
+</ul>
+<h3>S3：两条线通过后统一稳定性、定位准则和算法架构</h3>
+<ul>
+<li>结合四阶统计左子空间误差、LOS几何灵敏度和物理位置间隔；局部稳定与全局零残差分别证明。</li>
+<li>使用C0主准则、C2复系数profiling及必要二阶信号子空间约束组装<strong>直接输出双位置</strong>的完整非Oracle算法。首次提出复杂度与失败模式预测，而不是先运行长串小样本调参。</li>
+</ul>
+<h3>S4：再进入已批准新物理场景下的IQ验证</h3>
+<ul>
+<li>明确新32768点IQ、6dB、0.25平均反射比、最大每链路1条反射、未知同率源；验证双源成功率、RMSE、长尾、天然近碰撞、稳定性与运行成本。</li>
+<li>旧common18冻结压力测试保留，严禁删除不利构型或用真值调参。与Xia、VP、AP等近邻按真实输入信息公平比较。</li>
+</ul>
+<p><strong>失败处置</strong>：任何Gate未通过，先判断统计量不存在/不可估、有限样本病态、物理目标平坦还是求解成本过高；先提出<strong>同主路线内部合法修复及明确否证</strong>，只有确认无法合理修复才重新评估B1–B4备选。不得因本轮1A的总体修复就声称新DPD已完成。</p>
+<footer>阶段0/1A/1B数学审查。未运行IQ定位实验，所有数学测试为人工构造代数矩阵；详细条件与代码见同目录。</footer></main></body></html>

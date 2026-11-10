@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>四阶配对子空间：稳定性与干扰参数消元｜2026-11-10</title>
+<style>
+:root{--bg:#f5f7f9;--card:#fff;--ink:#1d3041;--muted:#60778a;--line:#dce6ec;--green:#136e69;--amber:#a46a31;--blue:#196b8b}*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font:15px/1.74 system-ui,"Microsoft YaHei","PingFang SC",sans-serif;color:var(--ink)}
+main{max-width:1060px;margin:0 auto;padding:40px 24px 76px}a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
+h1{font-size:32px;line-height:1.28;margin:9px 0 15px}h2{font-size:22px;margin:35px 0 13px}h3{font-size:17px;margin:6px 0 10px}p{color:#3f5467;margin:10px 0}.eyebrow{color:var(--green);font-size:12px;font-weight:800;letter-spacing:.14em}.small{font-size:12px;color:var(--muted)}.lead{font-size:17px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin:22px 0}.stat,.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}.stat b{font-size:27px;display:block;line-height:1.3;color:var(--green)}.stat span{font-size:12px;color:var(--muted)}.eq{font:12px/1.8 Consolas,"Courier New",monospace;background:#edf3f6;white-space:pre-wrap;overflow-wrap:anywhere;border-radius:8px;padding:13px 15px;margin:12px 0}.callout{background:#eaf4f0;border-left:4px solid var(--green);padding:14px 18px;border-radius:0 8px 8px 0;margin:18px 0}.callout.warn{background:#fdf2e7;border-left-color:var(--amber)}.badge{display:inline-block;padding:3px 10px;border-radius:20px;background:#e4f1ed;color:#176b61;font-size:12px;font-weight:700}.badge.warn{background:#faf0e5;color:#986127}.tab{overflow-x:auto;border:1px solid var(--line);background:white;border-radius:10px}table{border-collapse:collapse;width:100%;min-width:720px;font-size:13px}th,td{text-align:left;vertical-align:top;border-bottom:1px solid #e5edf1;padding:10px 12px}th{background:#eaf1f5;color:#4b6678}tr:last-child td{border:0}ol{padding-left:24px}li{margin:10px 0}footer{border-top:1px solid var(--line);margin-top:36px;padding-top:16px;color:var(--muted);font-size:12px}
+@media(max-width:780px){main{padding:23px 13px 55px}h1{font-size:26px}.stats{grid-template-columns:1fr}.grid{grid-template-columns:1fr}}
+</style></head>
+<body><main>
+<div class="eyebrow">FOUR SINGLE-ANTENNA STATIONS · TWO UNKNOWN COCHANNEL SOURCES · MULTIPATH · 2026-11-10</div>
+<h1>跨频四阶子空间：从数学唯一性走向稳定直接定位</h1>
+<p class="lead">本轮围绕已提出的C0/C1双源直接位置准则，严格研究<strong>统计谱隙、子空间扰动与哪些干扰参数能够解析消元</strong>。不使用冻结IQ，不恢复完整发射波形，也未部署新的定位器。</p>
+<span class="badge">3项独立矩阵代数审计通过</span>　<span class="badge warn">有限IQ/全部反射时延求解仍未完成</span>
+<div class="stats">
+<div class="stat"><b>4 × 1</b><span>四个异址单天线同步接收站</span></div>
+<div class="stat"><b>16 × 16</b><span>双频四阶统计配对矩阵</span></div>
+<div class="stat"><b>54 × 8</b><span>辅助线性交叉关系，4站18频点1反射时</span></div>
+</div>
+<h2>01 · 稳定性定理：四阶矩阵的谱隙决定能否识别两源</h2>
+<div class="card"><p>理想跨频四阶矩阵可写为K=Zdiag(γ₁,γ₂)Zᴴ，其中Z的两列是两个源的同源跨频响应。允许γ为负数，必须按照<strong>特征值绝对值</strong>选取源子空间。</p>
+<div class="eq">δ = min |非零特征值(K)|
+η = ‖K_hat − K‖₂，要求 η &lt; δ/2
+‖P_hat − P‖F ≤ 2η/(δ−η)</div>
+<p>这个经典Hermitian扰动界说明：若四阶矩阵估计误差接近最弱的源特异谱强度，原本精确可辨识的两个源在有限样本中仍可能不稳定。</p></div>
+<h2>02 · 为什么弱源与信道接近共线都很困难？</h2>
+<div class="grid">
+<div class="card"><h3>源强度</h3><p>若源的四阶统计系数很小，最小非零特征值可能很小。对iid独立创新线性调制，四阶统计项通常按接收功率平方缩放；但有限样本方差还取决于强源、噪声及统计滤波。</p></div>
+<div class="card"><h3>几何通道相似</h3><p>若两个源在锚频和工作频率的四站通道方向都几乎一致，跨频配对子空间的两列难以区分。满秩但近共线并不保证抗噪。</p></div>
+</div>
+<div class="eq">若各源通道列归一化：
+δ ≥ min(|γ₁|,|γ₂|) · (1−|ρ_anchor · ρ_work|)
+ρ_f = h₁(f)ᴴ h₂(f)</div>
+<p class="small">代数检查：δ=0.11555，理论下界0.09827；加入谱范数0.01618的Hermitian扰动后，实测子空间投影误差0.09844，严格上界0.32558。只检验矩阵代数，不是6dB IQ性能。</p>
+<h2>03 · 从统计误差走向双源位置错误概率</h2>
+<div class="card">
+<p>对于前轮C0的完整双源位置profile准则，如果所有离真实双位置至少ε的错误位置与真实统计子空间之间具有正间隔Δε，那么：</p>
+<div class="eq">eP = [Σ_k w_k ‖P_hat,k − P_k‖F²]^(1/2)
+eP &lt; Δε/2  ⇒  任何全局最优解的双源位置误差 &lt; ε</div>
+<p>将上一节的子空间误差界代入，即得到“统计估计误差→位置错误”的条件充分性公式。但当前<strong>尚无实际IQ可计算的统计误差常数，也没有可用的Δε数值下界</strong>；不能据此宣布定位精度。</p>
+</div>
+<h2>04 · C2：两路源的四阶统计系数可以精确消元</h2>
+<div class="card"><p>保留同一对候选位置及其全部合法有限反射信道，直接将观测四阶矩阵与物理预测矩阵拟合。给定位置与信道参数，未知每个源的四阶统计系数γ₁、γ₂是<strong>线性参数</strong>：</p>
+<div class="eq">min_{γ real} ‖K_hat − γ₁ z₁z₁ᴴ − γ₂ z₂z₂ᴴ‖F²
+G_rs = |z_rᴴ z_s|²
+b_r = Re(z_rᴴ K_hat z_r)
+γ_hat = G⁻¹ b
+profile RSS = ‖K_hat‖F² − bᵀ G⁻¹ b</div>
+<p>因此每频率的两个源统计系数只需解2×2实线性方程。它避免了将源谱系数加入高维外层优化，但<strong>不能消掉复信道增益、反射时延与位置本身</strong>。C2可作为利用统计幅度信息的备选目标，原C0仍是有完整两源覆盖约束的主要理论准则。</p>
+<p class="small">代数检查：γ真值[-2.1,0.35]，解析最优解约[-2.09884,0.34961]；最优残差0.20927不高于代入真值时的0.21193。此消元是成熟最小二乘方法，不是独立原创。</p>
+</div>
+<h2>05 · 对于源特异跨频方向：复增益还有一个小矩阵消元接口</h2>
+<div class="card"><p>若能由跨频四阶配对子空间获得某源的各站方向v(f)，在<strong>候选位置和每条反射时延固定</strong>时，四站物理信道对每站LOS与反射的两个复增益是线性的。</p>
+<div class="eq">H_m(f) = exp(−i2π f τ_m(p)) [a_m + b_m exp(−i2π f δ_m)]
+v_m(f) H_ref(f) − v_ref(f) H_m(f) = 0
+⇒ A(p, δ; v) · g = 0
+M=4, F=18：A为54×8复矩阵</div>
+<p>在‖g‖₂=1的<strong>无约束</strong>情况下，最小残差为σmin(A)²；但真实物理模型仍要求LOS非零、合法反射功率/时延等约束。若SVD给出不合法复增益，它只是合法模型残差的下界，不能直接当成定位决策。</p>
+<p class="small">独立代数核验：真位置、真反射时延下的交叉关系残差约1.51×10⁻¹³；某个错误位置固定相同时延时的最小奇异值约1.81。该结果不证明错误位置在自由重选反射时延后仍不能解释数据。</p>
+</div>
+<h2>06 · 下一阶段真正需要解决什么？</h2>
+<div class="tab"><table><thead><tr><th>已经完成的理论</th><th>尚未通过的硬条件</th></tr></thead><tbody>
+<tr><td>理想四阶配对子空间的谱隙及Hermitian扰动上界</td><td>真实有限IQ的正确四阶统计估计器，以及非Oracle误差常数</td></tr>
+<tr><td>总体子空间误差到错误双位置之间的条件界</td><td>实际物理双位置模型中足够大的统计间隔</td></tr>
+<tr><td>每频率的两个实四阶系数可以2×2解析消元</td><td>剩余未知复信道增益和反射时延的低成本物理可行求解</td></tr>
+<tr><td>固定反射时延时的复增益线性交叉关系</td><td>未知时延联合处理、统计方向误差与真正的双源直接位置优化</td></tr>
+</tbody></table></div>
+<div class="callout warn"><strong>当前取舍：</strong>继续主路线，暂不切换B1–B4，不再优化旧VP，不能将经典扰动定理或小规模SVD当成新的方法创新。下一步应明确有限IQ统计子空间的误差界，并建立物理合法的联合双源位置/反射时延求解组织。</div>
+<h2>07 · 证明与独立审计</h2>
+<p><a href="20261110_配对四阶子空间稳定性与干扰参数消元_数学推导.md">完整数学备忘录（S1–S4定理、C2解析消元和限制）</a> · <a href="paired_stability_gain_audit.py">独立纯NumPy代码</a> · <a href="paired_stability_gain_audit_results.json">已执行三项代数审计结果</a></p>
+<p><a href="20261110_跨频配对累积量子空间_联合DPD数学方案.md">前轮C0/C1总体位置准则</a> · <a href="研究共识与场景合同.md">研究共识与参数边界</a></p>
+<footer>数学审计为确定性人工矩阵代数，不是位置RMSE或原始RF IQ测试；未修改原scene.py、common18或MP算法。经典Davis–Kahan与Golub–Pereyra变量投影属于已有基础，新的学术价值须由异址单天线双源多径直接定位结果进一步确立。</footer>
+</main></body></html>

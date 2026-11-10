@@ -1,0 +1,55 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>跨频配对累积量子空间：双源多径直接定位数学方案｜2026-11-10</title>
+<style>
+:root{--bg:#f5f7f9;--text:#193045;--muted:#61768a;--line:#dce6eb;--primary:#136e72;--cyan:#ebf5f4;--warn:#a4652b;--sand:#fcf3e8;--card:#fff}*{box-sizing:border-box}body{font:15px/1.75 system-ui,"Microsoft YaHei","PingFang SC",sans-serif;color:var(--text);background:var(--bg);margin:0}main{max-width:1070px;margin:0 auto;padding:44px 24px 76px}.eyebrow{color:var(--primary);font-size:12px;letter-spacing:.14em;font-weight:800}h1{font-size:33px;line-height:1.32;margin:8px 0 12px}h2{font-size:22px;margin:34px 0 14px}h3{font-size:17px;margin:0 0 8px}p{color:#3c5063;margin:10px 0}a{color:var(--primary);text-decoration:none}a:hover{text-decoration:underline}header{padding-bottom:25px;border-bottom:1px solid var(--line)}.small{font-size:12px;color:var(--muted)}.sub{font-size:17px;color:#52677a}.badge{background:#e5f0ed;color:#186b61;font-size:12px;border-radius:20px;padding:3px 10px;display:inline-block;font-weight:700}.badge.warn{background:#fbefe1;color:#9a6228}.kpis,.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.kpis{grid-template-columns:repeat(4,1fr);margin:22px 0}.kpi,.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}.kpi b{display:block;font-size:28px;line-height:1.2;color:var(--primary)}.kpi span{font-size:12px;color:var(--muted)}.formula{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.78 Consolas,"Courier New",monospace;padding:13px 15px;background:#edf2f5;border-radius:8px;margin:14px 0}.callout{background:var(--cyan);padding:15px 18px;border-left:4px solid var(--primary);border-radius:0 9px 9px 0;margin:18px 0}.callout.warn{background:var(--sand);border-color:var(--warn)}.flow{background:white;border:1px solid var(--line);border-radius:11px;padding:22px}.step{padding:10px 16px;border-radius:8px;background:#edf5f2;text-align:center;font-weight:600}.arrow{text-align:center;color:#6a8592;font-size:20px}.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:11px;background:white}table{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}th,td{padding:11px 13px;text-align:left;vertical-align:top;border-bottom:1px solid #e7edf2}th{background:#eaf1f5;color:#566e7c}tbody tr:last-child td{border:0}footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:17px;margin-top:36px}ol{padding-left:24px}li{margin:8px 0}@media(max-width:770px){main{padding:26px 13px 56px}h1{font-size:27px}.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+</style></head><body><main>
+<header><div class="eyebrow">THEORETICAL A → B → C · 2026-11-10</div><h1>跨频配对累积量子空间：四站双源多径直接定位方案</h1>
+<p class="sub">保持四个异址单天线站、两个同时同频未知源和真实未知多径；由原IQ统计结构直接约束两个二维位置，不先完成盲源分离。</p>
+<span class="badge">理想总体条件命题已证明</span>　<span class="badge warn">有限IQ与高效求解仍待证明</span></header>
+<div class="kpis"><div class="kpi"><b>4 × 1</b><span>异址接收站/单天线</span></div><div class="kpi"><b>2</b><span>同时混叠的未知源</span></div><div class="kpi"><b>4 → 2</b><span>跨频二阶配对 → 四阶同源配对</span></div><div class="kpi"><b>16 → 4</b><span>白化可降低配对矩阵的边长</span></div></div>
+<h2>01 · 新的可利用信息：两个源在两个频率上的身份配对</h2>
+<div class="grid"><div class="card"><h3>二阶统计的张量积</h3><p>两频率分别有两个源空间方向，两者自由组合形成(1,1)、(1,2)、(2,1)、(2,2)四个配对方向。只有二阶频域子空间，无法直接表达“这是同一源”。</p></div>
+<div class="card"><h3>正确的跨频四阶累积量</h3><p>独立源的四阶累积量按源相加，只有(1,1)、(2,2)两个同源配对项；不同源混合项在总体累积量中消失。</p></div></div>
+<div class="formula">K(a,k) = Z(a,k) diag(γ₁ₖ, γ₂ₖ) Z(a,k)ᴴ
+Z(a,k) = [h₁(fa)⊗h₁(fk), h₂(fa)⊗h₂(fk)]
+γqk ≠ 0, rank H(fa) = rank H(fk) = 2
+⇒ rank K(a,k) = 2；range K(a,k) = range Z(a,k)</div>
+<p class="small">K是经正确总体四阶多谱定义、按站点索引重排的16×16矩阵，不是单次FFT外积或普通协方差。BPSK等源的四阶有效特征值可为负，所以应按绝对特征值或SVD恢复子空间。</p>
+<h2>02 · 关键命题：两个真实源方向是这个空间仅有的可分离方向</h2>
+<div class="card"><p>任意候选同源方向的线性组合可写成矩阵：</p><div class="formula">z = Σq c_q [h_q(fa) ⊗ h_q(fk)]
+reshape(z) = H(fa) diag(c) H(fk)ᵀ</div>
+<p>若H(fa)、H(fk)满列秩，那么这个矩阵的秩恰好是非零c_q的个数。只有一项非零时才是秩1矩阵，也就是一个可分离的同源Kronecker方向。</p>
+<p><strong>直白解释：</strong>两种真实源的跨频指纹可以混合成许多向量，但除两个原始指纹方向外，其他非平凡混合都不再是合法的“同一个源在两个频率上的响应”。</p></div>
+<h2>03 · 直接双源位置准则（C0）</h2>
+<div class="flow"><div class="step">原始四站混叠IQ → 跨频四阶统计K(a,k)与观测子空间</div><div class="arrow">↓</div><div class="step">候选双位置(p₁,p₂)＋每链路合法有限反射 → 物理配对子空间Z(a,k)</div><div class="arrow">↓</div><div class="step">全部频率上的观测投影矩阵与物理投影矩阵直接比较</div><div class="arrow">↓</div><div class="step">联合最小化，输出两个二维源位置（反射和增益仅为内部干扰参数）</div></div>
+<div class="formula">J_pair(p₁,p₂) = inf_{η physical} Σk ωk ‖P_K,k − P_Z,k(p₁,p₂,η)‖²_F
+ωk &gt; 0；每个频率候选Z必须满列秩2</div>
+<p>**数学结果：**理想总体K在频率锚点下满足满秩、非零四阶源系数及原有8频点无别名等条件时，这个准则的<strong>精确零残差</strong>只能在真实无序双源位置上达到。证明利用同源可分离方向唯一、公共锚频强制一致源标签、有限反射交叉关系和四站几何单射。</p>
+<div class="callout warn"><strong>不能忽略两源覆盖：</strong>若只检查每个候选向量是否落在观测子空间内，把第一个源复制成两列仍可得到零分。必须比较两个完整的秩2子空间，并禁止候选两列退化共线。独立代数审计中，复制同一源的单列评分约3.57×10⁻¹⁵，但正确的子空间差为1.0。</div>
+<h2>04 · 计算减维：二阶＋四阶联合（C1）</h2>
+<div class="grid"><div class="card"><h3>潜在加速</h3><p>利用四站二阶信号协方差，构建4维→2维白化算子W(f)。两个频率组合后，可将原本16×16的配对四阶矩阵压缩成4×4，同时保留两个源配对方向。</p></div>
+<div class="card"><h3>不可丢掉的条件</h3><p>白化矩阵存在非零零空间。错误的原始四站通道可以在白化后与真实通道完全相同。因此必须同时要求物理候选符合原始二阶信号子空间，不能只匹配白化四阶数据。</p></div></div>
+<div class="formula">Wf = Λf⁻¹ᐟ² Ufᴴ，Wf R_signal(f) Wfᴴ = I₂
+K_white = (Wa⊗Wk) K (Wa⊗Wk)ᴴ
+J_white = Σk ‖P_Kwhite,k−P_Zwhite,k(p,η)‖²_F
+约束：Σf ‖P_Rsignal,f−P_Hphysical,f(p,η)‖²_F ≤ ε_N</div>
+<p>在理想总体条件下，二阶子空间约束确保W只在对应真实信号子空间内作用，从而避免白化丢失的物理通道方向。有限IQ下的阈值ε_N必须依据统计估计误差确定，不能由真实位置或事后RMSE调参。</p>
+<h2>05 · 更深一层的二阶—四阶谱耦合（附加假设）</h2>
+<div class="card"><p>如果独立未知源属于“iid创新＋未知线性成形脉冲”类，那么二阶功率谱P_q(f)和锚定四阶源谱γ_qk不是完全独立的自由参数：</p><div class="formula">γ_qk = λ_q · P_q(fa) P_q(fk)
+λ_q = T_q κ₄(b_q) / σ_b,q⁴</div>
+<p>λ_q与频率k无关，虽然真实符号率、脉冲和λ_q都未知。由此对二阶信号子空间白化后的四阶矩阵，其非零总体特征值是两个λ_q。</p><p class="small">该关系不需要知道真实BPSK比特，但<strong>只对独立创新线性成形类别</strong>直接成立；一般非高斯未知信号不能无条件借用。若两源同调制、同统计强度导致λ₁=λ₂，特征值本身不能贴标签，仍需要上述可分离配对子空间结构。</p></div>
+<h2>06 · 五项独立数学核验</h2>
+<div class="tablewrap"><table><thead><tr><th>核验内容</th><th>本次结果</th><th>证明范围</th></tr></thead><tbody>
+<tr><td>负四阶源系数的配对矩阵</td><td>rank 2；投影误差9.88×10⁻¹⁶</td><td>总体矩阵代数</td></tr>
+<tr><td>两源非平凡混合的不可分离性</td><td>重排第二奇异值2.925</td><td>支撑配对子空间引理</td></tr>
+<tr><td>同一源复制两次</td><td>单列残差近零；完整投影误差1.0</td><td>排除单源伪双源退化</td></tr>
+<tr><td>二阶—四阶源谱耦合</td><td>谱系数误差2.22×10⁻¹⁶</td><td>iid创新线性成形特例</td></tr>
+<tr><td>白化通道零空间</td><td>白化误差5.54×10⁻¹⁶，原二阶子空间差0.453</td><td>显示C1必须加二阶约束</td></tr>
+</tbody></table></div>
+<h2>07 · 现阶段准入判断</h2>
+<div class="callout"><strong>A与B在理想总体条件下有严格可用的识别结构；C已经有直接以双源位置为目的变量的数学准则雏形。</strong> 但有限单记录IQ的四阶多谱估计、白化后弱源噪声放大、非退化间隔量化和反射干扰参数的低成本求解均未通过。不能宣称新算法已经完成，更不能马上公布定位RMSE。</div>
+<h2>08 · 研究文件与可复现证据</h2>
+<p><a href="20261110_跨频配对累积量子空间_联合DPD数学方案.md">完整Markdown证明与条件定理</a> · <a href="paired_subspace_math_audit.py">独立纯NumPy核验代码</a> · <a href="paired_subspace_math_audit_results.json">已执行结果JSON</a></p>
+<p><a href="有限频点双源DPD位置可辨识_定理与反例.md">前轮八频点位置唯一性</a> · <a href="研究共识与场景合同.md">正式场景和研究信息边界</a></p>
+<footer>文献边界：已有JADE/FOOBI、Khatri–Rao、Kruskal及四阶DPD思想。此次研究新对象是低硬件资源的异址单天线同频双源有限多径几何耦合。全部结果仅为数学阶段，既有common18、scene.py与公共MP方法未修改。</footer>
+</main></body></html>

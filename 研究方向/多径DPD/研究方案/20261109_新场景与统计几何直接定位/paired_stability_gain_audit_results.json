@@ -1,0 +1,56 @@
+{
+  "schema": "PAIRED_FOURTH_STABILITY_GAIN_AUDIT_V1",
+  "status": "PASS",
+  "source_file": "paired_stability_gain_audit.py",
+  "executed_source_sha256": "975a69902fa591b5d48358607ab61b682e28d2b88f78999c4de741e309f4c608",
+  "remote_exact_match_by_length_and_FNV32": true,
+  "executed_environment": "isolated Python NumPy, no project RF IQ",
+  "full_IQ_used": false,
+  "new_position_estimator": false,
+  "scope": "exact matrix algebra, no RF IQ or localization test",
+  "checks": [
+    {
+      "name": "paired_gap_and_signed_spectrum",
+      "delta": 0.11554963193260546,
+      "guaranteed_gap_lower_bound": 0.09826671766554598,
+      "paired_source_coherence": 0.18111068612045014,
+      "perturbation_spectral_norm": 0.016176948470564768,
+      "projector_error_frobenius": 0.09843960730206772,
+      "rigorous_projector_error_upper_bound": 0.32558139534883723,
+      "warning": "population matrix perturbation, not a finite-IQ noise model"
+    },
+    {
+      "name": "exact_signed_gamma_profiling",
+      "gamma_truth": [
+        -2.1,
+        0.35
+      ],
+      "gamma_profile_solution": [
+        -2.098838307924176,
+        0.34961109654845757
+      ],
+      "gram_min_eigenvalue": 1727.8565164243462,
+      "profile_cost": 0.20927291008990798,
+      "true_gamma_cost": 0.21192737844858556,
+      "stationarity_gradient_norm": 9.094947017729282e-13,
+      "warning": "profiles only real source fourth coefficients; complex channel gains and delays remain nonlinear"
+    },
+    {
+      "name": "conditional_linear_gain_elimination",
+      "frequency_count": 18,
+      "receivers": 4,
+      "rows": 54,
+      "columns": 8,
+      "true_gain_cross_relation_residual": 1.5104473859282559e-13,
+      "true_smallest_singular": 7.853906619842253e-14,
+      "false_position_smallest_singular_with_true_delays": 1.8100745683431827,
+      "warning": "requires already identified source-specific frequency directions; fixed echo delays only. Unconstrained SVD may violate physical gain constraints. No global fast optimizer yet."
+    }
+  ],
+  "next_theory_gates": [
+    "construct an explicit paired trispectrum estimator from one mixed IQ record and its non-oracle error bound",
+    "prove a non-negligible dual-position model margin under feasible physical multipath",
+    "solve remaining unknown echo delays in a bounded-cost direct-position routine without source-recovery prerequisite"
+  ],
+  "commentary": "No BPSK/RRC-specific observation window corrections introduced into the main structural theorem; the numerical tests check only matrix algebra."
+}

@@ -1,0 +1,87 @@
+{
+  "protocol": "one_fixed_seed_standalone_four_station_two_source_fourth_cumulant_gate",
+  "date": "2026-11-10",
+  "status": "NO_GO_FOR_THIS_SEGMENTED_FFT_ESTIMATOR_ONLY",
+  "is_formal_DPD_performance": false,
+  "user_project_frozen_IQ_read": false,
+  "legacy_files_modified": false,
+  "IQ_generator": "independent standalone BPSK RRC two-source, four distributed single antenna sites, LOS+0/1 echo",
+  "N": 32768,
+  "fs_hz": 50000000,
+  "bandwidth_hz": 12500000,
+  "snr_average_los_db_per_source": 6,
+  "echo_power_los_ratio": 0.25,
+  "echo_delay_range_microseconds_realized": [
+    0.5077690531381863,
+    1.2699793864471116
+  ],
+  "seed": 20261110,
+  "source_symbol_rate_generator_only_hz": 10000000,
+  "frequency_bins_base256": [
+    -20,
+    25,
+    -8,
+    13
+  ],
+  "mix_input_sha256": "5291dca36b77681f40100c6b34a65ffb64df2d9faf8a758e555b5cefbac05f92",
+  "repeat_reproduces_all_non_runtime_fields": true,
+  "oracle_used_to_construct_estimator": false,
+  "oracle_used_to_evaluate_subspace_only": true,
+  "windows": [
+    {
+      "samples": 256,
+      "nominal_windows": 128,
+      "condition": "noisy_echo",
+      "sv2_over_sv3": 1.0940768980570188,
+      "split_half_projector_distance_div2": 0.9112449255467939,
+      "evaluation_only_oracle_distance_div2": 0.9081067954608701
+    },
+    {
+      "samples": 1024,
+      "nominal_windows": 32,
+      "condition": "noisy_echo",
+      "sv2_over_sv3": 1.2584566786316236,
+      "split_half_projector_distance_div2": 0.726157445449788,
+      "evaluation_only_oracle_distance_div2": 0.778722234259774
+    },
+    {
+      "samples": 256,
+      "nominal_windows": 128,
+      "condition": "clean_echo",
+      "sv2_over_sv3": 1.235,
+      "split_half_projector_distance_div2": 0.94,
+      "evaluation_only_oracle_distance_div2": 0.819
+    },
+    {
+      "samples": 1024,
+      "nominal_windows": 32,
+      "condition": "clean_echo",
+      "sv2_over_sv3": 1.422,
+      "split_half_projector_distance_div2": 0.707,
+      "evaluation_only_oracle_distance_div2": 0.592
+    },
+    {
+      "samples": 256,
+      "nominal_windows": 128,
+      "condition": "noise_only",
+      "sv2_over_sv3": 1.1534675603782252,
+      "split_half_projector_distance_div2": 0.958,
+      "oracle": null
+    },
+    {
+      "samples": 1024,
+      "nominal_windows": 32,
+      "condition": "noise_only",
+      "sv2_over_sv3": 1.2628531927775688,
+      "split_half_projector_distance_div2": 0.976,
+      "oracle": null
+    }
+  ],
+  "caveats": [
+    "no repeat Monte Carlo or significance testing; one deterministic seed",
+    "window FFT coefficient samples not proved independent or identically distributed",
+    "fourth-order k-stat is not proved unbiased for the mixed cyclostationary multipath model",
+    "no position estimate; not a bound on all fourth-order estimators",
+    "full unabridged JSON and runnable source are in the separate local diagnostic ZIP supplied in conversation"
+  ]
+}

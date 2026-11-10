@@ -1,0 +1,78 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>阶段1A/1B数学深化｜异频选取与低维多径剖面</title>
+<style>
+:root{--bg:#f5f7f9;--fg:#183042;--muted:#5c7386;--border:#dbe5ec;--accent:#176e70;--warning:#ac6b28}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.75 system-ui,"Microsoft YaHei","PingFang SC",sans-serif}
+main{max-width:1050px;padding:38px 22px 76px;margin:auto}h1{font-size:32px;line-height:1.3;margin:7px 0 12px}h2{font-size:22px;margin:34px 0 12px}h3{font-size:16px;margin:0 0 9px}
+p{color:#3a5064;margin:9px 0}a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.eyebrow{color:var(--accent);font-weight:800;font-size:12px;letter-spacing:.14em}.small{font-size:12px;color:var(--muted)}
+.row{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.card{background:white;border:1px solid var(--border);border-radius:12px;padding:19px;margin:12px 0}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:24px 0}.kpi{background:white;border:1px solid var(--border);border-radius:10px;padding:15px}.kpi strong{display:block;font-size:23px;line-height:1.3}.kpi span{color:var(--muted);font-size:12px}
+.eq{font:12px/1.7 Consolas,"Courier New",monospace;background:#edf2f6;padding:13px 15px;border-radius:8px;white-space:pre-wrap;overflow-wrap:anywhere}
+.callout{padding:14px 17px;border-left:4px solid var(--accent);background:#e7f3ef;border-radius:0 8px 8px 0;margin:16px 0}
+.warning{border-color:var(--warning);background:#fcf2e7}.tbl{overflow-x:auto;background:white;border:1px solid var(--border);border-radius:11px}
+table{border-collapse:collapse;width:100%;min-width:650px;font-size:13px}th,td{text-align:left;padding:11px 12px;border-bottom:1px solid #e7edf1;vertical-align:top}th{background:#eaf1f4;color:#4e687c}tbody tr:last-child td{border:0}
+ol{padding-left:23px}li{margin:7px 0}footer{padding-top:15px;margin-top:40px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
+@media(max-width:770px){main{padding:24px 13px 54px}h1{font-size:26px}.row,.kpis{grid-template-columns:repeat(2,1fr)}}
+</style></head><body><main>
+<div class="eyebrow">MATHEMATICAL GATES 1A / 1B · NOV 10, 2026</div>
+<h1>从理想配对统计，走向可实现的双源直接定位</h1>
+<p>在四异址单天线、两路同时同频未知源和未知有限多径的主场景中，延续阶段0的非Hermitian跨频四阶统计路线。本轮只有严格条件命题、确定性代数核验和新的辅助求解接口，<strong>没有真实混合IQ定位算法</strong>。</p>
+<div class="kpis">
+<div class="kpi"><strong>Q × Q</strong><span>同源配对子空间方向矩阵束</span></div>
+<div class="kpi"><strong>2 × 2</strong><span>核心双源的矩阵束特征值分解</span></div>
+<div class="kpi"><strong>3 × 1D</strong><span>给定参考参数时的非参考站反射时延</span></div>
+<div class="kpi"><strong>4/4 PASS</strong><span>代数与频率保护检查，不是IQ验证</span></div>
+</div>
+<h2>01 · 1A：不输入真实符号率的异频选取</h2>
+<div class="card">
+<p>用公开频段内预先随机生成的锚频、工作频率间隔和异频偏移量，构造满足和频守恒的四频组。对于任何固定、未知的离散循环频率集合，若选择参数具有连续密度，则落入低阶谱奇异子流形的概率为零。</p>
+<div class="eq">f_k = f_a + k·Δf
+ν = (f_a, f_k, −f_a−ε, −f_k+ε)
+Σ ν = 0
+K_off = Z_left · Γ · Z_rightᴴ</div>
+<p>在相关循环频率集合局部有限时，单次泛型选频还能获得严格正的数学保护距离。但若离散采样导致无限循环频率模采样率密集，就不能据此推断存在统一有限样本保护间隔。</p>
+<div class="callout warning"><strong>最重要的限制：</strong>避免精确低阶谱碰撞并不等于可靠估计四阶多谱。单次FFT四阶乘积仍高方差；需要多维平滑或正确的时间域累积量估计，并明确统计误差和频率积分偏差。</div>
+<p class="small">纯算术检查：8个间隔12.5 kHz的左频率样本对应80 μs别名周期，可满足当前条件性交叉时延上界；右侧偏移463.5 kHz。已知循环集合仅用于检查选频，绝不作为算法输入。这些频点不代表已获得四阶谱定位精度。</p>
+</div>
+<h2>02 · 1B：一个很小的矩阵束就能提取条件源方向</h2>
+<div class="card">
+<p>准确的四阶左子空间由同一个源在两个频率上的Kronecker方向张成。任意两份泛型基向量重排后，形成具有共享左右通道因子的矩阵。把这些矩阵压缩到Q×Q后，构成同时对角化矩阵束。</p>
+<div class="eq">M_t = H_anchor · diag(c_t) · H_workᵀ
+B_t = A · diag(c_t) · Bᵀ
+B_1 B_2⁻¹ = A · diag(c_1 / c_2) · A⁻¹</div>
+<p>在满秩、非零参考系数及不同特征值条件下，可从矩阵束特征向量恢复各源的跨站通道方向。Q=2只需要2×2核心运算；对一般Q≤M可保持Q×Q接口。无需恢复发射比特。</p>
+<div class="callout warning">稳定性必须经过两个关口：<strong>四阶统计矩阵的源奇异值间隙</strong>和<strong>矩阵束的特征值分离程度</strong>。前者通过不能自动替代后者。</div>
+</div>
+<h2>03 · 一条反射时的条件低维信道剖面</h2>
+<div class="card">
+<p>从内部源方向消去逐源共同频率尺度后，使用各站相对参考站的信道比值。参考站LOS增益归一化，剩余响应可表示成1个直达复系数和1个反射复系数。</p>
+<div class="eq">r_m(f) = H_m(f) / H_ref(f)
+u_ref(f) = 1 + c·exp(−j2πf δ_ref)
+x_m(f;p,c,δ_ref)
+    = r_m(f) exp(j2πf·TDOA_m(p)) u_ref(f)
+    = A_m + B_m·exp(−j2πf δ_m)</div>
+<p>对固定候选位置、参考站复反射比和参考站时延，其余3站的各自反射时延彼此独立。每站固定时延时，A_m和B_m可以严格用两列复最小二乘消去，剩余是一维延迟搜索。</p>
+<div class="eq">E_m(δ)=min_{A_m,B_m}||W^½ [x_m − F_m(δ)·(A_m,B_m)]||²
+F_m(δ)=[1, exp(−j2π f δ)]
+J_ratio(p,c,δ_ref)=Σ(m≠ref) min_δ E_m(δ)</div>
+<p><strong>这是条件比值目标的精确拆分，不是原始四阶位置准则C0/C2的等价性证明。</strong> 非零LOS、参考频响不为零及全频共享复增益仍必须成立；无约束增益LS若违反物理条件，只能视为松弛下界。</p>
+</div>
+<h2>04 · 本轮可复核证据</h2>
+<div class="tbl"><table><thead><tr><th>检查</th><th>结果</th><th>限制</th></tr></thead><tbody>
+<tr><td>精确配对子空间的矩阵束源方向</td><td>双源两频方向机器精度恢复</td><td>不含统计噪声</td></tr>
+<tr><td>未知同周期下的异频保护示例</td><td>8个频点全避开已知核验循环线；80 μs别名周期</td><td>核验使用已知循环线，算法不使用；无四阶估计方差</td></tr>
+<tr><td>给定真实条件参数的逐链路复增益LS</td><td>真实物理比值误差约3.71×10⁻²⁶</td><td>错误位置仅在真参考/时延固定时对比</td></tr>
+<tr><td>零反射模型的统一嵌套</td><td>缺失反射用零复增益精确表示</td><td>不代表自动选阶已实现</td></tr>
+</tbody></table></div>
+<h2>05 · 下一步两道门槛仍然存在</h2>
+<ol>
+<li><strong>1A：</strong>建立同符号率未知双源下可由单条混合IQ计算的真正四阶累积谱估计器，给出非Oracle偏差/方差、可用频率维数和计算量。</li>
+<li><strong>1B：</strong>量化带噪矩阵束方向误差；检验一维延迟剖面能否提供物理合法的候选及安全筛选，再以原混合统计C0/C2作最终双源联合判别。</li>
+<li><strong>扩展接口：</strong>保留一般Q与L_max，但第一版先解决Q=2、L_max=1，不强制同时自动判断未知阶数。</li>
+</ol>
+<div class="callout"><strong>当前科研决定：</strong>继续现有统计—几何DPD主线；不依赖真实符号率/源标签/反射真值，不运行第22轮IQ定位调参，不将条件低维线性代数误称为已经完成的精准定位创新方法。</div>
+<h2>06 · 完整证明与数学核验</h2>
+<p><a href="20261110_阶段1A1B深化_盲选频_矩阵束与逐链路时延剖面.md">完整证明及限制（Markdown）</a> · <a href="paired_1A1B_microaudit.py">精简独立NumPy审计脚本</a> · <a href="paired_1A1B_microaudit_results.json">已执行结果JSON</a></p>
+<p><a href="20261110_阶段0与1A1B数学准入审查.md">前轮阶段0／1A／1B预审</a> · <a href="20261110_源数与反射阶数统一扩展接口_研究合同.md">统一源数与反射阶数模型</a></p>
+<footer>本页为抽象数学研究记录，不是新DPD软件或IQ性能成绩。四阶累积量、循环谱、同时对角化、复增益最小二乘均有成熟文献先例；实际原创性仍取决于单记录统计可估和物理多径直接位置目标的可靠可计算性。</footer>
+</main></body></html>
